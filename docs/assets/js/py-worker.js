@@ -23,6 +23,7 @@ const loaded = new Set();
 async function loadNeeded(code) {
   try {
     if (/\bzoneinfo\b/.test(code) && !loaded.has("tzdata")) { await pyodide.loadPackage("tzdata"); loaded.add("tzdata"); }
+    if (/\b(?:against|pytest_run)\(/.test(code) && !loaded.has("pytest")) { await pyodide.loadPackage("pytest"); loaded.add("pytest"); }
     await pyodide.loadPackagesFromImports(code);
   } catch { /* offline, or not a Pyodide package: the import will report it */ }
 }

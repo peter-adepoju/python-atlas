@@ -1,7 +1,7 @@
 // File reading figure: a real file drawn character by character, with the position marker
 // that every read moves along. Add operations and watch what each one returns.
-import { h } from "../site.js?v=9f26fe5be3";
-import { py } from "../runtime.js?v=9f26fe5be3";
+import { h } from "../site.js?v=0064081c78";
+import { py } from "../runtime.js?v=0064081c78";
 
 const OPS = ["f.readline()", "f.read(3)", "f.read()", "f.readlines()", "for line in f: ...", "f.close()"];
 

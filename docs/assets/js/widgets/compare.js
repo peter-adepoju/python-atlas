@@ -1,6 +1,6 @@
 // Comparison lab: all six comparisons for two values, and how strings are compared letter by letter.
-import { h } from "../site.js?v=9f26fe5be3";
-import { py } from "../runtime.js?v=9f26fe5be3";
+import { h } from "../site.js?v=0064081c78";
+import { py } from "../runtime.js?v=0064081c78";
 
 const OPS = ["==", "!=", "<", "<=", ">", ">="];
 

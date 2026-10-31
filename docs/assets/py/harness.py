@@ -373,6 +373,57 @@ def uses(source, *names):
     return all(_re.search(r"\b" + _re.escape(n) + r"\b", source) for n in names)
 
 
+_PYTEST_RUNS = [0]
+
+
+def _pytest_run(test_code, files=None):
+    """Run test code with real pytest in the working folder. Returns which tests passed and
+    failed, and pytest's own output."""
+    import contextlib
+    import importlib
+    import pytest
+    for name, text in (files or {}).items():
+        _write_file(name, text)
+    _PYTEST_RUNS[0] += 1
+    fname = f"test_yours_{_PYTEST_RUNS[0]}.py"
+    _write_file(fname, test_code)
+    _forget_work_modules()
+
+    class _Collect:
+        def __init__(self):
+            self.passed, self.failed = [], []
+
+        def pytest_runtest_logreport(self, report):
+            name = report.nodeid.split("::")[-1]
+            if report.failed and name not in self.failed:
+                self.failed.append(name)
+            elif report.when == "call" and report.passed:
+                self.passed.append(name)
+
+    c = _Collect()
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+        code = pytest.main([os.path.join(_WORK, fname), "-q", "-p", "no:cacheprovider",
+                            "--import-mode=importlib", "-o", "console_output_style=classic"], plugins=[c])
+    try:
+        os.remove(os.path.join(_WORK, fname))
+    except OSError:
+        pass
+    return {"exit": int(code), "passed": c.passed, "failed": c.failed, "output": buf.getvalue()}
+
+
+def _against(test_code, module, versions):
+    """Run the learner's tests against several versions of a module. Returns, for each version's
+    label, the list of tests that failed (a good test suite passes the correct version and fails
+    each buggy one)."""
+    out = {}
+    for label, text in versions.items():
+        _write_file(module + ".py", text)
+        r = _pytest_run(test_code)
+        out[label] = r["failed"] if r["exit"] in (0, 1) else ["(the tests could not run)"]
+    return out
+
+
 def grade_program(code, inputs, seed, tests_code):
     _reset_fs()
     g = _Grader(code, inputs, seed)
@@ -385,14 +436,16 @@ def grade_program(code, inputs, seed, tests_code):
                 "expect_output": _make_expect(g), "uses": lambda *n: uses(code, *n),
                 "run_with": lambda subs, inputs=(), echo=False: _run_with(g, subs, inputs, echo),
                 "read_file": _read_file, "write_file": _write_file, "files_now": _files_now,
-                "reset_files": _reset_fs})
+                "reset_files": _reset_fs, "pytest_run": _pytest_run, "against": _against})
     try:
         exec(compile(tests_code, "<tests>", "exec"), env)
     except BaseException as e:  # noqa: BLE001
         return {"output": g.output, "error": g.error, "passed": 0, "total": 1,
                 "results": [{"name": "tests", "ok": False,
                              "message": f"The checker itself failed: {type(e).__name__}: {e}"}]}
-    tests = [(k, v) for k, v in env.items() if k.startswith("test_") and callable(v)]
+    # Only the checks' own test_ functions are graded, never test functions the learner wrote.
+    own = [n.name for n in ast.parse(tests_code).body if isinstance(n, ast.FunctionDef) and n.name.startswith("test_")]
+    tests = [(k, env[k]) for k in own if callable(env.get(k))]
     for name, fn in tests:
         doc = (fn.__doc__ or name[5:].replace("_", " ")).strip()
         try:
