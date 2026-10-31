@@ -1,7 +1,7 @@
 // A practice terminal: a pretend shell with its own small set of folders and files, so commands
 // can be tried safely. Nothing here touches the real computer.
-import { h } from "../site.js?v=5b063fa476";
-import { makeGit } from "./minigit.js?v=5b063fa476";
+import { h } from "../site.js?v=9f26fe5be3";
+import { makeGit } from "./minigit.js?v=9f26fe5be3";
 
 const START = {
   "notes.txt": "Buy eggs\nCall Ada\n",

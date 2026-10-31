@@ -17,6 +17,16 @@ function boot(indexURL, harnessURL) {
   return ready;
 }
 
+// Packages that ship with Pyodide (numpy, pandas, ...) are fetched the first time code imports them.
+// zoneinfo is in the standard library, but needs the tzdata package for its time zone rules.
+const loaded = new Set();
+async function loadNeeded(code) {
+  try {
+    if (/\bzoneinfo\b/.test(code) && !loaded.has("tzdata")) { await pyodide.loadPackage("tzdata"); loaded.add("tzdata"); }
+    await pyodide.loadPackagesFromImports(code);
+  } catch { /* offline, or not a Pyodide package: the import will report it */ }
+}
+
 function plain(proxy) {
   const out = proxy.toJs({ dict_converter: Object.fromEntries, create_proxies: false });
   proxy.destroy();
@@ -34,6 +44,7 @@ self.onmessage = async (ev) => {
   const id = m.id;
   try {
     let result;
+    if (m.type === "run" || m.type === "trace" || m.type === "grade") await loadNeeded((m.code || "") + "\n" + (m.tests || ""));
     if (m.type === "run" || m.type === "trace" || m.type === "grade") harness.set_files(m.files || "{}");
     if (m.type === "run") {
       let pending = "";
