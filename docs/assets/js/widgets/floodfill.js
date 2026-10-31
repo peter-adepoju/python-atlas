@@ -1,6 +1,6 @@
 // Flood fill: click a square to start filling. The recursive fill visits squares in the order
 // shown, with the call stack beside it; walls (#) stop it.
-import { h } from "../site.js?v=e002563bcd";
+import { h } from "../site.js?v=db382219e3";
 
 export default function floodfill(el, { grid = [
   "..........",

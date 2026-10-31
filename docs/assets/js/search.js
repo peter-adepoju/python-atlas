@@ -1,7 +1,7 @@
 // Search the whole course: lessons (titles, sections and goals), weeks on the map, and pages.
 // Opens with the header's search box, Ctrl K (Cmd K on a Mac) or the / key.
-import { h, SITE } from "./site.js?v=e002563bcd";
-import { progress } from "./progress.js?v=e002563bcd";
+import { h, SITE } from "./site.js?v=db382219e3";
+import { progress } from "./progress.js?v=db382219e3";
 
 const PAGES = [
   { k: "page", u: "map.html", t: "Course map", s: ["all 104 weeks, phase by phase"] },

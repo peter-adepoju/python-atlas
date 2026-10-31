@@ -16,6 +16,7 @@ import random
 import sys
 
 sys.dont_write_bytecode = True   # keep the working folder free of __pycache__
+os.environ["PYTHONBREAKPOINT"] = "0"   # breakpoint() can't open a debugger prompt in the browser
 import tokenize
 import traceback
 import types
