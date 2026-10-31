@@ -1,6 +1,6 @@
 // The conversion machine: feed a value in, pick int/float/str/bool, see what comes out.
-import { h } from "../site.js?v=0064081c78";
-import { py } from "../runtime.js?v=0064081c78";
+import { h } from "../site.js?v=055c40ee42";
+import { py } from "../runtime.js?v=055c40ee42";
 
 export default function convert(el, { start = "'42'", tries = ["'42'", "'3.7'", "3.7", "'seven'", "' 12 '", "True", "0", "''", "'0'", "'1e3'", "-2.9"] }) {
   const input = h("input", { class: "w-input", value: start, spellcheck: "false", style: "width:9em;font-size:1.05rem", "aria-label": "Value to convert (as Python code)" });

@@ -16,6 +16,23 @@ import random
 import sys
 
 sys.dont_write_bytecode = True   # keep the working folder free of __pycache__
+
+
+class _RetryFinder:
+    """Last on the import path: if no finder found a module, clear the folder caches and look
+    once more. A file written a moment ago (in the same second, in the browser's file system)
+    can otherwise be invisible to import."""
+
+    @staticmethod
+    def find_spec(name, path=None, target=None):
+        import importlib
+        import importlib.machinery
+        importlib.invalidate_caches()
+        return importlib.machinery.PathFinder.find_spec(name, path, target)
+
+
+if not any(isinstance(f, type) and f.__name__ == "_RetryFinder" for f in sys.meta_path):
+    sys.meta_path.append(_RetryFinder)
 os.environ["PYTHONBREAKPOINT"] = "0"   # breakpoint() can't open a debugger prompt in the browser
 import tokenize
 import traceback

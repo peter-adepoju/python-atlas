@@ -1,6 +1,6 @@
 // Build an f-string format spec with controls and see Python's exact output, padding made visible.
-import { h } from "../site.js?v=0064081c78";
-import { py } from "../runtime.js?v=0064081c78";
+import { h } from "../site.js?v=055c40ee42";
+import { py } from "../runtime.js?v=055c40ee42";
 
 export default function fstringlab(el, { value = "3.14159", name = "pi" } = {}) {
   const vIn = h("input", { class: "w-input", value, spellcheck: "false", style: "width:9em", "aria-label": "Value" });
