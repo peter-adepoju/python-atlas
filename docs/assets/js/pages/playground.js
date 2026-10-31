@@ -1,8 +1,8 @@
-import "./common.js?v=db382219e3";
-import { $, h, toast } from "../site.js?v=db382219e3";
-import { progress } from "../progress.js?v=db382219e3";
-import { PyConsole } from "../console.js?v=db382219e3";
-import { ensure } from "../runtime.js?v=db382219e3";
+import "./common.js?v=5b063fa476";
+import { $, h, toast } from "../site.js?v=5b063fa476";
+import { progress } from "../progress.js?v=5b063fa476";
+import { PyConsole } from "../console.js?v=5b063fa476";
+import { ensure } from "../runtime.js?v=5b063fa476";
 
 const TEMPLATES = {
   "Hello": 'print("Hello!")\n',

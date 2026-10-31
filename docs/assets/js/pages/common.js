@@ -1,12 +1,12 @@
 // Runs on every page: account link, streak, review badge and the tutor.
-import { SITE, $, h } from "../site.js?v=db382219e3";
-import { displayName, firstName, avatar } from "../user.js?v=db382219e3";
-import { progress, getClient, onAuth, onSync, signOut } from "../progress.js?v=db382219e3";
-import { mountTutor } from "../tutor.js?v=db382219e3";
-import { settings, update as updateSettings, onSettings } from "../settings.js?v=db382219e3";
-import { initSearch } from "../search.js?v=db382219e3";
-import { initInstall, install, onInstallable } from "../install.js?v=db382219e3";
-import { loadCourse, nextDay } from "../resume.js?v=db382219e3";
+import { SITE, $, h } from "../site.js?v=5b063fa476";
+import { displayName, firstName, avatar } from "../user.js?v=5b063fa476";
+import { progress, getClient, onAuth, onSync, signOut } from "../progress.js?v=5b063fa476";
+import { mountTutor } from "../tutor.js?v=5b063fa476";
+import { settings, update as updateSettings, onSettings } from "../settings.js?v=5b063fa476";
+import { initSearch } from "../search.js?v=5b063fa476";
+import { initInstall, install, onInstallable } from "../install.js?v=5b063fa476";
+import { loadCourse, nextDay } from "../resume.js?v=5b063fa476";
 
 let closeMenu = () => {};
 document.addEventListener("click", (e) => { const slot = document.getElementById("account-slot"); if (slot && !slot.contains(e.target)) closeMenu(); });
