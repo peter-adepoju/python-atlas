@@ -225,6 +225,10 @@ def _forget_work_modules():
 
 def _reset_fs():
     _forget_work_modules()
+    # Leave the folder before deleting it, so it's really removed and made afresh. In the browser's
+    # file system, a folder that is the current directory can't be removed, and a file once
+    # replaced with os.replace can then still be opened by name after it was deleted.
+    os.chdir(os.path.dirname(_WORK))
     shutil.rmtree(_WORK, ignore_errors=True)
     os.makedirs(_WORK, exist_ok=True)
     for name, text in _FILES.items():

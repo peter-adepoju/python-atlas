@@ -8,7 +8,7 @@
 // work. Progress made before signing in is added to the account you sign in to. (If accounts aren't
 // switched on for this copy of the course, the device is the only place to keep progress, so it
 // stays in localStorage.)
-import { SITE, today } from "./site.js?v=588dc67651";
+import { SITE, today } from "./site.js?v=871ff52039";
 
 const GUEST = "atlas.progress.guest";
 const LEGACY = "atlas.progress.v1";   // the old signed-out space, kept on the device until sign-in
