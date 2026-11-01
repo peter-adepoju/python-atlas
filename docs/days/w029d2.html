@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="8fe38f9496">
+<title>Week 29 Day 2: Equality and hashing | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=8fe38f9496">
+<link rel="stylesheet" href="../assets/css/site.css?v=8fe38f9496">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=8fe38f9496"></script>
+<script src="../assets/vendor/codemirror.js?v=8fe38f9496" defer></script>
+<meta name="description" content="Two Point(1, 2) objects should be equal, but so far they aren’t: == has meant ‘the same object’. Today you’ll teach your classes what equal means with...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w029d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 29 Day 2: Equality and hashing">
+<meta property="og:description" content="Two Point(1, 2) objects should be equal, but so far they aren’t: == has meant ‘the same object’. Today you’ll teach your classes what equal means with...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w029d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-29">Week 29: Objects II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#teaching-what-equal-means" data-sec="teaching-what-equal-means">Teaching == what equal means</a></li><li><a href="#what-a-hash-is-for" data-sec="what-a-hash-is-for">What a hash is for</a></li><li><a href="#writing-hash" data-sec="writing-hash">Writing hash</a></li><li><a href="#the-mutable-key-trap" data-sec="the-mutable-key-trap">The mutable key trap</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w029d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-3">Phase 3: Objects and design</a></li><li><a href="../map.html#week-29">Week 29: Objects II</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 29, Day 2</span></p>
+      <h1>Equality and hashing</h1>
+      <div class="day-intro"><p>Two <code>Point(1, 2)</code> objects should be equal, but so far they aren&rsquo;t: <code>==</code> has meant &lsquo;the same object&rsquo;. Today you&rsquo;ll teach your classes what equal means with <code>__eq__</code>, and then meet its partner, <code>__hash__</code>, which decides whether objects can go in sets and be dictionary keys. The two must agree, and getting that right is one of the most important rules in Python&rsquo;s object model.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Write <strong>eq</strong> comparing the attributes that matter, and return NotImplemented for other types</li><li>Explain the difference between == and is, and why != needs no extra work</li><li>Explain what a hash is, and why sets and dictionaries need one</li><li>Write <strong>hash</strong> consistent with <strong>eq</strong>, and know when an object should be unhashable</li><li>Avoid changing an object&rsquo;s hashed attributes while it&rsquo;s in a set or used as a key</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Teaching == what equal means: 25 min"></span><span class="plan-seg s0" style="flex:25" title="What a hash is for: 25 min"></span><span class="plan-seg s1" style="flex:25" title="Writing __hash__: 25 min"></span><span class="plan-seg s0" style="flex:15" title="The mutable key trap: 15 min"></span><span class="plan-seg s1" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s0" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Teaching == what equal means</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">What a hash is for</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:00</span><span class="plan-what">Writing <strong>hash</strong></span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:25</span><span class="plan-what">The mutable key trap</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w029d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w029d2.ipynb" download>download it</a>. Exercises today are worth 120 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w029d2-p1"><textarea class="pc-src pc-code" hidden>class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+a, b = Point(1, 2), Point(1, 2)
+print(a == b, a is b, a == a)
+print(len({a, b}), [1, 2] == [1, 2], len({(1, 2), (1, 2)}))</textarea></div>
+<p>Without any special methods, <code>==</code> falls back to <code>is</code>: two points with the same coordinates aren&rsquo;t equal, and a set keeps both. Lists and tuples compare their contents, and a set of equal tuples keeps one. Today your classes learn to do the same.</p>
+<h2 id="teaching-what-equal-means">Teaching == what equal means</h2>
+<p><code>a == b</code> calls <code>a.__eq__(b)</code>. Write it to compare whatever makes two objects &ldquo;the same thing&rdquo; for your class, usually by comparing tuples of the attributes that matter:</p>
+<div class="pc pc-example" data-kind="example" data-id="w029d2-e2"><textarea class="pc-src pc-code" hidden>class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return f&quot;Point({self.x!r}, {self.y!r})&quot;
+
+    def __eq__(self, other):
+        if not isinstance(other, Point):
+            return NotImplemented
+        return (self.x, self.y) == (other.x, other.y)
+
+a, b = Point(1, 2), Point(1, 2)
+print(a == b, a != b, a is b)
+print(a == (1, 2), a == &quot;Point(1, 2)&quot;, Point(1, 2) in [Point(0, 0), Point(1, 2)])</textarea></div>
+<ul>
+<li><strong><code>NotImplemented</code></strong> (a special value, not the error <code>NotImplementedError</code>) means &ldquo;I don&rsquo;t know how to compare with that&rdquo;. Python then tries the other object&rsquo;s <code>__eq__</code>, and if neither knows, falls back to <code>is</code>, giving False. Returning it for other types is better than crashing on <code>other.x</code>, or deciding on behalf of a type you don&rsquo;t know about.</li>
+<li><strong><code>!=</code></strong> comes for free: Python inverts <code>__eq__</code> unless you write <code>__ne__</code> yourself (you almost never should).</li>
+<li><strong><code>in</code></strong> for lists, <code>list.index</code>, <code>list.count</code> and <code>remove</code> all use <code>==</code>, so they now work by value.</li>
+<li><code>is</code> still means &ldquo;the very same object&rdquo;. Use <code>is</code> only for identity, mostly <code>x is None</code>.</li>
+</ul>
+<p>Decide carefully what &ldquo;equal&rdquo; means. Two bank accounts with the same owner and balance are probably <strong>not</strong> the same account; two points with the same coordinates are the same point. Objects that represent a <strong>value</strong> (a point, an amount of money, a date) should compare by value; objects that represent a <strong>thing with an identity</strong> (an account, a player, a lift) are often best left comparing by identity.</p>
+<h2 id="what-a-hash-is-for">What a hash is for</h2>
+<p>Sets and dictionaries find things fast (Week 17: O(1) on average) by <strong>hashing</strong>: they turn each key into a whole number, its <strong>hash</strong>, and use it to jump straight to where the key should be stored. <code>hash(x)</code> shows it.</p>
+<div class="pc pc-predict" data-kind="predict" data-id="w029d2-p3"><textarea class="pc-src pc-code" hidden>print(hash(42) == hash(42), hash(&quot;abc&quot;) == hash(&quot;abc&quot;), hash((1, 2)) == hash((1, 2)))
+print(hash(1) == hash(1.0) == hash(True))
+try:
+    hash([1, 2])
+except TypeError as e:
+    print(&quot;TypeError:&quot;, e)</textarea></div>
+<p>A set looks for a key only among the objects with the <strong>same hash</strong>, then checks those with <code>==</code>. So there&rsquo;s one rule every hashable object must follow:</p>
+<blockquote>
+<p><strong>If <code>a == b</code>, then <code>hash(a) == hash(b)</code>.</strong></p>
+</blockquote>
+<p>(The reverse needn&rsquo;t hold: different objects may share a hash. That&rsquo;s a &ldquo;collision&rdquo;, and only slows things down a little.) That&rsquo;s why <code>1</code>, <code>1.0</code> and <code>True</code>, which are all equal, have the same hash. And it&rsquo;s why lists, which can change, have no hash at all: if a list&rsquo;s contents changed while it was in a set, its hash would change, and the set would look for it in the wrong place.</p>
+<h2 id="writing-hash">Writing <strong>hash</strong></h2>
+<p>When a class defines <code>__eq__</code>, Python <strong>removes</strong> its default hash (sets <code>__hash__</code> to <code>None</code>), because the default hash is based on identity and would break the rule. So a class with only <code>__eq__</code> can&rsquo;t go in a set:</p>
+<div class="pc pc-predict" data-kind="predict" data-id="w029d2-p4"><textarea class="pc-src pc-code" hidden>class Point:
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+
+    def __eq__(self, other):
+        if not isinstance(other, Point):
+            return NotImplemented
+        return (self.x, self.y) == (other.x, other.y)
+
+try:
+    {Point(1, 2)}
+except TypeError as e:
+    print(&quot;TypeError:&quot;, e)</textarea></div>
+<p>If instances should be usable in sets and as keys, write <code>__hash__</code> to hash <strong>the same attributes <code>__eq__</code> compares</strong>, usually by hashing a tuple of them:</p>
+<div class="pc pc-example" data-kind="example" data-id="w029d2-e5"><textarea class="pc-src pc-code" hidden>class Point:
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+
+    def __repr__(self):
+        return f&quot;Point({self.x!r}, {self.y!r})&quot;
+
+    def __eq__(self, other):
+        if not isinstance(other, Point):
+            return NotImplemented
+        return (self.x, self.y) == (other.x, other.y)
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+visited = {Point(0, 0), Point(1, 2), Point(1, 2)}
+print(visited)
+heights = {Point(0, 0): 12, Point(1, 2): 30}
+print(heights[Point(1, 2)], Point(5, 5) in heights)</textarea></div>
+<p>Using the same tuple in both methods guarantees the rule: equal points have equal tuples, so equal hashes.</p>
+<p>Should a class be hashable? Only if its equality can&rsquo;t change while it&rsquo;s in use: values like points, money, dates, versions, playing cards. For objects whose state changes (a basket, an account), either leave the default identity-based <code>==</code> and hash (don&rsquo;t write <code>__eq__</code>), or write <code>__eq__</code> and leave them unhashable.</p>
+<h2 id="the-mutable-key-trap">The mutable key trap</h2>
+<p>If a hashable object&rsquo;s attributes <strong>can</strong> be changed, changing them while it&rsquo;s in a set or a dictionary key breaks things silently:</p>
+<div class="pc pc-predict" data-kind="predict" data-id="w029d2-p6"><textarea class="pc-src pc-code" hidden>class Point:
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+    def __eq__(self, other):
+        return isinstance(other, Point) and (self.x, self.y) == (other.x, other.y)
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+p = Point(1, 2)
+seen = {p}
+p.x = 99
+print(p in seen, Point(1, 2) in seen, Point(99, 2) in seen, len(seen))</textarea></div>
+<p>The set stored <code>p</code> under its <strong>old</strong> hash. Now <code>p</code> is looked for under its new hash and isn&rsquo;t found; the old position holds an object that&rsquo;s no longer equal to <code>Point(1, 2)</code>. The object is in the set, and can&rsquo;t be found by any lookup.</p>
+<p>The rule: <strong>never change the attributes a hash depends on</strong> while the object is in a set or used as a key. The safest way is to make such objects <strong>immutable</strong>: set their attributes once in <code>__init__</code> and never change them. Week 29, Day 4 (properties) and Week 32 (frozen dataclasses) show ways to enforce that.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p><code>__eq__</code> defines <code>==</code>: compare tuples of the attributes that matter, and return <code>NotImplemented</code> for other types; <code>!=</code> follows automatically. Equal objects must have equal hashes, so defining <code>__eq__</code> removes the default hash. For value-like objects, write <code>__hash__</code> hashing the same tuple, and never change those attributes afterwards. Objects with a changing identity-like state should stay unhashable, or compare by identity.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w029d2-money_eq" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Equal amounts</div><div class="pc-prompt"><p>Give <code>Money</code> an <code>__eq__</code> (equal when the pence are equal; <code>NotImplemented</code> for anything that isn&rsquo;t <code>Money</code>) and a matching <code>__hash__</code>.</p></div><textarea class="pc-src pc-code" hidden>class Money:
+    def __init__(self, pence):
+        self.pence = pence
+
+    def __repr__(self):
+        return f&quot;Money({self.pence})&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;equality and hashing&quot;
+    M = ns[&quot;Money&quot;]
+    assert M(500) == M(500) and M(500) != M(501) and not (M(500) == 500) and M(5) != &quot;5&quot;
+    assert len({M(1), M(1), M(2)}) == 2 and {M(7): &quot;x&quot;}[M(7)] == &quot;x&quot;
+    assert M(500).__eq__(500) is NotImplemented</textarea><textarea class="pc-src pc-solution" hidden>class Money:
+    def __init__(self, pence):
+        self.pence = pence
+
+    def __repr__(self):
+        return f&quot;Money({self.pence})&quot;
+
+    def __eq__(self, other):
+        if not isinstance(other, Money):
+            return NotImplemented
+        return self.pence == other.pence
+
+    def __hash__(self):
+        return hash(self.pence)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w029d2-card" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Playing cards</div><div class="pc-prompt"><p>Write <code>Card(rank, suit)</code> where rank is one of <code>"2"</code> to <code>"10"</code>, <code>"J"</code>, <code>"Q"</code>, <code>"K"</code>, <code>"A"</code> (case-insensitive: <code>"q"</code> becomes <code>"Q"</code>) and suit is one of <code>"♠♥♦♣"</code> (or the letters <code>S H D C</code>, any case, which become the symbols). Bad values raise <code>ValueError</code>. Cards are equal when rank and suit match, and hashable. <code>__repr__</code> gives <code>Card('Q', '♥')</code>.</p></div><textarea class="pc-src pc-code" hidden>class Card:
+    RANKS = [&quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;6&quot;, &quot;7&quot;, &quot;8&quot;, &quot;9&quot;, &quot;10&quot;, &quot;J&quot;, &quot;Q&quot;, &quot;K&quot;, &quot;A&quot;]
+    SUITS = {&quot;S&quot;: &quot;♠&quot;, &quot;H&quot;: &quot;♥&quot;, &quot;D&quot;: &quot;♦&quot;, &quot;C&quot;: &quot;♣&quot;}
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;cards&quot;
+    C = ns[&quot;Card&quot;]
+    assert C(&quot;q&quot;, &quot;h&quot;) == C(&quot;Q&quot;, &quot;♥&quot;) and repr(C(&quot;10&quot;, &quot;s&quot;)) == &quot;Card(&#x27;10&#x27;, &#x27;♠&#x27;)&quot;
+    assert C(&quot;A&quot;, &quot;♣&quot;) != C(&quot;A&quot;, &quot;♠&quot;) and len({C(&quot;k&quot;, &quot;d&quot;), C(&quot;K&quot;, &quot;♦&quot;), C(&quot;K&quot;, &quot;D&quot;)}) == 1
+    hand = [C(&quot;2&quot;, &quot;c&quot;), C(&quot;j&quot;, &quot;h&quot;)]
+    assert C(&quot;J&quot;, &quot;♥&quot;) in hand and hand.index(C(&quot;J&quot;, &quot;H&quot;)) == 1
+    for bad in [(&quot;1&quot;, &quot;s&quot;), (&quot;Q&quot;, &quot;x&quot;), (&quot;11&quot;, &quot;h&quot;)]:
+        try:
+            C(*bad)
+            assert False, f&quot;Card{bad} should raise ValueError&quot;
+        except ValueError:
+            pass</textarea><textarea class="pc-src pc-solution" hidden>class Card:
+    RANKS = [&quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;6&quot;, &quot;7&quot;, &quot;8&quot;, &quot;9&quot;, &quot;10&quot;, &quot;J&quot;, &quot;Q&quot;, &quot;K&quot;, &quot;A&quot;]
+    SUITS = {&quot;S&quot;: &quot;♠&quot;, &quot;H&quot;: &quot;♥&quot;, &quot;D&quot;: &quot;♦&quot;, &quot;C&quot;: &quot;♣&quot;}
+
+    def __init__(self, rank, suit):
+        rank = rank.upper()
+        suit = Card.SUITS.get(suit.upper(), suit)
+        if rank not in Card.RANKS or suit not in Card.SUITS.values():
+            raise ValueError(f&quot;no such card: {rank}{suit}&quot;)
+        self.rank = rank
+        self.suit = suit
+
+    def __repr__(self):
+        return f&quot;Card({self.rank!r}, {self.suit!r})&quot;
+
+    def __eq__(self, other):
+        if not isinstance(other, Card):
+            return NotImplemented
+        return (self.rank, self.suit) == (other.rank, other.suit)
+
+    def __hash__(self):
+        return hash((self.rank, self.suit))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w029d2-words" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Equal, ignoring case</div><div class="pc-prompt"><p><code>Word(text)</code> stores the text as given (for display), but two words are equal if their texts match <strong>ignoring case and spaces at the ends</strong>. Write <code>__eq__</code> and <code>__hash__</code> so that equal words have equal hashes, then use a set to write <code>distinct(texts)</code> returning how many different words there are.</p></div><textarea class="pc-src pc-code" hidden>class Word:
+    def __init__(self, text):
+        self.text = text
+
+    def __repr__(self):
+        return f&quot;Word({self.text!r})&quot;
+
+def distinct(texts):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;values&quot;
+    W = ns[&quot;Word&quot;]
+    assert W(&quot;Hello&quot;) == W(&quot; hello &quot;) and W(&quot;Hello&quot;).text == &quot;Hello&quot; and hash(W(&quot;ABC&quot;)) == hash(W(&quot;abc &quot;))
+    assert distinct([&quot;Apple&quot;, &quot;apple&quot;, &quot; APPLE&quot;, &quot;pear&quot;, &quot;Pear &quot;]) == 2 and distinct([]) == 0
+    assert W(&quot;x&quot;) != &quot;x&quot;</textarea><textarea class="pc-src pc-solution" hidden>class Word:
+    def __init__(self, text):
+        self.text = text
+
+    def __repr__(self):
+        return f&quot;Word({self.text!r})&quot;
+
+    def _key(self):
+        return self.text.strip().lower()
+
+    def __eq__(self, other):
+        if not isinstance(other, Word):
+            return NotImplemented
+        return self._key() == other._key()
+
+    def __hash__(self):
+        return hash(self._key())
+
+def distinct(texts):
+    return len({Word(t) for t in texts})</textarea><template class="pc-src pc-hint">Put the &ldquo;key&rdquo; in one helper, <code>self._key()</code> returning <code>self.text.strip().lower()</code>, and use it in both methods. Then they can&rsquo;t disagree.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w029d2-grid" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Points as keys</div><div class="pc-prompt"><p>Using the hashable <code>Cell(row, col)</code> in the starter, write <code>count_neighbours(alive)</code>: given a set of live cells, return a dictionary from each cell that has <strong>at least one</strong> live neighbour (the 8 around it, not itself) to how many live neighbours it has. This is the heart of Conway&rsquo;s Game of Life.</p></div><textarea class="pc-src pc-code" hidden>class Cell:
+    def __init__(self, row, col):
+        self.row, self.col = row, col
+
+    def __repr__(self):
+        return f&quot;Cell({self.row}, {self.col})&quot;
+
+    def __eq__(self, other):
+        if not isinstance(other, Cell):
+            return NotImplemented
+        return (self.row, self.col) == (other.row, other.col)
+
+    def __hash__(self):
+        return hash((self.row, self.col))
+
+def count_neighbours(alive):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;counts&quot;
+    C = ns[&quot;Cell&quot;]
+    alive = {C(0, 0), C(0, 1), C(0, 2)}
+    n = count_neighbours(alive)
+    assert n[C(0, 1)] == 2 and n[C(0, 0)] == 1 and n[C(1, 1)] == 3 and n[C(-1, -1)] == 1 and C(0, 4) not in n
+    assert len(n) == 15 and count_neighbours(set()) == {}</textarea><textarea class="pc-src pc-solution" hidden>class Cell:
+    def __init__(self, row, col):
+        self.row, self.col = row, col
+
+    def __repr__(self):
+        return f&quot;Cell({self.row}, {self.col})&quot;
+
+    def __eq__(self, other):
+        if not isinstance(other, Cell):
+            return NotImplemented
+        return (self.row, self.col) == (other.row, other.col)
+
+    def __hash__(self):
+        return hash((self.row, self.col))
+
+def count_neighbours(alive):
+    counts = {}
+    for cell in alive:
+        for dr in (-1, 0, 1):
+            for dc in (-1, 0, 1):
+                if dr or dc:
+                    n = Cell(cell.row + dr, cell.col + dc)
+                    counts[n] = counts.get(n, 0) + 1
+    return counts</textarea><template class="pc-src pc-hint">For each live cell, add 1 to every one of its 8 neighbours in a dictionary (<code>counts[cell] = counts.get(cell, 0) + 1</code>). Cells that are themselves alive only get counts from their live neighbours, which is exactly right.</template></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w029d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Unhashable</div><div class="pc-prompt"><p>Adding a <code>Colour</code> to a set crashes with <code>TypeError: unhashable type: 'Colour'</code>. Colours never change once made. Fix the class so they can go in sets.</p></div><textarea class="pc-src pc-code" hidden>class Colour:
+    def __init__(self, r, g, b):
+        self.r, self.g, self.b = r, g, b
+
+    def __eq__(self, other):
+        if not isinstance(other, Colour):
+            return NotImplemented
+        return (self.r, self.g, self.b) == (other.r, other.g, other.b)
+
+palette = {Colour(255, 0, 0), Colour(255, 0, 0), Colour(0, 0, 255)}
+print(len(palette))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;two colours&quot;
+    expect_output(&quot;2&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Colour:
+    def __init__(self, r, g, b):
+        self.r, self.g, self.b = r, g, b
+
+    def __eq__(self, other):
+        if not isinstance(other, Colour):
+            return NotImplemented
+        return (self.r, self.g, self.b) == (other.r, other.g, other.b)
+
+    def __hash__(self):
+        return hash((self.r, self.g, self.b))
+
+palette = {Colour(255, 0, 0), Colour(255, 0, 0), Colour(0, 0, 255)}
+print(len(palette))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w029d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Comparing with None</div><div class="pc-prompt"><p><code>find</code> crashes with <code>AttributeError: 'NoneType' object has no attribute 'code'</code> because the list has a <code>None</code> in it. Fix <code>__eq__</code> (not <code>find</code>) so comparing a <code>Product</code> with anything else simply isn&rsquo;t equal.</p></div><textarea class="pc-src pc-code" hidden>class Product:
+    def __init__(self, code, name):
+        self.code, self.name = code, name
+
+    def __eq__(self, other):
+        return self.code == other.code
+
+    def __hash__(self):
+        return hash(self.code)
+
+def find(items, wanted):
+    return [i for i, item in enumerate(items) if item == wanted]
+
+stock = [Product(&quot;A1&quot;, &quot;pen&quot;), None, Product(&quot;B2&quot;, &quot;ink&quot;), Product(&quot;A1&quot;, &quot;pen (blue)&quot;)]
+print(find(stock, Product(&quot;A1&quot;, &quot;?&quot;)))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;finds both&quot;
+    expect_output(&quot;[0, 3]&quot;)
+    P = ns[&quot;Product&quot;]
+    assert P(&quot;A1&quot;, &quot;x&quot;).__eq__(None) is NotImplemented</textarea><textarea class="pc-src pc-solution" hidden>class Product:
+    def __init__(self, code, name):
+        self.code, self.name = code, name
+
+    def __eq__(self, other):
+        if not isinstance(other, Product):
+            return NotImplemented
+        return self.code == other.code
+
+    def __hash__(self):
+        return hash(self.code)
+
+def find(items, wanted):
+    return [i for i, item in enumerate(items) if item == wanted]
+
+stock = [Product(&quot;A1&quot;, &quot;pen&quot;), None, Product(&quot;B2&quot;, &quot;ink&quot;), Product(&quot;A1&quot;, &quot;pen (blue)&quot;)]
+print(find(stock, Product(&quot;A1&quot;, &quot;?&quot;)))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w029d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Equal but different hashes</div><div class="pc-prompt"><p>Two tags that are equal end up as two items in a set, because <code>__hash__</code> and <code>__eq__</code> disagree. Fix <code>__hash__</code>.</p></div><textarea class="pc-src pc-code" hidden>class Tag:
+    def __init__(self, name):
+        self.name = name
+
+    def __eq__(self, other):
+        if not isinstance(other, Tag):
+            return NotImplemented
+        return self.name.lower() == other.name.lower()
+
+    def __hash__(self):
+        return hash(self.name)
+
+print(len({Tag(&quot;Python&quot;), Tag(&quot;python&quot;), Tag(&quot;PYTHON&quot;)}))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;one tag&quot;
+    expect_output(&quot;1&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Tag:
+    def __init__(self, name):
+        self.name = name
+
+    def __eq__(self, other):
+        if not isinstance(other, Tag):
+            return NotImplemented
+        return self.name.lower() == other.name.lower()
+
+    def __hash__(self):
+        return hash(self.name.lower())
+
+print(len({Tag(&quot;Python&quot;), Tag(&quot;python&quot;), Tag(&quot;PYTHON&quot;)}))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w029d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>class K:
+    def __init__(self, v):
+        self.v = v
+    def __eq__(self, other):
+        return isinstance(other, K) and self.v == other.v
+    def __hash__(self):
+        return hash(self.v)
+
+class N:
+    def __init__(self, v):
+        self.v = v
+
+p = ___   # K(1) == K(1)
+q = ___   # N(1) == N(1)
+r = ___   # len({K(1), K(1), K(2)})
+s = ___   # len({N(1), N(1)})
+t = ___   # K(1) is K(1)</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert (p, q, r, s, t) == (True, False, 2, 2, False)</textarea><textarea class="pc-src pc-solution" hidden>class K:
+    def __init__(self, v):
+        self.v = v
+    def __eq__(self, other):
+        return isinstance(other, K) and self.v == other.v
+    def __hash__(self):
+        return hash(self.v)
+
+class N:
+    def __init__(self, v):
+        self.v = v
+
+p = True
+q = False
+r = 2
+s = 2
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w029d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does a == b call?", "answer": 1, "explain": "Without <strong>eq</strong>, it falls back to identity.", "options": ["a.<strong>is</strong>(b)", "a.<strong>eq</strong>(b)", "hash(a) == hash(b)", "id(a) == id(b)"]}, {"type": "mc", "q": "What should <strong>eq</strong> return for an object of a type it doesn&rsquo;t understand?", "answer": 1, "explain": "Python then tries the other side, and falls back to identity.", "options": ["False", "NotImplemented", "It should raise TypeError", "None"]}, {"type": "mc", "q": "Do you need to write <strong>ne</strong> for != to work?", "answer": 1, "explain": "Writing it yourself risks disagreement.", "options": ["Yes", "No: Python inverts <strong>eq</strong>", "Only for sets", "Only for numbers"]}, {"type": "mc", "q": "What&rsquo;s the rule connecting == and hash?", "answer": 1, "explain": "The reverse needn&rsquo;t hold.", "options": ["Different objects have different hashes", "If a == b, then hash(a) == hash(b)", "Hashes must be positive", "hash(a) == id(a)"]}, {"type": "mc", "q": "What happens to a class&rsquo;s hash when it defines <strong>eq</strong> but not <strong>hash</strong>?", "answer": 1, "explain": "Python sets <strong>hash</strong> to None.", "options": ["Nothing", "It becomes unhashable", "It hashes by value automatically", "It hashes by id"]}, {"type": "mc", "q": "Why aren&rsquo;t lists hashable?", "answer": 1, "explain": "Tuples, which can&rsquo;t change, are hashable.", "options": ["They&rsquo;re too big", "They can change, and a changed hash would lose them inside a set", "Lists can&rsquo;t be compared", "No reason"]}, {"type": "mc", "q": "How should <strong>hash</strong> usually be written?", "answer": 1, "explain": "Then equal objects always have equal hashes.", "options": ["return id(self)", "Hash a tuple of exactly the attributes <strong>eq</strong> compares", "return 1", "Hash every attribute"]}, {"type": "mc", "q": "What happens if you change an object&rsquo;s hashed attribute while it&rsquo;s in a set?", "answer": 1, "explain": "Make hashable objects immutable.", "options": ["The set updates", "It can&rsquo;t be found any more, though it&rsquo;s still in the set", "Python raises an error", "Nothing"]}, {"type": "mc", "q": "Which class is best compared by value?", "answer": 1, "explain": "Things with an identity often compare by identity.", "options": ["A bank account", "A point on a map", "A player in a game", "A lift"]}, {"type": "mc", "q": "Which is True?", "answer": 0, "explain": "1 == 1.0, so their hashes must match.", "options": ["hash(1) == hash(1.0)", "[1] is [1]", "hash([1])", "NotImplemented == NotImplementedError"]}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w029d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: version numbers</div><div class="pc-prompt"><p>Write <code>Version(text)</code> for version strings like <code>"1.10.2"</code>: one or more whole numbers separated by dots (<code>ValueError</code> otherwise, including empty parts and negative numbers). Trailing zeros don&rsquo;t matter: <code>Version("1.2") == Version("1.2.0") == Version("1.2.0.0")</code>, and their hashes must match. Keep the original text for <code>__repr__</code> (<code>Version('1.2.0')</code>) but compare by the numbers. Also write <code>newest(texts)</code> returning the text of the highest version (numbers compared part by part; <code>None</code> for no texts), keeping the first if equal versions appear.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+class Version:
+    ___
+
+def newest(texts):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_equal():
+    &quot;equality and hashing&quot;
+    V = ns[&quot;Version&quot;]
+    assert V(&quot;1.2&quot;) == V(&quot;1.2.0&quot;) == V(&quot;1.2.0.0&quot;) and V(&quot;1.2&quot;) != V(&quot;1.20&quot;) and V(&quot;0&quot;) == V(&quot;0.0&quot;)
+    assert len({V(&quot;2&quot;), V(&quot;2.0&quot;), V(&quot;2.0.1&quot;)}) == 2 and repr(V(&quot;1.2.0&quot;)) == &quot;Version(&#x27;1.2.0&#x27;)&quot;
+    assert V(&quot;1.0&quot;).__eq__(&quot;1.0&quot;) is NotImplemented
+def test_bad():
+    &quot;bad text&quot;
+    V = ns[&quot;Version&quot;]
+    for t in [&quot;&quot;, &quot;1..2&quot;, &quot;1.2.&quot;, &quot;v1.2&quot;, &quot;1.-2&quot;, &quot;1.2a&quot;]:
+        try:
+            V(t)
+            assert False, f&quot;Version({t!r}) should raise ValueError&quot;
+        except ValueError:
+            pass
+def test_newest():
+    &quot;newest&quot;
+    assert newest([&quot;1.9&quot;, &quot;1.10&quot;, &quot;1.9.9&quot;, &quot;0.99&quot;]) == &quot;1.10&quot;
+    assert newest([&quot;2.0&quot;, &quot;2&quot;, &quot;1.99&quot;]) == &quot;2.0&quot; and newest([]) is None</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+class Version:
+    def __init__(self, text):
+        if not re.fullmatch(r&quot;\d+(\.\d+)*&quot;, text):
+            raise ValueError(f&quot;not a version: {text!r}&quot;)
+        parts = [int(p) for p in text.split(&quot;.&quot;)]
+        while parts and parts[-1] == 0:
+            parts.pop()
+        self.text = text
+        self.parts = tuple(parts)
+
+    def __repr__(self):
+        return f&quot;Version({self.text!r})&quot;
+
+    def __eq__(self, other):
+        if not isinstance(other, Version):
+            return NotImplemented
+        return self.parts == other.parts
+
+    def __hash__(self):
+        return hash(self.parts)
+
+def newest(texts):
+    best = None
+    for t in texts:
+        v = Version(t)
+        if best is None or v.parts &gt; best.parts:
+            best = v
+    return None if best is None else best.text</textarea><template class="pc-src pc-hint">Store <code>self.text</code> and a tuple <code>self.parts</code> with trailing zeros removed (<code>while parts and parts[-1] == 0: parts.pop()</code>). Compare and hash <code>self.parts</code>. For <code>newest</code>, compare the tuples: <code>(1, 10) &gt; (1, 9, 9)</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>For each class you&rsquo;ve written, decide: does it represent a value (compare by value, hashable, never changed) or a thing with an identity (compare by identity, or by value but unhashable)? Tomorrow: operator overloading, so <code>Money(5) + Money(3)</code> and <code>Vector(1, 2) * 3</code> work.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w029d1.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w029d2", "week": 29, "day": 2, "title": "Equality and hashing", "exercises": [{"id": "w029d2-money_eq", "title": "Equal amounts", "points": 10}, {"id": "w029d2-card", "title": "Playing cards", "points": 15}, {"id": "w029d2-words", "title": "Equal, ignoring case", "points": 15}, {"id": "w029d2-grid", "title": "Points as keys", "points": 15}, {"id": "w029d2-bug1", "title": "Unhashable", "points": 10}, {"id": "w029d2-bug2", "title": "Comparing with None", "points": 10}, {"id": "w029d2-bug3", "title": "Equal but different hashes", "points": 10}, {"id": "w029d2-trace", "title": "Predict them", "points": 10}, {"id": "w029d2-challenge", "title": "Challenge: version numbers", "points": 25}], "points": 120}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=8fe38f9496"></script>
+</body>
+</html>
