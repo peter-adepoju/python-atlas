@@ -49,6 +49,8 @@ python3 course/build.py
 git add -A && git commit -m "..." && git pull --rebase -q && git push -q
 ```
 
+Peter has given standing permission (1 November 2026) to merge finished work into `main` without asking: when a session works on a separate branch, open a pull request and merge it once the work is validated and pushed, so the live site updates.
+
 The validator checks that every solution passes and every starter fails. Don't run two validations at once: they share `/tmp/atlas_work` and interfere.
 
 Pyodide grading (`course/static/py/harness.py`, `course/static/js/py-worker.js`) can be tested in Node with an npm copy of `pyodide`; pytest loads from the Pyodide CDN in the browser (the worker loads it automatically when checks call `against(` or `pytest_run(`).
