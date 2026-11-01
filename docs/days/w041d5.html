@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="871ff52039">
+<title>Week 41 Day 5: Prefix sums | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=871ff52039">
+<link rel="stylesheet" href="../assets/css/site.css?v=871ff52039">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=871ff52039"></script>
+<script src="../assets/vendor/codemirror.js?v=871ff52039" defer></script>
+<meta name="description" content="Week 14 met running totals: work out prefix[i], the sum of the first i items, once, and any range total becomes a single subtraction. Today shows how far...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w041d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 41 Day 5: Prefix sums">
+<meta property="og:description" content="Week 14 met running totals: work out prefix[i], the sum of the first i items, once, and any range total becomes a single subtraction. Today shows how far...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w041d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-41">Week 41: Arrays and their patterns</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#prefix-sums-again" data-sec="prefix-sums-again">Prefix sums again</a></li><li><a href="#prefix-sums-and-a-dictionary" data-sec="prefix-sums-and-a-dictionary">Prefix sums and a dictionary</a></li><li><a href="#remainders" data-sec="remainders">Remainders</a></li><li><a href="#two-dimensions" data-sec="two-dimensions">Two dimensions</a></li><li><a href="#difference-arrays" data-sec="difference-arrays">Difference arrays</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w041d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-41">Week 41: Arrays and their patterns</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 41, Day 5</span></p>
+      <h1>Prefix sums</h1>
+      <div class="day-intro"><p>Week 14 met running totals: work out <code>prefix[i]</code>, the sum of the first i items, once, and any range total becomes a single subtraction. Today shows how far that idea goes. Paired with a dictionary, prefix sums count and find runs with a given total in O(n), even with negative numbers, where yesterday&rsquo;s windows failed. They extend to grids, where any rectangle&rsquo;s total takes four lookups. And run backwards, as <strong>difference arrays</strong>, they apply thousands of range updates in one pass.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Build prefix sums with a leading 0, and answer any range total in O(1)</li><li>Count and find runs with a given total using a dictionary of earlier prefix sums</li><li>Use remainders of prefix sums for divisibility questions</li><li>Answer rectangle totals in a grid with 2D prefix sums</li><li>Apply many range updates at once with a difference array</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="Prefix sums again: 15 min"></span><span class="plan-seg s0" style="flex:30" title="Prefix sums and a dictionary: 30 min"></span><span class="plan-seg s1" style="flex:15" title="Remainders: 15 min"></span><span class="plan-seg s0" style="flex:20" title="Two dimensions: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Difference arrays: 20 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Prefix sums again</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">Prefix sums and a dictionary</span><span class="plan-min">30 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Remainders</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Two dimensions</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Difference arrays</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w041d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w041d5.ipynb" download>download it</a>. Exercises today are worth 145 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w041d5-p1"><textarea class="pc-src pc-code" hidden>from itertools import accumulate
+
+nums = [3, -2, 5, -1, 2]
+prefix = [0, *accumulate(nums)]
+print(prefix)
+print(prefix[4] - prefix[1], sum(nums[1:4]))
+print([prefix[j] - prefix[i] for i in range(len(nums)) for j in range(i + 1, len(nums) + 1) if prefix[j] - prefix[i] == 3])</textarea></div>
+<p><code>prefix[j] - prefix[i]</code> is the total of <code>nums[i:j]</code>: the first <code>j</code> items minus the first <code>i</code>. Three different runs add up to 3. The last line checks every pair of prefix positions, O(n²); today&rsquo;s main trick finds the same runs in one pass.</p>
+<h2 id="prefix-sums-again">Prefix sums again</h2>
+<p>With <code>prefix[0] = 0</code> and <code>prefix[i + 1] = prefix[i] + nums[i]</code>:</p>
+<pre><code class="language-text">nums:          3   -2    5   -1    2
+prefix:    0   3    1    6    5    7
+           ^ i=0                   ^ i=5
+total of nums[i:j]  =  prefix[j] - prefix[i]        (half-open, like slicing)
+</code></pre>
+<p>The leading 0 means ranges starting at the beginning need no special case. <code>itertools.accumulate</code> builds the running totals for you (add the 0 yourself). Building is O(n); every range total after that is O(1).</p>
+<p>When is it worth it? When there are <strong>many</strong> questions about ranges of data that <strong>doesn&rsquo;t change</strong>. If the data changes between questions, the prefix sums would need rebuilding each time; structures for that (Fenwick trees and segment trees) come later in this phase.</p>
+<h2 id="prefix-sums-and-a-dictionary">Prefix sums and a dictionary</h2>
+<p>How many runs of <code>nums</code> add up to exactly <code>k</code>? A run <code>nums[i:j]</code> adds up to <code>k</code> when <code>prefix[j] - prefix[i] == k</code>, that is, when <code>prefix[i] == prefix[j] - k</code>. So walk along, keeping a <strong>count of every prefix sum seen so far</strong>; at each position, the number of runs ending here with total <code>k</code> is how many earlier prefixes equal <code>current - k</code>:</p>
+<div class="pc pc-example" data-kind="example" data-id="w041d5-e2"><textarea class="pc-src pc-code" hidden>def count_runs(nums, k):
+    seen = {0: 1}               # the empty prefix, before any item
+    current = count = 0
+    for x in nums:
+        current += x
+        count += seen.get(current - k, 0)
+        seen[current] = seen.get(current, 0) + 1
+    return count
+
+print(count_runs([3, -2, 5, -1, 2], 3), count_runs([1, 1, 1], 2), count_runs([1, -1, 0], 0))</textarea></div>
+<p>That&rsquo;s O(n) time and O(n) space, and negative numbers are fine: nothing here depends on totals only going up. Seeding the dictionary with <code>{0: 1}</code> counts runs that start at the very beginning.</p>
+<p>To find the <strong>longest</strong> such run, remember the <strong>first</strong> position where each prefix sum appeared, instead of a count:</p>
+<div class="pc pc-example" data-kind="example" data-id="w041d5-e3"><textarea class="pc-src pc-code" hidden>def longest_run(nums, k):
+    first = {0: 0}              # prefix value -&gt; earliest number of items giving it
+    current, best = 0, 0
+    for j, x in enumerate(nums, start=1):
+        current += x
+        if current - k in first:
+            best = max(best, j - first[current - k])
+        first.setdefault(current, j)     # keep the earliest only
+    return best
+
+print(longest_run([1, -1, 5, -2, 3], 3), longest_run([-2, -1, 2, 1], 1), longest_run([1, 2], 7))</textarea></div>
+<h2 id="remainders">Remainders</h2>
+<p>A run&rsquo;s total is divisible by <code>k</code> exactly when its two prefix sums leave the <strong>same remainder</strong> when divided by <code>k</code>. So count remainders instead of totals:</p>
+<div class="pc pc-example" data-kind="example" data-id="w041d5-e4"><textarea class="pc-src pc-code" hidden>def divisible_runs(nums, k):
+    seen = {0: 1}
+    current = count = 0
+    for x in nums:
+        current = (current + x) % k          # Python&#x27;s % is never negative for positive k
+        count += seen.get(current, 0)
+        seen[current] = seen.get(current, 0) + 1
+    return count
+
+print(divisible_runs([4, 5, 0, -2, -3, 1], 5))</textarea></div>
+<p>Python&rsquo;s <code>%</code> always gives a result from 0 to k − 1 for a positive <code>k</code>, even for negative numbers (<code>-3 % 5</code> is 2), which is exactly what&rsquo;s needed here. In some other languages it doesn&rsquo;t, and this is a classic source of bugs when translating.</p>
+<h2 id="two-dimensions">Two dimensions</h2>
+<p>For a grid of numbers, let <code>P[r][c]</code> be the total of the rectangle from the top-left corner up to (but not including) row <code>r</code> and column <code>c</code>. Each entry is built from three neighbours, and any rectangle&rsquo;s total then takes four lookups (adding back the corner that was subtracted twice):</p>
+<pre><code class="language-text">P[r+1][c+1] = grid[r][c] + P[r][c+1] + P[r+1][c] - P[r][c]
+
+total of rows r1..r2-1, columns c1..c2-1  =  P[r2][c2] - P[r1][c2] - P[r2][c1] + P[r1][c1]
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w041d5-e5"><textarea class="pc-src pc-code" hidden>def build(grid):
+    rows, cols = len(grid), len(grid[0])
+    P = [[0] * (cols + 1) for _ in range(rows + 1)]
+    for r in range(rows):
+        for c in range(cols):
+            P[r + 1][c + 1] = grid[r][c] + P[r][c + 1] + P[r + 1][c] - P[r][c]
+    return P
+
+def rect(P, r1, c1, r2, c2):
+    return P[r2][c2] - P[r1][c2] - P[r2][c1] + P[r1][c1]
+
+grid = [[3, 0, 1, 4],
+        [5, 6, 3, 2],
+        [1, 2, 0, 1]]
+P = build(grid)
+print(rect(P, 1, 1, 3, 3), 6 + 3 + 2 + 0)
+print(rect(P, 0, 0, 3, 4), sum(map(sum, grid)))</textarea></div>
+<p>This is the same idea as an &ldquo;integral image&rdquo; in image processing, which makes the sums of many rectangles of pixels quick to compute.</p>
+<h2 id="difference-arrays">Difference arrays</h2>
+<p>Prefix sums turn many <strong>questions</strong> about ranges into O(1) each. Their mirror image turns many <strong>updates</strong> to ranges into O(1) each. To add <code>v</code> to every item from <code>i</code> to <code>j - 1</code>, don&rsquo;t touch them all: record <code>+v</code> at <code>i</code> and <code>-v</code> at <code>j</code> in a difference array. One running total at the end rebuilds every value:</p>
+<div class="pc pc-example" data-kind="example" data-id="w041d5-e6"><textarea class="pc-src pc-code" hidden>from itertools import accumulate
+
+def apply(n, updates):
+    diff = [0] * (n + 1)
+    for i, j, v in updates:            # add v to positions i .. j-1
+        diff[i] += v
+        diff[j] -= v
+    return list(accumulate(diff[:n]))
+
+# a hall with 8 time slots; each booking needs chairs from slot i up to slot j
+bookings = [(0, 3, 20), (2, 6, 35), (5, 8, 10)]
+chairs = apply(8, bookings)
+print(chairs, max(chairs))</textarea></div>
+<p>With u updates over n positions, that&rsquo;s O(n + u) instead of O(n × u). The same trick counts how many intervals cover each point: the busiest moment for a room, a road or a server.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Prefix sums with a leading 0 answer any range total as <code>prefix[j] - prefix[i]</code>. With a dictionary of earlier prefix sums (seeded with <code>{0: 1}</code>), you can count runs with total k in O(n), or find the longest (keeping each prefix&rsquo;s first position), and negatives are fine. Equal remainders of prefix sums mean a run divisible by k. In a grid, rectangle totals take four lookups. A difference array records <code>+v</code> at the start and <code>-v</code> just after the end of each update, and one running total applies them all.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d5-ranges" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Range totals</div><div class="pc-prompt"><p>Write <code>RangeSums(nums)</code>, which builds prefix sums once, with <code>total(i, j)</code> (the sum of <code>nums[i:j]</code>, half-open like a slice; <code>i &gt; j</code> or anything outside <code>0 .. len</code> raises <code>IndexError</code>) and <code>average(i, j)</code> (raising <code>ValueError</code> for an empty range). Every query must be O(1): no <code>sum</code> or loops in the methods.</p></div><textarea class="pc-src pc-code" hidden>class RangeSums:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import ast
+def test_ranges():
+    &quot;ranges&quot;
+    r = RangeSums([3, -2, 5, -1, 2])
+    assert r.total(0, 5) == 7 and r.total(1, 4) == 2 and r.total(2, 2) == 0 and r.total(4, 5) == 2 and r.average(0, 4) == 1.25
+    for args in [(3, 2), (0, 6), (-1, 2)]:
+        try:
+            r.total(*args)
+            assert False, args
+        except IndexError:
+            pass
+    try:
+        r.average(1, 1)
+        assert False
+    except ValueError:
+        pass
+    assert RangeSums([]).total(0, 0) == 0
+def test_o1():
+    &quot;O(1) queries&quot;
+    tree = ast.parse(source)
+    for cls in [n for n in tree.body if isinstance(n, ast.ClassDef)]:
+        for f in cls.body:
+            if isinstance(f, ast.FunctionDef) and f.name in (&quot;total&quot;, &quot;average&quot;):
+                assert not any(isinstance(n, (ast.For, ast.While, ast.comprehension)) for n in ast.walk(f)), f.name
+                assert not any(isinstance(n, ast.Name) and n.id == &quot;sum&quot; for n in ast.walk(f)), f.name</textarea><textarea class="pc-src pc-solution" hidden>class RangeSums:
+    def __init__(self, nums):
+        self._prefix = [0]
+        for x in nums:
+            self._prefix.append(self._prefix[-1] + x)
+
+    def total(self, i, j):
+        if not 0 &lt;= i &lt;= j &lt; len(self._prefix):
+            raise IndexError(f&quot;bad range {i}..{j}&quot;)
+        return self._prefix[j] - self._prefix[i]
+
+    def average(self, i, j):
+        if i == j:
+            raise ValueError(&quot;empty range&quot;)
+        return self.total(i, j) / (j - i)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d5-count_k" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Counting runs with a total</div><div class="pc-prompt"><p>Write <code>count_runs(nums, k)</code>: how many runs of consecutive items (of length 1 or more) add up to exactly <code>k</code>. Numbers may be negative. Use prefix sums and a dictionary, in O(n); the checks use 100,000 numbers.</p></div><textarea class="pc-src pc-code" hidden>def count_runs(nums, k):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def brute(nums, k):
+    return sum(1 for i in range(len(nums)) for j in range(i + 1, len(nums) + 1) if sum(nums[i:j]) == k)
+def test_small():
+    &quot;small&quot;
+    assert count_runs([1, 1, 1], 2) == 2 and count_runs([1, 2, 3], 3) == 2 and count_runs([], 0) == 0 and count_runs([0, 0], 0) == 3
+    rng = random.Random(8)
+    for _ in range(200):
+        nums = [rng.randint(-3, 3) for _ in range(rng.randint(0, 12))]
+        k = rng.randint(-4, 4)
+        assert count_runs(nums, k) == brute(nums, k), (nums, k)
+def test_big():
+    &quot;100,000 numbers&quot;
+    rng = random.Random(1)
+    nums = [rng.randint(-5, 5) for _ in range(100_000)]
+    assert count_runs(nums, 7) &gt; 0</textarea><textarea class="pc-src pc-solution" hidden>def count_runs(nums, k):
+    seen = {0: 1}
+    current = count = 0
+    for x in nums:
+        current += x
+        count += seen.get(current - k, 0)
+        seen[current] = seen.get(current, 0) + 1
+    return count</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d5-longest_k" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The longest run with a total</div><div class="pc-prompt"><p>Write <code>longest_run(nums, k)</code>: the <code>(start, end)</code> of the longest run <code>nums[start:end]</code> adding up to exactly <code>k</code>, choosing the one that starts <strong>earliest</strong> if several are equally long; <code>None</code> if there&rsquo;s none. Numbers may be negative. O(n) with a dictionary of each prefix sum&rsquo;s <strong>first</strong> position.</p></div><textarea class="pc-src pc-code" hidden>def longest_run(nums, k):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def brute(nums, k):
+    best = None
+    for i in range(len(nums)):
+        for j in range(i + 1, len(nums) + 1):
+            if sum(nums[i:j]) == k and (best is None or j - i &gt; best[1] - best[0]):
+                best = (i, j)
+    return best
+def test_small():
+    &quot;small&quot;
+    assert longest_run([1, -1, 5, -2, 3], 3) == (0, 4) and longest_run([1, 2], 7) is None and longest_run([5], 5) == (0, 1)
+    rng = random.Random(2)
+    for _ in range(300):
+        nums = [rng.randint(-3, 3) for _ in range(rng.randint(0, 12))]
+        k = rng.randint(-3, 3)
+        assert longest_run(nums, k) == brute(nums, k), (nums, k)</textarea><textarea class="pc-src pc-solution" hidden>def longest_run(nums, k):
+    first = {0: 0}
+    current = 0
+    best = None
+    for j, x in enumerate(nums, start=1):
+        current += x
+        if current - k in first:
+            i = first[current - k]
+            if best is None or j - i &gt; best[1] - best[0]:
+                best = (i, j)
+        first.setdefault(current, j)
+    return best</textarea><template class="pc-src pc-hint"><code>first = {0: 0}</code>. At position <code>j</code> (counting items so far), if <code>current - k</code> is in <code>first</code>, the run from <code>first[current - k]</code> to <code>j</code> works; keep it only if it&rsquo;s strictly longer. Add <code>current</code> to <code>first</code> only if it isn&rsquo;t there yet.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d5-divisible" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Divisible runs</div><div class="pc-prompt"><p>Write <code>divisible_runs(nums, k)</code> for a positive <code>k</code>: how many runs of consecutive items have a total divisible by <code>k</code>. Numbers may be negative. Count prefix-sum <strong>remainders</strong>, in O(n).</p></div><textarea class="pc-src pc-code" hidden>def divisible_runs(nums, k):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def brute(nums, k):
+    return sum(1 for i in range(len(nums)) for j in range(i + 1, len(nums) + 1) if sum(nums[i:j]) % k == 0)
+def test_small():
+    &quot;small&quot;
+    assert divisible_runs([4, 5, 0, -2, -3, 1], 5) == 7 and divisible_runs([5], 9) == 0 and divisible_runs([], 3) == 0
+    rng = random.Random(3)
+    for _ in range(200):
+        nums = [rng.randint(-6, 6) for _ in range(rng.randint(0, 12))]
+        k = rng.randint(1, 6)
+        assert divisible_runs(nums, k) == brute(nums, k), (nums, k)</textarea><textarea class="pc-src pc-solution" hidden>def divisible_runs(nums, k):
+    seen = {0: 1}
+    current = count = 0
+    for x in nums:
+        current = (current + x) % k
+        count += seen.get(current, 0)
+        seen[current] = seen.get(current, 0) + 1
+    return count</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d5-grid" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Rectangle totals</div><div class="pc-prompt"><p>Write <code>GridSums(grid)</code> for a rectangular list of rows of numbers (at least one row and one column): build 2D prefix sums once, then <code>total(r1, c1, r2, c2)</code> returns the total of rows <code>r1</code> to <code>r2 - 1</code> and columns <code>c1</code> to <code>c2 - 1</code> (half-open, like slices) in O(1). Also <code>best_square(k)</code>: the largest total of any k by k square, as <code>(total, r, c)</code> for its top-left corner (earliest row, then column, on a tie).</p></div><textarea class="pc-src pc-code" hidden>class GridSums:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_total():
+    &quot;rectangles&quot;
+    g = GridSums([[3, 0, 1, 4], [5, 6, 3, 2], [1, 2, 0, 1]])
+    assert g.total(1, 1, 3, 3) == 11 and g.total(0, 0, 3, 4) == 28 and g.total(0, 3, 1, 4) == 4 and g.total(2, 2, 2, 4) == 0
+    rng = random.Random(4)
+    grid = [[rng.randint(-5, 9) for _ in range(7)] for _ in range(6)]
+    gs = GridSums(grid)
+    for _ in range(100):
+        r1, r2 = sorted(rng.sample(range(7), 2))
+        c1, c2 = sorted(rng.sample(range(8), 2))
+        assert gs.total(r1, c1, r2, c2) == sum(grid[r][c] for r in range(r1, r2) for c in range(c1, c2))
+def test_square():
+    &quot;best square&quot;
+    g = GridSums([[3, 0, 1, 4], [5, 6, 3, 2], [1, 2, 0, 1]])
+    assert g.best_square(2) == (14, 0, 0) and g.best_square(1) == (6, 1, 1) and g.best_square(3) == (21, 0, 0)</textarea><textarea class="pc-src pc-solution" hidden>class GridSums:
+    def __init__(self, grid):
+        self.rows, self.cols = len(grid), len(grid[0])
+        P = [[0] * (self.cols + 1) for _ in range(self.rows + 1)]
+        for r in range(self.rows):
+            for c in range(self.cols):
+                P[r + 1][c + 1] = grid[r][c] + P[r][c + 1] + P[r + 1][c] - P[r][c]
+        self._P = P
+
+    def total(self, r1, c1, r2, c2):
+        P = self._P
+        return P[r2][c2] - P[r1][c2] - P[r2][c1] + P[r1][c1]
+
+    def best_square(self, k):
+        best = None
+        for r in range(self.rows - k + 1):
+            for c in range(self.cols - k + 1):
+                t = self.total(r, c, r + k, c + k)
+                if best is None or t &gt; best[0]:
+                    best = (t, r, c)
+        return best</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d5-diff" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Busiest moment</div><div class="pc-prompt"><p>A room&rsquo;s bookings are <code>(start, end)</code> pairs of whole hours from 0 to 24, each covering the hours from <code>start</code> up to but not including <code>end</code>. Write <code>busiest_hours(bookings)</code>: return <code>(most, hours)</code>, the largest number of bookings that overlap in any one hour, and a list of the hours (0 to 23) when that happens, in order. Use a difference array. No bookings gives <code>(0, list(range(24)))</code>.</p></div><textarea class="pc-src pc-code" hidden>def busiest_hours(bookings):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_busy():
+    &quot;busy hours&quot;
+    assert busiest_hours([(9, 12), (11, 14), (10, 11), (13, 15)]) == (2, [10, 11, 13])
+    assert busiest_hours([(0, 24)]) == (1, list(range(24))) and busiest_hours([]) == (0, list(range(24)))
+    assert busiest_hours([(8, 9), (8, 9), (8, 10)]) == (3, [8])</textarea><textarea class="pc-src pc-solution" hidden>def busiest_hours(bookings):
+    diff = [0] * 25
+    for start, end in bookings:
+        diff[start] += 1
+        diff[end] -= 1
+    counts, running = [], 0
+    for hour in range(24):
+        running += diff[hour]
+        counts.append(running)
+    most = max(counts)
+    return most, [h for h, n in enumerate(counts) if n == most]</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w041d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">No room for the empty start</div><div class="pc-prompt"><p>These prefix sums start with the first item instead of 0, so <code>prefix[j] - prefix[i]</code> is off by one item, and a range from the very start can&rsquo;t be expressed: this prints <code>9</code> where <code>sum(nums[0:3])</code> is <code>6</code>. Rebuild <code>prefix</code> with a leading 0 so it prints <code>6 6</code>.</p></div><textarea class="pc-src pc-code" hidden>nums = [1, 2, 3, 4]
+prefix = [nums[0]]
+for x in nums[1:]:
+    prefix.append(prefix[-1] + x)
+
+def total(i, j):
+    return prefix[j] - prefix[i]
+
+print(total(0, 3), sum(nums[0:3]))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a leading 0&quot;
+    assert output.strip() == &quot;6 6&quot;, output
+    assert total(1, 4) == 9 and total(2, 2) == 0</textarea><textarea class="pc-src pc-solution" hidden>nums = [1, 2, 3, 4]
+prefix = [0]
+for x in nums:
+    prefix.append(prefix[-1] + x)
+
+def total(i, j):
+    return prefix[j] - prefix[i]
+
+print(total(0, 3), sum(nums[0:3]))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w041d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Runs from the start go missing</div><div class="pc-prompt"><p>This counts runs adding up to <code>k</code>, but its dictionary starts empty, so it never counts a run that begins at the first item: it prints <code>1</code> for <code>[2, 1, 1]</code> with <code>k = 2</code>. Seed the dictionary so it prints <code>2</code> (<code>[2]</code> and <code>[1, 1]</code>).</p></div><textarea class="pc-src pc-code" hidden>def count_runs(nums, k):
+    seen = {}
+    current = count = 0
+    for x in nums:
+        current += x
+        count += seen.get(current - k, 0)
+        seen[current] = seen.get(current, 0) + 1
+    return count
+
+print(count_runs([2, 1, 1], 2))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;seed with the empty prefix&quot;
+    expect_output(&quot;2&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def count_runs(nums, k):
+    seen = {0: 1}
+    current = count = 0
+    for x in nums:
+        current += x
+        count += seen.get(current - k, 0)
+        seen[current] = seen.get(current, 0) + 1
+    return count
+
+print(count_runs([2, 1, 1], 2))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w041d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">An update that never ends</div><div class="pc-prompt"><p>Each update should add <code>v</code> only from <code>i</code> up to <code>j - 1</code>, but the difference array never records the <code>-v</code> at <code>j</code>, so every update runs on to the end: this prints <code>[5, 5, 7, 7, 7]</code>. Fix it so it prints <code>[5, 5, 2, 0, 0]</code>.</p></div><textarea class="pc-src pc-code" hidden>from itertools import accumulate
+
+def apply(n, updates):
+    diff = [0] * (n + 1)
+    for i, j, v in updates:
+        diff[i] += v
+    return list(accumulate(diff[:n]))
+
+print(apply(5, [(0, 2, 5), (2, 3, 2)]))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;stop at j&quot;
+    expect_output(&quot;[5, 5, 2, 0, 0]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from itertools import accumulate
+
+def apply(n, updates):
+    diff = [0] * (n + 1)
+    for i, j, v in updates:
+        diff[i] += v
+        diff[j] -= v
+    return list(accumulate(diff[:n]))
+
+print(apply(5, [(0, 2, 5), (2, 3, 2)]))</textarea></div>
+<div class="parsons" data-id="w041d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Counting runs with a dictionary</div><div class="pc-prompt"><p>Arrange the lines into a function that counts the runs adding up to <code>k</code>. One line is a trap.</p></div><script type="application/json">{"lines": ["def count_runs(nums, k):", "    seen = {0: 1}", "    current = count = 0", "    for x in nums:", "        current += x", "        count += seen.get(current - k, 0)", "        seen[current] = seen.get(current, 0) + 1", "    return count"], "distractors": ["        seen[current] = 1"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>from itertools import accumulate
+
+nums = [2, -1, 3, 0, 4]
+prefix = [0, *accumulate(nums)]
+
+p = ___   # prefix
+q = ___   # prefix[4] - prefix[2]
+r = ___   # -7 % 3
+s = ___   # how many lookups a rectangle total takes with 2D prefix sums
+t = ___   # the cost of applying u range updates to n items with a difference array: &quot;O(n + u)&quot; or &quot;O(n * u)&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [0, 2, 1, 4, 4, 8] and q == 3 and r == 2, &quot;p, q and r&quot;
+    assert s == 4 and t == &quot;O(n + u)&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>from itertools import accumulate
+
+nums = [2, -1, 3, 0, 4]
+prefix = [0, *accumulate(nums)]
+
+p = [0, 2, 1, 4, 4, 8]
+q = 3
+r = 2
+s = 4
+t = &quot;O(n + u)&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w041d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What is prefix[j] - prefix[i], when prefix starts with 0?", "answer": 1, "explain": "Half-open, like a slice.", "options": ["nums[i] + nums[j]", "The total of nums[i:j]", "The total of nums[i:j + 1]", "The average"]}, {"type": "mc", "q": "Why start prefix sums with 0?", "answer": 1, "explain": "The empty prefix.", "options": ["Tradition", "So a range starting at the beginning is prefix[j] - prefix[0], with no special case", "To avoid negatives", "Python needs it"]}, {"type": "mc", "q": "When are prefix sums worth building?", "answer": 1, "explain": "Changing data means rebuilding.", "options": ["Always", "When there are many range questions about data that doesn&rsquo;t change", "When the data changes often", "Only for sorted data"]}, {"type": "mc", "q": "How does a dictionary of prefix sums count runs adding up to k?", "answer": 1, "explain": "O(n), negatives allowed.", "options": ["It sorts them", "At each position, it adds how many earlier prefixes equal current - k", "It tries every pair", "It uses a window"]}, {"type": "mc", "q": "Why seed the dictionary with {0: 1}?", "answer": 1, "explain": "The empty prefix before any item.", "options": ["Speed", "So runs that start at the first item are counted", "To avoid KeyError", "It&rsquo;s not needed"]}, {"type": "mc", "q": "To find the longest run with total k, what do you keep for each prefix sum?", "answer": 1, "explain": "The earliest start gives the longest run.", "options": ["How often it appeared", "The first position it appeared", "The last position", "Its square"]}, {"type": "mc", "q": "When is a run&rsquo;s total divisible by k?", "answer": 1, "explain": "Count remainders.", "options": ["When its first item is", "When its two prefix sums leave the same remainder mod k", "When k is even", "Never"]}, {"type": "mc", "q": "How many lookups does a rectangle total take with 2D prefix sums?", "answer": 1, "explain": "Add back the corner subtracted twice.", "options": ["One per cell", "Four", "Two", "One per row"]}, {"type": "mc", "q": "In a difference array, how do you add v to positions i to j - 1?", "answer": 1, "explain": "O(1) per update.", "options": ["Loop over them", "diff[i] += v and diff[j] -= v, then one running total at the end", "diff[j] += v", "Multiply by v"]}, {"type": "output", "q": "What does this print?", "answer": "[1, 1, 2, 1, 1]", "explain": "Two overlapping ranges meet at position 2.", "code": "from itertools import accumulate\ndiff = [0] * 6\nfor i, j in [(0, 3), (2, 5)]:\n    diff[i] += 1\n    diff[j] -= 1\nprint(list(accumulate(diff[:5])))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: balanced runs</div><div class="pc-prompt"><p>A list holds only <code>0</code>s and <code>1</code>s. A run is <strong>balanced</strong> if it has as many 0s as 1s. Write <code>balanced(bits)</code>, returning <code>(count, longest)</code>: how many balanced runs there are, and the <code>(start, end)</code> of the longest one (<code>bits[start:end]</code>, earliest start on a tie), or <code>None</code> if there are none. One pass, O(n): count each 0 as −1 and each 1 as +1, so a balanced run is a run adding up to 0, and use one dictionary that keeps both how often each prefix value has appeared and where it first appeared. The checks use 100,000 bits.</p></div><textarea class="pc-src pc-code" hidden>def balanced(bits):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def brute(bits):
+    count, best = 0, None
+    for i in range(len(bits)):
+        for j in range(i + 1, len(bits) + 1):
+            if bits[i:j].count(0) * 2 == j - i:
+                count += 1
+                if best is None or j - i &gt; best[1] - best[0]:
+                    best = (i, j)
+    return count, best
+def test_small():
+    &quot;small&quot;
+    assert balanced([0, 1]) == (1, (0, 2)) and balanced([1, 1, 1]) == (0, None) and balanced([]) == (0, None)
+    assert balanced([0, 1, 0, 1]) == (4, (0, 4))
+    rng = random.Random(5)
+    for _ in range(300):
+        bits = [rng.randint(0, 1) for _ in range(rng.randint(0, 14))]
+        assert balanced(bits) == brute(bits), bits
+def test_big():
+    &quot;100,000 bits&quot;
+    rng = random.Random(6)
+    bits = [rng.randint(0, 1) for _ in range(100_000)]
+    count, (i, j) = balanced(bits)
+    assert count &gt; 0 and bits[i:j].count(0) * 2 == j - i</textarea><textarea class="pc-src pc-solution" hidden>def balanced(bits):
+    seen = {0: [1, 0]}
+    current = count = 0
+    best = None
+    for j, b in enumerate(bits, start=1):
+        current += 1 if b == 1 else -1
+        if current in seen:
+            times, first = seen[current]
+            count += times
+            if best is None or j - first &gt; best[1] - best[0]:
+                best = (first, j)
+            seen[current][0] += 1
+        else:
+            seen[current] = [1, j]
+    return count, best</textarea><template class="pc-src pc-hint">Store, for each prefix value, <code>[how_many_times, first_position]</code>, starting with <code>{0: [1, 0]}</code>. At position <code>j</code>, if the current value is already there, add its count to the total and compare <code>j - first_position</code> with the best length; then increase its count (or add it with count 1 and first position <code>j</code>).</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Take the difference-array idea and explain it to yourself the other way round: why does a running total of the differences give back the values? Tomorrow is the Forge, where all five of this week&rsquo;s patterns meet in one larger problem.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w041d4.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w041d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w041d5", "week": 41, "day": 5, "title": "Prefix sums", "exercises": [{"id": "w041d5-ranges", "title": "Range totals", "points": 10}, {"id": "w041d5-count_k", "title": "Counting runs with a total", "points": 15}, {"id": "w041d5-longest_k", "title": "The longest run with a total", "points": 15}, {"id": "w041d5-divisible", "title": "Divisible runs", "points": 15}, {"id": "w041d5-grid", "title": "Rectangle totals", "points": 15}, {"id": "w041d5-diff", "title": "Busiest moment", "points": 10}, {"id": "w041d5-bug1", "title": "No room for the empty start", "points": 10}, {"id": "w041d5-bug2", "title": "Runs from the start go missing", "points": 10}, {"id": "w041d5-bug3", "title": "An update that never ends", "points": 10}, {"id": "w041d5-trace", "title": "Predict them", "points": 10}, {"id": "w041d5-challenge", "title": "Challenge: balanced runs", "points": 25}], "points": 145}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=871ff52039"></script>
+</body>
+</html>

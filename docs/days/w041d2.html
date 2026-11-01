@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="871ff52039">
+<title>Week 41 Day 2: Amortised analysis | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=871ff52039">
+<link rel="stylesheet" href="../assets/css/site.css?v=871ff52039">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=871ff52039"></script>
+<script src="../assets/vendor/codemirror.js?v=871ff52039" defer></script>
+<meta name="description" content="Yesterday’s dynamic array sometimes takes O(n) time for one append, yet everyone calls append O(1). Both are true, and today explains how. Amortised...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w041d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 41 Day 2: Amortised analysis">
+<meta property="og:description" content="Yesterday’s dynamic array sometimes takes O(n) time for one append, yet everyone calls append O(1). Both are true, and today explains how. Amortised...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w041d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-41">Week 41: Arrays and their patterns</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#one-expensive-step-in-many-cheap-ones" data-sec="one-expensive-step-in-many-cheap-ones">One expensive step in many cheap ones</a></li><li><a href="#the-aggregate-method" data-sec="the-aggregate-method">The aggregate method</a></li><li><a href="#the-accounting-method" data-sec="the-accounting-method">The accounting method</a></li><li><a href="#growing-by-a-constant" data-sec="growing-by-a-constant">Growing by a constant</a></li><li><a href="#more-amortised-structures" data-sec="more-amortised-structures">More amortised structures</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w041d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-41">Week 41: Arrays and their patterns</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 41, Day 2</span></p>
+      <h1>Amortised analysis</h1>
+      <div class="day-intro"><p>Yesterday&rsquo;s dynamic array sometimes takes O(n) time for one <code>append</code>, yet everyone calls <code>append</code> O(1). Both are true, and today explains how. Amortised analysis looks at the total cost of a whole sequence of operations and shares it out, the way a yearly bill can be thought of as so much per month. You&rsquo;ll prove that doubling makes appends cost O(1) each in the long run, see why growing by a fixed amount doesn&rsquo;t, and use the same reasoning on two more structures: a binary counter and a stack with multi-pop.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain the difference between a worst-case cost, an amortised cost and an average cost</li><li>Use the aggregate method to total the cost of n operations</li><li>Use the accounting (banker&rsquo;s) method, saving credit on cheap operations to pay for expensive ones</li><li>Show why doubling gives O(1) amortised appends and growing by a constant gives O(n)</li><li>Apply amortised reasoning to counters, stacks and shrinking arrays</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="One expensive step in many cheap ones: 20 min"></span><span class="plan-seg s0" style="flex:25" title="The aggregate method: 25 min"></span><span class="plan-seg s1" style="flex:25" title="The accounting method: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Growing by a constant: 20 min"></span><span class="plan-seg s1" style="flex:15" title="More amortised structures: 15 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">One expensive step in many cheap ones</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">The aggregate method</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">The accounting method</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Growing by a constant</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">More amortised structures</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w041d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w041d2.ipynb" download>download it</a>. Exercises today are worth 135 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w041d2-p1"><textarea class="pc-src pc-code" hidden>def total_copies(n, grow):
+    capacity, size, copies = 1, 0, 0
+    for _ in range(n):
+        if size == capacity:
+            copies += size
+            capacity = grow(capacity)
+        size += 1
+    return copies
+
+for n in [1_000, 2_000, 4_000]:
+    print(n, total_copies(n, lambda c: 2 * c), total_copies(n, lambda c: c + 100))</textarea></div>
+<p>When n doubles, the copies with doubling roughly double too: the total is proportional to n. With &ldquo;add 100 slots&rdquo;, the copies roughly <strong>quadruple</strong>: the total grows like n². Today is about proving both.</p>
+<h2 id="one-expensive-step-in-many-cheap-ones">One expensive step in many cheap ones</h2>
+<p>Three ways to describe an operation&rsquo;s cost:</p>
+<table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Question it answers</th>
+<th><code>append</code> on a doubling array</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>worst case</strong></td>
+<td>what&rsquo;s the most one call can cost?</td>
+<td>O(n): the call that triggers a resize</td>
+</tr>
+<tr>
+<td><strong>amortised</strong></td>
+<td>over <strong>any</strong> sequence of n calls, what&rsquo;s the total, divided by n?</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td><strong>average</strong></td>
+<td>over random inputs, what&rsquo;s the expected cost?</td>
+<td>(a different question: needs probabilities)</td>
+</tr>
+</tbody>
+</table>
+<p>Amortised cost is a <strong>guarantee</strong>, not a hope: no matter what order the operations come in, n of them never cost more than n times the amortised cost. It says nothing about any single call, which is why a program that must answer within a fixed time, like one controlling a machine, sometimes can&rsquo;t use a dynamic array. For almost everything else, the total is what matters.</p>
+<h2 id="the-aggregate-method">The aggregate method</h2>
+<p>The simplest method: add up the cost of all n operations, and divide.</p>
+<p>Count each append as 1 unit for writing the item, plus 1 unit for each item copied during a resize. With doubling from capacity 1, resizes happen when the size reaches 1, 2, 4, 8, &hellip;, and copy that many items. For n appends, the copies are at most:</p>
+<pre><code class="language-text">1 + 2 + 4 + 8 + ... + (the largest power of 2 below n)   &lt;   2n
+</code></pre>
+<p>(Each power of two is bigger than all the smaller ones put together, so the whole sum is less than twice the largest term, which is less than n.) So:</p>
+<pre><code class="language-text">total cost  &lt;  n (writes)  +  2n (copies)  =  3n        amortised cost per append  &lt;  3  =  O(1)
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w041d2-e2"><textarea class="pc-src pc-code" hidden>def append_costs(n):
+    capacity, size, costs = 1, 0, []
+    for _ in range(n):
+        cost = 1
+        if size == capacity:
+            cost += size
+            capacity *= 2
+        size += 1
+        costs.append(cost)
+    return costs
+
+for n in [10, 100, 1000, 10_000]:
+    costs = append_costs(n)
+    print(f&quot;n={n:&gt;6}: most expensive {max(costs):&gt;6}, total {sum(costs):&gt;6}, per append {sum(costs) / n:.2f}&quot;)</textarea></div>
+<p>The most expensive single append grows with n, but the cost <strong>per append</strong> settles below 3.</p>
+<h2 id="the-accounting-method">The accounting method</h2>
+<p>The aggregate method needs the whole sum. The <strong>accounting</strong> method (sometimes called the banker&rsquo;s method) works one operation at a time: charge every operation a fixed price, pay its real cost from that price, and <strong>save the change</strong> as credit for later. If the savings never go negative, the fixed price is an upper bound on the amortised cost.</p>
+<p>For appends with doubling, charge <strong>3 units</strong> each:</p>
+<ul>
+<li>1 pays for writing the new item;</li>
+<li>2 are saved, &ldquo;on&rdquo; that item.</li>
+</ul>
+<p>When the array resizes from capacity c to 2c, the c/2 items added since the last resize each carry 2 saved units: that&rsquo;s c units, exactly enough to copy all c items. So the bank never runs dry, and every append is paid for by its own fixed price of 3.</p>
+<div class="pc pc-example" data-kind="example" data-id="w041d2-e3"><textarea class="pc-src pc-code" hidden>def bank(n, charge):
+    capacity, size, balance, lowest = 1, 0, 0, 0
+    for _ in range(n):
+        balance += charge          # what this append is charged
+        balance -= 1               # writing the item
+        if size == capacity:
+            balance -= size        # copying everything (before this item is added)
+            capacity *= 2
+        size += 1
+        lowest = min(lowest, balance)
+    return lowest
+
+for charge in [1, 2, 3]:
+    print(f&quot;charge {charge}: lowest balance over 1000 appends = {bank(1000, charge)}&quot;)</textarea></div>
+<p>A charge of 2 isn&rsquo;t quite enough here, because the very first copies come before much has been saved; 3 never goes negative. (The method is credited to Robert Tarjan, whose 1985 paper &ldquo;Amortized Computational Complexity&rdquo; set out these techniques.)</p>
+<h2 id="growing-by-a-constant">Growing by a constant</h2>
+<p>Suppose the array grows by a fixed k slots instead of doubling. Resizes happen at sizes k, 2k, 3k, &hellip;, and copy that many items:</p>
+<pre><code class="language-text">k + 2k + 3k + ... + (n/k)·k   =   k · (1 + 2 + ... + n/k)   ≈   n² / (2k)
+</code></pre>
+<p>That&rsquo;s O(n²) in total, so <strong>O(n) amortised</strong> per append, however big k is: a bigger k only divides the cost by a constant. Growing by a <strong>factor</strong> (any factor above 1) is what makes appends O(1) amortised. Different languages choose different factors:</p>
+<table>
+<thead>
+<tr>
+<th>Growth</th>
+<th>Copies for n appends</th>
+<th>Wasted space just after growing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>+ k slots</td>
+<td>about n²/(2k): O(n) amortised</td>
+<td>at most k slots</td>
+</tr>
+<tr>
+<td>× 1.5</td>
+<td>about 2n</td>
+<td>up to a third of the block</td>
+</tr>
+<tr>
+<td>× 2</td>
+<td>about n</td>
+<td>up to half of the block</td>
+</tr>
+</tbody>
+</table>
+<p>A smaller factor wastes less memory and copies a little more; both are O(1) amortised. CPython&rsquo;s list grows by about an eighth plus a little; that&rsquo;s still a factor, so still O(1) amortised.</p>
+<h2 id="more-amortised-structures">More amortised structures</h2>
+<p>The same reasoning works far beyond arrays.</p>
+<p><strong>A binary counter.</strong> Adding 1 to a binary number flips the trailing 1s to 0s and one 0 to 1. Adding 1 to <code>0111</code> flips four bits; adding 1 to <code>1000</code> flips one. The worst case is O(number of bits), but bit 0 flips every time, bit 1 every second time, bit 2 every fourth time&hellip; so n increments flip fewer than <code>n + n/2 + n/4 + ... &lt; 2n</code> bits: O(1) amortised.</p>
+<div class="pc pc-example" data-kind="example" data-id="w041d2-e4"><textarea class="pc-src pc-code" hidden>def increment(bits):
+    &quot;&quot;&quot;Add 1 to a list of bits, least significant first. Returns how many bits flipped.&quot;&quot;&quot;
+    i, flips = 0, 0
+    while i &lt; len(bits) and bits[i] == 1:
+        bits[i] = 0
+        flips += 1
+        i += 1
+    if i == len(bits):
+        bits.append(1)
+    else:
+        bits[i] = 1
+    return flips + 1
+
+bits, total = [], 0
+for n in range(1, 17):
+    total += increment(bits)
+    print(n, &quot;&quot;.join(map(str, reversed(bits))), total)</textarea></div>
+<p><strong>A stack with multi-pop.</strong> If a stack has <code>push</code> (cost 1) and <code>multipop(k)</code> (cost up to k), one multipop can be expensive, but every item can only be popped once after being pushed once. So any sequence of n operations costs at most 2n: O(1) amortised each. The accounting view: charge each push 2, and the saved 1 pays for that item&rsquo;s eventual pop.</p>
+<p><strong>Amortised, not average.</strong> These results hold for <strong>every</strong> sequence of operations: no luck involved. Average-case analysis (Week 17) is different: it assumes something about the inputs, such as random order, and can be beaten by unlucky or hostile inputs. Python&rsquo;s dictionaries are O(1) on <strong>average</strong>; its list appends are O(1) <strong>amortised</strong>.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Amortised cost is the total cost of any sequence of n operations divided by n: a guarantee for the whole sequence, not for each call. The aggregate method adds everything up; the accounting method charges each operation a fixed price and saves credit to pay for expensive ones. Doubling copies fewer than 2n items over n appends, so appends are O(1) amortised; growing by a constant copies about n²/(2k), so O(n) amortised. A binary counter and a stack with multi-pop are O(1) amortised too. Amortised is different from average, which depends on how the inputs are distributed.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d2-counter" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A binary counter</div><div class="pc-prompt"><p>Write <code>increment(bits)</code> for a list of bits stored <strong>least significant first</strong> (so <code>[1, 1, 0]</code> is 3): it adds 1 in place, appending a new 1 when it carries off the end, and returns how many bits changed. Then write <code>total_flips(n)</code>: the total number of bit changes for n increments starting from an empty list.</p></div><textarea class="pc-src pc-code" hidden>def increment(bits):
+    ___
+
+def total_flips(n):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_increment():
+    &quot;incrementing&quot;
+    b = [1, 1, 0]
+    assert increment(b) == 3 and b == [0, 0, 1]
+    b = []
+    assert increment(b) == 1 and b == [1] and increment(b) == 2 and b == [0, 1]
+    b = [1, 1, 1]
+    assert increment(b) == 4 and b == [0, 0, 0, 1]
+def test_total():
+    &quot;the total&quot;
+    assert [total_flips(n) for n in [1, 2, 3, 4, 8, 16]] == [1, 3, 4, 7, 15, 31]
+    for n in [10, 100, 1000, 5000]:
+        assert total_flips(n) &lt; 2 * n</textarea><textarea class="pc-src pc-solution" hidden>def increment(bits):
+    i, flips = 0, 0
+    while i &lt; len(bits) and bits[i] == 1:
+        bits[i] = 0
+        flips += 1
+        i += 1
+    if i == len(bits):
+        bits.append(1)
+    else:
+        bits[i] = 1
+    return flips + 1
+
+def total_flips(n):
+    bits, total = [], 0
+    for _ in range(n):
+        total += increment(bits)
+    return total</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d2-multipop" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A stack with multi-pop</div><div class="pc-prompt"><p>Write <code>CountingStack</code> with <code>push(item)</code> (cost 1), <code>multipop(k)</code> (pops up to <code>k</code> items, or all if fewer, returning them in the order popped; cost 1 per item popped) and an attribute <code>cost</code>, the total cost of everything so far. Then write <code>check(ops)</code>, which runs a list of operations on a new stack (<code>("push", x)</code> or <code>("multipop", k)</code>) and returns <code>(cost, pushes)</code>.</p></div><textarea class="pc-src pc-code" hidden>class CountingStack:
+    ___
+
+def check(ops):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_stack():
+    &quot;multi-pop&quot;
+    s = CountingStack()
+    for x in &quot;abcde&quot;:
+        s.push(x)
+    assert s.multipop(2) == [&quot;e&quot;, &quot;d&quot;] and s.multipop(10) == [&quot;c&quot;, &quot;b&quot;, &quot;a&quot;] and s.multipop(3) == [] and s.cost == 10
+def test_bound():
+    &quot;never more than twice the pushes&quot;
+    import random
+    rng = random.Random(4)
+    for _ in range(20):
+        ops = [(&quot;push&quot;, i) if rng.random() &lt; 0.7 else (&quot;multipop&quot;, rng.randint(1, 20)) for i in range(300)]
+        cost, pushes = check(ops)
+        assert cost &lt;= 2 * pushes
+    assert check([(&quot;push&quot;, 1), (&quot;push&quot;, 2), (&quot;multipop&quot;, 5)]) == (4, 2)</textarea><textarea class="pc-src pc-solution" hidden>class CountingStack:
+    def __init__(self):
+        self._items = []
+        self.cost = 0
+
+    def push(self, item):
+        self._items.append(item)
+        self.cost += 1
+
+    def multipop(self, k):
+        popped = []
+        while self._items and len(popped) &lt; k:
+            popped.append(self._items.pop())
+        self.cost += len(popped)
+        return popped
+
+def check(ops):
+    s = CountingStack()
+    pushes = 0
+    for name, value in ops:
+        if name == &quot;push&quot;:
+            s.push(value)
+            pushes += 1
+        else:
+            s.multipop(value)
+    return s.cost, pushes</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d2-banker" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Is the charge enough?</div><div class="pc-prompt"><p>Write <code>lowest_balance(n, charge, grow)</code>: simulate n appends into an array starting at capacity 1 that resizes to <code>grow(capacity)</code> when full. Each append adds <code>charge</code> to a balance, then pays 1 for writing, plus 1 for every item copied if it resized (the copy happens before the new item is written). Return the lowest balance reached (0 if it never drops below 0). Then write <code>smallest_charge(n, grow)</code>: the smallest whole-number charge from 1 upwards whose lowest balance over n appends is 0 or more.</p></div><textarea class="pc-src pc-code" hidden>def lowest_balance(n, charge, grow):
+    ___
+
+def smallest_charge(n, grow):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_balance():
+    &quot;balances&quot;
+    double = lambda c: 2 * c
+    assert lowest_balance(1000, 3, double) == 0 and lowest_balance(1000, 2, double) &lt; 0 and lowest_balance(0, 1, double) == 0
+    assert smallest_charge(1000, double) == 3 and smallest_charge(100_000, double) == 3
+def test_constant():
+    &quot;growing by a constant needs a charge that grows with n&quot;
+    plus = lambda c: c + 10
+    small, big = smallest_charge(200, plus), smallest_charge(800, plus)
+    assert big &gt; 3 * small &gt; 0, (small, big)</textarea><textarea class="pc-src pc-solution" hidden>def lowest_balance(n, charge, grow):
+    capacity, size, balance, lowest = 1, 0, 0, 0
+    for _ in range(n):
+        balance += charge - 1
+        if size == capacity:
+            balance -= size
+            capacity = grow(capacity)
+        size += 1
+        lowest = min(lowest, balance)
+    return lowest
+
+def smallest_charge(n, grow):
+    charge = 1
+    while lowest_balance(n, charge, grow) &lt; 0:
+        charge += 1
+    return charge</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d2-policies" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Comparing growth policies</div><div class="pc-prompt"><p>Write <code>compare(n, policies)</code>, where <code>policies</code> is a dictionary from a name to a growth function. For each, simulate n appends from capacity 1 and return a dictionary from the name to <code>(copies, spare)</code>: the total items copied, and the empty slots left at the end (capacity minus n). Keep the names in the given order.</p></div><textarea class="pc-src pc-code" hidden>def compare(n, policies):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import math
+def test_compare():
+    &quot;policies&quot;
+    got = compare(1000, {&quot;double&quot;: lambda c: 2 * c, &quot;half again&quot;: lambda c: max(c + 1, math.ceil(1.5 * c)), &quot;plus 16&quot;: lambda c: c + 16})
+    assert list(got) == [&quot;double&quot;, &quot;half again&quot;, &quot;plus 16&quot;]
+    assert got[&quot;double&quot;] == (1023, 24)
+    assert got[&quot;plus 16&quot;][0] &gt; 5 * got[&quot;half again&quot;][0] and got[&quot;plus 16&quot;][1] &lt; 16
+    assert compare(0, {&quot;x&quot;: lambda c: 2 * c}) == {&quot;x&quot;: (0, 1)}</textarea><textarea class="pc-src pc-solution" hidden>def compare(n, policies):
+    result = {}
+    for name, grow in policies.items():
+        capacity, size, copies = 1, 0, 0
+        for _ in range(n):
+            if size == capacity:
+                copies += size
+                capacity = grow(capacity)
+            size += 1
+        result[name] = (copies, capacity - n)
+    return result</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d2-thrash" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Thrashing</div><div class="pc-prompt"><p>Write <code>resizes(ops, shrink_when)</code>: start an array at capacity 8 with 8 items, then apply a string of operations, <code>"a"</code> (append) and <code>"p"</code> (pop). An append into a full array doubles the capacity; after a pop, if the capacity is above 1 and <code>size &lt;= capacity * shrink_when</code>, the capacity halves. Return the number of resizes. Then set <code>half</code> and <code>quarter</code> to the resizes for 100 alternating operations (<code>"ap" * 50</code>) with <code>shrink_when</code> of 0.5 and 0.25.</p></div><textarea class="pc-src pc-code" hidden>def resizes(ops, shrink_when):
+    ___
+
+half = ___
+quarter = ___</textarea><textarea class="pc-src pc-tests" hidden>def test_thrash():
+    &quot;thrashing&quot;
+    assert resizes(&quot;&quot;, 0.5) == 0 and resizes(&quot;a&quot;, 0.25) == 1 and resizes(&quot;pppppp&quot;, 0.25) == 1
+    assert half == 100 and quarter == 1</textarea><textarea class="pc-src pc-solution" hidden>def resizes(ops, shrink_when):
+    capacity, size, count = 8, 8, 0
+    for op in ops:
+        if op == &quot;a&quot;:
+            if size == capacity:
+                capacity *= 2
+                count += 1
+            size += 1
+        else:
+            size -= 1
+            if capacity &gt; 1 and size &lt;= capacity * shrink_when:
+                capacity //= 2
+                count += 1
+    return count
+
+half = resizes(&quot;ap&quot; * 50, 0.5)
+quarter = resizes(&quot;ap&quot; * 50, 0.25)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w041d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A carry that never stops</div><div class="pc-prompt"><p><code>increment</code> should stop carrying at the first 0, but its loop condition only checks the length, so it turns <strong>every</strong> bit to 0: this prints <code>[0, 0, 0, 1]</code> for 3 + 1 (right) but <code>[0, 0, 0, 0, 1]</code> for 5 + 1 (wrong). Fix it so the second line is <code>[0, 1, 1]</code> (6).</p></div><textarea class="pc-src pc-code" hidden>def increment(bits):
+    i = 0
+    while i &lt; len(bits):
+        bits[i] = 0
+        i += 1
+    if i == len(bits):
+        bits.append(1)
+    else:
+        bits[i] = 1
+
+a, b = [1, 1, 0], [1, 0, 1]
+increment(a)
+increment(b)
+print(a)
+print(b)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;stop at the first 0&quot;
+    assert output.splitlines()[1] == &quot;[0, 1, 1]&quot;, output
+    assert output.splitlines()[0] == &quot;[0, 0, 1]&quot;</textarea><textarea class="pc-src pc-solution" hidden>def increment(bits):
+    i = 0
+    while i &lt; len(bits) and bits[i] == 1:
+        bits[i] = 0
+        i += 1
+    if i == len(bits):
+        bits.append(1)
+    else:
+        bits[i] = 1
+
+a, b = [1, 1, 0], [1, 0, 1]
+increment(a)
+increment(b)
+print(a)
+print(b)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w041d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Growing by nothing</div><div class="pc-prompt"><p>This array grows by half its capacity, but starting from capacity 1, <code>1 // 2</code> is 0, so it never grows and crashes with <code>IndexError</code>. Make it always grow by at least one slot, so this prints <code>10 13</code>.</p></div><textarea class="pc-src pc-code" hidden>size, capacity, slots = 0, 1, [None]
+for item in range(10):
+    if size == capacity:
+        new_capacity = capacity + capacity // 2
+        new = [None] * new_capacity
+        for i in range(size):
+            new[i] = slots[i]
+        slots, capacity = new, new_capacity
+    slots[size] = item
+    size += 1
+print(size, capacity)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;always grow&quot;
+    expect_output(&quot;10 13&quot;)</textarea><textarea class="pc-src pc-solution" hidden>size, capacity, slots = 0, 1, [None]
+for item in range(10):
+    if size == capacity:
+        new_capacity = capacity + max(1, capacity // 2)
+        new = [None] * new_capacity
+        for i in range(size):
+            new[i] = slots[i]
+        slots, capacity = new, new_capacity
+    slots[size] = item
+    size += 1
+print(size, capacity)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w041d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Amortised, measured wrongly</div><div class="pc-prompt"><p>This tries to show that appends cost O(1) amortised, but divides the <strong>largest</strong> single cost by n instead of the <strong>total</strong>, so it prints a number that shrinks towards 0 and proves nothing. Fix it so it prints the cost per append for each n: <code>2.5</code>, <code>2.023</code>, <code>2.023</code>.</p></div><textarea class="pc-src pc-code" hidden>def append_costs(n):
+    capacity, size, costs = 1, 0, []
+    for _ in range(n):
+        cost = 1
+        if size == capacity:
+            cost += size
+            capacity *= 2
+        size += 1
+        costs.append(cost)
+    return costs
+
+for n in [10, 1000, 2000]:
+    print(round(max(append_costs(n)) / n, 3))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;total divided by n&quot;
+    expect_output(&quot;2.5\n2.023\n2.023&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def append_costs(n):
+    capacity, size, costs = 1, 0, []
+    for _ in range(n):
+        cost = 1
+        if size == capacity:
+            cost += size
+            capacity *= 2
+        size += 1
+        costs.append(cost)
+    return costs
+
+for n in [10, 1000, 2000]:
+    print(round(sum(append_costs(n)) / n, 3))</textarea></div>
+<div class="parsons" data-id="w041d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">The accounting method</div><div class="pc-prompt"><p>Arrange the lines into a loop that checks a charge of 3 per append never runs out. One line is a trap.</p></div><script type="application/json">{"lines": ["for _ in range(n):", "    balance += 3 - 1", "    if size == capacity:", "        balance -= size", "        capacity *= 2", "    size += 1", "    assert balance >= 0"], "distractors": ["        balance -= capacity * 2"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden># Answer without running code.
+
+p = ___   # total items copied by 64 appends into a doubling array starting at capacity 1
+q = ___   # amortised cost of append when growing by a constant 1000 slots: &quot;O(1)&quot; or &quot;O(n)&quot;
+r = ___   # bit flips to add 1 to binary 0111 (giving 1000)
+s = ___   # most pops a sequence of 50 pushes and any number of multipops can do
+t = ___   # True or False: an amortised O(1) operation is O(1) every single time</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 63 and q == &quot;O(n)&quot; and r == 4, &quot;p, q and r&quot;
+    assert s == 50 and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden># Answer without running code.
+
+p = 63
+q = &quot;O(n)&quot;
+r = 4
+s = 50
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w041d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does an amortised cost of O(1) per operation promise?", "answer": 1, "explain": "A guarantee for the sequence, not each call.", "options": ["Every call is O(1)", "Any sequence of n operations costs O(n) in total", "Random inputs are usually fast", "Nothing"]}, {"type": "mc", "q": "What&rsquo;s the worst-case cost of a single append to a doubling dynamic array?", "answer": 1, "explain": "Rare, but possible.", "options": ["O(1)", "O(n), when it triggers a resize", "O(log n)", "O(n\u00b2)"]}, {"type": "mc", "q": "Why is 1 + 2 + 4 + &hellip; + 2^k less than 2^(k+1)?", "answer": 1, "explain": "So n appends copy fewer than 2n items.", "options": ["It isn&rsquo;t", "Each power of two is bigger than all the smaller ones added together", "Because of rounding", "Python says so"]}, {"type": "mc", "q": "In the accounting method, what happens to the part of the charge an operation doesn&rsquo;t use?", "answer": 1, "explain": "The balance must never go negative.", "options": ["It&rsquo;s lost", "It&rsquo;s saved as credit to pay for later expensive operations", "It&rsquo;s refunded", "It&rsquo;s added to the next charge"]}, {"type": "mc", "q": "Why does growing by a constant 1000 slots give O(n) amortised appends?", "answer": 1, "explain": "Only a factor gives O(1).", "options": ["It doesn&rsquo;t", "Resizes happen every 1000 appends, and each copies more and more items: about n\u00b2/2000 in total", "1000 is too small", "Constant growth is O(1)"]}, {"type": "mc", "q": "Which growth makes appends O(1) amortised?", "answer": 2, "explain": "Any factor above 1.", "options": ["<ul>\n<li>1 slot</li>\n</ul>", "<ul>\n<li>100 slots</li>\n</ul>", "\u00d7 1.5", "None"]}, {"type": "mc", "q": "How many bits flip in total over n increments of a binary counter?", "answer": 1, "explain": "Bit k flips every 2^k increments.", "options": ["About n log n", "Fewer than 2n", "Exactly n", "About n\u00b2"]}, {"type": "mc", "q": "What&rsquo;s the difference between amortised and average cost?", "answer": 1, "explain": "List appends are amortised O(1); dict lookups are average O(1).", "options": ["None", "Amortised holds for every sequence; average assumes something about how inputs are distributed", "Average is always higher", "Amortised needs random inputs"]}, {"type": "mc", "q": "Why shrink at a quarter full rather than half?", "answer": 1, "explain": "No thrashing.", "options": ["Memory", "After any resize the array is half full, so it takes many cheap operations to reach the next resize", "Speed of copying", "It doesn&rsquo;t matter"]}, {"type": "output", "q": "What does this print?", "answer": "15 16", "explain": "1 + 2 + 4 + 8.", "code": "copies, capacity, size = 0, 1, 0\nfor _ in range(16):\n    if size == capacity:\n        copies += size\n        capacity *= 2\n    size += 1\nprint(copies, capacity)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w041d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a queue from two stacks</div><div class="pc-prompt"><p>A queue (first in, first out) can be built from two stacks (Python lists used only with <code>append</code> and <code>pop()</code>): push new items onto an <strong>in</strong> stack; to dequeue, pop from an <strong>out</strong> stack, and only when the out stack is empty, move <strong>every</strong> item from in to out (which reverses them into the right order). One dequeue can move many items, but each item is moved at most once.</p>
+<p>Write <code>TwoStackQueue</code> with <code>enqueue(item)</code>, <code>dequeue()</code> (raising <code>IndexError("dequeue from empty queue")</code>), <code>__len__</code>, and <code>moves</code>, the total number of items moved from in to out. Then write <code>worst_and_total(ops)</code>: run a string of operations (<code>"e"</code> enqueues the next whole number from 0 upwards; <code>"d"</code> dequeues) on a new queue, and return <code>(worst, total)</code>: the most items moved by any single dequeue, and the total moved. Use only <code>append</code> and <code>pop()</code> on the two lists.</p></div><textarea class="pc-src pc-code" hidden>class TwoStackQueue:
+    ___
+
+def worst_and_total(ops):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import ast
+def test_queue():
+    &quot;first in, first out&quot;
+    q = TwoStackQueue()
+    for x in &quot;abc&quot;:
+        q.enqueue(x)
+    assert q.dequeue() == &quot;a&quot; and len(q) == 2
+    q.enqueue(&quot;d&quot;)
+    assert [q.dequeue(), q.dequeue(), q.dequeue()] == [&quot;b&quot;, &quot;c&quot;, &quot;d&quot;] and len(q) == 0 and q.moves == 4
+    try:
+        q.dequeue()
+        assert False
+    except IndexError as err:
+        assert str(err) == &quot;dequeue from empty queue&quot;
+def test_amortised():
+    &quot;amortised&quot;
+    assert worst_and_total(&quot;e&quot; * 100 + &quot;d&quot; * 100) == (100, 100)
+    worst, total = worst_and_total(&quot;eed&quot; * 200 + &quot;d&quot; * 200)
+    assert total &lt;= 400 and worst &gt;= 2
+    assert worst_and_total(&quot;&quot;) == (0, 0)
+def test_only_stack_ops():
+    &quot;only append and pop()&quot;
+    for n in ast.walk(ast.parse(source)):
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == &quot;pop&quot;:
+            assert not n.args, &quot;use pop() with no index: stacks only take from the top&quot;
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute):
+            assert n.func.attr not in (&quot;insert&quot;, &quot;reverse&quot;), &quot;only append and pop()&quot;</textarea><textarea class="pc-src pc-solution" hidden>class TwoStackQueue:
+    def __init__(self):
+        self._in, self._out = [], []
+        self.moves = 0
+
+    def enqueue(self, item):
+        self._in.append(item)
+
+    def dequeue(self):
+        if not self._out:
+            while self._in:
+                self._out.append(self._in.pop())
+                self.moves += 1
+        if not self._out:
+            raise IndexError(&quot;dequeue from empty queue&quot;)
+        return self._out.pop()
+
+    def __len__(self):
+        return len(self._in) + len(self._out)
+
+def worst_and_total(ops):
+    q = TwoStackQueue()
+    worst, next_item = 0, 0
+    for op in ops:
+        if op == &quot;e&quot;:
+            q.enqueue(next_item)
+            next_item += 1
+        else:
+            before = q.moves
+            q.dequeue()
+            worst = max(worst, q.moves - before)
+    return worst, q.moves</textarea><template class="pc-src pc-hint">In <code>dequeue</code>, if the out stack is empty, <code>while self._in: self._out.append(self._in.pop())</code>, counting each move; then, if out is still empty, the queue was empty. Measure a single dequeue&rsquo;s moves by comparing <code>q.moves</code> before and after.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Explain to yourself, without notes, why <code>n</code> appends with doubling copy fewer than <code>2n</code> items. Tomorrow: two pointers, a pattern that turns many O(n²) problems on arrays into O(n).</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w041d1.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w041d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w041d2", "week": 41, "day": 2, "title": "Amortised analysis", "exercises": [{"id": "w041d2-counter", "title": "A binary counter", "points": 15}, {"id": "w041d2-multipop", "title": "A stack with multi-pop", "points": 10}, {"id": "w041d2-banker", "title": "Is the charge enough?", "points": 15}, {"id": "w041d2-policies", "title": "Comparing growth policies", "points": 15}, {"id": "w041d2-thrash", "title": "Thrashing", "points": 15}, {"id": "w041d2-bug1", "title": "A carry that never stops", "points": 10}, {"id": "w041d2-bug2", "title": "Growing by nothing", "points": 10}, {"id": "w041d2-bug3", "title": "Amortised, measured wrongly", "points": 10}, {"id": "w041d2-trace", "title": "Predict them", "points": 10}, {"id": "w041d2-challenge", "title": "Challenge: a queue from two stacks", "points": 25}], "points": 135}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=871ff52039"></script>
+</body>
+</html>
