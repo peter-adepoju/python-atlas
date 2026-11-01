@@ -286,11 +286,36 @@ def _fresh_namespace():
     return {"__name__": "__main__", "__builtins__": builtins}
 
 
+def _reset_logging():
+    """Put the logging module back as a fresh program would find it. Loggers live for the whole
+    session, so without this a second run would keep the first run's handlers (writing to an old
+    output) and basicConfig() would quietly do nothing."""
+    logging = sys.modules.get("logging")
+    if logging is None:
+        return
+    loggers = [logging.getLogger()] + [lg for lg in logging.Logger.manager.loggerDict.values()
+                                       if isinstance(lg, logging.Logger)]
+    for lg in loggers:
+        for h in list(lg.handlers):
+            lg.removeHandler(h)
+            try:
+                h.close()
+            except Exception:  # noqa: BLE001 - a learner's handler may fail to close
+                pass
+        lg.filters.clear()
+        lg.setLevel(logging.NOTSET)
+        lg.propagate = True
+        lg.disabled = False
+    logging.getLogger().setLevel(logging.WARNING)
+    logging.disable(logging.NOTSET)
+
+
 def _execute(code, inputs, seed, emit=None, namespace=None, echo=True):
     out = _Out(emit)
     ns = _fresh_namespace() if namespace is None else namespace
     old = sys.stdout, sys.stderr, builtins.input
     sys.stdout = sys.stderr = out
+    _reset_logging()
     builtins.input = _make_input(inputs, out, echo)
     random.seed(seed)
     error = None

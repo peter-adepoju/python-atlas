@@ -1,6 +1,6 @@
 // Read an error message like a detective: run broken code and label each part of the real error.
-import { h } from "../site.js?v=8fe38f9496";
-import { py } from "../runtime.js?v=8fe38f9496";
+import { h } from "../site.js?v=588dc67651";
+import { py } from "../runtime.js?v=588dc67651";
 
 const SAMPLES = {
   "A misspelt name": 'message = "Hello"\nprint(mesage)',

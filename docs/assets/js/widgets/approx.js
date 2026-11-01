@@ -1,6 +1,6 @@
 // Two ways to approximate a square root: bisection (halve the interval) and Newton's method
 // (average a guess with x / guess). Each row is one step; the bar shows how many digits are right.
-import { h } from "../site.js?v=8fe38f9496";
+import { h } from "../site.js?v=588dc67651";
 
 export default function approx(el, { x = 2, steps = 12 } = {}) {
   const ix = h("input", { type: "number", min: 0.01, step: "any", class: "w-input", value: x, style: "width:7em", "aria-label": "x" });

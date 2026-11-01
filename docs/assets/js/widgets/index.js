@@ -1,5 +1,5 @@
 // Loads each interactive figure on demand when it scrolls near the screen.
-import { $$, h } from "../site.js?v=8fe38f9496";
+import { $$, h } from "../site.js?v=588dc67651";
 
 export function mountWidgets(root = document) {
   const figs = $$(".widget[data-widget]", root);
@@ -10,7 +10,7 @@ export function mountWidgets(root = document) {
     const params = JSON.parse(fig.querySelector("script").textContent || "{}");
     const body = fig.querySelector(".widget-body");
     try {
-      const mod = await import(`./${name}.js?v=8fe38f9496`);
+      const mod = await import(`./${name}.js?v=588dc67651`);
       body.replaceChildren();
       await mod.default(body, params, fig);
     } catch (e) {
