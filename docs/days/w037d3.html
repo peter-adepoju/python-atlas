@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="8fe38f9496">
+<title>Week 37 Day 3: EAFP and LBYL | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=8fe38f9496">
+<link rel="stylesheet" href="../assets/css/site.css?v=8fe38f9496">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=8fe38f9496"></script>
+<script src="../assets/vendor/codemirror.js?v=8fe38f9496" defer></script>
+<meta name="description" content="Week 30 met the two styles for code that might fail: look before you leap (check first), and it’s easier to ask forgiveness than permission (try it, and...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w037d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 37 Day 3: EAFP and LBYL">
+<meta property="og:description" content="Week 30 met the two styles for code that might fail: look before you leap (check first), and it’s easier to ask forgiveness than permission (try it, and...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w037d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-37">Week 37: Robust programs</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#two-styles-again" data-sec="two-styles-again">Two styles, again</a></li><li><a href="#when-the-check-disagrees" data-sec="when-the-check-disagrees">When the check disagrees</a></li><li><a href="#when-the-world-changes" data-sec="when-the-world-changes">When the world changes</a></li><li><a href="#narrow-tries-and-quiet-helpers" data-sec="narrow-tries-and-quiet-helpers">Narrow tries and quiet helpers</a></li><li><a href="#when-to-look-first" data-sec="when-to-look-first">When to look first</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w037d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-3">Phase 3: Objects and design</a></li><li><a href="../map.html#week-37">Week 37: Robust programs</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 37, Day 3</span></p>
+      <h1>EAFP and LBYL</h1>
+      <div class="day-intro"><p>Week 30 met the two styles for code that might fail: look before you leap (check first), and it&rsquo;s easier to ask forgiveness than permission (try it, and catch the error). Today goes deeper. You&rsquo;ll see why checking first can be wrong even when it looks safer: the check can disagree with the real rule, and the world can change between the check and the use. You&rsquo;ll also see when checking first is exactly right, and learn the tools that avoid both: <code>dict.get</code>, <code>getattr</code> with a default, <code>contextlib.suppress</code>, and opening a file in a mode that refuses to overwrite.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain EAFP and LBYL, and the costs of each</li><li>Show how a check can disagree with the operation it guards</li><li>Explain a race between checking and using, and avoid it by trying the operation itself</li><li>Keep a try narrow with else, and use get, getattr, next and suppress where they fit</li><li>Recognise when checking first is right, such as validating everything before changing anything</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Two styles, again: 20 min"></span><span class="plan-seg s0" style="flex:25" title="When the check disagrees: 25 min"></span><span class="plan-seg s1" style="flex:25" title="When the world changes: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Narrow tries and quiet helpers: 20 min"></span><span class="plan-seg s1" style="flex:15" title="When to look first: 15 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Two styles, again</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">When the check disagrees</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">When the world changes</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Narrow tries and quiet helpers</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">When to look first</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w037d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w037d3.ipynb" download>download it</a>. Exercises today are worth 115 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w037d3-p1"><textarea class="pc-src pc-code" hidden>def lbyl(text):
+    if text.isdigit():
+        return int(text)
+    return None
+
+def eafp(text):
+    try:
+        return int(text)
+    except ValueError:
+        return None
+
+for text in [&quot;42&quot;, &quot; 42&quot;, &quot;-3&quot;, &quot;²&quot;]:
+    try:
+        print(repr(text), lbyl(text), eafp(text))
+    except ValueError:
+        print(repr(text), &quot;lbyl crashed!&quot;, eafp(text))</textarea></div>
+<p>Neither version is &ldquo;the safe one&rdquo;. The check <code>isdigit()</code> turned away <code>" 42"</code> and <code>"-3"</code>, which <code>int</code> accepts, and let through <code>"²"</code>, which <code>int</code> rejects, so <code>lbyl("²")</code> crashed. The check and the operation it guards follow <strong>different rules</strong>. That&rsquo;s the first of two ways checking first goes wrong.</p>
+<h2 id="two-styles-again">Two styles, again</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Look before you leap (LBYL)</th>
+<th>Easier to ask forgiveness than permission (EAFP)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shape</td>
+<td><code>if it will work: do it</code></td>
+<td><code>try: do it</code> / <code>except: handle it</code></td>
+</tr>
+<tr>
+<td>The rule used</td>
+<td>your check&rsquo;s</td>
+<td>the operation&rsquo;s own</td>
+</tr>
+<tr>
+<td>Cost when it works</td>
+<td>the check, then the work</td>
+<td>just the work</td>
+</tr>
+<tr>
+<td>Cost when it fails</td>
+<td>just the check</td>
+<td>the work so far, plus raising and catching</td>
+</tr>
+<tr>
+<td>Danger</td>
+<td>the check and the use disagree, or the world changes in between</td>
+<td>the <code>try</code> catches more than you meant</td>
+</tr>
+</tbody>
+</table>
+<p>The saying behind EAFP, &ldquo;it&rsquo;s easier to ask forgiveness than it is to get permission&rdquo;, is usually credited to Grace Hopper, and Python&rsquo;s own glossary describes the style as common in Python. In Python, raising and catching an exception is cheap enough that EAFP is the usual choice when failure is <strong>unusual</strong>. When failure is the <strong>normal</strong> case (most keys missing, most lines blank), a check reads better and does less work.</p>
+<p>Often there&rsquo;s a third way, better than both: a tool that <strong>builds the default in</strong>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w037d3-e2"><textarea class="pc-src pc-code" hidden>stock = {&quot;tea&quot;: 4, &quot;rice&quot;: 0}
+
+# LBYL
+count = stock[&quot;milk&quot;] if &quot;milk&quot; in stock else 0
+# EAFP
+try:
+    count = stock[&quot;milk&quot;]
+except KeyError:
+    count = 0
+# neither: the default is built in
+count = stock.get(&quot;milk&quot;, 0)
+print(count)
+
+words = [&quot;kettle&quot;, &quot;apple&quot;, &quot;Ada&quot;]
+print(next((w for w in words if w[0] in &quot;aeiouAEIOU&quot;), &quot;none&quot;))      # first match, or a default
+print(&quot;key=value=x&quot;.partition(&quot;=&quot;), &quot;novalue&quot;.partition(&quot;=&quot;))           # never fails, unlike split</textarea></div>
+<p><code>dict.get</code>, <code>getattr(obj, name, default)</code>, <code>next(iterator, default)</code> and <code>str.partition</code> all handle &ldquo;it might not be there&rdquo; without an <code>if</code> or a <code>try</code>. Reach for them first.</p>
+<h2 id="when-the-check-disagrees">When the check disagrees</h2>
+<p>The warm-up&rsquo;s problem is common: a check is a <strong>second copy</strong> of the rule, and copies drift. <code>int</code> accepts spaces around the number, a sign, underscores between digits (<code>"1_000"</code>), and digits from other writing systems (<code>"٣"</code>, Arabic-Indic three), and it rejects superscripts, which <code>isdigit</code> counts as digits. Your check would have to repeat all of that exactly. Asking <code>int</code> itself is the only reliable way to know whether <code>int</code> will work.</p>
+<p>The same goes for other checks:</p>
+<table>
+<thead>
+<tr>
+<th>Check first</th>
+<th>Why it can be wrong</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>if os.path.exists(path): open(path)</code></td>
+<td>the file can exist but be unreadable (<code>PermissionError</code>), or be a folder</td>
+</tr>
+<tr>
+<td><code>if hasattr(obj, "read"): obj.read()</code></td>
+<td><code>read</code> might need arguments, or fail for its own reasons</td>
+</tr>
+<tr>
+<td><code>if len(items) &gt; i: items[i]</code></td>
+<td>forgets that negative <code>i</code> works for lists</td>
+</tr>
+<tr>
+<td><code>if "@" in email:</code></td>
+<td>says nothing about whether the address works</td>
+</tr>
+</tbody>
+</table>
+<p>When the rule belongs to an operation, let the operation decide, and catch its error. When the rule is <strong>yours</strong> (an age must be 0 to 130, a name can&rsquo;t be empty), there&rsquo;s no operation to ask, and checking is the only way: that&rsquo;s validation, and it&rsquo;s tomorrow&rsquo;s subject.</p>
+<h2 id="when-the-world-changes">When the world changes</h2>
+<p>The second problem is <strong>time</strong>. Between your check and your use, something else can change the world: another program, another user, another part of your own program. This is called a race condition, and this particular one has a name, &ldquo;time of check to time of use&rdquo;:</p>
+<div class="pc pc-example" data-kind="example" data-id="w037d3-e3"><textarea class="pc-src pc-code" hidden>import os
+
+def lbyl_read(path, meanwhile):
+    if os.path.exists(path):
+        meanwhile()                      # something else runs between the check and the use
+        with open(path) as f:
+            return f.read()
+    return &quot;no file&quot;
+
+def eafp_read(path, meanwhile):
+    meanwhile()
+    try:
+        with open(path) as f:
+            return f.read()
+    except FileNotFoundError:
+        return &quot;no file&quot;
+
+def another_program():
+    os.remove(&quot;note.txt&quot;)
+
+for reader in [eafp_read, lbyl_read]:
+    with open(&quot;note.txt&quot;, &quot;w&quot;) as f:
+        f.write(&quot;hello&quot;)
+    try:
+        print(reader.__name__, &quot;-&gt;&quot;, reader(&quot;note.txt&quot;, another_program))
+    except FileNotFoundError as err:
+        print(reader.__name__, &quot;-&gt; crashed:&quot;, type(err).__name__)</textarea></div>
+<p>Here the &ldquo;other program&rdquo; is a function so you can see it happen every time. In real life it happens rarely, which is worse: a bug that appears once a month, on a busy server, is very hard to find. The check didn&rsquo;t make the code safe; it only made the failure rarer. The EAFP version has no gap, because the operation <strong>is</strong> the check.</p>
+<p>Files offer a neat example of letting the operation check. To create a file <strong>only if it doesn&rsquo;t already exist</strong>, don&rsquo;t check with <code>exists</code> and then open with <code>"w"</code> (which overwrites). Open with mode <code>"x"</code>, which refuses if the file is there:</p>
+<div class="pc pc-example" data-kind="example" data-id="w037d3-e4"><textarea class="pc-src pc-code" hidden>import os
+
+if os.path.exists(&quot;draft.txt&quot;):
+    os.remove(&quot;draft.txt&quot;)
+for attempt in [1, 2]:
+    try:
+        with open(&quot;draft.txt&quot;, &quot;x&quot;) as f:
+            f.write(f&quot;attempt {attempt}&quot;)
+        print(&quot;created on attempt&quot;, attempt)
+    except FileExistsError:
+        print(&quot;attempt&quot;, attempt, &quot;refused: draft.txt already exists&quot;)
+with open(&quot;draft.txt&quot;) as f:
+    print(f.read())</textarea></div>
+<h2 id="narrow-tries-and-quiet-helpers">Narrow tries and quiet helpers</h2>
+<p>EAFP&rsquo;s danger is catching too much. Week 30 kept the <code>try</code> around only the risky line; with <code>else</code>, you can do that even when more work follows:</p>
+<div class="pc pc-example" data-kind="example" data-id="w037d3-e5"><textarea class="pc-src pc-code" hidden>prices = {&quot;tea&quot;: 300, &quot;rice&quot;: 1200}
+discounts = {&quot;rice&quot;: 200}
+
+def price_of(item):
+    try:
+        price = prices[item]
+    except KeyError:
+        return f&quot;{item}: not sold here&quot;
+    else:
+        return f&quot;{item}: {price - discounts.get(item, 0)}&quot;
+
+for item in [&quot;tea&quot;, &quot;rice&quot;, &quot;milk&quot;]:
+    print(price_of(item))</textarea></div>
+<p>If <code>prices[item] - discounts[item]</code> had been inside the <code>try</code>, a missing <strong>discount</strong> would also raise <code>KeyError</code>, and tea would be reported as &ldquo;not sold here&rdquo;. A wide <code>try</code> doesn&rsquo;t only catch the error you expected; it catches the same <strong>type</strong> of error from anywhere inside it.</p>
+<p>When you want to <strong>ignore</strong> one kind of error completely, <code>contextlib.suppress</code> says so in one line:</p>
+<div class="pc pc-example" data-kind="example" data-id="w037d3-e6"><textarea class="pc-src pc-code" hidden>import os
+from contextlib import suppress
+
+with open(&quot;old.log&quot;, &quot;w&quot;) as f:
+    f.write(&quot;x&quot;)
+for name in [&quot;old.log&quot;, &quot;old.log&quot;, &quot;never-existed.log&quot;]:
+    with suppress(FileNotFoundError):
+        os.remove(name)
+        print(&quot;removed&quot;, name)
+print(os.path.exists(&quot;old.log&quot;))</textarea></div>
+<p><code>with suppress(FileNotFoundError):</code> is the same as <code>try: ... except FileNotFoundError: pass</code>, and reads as a decision rather than an accident. (It&rsquo;s built with <code>with</code>, which Phase 5 explains.) Use it only for errors that truly don&rsquo;t matter: here, &ldquo;it&rsquo;s already gone&rdquo; is exactly what we wanted.</p>
+<h2 id="when-to-look-first">When to look first</h2>
+<p>Checking first is the better choice when:</p>
+<ul>
+<li><strong>the rule is yours</strong>, not an operation&rsquo;s: a quantity above 0, a date in the future. There&rsquo;s no operation to ask.</li>
+<li><strong>failure is normal</strong>: if most dictionary keys are missing, <code>if key in d</code> reads better than a <code>try</code> that usually fails.</li>
+<li><strong>you mustn&rsquo;t stop halfway</strong>. If an operation makes several changes, a failure in the middle can leave things half-done. Check <strong>everything</strong> first, then make the changes:</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w037d3-e7"><textarea class="pc-src pc-code" hidden>def transfer(accounts, source, target, amount):
+    if source not in accounts:
+        raise KeyError(f&quot;no account {source!r}&quot;)
+    if target not in accounts:
+        raise KeyError(f&quot;no account {target!r}&quot;)
+    if not 0 &lt; amount &lt;= accounts[source]:
+        raise ValueError(f&quot;can&#x27;t move {amount} from a balance of {accounts[source]}&quot;)
+    accounts[source] -= amount
+    accounts[target] += amount
+
+accounts = {&quot;ada&quot;: 100, &quot;bo&quot;: 20}
+for args in [(&quot;ada&quot;, &quot;bo&quot;, 30), (&quot;ada&quot;, &quot;chi&quot;, 10), (&quot;bo&quot;, &quot;ada&quot;, 500)]:
+    try:
+        transfer(accounts, *args)
+    except (KeyError, ValueError) as err:
+        print(&quot;refused:&quot;, err)
+print(accounts)</textarea></div>
+<p>Without the checks at the top, <code>transfer(accounts, "ada", "chi", 10)</code> would take 10 from Ada and <strong>then</strong> fail on Chi, and the money would vanish. Validating before changing anything keeps the data consistent. Databases call this property atomicity: all of it happens or none of it does.</p>
+<p>A good rule: <strong>LBYL for your own rules and for anything that changes several things; EAFP for operations that know their own rules, and for anything another program could change.</strong></p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>LBYL checks first; EAFP tries and catches. A check is a second copy of the operation&rsquo;s rule and can disagree with it (<code>isdigit</code> against <code>int</code>), and the world can change between check and use (a race: the file is deleted after <code>exists</code> said yes), so for operations with their own rules, let the operation decide. Prefer built-in defaults (<code>dict.get</code>, <code>getattr</code>, <code>next(it, default)</code>, <code>partition</code>), keep each <code>try</code> narrow with <code>else</code>, and use <code>suppress</code> for errors that truly don&rsquo;t matter. Open with <code>"x"</code> to create only if absent. Check first for your own rules, when failure is normal, and before changes that mustn&rsquo;t stop halfway.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w037d3-toint" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Asking int</div><div class="pc-prompt"><p>Write <code>to_int(text, default=None)</code>, which returns <code>int(text)</code>, or <code>default</code> if <code>int</code> can&rsquo;t convert it. Let <code>int</code> decide (no <code>isdigit</code>), and don&rsquo;t catch anything except <code>ValueError</code>.</p></div><textarea class="pc-src pc-code" hidden>def to_int(text, default=None):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_to_int():
+    &quot;int decides&quot;
+    assert to_int(&quot;42&quot;) == 42 and to_int(&quot; 42 &quot;) == 42 and to_int(&quot;-3&quot;) == -3 and to_int(&quot;1_000&quot;) == 1000
+    assert to_int(&quot;²&quot;) is None and to_int(&quot;4.5&quot;, 0) == 0 and to_int(&quot;&quot;) is None
+    assert &quot;isdigit&quot; not in source
+    try:
+        to_int(None)
+        assert False, &quot;only ValueError should be caught: None is a bug, a TypeError&quot;
+    except TypeError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>def to_int(text, default=None):
+    try:
+        return int(text)
+    except ValueError:
+        return default</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w037d3-dig" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Digging into data</div><div class="pc-prompt"><p>Write <code>dig(data, path, default=None)</code>, which follows a path of keys and indexes into nested dictionaries and lists, and returns the value, or <code>default</code> if any step isn&rsquo;t there. <code>path</code> is a list such as <code>["users", 0, "name"]</code>. Use EAFP: catch <code>LookupError</code> (a missing key or index) and <code>TypeError</code> (indexing into something that isn&rsquo;t a container, like a number), and nothing else.</p></div><textarea class="pc-src pc-code" hidden>def dig(data, path, default=None):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_dig():
+    &quot;digging&quot;
+    data = {&quot;users&quot;: [{&quot;name&quot;: &quot;Ada&quot;, &quot;tags&quot;: [&quot;x&quot;]}, {&quot;name&quot;: &quot;Bo&quot;}], &quot;count&quot;: 2}
+    assert dig(data, [&quot;users&quot;, 0, &quot;name&quot;]) == &quot;Ada&quot; and dig(data, [&quot;users&quot;, -1, &quot;name&quot;]) == &quot;Bo&quot;
+    assert dig(data, [&quot;users&quot;, 1, &quot;tags&quot;, 0], &quot;none&quot;) == &quot;none&quot;
+    assert dig(data, [&quot;users&quot;, 5]) is None and dig(data, [&quot;count&quot;, 0], &quot;no&quot;) == &quot;no&quot;
+    assert dig(data, []) == data</textarea><textarea class="pc-src pc-solution" hidden>def dig(data, path, default=None):
+    value = data
+    try:
+        for step in path:
+            value = value[step]
+    except (LookupError, TypeError):
+        return default
+    return value</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w037d3-tidy" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Tidying up</div><div class="pc-prompt"><p>Write <code>remove_all(paths)</code>, which deletes each file in the list with <code>os.remove</code>, ignoring files that are already gone (use <code>contextlib.suppress</code>), and returns how many it actually removed.</p></div><textarea class="pc-src pc-code" hidden>import os
+
+def remove_all(paths):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_remove():
+    &quot;removing&quot;
+    write_file(&quot;a.tmp&quot;, &quot;1&quot;)
+    write_file(&quot;b.tmp&quot;, &quot;2&quot;)
+    assert remove_all([&quot;a.tmp&quot;, &quot;gone.tmp&quot;, &quot;b.tmp&quot;, &quot;a.tmp&quot;]) == 2
+    assert &quot;a.tmp&quot; not in files_now() and &quot;b.tmp&quot; not in files_now()
+    assert remove_all([]) == 0 and &quot;suppress&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>import os
+from contextlib import suppress
+
+def remove_all(paths):
+    removed = 0
+    for path in paths:
+        with suppress(FileNotFoundError):
+            os.remove(path)
+            removed += 1
+    return removed</textarea><template class="pc-src pc-hint">Count inside the <code>with suppress(...)</code> block, after <code>os.remove</code>: if the removal fails, the rest of the block is skipped.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w037d3-move" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">All or nothing</div><div class="pc-prompt"><p>Write <code>move_stock(stock, moves)</code>. <code>stock</code> maps item names to counts; <code>moves</code> is a list of <code>(item, change)</code> pairs, where a change can be negative. Apply all the moves, or none: first check every move (an unknown item raises <code>KeyError</code>, and any count that would go below 0 raises <code>ValueError</code>), and only then change <code>stock</code>. Several moves can affect the same item, so check the running totals.</p></div><textarea class="pc-src pc-code" hidden>def move_stock(stock, moves):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_moves():
+    &quot;all or nothing&quot;
+    stock = {&quot;tea&quot;: 5, &quot;rice&quot;: 2}
+    move_stock(stock, [(&quot;tea&quot;, -2), (&quot;rice&quot;, 3)])
+    assert stock == {&quot;tea&quot;: 3, &quot;rice&quot;: 5}
+    for moves, error in [([(&quot;tea&quot;, -1), (&quot;milk&quot;, 1)], KeyError), ([(&quot;rice&quot;, 1), (&quot;tea&quot;, -2), (&quot;tea&quot;, -2)], ValueError)]:
+        try:
+            move_stock(stock, moves)
+            assert False, f&quot;{moves} should raise {error.__name__}&quot;
+        except error:
+            pass
+        assert stock == {&quot;tea&quot;: 3, &quot;rice&quot;: 5}, f&quot;nothing should change: {stock}&quot;
+    move_stock(stock, [(&quot;tea&quot;, -3), (&quot;tea&quot;, 1)])
+    assert stock == {&quot;tea&quot;: 1, &quot;rice&quot;: 5}</textarea><textarea class="pc-src pc-solution" hidden>def move_stock(stock, moves):
+    after = dict(stock)
+    for item, change in moves:
+        if item not in after:
+            raise KeyError(f&quot;no item {item!r}&quot;)
+        after[item] += change
+        if after[item] &lt; 0:
+            raise ValueError(f&quot;not enough {item}&quot;)
+    stock.update(after)</textarea><template class="pc-src pc-hint">Work out the new counts in a separate dictionary (<code>after = dict(stock)</code>), checking as you go; if nothing was raised, <code>stock.update(after)</code>.</template></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w037d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A try too wide</div><div class="pc-prompt"><p>Tea has no discount, but the missing discount raises <code>KeyError</code> inside the <code>try</code>, so tea is reported as <code>not sold here</code>. Fix it so the output is <code>tea: 300</code>, then <code>rice: 1000</code>, then <code>milk: not sold here</code>.</p></div><textarea class="pc-src pc-code" hidden>prices = {&quot;tea&quot;: 300, &quot;rice&quot;: 1200}
+discounts = {&quot;rice&quot;: 200}
+
+for item in [&quot;tea&quot;, &quot;rice&quot;, &quot;milk&quot;]:
+    try:
+        print(f&quot;{item}: {prices[item] - discounts[item]}&quot;)
+    except KeyError:
+        print(f&quot;{item}: not sold here&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a narrow try&quot;
+    expect_output(&quot;tea: 300\nrice: 1000\nmilk: not sold here&quot;)</textarea><textarea class="pc-src pc-solution" hidden>prices = {&quot;tea&quot;: 300, &quot;rice&quot;: 1200}
+discounts = {&quot;rice&quot;: 200}
+
+for item in [&quot;tea&quot;, &quot;rice&quot;, &quot;milk&quot;]:
+    try:
+        price = prices[item]
+    except KeyError:
+        print(f&quot;{item}: not sold here&quot;)
+    else:
+        print(f&quot;{item}: {price - discounts.get(item, 0)}&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w037d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The check that disagrees</div><div class="pc-prompt"><p><code>parse_temps</code> should accept negative temperatures, but its <code>isdigit</code> check rejects them, so <code>-4</code> is reported as bad. Let <code>int</code> decide, so the output is <code>[12, -4, 0]</code> then <code>bad: 'warm'</code>.</p></div><textarea class="pc-src pc-code" hidden>def parse_temps(texts):
+    temps = []
+    for text in texts:
+        if not text.isdigit():
+            raise ValueError(f&quot;bad: {text!r}&quot;)
+        temps.append(int(text))
+    return temps
+
+print(parse_temps([&quot;12&quot;, &quot;-4&quot;, &quot;0&quot;]))
+try:
+    parse_temps([&quot;12&quot;, &quot;warm&quot;])
+except ValueError as err:
+    print(err)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;int decides&quot;
+    expect_output(&quot;[12, -4, 0]\nbad: &#x27;warm&#x27;&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def parse_temps(texts):
+    temps = []
+    for text in texts:
+        try:
+            temps.append(int(text))
+        except ValueError as err:
+            raise ValueError(f&quot;bad: {text!r}&quot;) from err
+    return temps
+
+print(parse_temps([&quot;12&quot;, &quot;-4&quot;, &quot;0&quot;]))
+try:
+    parse_temps([&quot;12&quot;, &quot;warm&quot;])
+except ValueError as err:
+    print(err)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w037d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Two errors in one clause</div><div class="pc-prompt"><p>A <code>0</code> should print <code>can't share between 0</code>, but because the division is inside the same <code>try</code> as the conversion, it&rsquo;s reported as <code>not a number</code>. Fix it so the output is <code>4</code>, <code>not a number</code>, <code>can't share between 0</code>.</p></div><textarea class="pc-src pc-code" hidden>for raw in [&quot;3&quot;, &quot;x&quot;, &quot;0&quot;]:
+    try:
+        n = int(raw)
+        print(12 // n)
+    except (ValueError, ZeroDivisionError):
+        print(&quot;not a number&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;one clause per problem&quot;
+    expect_output(&quot;4\nnot a number\ncan&#x27;t share between 0&quot;)</textarea><textarea class="pc-src pc-solution" hidden>for raw in [&quot;3&quot;, &quot;x&quot;, &quot;0&quot;]:
+    try:
+        n = int(raw)
+    except ValueError:
+        print(&quot;not a number&quot;)
+    else:
+        if n == 0:
+            print(&quot;can&#x27;t share between 0&quot;)
+        else:
+            print(12 // n)</textarea></div>
+<div class="parsons" data-id="w037d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Create, don&rsquo;t overwrite</div><div class="pc-prompt"><p>Arrange the lines into a function that creates a file only if it doesn&rsquo;t exist yet, with no gap between checking and creating. One line is a trap.</p></div><script type="application/json">{"lines": ["def create_once(path, text):", "    try:", "        with open(path, \"x\") as f:", "            f.write(text)", "    except FileExistsError:", "        return False", "    return True"], "distractors": ["    if os.path.exists(path):"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w037d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>stock = {&quot;tea&quot;: 0}
+
+a = stock.get(&quot;milk&quot;, 5)
+b = getattr(&quot;text&quot;, &quot;upper&quot;, None) is not None
+c = next((n for n in [1, 3, 4, 6] if n % 2 == 0), None)
+d = &quot;a=b=c&quot;.partition(&quot;=&quot;)[2]
+e = &quot;-7&quot;.isdigit()
+
+p = ___   # a
+q = ___   # b
+r = ___   # c
+s = ___   # d
+t = ___   # e</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 5 and q is True and r == 4, &quot;p, q and r&quot;
+    assert s == &quot;b=c&quot; and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>stock = {&quot;tea&quot;: 0}
+
+a = stock.get(&quot;milk&quot;, 5)
+b = getattr(&quot;text&quot;, &quot;upper&quot;, None) is not None
+c = next((n for n in [1, 3, 4, 6] if n % 2 == 0), None)
+d = &quot;a=b=c&quot;.partition(&quot;=&quot;)[2]
+e = &quot;-7&quot;.isdigit()
+
+p = 5
+q = True
+r = 4
+s = &quot;b=c&quot;
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w037d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does EAFP stand for?", "answer": 1, "explain": "Try it, and catch the error.", "options": ["Every action fails politely", "Easier to ask forgiveness than permission", "Errors are found progressively", "Exit after first problem"]}, {"type": "mc", "q": "Why can if text.isdigit() then int(text) still crash?", "answer": 1, "explain": "The check is a second copy of the rule.", "options": ["It can&rsquo;t", "isdigit and int follow different rules: &lsquo;\u00b2&rsquo; passes the check but int rejects it", "isdigit is slow", "int needs a base"]}, {"type": "mc", "q": "What&rsquo;s the race in if os.path.exists(p) followed by open(p)?", "answer": 1, "explain": "Time of check to time of use.", "options": ["There isn&rsquo;t one", "The file can be deleted between the check and the open", "exists is slow", "open checks twice"]}, {"type": "mc", "q": "How do you create a file only if it doesn&rsquo;t already exist, with no race?", "answer": 1, "explain": "The operation is the check.", "options": ["Check with exists first", "Open it with mode &lsquo;x&rsquo;, and catch FileExistsError", "Open with &lsquo;w&rsquo;", "Use os.remove first"]}, {"type": "mc", "q": "Why keep a try narrow?", "answer": 1, "explain": "Use else for the following work.", "options": ["Speed", "A wide try catches the same type of error from anywhere inside it, not just the line you meant", "Python requires it", "It isn&rsquo;t important"]}, {"type": "mc", "q": "What does with suppress(FileNotFoundError) do?", "answer": 1, "explain": "The same as try/except/pass, said clearly.", "options": ["Hides every error", "Ignores a FileNotFoundError raised inside the block, and skips the rest of the block", "Deletes files", "Logs the error"]}, {"type": "mc", "q": "When is checking first (LBYL) the better choice?", "answer": 1, "explain": "Validate everything, then change.", "options": ["Never", "For your own rules, when failure is normal, and before changes that mustn&rsquo;t stop halfway", "Always", "Only for files"]}, {"type": "mc", "q": "Why should transfer check both accounts before changing either balance?", "answer": 1, "explain": "All or nothing.", "options": ["Speed", "A failure in the middle would leave the money taken from one account and given to none", "It reads better", "Python requires it"]}, {"type": "mc", "q": "Which of these never needs an if or a try for a missing key?", "answer": 1, "explain": "The default is built in.", "options": ["d[key]", "d.get(key, default)", "d.pop(key)", "d.keys()[key]"]}, {"type": "output", "q": "What does this print?", "answer": "14", "explain": "else runs because nothing was raised.", "code": "try:\n    n = int(\"7\")\nexcept ValueError:\n    print(\"bad\")\nelse:\n    print(n * 2)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w037d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: saving without overwriting</div><div class="pc-prompt"><p>Write <code>save_new(stem, ext, text)</code>, which saves <code>text</code> to a <strong>new</strong> file and returns the name it used. It tries <code>stem.ext</code> first, then <code>stem-1.ext</code>, <code>stem-2.ext</code> and so on, opening each with mode <code>"x"</code> (no <code>exists</code> checks: another program could create a file at any moment). After 100 numbered attempts all fail (up to <code>stem-100.ext</code>), it raises <code>FileExistsError(f"no free name for {stem}.{ext}")</code>. Check the arguments first, before touching any file: <code>text</code> must be a string (else <code>TypeError</code>), and <code>stem</code> must be non-empty and contain no <code>/</code> (else <code>ValueError</code>).</p></div><textarea class="pc-src pc-code" hidden>def save_new(stem, ext, text):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_save():
+    &quot;saving&quot;
+    reset_files()
+    assert save_new(&quot;notes&quot;, &quot;txt&quot;, &quot;a&quot;) == &quot;notes.txt&quot;
+    assert save_new(&quot;notes&quot;, &quot;txt&quot;, &quot;b&quot;) == &quot;notes-1.txt&quot;
+    write_file(&quot;notes-2.txt&quot;, &quot;someone else&#x27;s&quot;)
+    assert save_new(&quot;notes&quot;, &quot;txt&quot;, &quot;c&quot;) == &quot;notes-3.txt&quot;
+    assert read_file(&quot;notes.txt&quot;) == &quot;a&quot; and read_file(&quot;notes-1.txt&quot;) == &quot;b&quot; and read_file(&quot;notes-2.txt&quot;) == &quot;someone else&#x27;s&quot; and read_file(&quot;notes-3.txt&quot;) == &quot;c&quot;
+    assert &quot;exists(&quot; not in source
+def test_full():
+    &quot;no free name&quot;
+    reset_files()
+    for i in range(101):
+        write_file(&quot;x.md&quot; if i == 0 else f&quot;x-{i}.md&quot;, &quot;&quot;)
+    try:
+        save_new(&quot;x&quot;, &quot;md&quot;, &quot;hi&quot;)
+        assert False
+    except FileExistsError as err:
+        assert str(err) == &quot;no free name for x.md&quot;
+def test_checks():
+    &quot;checking first&quot;
+    reset_files()
+    for args, error in [((&quot;a&quot;, &quot;txt&quot;, 5), TypeError), ((&quot;&quot;, &quot;txt&quot;, &quot;x&quot;), ValueError), ((&quot;a/b&quot;, &quot;txt&quot;, &quot;x&quot;), ValueError)]:
+        try:
+            save_new(*args)
+            assert False, f&quot;{args} should raise {error.__name__}&quot;
+        except error:
+            pass
+    assert files_now() == [], &quot;nothing should be created&quot;</textarea><textarea class="pc-src pc-solution" hidden>def save_new(stem, ext, text):
+    if not isinstance(text, str):
+        raise TypeError(&quot;text must be a string&quot;)
+    if not stem or &quot;/&quot; in stem:
+        raise ValueError(f&quot;bad file name stem: {stem!r}&quot;)
+    for n in range(101):
+        name = f&quot;{stem}.{ext}&quot; if n == 0 else f&quot;{stem}-{n}.{ext}&quot;
+        try:
+            with open(name, &quot;x&quot;) as f:
+                f.write(text)
+        except FileExistsError:
+            continue
+        return name
+    raise FileExistsError(f&quot;no free name for {stem}.{ext}&quot;)</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Find an <code>if os.path.exists</code> or an <code>isdigit</code> check in your own code. Is it guarding an operation that could decide for itself? Tomorrow: the <code>logging</code> module, so your programs can say what they&rsquo;re doing without <code>print</code>.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w037d2.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w037d3", "week": 37, "day": 3, "title": "EAFP and LBYL", "exercises": [{"id": "w037d3-toint", "title": "Asking int", "points": 10}, {"id": "w037d3-dig", "title": "Digging into data", "points": 15}, {"id": "w037d3-tidy", "title": "Tidying up", "points": 10}, {"id": "w037d3-move", "title": "All or nothing", "points": 15}, {"id": "w037d3-bug1", "title": "A try too wide", "points": 10}, {"id": "w037d3-bug2", "title": "The check that disagrees", "points": 10}, {"id": "w037d3-bug3", "title": "Two errors in one clause", "points": 10}, {"id": "w037d3-trace", "title": "Predict them", "points": 10}, {"id": "w037d3-challenge", "title": "Challenge: saving without overwriting", "points": 25}], "points": 115}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=8fe38f9496"></script>
+</body>
+</html>
