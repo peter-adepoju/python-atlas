@@ -1,0 +1,810 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="8fe38f9496">
+<title>Week 35 Day 5: Decorator (the pattern) | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=8fe38f9496">
+<link rel="stylesheet" href="../assets/css/site.css?v=8fe38f9496">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=8fe38f9496"></script>
+<script src="../assets/vendor/codemirror.js?v=8fe38f9496" defer></script>
+<meta name="description" content="Suppose a data source should sometimes cache its answers, sometimes log every lookup, sometimes retry when it fails, and sometimes all three. Subclasses for...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w035d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 35 Day 5: Decorator (the pattern)">
+<meta property="og:description" content="Suppose a data source should sometimes cache its answers, sometimes log every lookup, sometimes retry when it fails, and sometimes all three. Subclasses for...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w035d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-35">Week 35: Design patterns I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#too-many-subclasses" data-sec="too-many-subclasses">Too many subclasses</a></li><li><a href="#object-decorators" data-sec="object-decorators">Object decorators</a></li><li><a href="#the-order-of-the-layers" data-sec="the-order-of-the-layers">The order of the layers</a></li><li><a href="#wrapping-functions" data-sec="wrapping-functions">Wrapping functions</a></li><li><a href="#decorator-adapter-proxy" data-sec="decorator-adapter-proxy">Decorator, Adapter, Proxy</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w035d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-3">Phase 3: Objects and design</a></li><li><a href="../map.html#week-35">Week 35: Design patterns I</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 35, Day 5</span></p>
+      <h1>Decorator (the pattern)</h1>
+      <div class="day-intro"><p>Suppose a data source should sometimes cache its answers, sometimes log every lookup, sometimes retry when it fails, and sometimes all three. Subclasses for every combination would multiply out of control. The Decorator pattern adds each behaviour as a wrapper with the same interface as the thing it wraps, so behaviours can be stacked in any combination while the program runs. You met wrappers in Weeks 30 and 31; today they get their proper name, and you&rsquo;ll write them for objects and for functions. (Python also has a decorator <em>syntax</em>, the <code>@</code> line above a function. It&rsquo;s built on exactly this idea, and Phase 4 explains it fully.)</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Describe the Decorator pattern, and why it beats a subclass for every combination</li><li>Write object decorators that wrap a component with the same interface and add behaviour</li><li>Stack decorators, and predict how the order changes the result</li><li>Write function wrappers that add behaviour before or after a call, keeping the function&rsquo;s name with functools.wraps</li><li>Tell a decorator from an adapter and a proxy</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="Too many subclasses: 15 min"></span><span class="plan-seg s0" style="flex:25" title="Object decorators: 25 min"></span><span class="plan-seg s1" style="flex:15" title="The order of the layers: 15 min"></span><span class="plan-seg s0" style="flex:25" title="Wrapping functions: 25 min"></span><span class="plan-seg s1" style="flex:10" title="Decorator, Adapter, Proxy: 10 min"></span><span class="plan-seg s0" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s1" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Too many subclasses</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">Object decorators</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">The order of the layers</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:05</span><span class="plan-what">Wrapping functions</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Decorator, Adapter, Proxy</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:40</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w035d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w035d5.ipynb" download>download it</a>. Exercises today are worth 120 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w035d5-p1"><textarea class="pc-src pc-code" hidden>class Prices:
+    def get(self, item):
+        return {&quot;rice&quot;: 450, &quot;oil&quot;: 900}.get(item)
+
+class Logged:
+    def __init__(self, inner):
+        self.inner = inner
+        self.log = []
+    def get(self, item):
+        self.log.append(item)
+        return self.inner.get(item)
+
+class WithDefault:
+    def __init__(self, inner, default):
+        self.inner = inner
+        self.default = default
+    def get(self, item):
+        value = self.inner.get(item)
+        return self.default if value is None else value
+
+logged = Logged(Prices())
+source = WithDefault(logged, 0)
+print(source.get(&quot;rice&quot;), source.get(&quot;yam&quot;), logged.log)</textarea></div>
+<p><code>source</code> is a <code>Prices</code> wrapped twice. Each layer has the same <code>get</code> method as the thing it wraps, does its own small job (recording, filling in a default) and passes the call inward. Callers of <code>source.get</code> can&rsquo;t tell how many layers there are. That&rsquo;s the Decorator pattern.</p>
+<h2 id="too-many-subclasses">Too many subclasses</h2>
+<p>Without decorators, adding optional behaviours by inheritance goes like this: <code>Prices</code>, then <code>LoggedPrices</code>, <code>CachedPrices</code>, <code>RetryingPrices</code>, then <code>LoggedCachedPrices</code>, <code>CachedRetryingPrices</code>, <code>LoggedCachedRetryingPrices</code>&hellip; Three optional behaviours make eight combinations, four make sixteen, and the same behaviours must be written again for every other kind of source (Week 30, Day 5 called this class explosion).</p>
+<p>The Gang of Four&rsquo;s <strong>Decorator</strong> pattern says: &ldquo;attach additional responsibilities to an object dynamically. Decorators provide a flexible alternative to subclassing for extending functionality.&rdquo; Each behaviour is written <strong>once</strong>, as a wrapper, and works with any object that has the right interface:</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>component</td>
+<td>the interface (here, anything with <code>get(item)</code>)</td>
+</tr>
+<tr>
+<td>concrete component</td>
+<td>a real thing doing the job (<code>Prices</code>)</td>
+</tr>
+<tr>
+<td>decorator</td>
+<td>holds a component, has the same interface, adds behaviour before or after passing the call on</td>
+</tr>
+</tbody>
+</table>
+<h2 id="object-decorators">Object decorators</h2>
+<p>Here are three reusable decorators for anything with <code>get(key)</code>:</p>
+<div class="pc pc-example" data-kind="example" data-id="w035d5-e2"><textarea class="pc-src pc-code" hidden>class Database:
+    def __init__(self, data):
+        self.data = data
+        self.queries = 0
+    def get(self, key):
+        self.queries += 1
+        return self.data.get(key)
+
+class Cached:
+    def __init__(self, inner):
+        self.inner = inner
+        self.saved = {}
+    def get(self, key):
+        if key not in self.saved:
+            self.saved[key] = self.inner.get(key)
+        return self.saved[key]
+
+class Logged:
+    def __init__(self, inner, log):
+        self.inner = inner
+        self.log = log
+    def get(self, key):
+        value = self.inner.get(key)
+        self.log.append(f&quot;get({key!r}) -&gt; {value!r}&quot;)
+        return value
+
+class Upper:
+    def __init__(self, inner):
+        self.inner = inner
+    def get(self, key):
+        value = self.inner.get(key)
+        return value.upper() if isinstance(value, str) else value
+
+db = Database({&quot;city&quot;: &quot;Lagos&quot;, &quot;country&quot;: &quot;Nigeria&quot;})
+log = []
+source = Upper(Cached(Logged(db, log)))
+print([source.get(k) for k in [&quot;city&quot;, &quot;city&quot;, &quot;country&quot;, &quot;city&quot;]])
+print(db.queries, log)</textarea></div>
+<ul>
+<li>Each decorator does one job (Week 34&rsquo;s single responsibility) and knows nothing about the others.</li>
+<li>They&rsquo;re combined when the object is made, so different parts of a program can use different combinations of the same pieces.</li>
+<li>Because each has the same interface as what it wraps, a decorated object can go anywhere the original could (Liskov substitution).</li>
+</ul>
+<p>If the interface has many methods, a decorator must pass every one of them on, even those it doesn&rsquo;t change. Week 31&rsquo;s <code>__getattr__</code> can forward the rest automatically, at the cost of being less explicit.</p>
+<h2 id="the-order-of-the-layers">The order of the layers</h2>
+<p>Decorators run from the outside in on the way to the component, and from the inside out on the way back. So the order of wrapping changes the result. Above, <code>Logged</code> sat <strong>inside</strong> <code>Cached</code>, so it only saw the calls that reached the database. Swap them:</p>
+<div class="pc pc-example" data-kind="example" data-id="w035d5-e3"><textarea class="pc-src pc-code" hidden>class Database:
+    def __init__(self, data):
+        self.data = data
+    def get(self, key):
+        return self.data.get(key)
+
+class Cached:
+    def __init__(self, inner):
+        self.inner, self.saved = inner, {}
+    def get(self, key):
+        if key not in self.saved:
+            self.saved[key] = self.inner.get(key)
+        return self.saved[key]
+
+class Logged:
+    def __init__(self, inner, log):
+        self.inner, self.log = inner, log
+    def get(self, key):
+        self.log.append(key)
+        return self.inner.get(key)
+
+inside, outside = [], []
+a = Cached(Logged(Database({&quot;k&quot;: 1}), inside))      # logs only real lookups
+b = Logged(Cached(Database({&quot;k&quot;: 1})), outside)     # logs every request
+for _ in range(3):
+    a.get(&quot;k&quot;)
+    b.get(&quot;k&quot;)
+print(inside, outside)</textarea></div>
+<p>Neither order is wrong: logging every request and logging every database query are both useful. The point is to decide on purpose. A good habit is to read a stack of decorators from the outside in, saying what each layer does to the call before passing it on.</p>
+<h2 id="wrapping-functions">Wrapping functions</h2>
+<p>Functions can be decorated too: a function that takes a function and returns a new one that adds behaviour and calls the original. Week 31&rsquo;s <code>Remember</code> did this with a class; with a closure (Week 7) it looks like this:</p>
+<div class="pc pc-example" data-kind="example" data-id="w035d5-e4"><textarea class="pc-src pc-code" hidden>import functools
+
+def logged(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        print(f&quot;{func.__name__}{args} -&gt; {result}&quot;)
+        return result
+    return wrapper
+
+def vat(pence, rate=20):
+    &quot;&quot;&quot;VAT on a price in pence.&quot;&quot;&quot;
+    return pence * rate // 100
+
+vat = logged(vat)
+vat(1000)
+vat(999, rate=5)
+print(vat.__name__, vat.__doc__)</textarea></div>
+<p>The parts of every function wrapper:</p>
+<ul>
+<li><code>wrapper(*args, **kwargs)</code> accepts <strong>any</strong> arguments and passes them all on, so it works for any function (Week 7&rsquo;s <code>*args</code> and <code>**kwargs</code>);</li>
+<li>it calls the original, does its extra job before or after, and <strong>returns the original&rsquo;s result</strong>;</li>
+<li>the outer function returns <code>wrapper</code> itself (not <code>wrapper()</code>);</li>
+<li><code>@functools.wraps(func)</code> copies the original&rsquo;s name, docstring and other details onto <code>wrapper</code>, so <code>vat.__name__</code> is still <code>"vat"</code>, not <code>"wrapper"</code>. That <code>@</code> line is Python&rsquo;s decorator syntax, used here on <code>wrapper</code>; Phase 4 explains how it works.</li>
+</ul>
+<p><code>vat = logged(vat)</code> replaces the name with the wrapped version, as <code>ways = Remember(ways)</code> did in Week 31. Writing <code>@logged</code> on the line above <code>def vat</code> does exactly the same thing, which is why that syntax is called a &ldquo;decorator&rdquo;: it&rsquo;s this pattern, built into the language. <code>@functools.cache</code>, which you&rsquo;ve used since Week 16, is a function decorator from the standard library.</p>
+<p>When a decorator needs <strong>settings</strong> (how many times to retry, say), a callable class (Week 31) is a clear way to write it:</p>
+<div class="pc pc-example" data-kind="example" data-id="w035d5-e5"><textarea class="pc-src pc-code" hidden>class Retry:
+    def __init__(self, func, times=3):
+        self.func = func
+        self.times = times
+        self.attempts = 0
+
+    def __call__(self, *args, **kwargs):
+        for attempt in range(1, self.times + 1):
+            self.attempts += 1
+            try:
+                return self.func(*args, **kwargs)
+            except ConnectionError:
+                if attempt == self.times:
+                    raise
+
+failures = iter([True, True, False])
+def flaky_fetch(url):
+    if next(failures):
+        raise ConnectionError(&quot;timed out&quot;)
+    return f&quot;&lt;page from {url}&gt;&quot;
+
+fetch = Retry(flaky_fetch, times=3)
+print(fetch(&quot;example.org&quot;), fetch.attempts)</textarea></div>
+<h2 id="decorator-adapter-proxy">Decorator, Adapter, Proxy</h2>
+<p>Three patterns wrap an object, for different reasons:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Interface</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Decorator</td>
+<td>the <strong>same</strong> as the wrapped object</td>
+<td>add behaviour (logging, caching, retrying)</td>
+</tr>
+<tr>
+<td>Adapter (Day 4)</td>
+<td><strong>different</strong>: the one the client expects</td>
+<td>make something fit</td>
+</tr>
+<tr>
+<td>Proxy</td>
+<td>the <strong>same</strong></td>
+<td>control access to the real object: create it only when first needed, check permissions, or stand in for something far away</td>
+</tr>
+</tbody>
+</table>
+<p>A caching wrapper is sometimes called a proxy and sometimes a decorator; the names describe intent, and the code can look identical. What matters is knowing why the wrapper is there.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Decorator (Gang of Four): add responsibilities to an object by wrapping it in another with the same interface, which adds behaviour before or after passing calls on; behaviours are written once and combined freely, avoiding a subclass per combination. Stacked decorators run outside-in on the way in, so their order matters. Function wrappers take a function and return <code>wrapper(*args, **kwargs)</code>, which calls the original, adds its job and returns the result; <code>functools.wraps</code> keeps the original&rsquo;s name and docstring. <code>f = deco(f)</code> is what the <code>@deco</code> syntax does (Phase 4). Use a callable class for decorators with settings. Adapters change interfaces; proxies keep them but control access.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w035d5-counted" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Counting lookups</div><div class="pc-prompt"><p>Write two decorators for anything with <code>get(key)</code>: <code>Counted(inner)</code>, which counts how many times <code>get</code> was called in an attribute <code>calls</code>, and <code>Cached(inner)</code>, which calls the inner <code>get</code> at most once per key (remembering <code>None</code> results too) and counts in <code>hits</code> the calls it answered from memory. Both pass the result through unchanged.</p></div><textarea class="pc-src pc-code" hidden>class Source:
+    def __init__(self, data):
+        self.data = data
+
+    def get(self, key):
+        return self.data.get(key)
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_decorators():
+    &quot;counting and caching&quot;
+    S, Co, Ca = ns[&quot;Source&quot;], ns[&quot;Counted&quot;], ns[&quot;Cached&quot;]
+    inner = Co(S({&quot;a&quot;: 1}))
+    c = Ca(inner)
+    assert [c.get(k) for k in [&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;b&quot;, &quot;a&quot;]] == [1, 1, None, None, 1]
+    assert inner.calls == 2 and c.hits == 3, f&quot;calls {inner.calls}, hits {c.hits}&quot;
+    outer = Co(Ca(S({&quot;a&quot;: 1})))
+    for _ in range(4):
+        outer.get(&quot;a&quot;)
+    assert outer.calls == 4</textarea><textarea class="pc-src pc-solution" hidden>class Source:
+    def __init__(self, data):
+        self.data = data
+
+    def get(self, key):
+        return self.data.get(key)
+
+class Counted:
+    def __init__(self, inner):
+        self.inner = inner
+        self.calls = 0
+
+    def get(self, key):
+        self.calls += 1
+        return self.inner.get(key)
+
+class Cached:
+    def __init__(self, inner):
+        self.inner = inner
+        self.saved = {}
+        self.hits = 0
+
+    def get(self, key):
+        if key in self.saved:
+            self.hits += 1
+        else:
+            self.saved[key] = self.inner.get(key)
+        return self.saved[key]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w035d5-wrappers" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Function wrappers</div><div class="pc-prompt"><p>Write two function wrappers, each using <code>functools.wraps</code>:</p>
+<ul>
+<li><code>count_calls(func)</code>: returns a wrapper with an attribute <code>calls</code>, counting how many times it&rsquo;s been called;</li>
+<li><code>recorded(func, log)</code>: returns a wrapper that appends lines like <code>vat(1000, rate=5) -&gt; 50</code> to the list <code>log</code> (positional arguments with <code>repr</code>, then keyword arguments as <code>name=repr(value)</code>, separated by <code>", "</code>).</li>
+</ul>
+<p>Both must pass every argument through and return the original&rsquo;s result.</p></div><textarea class="pc-src pc-code" hidden>import functools
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_wrappers():
+    &quot;wrapping functions&quot;
+    def vat(pence, rate=20):
+        &quot;VAT on a price.&quot;
+        return pence * rate // 100
+    c = count_calls(vat)
+    assert c(1000) == 200 and c(500, rate=5) == 25 and c.calls == 2 and c.__name__ == &quot;vat&quot; and c.__doc__ == &quot;VAT on a price.&quot;
+    log = []
+    r = recorded(vat, log)
+    assert r(1000, rate=5) == 50 and r(999) == 199 and r.__name__ == &quot;vat&quot;
+    assert log == [&quot;vat(1000, rate=5) -&gt; 50&quot;, &quot;vat(999) -&gt; 199&quot;], f&quot;log: {log}&quot;
+    greet = recorded(lambda name, punct=&quot;!&quot;: f&quot;Hi {name}{punct}&quot;, log)
+    greet(&quot;Ada&quot;)
+    assert log[-1] == &quot;&lt;lambda&gt;(&#x27;Ada&#x27;) -&gt; &#x27;Hi Ada!&#x27;&quot;</textarea><textarea class="pc-src pc-solution" hidden>import functools
+
+def count_calls(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        wrapper.calls += 1
+        return func(*args, **kwargs)
+    wrapper.calls = 0
+    return wrapper
+
+def recorded(func, log):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        parts = [repr(a) for a in args] + [f&quot;{k}={v!r}&quot; for k, v in kwargs.items()]
+        log.append(f&quot;{func.__name__}({&#x27;, &#x27;.join(parts)}) -&gt; {result!r}&quot;)
+        return result
+    return wrapper</textarea><template class="pc-src pc-hint">Inside <code>count_calls</code>, set <code>wrapper.calls = 0</code> after defining <code>wrapper</code>, and add 1 inside it with <code>wrapper.calls += 1</code>. Functions can carry attributes like any object.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w035d5-retry" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Retrying with settings</div><div class="pc-prompt"><p>Write a callable class <code>Retry(func, times=3, errors=(ConnectionError,))</code>. Calling it calls <code>func</code> with the same arguments; if <code>func</code> raises one of the <code>errors</code>, it tries again, up to <code>times</code> attempts in all, then lets the last error through. Other errors pass straight through without retrying. It keeps <code>attempts</code>, the total number of calls made to <code>func</code> so far, and <code>failures</code>, a list of the error messages it caught (whether or not a later attempt succeeded). <code>times</code> below 1 raises <code>ValueError</code>.</p></div><textarea class="pc-src pc-code" hidden>___</textarea><textarea class="pc-src pc-tests" hidden>def test_retry():
+    &quot;retrying&quot;
+    R = ns[&quot;Retry&quot;]
+    plan = iter([ConnectionError(&quot;timeout 1&quot;), ConnectionError(&quot;timeout 2&quot;), &quot;ok&quot;])
+    def flaky(x):
+        step = next(plan)
+        if isinstance(step, Exception):
+            raise step
+        return x * 2
+    r = R(flaky, times=3)
+    assert r(21) == 42 and r.attempts == 3 and r.failures == [&quot;timeout 1&quot;, &quot;timeout 2&quot;]
+    def down():
+        raise ConnectionError(&quot;down&quot;)
+    r2 = R(down, times=2)
+    try:
+        r2()
+        assert False, &quot;should give up after 2 attempts&quot;
+    except ConnectionError:
+        pass
+    assert r2.attempts == 2
+    def bad():
+        raise ValueError(&quot;bad input&quot;)
+    r3 = R(bad)
+    try:
+        r3()
+        assert False
+    except ValueError:
+        pass
+    assert r3.attempts == 1 and r3.failures == []
+    assert R(lambda: 1, errors=(KeyError,))() == 1
+    try:
+        R(bad, times=0)
+        assert False, &quot;times 0 should raise ValueError&quot;
+    except ValueError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>class Retry:
+    def __init__(self, func, times=3, errors=(ConnectionError,)):
+        if times &lt; 1:
+            raise ValueError(&quot;times must be at least 1&quot;)
+        self.func = func
+        self.times = times
+        self.errors = errors
+        self.attempts = 0
+        self.failures = []
+
+    def __call__(self, *args, **kwargs):
+        for attempt in range(1, self.times + 1):
+            self.attempts += 1
+            try:
+                return self.func(*args, **kwargs)
+            except self.errors as err:
+                self.failures.append(str(err))
+                if attempt == self.times:
+                    raise</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w035d5-writers" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Stackable writers</div><div class="pc-prompt"><p>Writers have one method, <code>write(line)</code>. <code>ListWriter</code> (given) keeps every line. Write three decorators: <code>Upper(inner)</code> (passes the line in capitals), <code>Numbered(inner)</code> (adds <code>1:</code>, <code>2:</code>, and so on, counting its own lines), and <code>Censor(inner, words)</code> (replaces each of the words, matched in any case as whole words, with asterisks of the same length). Stack them in different orders and check what reaches the <code>ListWriter</code>.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+class ListWriter:
+    def __init__(self):
+        self.lines = []
+
+    def write(self, line):
+        self.lines.append(line)
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_writers():
+    &quot;stacking&quot;
+    L, U, N, C = ns[&quot;ListWriter&quot;], ns[&quot;Upper&quot;], ns[&quot;Numbered&quot;], ns[&quot;Censor&quot;]
+    out = L()
+    w = Numbered(Censor(Upper(out), [&quot;darn&quot;]))
+    for line in [&quot;Darn it&quot;, &quot;all good&quot;, &quot;darned luck&quot;]:
+        w.write(line)
+    assert out.lines == [&quot;1: **** IT&quot;, &quot;2: ALL GOOD&quot;, &quot;3: DARNED LUCK&quot;], f&quot;got {out.lines}&quot;
+    out2 = L()
+    w2 = U(N(out2))
+    w2.write(&quot;hello&quot;)
+    w2.write(&quot;bye&quot;)
+    assert out2.lines == [&quot;1: HELLO&quot;, &quot;2: BYE&quot;]
+    out3 = L()
+    C(L(), [&quot;x&quot;]).write(&quot;x&quot;)
+    C(out3, [&quot;rats&quot;, &quot;drat&quot;]).write(&quot;Rats! Drat, drats.&quot;)
+    assert out3.lines == [&quot;****! ****, drats.&quot;]</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+class ListWriter:
+    def __init__(self):
+        self.lines = []
+
+    def write(self, line):
+        self.lines.append(line)
+
+class Upper:
+    def __init__(self, inner):
+        self.inner = inner
+
+    def write(self, line):
+        self.inner.write(line.upper())
+
+class Numbered:
+    def __init__(self, inner):
+        self.inner = inner
+        self.count = 0
+
+    def write(self, line):
+        self.count += 1
+        self.inner.write(f&quot;{self.count}: {line}&quot;)
+
+class Censor:
+    def __init__(self, inner, words):
+        self.inner = inner
+        self.words = list(words)
+
+    def write(self, line):
+        for word in self.words:
+            line = re.sub(r&quot;\b&quot; + re.escape(word) + r&quot;\b&quot;, lambda m: &quot;*&quot; * len(m.group()), line, flags=re.IGNORECASE)
+        self.inner.write(line)</textarea><template class="pc-src pc-hint"><code>re.sub(r"\b" + re.escape(word) + r"\b", lambda m: "*" * len(m.group()), line, flags=re.IGNORECASE)</code> censors one word.</template></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w035d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The wrapper that lost the result</div><div class="pc-prompt"><p>After wrapping, <code>total</code> returns <code>None</code>, so this prints <code>None</code> instead of <code>1350</code> (after the log line). Fix the wrapper.</p></div><textarea class="pc-src pc-code" hidden>import functools
+
+def announce(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        print(&quot;calling&quot;, func.__name__)
+        func(*args, **kwargs)
+    return wrapper
+
+def total(prices):
+    return sum(prices)
+
+total = announce(total)
+print(total([450, 900]))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the result&quot;
+    expect_output(&quot;calling total\n1350&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import functools
+
+def announce(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        print(&quot;calling&quot;, func.__name__)
+        return func(*args, **kwargs)
+    return wrapper
+
+def total(prices):
+    return sum(prices)
+
+total = announce(total)
+print(total([450, 900]))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w035d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">No keywords allowed</div><div class="pc-prompt"><p>The timing wrapper only accepts positional arguments, so calling the wrapped function with a keyword crashes with <code>TypeError: wrapper() got an unexpected keyword argument 'rate'</code>. Fix the wrapper so it passes everything through, and the program prints <code>50</code> then <code>calls: 1</code>.</p></div><textarea class="pc-src pc-code" hidden>import functools
+
+def counted(func):
+    @functools.wraps(func)
+    def wrapper(*args):
+        wrapper.calls += 1
+        return func(*args)
+    wrapper.calls = 0
+    return wrapper
+
+def vat(pence, rate=20):
+    return pence * rate // 100
+
+vat = counted(vat)
+print(vat(1000, rate=5))
+print(&quot;calls:&quot;, vat.calls)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;keywords too&quot;
+    expect_output(&quot;50\ncalls: 1&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import functools
+
+def counted(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        wrapper.calls += 1
+        return func(*args, **kwargs)
+    wrapper.calls = 0
+    return wrapper
+
+def vat(pence, rate=20):
+    return pence * rate // 100
+
+vat = counted(vat)
+print(vat(1000, rate=5))
+print(&quot;calls:&quot;, vat.calls)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w035d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Logging the wrong layer</div><div class="pc-prompt"><p>The audit log should record only the lookups that actually reached the database, but it records every request, so this prints <code>['rice', 'rice', 'rice']</code> instead of <code>['rice']</code>. Fix the order of the decorators (not the classes).</p></div><textarea class="pc-src pc-code" hidden>class Database:
+    def get(self, key):
+        return {&quot;rice&quot;: 450}.get(key)
+
+class Cached:
+    def __init__(self, inner):
+        self.inner, self.saved = inner, {}
+    def get(self, key):
+        if key not in self.saved:
+            self.saved[key] = self.inner.get(key)
+        return self.saved[key]
+
+class Audited:
+    def __init__(self, inner, log):
+        self.inner, self.log = inner, log
+    def get(self, key):
+        self.log.append(key)
+        return self.inner.get(key)
+
+log = []
+source = Audited(Cached(Database()), log)
+for _ in range(3):
+    source.get(&quot;rice&quot;)
+print(log)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;only real lookups&quot;
+    expect_output(&quot;[&#x27;rice&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Database:
+    def get(self, key):
+        return {&quot;rice&quot;: 450}.get(key)
+
+class Cached:
+    def __init__(self, inner):
+        self.inner, self.saved = inner, {}
+    def get(self, key):
+        if key not in self.saved:
+            self.saved[key] = self.inner.get(key)
+        return self.saved[key]
+
+class Audited:
+    def __init__(self, inner, log):
+        self.inner, self.log = inner, log
+    def get(self, key):
+        self.log.append(key)
+        return self.inner.get(key)
+
+log = []
+source = Cached(Audited(Database(), log))
+for _ in range(3):
+    source.get(&quot;rice&quot;)
+print(log)</textarea></div>
+<div class="parsons" data-id="w035d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A function wrapper</div><div class="pc-prompt"><p>Arrange the lines into a wrapper that prints how many items a function returned, keeping its name. One line is a trap.</p></div><script type="application/json">{"lines": ["import functools", "def sized(func):", "    @functools.wraps(func)", "    def wrapper(*args, **kwargs):", "        result = func(*args, **kwargs)", "        print(func.__name__, \"gave\", len(result))", "        return result", "    return wrapper"], "distractors": ["    return wrapper()"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w035d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>class Base:
+    def say(self, x):
+        return x
+
+class Twice:
+    def __init__(self, inner):
+        self.inner = inner
+    def say(self, x):
+        return self.inner.say(x) * 2
+
+class Bang:
+    def __init__(self, inner):
+        self.inner = inner
+    def say(self, x):
+        return self.inner.say(x + &quot;!&quot;)
+
+p = ___   # Twice(Base()).say(&quot;hi&quot;)
+q = ___   # Bang(Twice(Base())).say(&quot;hi&quot;)
+r = ___   # Twice(Bang(Base())).say(&quot;hi&quot;)
+s = ___   # Twice(Twice(Base())).say(&quot;a&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert (p, q) == (&quot;hihi&quot;, &quot;hi!hi!&quot;), &quot;p and q&quot;
+    assert (r, s) == (&quot;hi!hi!&quot;, &quot;aaaa&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Base:
+    def say(self, x):
+        return x
+
+class Twice:
+    def __init__(self, inner):
+        self.inner = inner
+    def say(self, x):
+        return self.inner.say(x) * 2
+
+class Bang:
+    def __init__(self, inner):
+        self.inner = inner
+    def say(self, x):
+        return self.inner.say(x + &quot;!&quot;)
+
+p = &quot;hihi&quot;
+q = &quot;hi!hi!&quot;
+r = &quot;hi!hi!&quot;
+s = &quot;aaaa&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w035d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does the Decorator pattern do?", "answer": 1, "explain": "Gang of Four: attach responsibilities dynamically.", "options": ["Creates objects", "Adds behaviour to an object by wrapping it in another with the same interface", "Changes an interface", "Notifies observers"]}, {"type": "mc", "q": "What problem does it avoid?", "answer": 1, "explain": "Each behaviour is written once.", "options": ["Slow code", "A subclass for every combination of optional behaviours", "Missing methods", "Global variables"]}, {"type": "mc", "q": "Why must a decorator have the same interface as what it wraps?", "answer": 1, "explain": "Liskov substitution again.", "options": ["Python requires it", "So the decorated object can be used anywhere the original could, and decorators can be stacked", "For speed", "It needn&rsquo;t"]}, {"type": "mc", "q": "Does the order of stacked decorators matter?", "answer": 1, "explain": "A log inside a cache sees fewer calls.", "options": ["Never", "Yes: calls pass through the layers from the outside in", "Only for functions", "Only for caching"]}, {"type": "mc", "q": "Why does a function wrapper take *args and **kwargs?", "answer": 1, "explain": "Without **kwargs, keyword calls fail.", "options": ["For speed", "So it accepts and passes on any arguments, and works for any function", "It must", "To ignore arguments"]}, {"type": "mc", "q": "What does functools.wraps do?", "answer": 1, "explain": "So vat.<strong>name</strong> is still vat.", "options": ["Makes the wrapper faster", "Copies the original function&rsquo;s name, docstring and other details onto the wrapper", "Calls the function twice", "Caches results"]}, {"type": "mc", "q": "What does f = logged(f) have to do with @logged?", "answer": 1, "explain": "Phase 4 explains the syntax fully.", "options": ["Nothing", "@logged above def f does exactly the same", "@logged is slower", "@ only works for classes"]}, {"type": "mc", "q": "How do a decorator and an adapter differ?", "answer": 1, "explain": "A proxy keeps the interface but controls access.", "options": ["They&rsquo;re the same", "A decorator keeps the interface and adds behaviour; an adapter changes the interface to fit", "Adapters add behaviour", "Decorators change interfaces"]}, {"type": "mc", "q": "A wrapper calls func(*args, **kwargs) but has no return. What does the wrapped function return?", "answer": 1, "explain": "Always return the original&rsquo;s result.", "options": ["The original&rsquo;s result", "None", "An error", "The wrapper"]}, {"type": "output", "q": "What does this print?", "answer": "HI ADA hi bo HI CY", "explain": "greet itself is unchanged; wrapping twice is harmless here.", "code": "def shout(f):\n    def wrapper(*a, **k):\n        return f(*a, **k).upper()\n    return wrapper\ndef greet(name):\n    return \"hi \" + name\nloud = shout(greet)\nprint(loud(\"ada\"), greet(\"bo\"), shout(shout(greet))(\"cy\"))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w035d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a careful web client</div><div class="pc-prompt"><p>Programs that fetch data from the internet usually need caching, limits on how often they ask, and a log. Build these as stackable decorators around anything with <code>fetch(url) -&gt; str</code>, with the time passed in (Week 34) so everything can be tested:</p>
+<ul>
+<li><code>FakeWeb(pages)</code>: a component for tests; <code>fetch(url)</code> returns <code>pages[url]</code>, or raises <code>LookupError</code> for an unknown URL; it counts its calls in <code>requests</code>.</li>
+<li><code>Cached(inner, clock, seconds)</code>: remembers each URL&rsquo;s text for <code>seconds</code> seconds (by <code>clock()</code>, which returns a number of seconds); after that, it fetches again. Errors aren&rsquo;t cached.</li>
+<li><code>Limited(inner, clock, per_minute)</code>: allows at most <code>per_minute</code> fetches in any 60-second window (like Week 31&rsquo;s limiter: a fetch at time <code>t</code> counts until <code>t + 60</code>); one more raises <code>RateLimited</code>, an exception you define, without calling the inner object.</li>
+<li><code>Logged(inner, log)</code>: appends <code>"GET url"</code> before fetching and <code>"OK url"</code> or <code>"FAIL url: LookupError"</code> (the error&rsquo;s type name) after, and lets errors through.</li>
+</ul>
+<p>Each decorator must work around any of the others, in any order.</p></div><textarea class="pc-src pc-code" hidden>class RateLimited(Exception):
+    pass
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_parts():
+    &quot;each decorator&quot;
+    W, C, Li, Lo, RL = (ns[n] for n in [&quot;FakeWeb&quot;, &quot;Cached&quot;, &quot;Limited&quot;, &quot;Logged&quot;, &quot;RateLimited&quot;])
+    now = [0]
+    clock = lambda: now[0]
+    web = W({&quot;a&quot;: &quot;page A&quot;, &quot;b&quot;: &quot;page B&quot;})
+    c = C(web, clock, 30)
+    assert c.fetch(&quot;a&quot;) == &quot;page A&quot; and c.fetch(&quot;a&quot;) == &quot;page A&quot; and web.requests == 1
+    now[0] = 31
+    assert c.fetch(&quot;a&quot;) == &quot;page A&quot; and web.requests == 2
+    for _ in range(2):
+        try:
+            c.fetch(&quot;zzz&quot;)
+            assert False
+        except LookupError:
+            pass
+    assert web.requests == 4, &quot;errors aren&#x27;t cached&quot;
+    now[0] = 0
+    lim = Li(W({&quot;a&quot;: &quot;A&quot;}), clock, 2)
+    lim.fetch(&quot;a&quot;)
+    now[0] = 10
+    lim.fetch(&quot;a&quot;)
+    try:
+        lim.fetch(&quot;a&quot;)
+        assert False, &quot;the third fetch within 60 seconds should raise RateLimited&quot;
+    except RL:
+        pass
+    now[0] = 60
+    assert lim.fetch(&quot;a&quot;) == &quot;A&quot;, &quot;the fetch at time 0 no longer counts at time 60&quot;
+    log = []
+    lg = Lo(W({&quot;a&quot;: &quot;A&quot;}), log)
+    lg.fetch(&quot;a&quot;)
+    try:
+        lg.fetch(&quot;b&quot;)
+    except LookupError:
+        pass
+    assert log == [&quot;GET a&quot;, &quot;OK a&quot;, &quot;GET b&quot;, &quot;FAIL b: LookupError&quot;]
+def test_stacking():
+    &quot;stacked&quot;
+    W, C, Li, Lo, RL = (ns[n] for n in [&quot;FakeWeb&quot;, &quot;Cached&quot;, &quot;Limited&quot;, &quot;Logged&quot;, &quot;RateLimited&quot;])
+    now = [0]
+    clock = lambda: now[0]
+    web = W({&quot;a&quot;: &quot;A&quot;, &quot;b&quot;: &quot;B&quot;})
+    log = []
+    client = C(Lo(Li(web, clock, 2), log), clock, 100)
+    assert [client.fetch(u) for u in [&quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;a&quot;, &quot;b&quot;]] == [&quot;A&quot;, &quot;A&quot;, &quot;B&quot;, &quot;A&quot;, &quot;B&quot;]
+    assert web.requests == 2 and log == [&quot;GET a&quot;, &quot;OK a&quot;, &quot;GET b&quot;, &quot;OK b&quot;]
+    other = Lo(Li(C(W({&quot;a&quot;: &quot;A&quot;}), clock, 100), clock, 1), [])
+    other.fetch(&quot;a&quot;)
+    try:
+        other.fetch(&quot;a&quot;)
+        assert False, &quot;the limiter is outside the cache here, so the second request is refused&quot;
+    except RL:
+        pass
+    assert other.log[-1] == &quot;FAIL a: RateLimited&quot;</textarea><textarea class="pc-src pc-solution" hidden>class RateLimited(Exception):
+    pass
+
+class FakeWeb:
+    def __init__(self, pages):
+        self.pages = dict(pages)
+        self.requests = 0
+
+    def fetch(self, url):
+        self.requests += 1
+        if url not in self.pages:
+            raise LookupError(url)
+        return self.pages[url]
+
+class Cached:
+    def __init__(self, inner, clock, seconds):
+        self.inner, self.clock, self.seconds = inner, clock, seconds
+        self.saved = {}
+
+    def fetch(self, url):
+        now = self.clock()
+        if url in self.saved:
+            text, when = self.saved[url]
+            if now - when &lt; self.seconds:
+                return text
+        text = self.inner.fetch(url)
+        self.saved[url] = (text, now)
+        return text
+
+class Limited:
+    def __init__(self, inner, clock, per_minute):
+        self.inner, self.clock, self.per_minute = inner, clock, per_minute
+        self.recent = []
+
+    def fetch(self, url):
+        now = self.clock()
+        self.recent = [t for t in self.recent if t + 60 &gt; now]
+        if len(self.recent) &gt;= self.per_minute:
+            raise RateLimited(f&quot;more than {self.per_minute} fetches a minute&quot;)
+        self.recent.append(now)
+        return self.inner.fetch(url)
+
+class Logged:
+    def __init__(self, inner, log):
+        self.inner, self.log = inner, log
+
+    def fetch(self, url):
+        self.log.append(f&quot;GET {url}&quot;)
+        try:
+            text = self.inner.fetch(url)
+        except Exception as err:
+            self.log.append(f&quot;FAIL {url}: {type(err).__name__}&quot;)
+            raise
+        self.log.append(f&quot;OK {url}&quot;)
+        return text</textarea><template class="pc-src pc-hint"><code>Cached</code> stores <code>(text, time_fetched)</code> per URL and fetches again when <code>clock() - time_fetched &gt;= seconds</code>. <code>Limited</code> keeps a list of recent fetch times, dropping those with <code>t + 60 &lt;= now</code>, like Week 31&rsquo;s <code>Limiter</code>.</template><template class="pc-src pc-hint"><code>Logged.fetch</code> appends <code>"GET url"</code>, then tries <code>self.inner.fetch(url)</code>; on an exception it appends the <code>"FAIL ..."</code> line with <code>type(err).__name__</code> and re-raises with a bare <code>raise</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Find a function in your own code that you&rsquo;d like to time or log without changing it, and wrap it with today&rsquo;s <code>logged</code> (as <code>name = logged(name)</code>). Tomorrow is the Forge: all five patterns working together in one program.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w035d4.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w035d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w035d5", "week": 35, "day": 5, "title": "Decorator (the pattern)", "exercises": [{"id": "w035d5-counted", "title": "Counting lookups", "points": 10}, {"id": "w035d5-wrappers", "title": "Function wrappers", "points": 15}, {"id": "w035d5-retry", "title": "Retrying with settings", "points": 15}, {"id": "w035d5-writers", "title": "Stackable writers", "points": 15}, {"id": "w035d5-bug1", "title": "The wrapper that lost the result", "points": 10}, {"id": "w035d5-bug2", "title": "No keywords allowed", "points": 10}, {"id": "w035d5-bug3", "title": "Logging the wrong layer", "points": 10}, {"id": "w035d5-trace", "title": "Predict them", "points": 10}, {"id": "w035d5-challenge", "title": "Challenge: a careful web client", "points": 25}], "points": 120}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=8fe38f9496"></script>
+</body>
+</html>
