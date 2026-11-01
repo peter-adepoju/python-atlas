@@ -1,5 +1,5 @@
 // // and %: sharing things into groups, and the number line for negatives.
-import { h, svg } from "../site.js?v=8fe38f9496";
+import { h, svg } from "../site.js?v=588dc67651";
 
 const fd = (a, b) => Math.floor(a / b);
 const md = (a, b) => a - b * Math.floor(a / b);
