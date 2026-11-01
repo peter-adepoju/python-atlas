@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="8fe38f9496">
+<title>Week 30 Day 3: Overriding and the MRO | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=8fe38f9496">
+<link rel="stylesheet" href="../assets/css/site.css?v=8fe38f9496">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=8fe38f9496"></script>
+<script src="../assets/vendor/codemirror.js?v=8fe38f9496" defer></script>
+<meta name="description" content="Yesterday a child extended its parent with super(). Today you’ll look at overriding from the other side: a parent’s method that calls self.something() runs...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w030d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 30 Day 3: Overriding and the MRO">
+<meta property="og:description" content="Yesterday a child extended its parent with super(). Today you’ll look at overriding from the other side: a parent’s method that calls self.something() runs...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w030d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-30">Week 30: Inheritance</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#good-overrides" data-sec="good-overrides">Good overrides</a></li><li><a href="#parents-that-call-their-children" data-sec="parents-that-call-their-children">Parents that call their children</a></li><li><a href="#more-than-one-parent" data-sec="more-than-one-parent">More than one parent</a></li><li><a href="#the-mro-and-super" data-sec="the-mro-and-super">The MRO and super()</a></li><li><a href="#name-mangling-at-last" data-sec="name-mangling-at-last">Name mangling, at last</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w030d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-3">Phase 3: Objects and design</a></li><li><a href="../map.html#week-30">Week 30: Inheritance</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 30, Day 3</span></p>
+      <h1>Overriding and the MRO</h1>
+      <div class="day-intro"><p>Yesterday a child extended its parent with <code>super()</code>. Today you&rsquo;ll look at overriding from the other side: a parent&rsquo;s method that calls <code>self.something()</code> runs whatever version the child supplies, which lets a parent lay out the steps and leave the details to its children. Then classes get more than one parent. Python decides where to look first with the method resolution order (MRO), and <code>super()</code> follows that order, not simply &lsquo;the parent&rsquo;. Finally, the name mangling promised in Week 29 shows what it&rsquo;s for.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Override a method so that it still works everywhere the parent&rsquo;s did</li><li>Write a parent class whose method calls hooks that subclasses fill in</li><li>Read a class&rsquo;s MRO and predict which version of a method runs with several parents</li><li>Explain why super() follows the MRO, and use it in a mixin</li><li>Use name mangling to keep a parent&rsquo;s internal attribute apart from a child&rsquo;s</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Good overrides: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Parents that call their children: 20 min"></span><span class="plan-seg s1" style="flex:20" title="More than one parent: 20 min"></span><span class="plan-seg s0" style="flex:25" title="The MRO and super(): 25 min"></span><span class="plan-seg s1" style="flex:15" title="Name mangling, at last: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Good overrides</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Parents that call their children</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">More than one parent</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">The MRO and super()</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Name mangling, at last</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w030d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w030d3.ipynb" download>download it</a>. Exercises today are worth 120 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w030d3-p1"><textarea class="pc-src pc-code" hidden>class Report:
+    def render(self):
+        return self.header() + &quot; | &quot; + self.body()
+
+    def header(self):
+        return &quot;REPORT&quot;
+
+    def body(self):
+        return &quot;(nothing yet)&quot;
+
+class SalesReport(Report):
+    def body(self):
+        return &quot;12 sold&quot;
+
+print(Report().render())
+print(SalesReport().render())</textarea></div>
+<p><code>render</code> is written once, in <code>Report</code>, and never overridden. But when it runs for a <code>SalesReport</code>, its call <code>self.body()</code> starts searching at the sales report, finds the child&rsquo;s <code>body</code>, and uses it. The parent&rsquo;s code calls the child&rsquo;s method without knowing the child exists. A lot of good class design rests on that.</p>
+<h2 id="good-overrides">Good overrides</h2>
+<p>An override replaces the parent&rsquo;s method for the child&rsquo;s objects. Python only checks the <strong>name</strong>; it&rsquo;s up to you to keep the new method usable in the same way. The test is simple: <strong>any code that works with the parent should still work when given a child</strong>.</p>
+<p>That means an override should:</p>
+<ul>
+<li>accept the same arguments (it may add new ones, if they have defaults);</li>
+<li>return the same kind of thing (a number if the parent returns a number, a string if it returns a string);</li>
+<li>not raise errors that the parent never raised for the same input.</li>
+</ul>
+<p>Here&rsquo;s an override that breaks the rule:</p>
+<div class="pc pc-example" data-kind="example" data-id="w030d3-e2"><textarea class="pc-src pc-code" hidden>class Shape:
+    def area(self):
+        return 0
+
+class Square(Shape):
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        return self.side ** 2
+
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+
+    def area(self, pi):                         # a new required argument
+        return pi * self.radius ** 2
+
+shapes = [Square(2), Circle(1)]
+print(sum(s.area() for s in shapes))</textarea></div>
+<p>The loop worked for every <code>Shape</code> until a circle arrived. Giving <code>pi</code> a default (<code>def area(self, pi=3.14159)</code>) or using <code>math.pi</code> inside would keep the override safe.</p>
+<p>Special methods are overridden the same way. A child that adds an attribute which matters for equality should override <code>__eq__</code> (and <code>__hash__</code> with it), and a child with more to show can override <code>__repr__</code>:</p>
+<div class="pc pc-example" data-kind="example" data-id="w030d3-e3"><textarea class="pc-src pc-code" hidden>class Point:
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+
+    def __repr__(self):
+        return f&quot;{type(self).__name__}({self.x}, {self.y})&quot;
+
+class LabelledPoint(Point):
+    def __init__(self, x, y, label):
+        super().__init__(x, y)
+        self.label = label
+
+    def __repr__(self):
+        return f&quot;{super().__repr__()[:-1]}, {self.label!r})&quot;
+
+print(Point(1, 2), LabelledPoint(3, 4, &quot;Kano&quot;))</textarea></div>
+<h2 id="parents-that-call-their-children">Parents that call their children</h2>
+<p>The warm-up showed a design you&rsquo;ll meet everywhere: the parent writes the <strong>outline</strong> of a job in one method, and calls smaller methods (often called <strong>hooks</strong>) for the parts that differ. Each child overrides only the hooks it needs.</p>
+<div class="pc pc-example" data-kind="example" data-id="w030d3-e4"><textarea class="pc-src pc-code" hidden>class Receipt:
+    def render(self, items):
+        lines = [self.title()]
+        for name, pence in items:
+            lines.append(self.line(name, pence))
+        lines.append(self.footer(sum(p for _, p in items)))
+        return &quot;\n&quot;.join(lines)
+
+    def title(self):
+        return &quot;RECEIPT&quot;
+
+    def line(self, name, pence):
+        return f&quot;{name}: {pence / 100:.2f}&quot;
+
+    def footer(self, total):
+        return f&quot;Total: {total / 100:.2f}&quot;
+
+class ShortReceipt(Receipt):
+    def title(self):
+        return &quot;--&quot;
+
+    def line(self, name, pence):
+        return name[:8]
+
+items = [(&quot;Plantain chips&quot;, 150), (&quot;Ginger beer&quot;, 120)]
+print(Receipt().render(items))
+print(ShortReceipt().render(items))</textarea></div>
+<ul>
+<li>The order of the steps, and the adding up, live in one place. A fix to <code>render</code> fixes every kind of receipt.</li>
+<li><code>ShortReceipt</code> overrides two hooks and keeps the third.</li>
+<li>When there&rsquo;s no sensible default for a hook, the parent raises <code>NotImplementedError</code> (as <code>Shape.area</code> did on Day 1) so a child that forgets it fails loudly. Week 32&rsquo;s abstract base classes make this stricter.</li>
+</ul>
+<h2 id="more-than-one-parent">More than one parent</h2>
+<p>A class can list several parents: <code>class C(A, B):</code>. It inherits from all of them, and when two parents both have a name, the one listed <strong>first</strong> wins:</p>
+<div class="pc pc-example" data-kind="example" data-id="w030d3-e5"><textarea class="pc-src pc-code" hidden>class Swimmer:
+    def move(self):
+        return &quot;swims&quot;
+
+    def breathe(self):
+        return &quot;with gills&quot;
+
+class Walker:
+    def move(self):
+        return &quot;walks&quot;
+
+    def legs(self):
+        return 4
+
+class Frog(Walker, Swimmer):
+    pass
+
+f = Frog()
+print(f.move(), f.breathe(), f.legs())
+print([cls.__name__ for cls in Frog.__mro__])</textarea></div>
+<p>The common, safe use of this is the <strong>mixin</strong>: a small class that adds one ability (a repr, a way to save, logging) and isn&rsquo;t meant to be used on its own. Mixins usually have no <code>__init__</code> and rely only on <code>self</code>:</p>
+<div class="pc pc-example" data-kind="example" data-id="w030d3-e6"><textarea class="pc-src pc-code" hidden>class DictMixin:
+    &quot;&quot;&quot;Adds to_dict() to any class whose attributes are simple values.&quot;&quot;&quot;
+
+    def to_dict(self):
+        return {&quot;kind&quot;: type(self).__name__, **vars(self)}
+
+class Book:
+    def __init__(self, title, pages):
+        self.title, self.pages = title, pages
+
+class SavedBook(DictMixin, Book):
+    pass
+
+class Train(DictMixin):
+    def __init__(self, code, to):
+        self.code, self.to = code, to
+
+print(SavedBook(&quot;Aké&quot;, 230).to_dict())
+print(Train(&quot;1A23&quot;, &quot;Edinburgh&quot;).to_dict())</textarea></div>
+<p>Mixins go <strong>first</strong> in the list, before the main parent, so that their methods win if both define the same name. Keep multiple inheritance to mixins like this: deep families with several full parents are hard to follow, and Day 5 shows a simpler alternative.</p>
+<h2 id="the-mro-and-super">The MRO and super()</h2>
+<p>Every class has one search order, its <strong>method resolution order</strong> (MRO), in <code>C.__mro__</code> (or <code>C.mro()</code>). Python builds it so that:</p>
+<ol>
+<li>a class comes before its parents;</li>
+<li>parents keep the order they&rsquo;re listed in;</li>
+<li>each class appears once, even if it&rsquo;s reachable two ways.</li>
+</ol>
+<p>The third rule matters in a <strong>diamond</strong>, where two parents share a grandparent:</p>
+<div class="pc pc-predict" data-kind="predict" data-id="w030d3-p7"><textarea class="pc-src pc-code" hidden>class Base:
+    def __init__(self):
+        print(&quot;Base&quot;)
+
+class Left(Base):
+    def __init__(self):
+        print(&quot;Left&quot;)
+        super().__init__()
+
+class Right(Base):
+    def __init__(self):
+        print(&quot;Right&quot;)
+        super().__init__()
+
+class Both(Left, Right):
+    def __init__(self):
+        print(&quot;Both&quot;)
+        super().__init__()
+
+Both()
+print([cls.__name__ for cls in Both.__mro__])</textarea></div>
+<p>Look at <code>Left</code>: its <code>super().__init__()</code> ran <strong><code>Right</code></strong>&rsquo;s <code>__init__</code>, though <code>Right</code> isn&rsquo;t <code>Left</code>&rsquo;s parent. That&rsquo;s because <code>super()</code> doesn&rsquo;t mean &ldquo;my parent&rdquo;. It means <strong>the next class in the MRO of the object being built</strong>. For a <code>Both</code> object that order is <code>Both, Left, Right, Base, object</code>, so after <code>Left</code> comes <code>Right</code>. Each <code>__init__</code> runs exactly once, and <code>Base</code> runs last.</p>
+<p>That&rsquo;s also why calling a parent by name (<code>Base.__init__(self)</code>) causes trouble with several parents: in a diamond, <code>Left</code> and <code>Right</code> would each call <code>Base.__init__</code> directly, and it would run twice. With <code>super()</code> everywhere, every class gets one turn.</p>
+<p>Because <code>super()</code> follows the MRO, a mixin can extend a method of a class it doesn&rsquo;t even inherit from:</p>
+<div class="pc pc-example" data-kind="example" data-id="w030d3-e8"><textarea class="pc-src pc-code" hidden>class Account:
+    def __init__(self, balance=0):
+        self.balance = balance
+
+    def withdraw(self, amount):
+        if amount &gt; self.balance:
+            raise ValueError(&quot;not enough money&quot;)
+        self.balance -= amount
+        return self.balance
+
+class AuditMixin:
+    def withdraw(self, amount):
+        left = super().withdraw(amount)             # the next class in the MRO: Account
+        print(f&quot;audit: took {amount}, {left} left&quot;)
+        return left
+
+class AuditedAccount(AuditMixin, Account):
+    pass
+
+a = AuditedAccount(500)
+a.withdraw(120)
+print([cls.__name__ for cls in AuditedAccount.__mro__])</textarea></div>
+<p><code>AuditMixin</code>&rsquo;s only parent is <code>object</code>, which has no <code>withdraw</code>. But in an <code>AuditedAccount</code>, the class after <code>AuditMixin</code> is <code>Account</code>, so that&rsquo;s where <code>super().withdraw</code> goes.</p>
+<p>Not every order can be built. If the rules contradict each other, Python refuses to create the class:</p>
+<div class="pc pc-example" data-kind="example" data-id="w030d3-e9"><textarea class="pc-src pc-code" hidden>class Item:
+    pass
+
+class Book(Item):
+    pass
+
+class Odd(Item, Book):      # Item first, but Book must come before its parent Item
+    pass</textarea></div>
+<h2 id="name-mangling-at-last">Name mangling, at last</h2>
+<p>Week 29, Day 5 said that double-underscore names exist to stop a child and its parent clashing. Here&rsquo;s the clash. Both classes below use <code>_count</code> for their own private purposes:</p>
+<div class="pc pc-predict" data-kind="predict" data-id="w030d3-p10"><textarea class="pc-src pc-code" hidden>class Counter:
+    def __init__(self):
+        self._count = 0
+
+    def tick(self):
+        self._count += 1
+        return self._count
+
+class PageCounter(Counter):
+    def __init__(self, first_page):
+        super().__init__()
+        self._count = first_page          # meant for the child&#x27;s own use
+
+p = PageCounter(100)
+print(p.tick(), p.tick())</textarea></div>
+<p>The child&rsquo;s <code>_count</code> and the parent&rsquo;s are the same attribute on the same object, so the child&rsquo;s starting page wiped out the parent&rsquo;s tally. If the parent had written <code>self.__count</code>, Python would have stored it as <code>_Counter__count</code>, and a child writing <code>self.__count</code> would get <code>_PageCounter__count</code>: two separate attributes.</p>
+<div class="pc pc-example" data-kind="example" data-id="w030d3-e11"><textarea class="pc-src pc-code" hidden>class Counter:
+    def __init__(self):
+        self.__count = 0
+
+    def tick(self):
+        self.__count += 1
+        return self.__count
+
+class PageCounter(Counter):
+    def __init__(self, first_page):
+        super().__init__()
+        self.__count = first_page
+
+    def page(self):
+        return self.__count
+
+p = PageCounter(100)
+print(p.tick(), p.tick(), p.page())
+print(sorted(vars(p)))</textarea></div>
+<p>That&rsquo;s the whole purpose of mangling. Most classes are fine with a single underscore; use two for internal attributes of a class that other people will subclass without reading its code.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A good override keeps the parent&rsquo;s arguments and kind of result, so any code that works with the parent works with the child. A parent&rsquo;s method that calls <code>self.hook()</code> runs the child&rsquo;s version, so a parent can lay out a job and let children fill in steps. With several parents, Python searches the MRO (<code>C.__mro__</code>): each class before its parents, parents in the listed order, each class once. <code>super()</code> means &ldquo;the next class in the MRO&rdquo;, which runs every <code>__init__</code> once in a diamond and lets mixins (listed first) extend the main class. Double-underscore names are mangled with the class&rsquo;s name, so a parent&rsquo;s and a child&rsquo;s internals can&rsquo;t clash.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w030d3-notices" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Notices</div><div class="pc-prompt"><p><code>Notice</code> renders as <code>[i] text</code>. Write <code>Caution</code>, a <code>Notice</code> whose icon is <code>!</code>, and <code>Closure</code>, a <code>Notice</code> whose icon is <code>X</code> and whose whole rendered line is in capitals: <code>[X] LIBRARY SHUT ON MONDAY</code>. Override <code>icon</code> in both; <code>Closure</code> also extends <code>render</code> with <code>super()</code>. Don&rsquo;t change <code>Notice</code>.</p></div><textarea class="pc-src pc-code" hidden>class Notice:
+    def __init__(self, text):
+        self.text = text
+
+    def icon(self):
+        return &quot;i&quot;
+
+    def render(self):
+        return f&quot;[{self.icon()}] {self.text}&quot;
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_render():
+    &quot;rendering&quot;
+    N, Ca, Cl = ns[&quot;Notice&quot;], ns[&quot;Caution&quot;], ns[&quot;Closure&quot;]
+    assert N(&quot;Open at 9&quot;).render() == &quot;[i] Open at 9&quot;
+    assert Ca(&quot;Wet floor&quot;).render() == &quot;[!] Wet floor&quot;
+    assert Cl(&quot;Library shut on Monday&quot;).render() == &quot;[X] LIBRARY SHUT ON MONDAY&quot;
+    assert issubclass(Ca, N) and issubclass(Cl, N) and &quot;render&quot; not in vars(Ca)
+    assert Cl(&quot;a&quot;).icon() == &quot;X&quot; and Ca(&quot;a&quot;).icon() == &quot;!&quot;
+    assert &quot;super()&quot; in source, &quot;Closure.render should use super()&quot;</textarea><textarea class="pc-src pc-solution" hidden>class Notice:
+    def __init__(self, text):
+        self.text = text
+
+    def icon(self):
+        return &quot;i&quot;
+
+    def render(self):
+        return f&quot;[{self.icon()}] {self.text}&quot;
+
+class Caution(Notice):
+    def icon(self):
+        return &quot;!&quot;
+
+class Closure(Notice):
+    def icon(self):
+        return &quot;X&quot;
+
+    def render(self):
+        return super().render().upper()</textarea><template class="pc-src pc-hint"><code>Closure.render</code> returns <code>super().render().upper()</code>.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w030d3-exporters" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Exporters</div><div class="pc-prompt"><p><code>Exporter.export(columns, rows)</code> lays out a table: the header lines from <code>header(columns)</code>, then one line per row from <code>line(row)</code>. Write two children that fill in the hooks:</p>
+<ul>
+<li><code>CsvExporter</code>: the header is one line of column names joined by commas; each row is its values joined by commas.</li>
+<li><code>MarkdownExporter</code>: the header is two lines, <code>| name | price |</code> and <code>|---|---|</code> (one <code>---|</code> per column); each row is like <code>| Bread | 135 |</code>.</li>
+</ul>
+<p>Don&rsquo;t override <code>export</code>.</p></div><textarea class="pc-src pc-code" hidden>class Exporter:
+    def export(self, columns, rows):
+        lines = self.header(columns) + [self.line(row) for row in rows]
+        return &quot;\n&quot;.join(lines)
+
+    def header(self, columns):
+        return []
+
+    def line(self, row):
+        raise NotImplementedError(&quot;children must define line()&quot;)
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_csv():
+    &quot;CSV&quot;
+    C = ns[&quot;CsvExporter&quot;]
+    assert C().export([&quot;name&quot;, &quot;price&quot;], [(&quot;Bread&quot;, 135), (&quot;Milk&quot;, 95)]) == &quot;name,price\nBread,135\nMilk,95&quot;
+    assert C().export([&quot;a&quot;], []) == &quot;a&quot;
+def test_markdown():
+    &quot;Markdown&quot;
+    M = ns[&quot;MarkdownExporter&quot;]
+    got = M().export([&quot;name&quot;, &quot;price&quot;], [(&quot;Bread&quot;, 135)])
+    assert got == &quot;| name | price |\n|---|---|\n| Bread | 135 |&quot;, f&quot;got {got!r}&quot;
+    assert M().export([&quot;x&quot;, &quot;y&quot;, &quot;z&quot;], [(1, 2, 3)]).split(&quot;\n&quot;)[1] == &quot;|---|---|---|&quot;
+def test_family():
+    &quot;hooks only&quot;
+    E, C, M = ns[&quot;Exporter&quot;], ns[&quot;CsvExporter&quot;], ns[&quot;MarkdownExporter&quot;]
+    assert issubclass(C, E) and issubclass(M, E)
+    assert &quot;export&quot; not in vars(C) and &quot;export&quot; not in vars(M), &quot;inherit export&quot;
+    try:
+        E().export([&quot;a&quot;], [(1,)])
+        assert False, &quot;Exporter itself should still raise NotImplementedError&quot;
+    except NotImplementedError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>class Exporter:
+    def export(self, columns, rows):
+        lines = self.header(columns) + [self.line(row) for row in rows]
+        return &quot;\n&quot;.join(lines)
+
+    def header(self, columns):
+        return []
+
+    def line(self, row):
+        raise NotImplementedError(&quot;children must define line()&quot;)
+
+class CsvExporter(Exporter):
+    def header(self, columns):
+        return [&quot;,&quot;.join(columns)]
+
+    def line(self, row):
+        return &quot;,&quot;.join(str(v) for v in row)
+
+class MarkdownExporter(Exporter):
+    def header(self, columns):
+        return [self.line(columns), &quot;|&quot; + &quot;---|&quot; * len(columns)]
+
+    def line(self, row):
+        return &quot;| &quot; + &quot; | &quot;.join(str(v) for v in row) + &quot; |&quot;</textarea><template class="pc-src pc-hint">Rows can hold numbers, so turn each value into a string first: <code>",".join(str(v) for v in row)</code>. <code>header</code> must return a <strong>list</strong> of lines.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w030d3-mixins" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Two mixins</div><div class="pc-prompt"><p>Write two mixins that work with any class whose attributes are simple values:</p>
+<ul>
+<li><code>ReprMixin</code> gives <code>__repr__</code> in the form <code>Train(code='1A23', to='York')</code>: the class name, then each attribute in the order it was set, as <code>name=repr(value)</code>, separated by <code>,</code>.</li>
+<li><code>EqMixin</code> gives <code>__eq__</code>: equal when the other object has <strong>exactly</strong> the same class and the same attributes; <code>NotImplemented</code> otherwise.</li>
+</ul>
+<p>Then write <code>Train(code, to)</code> using both mixins.</p></div><textarea class="pc-src pc-code" hidden>class ReprMixin:
+    ___
+
+class EqMixin:
+    ___
+
+class Train(___):
+    def __init__(self, code, to):
+        self.code = code
+        self.to = to</textarea><textarea class="pc-src pc-tests" hidden>def test_train():
+    &quot;trains&quot;
+    T = ns[&quot;Train&quot;]
+    assert repr(T(&quot;1A23&quot;, &quot;York&quot;)) == &quot;Train(code=&#x27;1A23&#x27;, to=&#x27;York&#x27;)&quot;, f&quot;got {T(&#x27;1A23&#x27;, &#x27;York&#x27;)!r}&quot;
+    assert T(&quot;1A23&quot;, &quot;York&quot;) == T(&quot;1A23&quot;, &quot;York&quot;) and T(&quot;1A23&quot;, &quot;York&quot;) != T(&quot;1A23&quot;, &quot;Leeds&quot;)
+    assert T(&quot;1A23&quot;, &quot;York&quot;).__eq__(&quot;1A23&quot;) is NotImplemented
+def test_other():
+    &quot;mixins on another class&quot;
+    R, E = ns[&quot;ReprMixin&quot;], ns[&quot;EqMixin&quot;]
+    class Stop(R, E):
+        def __init__(self, name, mins):
+            self.name = name
+            self.mins = mins
+    class Other(R, E):
+        def __init__(self, name, mins):
+            self.name = name
+            self.mins = mins
+    assert repr(Stop(&quot;Kano&quot;, 5)) == &quot;Stop(name=&#x27;Kano&#x27;, mins=5)&quot;
+    assert Stop(&quot;a&quot;, 1) == Stop(&quot;a&quot;, 1) and Stop(&quot;a&quot;, 1) != Other(&quot;a&quot;, 1), &quot;different classes aren&#x27;t equal&quot;
+    assert repr(R()) == &quot;ReprMixin()&quot;</textarea><textarea class="pc-src pc-solution" hidden>class ReprMixin:
+    def __repr__(self):
+        parts = &quot;, &quot;.join(f&quot;{k}={v!r}&quot; for k, v in vars(self).items())
+        return f&quot;{type(self).__name__}({parts})&quot;
+
+class EqMixin:
+    def __eq__(self, other):
+        if type(other) is not type(self):
+            return NotImplemented
+        return vars(self) == vars(other)
+
+class Train(ReprMixin, EqMixin):
+    def __init__(self, code, to):
+        self.code = code
+        self.to = to</textarea><template class="pc-src pc-hint"><code>vars(self)</code> is a dictionary of the attributes in the order they were set. For equality, <code>type(other) is not type(self)</code> means <code>NotImplemented</code>.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w030d3-logmix" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A logging mixin</div><div class="pc-prompt"><p>Write <code>LogMixin</code>, which records successful withdrawals and deposits in a list <code>self.log</code> as strings like <code>"withdraw 30"</code> and <code>"deposit 50"</code>. Its methods extend the next class in the MRO with <code>super()</code>, and only record <strong>after</strong> the call succeeds. Give it an <code>__init__</code> that passes every argument on (<code>def __init__(self, *args, **kwargs)</code> and <code>super().__init__(*args, **kwargs)</code>) and then makes the empty log. Then write <code>LoggedAccount</code>, using <code>LogMixin</code> and <code>Account</code>, with an empty body.</p></div><textarea class="pc-src pc-code" hidden>class Account:
+    def __init__(self, owner, balance=0):
+        self.owner = owner
+        self.balance = balance
+
+    def withdraw(self, amount):
+        if amount &gt; self.balance:
+            raise ValueError(&quot;not enough money&quot;)
+        self.balance -= amount
+        return self.balance
+
+    def deposit(self, amount):
+        self.balance += amount
+        return self.balance
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_log():
+    &quot;logging&quot;
+    L = ns[&quot;LoggedAccount&quot;]
+    a = L(&quot;Tunde&quot;, balance=100)
+    assert a.withdraw(30) == 70 and a.deposit(50) == 120
+    try:
+        a.withdraw(500)
+        assert False, &quot;the account should still refuse&quot;
+    except ValueError:
+        pass
+    assert a.log == [&quot;withdraw 30&quot;, &quot;deposit 50&quot;], f&quot;log is {a.log}&quot;
+    assert a.owner == &quot;Tunde&quot; and L(&quot;x&quot;).log == [] and L(&quot;x&quot;).balance == 0
+def test_mro():
+    &quot;the class order&quot;
+    names = [c.__name__ for c in ns[&quot;LoggedAccount&quot;].__mro__]
+    assert names == [&quot;LoggedAccount&quot;, &quot;LogMixin&quot;, &quot;Account&quot;, &quot;object&quot;], f&quot;MRO is {names}&quot;
+    assert &quot;withdraw&quot; not in vars(ns[&quot;LoggedAccount&quot;])</textarea><textarea class="pc-src pc-solution" hidden>class Account:
+    def __init__(self, owner, balance=0):
+        self.owner = owner
+        self.balance = balance
+
+    def withdraw(self, amount):
+        if amount &gt; self.balance:
+            raise ValueError(&quot;not enough money&quot;)
+        self.balance -= amount
+        return self.balance
+
+    def deposit(self, amount):
+        self.balance += amount
+        return self.balance
+
+class LogMixin:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.log = []
+
+    def withdraw(self, amount):
+        left = super().withdraw(amount)
+        self.log.append(f&quot;withdraw {amount}&quot;)
+        return left
+
+    def deposit(self, amount):
+        result = super().deposit(amount)
+        self.log.append(f&quot;deposit {amount}&quot;)
+        return result
+
+class LoggedAccount(LogMixin, Account):
+    pass</textarea><template class="pc-src pc-hint"><code>withdraw</code> in the mixin is <code>left = super().withdraw(amount)</code>, then append to <code>self.log</code>, then <code>return left</code>.</template></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w030d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The mixin that never shouts</div><div class="pc-prompt"><p><code>LoudGreeter</code> should print <code>HELLO, AMARA!</code> but prints <code>Hello, Amara</code>. The classes are right; fix the order of the parents.</p></div><textarea class="pc-src pc-code" hidden>class Greeter:
+    def greet(self, name):
+        return f&quot;Hello, {name}&quot;
+
+class ShoutMixin:
+    def greet(self, name):
+        return super().greet(name).upper() + &quot;!&quot;
+
+class LoudGreeter(Greeter, ShoutMixin):
+    pass
+
+print(LoudGreeter().greet(&quot;Amara&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;shouting&quot;
+    expect_output(&quot;HELLO, AMARA!&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Greeter:
+    def greet(self, name):
+        return f&quot;Hello, {name}&quot;
+
+class ShoutMixin:
+    def greet(self, name):
+        return super().greet(name).upper() + &quot;!&quot;
+
+class LoudGreeter(ShoutMixin, Greeter):
+    pass
+
+print(LoudGreeter().greet(&quot;Amara&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w030d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Registered twice</div><div class="pc-prompt"><p>Each new <code>Kit</code> should be registered once, so this should print <code>1</code>, but it prints <code>2</code>. Fix it without changing <code>Device</code>.</p></div><textarea class="pc-src pc-code" hidden>class Device:
+    registered = 0
+
+    def __init__(self):
+        Device.registered += 1
+
+class Phone(Device):
+    def __init__(self):
+        Device.__init__(self)
+        self.can_call = True
+
+class Camera(Device):
+    def __init__(self):
+        Device.__init__(self)
+        self.can_film = True
+
+class Kit(Phone, Camera):
+    def __init__(self):
+        Phone.__init__(self)
+        Camera.__init__(self)
+
+k = Kit()
+print(Device.registered)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;registered once&quot;
+    expect_output(&quot;1&quot;)
+    k = ns[&quot;Kit&quot;]()
+    assert k.can_call and k.can_film, &quot;a Kit can still call and film&quot;</textarea><textarea class="pc-src pc-solution" hidden>class Device:
+    registered = 0
+
+    def __init__(self):
+        Device.registered += 1
+
+class Phone(Device):
+    def __init__(self):
+        super().__init__()
+        self.can_call = True
+
+class Camera(Device):
+    def __init__(self):
+        super().__init__()
+        self.can_film = True
+
+class Kit(Phone, Camera):
+    def __init__(self):
+        super().__init__()
+
+k = Kit()
+print(Device.registered)</textarea><template class="pc-src pc-hint">Change every hard-coded parent call to <code>super().__init__()</code>. <code>Kit</code> then needs only one call.</template></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w030d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The lost total</div><div class="pc-prompt"><p>A <code>Timer</code> adds up seconds in <code>_total</code>. <code>LapTimer</code> adds a lap count, but the total comes out wrong: it should print <code>90 2</code>, not <code>2 2</code>. Fix the clash so both values survive. Make the fix inside <code>Timer</code> with name mangling, so that whoever writes the next subclass can&rsquo;t make the same mistake.</p></div><textarea class="pc-src pc-code" hidden>class Timer:
+    def __init__(self):
+        self._total = 0
+
+    def add(self, seconds):
+        self._total += seconds
+
+    def total(self):
+        return self._total
+
+class LapTimer(Timer):
+    def __init__(self):
+        super().__init__()
+        self.laps = 0
+
+    def lap(self, seconds):
+        self.add(seconds)
+        self.laps += 1
+        self._total = self.laps
+
+t = LapTimer()
+t.lap(40)
+t.lap(50)
+print(t.total(), t.laps)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;both values&quot;
+    expect_output(&quot;90 2&quot;)
+    t = ns[&quot;Timer&quot;]()
+    t.add(5)
+    assert &quot;_Timer__total&quot; in vars(t), &quot;Timer should keep its total in a name-mangled attribute&quot;</textarea><textarea class="pc-src pc-solution" hidden>class Timer:
+    def __init__(self):
+        self.__total = 0
+
+    def add(self, seconds):
+        self.__total += seconds
+
+    def total(self):
+        return self.__total
+
+class LapTimer(Timer):
+    def __init__(self):
+        super().__init__()
+        self.laps = 0
+
+    def lap(self, seconds):
+        self.add(seconds)
+        self.laps += 1
+        self._total = self.laps
+
+t = LapTimer()
+t.lap(40)
+t.lap(50)
+print(t.total(), t.laps)</textarea></div>
+<div class="parsons" data-id="w030d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A timestamp mixin</div><div class="pc-prompt"><p>Arrange the lines so that <code>StampedNote</code> uses a mixin that extends <code>Note.text</code> by adding the day. One line is a trap.</p></div><script type="application/json">{"lines": ["class Note:", "    def __init__(self, body, day):", "        self.body, self.day = body, day", "    def text(self):", "        return self.body", "class DayMixin:", "    def text(self):", "        return f\"{self.day}: {super().text()}\"", "class StampedNote(DayMixin, Note):", "    pass"], "distractors": ["class StampedNote(Note, DayMixin):"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w030d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>class A:
+    def who(self):
+        return &quot;A&quot;
+
+class B(A):
+    def who(self):
+        return &quot;B&quot; + super().who()
+
+class C(A):
+    def who(self):
+        return &quot;C&quot; + super().who()
+
+class D(B, C):
+    pass
+
+class E(C, B):
+    def who(self):
+        return &quot;E&quot;
+
+p = ___   # D().who()
+q = ___   # [k.__name__ for k in D.__mro__]
+r = ___   # E().who()
+s = ___   # [k.__name__ for k in E.__mro__][1]
+t = ___   # issubclass(D, C)</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;BCA&quot;, &quot;p&quot;
+    assert q == [&quot;D&quot;, &quot;B&quot;, &quot;C&quot;, &quot;A&quot;, &quot;object&quot;], &quot;q&quot;
+    assert (r, s, t) == (&quot;E&quot;, &quot;C&quot;, True)</textarea><textarea class="pc-src pc-solution" hidden>class A:
+    def who(self):
+        return &quot;A&quot;
+
+class B(A):
+    def who(self):
+        return &quot;B&quot; + super().who()
+
+class C(A):
+    def who(self):
+        return &quot;C&quot; + super().who()
+
+class D(B, C):
+    pass
+
+class E(C, B):
+    def who(self):
+        return &quot;E&quot;
+
+p = &quot;BCA&quot;
+q = [&quot;D&quot;, &quot;B&quot;, &quot;C&quot;, &quot;A&quot;, &quot;object&quot;]
+r = &quot;E&quot;
+s = &quot;C&quot;
+t = True</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w030d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "A parent&rsquo;s render() calls self.body(). A child overrides body. What runs when render() is called on a child?", "answer": 1, "explain": "self is the child, so the search finds the child&rsquo;s body first.", "options": ["The parent&rsquo;s body", "The child&rsquo;s body", "Both", "An error"]}, {"type": "mc", "q": "Which override is safe?", "answer": 1, "explain": "Code that works with the parent must keep working with the child.", "options": ["One that adds a new required argument", "One that takes the same arguments and returns the same kind of thing", "One that returns a string where the parent returned a number", "One that raises for inputs the parent accepted"]}, {"type": "mc", "q": "In class Frog(Walker, Swimmer), both parents define move(). Which runs?", "answer": 1, "explain": "Parents keep the order they&rsquo;re listed in.", "options": ["Swimmer&rsquo;s", "Walker&rsquo;s, because it&rsquo;s listed first", "Both", "Python raises an error"]}, {"type": "mc", "q": "What is a mixin?", "answer": 1, "explain": "List it before the main parent.", "options": ["A class that can&rsquo;t have children", "A small class that adds one ability to other classes and isn&rsquo;t used on its own", "A class with two <strong>init</strong> methods", "Another name for a subclass"]}, {"type": "mc", "q": "What does super() mean, exactly?", "answer": 1, "explain": "In a diamond, Left&rsquo;s super() can lead to Right.", "options": ["The parent class", "The next class in the MRO of the object&rsquo;s class", "The object class", "The first class defined in the file"]}, {"type": "mc", "q": "In a diamond Both(Left, Right), with Left and Right both inheriting from Base, how many times does Base.<strong>init</strong> run if every class uses super()?", "answer": 1, "explain": "Each class appears once in the MRO.", "options": ["Never", "Once", "Twice", "Three times"]}, {"type": "output", "q": "What does this print?", "answer": "D C B A object", "explain": "Each class before its parents, parents in the listed order.", "code": "class A: pass\nclass B(A): pass\nclass C(A): pass\nclass D(C, B): pass\nprint(\" \".join(k.__name__ for k in D.__mro__))"}, {"type": "mc", "q": "Why does class Odd(Item, Book), where Book inherits from Item, fail?", "answer": 1, "explain": "Python can&rsquo;t build a consistent MRO.", "options": ["Two parents aren&rsquo;t allowed", "Item must come before Book by the listed order, but after it as Book&rsquo;s parent", "Book isn&rsquo;t defined", "It doesn&rsquo;t fail"]}, {"type": "mc", "q": "Inside class Counter, what name does self.__count become?", "answer": 2, "explain": "So a child&rsquo;s self.__count becomes _Child__count, a different attribute.", "options": ["__count", "_count", "_Counter__count", "Counter.count"]}, {"type": "mc", "q": "When is a double-underscore attribute worth using?", "answer": 1, "explain": "A single underscore is enough for most classes.", "options": ["Always", "For internals of a class that others will subclass without reading its code", "For security", "For public attributes"]}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w030d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: delivery options</div><div class="pc-prompt"><p>A shop offers deliveries with optional extras. Build them with a base class, children for the services, and mixins for the extras.</p>
+<ul>
+<li><code>Delivery(grams)</code>: <code>grams</code> must be an <code>int</code> above 0, otherwise <code>ValueError</code>. Class attributes <code>BASE = 300</code> and <code>PER_KG = 100</code>. <code>kg()</code> is the weight in whole kilograms, rounded <strong>up</strong> (1 to 1000 grams is 1, 1001 is 2). <code>cost()</code> is <code>BASE + PER_KG * kg()</code>. <code>extras()</code> returns <code>[]</code>. <code>describe()</code> returns for example <code>"NextDay 1kg: 850p"</code>, or with extras <code>"SecureNextDay 3kg: 1550p (insured, signed for)"</code>: the class name, the kilograms, the cost, and the extras in brackets joined by <code>,</code> if there are any.</li>
+<li><code>Standard(Delivery)</code> keeps the base prices. <code>NextDay(Delivery)</code> has <code>BASE = 700</code> and <code>PER_KG = 150</code>.</li>
+<li><code>InsuredMixin</code> adds 250 to the cost and <code>"insured"</code> to the extras; <code>SignedMixin</code> adds 150 and <code>"signed for"</code>. Each extends <code>cost()</code> and <code>extras()</code> with <code>super()</code>, adding its own extra to the <strong>end</strong> of the list.</li>
+<li><code>InsuredStandard</code> (insured standard delivery) and <code>SecureNextDay</code> (next day, insured and signed for, with extras in the order <code>insured, signed for</code>). Their bodies are empty: the order of the parents does the work.</li>
+</ul>
+<p><code>describe</code> is written once, in <code>Delivery</code>.</p></div><textarea class="pc-src pc-code" hidden>import math
+
+class Delivery:
+    BASE = 300
+    PER_KG = 100
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_base():
+    &quot;the base and services&quot;
+    D, S, N = ns[&quot;Delivery&quot;], ns[&quot;Standard&quot;], ns[&quot;NextDay&quot;]
+    assert [D(g).kg() for g in [1, 1000, 1001, 2500]] == [1, 1, 2, 3]
+    assert S(800).cost() == 400 and N(1000).cost() == 850 and N(2001).cost() == 1150
+    assert N(1000).describe() == &quot;NextDay 1kg: 850p&quot; and S(5).extras() == []
+    for bad in [0, -10, 2.5, &quot;100&quot;]:
+        try:
+            D(bad)
+            assert False, f&quot;Delivery({bad!r}) should raise ValueError&quot;
+        except ValueError:
+            pass
+def test_extras():
+    &quot;extras&quot;
+    IS, SN = ns[&quot;InsuredStandard&quot;], ns[&quot;SecureNextDay&quot;]
+    assert IS(1500).cost() == 750 and IS(1500).extras() == [&quot;insured&quot;]
+    assert IS(1500).describe() == &quot;InsuredStandard 2kg: 750p (insured)&quot;
+    s = SN(2500)
+    assert s.cost() == 1550 and s.extras() == [&quot;insured&quot;, &quot;signed for&quot;], f&quot;extras are {s.extras()}&quot;
+    assert s.describe() == &quot;SecureNextDay 3kg: 1550p (insured, signed for)&quot;, f&quot;got {s.describe()!r}&quot;
+def test_design():
+    &quot;the design&quot;
+    D, S, N, IM, SM, IS, SN = (ns[n] for n in [&quot;Delivery&quot;, &quot;Standard&quot;, &quot;NextDay&quot;, &quot;InsuredMixin&quot;, &quot;SignedMixin&quot;, &quot;InsuredStandard&quot;, &quot;SecureNextDay&quot;])
+    assert issubclass(IS, S) and issubclass(IS, IM) and issubclass(SN, N) and issubclass(SN, IM) and issubclass(SN, SM)
+    assert not issubclass(IM, D) and not issubclass(SM, D), &quot;mixins shouldn&#x27;t inherit from Delivery&quot;
+    for cls in (S, N, IS, SN):
+        assert &quot;describe&quot; not in vars(cls) and &quot;cost&quot; not in vars(cls), f&quot;{cls.__name__} should inherit describe and cost&quot;
+    for cls in (IS, SN):
+        assert all(k.startswith(&quot;__&quot;) for k in vars(cls)), f&quot;{cls.__name__}&#x27;s body should be empty&quot;</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+class Delivery:
+    BASE = 300
+    PER_KG = 100
+
+    def __init__(self, grams):
+        if not isinstance(grams, int) or isinstance(grams, bool) or grams &lt;= 0:
+            raise ValueError(f&quot;weight must be a whole number of grams above 0, not {grams!r}&quot;)
+        self.grams = grams
+
+    def kg(self):
+        return math.ceil(self.grams / 1000)
+
+    def cost(self):
+        return self.BASE + self.PER_KG * self.kg()
+
+    def extras(self):
+        return []
+
+    def describe(self):
+        text = f&quot;{type(self).__name__} {self.kg()}kg: {self.cost()}p&quot;
+        if self.extras():
+            text += f&quot; ({&#x27;, &#x27;.join(self.extras())})&quot;
+        return text
+
+class Standard(Delivery):
+    pass
+
+class NextDay(Delivery):
+    BASE = 700
+    PER_KG = 150
+
+class InsuredMixin:
+    def cost(self):
+        return super().cost() + 250
+
+    def extras(self):
+        return super().extras() + [&quot;insured&quot;]
+
+class SignedMixin:
+    def cost(self):
+        return super().cost() + 150
+
+    def extras(self):
+        return super().extras() + [&quot;signed for&quot;]
+
+class InsuredStandard(InsuredMixin, Standard):
+    pass
+
+class SecureNextDay(SignedMixin, InsuredMixin, NextDay):
+    pass</textarea><template class="pc-src pc-hint"><code>kg()</code> is <code>math.ceil(self.grams / 1000)</code>. In <code>InsuredMixin</code>, <code>cost()</code> returns <code>super().cost() + 250</code> and <code>extras()</code> returns <code>super().extras() + ["insured"]</code>.</template><template class="pc-src pc-hint">For <code>SecureNextDay</code>, think about the MRO: the mixin whose <code>extras</code> runs <strong>last</strong> adds to the end. With <code>SignedMixin</code> first, its <code>super().extras()</code> gets the list from <code>InsuredMixin</code>, then adds <code>"signed for"</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Pick any class family from this week and print its <code>__mro__</code>; then predict, before running, which class&rsquo;s method runs for each call. Tomorrow: polymorphism and duck typing, where one loop handles many kinds of object, and Python cares what an object can do rather than what it inherits from.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w030d2.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w030d3", "week": 30, "day": 3, "title": "Overriding and the MRO", "exercises": [{"id": "w030d3-notices", "title": "Notices", "points": 10}, {"id": "w030d3-exporters", "title": "Exporters", "points": 15}, {"id": "w030d3-mixins", "title": "Two mixins", "points": 15}, {"id": "w030d3-logmix", "title": "A logging mixin", "points": 15}, {"id": "w030d3-bug1", "title": "The mixin that never shouts", "points": 10}, {"id": "w030d3-bug2", "title": "Registered twice", "points": 10}, {"id": "w030d3-bug3", "title": "The lost total", "points": 10}, {"id": "w030d3-trace", "title": "Predict them", "points": 10}, {"id": "w030d3-challenge", "title": "Challenge: delivery options", "points": 25}], "points": 120}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=8fe38f9496"></script>
+</body>
+</html>
