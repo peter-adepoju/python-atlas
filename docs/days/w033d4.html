@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="8fe38f9496">
+<title>Week 33 Day 4: Generics, TypeVar and Callable | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=8fe38f9496">
+<link rel="stylesheet" href="../assets/css/site.css?v=8fe38f9496">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=8fe38f9496"></script>
+<script src="../assets/vendor/codemirror.js?v=8fe38f9496" defer></script>
+<meta name="description" content="Some functions work with any type: first(items) returns the first item of a list of names, numbers or tickets alike. Hinting it as Any would switch checking...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w033d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 33 Day 4: Generics, TypeVar and Callable">
+<meta property="og:description" content="Some functions work with any type: first(items) returns the first item of a list of names, numbers or tickets alike. Hinting it as Any would switch checking...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w033d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-33">Week 33: Type hints</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#what-any-loses" data-sec="what-any-loses">What Any loses</a></li><li><a href="#type-variables" data-sec="type-variables">Type variables</a></li><li><a href="#bounds-and-constraints" data-sec="bounds-and-constraints">Bounds and constraints</a></li><li><a href="#generic-classes" data-sec="generic-classes">Generic classes</a></li><li><a href="#callable" data-sec="callable">Callable</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w033d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-3">Phase 3: Objects and design</a></li><li><a href="../map.html#week-33">Week 33: Type hints</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 33, Day 4</span></p>
+      <h1>Generics, TypeVar and Callable</h1>
+      <div class="day-intro"><p>Some functions work with any type: <code>first(items)</code> returns the first item of a list of names, numbers or tickets alike. Hinting it as <code>Any</code> would switch checking off and lose the connection between what goes in and what comes out. Today&rsquo;s tools keep that connection: type variables say &ldquo;whatever type this is, the result is the same type&rdquo;, generic classes let a <code>Stack</code> of ints be checked as a stack of ints, and <code>Callable</code> describes functions passed as arguments, such as key functions and callbacks. Together they let you write general code without giving up the checker&rsquo;s help.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain why Any loses information, and what a type variable keeps</li><li>Write generic functions with type parameters, in the def f[T] form and the older TypeVar form</li><li>Restrict a type variable with a bound or a set of allowed types</li><li>Write a generic class such as Stack[T], and use it as Stack[int]</li><li>Describe functions passed as arguments with Callable, including generic ones</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="What Any loses: 15 min"></span><span class="plan-seg s0" style="flex:25" title="Type variables: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Bounds and constraints: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Generic classes: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Callable: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">What Any loses</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">Type variables</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Bounds and constraints</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Generic classes</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Callable</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w033d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w033d4.ipynb" download>download it</a>. Exercises today are worth 120 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w033d4-p1"><textarea class="pc-src pc-code" hidden>def first[T](items: list[T]) -&gt; T:
+    return items[0]
+
+print(first([3, 1]), first([&quot;Ada&quot;, &quot;Bo&quot;]))
+print(first.__type_params__, first.__annotations__[&quot;return&quot;])</textarea></div>
+<p><code>first[T]</code> declares a <strong>type parameter</strong> called <code>T</code>, and the hints say: the items are a list of <code>T</code>, and the result is a <code>T</code>. When the program runs, <code>T</code> makes no difference at all (it&rsquo;s just stored, like every hint). To a type checker, it means <code>first(["Ada", "Bo"])</code> returns a <code>str</code> and <code>first([3, 1])</code> returns an <code>int</code>, worked out separately for each call. That&rsquo;s what today is about.</p>
+<h2 id="what-any-loses">What Any loses</h2>
+<p>How would you hint <code>first</code> with what you know so far? <code>list[int]</code> is too narrow; it should work for any list. <code>Any</code> (Day 2) accepts every list, but look at what mypy thinks the result is:</p>
+<pre><code class="language-python">from typing import Any
+
+def first_any(items: list[Any]) -&gt; Any:
+    return items[0]
+
+reveal_type(first_any([&quot;Ada&quot;]))
+</code></pre>
+<pre><code class="language-text">gen.py:6: note: Revealed type is &quot;Any&quot;
+</code></pre>
+<p>The caller put strings in, but gets <code>Any</code> out, so the checker stops checking from there on: <code>first_any(["Ada"]) + 1</code> passes without complaint and crashes when it runs. <code>Any</code> breaks the chain. What <code>first</code> needs to say is &ldquo;the result has the same type as the items, whatever that is&rdquo;.</p>
+<h2 id="type-variables">Type variables</h2>
+<p>A <strong>type variable</strong> stands for &ldquo;some type, the same one everywhere it appears in this signature&rdquo;. Since Python 3.12, you declare one in square brackets after the function&rsquo;s name:</p>
+<pre><code class="language-python">from collections.abc import Sequence
+
+def first[T](items: Sequence[T]) -&gt; T:
+    return items[0]
+
+name = first([&quot;Ada&quot;, &quot;Bo&quot;])
+reveal_type(name)
+total = first([1, 2]) + &quot;x&quot;
+</code></pre>
+<pre><code class="language-text">gen.py:7: note: Revealed type is &quot;str&quot;
+gen.py:8: error: Unsupported operand types for + (&quot;int&quot; and &quot;str&quot;)  [operator]
+</code></pre>
+<p>For each call, mypy works out what <code>T</code> must be from the arguments (<code>str</code> for the first, <code>int</code> for the second) and uses it for the result. Code like this is called <strong>generic</strong>: written once, checked for each type it&rsquo;s used with.</p>
+<p>A signature can have several type variables, each standing for its own type:</p>
+<div class="pc pc-example" data-kind="example" data-id="w033d4-e2"><textarea class="pc-src pc-code" hidden>def invert[K, V](d: dict[K, V]) -&gt; dict[V, K]:
+    return {v: k for k, v in d.items()}
+
+def pair_up[A, B](xs: list[A], ys: list[B]) -&gt; list[tuple[A, B]]:
+    return list(zip(xs, ys))
+
+print(invert({&quot;Ada&quot;: 1, &quot;Bo&quot;: 2}))
+print(pair_up([&quot;Lagos&quot;, &quot;Leeds&quot;], [15.4, 0.8]))</textarea></div>
+<p>To mypy, <code>invert({"Ada": 1})</code> has the type <code>dict[int, str]</code>. The names <code>T</code>, <code>K</code>, <code>V</code> are conventions, like <code>i</code> for a loop counter; longer names are fine.</p>
+<p>Before Python 3.12, type variables were made with <code>typing.TypeVar</code> at the top of the module, and you&rsquo;ll meet this form constantly in existing code:</p>
+<pre><code class="language-python">from typing import TypeVar
+
+T = TypeVar(&quot;T&quot;)
+
+def first(items: Sequence[T]) -&gt; T:
+    return items[0]
+</code></pre>
+<p>Both forms mean the same to a type checker. This course uses the newer one.</p>
+<h2 id="bounds-and-constraints">Bounds and constraints</h2>
+<p>Sometimes &ldquo;any type&rdquo; is too much: the function needs to do something with the values. A <strong>bound</strong> says the type must be a particular type or one of its subclasses (or, for a Protocol, have its methods):</p>
+<div class="pc pc-example" data-kind="example" data-id="w033d4-e3"><textarea class="pc-src pc-code" hidden>from collections.abc import Iterable, Sized
+
+def longest[S: Sized](items: Iterable[S]) -&gt; S | None:
+    best = None
+    for item in items:
+        if best is None or len(item) &gt; len(best):
+            best = item
+    return best
+
+print(longest([&quot;fig&quot;, &quot;plantain&quot;, &quot;yam&quot;]), longest([[1], [1, 2, 3], []]), longest([]))</textarea></div>
+<p>Because <code>S</code> is bound to <code>Sized</code>, mypy accepts <code>len(item)</code>, and the result keeps the caller&rsquo;s own type: a list of strings gives back a <code>str</code>, not just &ldquo;something sized&rdquo;.</p>
+<p>A <strong>constraint</strong> lists the exact types allowed, written as a tuple:</p>
+<div class="pc pc-example" data-kind="example" data-id="w033d4-e4"><textarea class="pc-src pc-code" hidden>def biggest[N: (int, float)](a: N, b: N) -&gt; N:
+    return a if a &gt; b else b
+
+print(biggest(2, 3), biggest(2.5, 1.0))</textarea></div>
+<p>With constraints, <code>T</code> must be exactly one of the listed types for each call, so <code>biggest(2, 3)</code> is an <code>int</code>, and <code>biggest("a", "b")</code> is an error. Bounds are much more common; reach for constraints only when the types really are a short fixed list.</p>
+<h2 id="generic-classes">Generic classes</h2>
+<p>A class can have type parameters too. That&rsquo;s how the built-in collections work: <code>list[int]</code> is the generic class <code>list</code> with its parameter filled in. Your own containers can do the same:</p>
+<div class="pc pc-example" data-kind="example" data-id="w033d4-e5"><textarea class="pc-src pc-code" hidden>class Stack[T]:
+    def __init__(self) -&gt; None:
+        self._items: list[T] = []
+
+    def push(self, item: T) -&gt; None:
+        self._items.append(item)
+
+    def pop(self) -&gt; T:
+        if not self._items:
+            raise IndexError(&quot;pop from an empty stack&quot;)
+        return self._items.pop()
+
+    def __len__(self) -&gt; int:
+        return len(self._items)
+
+plates = Stack[int]()
+plates.push(3)
+plates.push(5)
+print(plates.pop() + 1, len(plates))
+names: Stack[str] = Stack()
+names.push(&quot;Ada&quot;)
+print(names.pop().upper())</textarea></div>
+<p><code>Stack[int]()</code> makes a stack that mypy checks as holding ints (at run time it&rsquo;s an ordinary <code>Stack</code>). So mypy catches this:</p>
+<pre><code class="language-python">s = Stack[int]()
+s.push(&quot;three&quot;)
+</code></pre>
+<pre><code class="language-text">gen.py:2: error: Argument 1 to &quot;push&quot; of &quot;Stack&quot; has incompatible type &quot;str&quot;; expected &quot;int&quot;  [arg-type]
+</code></pre>
+<p>In older code you&rsquo;ll see the same class written <code>class Stack(Generic[T]):</code>, with <code>T</code> made by <code>TypeVar</code> and <code>Generic</code> imported from <code>typing</code>.</p>
+<h2 id="callable">Callable</h2>
+<p>Functions are values (Week 7), so they get hints too. <code>Callable[[int, str], bool]</code> means &ldquo;a function that takes an <code>int</code> and a <code>str</code> and returns a <code>bool</code>&rdquo;: the argument types in a list, then the return type. Import it from <code>collections.abc</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w033d4-e6"><textarea class="pc-src pc-code" hidden>from collections.abc import Callable, Iterable
+
+def apply_twice(f: Callable[[int], int], x: int) -&gt; int:
+    return f(f(x))
+
+def apply_all[T, R](f: Callable[[T], R], items: Iterable[T]) -&gt; list[R]:
+    return [f(item) for item in items]
+
+print(apply_twice(lambda n: n * 3, 2))
+print(apply_all(len, [&quot;fig&quot;, &quot;plantain&quot;]), apply_all(str.upper, [&quot;ada&quot;, &quot;bo&quot;]))</textarea></div>
+<p><code>apply_all</code> combines both ideas: whatever <code>T</code> the function takes must be what the items are, and the result is a list of whatever <code>R</code> it returns. For <code>apply_all(len, ...)</code> mypy works out a <code>list[int]</code>.</p>
+<p>Passing the wrong kind of function is caught like any other wrong argument. Here&rsquo;s mypy&rsquo;s report for <code>apply_twice(str.upper, 3)</code>:</p>
+<pre><code class="language-text">gen.py:9: error: Argument 1 to &quot;apply_twice&quot; has incompatible type &quot;Callable[[str], str]&quot;; expected &quot;Callable[[int], int]&quot;  [arg-type]
+</code></pre>
+<p><code>Callable[..., int]</code> (with three dots) means &ldquo;any arguments, returning an <code>int</code>&rdquo;, for when the arguments don&rsquo;t matter. For callables with keyword arguments or optional parameters, <code>Callable</code> isn&rsquo;t expressive enough; a Protocol with a <code>__call__</code> method (Week 32 and Week 31 combined) describes them exactly.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p><code>Any</code> loses the link between a function&rsquo;s input and output types; a type variable keeps it: <code>def first[T](items: Sequence[T]) -&gt; T</code> (older code: <code>T = TypeVar("T")</code>). Type checkers work out <code>T</code> for each call. Bound a type variable (<code>[S: Sized]</code>) to use its methods, or constrain it to a list of types (<code>[N: (int, float)]</code>). Generic classes (<code>class Stack[T]:</code>, older <code>Generic[T]</code>) are used as <code>Stack[int]</code>, and the parameters make no difference when the program runs. <code>Callable[[A, B], R]</code> describes functions passed as arguments; combine it with type variables for general helpers.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w033d4-generic_funcs" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Generic functions</div><div class="pc-prompt"><p>Write two generic functions with the <code>def f[T]</code> syntax:</p>
+<ul>
+<li><code>last[T](items: Sequence[T]) -&gt; T</code>, the last item, raising <code>IndexError</code> for an empty sequence;</li>
+<li><code>pair_up[A, B](xs: list[A], ys: list[B]) -&gt; list[tuple[A, B]]</code>, pairing items in order; lists of different lengths raise <code>ValueError</code>.</li>
+</ul>
+<p>Import <code>Sequence</code> from <code>collections.abc</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections.abc import Sequence
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_generic():
+    &quot;generic&quot;
+    from typing import get_type_hints as h
+    from collections.abc import Sequence as Seq
+    assert len(last.__type_params__) == 1 and len(pair_up.__type_params__) == 2, &quot;use def last[T] and def pair_up[A, B]&quot;
+    T, = last.__type_params__
+    A, B = pair_up.__type_params__
+    assert h(last) == {&quot;items&quot;: Seq[T], &quot;return&quot;: T}, f&quot;last: {h(last)}&quot;
+    assert h(pair_up) == {&quot;xs&quot;: list[A], &quot;ys&quot;: list[B], &quot;return&quot;: list[tuple[A, B]]}, f&quot;pair_up: {h(pair_up)}&quot;
+    assert last([1, 2, 3]) == 3 and last(&quot;abc&quot;) == &quot;c&quot; and last((None,)) is None
+    assert pair_up([&quot;a&quot;, &quot;b&quot;], [1, 2]) == [(&quot;a&quot;, 1), (&quot;b&quot;, 2)] and pair_up([], []) == []
+    for f in [lambda: last([]), lambda: pair_up([1], [])]:
+        try:
+            f()
+            assert False, &quot;should raise&quot;
+        except (IndexError, ValueError):
+            pass</textarea><textarea class="pc-src pc-solution" hidden>from collections.abc import Sequence
+
+def last[T](items: Sequence[T]) -&gt; T:
+    if not items:
+        raise IndexError(&quot;no items&quot;)
+    return items[-1]
+
+def pair_up[A, B](xs: list[A], ys: list[B]) -&gt; list[tuple[A, B]]:
+    if len(xs) != len(ys):
+        raise ValueError(&quot;lists must be the same length&quot;)
+    return list(zip(xs, ys))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w033d4-queue" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A generic queue</div><div class="pc-prompt"><p>Write a generic class <code>Queue[T]</code> (first in, first out) with fully annotated methods: <code>join(item: T) -&gt; None</code>, <code>serve() -&gt; T</code> (raising <code>IndexError</code> if empty), <code>peek() -&gt; T | None</code> (the next item without removing it, or <code>None</code>), <code>__len__() -&gt; int</code>, and <code>__init__(self) -&gt; None</code>. Keep the items in a <code>collections.deque</code> (Week 20).</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+class Queue[T]:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_queue():
+    &quot;a queue&quot;
+    from typing import get_type_hints as h
+    Q = ns[&quot;Queue&quot;]
+    T, = Q.__type_params__
+    assert h(Q.join) == {&quot;item&quot;: T, &quot;return&quot;: type(None)} and h(Q.serve) == {&quot;return&quot;: T} and h(Q.peek) == {&quot;return&quot;: T | None}
+    assert h(Q.__len__) == {&quot;return&quot;: int} and h(Q.__init__) == {&quot;return&quot;: type(None)}
+    q = Q[str]()
+    q.join(&quot;Ada&quot;)
+    q.join(&quot;Bo&quot;)
+    assert q.peek() == &quot;Ada&quot; and len(q) == 2 and q.serve() == &quot;Ada&quot; and q.serve() == &quot;Bo&quot; and q.peek() is None and len(q) == 0
+    try:
+        q.serve()
+        assert False, &quot;serving an empty queue should raise IndexError&quot;
+    except IndexError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+class Queue[T]:
+    def __init__(self) -&gt; None:
+        self._items: deque[T] = deque()
+
+    def join(self, item: T) -&gt; None:
+        self._items.append(item)
+
+    def serve(self) -&gt; T:
+        if not self._items:
+            raise IndexError(&quot;the queue is empty&quot;)
+        return self._items.popleft()
+
+    def peek(self) -&gt; T | None:
+        return self._items[0] if self._items else None
+
+    def __len__(self) -&gt; int:
+        return len(self._items)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w033d4-callables" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Functions in, functions out</div><div class="pc-prompt"><p>Write these generic functions, with hints using <code>Callable</code> and <code>Iterable</code> from <code>collections.abc</code>:</p>
+<ul>
+<li><code>apply_all[T, R](f: Callable[[T], R], items: Iterable[T]) -&gt; list[R]</code>;</li>
+<li><code>keep[T](test: Callable[[T], bool], items: Iterable[T]) -&gt; list[T]</code>, the items for which <code>test</code> is True;</li>
+<li><code>compose[A, B, C](f: Callable[[A], B], g: Callable[[B], C]) -&gt; Callable[[A], C]</code>, which returns a <strong>new function</strong> that applies <code>f</code> and then <code>g</code>.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>from collections.abc import Callable, Iterable
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_callables():
+    &quot;callables&quot;
+    from typing import get_type_hints as h
+    from collections.abc import Callable as C, Iterable as I
+    T, R = apply_all.__type_params__
+    assert h(apply_all) == {&quot;f&quot;: C[[T], R], &quot;items&quot;: I[T], &quot;return&quot;: list[R]}, f&quot;apply_all: {h(apply_all)}&quot;
+    K, = keep.__type_params__
+    assert h(keep) == {&quot;test&quot;: C[[K], bool], &quot;items&quot;: I[K], &quot;return&quot;: list[K]}
+    A, B, D = compose.__type_params__
+    assert h(compose) == {&quot;f&quot;: C[[A], B], &quot;g&quot;: C[[B], D], &quot;return&quot;: C[[A], D]}
+    assert apply_all(len, [&quot;fig&quot;, &quot;yam&quot;]) == [3, 3] and keep(str.isdigit, [&quot;1&quot;, &quot;a&quot;, &quot;22&quot;]) == [&quot;1&quot;, &quot;22&quot;]
+    shout_len = compose(str.upper, len)
+    assert shout_len(&quot;ada&quot;) == 3 and compose(lambda n: n + 1, str)(41) == &quot;42&quot; and keep(bool, range(3)) == [1, 2]</textarea><textarea class="pc-src pc-solution" hidden>from collections.abc import Callable, Iterable
+
+def apply_all[T, R](f: Callable[[T], R], items: Iterable[T]) -&gt; list[R]:
+    return [f(item) for item in items]
+
+def keep[T](test: Callable[[T], bool], items: Iterable[T]) -&gt; list[T]:
+    return [item for item in items if test(item)]
+
+def compose[A, B, C](f: Callable[[A], B], g: Callable[[B], C]) -&gt; Callable[[A], C]:
+    def both(x: A) -&gt; C:
+        return g(f(x))
+    return both</textarea><template class="pc-src pc-hint"><code>compose</code> defines a small function inside itself, <code>def both(x: A) -&gt; C: return g(f(x))</code>, and returns it (Week 7&rsquo;s closures).</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w033d4-bounded" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Bounded and constrained</div><div class="pc-prompt"><p>Write:</p>
+<ul>
+<li><code>longest[S: Sized](items: Iterable[S]) -&gt; S | None</code>: the first of the longest items, or <code>None</code> if there are none;</li>
+<li><code>clamp[N: (int, float)](value: N, low: N, high: N) -&gt; N</code>: <code>value</code> kept between <code>low</code> and <code>high</code> (raise <code>ValueError</code> if <code>low &gt; high</code>).</li>
+</ul>
+<p>Import <code>Iterable</code> and <code>Sized</code> from <code>collections.abc</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections.abc import Iterable, Sized
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_bounded():
+    &quot;bounds&quot;
+    from collections.abc import Sized as Sz
+    S, = longest.__type_params__
+    N, = clamp.__type_params__
+    assert S.__bound__ is Sz, &quot;S should be bound to Sized&quot;
+    assert N.__constraints__ == (int, float), &quot;N should be constrained to (int, float)&quot;
+    assert longest([&quot;fig&quot;, &quot;yam&quot;, &quot;plantain&quot;, &quot;okra&quot;]) == &quot;plantain&quot; and longest([&quot;ab&quot;, &quot;cd&quot;]) == &quot;ab&quot; and longest([]) is None
+    assert longest([{1}, {1, 2}]) == {1, 2} and clamp(15, 0, 10) == 10 and clamp(-2.5, -1.0, 1.0) == -1.0 and clamp(5, 0, 10) == 5
+    try:
+        clamp(1, 5, 0)
+        assert False, &quot;low &gt; high should raise ValueError&quot;
+    except ValueError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>from collections.abc import Iterable, Sized
+
+def longest[S: Sized](items: Iterable[S]) -&gt; S | None:
+    best = None
+    for item in items:
+        if best is None or len(item) &gt; len(best):
+            best = item
+    return best
+
+def clamp[N: (int, float)](value: N, low: N, high: N) -&gt; N:
+    if low &gt; high:
+        raise ValueError(&quot;low must not be more than high&quot;)
+    return max(low, min(value, high))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w033d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The wrong kind of function</div><div class="pc-prompt"><p>mypy reports <code>Argument 1 to "apply_twice" has incompatible type "Callable[[str], str]"; expected "Callable[[int], int]"  [arg-type]</code>, and the program crashes with a <code>TypeError</code>. The aim is to triple 2 twice, printing <code>18</code>. Fix the call.</p></div><textarea class="pc-src pc-code" hidden>from collections.abc import Callable
+
+def apply_twice(f: Callable[[int], int], x: int) -&gt; int:
+    return f(f(x))
+
+print(apply_twice(str.upper, 2))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;tripled twice&quot;
+    expect_output(&quot;18&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from collections.abc import Callable
+
+def apply_twice(f: Callable[[int], int], x: int) -&gt; int:
+    return f(f(x))
+
+print(apply_twice(lambda n: n * 3, 2))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w033d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A string in a stack of ints</div><div class="pc-prompt"><p>mypy reports <code>Argument 1 to "push" of "Stack" has incompatible type "str"; expected "int"  [arg-type]</code>, and adding up the stack crashes with <code>TypeError</code>. Fix the line mypy points to, so it prints <code>10</code>.</p></div><textarea class="pc-src pc-code" hidden>class Stack[T]:
+    def __init__(self) -&gt; None:
+        self._items: list[T] = []
+
+    def push(self, item: T) -&gt; None:
+        self._items.append(item)
+
+    def total_of(self) -&gt; list[T]:
+        return list(self._items)
+
+boxes = Stack[int]()
+boxes.push(3)
+boxes.push(&quot;three&quot;)
+boxes.push(4)
+print(sum(boxes.total_of()))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the total&quot;
+    expect_output(&quot;10&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Stack[T]:
+    def __init__(self) -&gt; None:
+        self._items: list[T] = []
+
+    def push(self, item: T) -&gt; None:
+        self._items.append(item)
+
+    def total_of(self) -&gt; list[T]:
+        return list(self._items)
+
+boxes = Stack[int]()
+boxes.push(3)
+boxes.push(3)
+boxes.push(4)
+print(sum(boxes.total_of()))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w033d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A key that isn&rsquo;t a name</div><div class="pc-prompt"><p>mypy reports <code>Incompatible return value type (got "Player", expected "str")  [return-value]</code> for <code>by_name</code>, and sorting crashes with <code>TypeError: '&lt;' not supported between instances of 'Player' and 'Player'</code>. Fix <code>by_name</code> so the program prints <code>['Ade', 'Kane', 'Osimhen']</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections.abc import Callable
+from dataclasses import dataclass
+
+@dataclass
+class Player:
+    name: str
+    goals: int
+
+def by_name(p: Player) -&gt; str:
+    return p
+
+def ranked(players: list[Player], key: Callable[[Player], str]) -&gt; list[str]:
+    return [p.name for p in sorted(players, key=key)]
+
+squad = [Player(&quot;Osimhen&quot;, 20), Player(&quot;Ade&quot;, 12), Player(&quot;Kane&quot;, 20)]
+print(ranked(squad, by_name))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;sorted&quot;
+    expect_output(&quot;[&#x27;Ade&#x27;, &#x27;Kane&#x27;, &#x27;Osimhen&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from collections.abc import Callable
+from dataclasses import dataclass
+
+@dataclass
+class Player:
+    name: str
+    goals: int
+
+def by_name(p: Player) -&gt; str:
+    return p.name
+
+def ranked(players: list[Player], key: Callable[[Player], str]) -&gt; list[str]:
+    return [p.name for p in sorted(players, key=key)]
+
+squad = [Player(&quot;Osimhen&quot;, 20), Player(&quot;Ade&quot;, 12), Player(&quot;Kane&quot;, 20)]
+print(ranked(squad, by_name))</textarea></div>
+<div class="parsons" data-id="w033d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A generic lookup</div><div class="pc-prompt"><p>Arrange the lines into a generic function that returns a dictionary&rsquo;s value for a key, or a default of the same type. One line is a trap.</p></div><script type="application/json">{"lines": ["def get_or[K, V](d: dict[K, V], key: K, default: V) -> V:", "    if key in d:", "        return d[key]", "    return default", "print(get_or({\"Ada\": 31}, \"Bo\", 0))"], "distractors": ["def get_or(d: dict[K, V], key: K, default: V) -> V:"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w033d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>from collections.abc import Callable
+
+def twice[T](f: Callable[[T], T], x: T) -&gt; T:
+    return f(f(x))
+
+class Box[T]:
+    def __init__(self, item: T) -&gt; None:
+        self.item = item
+
+p = ___   # twice(lambda s: s + &quot;!&quot;, &quot;hi&quot;)
+q = ___   # twice(abs, -4)
+r = ___   # Box[int](&quot;not an int&quot;).item
+s = ___   # len(twice.__type_params__)
+t = ___   # type(Box[str](&quot;x&quot;)).__name__</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert (p, q, r) == (&quot;hi!!&quot;, 4, &quot;not an int&quot;), &quot;p to r&quot;
+    assert (s, t) == (1, &quot;Box&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from collections.abc import Callable
+
+def twice[T](f: Callable[[T], T], x: T) -&gt; T:
+    return f(f(x))
+
+class Box[T]:
+    def __init__(self, item: T) -&gt; None:
+        self.item = item
+
+p = &quot;hi!!&quot;
+q = 4
+r = &quot;not an int&quot;
+s = 1
+t = &quot;Box&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w033d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What&rsquo;s wrong with hinting a general function as def first(items: list[Any]) -&gt; Any?", "answer": 1, "explain": "A type variable keeps the link between input and output.", "options": ["Nothing", "The result is Any, so checking stops for whatever uses it", "Any isn&rsquo;t allowed in lists", "It&rsquo;s slower"]}, {"type": "mc", "q": "What does T mean in def first<a href=\"items: Sequence[T]\">T</a> -&gt; T?", "answer": 1, "explain": "The checker works out T for each call.", "options": ["The type text", "Some type, the same one wherever T appears in this signature", "Any type, checked separately in each place", "A tuple"]}, {"type": "mc", "q": "How was a type variable made before Python 3.12?", "answer": 0, "explain": "You&rsquo;ll see it in a lot of code.", "options": ["T = TypeVar(&lsquo;T&rsquo;) from typing", "T = type()", "class T: pass", "It wasn&rsquo;t possible"]}, {"type": "mc", "q": "What does the bound in def longest[S: Sized] allow inside the function?", "answer": 1, "explain": "And the result keeps the caller&rsquo;s own type.", "options": ["Nothing extra", "Using len on values of type S, because S must be Sized", "Only lists", "Changing S"]}, {"type": "mc", "q": "How does a constraint like [N: (int, float)] differ from a bound?", "answer": 1, "explain": "Bounds are more common.", "options": ["It doesn&rsquo;t", "N must be exactly one of the listed types", "N can be any subclass of a tuple", "It&rsquo;s only for classes"]}, {"type": "mc", "q": "What does Stack<a href=\"\">int</a> do when the program runs?", "answer": 1, "explain": "Type parameters make no difference at run time.", "options": ["Makes a stack that refuses non-ints", "Makes an ordinary Stack; the [int] is for type checkers", "Raises TypeError", "Makes a list"]}, {"type": "mc", "q": "What does Callable[[int, str], bool] describe?", "answer": 1, "explain": "Arguments in a list, then the return type.", "options": ["A list of an int, a str and a bool", "A function taking an int and a str and returning a bool", "A class", "A tuple"]}, {"type": "mc", "q": "What does Callable[&hellip;, int] mean?", "answer": 1, "explain": "For when the arguments don&rsquo;t matter.", "options": ["A function taking no arguments", "A function taking any arguments and returning an int", "A function returning any number of ints", "An error"]}, {"type": "mc", "q": "How is a generic class written in older code?", "answer": 1, "explain": "Both forms mean the same to a checker.", "options": ["class Stack[T]", "class Stack(Generic[T]) with T = TypeVar(&lsquo;T&rsquo;)", "class Stack(list)", "class Stack(T)"]}, {"type": "output", "q": "What does this print?", "answer": "two T", "explain": "Nothing checks the types at run time; mypy would infer T as object here.", "code": "def pick[T](a: T, b: T, first: bool) -> T:\n    return a if first else b\nprint(pick(1, \"two\", False), pick.__type_params__[0].__name__)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w033d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a generic loading cache</div><div class="pc-prompt"><p>Write a generic class <code>LoadingCache[K, V]</code> that fetches values with a loader function and remembers up to <code>capacity</code> of them, forgetting the least recently used (like Week 31&rsquo;s Forge bonus, now fully typed).</p>
+<ul>
+<li><code>__init__(self, loader: Callable[[K], V], capacity: int) -&gt; None</code> (capacity at least 1, otherwise <code>ValueError</code>).</li>
+<li><code>get(self, key: K) -&gt; V</code>: the remembered value (counted in <code>hits</code>, and made most recently used), or, if it isn&rsquo;t remembered, the loader&rsquo;s value (counted in <code>misses</code>), which is then remembered, forgetting the least recently used if over capacity.</li>
+<li><code>peek(self, key: K) -&gt; V | None</code>: the remembered value without loading, counting or reordering anything.</li>
+<li><code>__len__(self) -&gt; int</code> and <code>keys(self) -&gt; list[K]</code>, from least to most recently used.</li>
+<li>A generic <strong>method</strong> <code>map_values[R](self, f: Callable[[V], R]) -&gt; dict[K, R]</code>: a dictionary from each remembered key to <code>f</code> of its value, in the same order as <code>keys()</code>.</li>
+</ul>
+<p>Every method must be fully annotated, with <code>K</code> and <code>V</code> as the class&rsquo;s type parameters.</p></div><textarea class="pc-src pc-code" hidden>from collections.abc import Callable
+
+class LoadingCache[K, V]:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_hints():
+    &quot;the hints&quot;
+    from typing import get_type_hints as h
+    from collections.abc import Callable as C
+    L = ns[&quot;LoadingCache&quot;]
+    K, V = L.__type_params__
+    assert h(L.__init__) == {&quot;loader&quot;: C[[K], V], &quot;capacity&quot;: int, &quot;return&quot;: type(None)}, f&quot;__init__: {h(L.__init__)}&quot;
+    assert h(L.get) == {&quot;key&quot;: K, &quot;return&quot;: V} and h(L.peek) == {&quot;key&quot;: K, &quot;return&quot;: V | None}
+    assert h(L.__len__) == {&quot;return&quot;: int} and h(L.keys) == {&quot;return&quot;: list[K]}
+    R, = L.map_values.__type_params__
+    assert h(L.map_values) == {&quot;f&quot;: C[[V], R], &quot;return&quot;: dict[K, R]}
+def test_cache():
+    &quot;the cache&quot;
+    L = ns[&quot;LoadingCache&quot;]
+    calls = []
+    def square(n):
+        calls.append(n)
+        return n * n
+    c = L(square, 2)
+    assert [c.get(2), c.get(3), c.get(2), c.get(4), c.get(3)] == [4, 9, 4, 16, 9]
+    assert calls == [2, 3, 4, 3] and (c.hits, c.misses) == (1, 4) and c.keys() == [4, 3] and len(c) == 2
+    assert c.peek(4) == 16 and c.peek(2) is None and c.keys() == [4, 3] and (c.hits, c.misses) == (1, 4)
+    assert c.map_values(str) == {4: &quot;16&quot;, 3: &quot;9&quot;} and list(c.map_values(lambda v: v &gt; 10)) == [4, 3]
+    try:
+        L(square, 0)
+        assert False, &quot;capacity 0 should raise ValueError&quot;
+    except ValueError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>from collections.abc import Callable
+
+class LoadingCache[K, V]:
+    def __init__(self, loader: Callable[[K], V], capacity: int) -&gt; None:
+        if capacity &lt; 1:
+            raise ValueError(&quot;capacity must be at least 1&quot;)
+        self.loader = loader
+        self.capacity = capacity
+        self._data: dict[K, V] = {}
+        self.hits = 0
+        self.misses = 0
+
+    def get(self, key: K) -&gt; V:
+        if key in self._data:
+            self.hits += 1
+            value = self._data.pop(key)
+        else:
+            self.misses += 1
+            value = self.loader(key)
+        self._data[key] = value
+        if len(self._data) &gt; self.capacity:
+            del self._data[next(iter(self._data))]
+        return value
+
+    def peek(self, key: K) -&gt; V | None:
+        return self._data.get(key)
+
+    def __len__(self) -&gt; int:
+        return len(self._data)
+
+    def keys(self) -&gt; list[K]:
+        return list(self._data)
+
+    def map_values[R](self, f: Callable[[V], R]) -&gt; dict[K, R]:
+        return {k: f(v) for k, v in self._data.items()}</textarea><template class="pc-src pc-hint">Keep the remembered values in <code>self._data: dict[K, V] = {}</code>. Moving a key to the most recent end is <code>self._data[key] = self._data.pop(key)</code>.</template><template class="pc-src pc-hint">A method&rsquo;s own type parameter goes after its name, just like a function&rsquo;s: <code>def map_values[R](self, f: Callable[[V], R]) -&gt; dict[K, R]:</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Find a helper function in your own code that works for many types (one that picks, groups, sorts or wraps things), and give it a type variable instead of <code>Any</code> or no hints. Tomorrow: static versus runtime types, what&rsquo;s checked when, and how to check data from outside your program while it runs.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w033d3.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w033d4", "week": 33, "day": 4, "title": "Generics, TypeVar and Callable", "exercises": [{"id": "w033d4-generic_funcs", "title": "Generic functions", "points": 10}, {"id": "w033d4-queue", "title": "A generic queue", "points": 15}, {"id": "w033d4-callables", "title": "Functions in, functions out", "points": 15}, {"id": "w033d4-bounded", "title": "Bounded and constrained", "points": 15}, {"id": "w033d4-bug1", "title": "The wrong kind of function", "points": 10}, {"id": "w033d4-bug2", "title": "A string in a stack of ints", "points": 10}, {"id": "w033d4-bug3", "title": "A key that isn't a name", "points": 10}, {"id": "w033d4-trace", "title": "Predict them", "points": 10}, {"id": "w033d4-challenge", "title": "Challenge: a generic loading cache", "points": 25}], "points": 120}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=8fe38f9496"></script>
+</body>
+</html>
