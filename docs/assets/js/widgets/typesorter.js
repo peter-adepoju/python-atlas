@@ -1,6 +1,6 @@
 // Sort values into their types, then let Python check every answer with type().
-import { h } from "../site.js?v=055c40ee42";
-import { py } from "../runtime.js?v=055c40ee42";
+import { h } from "../site.js?v=8fe38f9496";
+import { py } from "../runtime.js?v=8fe38f9496";
 
 const BINS = ["int", "float", "str", "bool"];
 

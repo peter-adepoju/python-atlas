@@ -1,7 +1,7 @@
 // Nested data explorer: draws nested lists and dictionaries as a tree. Click any part to see
 // the expression that reaches it, and its value.
-import { h } from "../site.js?v=055c40ee42";
-import { py } from "../runtime.js?v=055c40ee42";
+import { h } from "../site.js?v=8fe38f9496";
+import { py } from "../runtime.js?v=8fe38f9496";
 
 const SAMPLE = `{
     "name": "Python Atlas",

@@ -1,5 +1,5 @@
 // A thin wrapper around CodeMirror 5 (loaded as a global from assets/vendor).
-import { settings, onSettings } from "./settings.js?v=055c40ee42";
+import { settings, onSettings } from "./settings.js?v=8fe38f9496";
 // On a phone, long lines wrap, so nobody has to scroll sideways inside a small box.
 const narrow = () => matchMedia("(max-width: 640px)").matches;
 const wrapOn = (s) => s.wrap || narrow();
