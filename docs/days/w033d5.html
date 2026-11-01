@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="8fe38f9496">
+<title>Week 33 Day 5: Static vs runtime types | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=8fe38f9496">
+<link rel="stylesheet" href="../assets/css/site.css?v=8fe38f9496">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=8fe38f9496"></script>
+<script src="../assets/vendor/codemirror.js?v=8fe38f9496" defer></script>
+<meta name="description" content="There are two moments when a program’s types can be checked. Before it runs, a type checker reads the hints and the code (static checking). While it runs,...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w033d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 33 Day 5: Static vs runtime types">
+<meta property="og:description" content="There are two moments when a program’s types can be checked. Before it runs, a type checker reads the hints and the code (static checking). While it runs,...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w033d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-33">Week 33: Type hints</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#two-moments" data-sec="two-moments">Two moments</a></li><li><a href="#generics-disappear" data-sec="generics-disappear">Generics disappear</a></li><li><a href="#checking-at-the-boundaries" data-sec="checking-at-the-boundaries">Checking at the boundaries</a></li><li><a href="#checking-values-against-hints" data-sec="checking-values-against-hints">Checking values against hints</a></li><li><a href="#telling-the-checker-what-you-know" data-sec="telling-the-checker-what-you-know">Telling the checker what you know</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w033d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-3">Phase 3: Objects and design</a></li><li><a href="../map.html#week-33">Week 33: Type hints</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 33, Day 5</span></p>
+      <h1>Static vs runtime types</h1>
+      <div class="day-intro"><p>There are two moments when a program&rsquo;s types can be checked. Before it runs, a type checker reads the hints and the code (static checking). While it runs, the program can look at real values with <code>isinstance</code> (runtime checking). This week has mostly been about the first. Today is about how the two fit together: what each can see, why hints for generics vanish when the program runs, where runtime checks belong (at the edges, where data comes in from outside), and how to check data against hints yourself. You&rsquo;ll also learn how to tell the checker something it can&rsquo;t work out, and why that needs care.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain what a type checker can see before a program runs, and what isinstance can see while it runs</li><li>Explain why isinstance can&rsquo;t check list[int], and check the items instead</li><li>Put runtime checks at the boundaries of a program, and trust hints inside</li><li>Check a value against simple hints at run time with typing.get_origin and get_args</li><li>Use cast, assert isinstance and TYPE_CHECKING correctly, knowing what each does when the program runs</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Two moments: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Generics disappear: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Checking at the boundaries: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Checking values against hints: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Telling the checker what you know: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Two moments</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Generics disappear</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Checking at the boundaries</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Checking values against hints</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Telling the checker what you know</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w033d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w033d5.ipynb" download>download it</a>. Exercises today are worth 115 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w033d5-p1"><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+@dataclass
+class Member:
+    name: str
+    age: int
+
+m = Member(42, &quot;forty-two&quot;)
+print(m, isinstance(m.age, int))
+try:
+    print(isinstance([1, 2], list[int]))
+except TypeError:
+    print(&quot;TypeError&quot;)</textarea></div>
+<p>A dataclass reads its fields&rsquo; hints, yet accepts a number for <code>name</code> and text for <code>age</code> without a murmur. And <code>isinstance</code> refuses outright to check <code>list[int]</code>. Both show the same thing: hints describe the program for tools that read it <strong>before</strong> it runs, and they mostly disappear <strong>while</strong> it runs. Today is about using each kind of checking for what it&rsquo;s good at.</p>
+<h2 id="two-moments">Two moments</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Static checking (before running)</th>
+<th>Runtime checking (while running)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Who does it</td>
+<td>a type checker such as mypy, and your editor</td>
+<td>your own code: <code>isinstance</code>, <code>if</code>, <code>raise</code></td>
+</tr>
+<tr>
+<td>What it sees</td>
+<td>the code and its hints, every path through it</td>
+<td>the actual values, on the path that runs</td>
+</tr>
+<tr>
+<td>What it can&rsquo;t see</td>
+<td>the values that will really arrive from files, users, the network</td>
+<td>paths that don&rsquo;t run, and the contents of hints like <code>list[int]</code></td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>none when the program runs</td>
+<td>a little time on every check</td>
+</tr>
+<tr>
+<td>Finds problems</td>
+<td>before anyone runs the code</td>
+<td>only when that line runs with bad data</td>
+</tr>
+</tbody>
+</table>
+<p>Neither replaces the other. A type checker proves that, <strong>if</strong> the data is what the hints say, every call fits. It can&rsquo;t prove that a JSON file from somewhere else really contains a number where the hint says <code>int</code>. That&rsquo;s runtime checking&rsquo;s job.</p>
+<h2 id="generics-disappear">Generics disappear</h2>
+<p>When a program runs, <code>list[int]</code> is just <code>list</code>: Python keeps no record of what a list is meant to hold, because a list can hold anything. So <code>isinstance</code> can check that something is a list, but not what&rsquo;s in it. To check the contents, check each item:</p>
+<div class="pc pc-example" data-kind="example" data-id="w033d5-e2"><textarea class="pc-src pc-code" hidden>def is_int_list(value: object) -&gt; bool:
+    return isinstance(value, list) and all(isinstance(x, int) for x in value)
+
+print(is_int_list([1, 2, 3]), is_int_list([1, &quot;2&quot;]), is_int_list((1, 2)), is_int_list([]))
+
+scores: list[int] = [70, 81]
+scores.append(&quot;absent&quot;)      # nothing stops this when the program runs
+print(scores, type(scores))</textarea></div>
+<p>The same goes for your own generic classes: <code>Stack[int]()</code> makes an ordinary <code>Stack</code>, and nothing checks what&rsquo;s pushed onto it, except mypy, before the program runs.</p>
+<h2 id="checking-at-the-boundaries">Checking at the boundaries</h2>
+<p>So where should a program check types while it runs? At its <strong>boundaries</strong>: the places where data comes in from outside, where no type checker can vouch for it.</p>
+<ul>
+<li>text typed by a user, command-line arguments (Week 21);</li>
+<li>files: CSV, JSON, configuration (Week 23);</li>
+<li>data from other programs and from the network.</li>
+</ul>
+<p>Check (and convert) the data <strong>once</strong>, at the boundary, into well-typed objects. Inside the program, trust the hints and let the type checker do the rest. That keeps checks in one place instead of scattered <code>isinstance</code> calls everywhere.</p>
+<div class="pc pc-example" data-kind="example" data-id="w033d5-e3"><textarea class="pc-src pc-code" hidden>import json
+from dataclasses import dataclass
+from typing import Any
+
+@dataclass
+class Config:
+    host: str
+    port: int
+    debug: bool = False
+
+def load_config(text: str) -&gt; Config:
+    data: Any = json.loads(text)                      # Any: we don&#x27;t know yet
+    if not isinstance(data, dict):
+        raise ValueError(&quot;config must be a JSON object&quot;)
+    host, port, debug = data.get(&quot;host&quot;), data.get(&quot;port&quot;), data.get(&quot;debug&quot;, False)
+    if not isinstance(host, str) or not host:
+        raise ValueError(&quot;host must be a non-empty string&quot;)
+    if not isinstance(port, int) or isinstance(port, bool) or not 1 &lt;= port &lt;= 65535:
+        raise ValueError(&quot;port must be a whole number from 1 to 65535&quot;)
+    if not isinstance(debug, bool):
+        raise ValueError(&quot;debug must be true or false&quot;)
+    return Config(host, port, debug)                  # from here on, a real Config
+
+print(load_config(&#x27;{&quot;host&quot;: &quot;localhost&quot;, &quot;port&quot;: 8080}&#x27;))
+for bad in [&#x27;{&quot;host&quot;: &quot;x&quot;, &quot;port&quot;: &quot;8080&quot;}&#x27;, &#x27;[1, 2]&#x27;, &#x27;{&quot;host&quot;: &quot;x&quot;, &quot;port&quot;: 8080, &quot;debug&quot;: &quot;yes&quot;}&#x27;]:
+    try:
+        load_config(bad)
+    except ValueError as err:
+        print(&quot;ValueError:&quot;, err)</textarea></div>
+<p><code>json.loads</code> returns <code>Any</code>, honestly: its result depends on the text. Checking turns that <code>Any</code> into a <code>Config</code> that mypy can then follow everywhere. Libraries such as pydantic do this kind of checking automatically from the hints, which is useful in bigger programs; the idea is the same.</p>
+<h2 id="checking-values-against-hints">Checking values against hints</h2>
+<p>Hints are objects, so a program can read them and check values against them. Two functions from <code>typing</code> take hints apart:</p>
+<div class="pc pc-example" data-kind="example" data-id="w033d5-e4"><textarea class="pc-src pc-code" hidden>from typing import get_origin, get_args
+
+for hint in [int, list[int], dict[str, float], tuple[int, ...], int | None]:
+    print(f&quot;{str(hint):&lt;18} origin={get_origin(hint)}  args={get_args(hint)}&quot;)</textarea></div>
+<ul>
+<li><code>get_origin(hint)</code> gives the plain class behind a generic hint (<code>list</code> for <code>list[int]</code>), or <code>None</code> for a plain class like <code>int</code>. For a union such as <code>int | None</code>, it gives a union type (which one depends on the Python version, so compare with both <code>typing.Union</code> and <code>types.UnionType</code>).</li>
+<li><code>get_args(hint)</code> gives what&rsquo;s in the brackets.</li>
+</ul>
+<p>With these, a short recursive function (Week 15) can check a value against a hint:</p>
+<div class="pc pc-example" data-kind="example" data-id="w033d5-e5"><textarea class="pc-src pc-code" hidden>import types
+from typing import Union, get_args, get_origin
+
+def matches(value: object, hint: object) -&gt; bool:
+    origin, args = get_origin(hint), get_args(hint)
+    if hint is None or hint is type(None):
+        return value is None
+    if origin in (Union, types.UnionType):
+        return any(matches(value, a) for a in args)
+    if origin is list:
+        return isinstance(value, list) and all(matches(x, args[0]) for x in value)
+    if origin is dict:
+        return isinstance(value, dict) and all(matches(k, args[0]) and matches(v, args[1]) for k, v in value.items())
+    if hint is float:
+        return isinstance(value, (int, float))
+    return isinstance(value, hint)
+
+print(matches([1, 2], list[int]), matches([1, &quot;2&quot;], list[int]), matches(None, str | None))
+print(matches({&quot;Ada&quot;: [70, 81]}, dict[str, list[int]]), matches({&quot;Ada&quot;: [70, &quot;x&quot;]}, dict[str, list[int]]), matches(3, float))</textarea></div>
+<p>Notice <code>float</code> accepts an <code>int</code>, following the same convention as type checkers. The practice builds this out, and the daily challenge turns it into a checker that reports exactly where data goes wrong.</p>
+<h2 id="telling-the-checker-what-you-know">Telling the checker what you know</h2>
+<p>Sometimes you know more than the type checker can work out. There are three tools for telling it, and it&rsquo;s important to know what each does <strong>when the program runs</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>To the type checker</th>
+<th>When the program runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cast(int, value)</code></td>
+<td>&ldquo;treat <code>value</code> as an <code>int</code> from here&rdquo;</td>
+<td><strong>nothing</strong>: returns <code>value</code> unchanged, unchecked</td>
+</tr>
+<tr>
+<td><code>assert isinstance(value, int)</code></td>
+<td>narrows <code>value</code> to <code>int</code> after this line</td>
+<td>checks, and raises <code>AssertionError</code> if wrong (unless Python runs with <code>-O</code>)</td>
+</tr>
+<tr>
+<td><code>if not isinstance(value, int): raise TypeError(...)</code></td>
+<td>narrows, like the <code>assert</code></td>
+<td>checks, always</td>
+</tr>
+</tbody>
+</table>
+<div class="pc pc-example" data-kind="example" data-id="w033d5-e6"><textarea class="pc-src pc-code" hidden>from typing import cast
+
+text = &quot;12&quot;
+n = cast(int, text)                 # a promise to the checker, not a conversion
+print(repr(n), type(n).__name__)
+try:
+    print(n + 1)
+except TypeError as err:
+    print(&quot;TypeError:&quot;, err)
+print(int(text) + 1)                # what was really needed</textarea></div>
+<p><code>cast</code> is a promise you make to the checker. If the promise is wrong, nothing catches it, and the program fails somewhere else later. Use it only when you&rsquo;re sure and the checker can&rsquo;t follow (for example, after checking with a helper function it doesn&rsquo;t understand). For data from outside, check with <code>isinstance</code> and raise.</p>
+<p>One more tool you&rsquo;ll see in real projects: <code>typing.TYPE_CHECKING</code> is <code>False</code> when the program runs and treated as <code>True</code> by type checkers. Imports needed only for hints go inside <code>if TYPE_CHECKING:</code>, which avoids slow imports and circular imports between modules (Week 20) at run time. And functions declared to return <code>TypeGuard[...]</code> (or <code>TypeIs[...]</code> in newer Pythons) tell the checker that a <code>True</code> result narrows their argument, as <code>isinstance</code> does.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Static checking happens before the program runs and sees every path but not real data; runtime checking happens while it runs and sees real values on the path taken. Generic hints vanish at run time: <code>isinstance(x, list[int])</code> is an error, so check the items. Check data where it enters the program (users, files, JSON, the network), convert it into typed objects once, and trust hints inside. <code>get_origin</code> and <code>get_args</code> take hints apart for checking values against them. <code>cast</code> changes nothing at run time; <code>isinstance</code> with <code>raise</code> (or <code>assert</code>) checks and narrows; <code>TYPE_CHECKING</code> guards imports needed only for hints.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w033d5-int_list" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Lists of what?</div><div class="pc-prompt"><p>Write two checks that work while the program runs:</p>
+<ul>
+<li><code>all_of(value: object, kind: type) -&gt; bool</code>: True if <code>value</code> is a list whose items are all instances of <code>kind</code> (an empty list counts);</li>
+<li><code>clean_ints(values: list[object]) -&gt; list[int]</code>: the items that are real whole numbers, in order, leaving out everything else, <strong>including</strong> <code>True</code> and <code>False</code>.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>def all_of(value, kind):
+    ___
+
+def clean_ints(values):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_checks():
+    &quot;checks&quot;
+    assert all_of([1, 2], int) and not all_of([1, &quot;2&quot;], int) and not all_of((1, 2), int) and all_of([], str)
+    assert all_of([&quot;a&quot;], str) and not all_of(&quot;abc&quot;, str) and all_of([True], int)
+    assert clean_ints([1, &quot;2&quot;, 3.0, True, None, -4, [5]]) == [1, -4] and clean_ints([]) == []</textarea><textarea class="pc-src pc-solution" hidden>def all_of(value: object, kind: type) -&gt; bool:
+    return isinstance(value, list) and all(isinstance(x, kind) for x in value)
+
+def clean_ints(values: list[object]) -&gt; list[int]:
+    return [v for v in values if isinstance(v, int) and not isinstance(v, bool)]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w033d5-matches" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Values against hints</div><div class="pc-prompt"><p>Write <code>matches(value, hint)</code>, which says whether a value fits a hint, supporting:</p>
+<ul>
+<li>plain classes (<code>int</code>, <code>str</code>, <code>bool</code>, your own classes), using <code>isinstance</code>; <code>float</code> also accepts <code>int</code>;</li>
+<li><code>None</code> (or <code>type(None)</code>), which only <code>None</code> fits;</li>
+<li>unions such as <code>int | str</code> and <code>str | None</code>;</li>
+<li><code>list[X]</code>, <code>set[X]</code> and <code>dict[K, V]</code>, checking every item, key and value;</li>
+<li><code>tuple[X, ...]</code> (any length, all <code>X</code>) and <code>tuple[X, Y, Z]</code> (exactly that many, each its own type).</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import types
+from typing import Union, get_args, get_origin
+
+def matches(value, hint):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_matches():
+    &quot;matching&quot;
+    assert matches(3, int) and not matches(&quot;3&quot;, int) and matches(3, float) and matches(2.5, float) and not matches(2.5, int)
+    assert matches(None, None) and matches(None, type(None)) and not matches(0, None)
+    assert matches(&quot;a&quot;, int | str) and matches(None, str | None) and not matches(3.5, int | str)
+    assert matches([1, 2], list[int]) and not matches([1, &quot;2&quot;], list[int]) and not matches((1,), list[int]) and matches([], list[str])
+    assert matches({&quot;a&quot;, &quot;b&quot;}, set[str]) and not matches({1}, set[str])
+    assert matches({&quot;Ada&quot;: [1, 2]}, dict[str, list[int]]) and not matches({&quot;Ada&quot;: [1, &quot;x&quot;]}, dict[str, list[int]]) and not matches({1: []}, dict[str, list[int]])
+    assert matches((1, 2, 3), tuple[int, ...]) and matches((), tuple[int, ...]) and not matches((1, &quot;2&quot;), tuple[int, ...])
+    assert matches((&quot;Ada&quot;, 31), tuple[str, int]) and not matches((&quot;Ada&quot;, 31, 1), tuple[str, int]) and not matches([&quot;Ada&quot;, 31], tuple[str, int])
+    assert matches([None, 3], list[int | None]) and matches({&quot;x&quot;: (1.5, 2)}, dict[str, tuple[float, ...]])</textarea><textarea class="pc-src pc-solution" hidden>import types
+from typing import Union, get_args, get_origin
+
+def matches(value: object, hint: object) -&gt; bool:
+    origin, args = get_origin(hint), get_args(hint)
+    if hint is None or hint is type(None):
+        return value is None
+    if origin in (Union, types.UnionType):
+        return any(matches(value, a) for a in args)
+    if origin in (list, set):
+        return isinstance(value, origin) and all(matches(x, args[0]) for x in value)
+    if origin is dict:
+        return isinstance(value, dict) and all(matches(k, args[0]) and matches(v, args[1]) for k, v in value.items())
+    if origin is tuple:
+        if not isinstance(value, tuple):
+            return False
+        if len(args) == 2 and args[1] is Ellipsis:
+            return all(matches(x, args[0]) for x in value)
+        return len(value) == len(args) and all(matches(x, a) for x, a in zip(value, args))
+    if hint is float:
+        return isinstance(value, (int, float))
+    return isinstance(value, hint)</textarea><template class="pc-src pc-hint">Start with the union and <code>None</code> cases, then use <code>get_origin(hint)</code>: <code>list</code>, <code>set</code>, <code>dict</code> and <code>tuple</code> each get their own branch. For a tuple, <code>args[1] is Ellipsis</code> means &ldquo;any length&rdquo;.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w033d5-checked" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A checking wrapper</div><div class="pc-prompt"><p>Write <code>checked(func)</code>, which returns a <strong>new function</strong> that checks its positional arguments against <code>func</code>&rsquo;s hints, calls <code>func</code>, then checks the result against the return hint. A failure raises <code>TypeError</code> with a message like <code>amount: expected int, got str</code> or <code>return: expected str, got int</code>. Use <code>matches</code> from the starter, <code>typing.get_type_hints</code>, and <code>inspect.signature</code> for the parameter names. Parameters without hints aren&rsquo;t checked.</p></div><textarea class="pc-src pc-code" hidden>import inspect
+import types
+from typing import Union, get_args, get_origin, get_type_hints
+
+def matches(value, hint):
+    origin, args = get_origin(hint), get_args(hint)
+    if hint is None or hint is type(None):
+        return value is None
+    if origin in (Union, types.UnionType):
+        return any(matches(value, a) for a in args)
+    if origin is list:
+        return isinstance(value, list) and all(matches(x, args[0]) for x in value)
+    if hint is float:
+        return isinstance(value, (int, float))
+    return isinstance(value, hint)
+
+def checked(func):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_checked():
+    &quot;checking&quot;
+    def pay(name: str, amount: int, note=None) -&gt; str:
+        return f&quot;{name}: {amount}&quot;
+    def broken(x: int) -&gt; str:
+        return x
+    def names(items: list[str]) -&gt; int | None:
+        return len(items) or None
+    p = checked(pay)
+    assert p(&quot;Ada&quot;, 500) == &quot;Ada: 500&quot; and p(&quot;Ada&quot;, 5, 99) == &quot;Ada: 5&quot; and checked(names)([]) is None and checked(names)([&quot;a&quot;]) == 1
+    for f, args, msg in [(p, (&quot;Ada&quot;, &quot;500&quot;), &quot;amount: expected int, got str&quot;), (p, (3, 3), &quot;name: expected str, got int&quot;),
+                         (checked(broken), (4,), &quot;return: expected str, got int&quot;), (checked(names), ([1],), &quot;items: expected list[str], got list&quot;)]:
+        try:
+            f(*args)
+            assert False, f&quot;should raise TypeError: {msg}&quot;
+        except TypeError as err:
+            assert str(err) == msg, f&quot;message was {str(err)!r}&quot;</textarea><textarea class="pc-src pc-solution" hidden>import inspect
+import types
+from typing import Union, get_args, get_origin, get_type_hints
+
+def matches(value, hint):
+    origin, args = get_origin(hint), get_args(hint)
+    if hint is None or hint is type(None):
+        return value is None
+    if origin in (Union, types.UnionType):
+        return any(matches(value, a) for a in args)
+    if origin is list:
+        return isinstance(value, list) and all(matches(x, args[0]) for x in value)
+    if hint is float:
+        return isinstance(value, (int, float))
+    return isinstance(value, hint)
+
+def hint_name(hint):
+    return hint.__name__ if isinstance(hint, type) and not get_args(hint) else str(hint)
+
+def checked(func):
+    hints = get_type_hints(func)
+    names = list(inspect.signature(func).parameters)
+
+    def wrapper(*args):
+        for name, value in zip(names, args):
+            if name in hints and not matches(value, hints[name]):
+                raise TypeError(f&quot;{name}: expected {hint_name(hints[name])}, got {type(value).__name__}&quot;)
+        result = func(*args)
+        if &quot;return&quot; in hints and not matches(result, hints[&quot;return&quot;]):
+            raise TypeError(f&quot;return: expected {hint_name(hints[&#x27;return&#x27;])}, got {type(result).__name__}&quot;)
+        return result
+
+    return wrapper</textarea><template class="pc-src pc-hint">Inside <code>checked</code>, define <code>def wrapper(*args):</code>, which loops over <code>zip(names, args)</code>, calls <code>func(*args)</code>, checks the result, and returns it; then <code>return wrapper</code>. For the message, <code>getattr(hint, "__name__", str(hint))</code> gives <code>int</code> for a class and <code>list[str]</code> for a generic.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w033d5-config" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Checking a settings file</div><div class="pc-prompt"><p>Write <code>load_settings(text: str) -&gt; Settings</code>, where <code>Settings</code> is the dataclass in the starter. The text is JSON. Check it at the boundary: it must be an object with a non-empty string <code>"name"</code>, a whole number <code>"volume"</code> from 0 to 10 (not a <code>bool</code>), and optionally a list of strings <code>"playlists"</code> (default empty). Any problem raises <code>ValueError</code> (including JSON that won&rsquo;t parse, whose error, <code>json.JSONDecodeError</code>, is already a kind of <code>ValueError</code>). Unknown keys raise <code>ValueError</code> too.</p></div><textarea class="pc-src pc-code" hidden>import json
+from dataclasses import dataclass, field
+from typing import Any
+
+@dataclass
+class Settings:
+    name: str
+    volume: int
+    playlists: list[str] = field(default_factory=list)
+
+def load_settings(text):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_settings():
+    &quot;loading&quot;
+    S = ns[&quot;Settings&quot;]
+    assert load_settings(&#x27;{&quot;name&quot;: &quot;Ada&quot;, &quot;volume&quot;: 7}&#x27;) == S(&quot;Ada&quot;, 7, [])
+    assert load_settings(&#x27;{&quot;name&quot;: &quot;Bo&quot;, &quot;volume&quot;: 0, &quot;playlists&quot;: [&quot;Chill&quot;, &quot;Gym&quot;]}&#x27;) == S(&quot;Bo&quot;, 0, [&quot;Chill&quot;, &quot;Gym&quot;])
+    for bad in [&#x27;{&quot;name&quot;: &quot;Ada&quot;, &quot;volume&quot;: &quot;7&quot;}&#x27;, &#x27;{&quot;name&quot;: &quot;Ada&quot;, &quot;volume&quot;: true}&#x27;, &#x27;{&quot;name&quot;: &quot;&quot;, &quot;volume&quot;: 3}&#x27;, &#x27;{&quot;volume&quot;: 3}&#x27;,
+                &#x27;{&quot;name&quot;: &quot;Ada&quot;, &quot;volume&quot;: 11}&#x27;, &#x27;{&quot;name&quot;: &quot;Ada&quot;, &quot;volume&quot;: 3, &quot;playlists&quot;: [&quot;a&quot;, 2]}&#x27;, &#x27;[1]&#x27;, &#x27;not json&#x27;,
+                &#x27;{&quot;name&quot;: &quot;Ada&quot;, &quot;volume&quot;: 3, &quot;colour&quot;: &quot;red&quot;}&#x27;]:
+        try:
+            load_settings(bad)
+            assert False, f&quot;{bad} should raise ValueError&quot;
+        except ValueError:
+            pass</textarea><textarea class="pc-src pc-solution" hidden>import json
+from dataclasses import dataclass, field
+from typing import Any
+
+@dataclass
+class Settings:
+    name: str
+    volume: int
+    playlists: list[str] = field(default_factory=list)
+
+def load_settings(text: str) -&gt; Settings:
+    data: Any = json.loads(text)
+    if not isinstance(data, dict):
+        raise ValueError(&quot;settings must be a JSON object&quot;)
+    unknown = set(data) - {&quot;name&quot;, &quot;volume&quot;, &quot;playlists&quot;}
+    if unknown:
+        raise ValueError(f&quot;unknown settings: {sorted(unknown)}&quot;)
+    name, volume, playlists = data.get(&quot;name&quot;), data.get(&quot;volume&quot;), data.get(&quot;playlists&quot;, [])
+    if not isinstance(name, str) or not name:
+        raise ValueError(&quot;name must be a non-empty string&quot;)
+    if not isinstance(volume, int) or isinstance(volume, bool) or not 0 &lt;= volume &lt;= 10:
+        raise ValueError(&quot;volume must be a whole number from 0 to 10&quot;)
+    if not isinstance(playlists, list) or not all(isinstance(p, str) for p in playlists):
+        raise ValueError(&quot;playlists must be a list of strings&quot;)
+    return Settings(name, volume, playlists)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w033d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A check that can&rsquo;t be made</div><div class="pc-prompt"><p>The validation crashes with <code>TypeError: isinstance() argument 2 cannot be a parameterized generic</code>. Fix <code>valid_tags</code> so it checks the list and its items, and prints <code>True False False</code>.</p></div><textarea class="pc-src pc-code" hidden>def valid_tags(tags: object) -&gt; bool:
+    return isinstance(tags, list[str])
+
+print(valid_tags([&quot;news&quot;, &quot;sport&quot;]), valid_tags([&quot;news&quot;, 3]), valid_tags(&quot;news&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;checked&quot;
+    expect_output(&quot;True False False&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def valid_tags(tags: object) -&gt; bool:
+    return isinstance(tags, list) and all(isinstance(t, str) for t in tags)
+
+print(valid_tags([&quot;news&quot;, &quot;sport&quot;]), valid_tags([&quot;news&quot;, 3]), valid_tags(&quot;news&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w033d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A cast that converts nothing</div><div class="pc-prompt"><p>The program crashes with <code>TypeError: can only concatenate str (not "int") to str</code>. Someone thought <code>cast</code> turns text into a number. Fix the line that uses <code>cast</code> so it prints <code>13</code>.</p></div><textarea class="pc-src pc-code" hidden>from typing import cast
+
+def next_number(text: str) -&gt; int:
+    n = cast(int, text.strip())
+    return n + 1
+
+print(next_number(&quot; 12 &quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a real conversion&quot;
+    expect_output(&quot;13&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from typing import cast
+
+def next_number(text: str) -&gt; int:
+    n = int(text.strip())
+    return n + 1
+
+print(next_number(&quot; 12 &quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w033d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Trusting the file</div><div class="pc-prompt"><p>The order file stores quantities, but one was saved as text, so the total crashes with <code>TypeError</code>. <code>total_qty</code> trusts its hint, which is fine inside the program; the bug is that <code>load_orders</code> is the boundary and doesn&rsquo;t check. Fix <code>load_orders</code> so it converts quantities written as digit strings (like <code>"3"</code>) to <code>int</code>, raises <code>ValueError</code> for anything else that isn&rsquo;t an <code>int</code>, and the program prints <code>6</code>.</p></div><textarea class="pc-src pc-code" hidden>import json
+
+def load_orders(text: str) -&gt; list[dict[str, int]]:
+    return json.loads(text)
+
+def total_qty(orders: list[dict[str, int]]) -&gt; int:
+    return sum(o[&quot;qty&quot;] for o in orders)
+
+print(total_qty(load_orders(&#x27;[{&quot;qty&quot;: 2}, {&quot;qty&quot;: &quot;3&quot;}, {&quot;qty&quot;: 1}]&#x27;)))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the total&quot;
+    expect_output(&quot;6&quot;)
+    try:
+        load_orders(&#x27;[{&quot;qty&quot;: &quot;three&quot;}]&#x27;)
+        assert False, &quot;a word should raise ValueError&quot;
+    except ValueError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import json
+
+def load_orders(text: str) -&gt; list[dict[str, int]]:
+    orders = json.loads(text)
+    for order in orders:
+        qty = order[&quot;qty&quot;]
+        if isinstance(qty, str) and qty.isdigit():
+            order[&quot;qty&quot;] = int(qty)
+        elif not isinstance(qty, int) or isinstance(qty, bool):
+            raise ValueError(f&quot;bad quantity: {qty!r}&quot;)
+    return orders
+
+def total_qty(orders: list[dict[str, int]]) -&gt; int:
+    return sum(o[&quot;qty&quot;] for o in orders)
+
+print(total_qty(load_orders(&#x27;[{&quot;qty&quot;: 2}, {&quot;qty&quot;: &quot;3&quot;}, {&quot;qty&quot;: 1}]&#x27;)))</textarea></div>
+<div class="parsons" data-id="w033d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Checking at the edge</div><div class="pc-prompt"><p>Arrange the lines into a function that checks data loaded from a file before trusting it. One line is a trap.</p></div><script type="application/json">{"lines": ["def as_names(data: object) -> list[str]:", "    if not isinstance(data, list):", "        raise ValueError(\"expected a list\")", "    if not all(isinstance(x, str) for x in data):", "        raise ValueError(\"expected only strings\")", "    return data"], "distractors": ["    if not isinstance(data, list[str]):"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w033d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>from typing import cast, get_origin, get_args
+
+p = ___   # cast(int, &quot;5&quot;)
+q = ___   # get_origin(list[str])
+r = ___   # get_args(dict[str, int])
+s = ___   # get_origin(int)
+t = ___   # type([1, 2]) is list</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;5&quot; and q is list and r == (str, int), &quot;p to r&quot;
+    assert s is None and t is True</textarea><textarea class="pc-src pc-solution" hidden>from typing import cast, get_origin, get_args
+
+p = &quot;5&quot;
+q = list
+r = (str, int)
+s = None
+t = True</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w033d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What can a type checker see that a running program can&rsquo;t?", "answer": 1, "explain": "It reads the code; it doesn&rsquo;t run it.", "options": ["The real data from a file", "Every path through the code, including ones that don&rsquo;t run", "Values typed by a user", "Nothing"]}, {"type": "mc", "q": "What can runtime checking see that a type checker can&rsquo;t?", "answer": 1, "explain": "Including bad data from outside.", "options": ["Every path", "The actual values that arrive while the program runs", "The hints", "Unused imports"]}, {"type": "mc", "q": "What does isinstance([1], list[int]) do?", "answer": 1, "explain": "Check isinstance(x, list) and then the items.", "options": ["Returns True", "Raises TypeError", "Returns False", "Checks the items"]}, {"type": "mc", "q": "Where do runtime type checks belong?", "answer": 1, "explain": "Convert once into typed objects; trust hints inside.", "options": ["In every function", "At the boundaries, where data comes in from outside", "Nowhere", "Only in tests"]}, {"type": "mc", "q": "What does json.loads return, as a hint?", "answer": 1, "explain": "It depends on the text, which nobody can know in advance.", "options": ["dict", "Any", "str", "list"]}, {"type": "mc", "q": "What does get_origin(list[int]) give?", "answer": 1, "explain": "get_args gives (int,).", "options": ["int", "list", "None", "list[int]"]}, {"type": "mc", "q": "What does cast(int, &ldquo;12&rdquo;) return when the program runs?", "answer": 1, "explain": "cast is only a promise to the checker.", "options": ["12", "&ldquo;12&rdquo;, unchanged", "An error", "None"]}, {"type": "mc", "q": "Which both checks while running and narrows the type for mypy?", "answer": 1, "explain": "assert isinstance does too, unless Python runs with -O.", "options": ["cast(int, x)", "if not isinstance(x, int): raise TypeError(&hellip;)", "x: int", "reveal_type(x)"]}, {"type": "mc", "q": "What is TYPE_CHECKING for?", "answer": 1, "explain": "Type checkers treat it as True.", "options": ["Switching mypy on", "Guarding imports needed only for hints, since it&rsquo;s False when the program runs", "Checking types at run time", "Testing"]}, {"type": "output", "q": "What does this print?", "answer": "one int", "explain": "The hint is stored, not enforced.", "code": "from dataclasses import dataclass\n@dataclass\nclass P:\n    x: int\nprint(P(\"one\").x, P.__annotations__[\"x\"].__name__)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w033d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a data checker with paths</div><div class="pc-prompt"><p>Write <code>validate(value, hint, path="value") -&gt; list[str]</code>, which checks data (such as JSON already loaded) against a hint and returns <strong>every</strong> problem, each with the path to where it went wrong. An empty list means the data is valid.</p>
+<ul>
+<li>Plain classes are checked with <code>isinstance</code>, except that <code>bool</code> is <strong>not</strong> accepted for <code>int</code> or <code>float</code> (in data, it&rsquo;s almost always a mistake), and <code>int</code> <strong>is</strong> accepted for <code>float</code>. A failure is reported as <code>value.age: expected int, got str</code>.</li>
+<li><code>X | None</code> and other unions: valid if any part fits; otherwise <code>expected int | None, got str</code> (using <code>str(hint)</code>).</li>
+<li><code>list[X]</code>: must be a list (otherwise <code>expected list[int], got dict</code>); each item is checked with the path <code>value[0]</code>, <code>value[1]</code>, &hellip;</li>
+<li><code>dict[str, X]</code>: must be a dict; each value is checked with the path <code>value['Ada']</code>.</li>
+<li>A <strong>dataclass</strong> (use <code>dataclasses.is_dataclass</code> and <code>fields</code>): the value must be a dict (otherwise <code>value: expected Member, got list</code>); each field is checked with the path <code>value.name</code>; a field without a default that&rsquo;s missing gives <code>value: missing field 'age'</code>; keys that aren&rsquo;t fields give <code>value: unknown field 'colour'</code> (reported in sorted order, after the fields). Use <code>typing.get_type_hints</code> on the class for the fields&rsquo; hints.</li>
+</ul>
+<p>Problems appear in the order the data is walked: fields in the order the class defines them, list items in order, dictionary values in the order of the keys.</p></div><textarea class="pc-src pc-code" hidden>import dataclasses
+import types
+import typing
+from dataclasses import dataclass, field
+
+@dataclass
+class Member:
+    name: str
+    age: int
+    email: str | None = None
+
+@dataclass
+class Club:
+    name: str
+    members: list[Member]
+    fees: dict[str, float] = field(default_factory=dict)
+
+def validate(value, hint, path=&quot;value&quot;):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_simple():
+    &quot;simple hints&quot;
+    assert validate(3, int) == [] and validate(True, int) == [&quot;value: expected int, got bool&quot;] and validate(2, float) == []
+    assert validate(&quot;x&quot;, int | None) == [&quot;value: expected int | None, got str&quot;] and validate(None, int | None) == []
+    assert validate([1, &quot;a&quot;, 3, &quot;b&quot;], list[int]) == [&quot;value[1]: expected int, got str&quot;, &quot;value[3]: expected int, got str&quot;]
+    assert validate({&quot;a&quot;: 1}, list[int]) == [&quot;value: expected list[int], got dict&quot;]
+    assert validate({&quot;Ada&quot;: 2.5, &quot;Bo&quot;: &quot;x&quot;}, dict[str, float], &quot;fees&quot;) == [&quot;fees[&#x27;Bo&#x27;]: expected float, got str&quot;]
+def test_dataclasses():
+    &quot;dataclasses&quot;
+    M, C = ns[&quot;Member&quot;], ns[&quot;Club&quot;]
+    assert validate({&quot;name&quot;: &quot;Ada&quot;, &quot;age&quot;: 31}, M) == []
+    assert validate({&quot;name&quot;: &quot;Ada&quot;, &quot;age&quot;: &quot;31&quot;, &quot;colour&quot;: &quot;red&quot;, &quot;badge&quot;: 1}, M) == [
+        &quot;value.age: expected int, got str&quot;, &quot;value: unknown field &#x27;badge&#x27;&quot;, &quot;value: unknown field &#x27;colour&#x27;&quot;]
+    assert validate({&quot;name&quot;: &quot;Ada&quot;}, M, &quot;m&quot;) == [&quot;m: missing field &#x27;age&#x27;&quot;] and validate([1], M) == [&quot;value: expected Member, got list&quot;]
+    club = {&quot;name&quot;: &quot;Chess&quot;, &quot;members&quot;: [{&quot;name&quot;: &quot;Ada&quot;, &quot;age&quot;: 31}, {&quot;name&quot;: 7, &quot;age&quot;: 12, &quot;email&quot;: 5}, {&quot;age&quot;: True}],
+            &quot;fees&quot;: {&quot;junior&quot;: 5, &quot;senior&quot;: &quot;ten&quot;}}
+    assert validate(club, C, &quot;club&quot;) == [
+        &quot;club.members[1].name: expected str, got int&quot;,
+        &quot;club.members[1].email: expected str | None, got int&quot;,
+        &quot;club.members[2]: missing field &#x27;name&#x27;&quot;,
+        &quot;club.members[2].age: expected int, got bool&quot;,
+        &quot;club.fees[&#x27;senior&#x27;]: expected float, got str&quot;,
+    ], &quot;\n&quot;.join(validate(club, C, &quot;club&quot;))</textarea><textarea class="pc-src pc-solution" hidden>import dataclasses
+import types
+import typing
+from dataclasses import dataclass, field
+
+@dataclass
+class Member:
+    name: str
+    age: int
+    email: str | None = None
+
+@dataclass
+class Club:
+    name: str
+    members: list[Member]
+    fees: dict[str, float] = field(default_factory=dict)
+
+def describe(hint):
+    return hint.__name__ if isinstance(hint, type) and not typing.get_args(hint) else str(hint)
+
+def fits_plain(value, hint):
+    if hint in (int, float) and isinstance(value, bool):
+        return False
+    if hint is float:
+        return isinstance(value, (int, float))
+    if hint is None or hint is type(None):
+        return value is None
+    return isinstance(value, hint)
+
+def validate(value, hint, path=&quot;value&quot;):
+    got = type(value).__name__
+    if dataclasses.is_dataclass(hint):
+        if not isinstance(value, dict):
+            return [f&quot;{path}: expected {hint.__name__}, got {got}&quot;]
+        problems = []
+        hints = typing.get_type_hints(hint)
+        for f in dataclasses.fields(hint):
+            if f.name in value:
+                problems.extend(validate(value[f.name], hints[f.name], f&quot;{path}.{f.name}&quot;))
+            elif f.default is dataclasses.MISSING and f.default_factory is dataclasses.MISSING:
+                problems.append(f&quot;{path}: missing field &#x27;{f.name}&#x27;&quot;)
+        names = {f.name for f in dataclasses.fields(hint)}
+        for key in sorted(set(value) - names):
+            problems.append(f&quot;{path}: unknown field &#x27;{key}&#x27;&quot;)
+        return problems
+    origin, args = typing.get_origin(hint), typing.get_args(hint)
+    if origin in (typing.Union, types.UnionType):
+        if any(not validate(value, a, path) for a in args):
+            return []
+        return [f&quot;{path}: expected {describe(hint)}, got {got}&quot;]
+    if origin is list:
+        if not isinstance(value, list):
+            return [f&quot;{path}: expected {describe(hint)}, got {got}&quot;]
+        problems = []
+        for i, item in enumerate(value):
+            problems.extend(validate(item, args[0], f&quot;{path}[{i}]&quot;))
+        return problems
+    if origin is dict:
+        if not isinstance(value, dict):
+            return [f&quot;{path}: expected {describe(hint)}, got {got}&quot;]
+        problems = []
+        for k, v in value.items():
+            problems.extend(validate(v, args[1], f&quot;{path}[{k!r}]&quot;))
+        return problems
+    if fits_plain(value, hint):
+        return []
+    return [f&quot;{path}: expected {describe(hint)}, got {got}&quot;]</textarea><template class="pc-src pc-hint">Handle the cases in this order: dataclass, union, <code>list</code>, <code>dict</code>, then plain classes. For a dataclass, go through <code>dataclasses.fields(hint)</code>: if the name is in the dict, extend the problems with <code>validate(value[f.name], hints[f.name], f"{path}.{f.name}")</code>; if not, it&rsquo;s missing only when <code>f.default</code> and <code>f.default_factory</code> are both <code>dataclasses.MISSING</code>.</template><template class="pc-src pc-hint">For the &ldquo;got&rdquo; part of a message, use <code>type(value).__name__</code>. For the &ldquo;expected&rdquo; part, a class&rsquo;s <code>__name__</code>, or <code>str(hint)</code> for anything else.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Find the place in one of your programs where data comes in from outside (a file, user input, JSON) and check whether it&rsquo;s validated there. If it isn&rsquo;t, write the checks, and convert the data into a typed object. Tomorrow is the Forge: a typed program from start to finish.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w033d4.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w033d5", "week": 33, "day": 5, "title": "Static vs runtime types", "exercises": [{"id": "w033d5-int_list", "title": "Lists of what?", "points": 10}, {"id": "w033d5-matches", "title": "Values against hints", "points": 15}, {"id": "w033d5-checked", "title": "A checking wrapper", "points": 15}, {"id": "w033d5-config", "title": "Checking a settings file", "points": 10}, {"id": "w033d5-bug1", "title": "A check that can't be made", "points": 10}, {"id": "w033d5-bug2", "title": "A cast that converts nothing", "points": 10}, {"id": "w033d5-bug3", "title": "Trusting the file", "points": 10}, {"id": "w033d5-trace", "title": "Predict them", "points": 10}, {"id": "w033d5-challenge", "title": "Challenge: a data checker with paths", "points": 25}], "points": 115}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=8fe38f9496"></script>
+</body>
+</html>
