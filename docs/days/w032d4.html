@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="8fe38f9496">
+<title>Week 32 Day 4: Abstract base classes | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=8fe38f9496">
+<link rel="stylesheet" href="../assets/css/site.css?v=8fe38f9496">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=8fe38f9496"></script>
+<script src="../assets/vendor/codemirror.js?v=8fe38f9496" defer></script>
+<meta name="description" content="In Week 30 a parent class marked the methods its children must write by raising NotImplementedError, and a child that forgot only failed when the missing...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w032d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 32 Day 4: Abstract base classes">
+<meta property="og:description" content="In Week 30 a parent class marked the methods its children must write by raising NotImplementedError, and a child that forgot only failed when the missing...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w032d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-32">Week 32: Modern classes</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#abstract-methods" data-sec="abstract-methods">Abstract methods</a></li><li><a href="#designing-a-small-interface" data-sec="designing-a-small-interface">Designing a small interface</a></li><li><a href="#collections-abc" data-sec="collections-abc">collections.abc</a></li><li><a href="#checking-kinds-with-isinstance" data-sec="checking-kinds-with-isinstance">Checking kinds with isinstance</a></li><li><a href="#when-to-use-an-abc" data-sec="when-to-use-an-abc">When to use an ABC</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w032d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-3">Phase 3: Objects and design</a></li><li><a href="../map.html#week-32">Week 32: Modern classes</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 32, Day 4</span></p>
+      <h1>Abstract base classes</h1>
+      <div class="day-intro"><p>In Week 30 a parent class marked the methods its children must write by raising <code>NotImplementedError</code>, and a child that forgot only failed when the missing method was called. An abstract base class (ABC) makes the rule official: Python refuses to create an object of any class that hasn&rsquo;t written every required method. Today you&rsquo;ll write ABCs with <code>@abstractmethod</code>, design small interfaces, and then use the standard library&rsquo;s own ABCs in <code>collections.abc</code>, which turn two or three special methods into a complete list-like or dictionary-like class, as promised last week.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Write an abstract base class with @abstractmethod, and explain when Python checks it</li><li>Combine abstract methods with ordinary methods that use them</li><li>Build a sequence or mapping from collections.abc by writing only the required methods</li><li>Use isinstance with collections.abc to check what an object can do</li><li>Decide when an ABC is worth having, and when duck typing is enough</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Abstract methods: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Designing a small interface: 20 min"></span><span class="plan-seg s1" style="flex:30" title="collections.abc: 30 min"></span><span class="plan-seg s0" style="flex:15" title="Checking kinds with isinstance: 15 min"></span><span class="plan-seg s1" style="flex:10" title="When to use an ABC: 10 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Abstract methods</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Designing a small interface</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">collections.abc</span><span class="plan-min">30 min</span></li><li><span class="plan-at">1:25</span><span class="plan-what">Checking kinds with isinstance</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">When to use an ABC</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w032d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w032d4.ipynb" download>download it</a>. Exercises today are worth 115 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w032d4-p1"><textarea class="pc-src pc-code" hidden>from abc import ABC, abstractmethod
+
+class Shape(ABC):
+    @abstractmethod
+    def area(self):
+        ...
+
+    def describe(self):
+        return f&quot;{type(self).__name__}: {self.area()}&quot;
+
+class Square(Shape):
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        return self.side ** 2
+
+class Blob(Shape):
+    pass
+
+print(Square(3).describe())
+for cls in (Shape, Blob):
+    try:
+        cls()
+        print(&quot;made a&quot;, cls.__name__)
+    except TypeError:
+        print(&quot;can&#x27;t make a&quot;, cls.__name__)</textarea></div>
+<p><code>Shape</code> says every shape must have an <code>area</code>. Python then refuses to make a <code>Shape</code> itself, or a <code>Blob</code>, which never wrote one. A <code>Square</code> that keeps the rule works, and gets <code>describe</code> for free. The check happens when the object is <strong>made</strong>, not later when someone happens to call <code>area</code>.</p>
+<h2 id="abstract-methods">Abstract methods</h2>
+<p>An <strong>abstract base class</strong> is a class that exists to be inherited from and that lists methods its children <strong>must</strong> provide. Inherit from <code>abc.ABC</code> and mark the required methods with <code>@abstractmethod</code>:</p>
+<div class="pc pc-example" data-kind="example" data-id="w032d4-e2"><textarea class="pc-src pc-code" hidden>from abc import ABC, abstractmethod
+
+class Payment(ABC):
+    def __init__(self, pence):
+        self.pence = pence
+
+    @abstractmethod
+    def fee(self):
+        &quot;&quot;&quot;The fee for this payment, in pence.&quot;&quot;&quot;
+
+    def total(self):
+        return self.pence + self.fee()
+
+class Card(Payment):
+    def fee(self):
+        return self.pence * 15 // 1000
+
+class Cash(Payment):
+    def fee(self):
+        return 0
+
+class Cheque(Payment):
+    def fea(self):                     # a typo: fee is still missing
+        return 50
+
+print(Card(2000).total(), Cash(2000).total())
+try:
+    Cheque(2000)
+except TypeError as err:
+    print(&quot;TypeError:&quot;, err)</textarea></div>
+<ul>
+<li>An abstract method&rsquo;s body is usually just a docstring, or <code>...</code> (the &ldquo;ellipsis&rdquo;, Python&rsquo;s way of writing &ldquo;nothing here yet&rdquo;). It can also hold real code that children reach with <code>super()</code>.</li>
+<li>A class with <strong>any</strong> abstract method that hasn&rsquo;t been written can&rsquo;t be made. That catches a misspelt method name the moment the class is used, as <code>Cheque</code> shows. Compare Week 30&rsquo;s <code>raise NotImplementedError</code>, which only failed when the method was called, perhaps much later.</li>
+<li>ABCs can have ordinary methods (<code>total</code>), <code>__init__</code>, class attributes and everything else. A good ABC is usually a parent class from Week 30, Day 3: it lays out the job, and the abstract methods are the hooks.</li>
+</ul>
+<p>Properties and class methods can be abstract too; put <code>@abstractmethod</code> <strong>underneath</strong> the other decorator:</p>
+<div class="pc pc-example" data-kind="example" data-id="w032d4-e3"><textarea class="pc-src pc-code" hidden>from abc import ABC, abstractmethod
+
+class Vehicle(ABC):
+    @property
+    @abstractmethod
+    def wheels(self):
+        ...
+
+    def tyres_needed(self, count):
+        return self.wheels * count
+
+class Bike(Vehicle):
+    wheels = 2            # a plain class attribute satisfies an abstract property
+
+class Car(Vehicle):
+    @property
+    def wheels(self):
+        return 4
+
+print(Bike().tyres_needed(10), Car().tyres_needed(3))</textarea></div>
+<h2 id="designing-a-small-interface">Designing a small interface</h2>
+<p>The abstract methods of an ABC are an <strong>interface</strong>: a promise about what every child can do. Code that works with the parent can then rely on it. Keep interfaces small: every abstract method is work for every child, now and later.</p>
+<p>Here&rsquo;s a design with two different storage places for notes, sharing one interface and one set of helpers:</p>
+<div class="pc pc-example" data-kind="example" data-id="w032d4-e4"><textarea class="pc-src pc-code" hidden>import json
+from abc import ABC, abstractmethod
+
+class Store(ABC):
+    &quot;&quot;&quot;Somewhere to keep text by key.&quot;&quot;&quot;
+
+    @abstractmethod
+    def get(self, key):
+        &quot;&quot;&quot;The text for key; KeyError if there isn&#x27;t any.&quot;&quot;&quot;
+
+    @abstractmethod
+    def put(self, key, text):
+        &quot;&quot;&quot;Keep text under key.&quot;&quot;&quot;
+
+    @abstractmethod
+    def keys(self):
+        &quot;&quot;&quot;All the keys, sorted.&quot;&quot;&quot;
+
+    def get_or(self, key, default=&quot;&quot;):
+        try:
+            return self.get(key)
+        except KeyError:
+            return default
+
+    def copy_to(self, other):
+        for key in self.keys():
+            other.put(key, self.get(key))
+
+class MemoryStore(Store):
+    def __init__(self):
+        self._data = {}
+
+    def get(self, key):
+        return self._data[key]
+
+    def put(self, key, text):
+        self._data[key] = text
+
+    def keys(self):
+        return sorted(self._data)
+
+class FileStore(Store):
+    def __init__(self, path):
+        self.path = path
+
+    def _load(self):
+        try:
+            with open(self.path) as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return {}
+
+    def get(self, key):
+        return self._load()[key]
+
+    def put(self, key, text):
+        data = self._load()
+        data[key] = text
+        with open(self.path, &quot;w&quot;) as f:
+            json.dump(data, f)
+
+    def keys(self):
+        return sorted(self._load())
+
+mem = MemoryStore()
+mem.put(&quot;shopping&quot;, &quot;yam, eggs&quot;)
+mem.put(&quot;todo&quot;, &quot;call Kemi&quot;)
+disk = FileStore(&quot;notes.json&quot;)
+mem.copy_to(disk)
+print(disk.keys(), disk.get(&quot;todo&quot;), disk.get_or(&quot;diary&quot;, &quot;(none)&quot;))</textarea></div>
+<p><code>copy_to</code> works between <strong>any</strong> two stores, including kinds written next year, because it only uses the interface. That&rsquo;s polymorphism (Week 30, Day 4) with a contract written down.</p>
+<h2 id="collections-abc">collections.abc</h2>
+<p>The <code>collections.abc</code> module holds ABCs for Python&rsquo;s own kinds of container. Each one lists a few abstract methods, and gives you many more methods for free once you&rsquo;ve written them. Week 31 promised exactly this:</p>
+<table>
+<thead>
+<tr>
+<th>Inherit from</th>
+<th>You write</th>
+<th>You get for free</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Sequence</code></td>
+<td><code>__getitem__</code>, <code>__len__</code></td>
+<td><code>__contains__</code>, <code>__iter__</code>, <code>__reversed__</code>, <code>index</code>, <code>count</code></td>
+</tr>
+<tr>
+<td><code>MutableSequence</code></td>
+<td>those, plus <code>__setitem__</code>, <code>__delitem__</code>, <code>insert</code></td>
+<td><code>append</code>, <code>extend</code>, <code>pop</code>, <code>remove</code>, <code>reverse</code>, <code>+=</code>, &hellip;</td>
+</tr>
+<tr>
+<td><code>Mapping</code></td>
+<td><code>__getitem__</code>, <code>__iter__</code>, <code>__len__</code></td>
+<td><code>__contains__</code>, <code>get</code>, <code>keys</code>, <code>items</code>, <code>values</code>, <code>__eq__</code></td>
+</tr>
+<tr>
+<td><code>MutableMapping</code></td>
+<td>those, plus <code>__setitem__</code>, <code>__delitem__</code></td>
+<td><code>pop</code>, <code>popitem</code>, <code>clear</code>, <code>update</code>, <code>setdefault</code></td>
+</tr>
+<tr>
+<td><code>Set</code></td>
+<td><code>__contains__</code>, <code>__iter__</code>, <code>__len__</code></td>
+<td><code>&amp;</code>, <code>|</code>, <code>-</code>, <code>^</code>, <code>&lt;=</code>, <code>isdisjoint</code>, <code>==</code>, &hellip;</td>
+</tr>
+</tbody>
+</table>
+<p>Here&rsquo;s the case-insensitive dictionary from Weeks 30 and 31 one last time. As a <code>MutableMapping</code>, it needs five methods, and every other dictionary method comes from the ABC, built on top of yours. So <code>update</code> and <code>setdefault</code> go through your <code>__setitem__</code>, unlike the <code>dict</code> subclass of Week 30:</p>
+<div class="pc pc-example" data-kind="example" data-id="w032d4-e5"><textarea class="pc-src pc-code" hidden>from collections.abc import MutableMapping
+
+class LowerDict(MutableMapping):
+    def __init__(self, data=()):
+        self._data = {}
+        self.update(data)                       # free, and uses __setitem__
+
+    def __getitem__(self, key):
+        return self._data[key.lower()]
+
+    def __setitem__(self, key, value):
+        self._data[key.lower()] = value
+
+    def __delitem__(self, key):
+        del self._data[key.lower()]
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def __len__(self):
+        return len(self._data)
+
+d = LowerDict({&quot;Lagos&quot;: 15})
+d.update(LEEDS=0.8)
+d.setdefault(&quot;KANO&quot;, 4)
+print(dict(d), d.get(&quot;LAGOS&quot;), &quot;leeds&quot; in d, d.pop(&quot;Kano&quot;), len(d))
+print(d == {&quot;lagos&quot;: 15, &quot;leeds&quot;: 0.8})</textarea></div>
+<p>The free methods are written in terms of yours, so they&rsquo;re sometimes slower than hand-written ones (<code>__contains__</code> from <code>Sequence</code> checks items one by one). Override any of them when it matters.</p>
+<h2 id="checking-kinds-with-isinstance">Checking kinds with isinstance</h2>
+<p>ABCs also name <strong>kinds</strong> of object, which makes them the right thing to check with <code>isinstance</code>. For the simplest ones (<code>Iterable</code>, <code>Sized</code>, <code>Container</code>, <code>Hashable</code>, <code>Callable</code>), Python checks whether the object&rsquo;s class has the needed method, so classes count without inheriting anything:</p>
+<div class="pc pc-example" data-kind="example" data-id="w032d4-e6"><textarea class="pc-src pc-code" hidden>from collections.abc import Iterable, Sized, Hashable, Callable, Sequence, Mapping
+
+class Crate:
+    def __len__(self):
+        return 3
+
+print(isinstance(Crate(), Sized), isinstance(Crate(), Iterable))
+print(isinstance([1], Hashable), isinstance((1,), Hashable), isinstance(len, Callable))
+print(isinstance(&quot;abc&quot;, Sequence), isinstance({}, Mapping), isinstance({}, Sequence))</textarea></div>
+<p>The bigger ones (<code>Sequence</code>, <code>Mapping</code>) only count classes that inherit from them, or that are <strong>registered</strong> with <code>Sequence.register(SomeClass)</code>; Python&rsquo;s own <code>list</code>, <code>tuple</code>, <code>str</code>, <code>range</code> and <code>dict</code> are.</p>
+<p>A classic use is a function that accepts &ldquo;one thing or many&rdquo;. Watch out for strings: a string is iterable, so it must be checked first.</p>
+<div class="pc pc-example" data-kind="example" data-id="w032d4-e7"><textarea class="pc-src pc-code" hidden>from collections.abc import Iterable
+
+def as_list(names):
+    if isinstance(names, str) or not isinstance(names, Iterable):
+        return [names]
+    return list(names)
+
+print(as_list(&quot;Ada&quot;), as_list([&quot;Ada&quot;, &quot;Bo&quot;]), as_list((&quot;Ada&quot;,)), as_list({&quot;Bo&quot;}), as_list(42))</textarea></div>
+<h2 id="when-to-use-an-abc">When to use an ABC</h2>
+<p>ABCs earn their place when there&rsquo;s a <strong>family</strong> of classes that must all keep the same promise, and mistakes would be costly or late: payment types, storage backends, exporters, plugins that other people write. They also make the interface visible in one place, with docstrings, for anyone writing a new child.</p>
+<p>They&rsquo;re unnecessary when a function just needs &ldquo;something with a <code>write</code> method&rdquo;: plain duck typing (Week 30, Day 4) already handles that, and forcing callers to inherit from your class would be a nuisance. Tomorrow&rsquo;s Protocols describe such interfaces <strong>without</strong> inheritance. And <code>collections.abc</code> is worth reaching for whenever you write your own container.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>An abstract base class inherits from <code>abc.ABC</code> and marks required methods with <code>@abstractmethod</code> (under <code>@property</code> or <code>@classmethod</code> if used); Python refuses to make any object whose class hasn&rsquo;t written them all, which catches missing and misspelt methods early. ABCs can also hold ordinary methods built on the abstract ones. <code>collections.abc</code> provides <code>Sequence</code>, <code>Mapping</code>, <code>MutableMapping</code>, <code>Set</code> and more: write the few required special methods and get the rest free, built on yours. <code>isinstance(x, Iterable)</code> and friends check what an object can do (remember that strings are iterable). Use ABCs for families that must keep a promise; use duck typing for simple needs.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w032d4-shapes" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">An abstract shape</div><div class="pc-prompt"><p>Make <code>Shape</code> an ABC whose <code>area</code> and <code>perimeter</code> are abstract, keeping <code>describe</code> as an ordinary method. Then write <code>Rect(width, height)</code> and <code>Circle(radius)</code> (use <code>math.pi</code>). <code>Shape()</code> itself must be impossible to make.</p></div><textarea class="pc-src pc-code" hidden>import math
+from abc import ABC, abstractmethod
+
+class Shape:
+    def area(self):
+        raise NotImplementedError
+
+    def perimeter(self):
+        raise NotImplementedError
+
+    def describe(self):
+        return f&quot;{type(self).__name__}: area {self.area():.2f}, perimeter {self.perimeter():.2f}&quot;
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_shapes():
+    &quot;shapes&quot;
+    Sh, R, C = ns[&quot;Shape&quot;], ns[&quot;Rect&quot;], ns[&quot;Circle&quot;]
+    assert R(2, 3).describe() == &quot;Rect: area 6.00, perimeter 10.00&quot; and C(1).describe() == &quot;Circle: area 3.14, perimeter 6.28&quot;
+    try:
+        Sh()
+        assert False, &quot;Shape() should raise TypeError&quot;
+    except TypeError:
+        pass
+    class Half(Sh):
+        def area(self):
+            return 1
+    try:
+        Half()
+        assert False, &quot;a shape without perimeter can&#x27;t be made&quot;
+    except TypeError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import math
+from abc import ABC, abstractmethod
+
+class Shape(ABC):
+    @abstractmethod
+    def area(self):
+        ...
+
+    @abstractmethod
+    def perimeter(self):
+        ...
+
+    def describe(self):
+        return f&quot;{type(self).__name__}: area {self.area():.2f}, perimeter {self.perimeter():.2f}&quot;
+
+class Rect(Shape):
+    def __init__(self, width, height):
+        self.width, self.height = width, height
+
+    def area(self):
+        return self.width * self.height
+
+    def perimeter(self):
+        return 2 * (self.width + self.height)
+
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+
+    def area(self):
+        return math.pi * self.radius ** 2
+
+    def perimeter(self):
+        return 2 * math.pi * self.radius</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w032d4-chapters" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A sequence for free</div><div class="pc-prompt"><p>Write <code>Book(title, chapters)</code> as a <code>Sequence</code> of chapter titles: write only <code>__getitem__</code> (a slice gives a new <code>Book</code> with the same title) and <code>__len__</code>, plus <code>__repr__</code> like <code>Book('Aké', 3 chapters)</code>. Everything else (<code>in</code>, <code>for</code>, <code>reversed</code>, <code>index</code>, <code>count</code>) must come from <code>Sequence</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections.abc import Sequence
+
+class Book(Sequence):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_book():
+    &quot;a sequence&quot;
+    from collections.abc import Sequence as Seq
+    B = ns[&quot;Book&quot;]
+    b = B(&quot;Aké&quot;, [&quot;Ijebu&quot;, &quot;Ake&quot;, &quot;School&quot;, &quot;Return&quot;])
+    assert len(b) == 4 and b[0] == &quot;Ijebu&quot; and b[-1] == &quot;Return&quot; and repr(b) == &quot;Book(&#x27;Aké&#x27;, 4 chapters)&quot;
+    assert &quot;School&quot; in b and list(reversed(b)) == [&quot;Return&quot;, &quot;School&quot;, &quot;Ake&quot;, &quot;Ijebu&quot;] and b.index(&quot;Ake&quot;) == 1 and b.count(&quot;x&quot;) == 0
+    part = b[1:3]
+    assert isinstance(part, B) and list(part) == [&quot;Ake&quot;, &quot;School&quot;] and part.title == &quot;Aké&quot; and isinstance(b, Seq)
+    for name in [&quot;__contains__&quot;, &quot;__iter__&quot;, &quot;index&quot;, &quot;count&quot;, &quot;__reversed__&quot;]:
+        assert name not in vars(B), f&quot;{name} should come from Sequence&quot;</textarea><textarea class="pc-src pc-solution" hidden>from collections.abc import Sequence
+
+class Book(Sequence):
+    def __init__(self, title, chapters):
+        self.title = title
+        self._chapters = list(chapters)
+
+    def __getitem__(self, i):
+        if isinstance(i, slice):
+            return Book(self.title, self._chapters[i])
+        return self._chapters[i]
+
+    def __len__(self):
+        return len(self._chapters)
+
+    def __repr__(self):
+        return f&quot;Book({self.title!r}, {len(self)} chapters)&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w032d4-scores" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A checked mapping</div><div class="pc-prompt"><p>Write <code>Scores</code>, a <code>MutableMapping</code> from player names to scores: names are stored without spaces at the ends and in title case (<code>" ada "</code> becomes <code>"Ada"</code>), and scores must be whole numbers of 0 or more (not <code>bool</code>), otherwise <code>ValueError</code>. Write only the five required methods and <code>__init__</code> (which takes an optional starting dictionary). Check that the free methods (<code>update</code>, <code>setdefault</code>, <code>get</code>, <code>pop</code>) all apply your rules.</p></div><textarea class="pc-src pc-code" hidden>from collections.abc import MutableMapping
+
+class Scores(MutableMapping):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_scores():
+    &quot;scores&quot;
+    S = ns[&quot;Scores&quot;]
+    s = S({&quot; ada &quot;: 10})
+    s[&quot;bo&quot;] = 7
+    s.update({&quot;CHIDI&quot;: 3}, dami=0)
+    assert dict(s) == {&quot;Ada&quot;: 10, &quot;Bo&quot;: 7, &quot;Chidi&quot;: 3, &quot;Dami&quot;: 0} and s[&quot;ADA&quot;] == 10 and s.get(&quot;chidi&quot;) == 3
+    assert s.setdefault(&quot;bo&quot;, 99) == 7 and s.pop(&quot;dami&quot;) == 0 and len(s) == 3 and &quot;ada&quot; in s
+    for bad in [-1, 2.5, True, &quot;9&quot;]:
+        for f in [lambda: s.__setitem__(&quot;x&quot;, bad), lambda: s.update(x=bad), lambda: s.setdefault(&quot;zed&quot;, bad), lambda: S({&quot;q&quot;: bad})]:
+            try:
+                f()
+                assert False, f&quot;score {bad!r} should raise ValueError&quot;
+            except ValueError:
+                pass
+    assert &quot;Zed&quot; not in s and &quot;X&quot; not in s
+    for name in [&quot;update&quot;, &quot;setdefault&quot;, &quot;get&quot;, &quot;pop&quot;, &quot;__contains__&quot;]:
+        assert name not in vars(S), f&quot;{name} should come from MutableMapping&quot;</textarea><textarea class="pc-src pc-solution" hidden>from collections.abc import MutableMapping
+
+class Scores(MutableMapping):
+    def __init__(self, data=()):
+        self._data = {}
+        self.update(data)
+
+    @staticmethod
+    def _key(name):
+        return name.strip().title()
+
+    def __getitem__(self, name):
+        return self._data[self._key(name)]
+
+    def __setitem__(self, name, score):
+        if not isinstance(score, int) or isinstance(score, bool) or score &lt; 0:
+            raise ValueError(f&quot;bad score: {score!r}&quot;)
+        self._data[self._key(name)] = score
+
+    def __delitem__(self, name):
+        del self._data[self._key(name)]
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def __len__(self):
+        return len(self._data)</textarea><template class="pc-src pc-hint">Write a helper <code>_key(name)</code> returning <code>name.strip().title()</code>, and use it in all three methods that take a key. <code>__init__</code> can call <code>self.update(data)</code>.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w032d4-flatten" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Flattening anything</div><div class="pc-prompt"><p>Write <code>flatten(items)</code>, which returns a flat list of everything inside <code>items</code>, going into any nested iterable (lists, tuples, sets, ranges, your own iterable classes) but treating strings and bytes as single items. Use <code>collections.abc.Iterable</code>, not a list of types.</p></div><textarea class="pc-src pc-code" hidden>from collections.abc import Iterable
+
+def flatten(items):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_flatten():
+    &quot;flattening&quot;
+    assert flatten([1, [2, [3, (4, 5)]], 6]) == [1, 2, 3, 4, 5, 6]
+    assert flatten([&quot;ab&quot;, [&quot;cd&quot;, (&quot;ef&quot;,)]]) == [&quot;ab&quot;, &quot;cd&quot;, &quot;ef&quot;] and flatten([b&quot;xy&quot;, [b&quot;z&quot;]]) == [b&quot;xy&quot;, b&quot;z&quot;]
+    assert flatten([range(3), [], [[[]]]]) == [0, 1, 2] and flatten([]) == []
+    class Pair:
+        def __iter__(self):
+            return iter([7, [8]])
+    assert flatten([Pair(), 9]) == [7, 8, 9]</textarea><textarea class="pc-src pc-solution" hidden>from collections.abc import Iterable
+
+def flatten(items):
+    result = []
+    for item in items:
+        if isinstance(item, Iterable) and not isinstance(item, (str, bytes)):
+            result.extend(flatten(item))
+        else:
+            result.append(item)
+    return result</textarea><template class="pc-src pc-hint">For each item: if it&rsquo;s iterable and not a <code>str</code> or <code>bytes</code>, extend the result with <code>flatten(item)</code>; otherwise append it.</template></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w032d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Can&rsquo;t make a circle</div><div class="pc-prompt"><p>Making a <code>Circle</code> crashes with <code>TypeError: Can't instantiate abstract class Circle without an implementation for abstract method 'area'</code>. Fix <code>Circle</code> so this prints <code>12.57</code>.</p></div><textarea class="pc-src pc-code" hidden>import math
+from abc import ABC, abstractmethod
+
+class Shape(ABC):
+    @abstractmethod
+    def area(self):
+        ...
+
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+
+    def aera(self):
+        return math.pi * self.radius ** 2
+
+print(round(Circle(2).area(), 2))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the area&quot;
+    expect_output(&quot;12.57&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import math
+from abc import ABC, abstractmethod
+
+class Shape(ABC):
+    @abstractmethod
+    def area(self):
+        ...
+
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+
+    def area(self):
+        return math.pi * self.radius ** 2
+
+print(round(Circle(2).area(), 2))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w032d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Letters everywhere</div><div class="pc-prompt"><p><code>tags</code> should accept one tag or a list of tags, so this should print <code>['news', 'sport', 'news']</code>. But the single tag is split into letters. Fix <code>tags</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections.abc import Iterable
+
+def tags(*groups):
+    result = []
+    for g in groups:
+        if isinstance(g, Iterable):
+            result.extend(g)
+        else:
+            result.append(g)
+    return result
+
+print(tags(&quot;news&quot;, [&quot;sport&quot;, &quot;news&quot;]))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;tags&quot;
+    expect_output(&quot;[&#x27;news&#x27;, &#x27;sport&#x27;, &#x27;news&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from collections.abc import Iterable
+
+def tags(*groups):
+    result = []
+    for g in groups:
+        if isinstance(g, Iterable) and not isinstance(g, str):
+            result.extend(g)
+        else:
+            result.append(g)
+    return result
+
+print(tags(&quot;news&quot;, [&quot;sport&quot;, &quot;news&quot;]))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w032d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Half a sequence</div><div class="pc-prompt"><p><code>Week</code> inherits from <code>Sequence</code>, but making one crashes with <code>TypeError: Can't instantiate abstract class Week without an implementation for abstract method '__len__'</code>. Fix it so this prints <code>7 True 4</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections.abc import Sequence
+
+class Week(Sequence):
+    DAYS = [&quot;Mon&quot;, &quot;Tue&quot;, &quot;Wed&quot;, &quot;Thu&quot;, &quot;Fri&quot;, &quot;Sat&quot;, &quot;Sun&quot;]
+
+    def __getitem__(self, i):
+        return Week.DAYS[i]
+
+w = Week()
+print(len(w), &quot;Sat&quot; in w, w.index(&quot;Fri&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a full sequence&quot;
+    expect_output(&quot;7 True 4&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from collections.abc import Sequence
+
+class Week(Sequence):
+    DAYS = [&quot;Mon&quot;, &quot;Tue&quot;, &quot;Wed&quot;, &quot;Thu&quot;, &quot;Fri&quot;, &quot;Sat&quot;, &quot;Sun&quot;]
+
+    def __getitem__(self, i):
+        return Week.DAYS[i]
+
+    def __len__(self):
+        return len(Week.DAYS)
+
+w = Week()
+print(len(w), &quot;Sat&quot; in w, w.index(&quot;Fri&quot;))</textarea></div>
+<div class="parsons" data-id="w032d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">An abstract notifier</div><div class="pc-prompt"><p>Arrange the lines into an abstract <code>Notifier</code> that requires <code>send</code>, with an ordinary <code>send_all</code> built on it. One line is a trap.</p></div><script type="application/json">{"lines": ["from abc import ABC, abstractmethod", "class Notifier(ABC):", "    @abstractmethod", "    def send(self, text):", "        ...", "    def send_all(self, texts):", "        return [self.send(t) for t in texts]"], "distractors": ["class Notifier(abstractmethod):"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w032d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>from abc import ABC, abstractmethod
+from collections.abc import Iterable, Sized, Sequence
+
+class A(ABC):
+    @abstractmethod
+    def f(self):
+        ...
+
+class B(A):
+    def f(self):
+        return 1
+
+class C:
+    def __iter__(self):
+        return iter([])
+
+p = ___   # B().f()
+q = ___   # isinstance(B(), A)
+r = ___   # isinstance(C(), Iterable)
+s = ___   # isinstance(C(), Sized)
+t = ___   # isinstance(&quot;hi&quot;, Sequence)
+u = ___   # isinstance(5, Iterable)</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert (p, q, r) == (1, True, True), &quot;p to r&quot;
+    assert (s, t, u) == (False, True, False)</textarea><textarea class="pc-src pc-solution" hidden>from abc import ABC, abstractmethod
+from collections.abc import Iterable, Sized, Sequence
+
+class A(ABC):
+    @abstractmethod
+    def f(self):
+        ...
+
+class B(A):
+    def f(self):
+        return 1
+
+class C:
+    def __iter__(self):
+        return iter([])
+
+p = 1
+q = True
+r = True
+s = False
+t = True
+u = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w032d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "When does Python complain about a missing abstract method?", "answer": 1, "explain": "Earlier than NotImplementedError, which waits for the call.", "options": ["When the class is defined", "When you try to make an object of the class", "When the method is called", "Never"]}, {"type": "mc", "q": "What must a class inherit from to use @abstractmethod as intended?", "answer": 1, "explain": "ABC sets up the checking.", "options": ["object", "abc.ABC", "Exception", "Enum"]}, {"type": "mc", "q": "Can an ABC have ordinary methods?", "answer": 1, "explain": "That&rsquo;s the parent-lays-out-the-job design from Week 30.", "options": ["No", "Yes, and they can use the abstract ones", "Only properties", "Only <strong>init</strong>"]}, {"type": "mc", "q": "Where does @abstractmethod go with @property?", "answer": 1, "explain": "The innermost decorator is applied first.", "options": ["Above @property", "Underneath @property, nearest the def", "Either", "They can&rsquo;t be combined"]}, {"type": "mc", "q": "Which methods must a Sequence subclass write?", "answer": 1, "explain": "The rest come free.", "options": ["<strong>iter</strong> and <strong>contains</strong>", "<strong>getitem</strong> and <strong>len</strong>", "index and count", "All of them"]}, {"type": "mc", "q": "Which methods must a MutableMapping subclass write?", "answer": 1, "explain": "update, pop, setdefault and others are built on them.", "options": ["get and set", "<strong>getitem</strong>, <strong>setitem</strong>, <strong>delitem</strong>, <strong>iter</strong>, <strong>len</strong>", "update and pop", "keys and values"]}, {"type": "mc", "q": "Why does MutableMapping&rsquo;s update respect your rules when dict&rsquo;s doesn&rsquo;t for a dict subclass?", "answer": 1, "explain": "dict&rsquo;s own methods skip overrides for speed.", "options": ["It&rsquo;s newer", "It&rsquo;s written in terms of your <strong>setitem</strong>", "It copies the data", "It doesn&rsquo;t"]}, {"type": "mc", "q": "What does isinstance(x, collections.abc.Iterable) check for an ordinary class?", "answer": 1, "explain": "The simple ABCs check for the method.", "options": ["That it inherits from Iterable", "That its class has <strong>iter</strong>", "That it&rsquo;s a list", "That it has <strong>len</strong>"]}, {"type": "mc", "q": "Why check for str before treating something as Iterable?", "answer": 1, "explain": "bytes have the same problem.", "options": ["Strings aren&rsquo;t iterable", "Strings are iterable, so a single word would be split into letters", "It&rsquo;s faster", "It isn&rsquo;t needed"]}, {"type": "mc", "q": "When is an ABC unnecessary?", "answer": 1, "explain": "Tomorrow&rsquo;s Protocols describe such needs without inheritance.", "options": ["For a family of payment types", "When a function only needs something with one method, which duck typing handles", "For storage backends", "For your own containers"]}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w032d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: files and folders</div><div class="pc-prompt"><p>Model a small file system with an ABC and a mapping.</p>
+<ul>
+<li><code>Node(ABC)</code>, made with a <code>name</code> that isn&rsquo;t empty and contains no <code>/</code> (otherwise <code>ValueError</code>). It has an attribute <code>parent</code> (starting as <code>None</code>), an abstract method <code>size()</code>, and an ordinary method <code>path()</code>: <code>"/" + name</code> for a node with no parent, otherwise the parent&rsquo;s path, <code>"/"</code>, and the name (<code>/home/docs/cv.txt</code>).</li>
+<li><code>File(name, size_bytes)</code>, a <code>Node</code> whose size is <code>size_bytes</code> (an <code>int</code> of 0 or more, otherwise <code>ValueError</code>).</li>
+<li><code>Folder(name)</code>, which is a <code>Node</code> <strong>and</strong> a <code>Mapping</code> from child names to child nodes (inherit from both). <code>add(node)</code> puts a node in the folder, sets its <code>parent</code>, and returns it; adding something that isn&rsquo;t a <code>Node</code> raises <code>TypeError</code>, and a name already in the folder raises <code>ValueError</code>. Iterating gives child names in alphabetical order. <code>size()</code> is the total size of everything inside, however deep.</li>
+<li><code>Folder.find(suffix)</code>: the paths of every file anywhere inside whose name ends with <code>suffix</code>, sorted.</li>
+</ul>
+<p>Remember that an empty folder has a length of 0, so it&rsquo;s false in an <code>if</code>: test <code>is None</code> where you mean &ldquo;no parent&rdquo;.</p></div><textarea class="pc-src pc-code" hidden>from abc import ABC, abstractmethod
+from collections.abc import Mapping
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def build():
+    F, D = ns[&quot;File&quot;], ns[&quot;Folder&quot;]
+    home = D(&quot;home&quot;)
+    docs = home.add(D(&quot;docs&quot;))
+    docs.add(F(&quot;cv.txt&quot;, 1200))
+    docs.add(F(&quot;notes.md&quot;, 300))
+    pics = home.add(D(&quot;pics&quot;))
+    pics.add(F(&quot;lagos.jpg&quot;, 50000))
+    trip = pics.add(D(&quot;trip&quot;))
+    trip.add(F(&quot;kano.jpg&quot;, 70000))
+    trip.add(F(&quot;plan.txt&quot;, 100))
+    home.add(D(&quot;empty&quot;))
+    return home
+def test_tree():
+    &quot;the tree&quot;
+    home = build()
+    assert list(home) == [&quot;docs&quot;, &quot;empty&quot;, &quot;pics&quot;] and len(home) == 3 and home[&quot;pics&quot;][&quot;trip&quot;][&quot;kano.jpg&quot;].size() == 70000
+    assert home.size() == 121600 and home[&quot;docs&quot;].size() == 1500 and home[&quot;empty&quot;].size() == 0
+    assert home[&quot;pics&quot;][&quot;trip&quot;][&quot;plan.txt&quot;].path() == &quot;/home/pics/trip/plan.txt&quot; and home.path() == &quot;/home&quot;
+    assert home[&quot;pics&quot;][&quot;trip&quot;].parent is home[&quot;pics&quot;] and &quot;docs&quot; in home and home.get(&quot;music&quot;) is None
+    assert home.find(&quot;.txt&quot;) == [&quot;/home/docs/cv.txt&quot;, &quot;/home/pics/trip/plan.txt&quot;] and home.find(&quot;.jpg&quot;) == [&quot;/home/pics/lagos.jpg&quot;, &quot;/home/pics/trip/kano.jpg&quot;]
+    assert home[&quot;empty&quot;].find(&quot;&quot;) == [] and home.find(&quot;.doc&quot;) == []
+def test_rules():
+    &quot;rules&quot;
+    N, F, D = ns[&quot;Node&quot;], ns[&quot;File&quot;], ns[&quot;Folder&quot;]
+    from collections.abc import Mapping as Map
+    assert issubclass(D, N) and issubclass(D, Map) and issubclass(F, N)
+    for bad in [lambda: N(&quot;x&quot;), lambda: F(&quot;&quot;, 1), lambda: F(&quot;a/b&quot;, 1), lambda: F(&quot;x&quot;, -1), lambda: D(&quot;a/b&quot;)]:
+        try:
+            bad()
+            assert False, &quot;should raise&quot;
+        except (TypeError, ValueError):
+            pass
+    d = D(&quot;d&quot;)
+    d.add(F(&quot;a&quot;, 1))
+    try:
+        d.add(F(&quot;a&quot;, 2))
+        assert False, &quot;a duplicate name should raise ValueError&quot;
+    except ValueError:
+        pass
+    try:
+        d.add(&quot;a file&quot;)
+        assert False, &quot;adding a non-Node should raise TypeError&quot;
+    except TypeError:
+        pass
+    sub = D(&quot;sub&quot;)
+    d.add(sub)
+    sub.add(F(&quot;z&quot;, 5))
+    assert sub[&quot;z&quot;].path() == &quot;/d/sub/z&quot; and d.size() == 6</textarea><textarea class="pc-src pc-solution" hidden>from abc import ABC, abstractmethod
+from collections.abc import Mapping
+
+class Node(ABC):
+    def __init__(self, name):
+        if not name or &quot;/&quot; in name:
+            raise ValueError(f&quot;bad name: {name!r}&quot;)
+        self.name = name
+        self.parent = None
+
+    @abstractmethod
+    def size(self):
+        ...
+
+    def path(self):
+        if self.parent is None:
+            return &quot;/&quot; + self.name
+        return self.parent.path() + &quot;/&quot; + self.name
+
+class File(Node):
+    def __init__(self, name, size_bytes):
+        super().__init__(name)
+        if not isinstance(size_bytes, int) or isinstance(size_bytes, bool) or size_bytes &lt; 0:
+            raise ValueError(f&quot;bad size: {size_bytes!r}&quot;)
+        self.size_bytes = size_bytes
+
+    def size(self):
+        return self.size_bytes
+
+class Folder(Node, Mapping):
+    def __init__(self, name):
+        super().__init__(name)
+        self._children = {}
+
+    def add(self, node):
+        if not isinstance(node, Node):
+            raise TypeError(f&quot;can only add files and folders, not {node!r}&quot;)
+        if node.name in self._children:
+            raise ValueError(f&quot;{node.name} is already in {self.path()}&quot;)
+        node.parent = self
+        self._children[node.name] = node
+        return node
+
+    def __getitem__(self, name):
+        return self._children[name]
+
+    def __iter__(self):
+        return iter(sorted(self._children))
+
+    def __len__(self):
+        return len(self._children)
+
+    def size(self):
+        return sum(child.size() for child in self._children.values())
+
+    def find(self, suffix):
+        found = []
+        for child in self._children.values():
+            if isinstance(child, Folder):
+                found.extend(child.find(suffix))
+            elif child.name.endswith(suffix):
+                found.append(child.path())
+        return sorted(found)</textarea><template class="pc-src pc-hint"><code>class Folder(Node, Mapping):</code> needs <code>__getitem__</code>, <code>__iter__</code> and <code>__len__</code> for the mapping, and <code>size()</code> for the node: <code>sum(child.size() for child in self._children.values())</code>.</template><template class="pc-src pc-hint"><code>find</code> can go through the children: for a <code>File</code>, check its name; for a <code>Folder</code>, add the results of its own <code>find</code>. Sort at the end.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Look back at a family of classes from Week 30 (shapes, payments, exporters) and decide which methods should be abstract. Tomorrow: Protocols, which describe what an object must be able to do without asking it to inherit anything.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w032d3.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w032d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w032d4", "week": 32, "day": 4, "title": "Abstract base classes", "exercises": [{"id": "w032d4-shapes", "title": "An abstract shape", "points": 10}, {"id": "w032d4-chapters", "title": "A sequence for free", "points": 15}, {"id": "w032d4-scores", "title": "A checked mapping", "points": 15}, {"id": "w032d4-flatten", "title": "Flattening anything", "points": 10}, {"id": "w032d4-bug1", "title": "Can't make a circle", "points": 10}, {"id": "w032d4-bug2", "title": "Letters everywhere", "points": 10}, {"id": "w032d4-bug3", "title": "Half a sequence", "points": 10}, {"id": "w032d4-trace", "title": "Predict them", "points": 10}, {"id": "w032d4-challenge", "title": "Challenge: files and folders", "points": 25}], "points": 115}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=8fe38f9496"></script>
+</body>
+</html>
