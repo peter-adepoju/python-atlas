@@ -8,7 +8,7 @@ Repo: https://github.com/peter-adepoju/python-atlas
 
 Write the course week by week, to the standard of Week 1 and the recent weeks (look at `course/content/w028` and `w029` as models). After each week: validate, build, commit, push, and send Peter a short progress message. "Continue" means carry on with the next day.
 
-**Status (1 November 2026):** Weeks 1 to 26 and 28 to 29 are done (Week 27 is a rest week, with no content). **Next: Week 30, "Inheritance"**: Inheritance, super(), Overriding and the MRO, Polymorphism and duck typing, Composition versus inheritance, Forge. The full plan is in `course/curriculum.py`. Rest weeks have no folder; Phase 3 ends with a consolidation project (library system) and an exam week.
+**Status (1 November 2026):** Weeks 1 to 26 and 28 to 30 are done (Week 27 is a rest week, with no content). **Next: Week 31, "The Python data model"**: Special methods: a tour, Container protocols, Rich comparisons, Callable objects, __slots__ and memory, Forge. The full plan is in `course/curriculum.py`. Rest weeks have no folder; Phase 3 ends with a consolidation project (library system) and an exam week.
 
 Week numbers in cross-references: Phase 2 runs Week 14 (method) to 26 (exam): 15 to 16 recursion, 17 Big-O, 18 to 19 searching and sorting, 20 modules and stdlib, 21 shell, argparse and Git, 22 setting up, 23 text and data formats, 24 testing, 25 project (the `spend` expense tracker), 26 review and exam. Phase 3 starts at Week 28. Check a day's title (`sed -n 2p course/content/wNNN/dD.md`) before writing "Week N" in a lesson.
 
@@ -48,6 +48,8 @@ rm -rf course/static/py/__pycache__
 python3 course/build.py
 git add -A && git commit -m "..." && git pull --rebase -q && git push -q
 ```
+
+Peter has given standing permission (1 November 2026) to merge finished work into `main` without asking: when a session works on a separate branch, open a pull request and merge it once the work is validated and pushed, so the live site updates.
 
 The validator checks that every solution passes and every starter fails. Don't run two validations at once: they share `/tmp/atlas_work` and interfere.
 
