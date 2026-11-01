@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="8fe38f9496">
+<title>Week 36 Day 5: Dependency injection | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=8fe38f9496">
+<link rel="stylesheet" href="../assets/css/site.css?v=8fe38f9496">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=8fe38f9496"></script>
+<script src="../assets/vendor/codemirror.js?v=8fe38f9496" defer></script>
+<meta name="description" content="Week 34 introduced dependency inversion: pass dependencies such as a clock or a sender into a class instead of creating them inside, and use simple fakes in...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w036d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 36 Day 5: Dependency injection">
+<meta property="og:description" content="Week 34 introduced dependency inversion: pass dependencies such as a clock or a sender into a class instead of creating them inside, and use simple fakes in...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w036d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-36">Week 36: Design patterns II and architecture</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#from-one-class-to-a-program" data-sec="from-one-class-to-a-program">From one class to a program</a></li><li><a href="#three-ways-to-inject" data-sec="three-ways-to-inject">Three ways to inject</a></li><li><a href="#the-composition-root-and-configuration" data-sec="the-composition-root-and-configuration">The composition root and configuration</a></li><li><a href="#a-small-container" data-sec="a-small-container">A small container</a></li><li><a href="#keeping-dependencies-visible" data-sec="keeping-dependencies-visible">Keeping dependencies visible</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w036d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-3">Phase 3: Objects and design</a></li><li><a href="../map.html#week-36">Week 36: Design patterns II and architecture</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 36, Day 5</span></p>
+      <h1>Dependency injection</h1>
+      <div class="day-intro"><p>Week 34 introduced dependency inversion: pass dependencies such as a clock or a sender into a class instead of creating them inside, and use simple fakes in tests. Yesterday&rsquo;s layers made that the backbone of a whole program. Today is about doing it at scale: the three ways of injecting, the one place where a program is wired together, configuration that chooses what gets wired, a small container that does the wiring for you, and the trap of hiding dependencies behind a global. By the end, you&rsquo;ll be able to build a whole program for real use or for testing by changing a few settings.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Use constructor injection by default, and know when a parameter or a default is better</li><li>Wire a whole program in one composition root, choosing implementations from configuration</li><li>Turn settings from the environment into a checked, immutable settings object</li><li>Build a small container that creates objects on demand, including shared single instances</li><li>Recognise the service locator trap and keep dependencies visible</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="From one class to a program: 15 min"></span><span class="plan-seg s0" style="flex:20" title="Three ways to inject: 20 min"></span><span class="plan-seg s1" style="flex:25" title="The composition root and configuration: 25 min"></span><span class="plan-seg s0" style="flex:25" title="A small container: 25 min"></span><span class="plan-seg s1" style="flex:10" title="Keeping dependencies visible: 10 min"></span><span class="plan-seg s0" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">From one class to a program</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">Three ways to inject</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:45</span><span class="plan-what">The composition root and configuration</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">A small container</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Keeping dependencies visible</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:45</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w036d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w036d5.ipynb" download>download it</a>. Exercises today are worth 120 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w036d5-p1"><textarea class="pc-src pc-code" hidden>class Greeter:
+    def __init__(self, clock, out):
+        self.clock, self.out = clock, out
+
+    def greet(self, name):
+        part = &quot;morning&quot; if self.clock() &lt; 12 else &quot;afternoon&quot;
+        self.out(f&quot;Good {part}, {name}&quot;)
+
+lines = []
+Greeter(clock=lambda: 9, out=lines.append).greet(&quot;Ada&quot;)
+Greeter(clock=lambda: 15, out=lines.append).greet(&quot;Bo&quot;)
+print(lines)
+Greeter(clock=lambda: 20, out=print).greet(&quot;Chi&quot;)</textarea></div>
+<p>The same class greeted three people at three &ldquo;times&rdquo;, into a list and onto the screen, without changing a line of it. Everything it depends on (what time it is, where words go) was <strong>injected</strong>. Today scales that idea up from one class to a whole program.</p>
+<h2 id="from-one-class-to-a-program">From one class to a program</h2>
+<p><strong>Dependency injection</strong> means a piece of code receives the things it depends on from outside, rather than creating or finding them itself. Week 34 showed why: the code becomes testable with fakes, and the details (the real clock, the real email server) can change without touching it.</p>
+<p>In a whole program, objects depend on objects that depend on objects: the command-line interface needs a loan service, which needs a book repository and a member repository and a clock, and the repositories need a file path. Someone has to create all of these, in the right order, and decide <strong>which</strong> implementation of each to use (a JSON repository or a memory one? the real clock or a fixed one?). Today is about doing that well.</p>
+<h2 id="three-ways-to-inject">Three ways to inject</h2>
+<table>
+<thead>
+<tr>
+<th>Way</th>
+<th>Looks like</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>constructor</strong> injection</td>
+<td><code>LoanService(books, members, clock)</code></td>
+<td>dependencies an object needs for its whole life: the default choice</td>
+</tr>
+<tr>
+<td><strong>parameter</strong> injection</td>
+<td><code>report(loans, out=print)</code></td>
+<td>functions, or something needed for one call only</td>
+</tr>
+<tr>
+<td><strong>attribute</strong> injection</td>
+<td><code>service.clock = fake</code> after making it</td>
+<td>rarely; easy to forget, and the object is half-made until it&rsquo;s done</td>
+</tr>
+</tbody>
+</table>
+<p>Constructor injection is the default because it&rsquo;s <strong>honest</strong>: the signature lists everything the class needs, and the object is complete as soon as it exists.</p>
+<p>A <strong>default</strong> can make injection convenient without hiding it. Use <code>None</code> as the default and choose the real thing inside, so the default is made fresh each time (Week 28&rsquo;s shared-default trap):</p>
+<div class="pc pc-example" data-kind="example" data-id="w036d5-e2"><textarea class="pc-src pc-code" hidden>from datetime import datetime
+
+class Stamp:
+    def __init__(self, clock=None):
+        self.clock = clock or datetime.now
+
+    def label(self, text):
+        return f&quot;[{self.clock():%H:%M}] {text}&quot;
+
+print(Stamp(clock=lambda: datetime(2026, 11, 3, 9, 5)).label(&quot;opened&quot;))
+print(Stamp().label(&quot;opened&quot;)[:1] == &quot;[&quot;)</textarea></div>
+<p>Defaults suit <strong>optional</strong> dependencies with an obvious real choice (the system clock). Dependencies with no sensible default, such as which repository to use, should be required arguments.</p>
+<h2 id="the-composition-root-and-configuration">The composition root and configuration</h2>
+<p>All the creating and connecting happens in <strong>one</strong> place, the <strong>composition root</strong> (Week 34): usually a function at the very edge of the program, called by <code>main</code>. It&rsquo;s the only code that names concrete classes for the details. <strong>Configuration</strong> tells it which ones to choose.</p>
+<p>Configuration usually comes from <strong>environment variables</strong> (settings given to a program by the system it runs on, read in Python from <code>os.environ</code>, a dictionary) or a settings file. Turn it into a checked, immutable object once, at the start, rather than reading <code>os.environ</code> all over the program:</p>
+<div class="pc pc-example" data-kind="example" data-id="w036d5-e3"><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class Settings:
+    storage: str = &quot;memory&quot;
+    data_path: str = &quot;library.json&quot;
+    loan_days: int = 14
+
+    @classmethod
+    def from_env(cls, env):
+        storage = env.get(&quot;LIBRARY_STORAGE&quot;, &quot;memory&quot;)
+        if storage not in (&quot;memory&quot;, &quot;json&quot;):
+            raise ValueError(f&quot;LIBRARY_STORAGE must be memory or json, not {storage!r}&quot;)
+        days = env.get(&quot;LIBRARY_LOAN_DAYS&quot;, &quot;14&quot;)
+        if not days.isdigit() or int(days) &lt; 1:
+            raise ValueError(&quot;LIBRARY_LOAN_DAYS must be a whole number of days&quot;)
+        return cls(storage, env.get(&quot;LIBRARY_DATA&quot;, &quot;library.json&quot;), int(days))
+
+class MemoryBooks:
+    def __init__(self):
+        self.books = {}
+
+class JsonBooks:
+    def __init__(self, path):
+        self.path = path
+
+class LoanService:
+    def __init__(self, books, loan_days):
+        self.books, self.loan_days = books, loan_days
+
+def build(settings):                                  # the composition root
+    books = JsonBooks(settings.data_path) if settings.storage == &quot;json&quot; else MemoryBooks()
+    return LoanService(books, settings.loan_days)
+
+for env in [{}, {&quot;LIBRARY_STORAGE&quot;: &quot;json&quot;, &quot;LIBRARY_LOAN_DAYS&quot;: &quot;21&quot;}]:
+    service = build(Settings.from_env(env))
+    print(type(service.books).__name__, service.loan_days)
+try:
+    Settings.from_env({&quot;LIBRARY_STORAGE&quot;: &quot;cloud&quot;})
+except ValueError as err:
+    print(&quot;ValueError:&quot;, err)</textarea></div>
+<p><code>from_env</code> takes the environment <strong>as an argument</strong> (in the real program, <code>Settings.from_env(os.environ)</code>), so tests can pass a plain dictionary. That&rsquo;s injection again, applied to configuration. A bad setting fails at start-up with a clear message, not halfway through the night.</p>
+<p>Tests rarely use the composition root at all: they build just the part they&rsquo;re testing, with fakes. The composition root itself gets one or two tests checking that it wires the right classes.</p>
+<h2 id="a-small-container">A small container</h2>
+<p>In a large program the composition root grows long. A <strong>dependency injection container</strong> can take over some of the work: you register, for each name, a <strong>provider</strong> (a function that makes the object), and the container calls providers on demand, passing itself so providers can ask for what they need. It can also keep <strong>one shared instance</strong> of things that should exist once (a repository, a database connection):</p>
+<div class="pc pc-example" data-kind="example" data-id="w036d5-e4"><textarea class="pc-src pc-code" hidden>class Container:
+    def __init__(self):
+        self._providers = {}
+        self._singletons = {}
+
+    def register(self, name, provider, singleton=False):
+        self._providers[name] = (provider, singleton)
+
+    def resolve(self, name):
+        provider, singleton = self._providers[name]
+        if singleton:
+            if name not in self._singletons:
+                self._singletons[name] = provider(self)
+            return self._singletons[name]
+        return provider(self)
+
+class Books:
+    def __init__(self):
+        self.items = {}
+
+class Service:
+    def __init__(self, books, loan_days):
+        self.books, self.loan_days = books, loan_days
+
+c = Container()
+c.register(&quot;loan_days&quot;, lambda c: 14)
+c.register(&quot;books&quot;, lambda c: Books(), singleton=True)
+c.register(&quot;service&quot;, lambda c: Service(c.resolve(&quot;books&quot;), c.resolve(&quot;loan_days&quot;)))
+
+a, b = c.resolve(&quot;service&quot;), c.resolve(&quot;service&quot;)
+print(a is b, a.books is b.books, a.loan_days)</textarea></div>
+<p>Each <code>service</code> is new, but both share the single <code>books</code> repository. Containers like this exist as libraries for Python, but many Python programs never need one: a plain composition-root function is clearer until the wiring becomes genuinely large. Use a container, if at all, only in the composition root.</p>
+<h2 id="keeping-dependencies-visible">Keeping dependencies visible</h2>
+<p>The tempting shortcut is to put the container (or a dictionary of shared objects) in a global, and have classes fetch what they need from it:</p>
+<pre><code class="language-python">class LoanService:
+    def __init__(self):
+        self.books = CONTAINER.resolve(&quot;books&quot;)       # hidden dependency
+</code></pre>
+<p>This is called the <strong>service locator</strong> pattern, and Mark Seemann, among others, describes it as an anti-pattern: the class&rsquo;s signature no longer says what it needs, tests have to set up the global before making one, and nothing stops two tests interfering through it. It&rsquo;s Week 34&rsquo;s hidden global coupling in a new form. Keep dependencies <strong>visible</strong> in signatures, and keep the container (if you have one) at the edge.</p>
+<p>A related term you&rsquo;ll meet: <strong>test doubles</strong>, the general name for stand-ins used in tests. A <strong>fake</strong> is a working, simpler version (a memory repository); a <strong>stub</strong> returns fixed answers (a clock that always says 9 o&rsquo;clock); a <strong>mock</strong> also records how it was called so the test can check (Python&rsquo;s <code>unittest.mock</code> provides these, as Week 24 mentioned). Hand-written fakes and stubs, passed in through constructors, cover most needs.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Dependency injection: code receives what it depends on rather than creating or finding it. Prefer constructor injection, which makes the signature honest; use parameters for single calls and <code>None</code> defaults for optional dependencies with an obvious real choice. Wire the whole program in one composition root, choosing implementations from a checked, immutable settings object built from the environment (passed in, not read globally). A container registers providers and can share single instances, but belongs only at the edge. Avoid the service locator, which hides dependencies behind a global. Test doubles (fakes, stubs, mocks) stand in for real dependencies.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d5-inject" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Making a class injectable</div><div class="pc-prompt"><p><code>DailyReport</code> creates its own dependencies: it reads the real date and prints. Change it to receive <code>today</code> (a function returning a <code>date</code>, defaulting to <code>date.today</code>) and <code>out</code> (a function taking a line, defaulting to <code>print</code>), keeping the behaviour the same. <code>run(sales)</code> writes <code>Report for 03/11/2026</code> and then <code>Total: £12.50</code> (the sum of the sales in pence).</p></div><textarea class="pc-src pc-code" hidden>from datetime import date
+
+class DailyReport:
+    def run(self, sales):
+        print(f&quot;Report for {date.today():%d/%m/%Y}&quot;)
+        total = sum(sales)
+        print(f&quot;Total: £{total / 100:.2f}&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_inject():
+    &quot;injected&quot;
+    from datetime import date as d
+    import inspect
+    R = ns[&quot;DailyReport&quot;]
+    lines = []
+    R(today=lambda: d(2026, 11, 3), out=lines.append).run([1000, 250])
+    assert lines == [&quot;Report for 03/11/2026&quot;, &quot;Total: £12.50&quot;]
+    params = inspect.signature(R).parameters
+    assert params[&quot;today&quot;].default is None and params[&quot;out&quot;].default is None, &quot;use None defaults&quot;
+    import io, contextlib
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        R().run([5])
+    assert buf.getvalue().endswith(&quot;Total: £0.05\n&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from datetime import date
+
+class DailyReport:
+    def __init__(self, today=None, out=None):
+        self.today = today or date.today
+        self.out = out or print
+
+    def run(self, sales):
+        self.out(f&quot;Report for {self.today():%d/%m/%Y}&quot;)
+        total = sum(sales)
+        self.out(f&quot;Total: £{total / 100:.2f}&quot;)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d5-settings" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Settings from the environment</div><div class="pc-prompt"><p>Write a frozen dataclass <code>Settings</code> with <code>host</code> (default <code>"localhost"</code>), <code>port</code> (default 8080), <code>debug</code> (default <code>False</code>) and <code>admins</code> (default an empty tuple), and a class method <code>from_env(env)</code> that reads them from a mapping of strings: <code>APP_HOST</code>, <code>APP_PORT</code> (a whole number from 1 to 65535), <code>APP_DEBUG</code> (<code>"1"</code>, <code>"true"</code> or <code>"yes"</code> in any case mean True; <code>"0"</code>, <code>"false"</code>, <code>"no"</code> or missing mean False; anything else is an error) and <code>APP_ADMINS</code> (comma-separated names, spaces stripped, blanks dropped). Any bad value raises <code>ValueError</code> naming the variable.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_settings():
+    &quot;settings&quot;
+    S = ns[&quot;Settings&quot;]
+    s = S.from_env({})
+    assert s == S() and s.port == 8080 and s.debug is False and s.admins == ()
+    s = S.from_env({&quot;APP_HOST&quot;: &quot;0.0.0.0&quot;, &quot;APP_PORT&quot;: &quot;443&quot;, &quot;APP_DEBUG&quot;: &quot;Yes&quot;, &quot;APP_ADMINS&quot;: &quot; ada, bo ,,&quot;})
+    assert (s.host, s.port, s.debug, s.admins) == (&quot;0.0.0.0&quot;, 443, True, (&quot;ada&quot;, &quot;bo&quot;))
+    for bad, name in [({&quot;APP_PORT&quot;: &quot;http&quot;}, &quot;APP_PORT&quot;), ({&quot;APP_PORT&quot;: &quot;70000&quot;}, &quot;APP_PORT&quot;), ({&quot;APP_DEBUG&quot;: &quot;maybe&quot;}, &quot;APP_DEBUG&quot;), ({&quot;APP_PORT&quot;: &quot;0&quot;}, &quot;APP_PORT&quot;)]:
+        try:
+            S.from_env(bad)
+            assert False, f&quot;{bad} should raise ValueError&quot;
+        except ValueError as err:
+            assert name in str(err), f&quot;the message should name {name}&quot;
+    try:
+        s.port = 1
+        assert False, &quot;settings are frozen&quot;
+    except AttributeError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class Settings:
+    host: str = &quot;localhost&quot;
+    port: int = 8080
+    debug: bool = False
+    admins: tuple = ()
+
+    @classmethod
+    def from_env(cls, env):
+        port_text = env.get(&quot;APP_PORT&quot;, &quot;8080&quot;)
+        if not port_text.isdigit() or not 1 &lt;= int(port_text) &lt;= 65535:
+            raise ValueError(f&quot;APP_PORT must be a whole number from 1 to 65535, not {port_text!r}&quot;)
+        debug_text = env.get(&quot;APP_DEBUG&quot;, &quot;0&quot;).lower()
+        if debug_text in (&quot;1&quot;, &quot;true&quot;, &quot;yes&quot;):
+            debug = True
+        elif debug_text in (&quot;0&quot;, &quot;false&quot;, &quot;no&quot;):
+            debug = False
+        else:
+            raise ValueError(f&quot;APP_DEBUG must be yes or no, not {debug_text!r}&quot;)
+        admins = tuple(a.strip() for a in env.get(&quot;APP_ADMINS&quot;, &quot;&quot;).split(&quot;,&quot;) if a.strip())
+        return cls(env.get(&quot;APP_HOST&quot;, &quot;localhost&quot;), int(port_text), debug, admins)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d5-container" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A container that spots loops</div><div class="pc-prompt"><p>Write a <code>Container</code> with <code>register(name, provider, singleton=False)</code> (registering a name twice raises <code>ValueError</code>) and <code>resolve(name)</code>. A provider is called with the container. Singletons are made once and shared. An unknown name raises <code>KeyError</code>. A <strong>cycle</strong> (a provider that, directly or indirectly, resolves the name being made) must raise <code>RuntimeError</code> with a message showing the chain, like <code>cycle: a -&gt; b -&gt; a</code>, instead of recursing forever.</p></div><textarea class="pc-src pc-code" hidden>class Container:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_container():
+    &quot;resolving&quot;
+    C = ns[&quot;Container&quot;]
+    c = C()
+    made = []
+    c.register(&quot;config&quot;, lambda c: {&quot;days&quot;: 14})
+    c.register(&quot;repo&quot;, lambda c: made.append(&quot;repo&quot;) or object(), singleton=True)
+    c.register(&quot;service&quot;, lambda c: (c.resolve(&quot;repo&quot;), c.resolve(&quot;config&quot;)[&quot;days&quot;]))
+    s1, s2 = c.resolve(&quot;service&quot;), c.resolve(&quot;service&quot;)
+    assert s1[0] is s2[0] and s1[1] == 14 and made == [&quot;repo&quot;] and c.resolve(&quot;config&quot;) is not c.resolve(&quot;config&quot;)
+    for f, err in [(lambda: c.resolve(&quot;nope&quot;), KeyError), (lambda: c.register(&quot;repo&quot;, lambda c: 1), ValueError)]:
+        try:
+            f()
+            assert False
+        except err:
+            pass
+    c.register(&quot;a&quot;, lambda c: c.resolve(&quot;b&quot;))
+    c.register(&quot;b&quot;, lambda c: c.resolve(&quot;a&quot;))
+    try:
+        c.resolve(&quot;a&quot;)
+        assert False, &quot;a cycle should raise RuntimeError&quot;
+    except RuntimeError as err:
+        assert str(err) == &quot;cycle: a -&gt; b -&gt; a&quot;, f&quot;message was {err}&quot;
+    c.register(&quot;x&quot;, lambda c: 1)
+    assert c.resolve(&quot;x&quot;) == 1, &quot;the container should still work after a cycle error&quot;</textarea><textarea class="pc-src pc-solution" hidden>class Container:
+    def __init__(self):
+        self._providers = {}
+        self._singletons = {}
+        self._resolving = []
+
+    def register(self, name, provider, singleton=False):
+        if name in self._providers:
+            raise ValueError(f&quot;{name!r} is already registered&quot;)
+        self._providers[name] = (provider, singleton)
+
+    def resolve(self, name):
+        if name in self._resolving:
+            raise RuntimeError(&quot;cycle: &quot; + &quot; -&gt; &quot;.join(self._resolving + [name]))
+        provider, singleton = self._providers[name]
+        if singleton and name in self._singletons:
+            return self._singletons[name]
+        self._resolving.append(name)
+        try:
+            obj = provider(self)
+        finally:
+            self._resolving.pop()
+        if singleton:
+            self._singletons[name] = obj
+        return obj</textarea><template class="pc-src pc-hint">Keep a list <code>self._resolving</code> of the names being made right now. At the start of <code>resolve</code>, if the name is already in it, raise with <code>" -&gt; ".join(self._resolving + [name])</code>. Remove the name in a <code>finally</code>, so an error doesn&rsquo;t leave it stuck.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d5-root" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A composition root</div><div class="pc-prompt"><p>Write <code>build(settings)</code>, the composition root for a small shop: it returns an <code>App</code> (a simple class you write) with attributes <code>stock</code> (a <code>MemoryStock()</code> or a <code>FileStock(path)</code>, by <code>settings.storage</code>), <code>clock</code> (<code>datetime.now</code>, or a fixed time if <code>settings.fixed_time</code> is set) and <code>checkout</code>, a <code>Checkout(stock, clock)</code>. The classes are given. An unknown storage raises <code>ValueError</code>. The same settings must always build the same kinds of object, and two calls to <code>build</code> must give independent apps.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+from datetime import datetime
+
+@dataclass(frozen=True)
+class Settings:
+    storage: str = &quot;memory&quot;
+    path: str = &quot;stock.json&quot;
+    fixed_time: datetime | None = None
+
+class MemoryStock:
+    def __init__(self):
+        self.levels = {}
+
+class FileStock:
+    def __init__(self, path):
+        self.path = path
+
+class Checkout:
+    def __init__(self, stock, clock):
+        self.stock, self.clock = stock, clock
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_root():
+    &quot;wiring&quot;
+    from datetime import datetime as dt
+    S, M, F, C = ns[&quot;Settings&quot;], ns[&quot;MemoryStock&quot;], ns[&quot;FileStock&quot;], ns[&quot;Checkout&quot;]
+    a = build(S())
+    assert isinstance(a.stock, M) and isinstance(a.checkout, C) and a.checkout.stock is a.stock and a.checkout.clock is a.clock
+    assert isinstance(a.clock(), dt)
+    b = build(S(storage=&quot;file&quot;, path=&quot;x.json&quot;, fixed_time=dt(2026, 11, 3, 9, 0)))
+    assert isinstance(b.stock, F) and b.stock.path == &quot;x.json&quot; and b.clock() == dt(2026, 11, 3, 9, 0) and b.checkout.clock() == dt(2026, 11, 3, 9, 0)
+    assert build(S()).stock is not build(S()).stock
+    try:
+        build(S(storage=&quot;cloud&quot;))
+        assert False, &quot;an unknown storage should raise ValueError&quot;
+    except ValueError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+from datetime import datetime
+
+@dataclass(frozen=True)
+class Settings:
+    storage: str = &quot;memory&quot;
+    path: str = &quot;stock.json&quot;
+    fixed_time: datetime | None = None
+
+class MemoryStock:
+    def __init__(self):
+        self.levels = {}
+
+class FileStock:
+    def __init__(self, path):
+        self.path = path
+
+class Checkout:
+    def __init__(self, stock, clock):
+        self.stock, self.clock = stock, clock
+
+class App:
+    def __init__(self, stock, clock, checkout):
+        self.stock, self.clock, self.checkout = stock, clock, checkout
+
+def build(settings):
+    if settings.storage == &quot;memory&quot;:
+        stock = MemoryStock()
+    elif settings.storage == &quot;file&quot;:
+        stock = FileStock(settings.path)
+    else:
+        raise ValueError(f&quot;unknown storage {settings.storage!r}&quot;)
+    fixed = settings.fixed_time
+    clock = (lambda: fixed) if fixed is not None else datetime.now
+    return App(stock, clock, Checkout(stock, clock))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w036d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A default made once</div><div class="pc-prompt"><p><code>log</code> is meant to stamp each message with the <strong>current</strong> hour, but its default is worked out once, when the function is defined, so every message gets the same hour: this prints <code>09 opened</code> and <code>09 closed</code>. Fix it with a <code>None</code> default, so it prints <code>09 opened</code> and <code>17 closed</code>.</p></div><textarea class="pc-src pc-code" hidden>HOUR = [9]
+
+def current_hour():
+    return HOUR[0]
+
+def log(message, hour=current_hour()):
+    return f&quot;{hour:02} {message}&quot;
+
+print(log(&quot;opened&quot;))
+HOUR[0] = 17
+print(log(&quot;closed&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the current hour&quot;
+    expect_output(&quot;09 opened\n17 closed&quot;)
+    assert log(&quot;x&quot;, 3) == &quot;03 x&quot;</textarea><textarea class="pc-src pc-solution" hidden>HOUR = [9]
+
+def current_hour():
+    return HOUR[0]
+
+def log(message, hour=None):
+    if hour is None:
+        hour = current_hour()
+    return f&quot;{hour:02} {message}&quot;
+
+print(log(&quot;opened&quot;))
+HOUR[0] = 17
+print(log(&quot;closed&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w036d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A hidden dependency</div><div class="pc-prompt"><p><code>Greeting</code> fetches its clock from a global registry instead of receiving it, so the test&rsquo;s fake clock is ignored and it prints <code>Good afternoon</code> (from the registry) instead of <code>Good morning</code>. Make <code>Greeting</code> take its clock in its constructor, and pass the fake, so the program prints <code>Good morning</code>.</p></div><textarea class="pc-src pc-code" hidden>REGISTRY = {&quot;clock&quot;: lambda: 15}
+
+class Greeting:
+    def __init__(self):
+        self.clock = REGISTRY[&quot;clock&quot;]
+
+    def text(self):
+        return &quot;Good morning&quot; if self.clock() &lt; 12 else &quot;Good afternoon&quot;
+
+fake_clock = lambda: 9
+print(Greeting().text())</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;injected&quot;
+    expect_output(&quot;Good morning&quot;)
+    assert ns[&quot;Greeting&quot;](lambda: 13).text() == &quot;Good afternoon&quot;</textarea><textarea class="pc-src pc-solution" hidden>REGISTRY = {&quot;clock&quot;: lambda: 15}
+
+class Greeting:
+    def __init__(self, clock):
+        self.clock = clock
+
+    def text(self):
+        return &quot;Good morning&quot; if self.clock() &lt; 12 else &quot;Good afternoon&quot;
+
+fake_clock = lambda: 9
+print(Greeting(fake_clock).text())</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w036d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Two repositories</div><div class="pc-prompt"><p>The repository is registered as an ordinary provider, so the service that adds a book and the report that counts books each get a <strong>different</strong> repository: this prints <code>0</code>. It should be one shared instance. Fix the registration so it prints <code>1</code>.</p></div><textarea class="pc-src pc-code" hidden>class Container:
+    def __init__(self):
+        self.providers, self.single = {}, {}
+    def register(self, name, provider, singleton=False):
+        self.providers[name] = (provider, singleton)
+    def resolve(self, name):
+        provider, singleton = self.providers[name]
+        if not singleton:
+            return provider(self)
+        if name not in self.single:
+            self.single[name] = provider(self)
+        return self.single[name]
+
+c = Container()
+c.register(&quot;books&quot;, lambda c: [])
+c.register(&quot;adder&quot;, lambda c: c.resolve(&quot;books&quot;).append)
+c.register(&quot;counter&quot;, lambda c: lambda: len(c.resolve(&quot;books&quot;)))
+
+c.resolve(&quot;adder&quot;)(&quot;Aké&quot;)
+print(c.resolve(&quot;counter&quot;)())</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;one shared repository&quot;
+    expect_output(&quot;1&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Container:
+    def __init__(self):
+        self.providers, self.single = {}, {}
+    def register(self, name, provider, singleton=False):
+        self.providers[name] = (provider, singleton)
+    def resolve(self, name):
+        provider, singleton = self.providers[name]
+        if not singleton:
+            return provider(self)
+        if name not in self.single:
+            self.single[name] = provider(self)
+        return self.single[name]
+
+c = Container()
+c.register(&quot;books&quot;, lambda c: [], singleton=True)
+c.register(&quot;adder&quot;, lambda c: c.resolve(&quot;books&quot;).append)
+c.register(&quot;counter&quot;, lambda c: lambda: len(c.resolve(&quot;books&quot;)))
+
+c.resolve(&quot;adder&quot;)(&quot;Aké&quot;)
+print(c.resolve(&quot;counter&quot;)())</textarea></div>
+<div class="parsons" data-id="w036d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">An injectable class with a default</div><div class="pc-prompt"><p>Arrange the lines into a class that takes an optional clock, using the real one by default. One line is a trap.</p></div><script type="application/json">{"lines": ["from datetime import datetime", "class Receipt:", "    def __init__(self, clock=None):", "        self.clock = clock or datetime.now", "    def header(self):", "        return f\"Receipt {self.clock():%d/%m/%Y}\""], "distractors": ["    def __init__(self, clock=datetime.now()):"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>made = []
+
+def make_repo(c):
+    made.append(&quot;repo&quot;)
+    return {&quot;n&quot;: 0}
+
+providers = {&quot;repo&quot;: make_repo}
+cache = {}
+
+def resolve(name, shared):
+    if shared and name in cache:
+        return cache[name]
+    obj = providers[name](None)
+    if shared:
+        cache[name] = obj
+    return obj
+
+a = resolve(&quot;repo&quot;, True)
+b = resolve(&quot;repo&quot;, True)
+c = resolve(&quot;repo&quot;, False)
+
+p = ___   # a is b
+q = ___   # a is c
+r = ___   # len(made)</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert (p, q, r) == (True, False, 2)</textarea><textarea class="pc-src pc-solution" hidden>made = []
+
+def make_repo(c):
+    made.append(&quot;repo&quot;)
+    return {&quot;n&quot;: 0}
+
+providers = {&quot;repo&quot;: make_repo}
+cache = {}
+
+def resolve(name, shared):
+    if shared and name in cache:
+        return cache[name]
+    obj = providers[name](None)
+    if shared:
+        cache[name] = obj
+    return obj
+
+a = resolve(&quot;repo&quot;, True)
+b = resolve(&quot;repo&quot;, True)
+c = resolve(&quot;repo&quot;, False)
+
+p = True
+q = False
+r = 2</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w036d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What is dependency injection?", "answer": 1, "explain": "Week 34 introduced it; today scales it up.", "options": ["Importing modules", "Code receiving what it depends on from outside instead of creating or finding it", "A kind of inheritance", "Adding hints"]}, {"type": "mc", "q": "Why is constructor injection the default choice?", "answer": 1, "explain": "Honest signatures.", "options": ["It&rsquo;s fastest", "The signature lists everything the class needs, and the object is complete once made", "It&rsquo;s the only way", "It hides dependencies"]}, {"type": "mc", "q": "Why default to None and choose the real dependency inside?", "answer": 1, "explain": "Week 28&rsquo;s shared-default trap.", "options": ["Style", "A default like datetime.now() would be worked out once, when the function is defined", "None is faster", "It&rsquo;s required"]}, {"type": "mc", "q": "What is the composition root?", "answer": 1, "explain": "Usually a function called by main.", "options": ["The first class", "The one place at the edge of the program where everything is created and connected", "The root folder", "The test suite"]}, {"type": "mc", "q": "Why build a settings object once from the environment?", "answer": 1, "explain": "Pass the environment in, so tests can use a plain dictionary.", "options": ["Speed", "Bad settings fail at start-up with a clear message, and the rest of the program gets checked values", "os.environ is slow", "It isn&rsquo;t better"]}, {"type": "mc", "q": "What does a singleton registration in a container mean?", "answer": 1, "explain": "Good for repositories and connections.", "options": ["Only one provider", "The object is made once and shared by everyone who resolves it", "It can&rsquo;t be resolved", "It&rsquo;s made every time"]}, {"type": "mc", "q": "What is the service locator anti-pattern?", "answer": 1, "explain": "Mark Seemann&rsquo;s term; keep dependencies in signatures.", "options": ["Using a container in main", "Classes fetching their dependencies from a global registry, hiding them", "Passing arguments", "Using fakes"]}, {"type": "mc", "q": "Where should a container be used, if at all?", "answer": 1, "explain": "Elsewhere, pass dependencies directly.", "options": ["Everywhere", "Only in the composition root", "In domain classes", "In tests only"]}, {"type": "mc", "q": "What&rsquo;s the difference between a fake and a stub?", "answer": 1, "explain": "A mock also records how it was called.", "options": ["None", "A fake is a simpler working version; a stub just returns fixed answers", "A stub is a real database", "Fakes record calls"]}, {"type": "output", "q": "What does this print?", "answer": "MemoryRepo JsonRepo", "explain": "Configuration chooses the implementation.", "code": "def build(env):\n    storage = env.get(\"STORE\", \"memory\")\n    return {\"memory\": \"MemoryRepo\", \"json\": \"JsonRepo\"}[storage]\nprint(build({}), build({\"STORE\": \"json\"}))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: one program, three set-ups</div><div class="pc-prompt"><p>Wire a small reminders program three ways from settings. The pieces (given) are a <code>Reminders</code> service that takes a <code>store</code>, a <code>clock</code> and a <code>notifier</code>, two stores and two notifiers. Write:</p>
+<ul>
+<li><code>Settings</code>, a frozen dataclass with <code>store</code> (<code>"memory"</code> or <code>"json"</code>), <code>path</code>, <code>notify</code> (<code>"print"</code> or <code>"list"</code>) and <code>now</code> (<code>None</code> for the real clock, or text like <code>"2026-11-03 09:00"</code> for a fixed one), with <code>from_env(env)</code> reading <code>REM_STORE</code>, <code>REM_PATH</code>, <code>REM_NOTIFY</code> and <code>REM_NOW</code> (defaults: memory, <code>reminders.json</code>, print, the real clock). Bad values raise <code>ValueError</code> (a bad <code>REM_NOW</code> too).</li>
+<li><code>build(settings)</code>, the composition root, returning the <code>Reminders</code> service wired as the settings say. A <code>"list"</code> notifier is a <code>ListNotifier</code>; the program&rsquo;s tests reach it through <code>service.notifier.sent</code>.</li>
+</ul>
+<p>The <code>Reminders</code> service must not be changed, and must not know which store, clock or notifier it has.</p></div><textarea class="pc-src pc-code" hidden>import json
+from dataclasses import dataclass
+from datetime import datetime
+
+class MemoryStore:
+    def __init__(self):
+        self.items = []
+    def add(self, when, text):
+        self.items.append((when, text))
+    def due(self, now):
+        due = [i for i in self.items if i[0] &lt;= now]
+        self.items = [i for i in self.items if i[0] &gt; now]
+        return due
+
+class JsonStore:
+    def __init__(self, path):
+        self.path = path
+    def _load(self):
+        try:
+            with open(self.path) as f:
+                return [(datetime.fromisoformat(w), t) for w, t in json.load(f)]
+        except FileNotFoundError:
+            return []
+    def _save(self, items):
+        with open(self.path, &quot;w&quot;) as f:
+            json.dump([(w.isoformat(), t) for w, t in items], f)
+    def add(self, when, text):
+        self._save(self._load() + [(when, text)])
+    def due(self, now):
+        items = self._load()
+        self._save([i for i in items if i[0] &gt; now])
+        return [i for i in items if i[0] &lt;= now]
+
+class PrintNotifier:
+    def send(self, text):
+        print(&quot;REMINDER:&quot;, text)
+
+class ListNotifier:
+    def __init__(self):
+        self.sent = []
+    def send(self, text):
+        self.sent.append(text)
+
+class Reminders:
+    def __init__(self, store, clock, notifier):
+        self.store, self.clock, self.notifier = store, clock, notifier
+    def add(self, when, text):
+        self.store.add(when, text)
+    def run(self):
+        due = self.store.due(self.clock())
+        for _, text in sorted(due):
+            self.notifier.send(text)
+        return len(due)
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_settings():
+    &quot;settings&quot;
+    S = ns[&quot;Settings&quot;]
+    s = S.from_env({})
+    assert (s.store, s.path, s.notify, s.now) == (&quot;memory&quot;, &quot;reminders.json&quot;, &quot;print&quot;, None)
+    s = S.from_env({&quot;REM_STORE&quot;: &quot;json&quot;, &quot;REM_PATH&quot;: &quot;r.json&quot;, &quot;REM_NOTIFY&quot;: &quot;list&quot;, &quot;REM_NOW&quot;: &quot;2026-11-03 09:00&quot;})
+    assert (s.store, s.path, s.notify, s.now) == (&quot;json&quot;, &quot;r.json&quot;, &quot;list&quot;, &quot;2026-11-03 09:00&quot;)
+    for bad in [{&quot;REM_STORE&quot;: &quot;cloud&quot;}, {&quot;REM_NOTIFY&quot;: &quot;email&quot;}, {&quot;REM_NOW&quot;: &quot;tomorrow&quot;}]:
+        try:
+            S.from_env(bad)
+            assert False, f&quot;{bad} should raise ValueError&quot;
+        except ValueError:
+            pass
+def test_build():
+    &quot;three set-ups&quot;
+    from datetime import datetime as dt
+    S = ns[&quot;Settings&quot;]
+    svc = build(S.from_env({&quot;REM_NOTIFY&quot;: &quot;list&quot;, &quot;REM_NOW&quot;: &quot;2026-11-03 09:00&quot;}))
+    svc.add(dt(2026, 11, 3, 8, 0), &quot;medicine&quot;)
+    svc.add(dt(2026, 11, 3, 18, 0), &quot;call Kemi&quot;)
+    assert svc.run() == 1 and svc.notifier.sent == [&quot;medicine&quot;] and type(svc.store).__name__ == &quot;MemoryStore&quot;
+    js = build(S.from_env({&quot;REM_STORE&quot;: &quot;json&quot;, &quot;REM_PATH&quot;: &quot;rem.json&quot;, &quot;REM_NOTIFY&quot;: &quot;list&quot;, &quot;REM_NOW&quot;: &quot;2026-11-03 19:00&quot;}))
+    js.add(dt(2026, 11, 3, 18, 0), &quot;call Kemi&quot;)
+    again = build(S.from_env({&quot;REM_STORE&quot;: &quot;json&quot;, &quot;REM_PATH&quot;: &quot;rem.json&quot;, &quot;REM_NOTIFY&quot;: &quot;list&quot;, &quot;REM_NOW&quot;: &quot;2026-11-03 19:00&quot;}))
+    assert again.run() == 1 and again.notifier.sent == [&quot;call Kemi&quot;] and again.run() == 0
+    real = build(S.from_env({}))
+    assert type(real.notifier).__name__ == &quot;PrintNotifier&quot; and isinstance(real.clock(), dt)</textarea><textarea class="pc-src pc-solution" hidden>import json
+from dataclasses import dataclass
+from datetime import datetime
+
+class MemoryStore:
+    def __init__(self):
+        self.items = []
+    def add(self, when, text):
+        self.items.append((when, text))
+    def due(self, now):
+        due = [i for i in self.items if i[0] &lt;= now]
+        self.items = [i for i in self.items if i[0] &gt; now]
+        return due
+
+class JsonStore:
+    def __init__(self, path):
+        self.path = path
+    def _load(self):
+        try:
+            with open(self.path) as f:
+                return [(datetime.fromisoformat(w), t) for w, t in json.load(f)]
+        except FileNotFoundError:
+            return []
+    def _save(self, items):
+        with open(self.path, &quot;w&quot;) as f:
+            json.dump([(w.isoformat(), t) for w, t in items], f)
+    def add(self, when, text):
+        self._save(self._load() + [(when, text)])
+    def due(self, now):
+        items = self._load()
+        self._save([i for i in items if i[0] &gt; now])
+        return [i for i in items if i[0] &lt;= now]
+
+class PrintNotifier:
+    def send(self, text):
+        print(&quot;REMINDER:&quot;, text)
+
+class ListNotifier:
+    def __init__(self):
+        self.sent = []
+    def send(self, text):
+        self.sent.append(text)
+
+class Reminders:
+    def __init__(self, store, clock, notifier):
+        self.store, self.clock, self.notifier = store, clock, notifier
+    def add(self, when, text):
+        self.store.add(when, text)
+    def run(self):
+        due = self.store.due(self.clock())
+        for _, text in sorted(due):
+            self.notifier.send(text)
+        return len(due)
+
+FORMAT = &quot;%Y-%m-%d %H:%M&quot;
+
+@dataclass(frozen=True)
+class Settings:
+    store: str = &quot;memory&quot;
+    path: str = &quot;reminders.json&quot;
+    notify: str = &quot;print&quot;
+    now: str | None = None
+
+    @classmethod
+    def from_env(cls, env):
+        store = env.get(&quot;REM_STORE&quot;, &quot;memory&quot;)
+        if store not in (&quot;memory&quot;, &quot;json&quot;):
+            raise ValueError(f&quot;REM_STORE must be memory or json, not {store!r}&quot;)
+        notify = env.get(&quot;REM_NOTIFY&quot;, &quot;print&quot;)
+        if notify not in (&quot;print&quot;, &quot;list&quot;):
+            raise ValueError(f&quot;REM_NOTIFY must be print or list, not {notify!r}&quot;)
+        now = env.get(&quot;REM_NOW&quot;)
+        if now is not None:
+            datetime.strptime(now, FORMAT)
+        return cls(store, env.get(&quot;REM_PATH&quot;, &quot;reminders.json&quot;), notify, now)
+
+def build(settings):
+    store = JsonStore(settings.path) if settings.store == &quot;json&quot; else MemoryStore()
+    if settings.now is None:
+        clock = datetime.now
+    else:
+        fixed = datetime.strptime(settings.now, FORMAT)
+        clock = lambda: fixed
+    notifier = ListNotifier() if settings.notify == &quot;list&quot; else PrintNotifier()
+    return Reminders(store, clock, notifier)</textarea><template class="pc-src pc-hint">In <code>from_env</code>, check <code>REM_NOW</code> with <code>datetime.strptime(text, "%Y-%m-%d %H:%M")</code>, which raises <code>ValueError</code> for bad text. In <code>build</code>, the fixed clock is <code>lambda: fixed</code> where <code>fixed</code> is that parsed time.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Look at the <code>main</code> function of a program you&rsquo;ve written (the Week 25 project is a good one) and pick out its composition root: the lines that create the real objects. Could a test build the same program with fakes? Tomorrow is the Forge: patterns and architecture together in one program.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w036d4.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w036d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w036d5", "week": 36, "day": 5, "title": "Dependency injection", "exercises": [{"id": "w036d5-inject", "title": "Making a class injectable", "points": 10}, {"id": "w036d5-settings", "title": "Settings from the environment", "points": 15}, {"id": "w036d5-container", "title": "A container that spots loops", "points": 15}, {"id": "w036d5-root", "title": "A composition root", "points": 15}, {"id": "w036d5-bug1", "title": "A default made once", "points": 10}, {"id": "w036d5-bug2", "title": "A hidden dependency", "points": 10}, {"id": "w036d5-bug3", "title": "Two repositories", "points": 10}, {"id": "w036d5-trace", "title": "Predict them", "points": 10}, {"id": "w036d5-challenge", "title": "Challenge: one program, three set-ups", "points": 25}], "points": 120}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=8fe38f9496"></script>
+</body>
+</html>

@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="8fe38f9496">
+<title>Week 36 Day 2: Command and undo | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=8fe38f9496">
+<link rel="stylesheet" href="../assets/css/site.css?v=8fe38f9496">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=8fe38f9496"></script>
+<script src="../assets/vendor/codemirror.js?v=8fe38f9496" defer></script>
+<meta name="description" content="Almost every program you use can undo: text editors, drawing programs, spreadsheets, even the Git commands from Week 21. Undo needs actions to be...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w036d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 36 Day 2: Command and undo">
+<meta property="og:description" content="Almost every program you use can undo: text editors, drawing programs, spreadsheets, even the Git commands from Week 21. Undo needs actions to be...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w036d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-36">Week 36: Design patterns II and architecture</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#actions-as-objects" data-sec="actions-as-objects">Actions as objects</a></li><li><a href="#undo-and-redo" data-sec="undo-and-redo">Undo and redo</a></li><li><a href="#what-a-command-must-remember" data-sec="what-a-command-must-remember">What a command must remember</a></li><li><a href="#macros" data-sec="macros">Macros</a></li><li><a href="#commands-as-functions" data-sec="commands-as-functions">Commands as functions</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w036d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-3">Phase 3: Objects and design</a></li><li><a href="../map.html#week-36">Week 36: Design patterns II and architecture</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 36, Day 2</span></p>
+      <h1>Command and undo</h1>
+      <div class="day-intro"><p>Almost every program you use can undo: text editors, drawing programs, spreadsheets, even the Git commands from Week 21. Undo needs actions to be remembered, and remembering an action means turning it into an object. That&rsquo;s the Command pattern: each action becomes an object that knows how to do itself and how to undo itself, so it can be stored, undone, redone, queued, logged or grouped. Today you&rsquo;ll build undo and redo with two stacks, group commands into one, and see the lighter Python form where a command is a pair of functions.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Describe the Command pattern, and why turning actions into objects makes undo possible</li><li>Write command objects with execute and undo that record what they need to reverse themselves</li><li>Build undo and redo with two stacks, clearing the redo stack when a new command runs</li><li>Group several commands into one with a macro command</li><li>Write lightweight commands as functions that return their own undo</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="Actions as objects: 15 min"></span><span class="plan-seg s0" style="flex:30" title="Undo and redo: 30 min"></span><span class="plan-seg s1" style="flex:15" title="What a command must remember: 15 min"></span><span class="plan-seg s0" style="flex:15" title="Macros: 15 min"></span><span class="plan-seg s1" style="flex:15" title="Commands as functions: 15 min"></span><span class="plan-seg s0" style="flex:65" title="Practice: 65 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Actions as objects</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">Undo and redo</span><span class="plan-min">30 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">What a command must remember</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Macros</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:25</span><span class="plan-what">Commands as functions</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">Practice</span><span class="plan-min">65 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w036d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w036d2.ipynb" download>download it</a>. Exercises today are worth 120 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w036d2-p1"><textarea class="pc-src pc-code" hidden>done = []
+text = []
+
+def type_word(word):
+    text.append(word)
+    done.append(word)
+
+def undo():
+    done.pop()
+    text.pop()
+
+for w in [&quot;Ẹ&quot;, &quot;káàbọ̀&quot;, &quot;everyone&quot;]:
+    type_word(w)
+undo()
+type_word(&quot;all&quot;)
+print(&quot; &quot;.join(text), len(done))</textarea></div>
+<p>To undo the last word, the program had to <strong>remember</strong> what was done, in order. Here that was easy, because every action was &ldquo;add a word&rdquo;. Real programs have many kinds of action (type, delete, bold, move), each undone differently. The Command pattern makes each action an object that knows how to undo itself.</p>
+<h2 id="actions-as-objects">Actions as objects</h2>
+<p>The Gang of Four describe Command as: &ldquo;encapsulate a request as an object, thereby letting you parameterise clients with different requests, queue or log requests, and support undoable operations.&rdquo; A command object has:</p>
+<ul>
+<li>an <code>execute()</code> method, which carries out the action;</li>
+<li>an <code>undo()</code> method, which reverses it;</li>
+<li>whatever it needs to do both: what it acts on (the <strong>receiver</strong>), its settings, and anything it must remember to reverse itself.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w036d2-e2"><textarea class="pc-src pc-code" hidden>class Account:
+    def __init__(self, balance=0):
+        self.balance = balance
+
+class Deposit:
+    def __init__(self, account, amount):
+        self.account = account
+        self.amount = amount
+
+    def execute(self):
+        self.account.balance += self.amount
+
+    def undo(self):
+        self.account.balance -= self.amount
+
+    def __repr__(self):
+        return f&quot;Deposit({self.amount})&quot;
+
+acc = Account(100)
+d = Deposit(acc, 50)
+d.execute()
+print(acc.balance, d)
+d.undo()
+print(acc.balance)</textarea></div>
+<p>Once actions are objects, a program can do things with them that it can&rsquo;t do with plain function calls: keep a <strong>history</strong>, <strong>undo</strong> and <strong>redo</strong> them, <strong>queue</strong> them to run later, <strong>log</strong> them, send them to another program, or <strong>replay</strong> them (to rebuild a document from its history, say).</p>
+<h2 id="undo-and-redo">Undo and redo</h2>
+<p>Undo and redo need two stacks (lists used last-in, first-out, Week 8):</p>
+<ul>
+<li><strong>run</strong> a command: execute it, push it onto the undo stack, and <strong>clear the redo stack</strong> (a new action makes the old &ldquo;future&rdquo; meaningless);</li>
+<li><strong>undo</strong>: pop from the undo stack, undo it, push it onto the redo stack;</li>
+<li><strong>redo</strong>: pop from the redo stack, execute it again, push it back onto the undo stack.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w036d2-e3"><textarea class="pc-src pc-code" hidden>class History:
+    def __init__(self):
+        self.undo_stack = []
+        self.redo_stack = []
+
+    def run(self, command):
+        command.execute()
+        self.undo_stack.append(command)
+        self.redo_stack.clear()
+
+    def undo(self):
+        if not self.undo_stack:
+            return False
+        command = self.undo_stack.pop()
+        command.undo()
+        self.redo_stack.append(command)
+        return True
+
+    def redo(self):
+        if not self.redo_stack:
+            return False
+        command = self.redo_stack.pop()
+        command.execute()
+        self.undo_stack.append(command)
+        return True
+
+class Account:
+    def __init__(self, balance=0):
+        self.balance = balance
+
+class Deposit:
+    def __init__(self, account, amount):
+        self.account, self.amount = account, amount
+    def execute(self):
+        self.account.balance += self.amount
+    def undo(self):
+        self.account.balance -= self.amount
+
+acc = Account()
+h = History()
+for amount in [100, 50, 25]:
+    h.run(Deposit(acc, amount))
+h.undo()
+h.undo()
+print(acc.balance)
+h.redo()
+print(acc.balance)
+h.run(Deposit(acc, 1))           # a new action: the redo stack is cleared
+print(acc.balance, h.redo())</textarea></div>
+<p>The <code>History</code> class knows nothing about accounts: it works with any objects that have <code>execute</code> and <code>undo</code> (duck typing again). The same history can manage commands for text, drawings or bank accounts.</p>
+<h2 id="what-a-command-must-remember">What a command must remember</h2>
+<p>A deposit is easy to undo: subtract what was added. Other actions <strong>destroy information</strong>, and the command must save it when it runs, so it can put it back:</p>
+<div class="pc pc-example" data-kind="example" data-id="w036d2-e4"><textarea class="pc-src pc-code" hidden>class Document:
+    def __init__(self, text=&quot;&quot;):
+        self.text = text
+
+class Replace:
+    def __init__(self, doc, old, new):
+        self.doc, self.old, self.new = doc, old, new
+        self.before = None                    # filled in by execute
+
+    def execute(self):
+        self.before = self.doc.text
+        self.doc.text = self.doc.text.replace(self.old, self.new)
+
+    def undo(self):
+        self.doc.text = self.before
+
+class Delete:
+    def __init__(self, doc, start, end):
+        self.doc, self.start, self.end = doc, start, end
+        self.removed = &quot;&quot;
+
+    def execute(self):
+        self.removed = self.doc.text[self.start:self.end]
+        self.doc.text = self.doc.text[:self.start] + self.doc.text[self.end:]
+
+    def undo(self):
+        self.doc.text = self.doc.text[:self.start] + self.removed + self.doc.text[self.start:]
+
+doc = Document(&quot;fish &amp; chips &amp; peas&quot;)
+r = Replace(doc, &quot;&amp;&quot;, &quot;and&quot;)
+r.execute()
+d = Delete(doc, 0, 5)
+d.execute()
+print(repr(doc.text))
+d.undo()
+r.undo()
+print(repr(doc.text))</textarea></div>
+<p>Two ways to remember:</p>
+<ul>
+<li><strong>Save just what changed</strong> (<code>Delete</code> keeps the removed characters). Small and precise, but you must get the reverse exactly right.</li>
+<li><strong>Save a snapshot</strong> of the state before (<code>Replace</code> keeps the whole text). Simple and hard to get wrong, but costly for large data. (Keeping snapshots is sometimes called the Memento pattern.)</li>
+</ul>
+<p>Either way, commands must be undone in <strong>reverse order</strong>: <code>Delete</code>&rsquo;s positions only make sense on the text as it was after <code>Replace</code> ran. The undo stack guarantees that.</p>
+<h2 id="macros">Macros</h2>
+<p>A <strong>macro command</strong> groups several commands so they&rsquo;re done and undone as one: &ldquo;format as heading&rdquo; might be bold plus bigger plus centred, and one undo should reverse all three. It&rsquo;s a command that holds a list of commands:</p>
+<div class="pc pc-example" data-kind="example" data-id="w036d2-e5"><textarea class="pc-src pc-code" hidden>class Macro:
+    def __init__(self, commands):
+        self.commands = list(commands)
+
+    def execute(self):
+        for c in self.commands:
+            c.execute()
+
+    def undo(self):
+        for c in reversed(self.commands):
+            c.undo()
+
+class Account:
+    def __init__(self, balance=0):
+        self.balance = balance
+
+class Deposit:
+    def __init__(self, account, amount):
+        self.account, self.amount = account, amount
+    def execute(self):
+        self.account.balance += self.amount
+    def undo(self):
+        self.account.balance -= self.amount
+
+savings, current = Account(500), Account(100)
+transfer = Macro([Deposit(savings, -200), Deposit(current, 200)])
+transfer.execute()
+print(savings.balance, current.balance)
+transfer.undo()
+print(savings.balance, current.balance)</textarea></div>
+<p>A macro undoes its parts in <strong>reverse</strong> order, for the same reason a history does. Because a macro has <code>execute</code> and <code>undo</code>, it&rsquo;s a command like any other, so it can go in a history, or even inside another macro.</p>
+<h2 id="commands-as-functions">Commands as functions</h2>
+<p>When commands don&rsquo;t need names, reprs or settings that others inspect, a lighter Python form works: a function that <strong>does</strong> the action and <strong>returns a function that undoes it</strong>:</p>
+<div class="pc pc-example" data-kind="example" data-id="w036d2-e6"><textarea class="pc-src pc-code" hidden>def append_item(items, item):
+    items.append(item)
+    return lambda: items.pop()
+
+def set_key(d, key, value):
+    had, old = key in d, d.get(key)
+    d[key] = value
+    def undo():
+        if had:
+            d[key] = old
+        else:
+            del d[key]
+    return undo
+
+basket, prices = [], {&quot;rice&quot;: 450}
+undos = [append_item(basket, &quot;rice&quot;), set_key(prices, &quot;rice&quot;, 500), set_key(prices, &quot;oil&quot;, 900)]
+print(basket, prices)
+while undos:
+    undos.pop()()
+print(basket, prices)</textarea></div>
+<p>The closure (Week 7) remembers what&rsquo;s needed to undo. This form is compact, but it can&rsquo;t redo (the &ldquo;do&rdquo; part isn&rsquo;t kept) and can&rsquo;t describe itself in a log. Use classes when you need redo, history display or saving commands; use functions for quick, local undo.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Command (Gang of Four): turn an action into an object with <code>execute()</code> and <code>undo()</code>, holding its receiver, settings and whatever it must remember to reverse itself. Actions as objects can be stored, undone, redone, queued, logged and replayed. Undo and redo use two stacks: running a command pushes it on the undo stack and clears the redo stack; undo moves the top command to the redo stack, redo moves it back. Commands that destroy information save it when they execute (just the change, or a snapshot). A macro holds commands and undoes them in reverse. A function that does an action and returns its undo is a lighter form without redo.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d2-counter" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Commands for a counter</div><div class="pc-prompt"><p>Write two command classes for a <code>Counter</code> (given): <code>Add(counter, n)</code> and <code>Reset(counter)</code>. Both have <code>execute()</code> and <code>undo()</code>. <code>Reset</code> sets the value to 0, and its <code>undo</code> must restore whatever the value was before it ran.</p></div><textarea class="pc-src pc-code" hidden>class Counter:
+    def __init__(self, value=0):
+        self.value = value
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_commands():
+    &quot;do and undo&quot;
+    C, A, R = ns[&quot;Counter&quot;], ns[&quot;Add&quot;], ns[&quot;Reset&quot;]
+    c = C(5)
+    a, r = A(c, 3), R(c)
+    a.execute()
+    r.execute()
+    assert c.value == 0
+    r.undo()
+    assert c.value == 8
+    a.undo()
+    assert c.value == 5
+    r2 = R(c)
+    c.value = 42
+    r2.execute()
+    r2.undo()
+    assert c.value == 42, &quot;Reset should remember the value when it runs, not when it&#x27;s made&quot;</textarea><textarea class="pc-src pc-solution" hidden>class Counter:
+    def __init__(self, value=0):
+        self.value = value
+
+class Add:
+    def __init__(self, counter, n):
+        self.counter, self.n = counter, n
+
+    def execute(self):
+        self.counter.value += self.n
+
+    def undo(self):
+        self.counter.value -= self.n
+
+class Reset:
+    def __init__(self, counter):
+        self.counter = counter
+        self.before = None
+
+    def execute(self):
+        self.before = self.counter.value
+        self.counter.value = 0
+
+    def undo(self):
+        self.counter.value = self.before</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d2-history" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A history with undo and redo</div><div class="pc-prompt"><p>Write <code>History</code> with <code>run(command)</code>, <code>undo()</code> and <code>redo()</code> (each returning <code>True</code> if it did something, <code>False</code> if there was nothing to undo or redo), and properties <code>can_undo</code> and <code>can_redo</code>. Running a new command clears the redo stack. It also has <code>labels()</code>, a list of <code>str(command)</code> for the commands that can currently be undone, oldest first.</p></div><textarea class="pc-src pc-code" hidden>class Counter:
+    def __init__(self):
+        self.value = 0
+
+class Add:
+    def __init__(self, counter, n):
+        self.counter, self.n = counter, n
+    def execute(self):
+        self.counter.value += self.n
+    def undo(self):
+        self.counter.value -= self.n
+    def __str__(self):
+        return f&quot;add {self.n}&quot;
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_history():
+    &quot;undo and redo&quot;
+    C, A, H = ns[&quot;Counter&quot;], ns[&quot;Add&quot;], ns[&quot;History&quot;]
+    c, h = C(), H()
+    assert not h.can_undo and not h.undo() and not h.redo()
+    for n in [1, 10, 100]:
+        h.run(A(c, n))
+    assert c.value == 111 and h.labels() == [&quot;add 1&quot;, &quot;add 10&quot;, &quot;add 100&quot;]
+    assert h.undo() and h.undo() and c.value == 1 and h.can_redo and h.labels() == [&quot;add 1&quot;]
+    assert h.redo() and c.value == 11
+    h.run(A(c, 5))
+    assert c.value == 16 and not h.can_redo and not h.redo() and h.labels() == [&quot;add 1&quot;, &quot;add 10&quot;, &quot;add 5&quot;]
+    while h.undo():
+        pass
+    assert c.value == 0 and not h.can_undo</textarea><textarea class="pc-src pc-solution" hidden>class Counter:
+    def __init__(self):
+        self.value = 0
+
+class Add:
+    def __init__(self, counter, n):
+        self.counter, self.n = counter, n
+    def execute(self):
+        self.counter.value += self.n
+    def undo(self):
+        self.counter.value -= self.n
+    def __str__(self):
+        return f&quot;add {self.n}&quot;
+
+class History:
+    def __init__(self):
+        self._undo = []
+        self._redo = []
+
+    def run(self, command):
+        command.execute()
+        self._undo.append(command)
+        self._redo.clear()
+
+    def undo(self):
+        if not self._undo:
+            return False
+        command = self._undo.pop()
+        command.undo()
+        self._redo.append(command)
+        return True
+
+    def redo(self):
+        if not self._redo:
+            return False
+        command = self._redo.pop()
+        command.execute()
+        self._undo.append(command)
+        return True
+
+    @property
+    def can_undo(self):
+        return bool(self._undo)
+
+    @property
+    def can_redo(self):
+        return bool(self._redo)
+
+    def labels(self):
+        return [str(c) for c in self._undo]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d2-editor" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Editing commands</div><div class="pc-prompt"><p>A <code>Buffer</code> holds <code>text</code>. Write three commands: <code>Insert(buffer, pos, s)</code>, <code>Delete(buffer, start, end)</code> (which remembers what it removed) and <code>Upper(buffer, start, end)</code> (capitalises that slice, remembering what was there). Each has <code>execute</code> and <code>undo</code>. A position outside the text (below 0 or beyond its length) raises <code>ValueError</code> when the command <strong>executes</strong>, and changes nothing. After any sequence of commands, undoing them in reverse order must give back the original text.</p></div><textarea class="pc-src pc-code" hidden>class Buffer:
+    def __init__(self, text=&quot;&quot;):
+        self.text = text
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_editing():
+    &quot;edits and undo&quot;
+    B, I, D, U = ns[&quot;Buffer&quot;], ns[&quot;Insert&quot;], ns[&quot;Delete&quot;], ns[&quot;Upper&quot;]
+    b = B(&quot;rail strike called off&quot;)
+    cmds = [I(b, 0, &quot;BREAKING: &quot;), U(b, 10, 14), D(b, 15, 22)]
+    for c in cmds:
+        c.execute()
+    assert b.text == &quot;BREAKING: RAIL called off&quot;, f&quot;got {b.text!r}&quot;
+    for c in reversed(cmds):
+        c.undo()
+    assert b.text == &quot;rail strike called off&quot;
+    for bad in [I(b, 99, &quot;x&quot;), D(b, -1, 3), U(b, 0, 100)]:
+        try:
+            bad.execute()
+            assert False, &quot;an out-of-range position should raise ValueError&quot;
+        except ValueError:
+            pass
+    assert b.text == &quot;rail strike called off&quot;</textarea><textarea class="pc-src pc-solution" hidden>class Buffer:
+    def __init__(self, text=&quot;&quot;):
+        self.text = text
+
+def check(buffer, *positions):
+    for p in positions:
+        if not 0 &lt;= p &lt;= len(buffer.text):
+            raise ValueError(f&quot;position {p} is outside the text&quot;)
+
+class Insert:
+    def __init__(self, buffer, pos, s):
+        self.buffer, self.pos, self.s = buffer, pos, s
+
+    def execute(self):
+        check(self.buffer, self.pos)
+        t = self.buffer.text
+        self.buffer.text = t[:self.pos] + self.s + t[self.pos:]
+
+    def undo(self):
+        t = self.buffer.text
+        self.buffer.text = t[:self.pos] + t[self.pos + len(self.s):]
+
+class Delete:
+    def __init__(self, buffer, start, end):
+        self.buffer, self.start, self.end = buffer, start, end
+        self.removed = &quot;&quot;
+
+    def execute(self):
+        check(self.buffer, self.start, self.end)
+        t = self.buffer.text
+        self.removed = t[self.start:self.end]
+        self.buffer.text = t[:self.start] + t[self.end:]
+
+    def undo(self):
+        t = self.buffer.text
+        self.buffer.text = t[:self.start] + self.removed + t[self.start:]
+
+class Upper:
+    def __init__(self, buffer, start, end):
+        self.buffer, self.start, self.end = buffer, start, end
+        self.before = &quot;&quot;
+
+    def execute(self):
+        check(self.buffer, self.start, self.end)
+        t = self.buffer.text
+        self.before = t[self.start:self.end]
+        self.buffer.text = t[:self.start] + self.before.upper() + t[self.end:]
+
+    def undo(self):
+        t = self.buffer.text
+        self.buffer.text = t[:self.start] + self.before + t[self.end:]</textarea><template class="pc-src pc-hint">Write one helper, <code>check(buffer, *positions)</code>, that raises <code>ValueError</code> unless every position is from 0 to <code>len(buffer.text)</code>. <code>Upper.undo</code> puts back the saved slice exactly like <code>Delete.undo</code> does, but replacing rather than inserting.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d2-macro" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">All or nothing</div><div class="pc-prompt"><p>Write <code>Macro(commands)</code>, a command whose <code>execute</code> runs its commands in order and whose <code>undo</code> undoes them in reverse. If one of them raises an exception during <code>execute</code>, the macro must <strong>undo the ones that already ran</strong> (in reverse) and then let the error through, so a failed macro leaves everything as it was. Then use it in <code>transfer(source, target, amount)</code>, which returns a macro of two <code>Change</code> commands (given) that moves money between two accounts; a <code>Change</code> that would make a balance negative raises <code>ValueError</code>.</p></div><textarea class="pc-src pc-code" hidden>class Account:
+    def __init__(self, balance):
+        self.balance = balance
+
+class Change:
+    def __init__(self, account, amount):
+        self.account, self.amount = account, amount
+    def execute(self):
+        if self.account.balance + self.amount &lt; 0:
+            raise ValueError(&quot;not enough money&quot;)
+        self.account.balance += self.amount
+    def undo(self):
+        self.account.balance -= self.amount
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_macro():
+    &quot;all or nothing&quot;
+    A, M = ns[&quot;Account&quot;], ns[&quot;Macro&quot;]
+    a, b = A(500), A(100)
+    t = transfer(a, b, 200)
+    t.execute()
+    assert (a.balance, b.balance) == (300, 300)
+    t.undo()
+    assert (a.balance, b.balance) == (500, 100)
+    log = []
+    class Step:
+        def __init__(self, name, fail=False):
+            self.name, self.fail = name, fail
+        def execute(self):
+            if self.fail:
+                raise RuntimeError(&quot;boom&quot;)
+            log.append(&quot;do &quot; + self.name)
+        def undo(self):
+            log.append(&quot;undo &quot; + self.name)
+    try:
+        M([Step(&quot;a&quot;), Step(&quot;b&quot;), Step(&quot;c&quot;, fail=True), Step(&quot;d&quot;)]).execute()
+        assert False, &quot;the error should come through&quot;
+    except RuntimeError:
+        pass
+    assert log == [&quot;do a&quot;, &quot;do b&quot;, &quot;undo b&quot;, &quot;undo a&quot;], f&quot;log: {log}&quot;
+    try:
+        transfer(b, a, 1000).execute()
+        assert False
+    except ValueError:
+        pass
+    assert (a.balance, b.balance) == (500, 100)</textarea><textarea class="pc-src pc-solution" hidden>class Account:
+    def __init__(self, balance):
+        self.balance = balance
+
+class Change:
+    def __init__(self, account, amount):
+        self.account, self.amount = account, amount
+    def execute(self):
+        if self.account.balance + self.amount &lt; 0:
+            raise ValueError(&quot;not enough money&quot;)
+        self.account.balance += self.amount
+    def undo(self):
+        self.account.balance -= self.amount
+
+class Macro:
+    def __init__(self, commands):
+        self.commands = list(commands)
+
+    def execute(self):
+        done = []
+        for c in self.commands:
+            try:
+                c.execute()
+            except Exception:
+                for d in reversed(done):
+                    d.undo()
+                raise
+            done.append(c)
+
+    def undo(self):
+        for c in reversed(self.commands):
+            c.undo()
+
+def transfer(source, target, amount):
+    return Macro([Change(source, -amount), Change(target, amount)])</textarea><template class="pc-src pc-hint">In <code>execute</code>, keep a list of the commands that finished. Wrap each <code>execute</code> in <code>try</code>; in the <code>except</code>, undo the finished ones in reverse and <code>raise</code>. In <code>transfer</code>, take the money out first: if the source can&rsquo;t afford it, nothing has changed.</template></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w036d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A redo from a different past</div><div class="pc-prompt"><p>After undoing, the user ran a new command, then pressed redo, and an old command came back on top of the new one: this prints <code>103</code>. A new command must clear the redo stack. Fix <code>run</code> so redo does nothing and the program prints <code>3</code>.</p></div><textarea class="pc-src pc-code" hidden>class Counter:
+    def __init__(self):
+        self.value = 0
+
+class Add:
+    def __init__(self, c, n):
+        self.c, self.n = c, n
+    def execute(self):
+        self.c.value += self.n
+    def undo(self):
+        self.c.value -= self.n
+
+class History:
+    def __init__(self):
+        self.undos, self.redos = [], []
+    def run(self, cmd):
+        cmd.execute()
+        self.undos.append(cmd)
+    def undo(self):
+        if self.undos:
+            cmd = self.undos.pop()
+            cmd.undo()
+            self.redos.append(cmd)
+    def redo(self):
+        if self.redos:
+            cmd = self.redos.pop()
+            cmd.execute()
+            self.undos.append(cmd)
+
+c, h = Counter(), History()
+h.run(Add(c, 100))
+h.undo()
+h.run(Add(c, 3))
+h.redo()
+print(c.value)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a fresh future&quot;
+    expect_output(&quot;3&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Counter:
+    def __init__(self):
+        self.value = 0
+
+class Add:
+    def __init__(self, c, n):
+        self.c, self.n = c, n
+    def execute(self):
+        self.c.value += self.n
+    def undo(self):
+        self.c.value -= self.n
+
+class History:
+    def __init__(self):
+        self.undos, self.redos = [], []
+    def run(self, cmd):
+        cmd.execute()
+        self.undos.append(cmd)
+        self.redos.clear()
+    def undo(self):
+        if self.undos:
+            cmd = self.undos.pop()
+            cmd.undo()
+            self.redos.append(cmd)
+    def redo(self):
+        if self.redos:
+            cmd = self.redos.pop()
+            cmd.execute()
+            self.undos.append(cmd)
+
+c, h = Counter(), History()
+h.run(Add(c, 100))
+h.undo()
+h.run(Add(c, 3))
+h.redo()
+print(c.value)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w036d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Remembered too early</div><div class="pc-prompt"><p><code>SetPrice</code> saves the old price when it&rsquo;s <strong>made</strong>, but the price changes before it runs, so undo restores the wrong value: this prints <code>450</code>. Fix the command so it remembers the price when it executes, and the program prints <code>500</code>.</p></div><textarea class="pc-src pc-code" hidden>class SetPrice:
+    def __init__(self, prices, item, new):
+        self.prices, self.item, self.new = prices, item, new
+        self.old = prices[item]
+    def execute(self):
+        self.prices[self.item] = self.new
+    def undo(self):
+        self.prices[self.item] = self.old
+
+prices = {&quot;rice&quot;: 450}
+cmd = SetPrice(prices, &quot;rice&quot;, 600)
+prices[&quot;rice&quot;] = 500
+cmd.execute()
+cmd.undo()
+print(prices[&quot;rice&quot;])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the right old value&quot;
+    expect_output(&quot;500&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class SetPrice:
+    def __init__(self, prices, item, new):
+        self.prices, self.item, self.new = prices, item, new
+        self.old = None
+    def execute(self):
+        self.old = self.prices[self.item]
+        self.prices[self.item] = self.new
+    def undo(self):
+        self.prices[self.item] = self.old
+
+prices = {&quot;rice&quot;: 450}
+cmd = SetPrice(prices, &quot;rice&quot;, 600)
+prices[&quot;rice&quot;] = 500
+cmd.execute()
+cmd.undo()
+print(prices[&quot;rice&quot;])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w036d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Undone in the wrong order</div><div class="pc-prompt"><p>The macro undoes its steps in the same order it did them, so the second insertion is removed from the wrong place (its position only makes sense while the first insertion is still there): this prints <code>'big wor'</code>. Fix <code>Macro.undo</code> so the program prints <code>'world'</code>.</p></div><textarea class="pc-src pc-code" hidden>class Doc:
+    def __init__(self, text):
+        self.text = text
+
+class Insert:
+    def __init__(self, d, pos, s):
+        self.d, self.pos, self.s = d, pos, s
+    def execute(self):
+        self.d.text = self.d.text[:self.pos] + self.s + self.d.text[self.pos:]
+    def undo(self):
+        self.d.text = self.d.text[:self.pos] + self.d.text[self.pos + len(self.s):]
+
+class Macro:
+    def __init__(self, cmds):
+        self.cmds = cmds
+    def execute(self):
+        for c in self.cmds:
+            c.execute()
+    def undo(self):
+        for c in self.cmds:
+            c.undo()
+
+d = Doc(&quot;world&quot;)
+m = Macro([Insert(d, 0, &quot;Hello, &quot;), Insert(d, 7, &quot;big &quot;)])
+m.execute()
+m.undo()
+print(repr(d.text))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;reverse order&quot;
+    expect_output(&quot;&#x27;world&#x27;&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Doc:
+    def __init__(self, text):
+        self.text = text
+
+class Insert:
+    def __init__(self, d, pos, s):
+        self.d, self.pos, self.s = d, pos, s
+    def execute(self):
+        self.d.text = self.d.text[:self.pos] + self.s + self.d.text[self.pos:]
+    def undo(self):
+        self.d.text = self.d.text[:self.pos] + self.d.text[self.pos + len(self.s):]
+
+class Macro:
+    def __init__(self, cmds):
+        self.cmds = cmds
+    def execute(self):
+        for c in self.cmds:
+            c.execute()
+    def undo(self):
+        for c in reversed(self.cmds):
+            c.undo()
+
+d = Doc(&quot;world&quot;)
+m = Macro([Insert(d, 0, &quot;Hello, &quot;), Insert(d, 7, &quot;big &quot;)])
+m.execute()
+m.undo()
+print(repr(d.text))</textarea></div>
+<div class="parsons" data-id="w036d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Undo with two stacks</div><div class="pc-prompt"><p>Arrange the lines into <code>undo</code> for a history with an undo stack and a redo stack. One line is a trap.</p></div><script type="application/json">{"lines": ["def undo(self):", "    if not self.undo_stack:", "        return False", "    command = self.undo_stack.pop()", "    command.undo()", "    self.redo_stack.append(command)", "    return True"], "distractors": ["    command = self.undo_stack.pop(0)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>log = []
+
+def put(lst, x):
+    lst.append(x)
+    return lambda: lst.remove(x)
+
+items = []
+undos = [put(items, &quot;a&quot;), put(items, &quot;b&quot;), put(items, &quot;c&quot;)]
+undos[1]()
+log.append(list(items))
+undos.pop()()
+log.append(list(items))
+
+p = ___   # log[0]
+q = ___   # log[1]
+r = ___   # len(undos)
+s = ___   # items</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert (p, q) == ([&quot;a&quot;, &quot;c&quot;], [&quot;a&quot;]), &quot;p and q&quot;
+    assert (r, s) == (2, [&quot;a&quot;])</textarea><textarea class="pc-src pc-solution" hidden>log = []
+
+def put(lst, x):
+    lst.append(x)
+    return lambda: lst.remove(x)
+
+items = []
+undos = [put(items, &quot;a&quot;), put(items, &quot;b&quot;), put(items, &quot;c&quot;)]
+undos[1]()
+log.append(list(items))
+undos.pop()()
+log.append(list(items))
+
+p = [&quot;a&quot;, &quot;c&quot;]
+q = [&quot;a&quot;]
+r = 2
+s = [&quot;a&quot;]</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w036d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does the Command pattern do?", "answer": 1, "explain": "Gang of Four: encapsulate a request as an object.", "options": ["Creates objects", "Turns an action into an object that can be stored, undone, redone, queued and logged", "Notifies observers", "Wraps functions"]}, {"type": "mc", "q": "What methods does an undoable command have?", "answer": 1, "explain": "Plus whatever it remembers to reverse itself.", "options": ["start and stop", "execute and undo", "get and set", "open and close"]}, {"type": "mc", "q": "What happens to the redo stack when a new command runs?", "answer": 1, "explain": "Like most editors.", "options": ["Nothing", "It&rsquo;s cleared, because the old future no longer applies", "It&rsquo;s undone", "It&rsquo;s executed"]}, {"type": "mc", "q": "What does undo do with the two stacks?", "answer": 1, "explain": "Redo does the reverse.", "options": ["Pops from redo", "Pops the newest command from the undo stack, undoes it, and pushes it onto the redo stack", "Clears both", "Executes the oldest command"]}, {"type": "mc", "q": "Why must a Delete command save the removed text?", "answer": 1, "explain": "Save just the change, or a snapshot.", "options": ["For speed", "Deleting destroys information that undo has to put back", "Python requires it", "It needn&rsquo;t"]}, {"type": "mc", "q": "When should a command save what it needs for undo?", "answer": 1, "explain": "The state may change between making and running it.", "options": ["When it&rsquo;s made", "When it executes", "When it&rsquo;s undone", "Never"]}, {"type": "mc", "q": "Why are commands undone in reverse order?", "answer": 1, "explain": "Positions and values only make sense in order.", "options": ["Tradition", "Later commands depend on the state the earlier ones left", "It&rsquo;s faster", "It doesn&rsquo;t matter"]}, {"type": "mc", "q": "What is a macro command?", "answer": 1, "explain": "It&rsquo;s a command itself, so it can go in a history.", "options": ["A very long command", "A command holding a list of commands, done in order and undone in reverse", "A keyboard shortcut", "A function"]}, {"type": "mc", "q": "What can&rsquo;t the &ldquo;function that returns its undo&rdquo; form do?", "answer": 1, "explain": "The doing part isn&rsquo;t kept.", "options": ["Undo", "Redo, or describe itself in a log", "Run", "Be stored in a list"]}, {"type": "output", "q": "What does this print?", "answer": "[1, 2] [3]", "explain": "Two undos, then one redo.", "code": "stack, redo = [1, 2, 3], []\nredo.append(stack.pop())\nredo.append(stack.pop())\nstack.append(redo.pop())\nprint(stack, redo)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a drawing with undo</div><div class="pc-prompt"><p>A tiny drawing program keeps shapes in a <code>Canvas</code> (a dictionary <code>shapes</code> from a shape&rsquo;s id to a dictionary of its properties, such as <code>{"kind": "circle", "x": 10, "y": 20, "colour": "red"}</code>). Write commands and an <code>Editor</code>:</p>
+<ul>
+<li><code>AddShape(canvas, shape_id, props)</code>: adds a shape (a copy of <code>props</code>); an id already in use raises <code>ValueError</code>.</li>
+<li><code>Move(canvas, shape_id, dx, dy)</code>: moves a shape; an unknown id raises <code>KeyError</code>.</li>
+<li><code>Recolour(canvas, shape_id, colour)</code>: changes its colour, remembering the old one.</li>
+<li><code>RemoveShape(canvas, shape_id)</code>: removes it, remembering it (and its position in the canvas&rsquo;s order, so undo puts it back in the same place).</li>
+<li><code>Editor(canvas)</code> with <code>do(command)</code>, <code>undo()</code>, <code>redo()</code> (as in today&rsquo;s <code>History</code>), and <code>group(commands)</code>, which runs several commands as <strong>one</strong> undoable step (all or nothing: if one fails, the ones before it are undone and the error comes through).</li>
+</ul>
+<p>Every command&rsquo;s undo must restore the canvas exactly, including the order of <code>shapes</code>.</p></div><textarea class="pc-src pc-code" hidden>___</textarea><textarea class="pc-src pc-tests" hidden>def test_drawing():
+    &quot;drawing&quot;
+    C, E, Add, Mv, Rc, Rm = (ns[n] for n in [&quot;Canvas&quot;, &quot;Editor&quot;, &quot;AddShape&quot;, &quot;Move&quot;, &quot;Recolour&quot;, &quot;RemoveShape&quot;])
+    c = C()
+    e = E(c)
+    props = {&quot;kind&quot;: &quot;circle&quot;, &quot;x&quot;: 0, &quot;y&quot;: 0, &quot;colour&quot;: &quot;red&quot;}
+    e.do(Add(c, &quot;a&quot;, props))
+    props[&quot;x&quot;] = 999
+    e.do(Add(c, &quot;b&quot;, {&quot;kind&quot;: &quot;square&quot;, &quot;x&quot;: 5, &quot;y&quot;: 5, &quot;colour&quot;: &quot;blue&quot;}))
+    e.do(Add(c, &quot;c&quot;, {&quot;kind&quot;: &quot;line&quot;, &quot;x&quot;: 1, &quot;y&quot;: 1, &quot;colour&quot;: &quot;black&quot;}))
+    e.do(Mv(c, &quot;a&quot;, 3, -2))
+    e.do(Rc(c, &quot;b&quot;, &quot;green&quot;))
+    assert c.shapes[&quot;a&quot;][&quot;x&quot;] == 3 and c.shapes[&quot;a&quot;][&quot;y&quot;] == -2 and c.shapes[&quot;b&quot;][&quot;colour&quot;] == &quot;green&quot;
+    e.do(Rm(c, &quot;b&quot;))
+    assert list(c.shapes) == [&quot;a&quot;, &quot;c&quot;]
+    e.undo()
+    assert list(c.shapes) == [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;] and c.shapes[&quot;b&quot;][&quot;colour&quot;] == &quot;green&quot;
+    e.undo()
+    e.undo()
+    assert c.shapes[&quot;b&quot;][&quot;colour&quot;] == &quot;blue&quot; and c.shapes[&quot;a&quot;][&quot;x&quot;] == 0
+    e.redo()
+    assert c.shapes[&quot;a&quot;][&quot;x&quot;] == 3
+def test_group():
+    &quot;grouped steps&quot;
+    C, E, Add, Mv, Rc = (ns[n] for n in [&quot;Canvas&quot;, &quot;Editor&quot;, &quot;AddShape&quot;, &quot;Move&quot;, &quot;Recolour&quot;])
+    c = C()
+    e = E(c)
+    e.group([Add(c, &quot;a&quot;, {&quot;kind&quot;: &quot;dot&quot;, &quot;x&quot;: 0, &quot;y&quot;: 0, &quot;colour&quot;: &quot;red&quot;}), Mv(c, &quot;a&quot;, 1, 1), Rc(c, &quot;a&quot;, &quot;gold&quot;)])
+    assert c.shapes[&quot;a&quot;] == {&quot;kind&quot;: &quot;dot&quot;, &quot;x&quot;: 1, &quot;y&quot;: 1, &quot;colour&quot;: &quot;gold&quot;}
+    e.undo()
+    assert c.shapes == {}
+    e.redo()
+    assert c.shapes[&quot;a&quot;][&quot;colour&quot;] == &quot;gold&quot;
+    for bad, err in [([Mv(c, &quot;a&quot;, 5, 5), Mv(c, &quot;nope&quot;, 1, 1)], KeyError), ([Add(c, &quot;a&quot;, {&quot;kind&quot;: &quot;x&quot;, &quot;x&quot;: 0, &quot;y&quot;: 0, &quot;colour&quot;: &quot;r&quot;})], ValueError)]:
+        try:
+            e.group(bad)
+            assert False, &quot;should raise&quot;
+        except err:
+            pass
+    assert c.shapes[&quot;a&quot;][&quot;x&quot;] == 1, &quot;a failed group leaves everything as it was&quot;
+    e.undo()
+    assert c.shapes == {}</textarea><textarea class="pc-src pc-solution" hidden>class Canvas:
+    def __init__(self):
+        self.shapes = {}
+
+class AddShape:
+    def __init__(self, canvas, shape_id, props):
+        self.canvas, self.shape_id, self.props = canvas, shape_id, dict(props)
+
+    def execute(self):
+        if self.shape_id in self.canvas.shapes:
+            raise ValueError(f&quot;id {self.shape_id!r} is already in use&quot;)
+        self.canvas.shapes[self.shape_id] = dict(self.props)
+
+    def undo(self):
+        del self.canvas.shapes[self.shape_id]
+
+class Move:
+    def __init__(self, canvas, shape_id, dx, dy):
+        self.canvas, self.shape_id, self.dx, self.dy = canvas, shape_id, dx, dy
+
+    def execute(self):
+        shape = self.canvas.shapes[self.shape_id]
+        shape[&quot;x&quot;] += self.dx
+        shape[&quot;y&quot;] += self.dy
+
+    def undo(self):
+        shape = self.canvas.shapes[self.shape_id]
+        shape[&quot;x&quot;] -= self.dx
+        shape[&quot;y&quot;] -= self.dy
+
+class Recolour:
+    def __init__(self, canvas, shape_id, colour):
+        self.canvas, self.shape_id, self.colour = canvas, shape_id, colour
+        self.old = None
+
+    def execute(self):
+        shape = self.canvas.shapes[self.shape_id]
+        self.old = shape[&quot;colour&quot;]
+        shape[&quot;colour&quot;] = self.colour
+
+    def undo(self):
+        self.canvas.shapes[self.shape_id][&quot;colour&quot;] = self.old
+
+class RemoveShape:
+    def __init__(self, canvas, shape_id):
+        self.canvas, self.shape_id = canvas, shape_id
+        self.index = None
+        self.shape = None
+
+    def execute(self):
+        self.index = list(self.canvas.shapes).index(self.shape_id)
+        self.shape = self.canvas.shapes.pop(self.shape_id)
+
+    def undo(self):
+        items = list(self.canvas.shapes.items())
+        items.insert(self.index, (self.shape_id, self.shape))
+        self.canvas.shapes.clear()
+        self.canvas.shapes.update(items)
+
+class Group:
+    def __init__(self, commands):
+        self.commands = list(commands)
+
+    def execute(self):
+        done = []
+        for c in self.commands:
+            try:
+                c.execute()
+            except Exception:
+                for d in reversed(done):
+                    d.undo()
+                raise
+            done.append(c)
+
+    def undo(self):
+        for c in reversed(self.commands):
+            c.undo()
+
+class Editor:
+    def __init__(self, canvas):
+        self.canvas = canvas
+        self._undo = []
+        self._redo = []
+
+    def do(self, command):
+        command.execute()
+        self._undo.append(command)
+        self._redo.clear()
+
+    def undo(self):
+        if not self._undo:
+            return False
+        command = self._undo.pop()
+        command.undo()
+        self._redo.append(command)
+        return True
+
+    def redo(self):
+        if not self._redo:
+            return False
+        command = self._redo.pop()
+        command.execute()
+        self._undo.append(command)
+        return True
+
+    def group(self, commands):
+        self.do(Group(commands))</textarea><template class="pc-src pc-hint"><code>RemoveShape</code> saves <code>list(canvas.shapes).index(shape_id)</code> and the shape. To put it back in place, rebuild the dictionary: <code>items = list(canvas.shapes.items())</code>, insert the pair at the saved index, then <code>canvas.shapes = dict(items)</code> (or clear and update the same dictionary).</template><template class="pc-src pc-hint"><code>group</code> can make a macro like today&rsquo;s all-or-nothing <code>Macro</code> and pass it to <code>do</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Think about a program you use every day and list three actions it lets you undo, and one it doesn&rsquo;t. Why might that one be hard to undo? Tomorrow: the Iterator pattern, the protocol behind every <code>for</code> loop.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w036d1.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w036d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w036d2", "week": 36, "day": 2, "title": "Command and undo", "exercises": [{"id": "w036d2-counter", "title": "Commands for a counter", "points": 10}, {"id": "w036d2-history", "title": "A history with undo and redo", "points": 15}, {"id": "w036d2-editor", "title": "Editing commands", "points": 15}, {"id": "w036d2-macro", "title": "All or nothing", "points": 15}, {"id": "w036d2-bug1", "title": "A redo from a different past", "points": 10}, {"id": "w036d2-bug2", "title": "Remembered too early", "points": 10}, {"id": "w036d2-bug3", "title": "Undone in the wrong order", "points": 10}, {"id": "w036d2-trace", "title": "Predict them", "points": 10}, {"id": "w036d2-challenge", "title": "Challenge: a drawing with undo", "points": 25}], "points": 120}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=8fe38f9496"></script>
+</body>
+</html>

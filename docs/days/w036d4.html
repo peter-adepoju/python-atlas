@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="8fe38f9496">
+<title>Week 36 Day 4: Layered architecture | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=8fe38f9496">
+<link rel="stylesheet" href="../assets/css/site.css?v=8fe38f9496">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=8fe38f9496"></script>
+<script src="../assets/vendor/codemirror.js?v=8fe38f9496" defer></script>
+<meta name="description" content="Patterns arrange a few classes; architecture arranges a whole program. Once a program has more than a handful of modules, it needs an answer to “what goes...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w036d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 36 Day 4: Layered architecture">
+<meta property="og:description" content="Patterns arrange a few classes; architecture arranges a whole program. Once a program has more than a handful of modules, it needs an answer to “what goes...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w036d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-36">Week 36: Design patterns II and architecture</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#from-classes-to-programs" data-sec="from-classes-to-programs">From classes to programs</a></li><li><a href="#four-layers-and-one-rule" data-sec="four-layers-and-one-rule">Four layers and one rule</a></li><li><a href="#repositories" data-sec="repositories">Repositories</a></li><li><a href="#services-and-presentation" data-sec="services-and-presentation">Services and presentation</a></li><li><a href="#layers-in-files" data-sec="layers-in-files">Layers in files</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w036d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-3">Phase 3: Objects and design</a></li><li><a href="../map.html#week-36">Week 36: Design patterns II and architecture</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 36, Day 4</span></p>
+      <h1>Layered architecture</h1>
+      <div class="day-intro"><p>Patterns arrange a few classes; <strong>architecture</strong> arranges a whole program. Once a program has more than a handful of modules, it needs an answer to &ldquo;what goes where, and what may depend on what?&rdquo; Today&rsquo;s answer is the most common one: layers. The rules of the business sit in the middle, untouched by screens, files or databases; around them, a layer of use cases; at the edges, the parts that talk to people and to storage. You&rsquo;ll build each layer for a small library, including the <strong>repository</strong>, the standard way to hide where data is kept, and you&rsquo;ll see why the Week 25 expense tracker already had this shape.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Name the usual layers of a program (presentation, application, domain, infrastructure) and what belongs in each</li><li>Apply the dependency rule, that outer layers depend on inner ones and never the reverse</li><li>Hide storage behind a repository with an in-memory and a file-based version</li><li>Write a service layer of use cases that the presentation layer calls</li><li>Check that modules respect the layers, and spot code in the wrong layer</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="From classes to programs: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Four layers and one rule: 25 min"></span><span class="plan-seg s1" style="flex:25" title="Repositories: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Services and presentation: 20 min"></span><span class="plan-seg s1" style="flex:10" title="Layers in files: 10 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">From classes to programs</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Four layers and one rule</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Repositories</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Services and presentation</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">Layers in files</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w036d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w036d4.ipynb" download>download it</a>. Exercises today are worth 120 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w036d4-p1"><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+@dataclass
+class Book:                                   # domain: rules, no input or output
+    isbn: str
+    title: str
+    on_loan: bool = False
+
+class MemoryBooks:                            # infrastructure: where books are kept
+    def __init__(self):
+        self._books = {}
+    def add(self, book):
+        self._books[book.isbn] = book
+    def get(self, isbn):
+        return self._books.get(isbn)
+
+def borrow(books, isbn):                      # application: one use case
+    book = books.get(isbn)
+    if book is None or book.on_loan:
+        return False
+    book.on_loan = True
+    return True
+
+books = MemoryBooks()                         # the edge: wiring and presentation
+books.add(Book(&quot;978-0&quot;, &quot;Aké&quot;))
+for isbn in [&quot;978-0&quot;, &quot;978-0&quot;, &quot;999&quot;]:
+    print(&quot;borrowed&quot; if borrow(books, isbn) else &quot;not available&quot;)</textarea></div>
+<p>Four small parts, each with one kind of job: what a book <strong>is</strong>, where books are <strong>kept</strong>, what the library <strong>does</strong>, and how the user <strong>sees</strong> it. Only the last part prints, and only the second knows how books are stored. That separation is what today is about.</p>
+<h2 id="from-classes-to-programs">From classes to programs</h2>
+<p>Weeks 28 to 35 were about single classes and small groups of them. Real programs have dozens of modules, and the same design questions come back at a larger scale: which parts may know about which (coupling), and does each module have one kind of job (cohesion)?</p>
+<p>Without an answer, programs drift into a shape where the code that draws the screen also reads the database and decides the business rules. Then changing the screen risks breaking the rules, testing the rules needs a database, and moving from files to a database means rewriting everything.</p>
+<p>An <strong>architecture</strong> is a decision about the large-scale shape: what kinds of module there are, and what each may depend on. The most widely used is a <strong>layered</strong> architecture.</p>
+<h2 id="four-layers-and-one-rule">Four layers and one rule</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Holds</th>
+<th>In the library</th>
+<th>Knows about</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>presentation</strong></td>
+<td>input and output for people: a command line, a web page, an app screen</td>
+<td>reads commands, prints results and error messages</td>
+<td>the application layer</td>
+</tr>
+<tr>
+<td><strong>application</strong> (services)</td>
+<td>use cases: what the program does, step by step</td>
+<td>&ldquo;borrow a book&rdquo;, &ldquo;return a book&rdquo;, &ldquo;list overdue loans&rdquo;</td>
+<td>the domain, and interfaces for storage and other details</td>
+</tr>
+<tr>
+<td><strong>domain</strong></td>
+<td>the core concepts and rules</td>
+<td><code>Book</code>, <code>Loan</code>, &ldquo;a book can&rsquo;t be lent twice&rdquo;, &ldquo;loans last 14 days&rdquo;</td>
+<td>nothing outside itself</td>
+</tr>
+<tr>
+<td><strong>infrastructure</strong></td>
+<td>the details: files, databases, email, clocks</td>
+<td>a JSON file of books, a real clock</td>
+<td>the domain (to store its objects)</td>
+</tr>
+</tbody>
+</table>
+<p>And one rule above all, the <strong>dependency rule</strong>: <strong>dependencies point inwards, towards the domain.</strong> The domain imports nothing from the other layers; the application layer uses the domain and <strong>interfaces</strong> (Protocols, Week 32) for the details it needs; the infrastructure <strong>implements</strong> those interfaces; the presentation calls the application layer.</p>
+<p>That&rsquo;s Week 34&rsquo;s dependency inversion applied to a whole program: the important rules (the domain and the use cases) don&rsquo;t depend on details (files, screens); details depend on them. Variations of this idea go by several names (Alistair Cockburn&rsquo;s &ldquo;ports and adapters&rdquo;, Robert C. Martin&rsquo;s &ldquo;clean architecture&rdquo;), but they share this rule.</p>
+<p>What it buys you:</p>
+<ul>
+<li>The domain and services can be <strong>tested</strong> with plain objects and fakes, in milliseconds.</li>
+<li>The presentation can <strong>change</strong> (a command line today, a web page next year) without touching the rules.</li>
+<li>Storage can <strong>change</strong> (a JSON file today, a database next year) without touching the rules.</li>
+</ul>
+<h2 id="repositories">Repositories</h2>
+<p>A <strong>repository</strong> is an object that looks like a collection of domain objects (add one, get one, list them) while hiding where they&rsquo;re actually stored. The application layer depends on the repository&rsquo;s <strong>interface</strong>; the infrastructure provides implementations:</p>
+<div class="pc pc-example" data-kind="example" data-id="w036d4-e2"><textarea class="pc-src pc-code" hidden>import json
+from dataclasses import dataclass, asdict
+from typing import Protocol
+
+@dataclass
+class Book:
+    isbn: str
+    title: str
+    on_loan_to: str | None = None
+
+class BookRepository(Protocol):
+    def add(self, book: Book) -&gt; None: ...
+    def get(self, isbn: str) -&gt; Book | None: ...
+    def save(self, book: Book) -&gt; None: ...
+    def all(self) -&gt; list[Book]: ...
+
+class MemoryBookRepository:
+    def __init__(self):
+        self._books = {}
+    def add(self, book):
+        self._books[book.isbn] = book
+    def get(self, isbn):
+        return self._books.get(isbn)
+    def save(self, book):
+        self._books[book.isbn] = book
+    def all(self):
+        return sorted(self._books.values(), key=lambda b: b.title)
+
+class JsonBookRepository:
+    def __init__(self, path):
+        self.path = path
+    def _load(self):
+        try:
+            with open(self.path) as f:
+                return {d[&quot;isbn&quot;]: Book(**d) for d in json.load(f)}
+        except FileNotFoundError:
+            return {}
+    def _write(self, books):
+        with open(self.path, &quot;w&quot;) as f:
+            json.dump([asdict(b) for b in books.values()], f, indent=1)
+    def add(self, book):
+        books = self._load()
+        books[book.isbn] = book
+        self._write(books)
+    def get(self, isbn):
+        return self._load().get(isbn)
+    def save(self, book):
+        self.add(book)
+    def all(self):
+        return sorted(self._load().values(), key=lambda b: b.title)
+
+for repo in (MemoryBookRepository(), JsonBookRepository(&quot;books.json&quot;)):
+    repo.add(Book(&quot;978-1&quot;, &quot;Small Island&quot;))
+    repo.add(Book(&quot;978-0&quot;, &quot;Aké&quot;))
+    b = repo.get(&quot;978-0&quot;)
+    b.on_loan_to = &quot;Ada&quot;
+    repo.save(b)
+    print(type(repo).__name__, [(x.title, x.on_loan_to) for x in repo.all()])
+print(JsonBookRepository(&quot;books.json&quot;).get(&quot;978-0&quot;))</textarea></div>
+<p>Notice <code>save</code>: the JSON version hands out <strong>copies</strong> loaded from the file, so changing a book changes nothing until it&rsquo;s saved. Code using a repository should always <code>save</code> what it changes, so it works with both kinds. The memory version is for tests and quick experiments; the file version is what the real program uses. Neither the books nor the code that uses the repository can tell which they have.</p>
+<h2 id="services-and-presentation">Services and presentation</h2>
+<p>The <strong>application layer</strong> holds the use cases, usually as methods on a service class that&rsquo;s given its repository (and anything else it needs, such as a clock) when it&rsquo;s made. Services return results or raise <strong>domain errors</strong>; they never print or read input:</p>
+<div class="pc pc-example" data-kind="example" data-id="w036d4-e3"><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+from datetime import date, timedelta
+
+class LibraryError(Exception):
+    pass
+
+class NotFound(LibraryError):
+    pass
+
+class OnLoan(LibraryError):
+    pass
+
+@dataclass
+class Book:
+    isbn: str
+    title: str
+    on_loan_to: str | None = None
+    due: date | None = None
+
+class MemoryBooks:
+    def __init__(self, books=()):
+        self._books = {b.isbn: b for b in books}
+    def get(self, isbn):
+        return self._books.get(isbn)
+    def save(self, book):
+        self._books[book.isbn] = book
+
+class LoanService:                                   # application layer
+    LOAN_DAYS = 14
+
+    def __init__(self, books, today):
+        self.books, self.today = books, today
+
+    def borrow(self, isbn, member):
+        book = self.books.get(isbn)
+        if book is None:
+            raise NotFound(isbn)
+        if book.on_loan_to is not None:
+            raise OnLoan(f&quot;{book.title} is on loan until {book.due}&quot;)
+        book.on_loan_to, book.due = member, self.today() + timedelta(days=self.LOAN_DAYS)
+        self.books.save(book)
+        return book.due
+
+def handle(line, service):                            # presentation layer
+    command, *args = line.split()
+    try:
+        if command == &quot;borrow&quot;:
+            due = service.borrow(args[0], args[1])
+            return f&quot;Borrowed. Please return it by {due:%d %B %Y}.&quot;
+        return f&quot;Unknown command: {command}&quot;
+    except NotFound as err:
+        return f&quot;No book with ISBN {err}.&quot;
+    except LibraryError as err:
+        return f&quot;Sorry: {err}.&quot;
+
+service = LoanService(MemoryBooks([Book(&quot;978-0&quot;, &quot;Aké&quot;)]), today=lambda: date(2026, 11, 3))
+for line in [&quot;borrow 978-0 Ada&quot;, &quot;borrow 978-0 Bo&quot;, &quot;borrow 999 Bo&quot;, &quot;renew 978-0&quot;]:
+    print(handle(line, service))</textarea></div>
+<p>The division of work is sharp:</p>
+<ul>
+<li>the <strong>service</strong> decides (is it available? when is it due?) and reports problems as exceptions;</li>
+<li>the <strong>presentation</strong> translates: text into calls, results into friendly text, exceptions into messages;</li>
+<li>the <strong>domain</strong> errors (<code>NotFound</code>, <code>OnLoan</code>) are part of the domain&rsquo;s vocabulary, so the presentation can catch them without knowing how the service works.</li>
+</ul>
+<h2 id="layers-in-files">Layers in files</h2>
+<p>In a real project each layer is usually a module or a package, and you can check the dependency rule by looking at the imports:</p>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>May import</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>library/domain.py</code></td>
+<td>the standard library only</td>
+</tr>
+<tr>
+<td><code>library/services.py</code></td>
+<td><code>domain</code></td>
+</tr>
+<tr>
+<td><code>library/storage.py</code></td>
+<td><code>domain</code></td>
+</tr>
+<tr>
+<td><code>library/cli.py</code></td>
+<td><code>services</code>, <code>domain</code> (for its error types)</td>
+</tr>
+<tr>
+<td><code>main.py</code> (the composition root, Week 34)</td>
+<td>everything, to wire it together</td>
+</tr>
+</tbody>
+</table>
+<p>If <code>domain.py</code> ever imports <code>cli</code> or <code>storage</code>, a layer has leaked. Some teams check this automatically in their tests or with tools that read imports.</p>
+<p>Week 25&rsquo;s <code>spend</code> expense tracker already had this shape: pure functions for the totals and categories (domain), functions that loaded and saved files (infrastructure), and a command-line interface on top (presentation). Next week&rsquo;s project, a library system, will be built in exactly these layers.</p>
+<p>Layers aren&rsquo;t free: a tiny script doesn&rsquo;t need four of them. Introduce them when a program grows beyond a few hundred lines, or when you can already see a second kind of storage or interface coming.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A layered architecture separates presentation (input and output for people), application services (use cases), the domain (core concepts and rules) and infrastructure (files, databases, clocks). The dependency rule: dependencies point inwards, so the domain depends on nothing and the details implement interfaces the inner layers define (Week 34&rsquo;s dependency inversion at program scale). A repository hides storage behind add, get, save and list methods, with in-memory and file versions. Services decide and raise domain errors; the presentation translates text to calls and errors to messages. Check layers by checking imports.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d4-layers" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Which layer?</div><div class="pc-prompt"><p>For each piece of code, give the layer it belongs in: <code>"presentation"</code>, <code>"application"</code>, <code>"domain"</code> or <code>"infrastructure"</code>.</p></div><textarea class="pc-src pc-code" hidden># p: a function that reads members.json and turns each entry into a Member
+# q: a method Loan.is_overdue(today) that compares the due date with today
+# r: a function that turns &quot;borrow 978-0 Ada&quot; into a call and prints the result
+# s: a LoanService.renew(isbn) method that checks the rules and saves the loan
+# t: a class that sends emails through a mail server
+# u: the rule &quot;a member may have at most five loans&quot;, as a function on Member
+
+p = ___
+q = ___
+r = ___
+s = ___
+t = ___
+u = ___</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert (p, q, r) == (&quot;infrastructure&quot;, &quot;domain&quot;, &quot;presentation&quot;), &quot;p to r&quot;
+    assert (s, t, u) == (&quot;application&quot;, &quot;infrastructure&quot;, &quot;domain&quot;)</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;infrastructure&quot;
+q = &quot;domain&quot;
+r = &quot;presentation&quot;
+s = &quot;application&quot;
+t = &quot;infrastructure&quot;
+u = &quot;domain&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d4-repos" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Two repositories, one interface</div><div class="pc-prompt"><p>Write two repositories for <code>Member</code> (given), each with <code>add(member)</code> (an id already present raises <code>ValueError</code>), <code>get(member_id)</code> (the member or <code>None</code>), <code>save(member)</code> (store changes; an unknown id raises <code>KeyError</code>) and <code>all()</code> (sorted by name). <code>MemoryMembers()</code> keeps them in a dictionary; <code>JsonMembers(path)</code> keeps them in a JSON file, so a second <code>JsonMembers</code> on the same path sees what the first stored. Both must give back members you can change without affecting what&rsquo;s stored until <code>save</code> is called.</p></div><textarea class="pc-src pc-code" hidden>import json
+from dataclasses import dataclass, asdict, replace
+
+@dataclass
+class Member:
+    member_id: str
+    name: str
+    loans: int = 0
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def check(repo):
+    M = ns[&quot;Member&quot;]
+    repo.add(M(&quot;m2&quot;, &quot;Tunde&quot;))
+    repo.add(M(&quot;m1&quot;, &quot;Ada&quot;))
+    m = repo.get(&quot;m1&quot;)
+    m.loans = 3
+    assert repo.get(&quot;m1&quot;).loans == 0, &quot;changes shouldn&#x27;t be stored until save&quot;
+    repo.save(m)
+    assert repo.get(&quot;m1&quot;).loans == 3 and [x.name for x in repo.all()] == [&quot;Ada&quot;, &quot;Tunde&quot;] and repo.get(&quot;zz&quot;) is None
+    for f, err in [(lambda: repo.add(M(&quot;m1&quot;, &quot;X&quot;)), ValueError), (lambda: repo.save(M(&quot;nope&quot;, &quot;Y&quot;)), KeyError)]:
+        try:
+            f()
+            assert False, f&quot;should raise {err.__name__}&quot;
+        except err:
+            pass
+def test_memory():
+    &quot;in memory&quot;
+    check(ns[&quot;MemoryMembers&quot;]())
+def test_json():
+    &quot;in a file&quot;
+    check(ns[&quot;JsonMembers&quot;](&quot;members.json&quot;))
+    again = ns[&quot;JsonMembers&quot;](&quot;members.json&quot;)
+    assert [(m.member_id, m.loans) for m in again.all()] == [(&quot;m1&quot;, 3), (&quot;m2&quot;, 0)]</textarea><textarea class="pc-src pc-solution" hidden>import json
+from dataclasses import dataclass, asdict, replace
+
+@dataclass
+class Member:
+    member_id: str
+    name: str
+    loans: int = 0
+
+class MemoryMembers:
+    def __init__(self):
+        self._members = {}
+
+    def add(self, member):
+        if member.member_id in self._members:
+            raise ValueError(f&quot;{member.member_id} already exists&quot;)
+        self._members[member.member_id] = replace(member)
+
+    def get(self, member_id):
+        m = self._members.get(member_id)
+        return replace(m) if m else None
+
+    def save(self, member):
+        if member.member_id not in self._members:
+            raise KeyError(member.member_id)
+        self._members[member.member_id] = replace(member)
+
+    def all(self):
+        return [replace(m) for m in sorted(self._members.values(), key=lambda m: m.name)]
+
+class JsonMembers:
+    def __init__(self, path):
+        self.path = path
+
+    def _load(self):
+        try:
+            with open(self.path) as f:
+                return {d[&quot;member_id&quot;]: Member(**d) for d in json.load(f)}
+        except FileNotFoundError:
+            return {}
+
+    def _write(self, members):
+        with open(self.path, &quot;w&quot;) as f:
+            json.dump([asdict(m) for m in members.values()], f)
+
+    def add(self, member):
+        members = self._load()
+        if member.member_id in members:
+            raise ValueError(f&quot;{member.member_id} already exists&quot;)
+        members[member.member_id] = member
+        self._write(members)
+
+    def get(self, member_id):
+        return self._load().get(member_id)
+
+    def save(self, member):
+        members = self._load()
+        if member.member_id not in members:
+            raise KeyError(member.member_id)
+        members[member.member_id] = member
+        self._write(members)
+
+    def all(self):
+        return sorted(self._load().values(), key=lambda m: m.name)</textarea><template class="pc-src pc-hint">For the memory version, store copies (<code>replace(member)</code> from <code>dataclasses</code> makes one) and hand out copies, so outside changes don&rsquo;t reach the store. The JSON version naturally hands out new objects each time it loads.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d4-service" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A service layer</div><div class="pc-prompt"><p>Write a <code>LoanService(books, today)</code> where <code>books</code> is a repository (with <code>get</code> and <code>save</code>, as in the lesson) and <code>today</code> a function returning a <code>date</code>. It has three use cases, and must not print anything:</p>
+<ul>
+<li><code>borrow(isbn, member)</code>: returns the due date (14 days on); raises <code>NotFound</code> for an unknown ISBN and <code>OnLoan</code> if it&rsquo;s already lent;</li>
+<li><code>give_back(isbn)</code>: clears the loan and returns how many days late it was (0 if on time); raises <code>NotFound</code>, or <code>NotOnLoan</code> if it wasn&rsquo;t lent;</li>
+<li><code>overdue()</code>: the titles of books past their due date, sorted.</li>
+</ul>
+<p><code>NotFound</code>, <code>OnLoan</code> and <code>NotOnLoan</code> are all kinds of <code>LibraryError</code>.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+from datetime import date, timedelta
+
+@dataclass
+class Book:
+    isbn: str
+    title: str
+    on_loan_to: str | None = None
+    due: date | None = None
+
+class MemoryBooks:
+    def __init__(self, books=()):
+        self._books = {b.isbn: b for b in books}
+    def get(self, isbn):
+        return self._books.get(isbn)
+    def save(self, book):
+        self._books[book.isbn] = book
+    def all(self):
+        return list(self._books.values())
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_service():
+    &quot;use cases&quot;
+    from datetime import date as d
+    import io, contextlib
+    B, M, S = ns[&quot;Book&quot;], ns[&quot;MemoryBooks&quot;], ns[&quot;LoanService&quot;]
+    now = [d(2026, 11, 3)]
+    repo = M([B(&quot;1&quot;, &quot;Aké&quot;), B(&quot;2&quot;, &quot;Kindred&quot;), B(&quot;3&quot;, &quot;Small Island&quot;)])
+    s = S(repo, lambda: now[0])
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        assert s.borrow(&quot;1&quot;, &quot;Ada&quot;) == d(2026, 11, 17) and s.borrow(&quot;2&quot;, &quot;Bo&quot;) == d(2026, 11, 17)
+        now[0] = d(2026, 11, 20)
+        assert s.overdue() == [&quot;Aké&quot;, &quot;Kindred&quot;] and s.give_back(&quot;1&quot;) == 3 and s.overdue() == [&quot;Kindred&quot;]
+        assert repo.get(&quot;1&quot;).on_loan_to is None and repo.get(&quot;1&quot;).due is None
+    assert out.getvalue() == &quot;&quot;, &quot;the service shouldn&#x27;t print&quot;
+    for f, err in [(lambda: s.borrow(&quot;9&quot;, &quot;X&quot;), &quot;NotFound&quot;), (lambda: s.borrow(&quot;2&quot;, &quot;X&quot;), &quot;OnLoan&quot;), (lambda: s.give_back(&quot;3&quot;), &quot;NotOnLoan&quot;)]:
+        try:
+            f()
+            assert False, f&quot;should raise {err}&quot;
+        except ns[err]:
+            pass
+    assert all(issubclass(ns[e], ns[&quot;LibraryError&quot;]) for e in [&quot;NotFound&quot;, &quot;OnLoan&quot;, &quot;NotOnLoan&quot;])
+    s2 = S(M([B(&quot;4&quot;, &quot;x&quot;)]), lambda: d(2026, 1, 1))
+    s2.borrow(&quot;4&quot;, &quot;A&quot;)
+    assert s2.give_back(&quot;4&quot;) == 0</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+from datetime import date, timedelta
+
+@dataclass
+class Book:
+    isbn: str
+    title: str
+    on_loan_to: str | None = None
+    due: date | None = None
+
+class MemoryBooks:
+    def __init__(self, books=()):
+        self._books = {b.isbn: b for b in books}
+    def get(self, isbn):
+        return self._books.get(isbn)
+    def save(self, book):
+        self._books[book.isbn] = book
+    def all(self):
+        return list(self._books.values())
+
+class LibraryError(Exception):
+    pass
+
+class NotFound(LibraryError):
+    pass
+
+class OnLoan(LibraryError):
+    pass
+
+class NotOnLoan(LibraryError):
+    pass
+
+class LoanService:
+    LOAN_DAYS = 14
+
+    def __init__(self, books, today):
+        self.books, self.today = books, today
+
+    def _find(self, isbn):
+        book = self.books.get(isbn)
+        if book is None:
+            raise NotFound(isbn)
+        return book
+
+    def borrow(self, isbn, member):
+        book = self._find(isbn)
+        if book.on_loan_to is not None:
+            raise OnLoan(book.title)
+        book.on_loan_to = member
+        book.due = self.today() + timedelta(days=self.LOAN_DAYS)
+        self.books.save(book)
+        return book.due
+
+    def give_back(self, isbn):
+        book = self._find(isbn)
+        if book.on_loan_to is None:
+            raise NotOnLoan(book.title)
+        late = max(0, (self.today() - book.due).days)
+        book.on_loan_to, book.due = None, None
+        self.books.save(book)
+        return late
+
+    def overdue(self):
+        today = self.today()
+        return sorted(b.title for b in self.books.all() if b.due is not None and b.due &lt; today)</textarea><template class="pc-src pc-hint"><code>overdue</code> needs the repository&rsquo;s <code>all()</code> (given in <code>MemoryBooks</code>). Days late is <code>max(0, (today - due).days)</code>.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d4-imports" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Checking the dependency rule</div><div class="pc-prompt"><p>Write <code>violations(imports, layers)</code>. <code>imports</code> is a dictionary from a module name to the list of modules it imports; <code>layers</code> is a dictionary from module name to its layer number, where a <strong>bigger number is further out</strong> (for example domain 0, services 1, storage 2, cli 3). A module may import modules in its own layer or further in (a smaller or equal number); importing one further out is a violation. Modules not in <code>layers</code> (like the standard library) are ignored. Return the violations as <code>(module, imported)</code> pairs, sorted.</p></div><textarea class="pc-src pc-code" hidden>def violations(imports, layers):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_violations():
+    &quot;the rule&quot;
+    layers = {&quot;domain&quot;: 0, &quot;services&quot;: 1, &quot;storage&quot;: 2, &quot;cli&quot;: 3, &quot;main&quot;: 4}
+    imports = {&quot;domain&quot;: [&quot;dataclasses&quot;, &quot;datetime&quot;], &quot;services&quot;: [&quot;domain&quot;, &quot;storage&quot;], &quot;storage&quot;: [&quot;json&quot;, &quot;domain&quot;],
+               &quot;cli&quot;: [&quot;services&quot;, &quot;domain&quot;], &quot;main&quot;: [&quot;cli&quot;, &quot;storage&quot;, &quot;services&quot;], &quot;helpers&quot;: [&quot;cli&quot;]}
+    assert violations(imports, layers) == [(&quot;services&quot;, &quot;storage&quot;)]
+    imports[&quot;domain&quot;].append(&quot;cli&quot;)
+    assert violations(imports, layers) == [(&quot;domain&quot;, &quot;cli&quot;), (&quot;services&quot;, &quot;storage&quot;)]
+    assert violations({}, layers) == []</textarea><textarea class="pc-src pc-solution" hidden>def violations(imports, layers):
+    found = []
+    for module, targets in imports.items():
+        if module not in layers:
+            continue
+        for target in targets:
+            if target in layers and layers[target] &gt; layers[module]:
+                found.append((module, target))
+    return sorted(found)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w036d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A domain that prints</div><div class="pc-prompt"><p>The domain&rsquo;s <code>Book.lend</code> prints a message, so every use (including tests, and a future web page) gets text on the screen it didn&rsquo;t ask for: this prints <code>Aké lent to Ada</code> before <code>ok</code>. Domain code shouldn&rsquo;t do input or output. Remove the print from the domain, so the program prints only <code>ok</code> (the presentation decides what to show).</p></div><textarea class="pc-src pc-code" hidden>class Book:
+    def __init__(self, title):
+        self.title = title
+        self.on_loan_to = None
+
+    def lend(self, member):
+        if self.on_loan_to is not None:
+            raise ValueError(&quot;already on loan&quot;)
+        self.on_loan_to = member
+        print(f&quot;{self.title} lent to {member}&quot;)
+
+b = Book(&quot;Aké&quot;)
+b.lend(&quot;Ada&quot;)
+print(&quot;ok&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a quiet domain&quot;
+    expect_output(&quot;ok&quot;)
+    b = ns[&quot;Book&quot;](&quot;x&quot;)
+    b.lend(&quot;A&quot;)
+    assert b.on_loan_to == &quot;A&quot;</textarea><textarea class="pc-src pc-solution" hidden>class Book:
+    def __init__(self, title):
+        self.title = title
+        self.on_loan_to = None
+
+    def lend(self, member):
+        if self.on_loan_to is not None:
+            raise ValueError(&quot;already on loan&quot;)
+        self.on_loan_to = member
+
+b = Book(&quot;Aké&quot;)
+b.lend(&quot;Ada&quot;)
+print(&quot;ok&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w036d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Around the repository</div><div class="pc-prompt"><p>The service looks books up in a global dictionary instead of the repository it was given, so a book added through the repository can&rsquo;t be found: this prints <code>not found</code>. Fix <code>find</code> to use the repository, so it prints <code>Kindred</code>.</p></div><textarea class="pc-src pc-code" hidden>BOOKS = {&quot;1&quot;: &quot;Aké&quot;}
+
+class Repo:
+    def __init__(self):
+        self.books = {}
+    def add(self, isbn, title):
+        self.books[isbn] = title
+    def get(self, isbn):
+        return self.books.get(isbn)
+
+class Service:
+    def __init__(self, repo):
+        self.repo = repo
+    def find(self, isbn):
+        return BOOKS.get(isbn, &quot;not found&quot;)
+
+repo = Repo()
+repo.add(&quot;2&quot;, &quot;Kindred&quot;)
+print(Service(repo).find(&quot;2&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;through the repository&quot;
+    expect_output(&quot;Kindred&quot;)
+    assert ns[&quot;Service&quot;](Repo()).find(&quot;1&quot;) == &quot;not found&quot;</textarea><textarea class="pc-src pc-solution" hidden>BOOKS = {&quot;1&quot;: &quot;Aké&quot;}
+
+class Repo:
+    def __init__(self):
+        self.books = {}
+    def add(self, isbn, title):
+        self.books[isbn] = title
+    def get(self, isbn):
+        return self.books.get(isbn)
+
+class Service:
+    def __init__(self, repo):
+        self.repo = repo
+    def find(self, isbn):
+        title = self.repo.get(isbn)
+        return &quot;not found&quot; if title is None else title
+
+repo = Repo()
+repo.add(&quot;2&quot;, &quot;Kindred&quot;)
+print(Service(repo).find(&quot;2&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w036d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A rule in the wrong layer</div><div class="pc-prompt"><p>The presentation works out the due date itself, with its own (wrong) idea of the loan length, instead of using what the service returned: the screen says 10 November while the loan is really due on 17 November. Fix <code>show_borrow</code> so it reports the service&rsquo;s due date and prints <code>Due 17 November</code>.</p></div><textarea class="pc-src pc-code" hidden>from datetime import date, timedelta
+
+class Service:
+    def borrow(self, today):
+        return today + timedelta(days=14)
+
+def show_borrow(service, today):
+    service.borrow(today)
+    due = today + timedelta(days=7)
+    return f&quot;Due {due.day} {due:%B}&quot;
+
+print(show_borrow(Service(), date(2026, 11, 3)))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the service decides&quot;
+    expect_output(&quot;Due 17 November&quot;)
+    assert &quot;timedelta&quot; not in source.split(&quot;def show_borrow&quot;)[1].split(&quot;print(&quot;)[0], &quot;the presentation shouldn&#x27;t calculate the date&quot;</textarea><textarea class="pc-src pc-solution" hidden>from datetime import date, timedelta
+
+class Service:
+    def borrow(self, today):
+        return today + timedelta(days=14)
+
+def show_borrow(service, today):
+    due = service.borrow(today)
+    return f&quot;Due {due.day} {due:%B}&quot;
+
+print(show_borrow(Service(), date(2026, 11, 3)))</textarea></div>
+<div class="parsons" data-id="w036d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Presentation calling a service</div><div class="pc-prompt"><p>Arrange the lines into a presentation function that calls the service and turns its errors into messages. One line is a trap.</p></div><script type="application/json">{"lines": ["def show_return(service, isbn):", "    try:", "        late = service.give_back(isbn)", "    except NotFound:", "        return \"No such book.\"", "    if late:", "        return f\"Returned {late} days late.\"", "    return \"Returned on time. Thank you!\""], "distractors": ["    late = (date.today() - book.due).days"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>class Repo:
+    def __init__(self):
+        self.d = {}
+    def add(self, k, v):
+        self.d[k] = v
+    def get(self, k):
+        return self.d.get(k)
+
+class Service:
+    def __init__(self, repo):
+        self.repo = repo
+    def double(self, k):
+        v = self.repo.get(k)
+        if v is None:
+            raise KeyError(k)
+        self.repo.add(k, v * 2)
+        return v * 2
+
+r = Repo()
+r.add(&quot;a&quot;, 3)
+s = Service(r)
+s.double(&quot;a&quot;)
+
+p = ___   # r.get(&quot;a&quot;)
+q = ___   # s.double(&quot;a&quot;)
+r_ = ___  # Service(Repo()).repo.get(&quot;a&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert (p, q, r_) == (6, 12, None)</textarea><textarea class="pc-src pc-solution" hidden>class Repo:
+    def __init__(self):
+        self.d = {}
+    def add(self, k, v):
+        self.d[k] = v
+    def get(self, k):
+        return self.d.get(k)
+
+class Service:
+    def __init__(self, repo):
+        self.repo = repo
+    def double(self, k):
+        v = self.repo.get(k)
+        if v is None:
+            raise KeyError(k)
+        self.repo.add(k, v * 2)
+        return v * 2
+
+r = Repo()
+r.add(&quot;a&quot;, 3)
+s = Service(r)
+s.double(&quot;a&quot;)
+
+p = 6
+q = 12
+r_ = None</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w036d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does the domain layer hold?", "answer": 1, "explain": "It depends on nothing outside itself.", "options": ["Screens", "The core concepts and rules, such as Book and the loan rules", "Database code", "Web pages"]}, {"type": "mc", "q": "What is the dependency rule?", "answer": 1, "explain": "Details depend on rules, not the reverse.", "options": ["Every layer imports every other", "Dependencies point inwards, towards the domain", "The domain imports the database", "There are no dependencies"]}, {"type": "mc", "q": "Which layer holds use cases like &ldquo;borrow a book&rdquo;?", "answer": 1, "explain": "Services coordinate the domain and the repositories.", "options": ["Presentation", "Application (services)", "Infrastructure", "Domain only"]}, {"type": "mc", "q": "What is a repository?", "answer": 1, "explain": "Memory and file versions share one interface.", "options": ["A Git folder", "An object that looks like a collection of domain objects while hiding where they&rsquo;re stored", "A list", "A database"]}, {"type": "mc", "q": "Why call save() after changing an object from a repository?", "answer": 1, "explain": "Then the code works with every kind of repository.", "options": ["It&rsquo;s faster", "Some repositories hand out copies, so changes aren&rsquo;t stored until saved", "Python requires it", "It isn&rsquo;t needed"]}, {"type": "mc", "q": "Should a service print messages?", "answer": 1, "explain": "Then it works for a command line and a web page alike.", "options": ["Yes", "No: it returns results and raises domain errors; the presentation shows them", "Only errors", "Only in tests"]}, {"type": "mc", "q": "What does the presentation layer do with a domain error?", "answer": 1, "explain": "It translates between people and the program.", "options": ["Ignores it", "Turns it into a message for the person", "Passes it to the database", "Retries forever"]}, {"type": "mc", "q": "How can you check that layers are respected?", "answer": 1, "explain": "The domain should import none of the others.", "options": ["You can&rsquo;t", "By checking which modules import which", "By running the program", "By counting lines"]}, {"type": "mc", "q": "What&rsquo;s a good reason not to use four layers?", "answer": 1, "explain": "Introduce them as a program grows.", "options": ["They&rsquo;re always wrong", "A small script gains little from them", "Python forbids it", "They&rsquo;re slow"]}, {"type": "output", "q": "What does this print?", "answer": "added duplicate 1", "explain": "The service decides; the repository stores.", "code": "class Repo:\n    def __init__(self):\n        self.items = []\n    def add(self, x):\n        self.items.append(x)\ndef service(repo, x):\n    if x in repo.items:\n        return \"duplicate\"\n    repo.add(x)\n    return \"added\"\nr = Repo()\nprint(service(r, \"a\"), service(r, \"a\"), len(r.items))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w036d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a layered notes app</div><div class="pc-prompt"><p>Build a small notes app in layers, all in one file but kept separate:</p>
+<ul>
+<li><strong>Domain</strong>: <code>Note</code>, a dataclass with <code>note_id</code> (int), <code>title</code>, <code>body</code> and <code>tags</code> (a list of strings, stored lower case). <code>NotesError</code>, with <code>NoSuchNote</code> and <code>BadNote</code> as kinds of it.</li>
+<li><strong>Infrastructure</strong>: <code>MemoryNotes</code> and <code>JsonNotes(path)</code> repositories with <code>add(note)</code>, <code>get(note_id)</code> (or <code>None</code>), <code>save(note)</code>, <code>delete(note_id)</code> and <code>all()</code> (sorted by id), handing out copies.</li>
+<li><strong>Application</strong>: <code>NotesService(repo)</code> with <code>create(title, body, tags)</code> (a blank title raises <code>BadNote</code>; ids are 1 more than the largest so far, starting at 1; returns the id), <code>tag(note_id, tag)</code> (adds a tag in lower case if it isn&rsquo;t there), <code>find(tag)</code> (the titles of notes with that tag, sorted) and <code>remove(note_id)</code>. Unknown ids raise <code>NoSuchNote</code>.</li>
+<li><strong>Presentation</strong>: <code>handle(line, service)</code> understanding <code>new &lt;title&gt; | &lt;body&gt; | &lt;tag,tag&gt;</code>, <code>tag &lt;id&gt; &lt;tag&gt;</code>, <code>find &lt;tag&gt;</code> and <code>rm &lt;id&gt;</code>, and returning text: <code>created note 3</code>, <code>tagged</code>, the titles joined by <code>,</code> (or <code>nothing tagged x</code>), <code>removed</code>; a <code>NotesError</code> becomes <code>error:</code> and its message; an unknown command gives <code>unknown command</code>.</li>
+</ul>
+<p>The presentation must only call the service, and the service must only use its repository.</p></div><textarea class="pc-src pc-code" hidden>import json
+from dataclasses import dataclass, field, asdict, replace
+
+___</textarea><textarea class="pc-src pc-tests" hidden>def test_layers():
+    &quot;the app&quot;
+    MN, S = ns[&quot;MemoryNotes&quot;], ns[&quot;NotesService&quot;]
+    s = S(MN())
+    assert handle(&quot;new Shopping | rice, oil | home,Food&quot;, s) == &quot;created note 1&quot;
+    assert handle(&quot;new Rota | Ada Mon, Bo Tue | work&quot;, s) == &quot;created note 2&quot;
+    assert handle(&quot;tag 2 HOME&quot;, s) == &quot;tagged&quot; and handle(&quot;tag 2 home&quot;, s) == &quot;tagged&quot;
+    assert handle(&quot;find home&quot;, s) == &quot;Rota, Shopping&quot; and handle(&quot;find food&quot;, s) == &quot;Shopping&quot; and handle(&quot;find gym&quot;, s) == &quot;nothing tagged gym&quot;
+    assert handle(&quot;rm 1&quot;, s) == &quot;removed&quot; and handle(&quot;rm 1&quot;, s).startswith(&quot;error: &quot;) and handle(&quot;dance&quot;, s) == &quot;unknown command&quot;
+    assert handle(&quot;new  | x | y&quot;, s).startswith(&quot;error: &quot;) and handle(&quot;new Next | b | &quot;, s) == &quot;created note 3&quot;
+    assert s.repo.get(2).tags == [&quot;work&quot;, &quot;home&quot;]
+def test_json():
+    &quot;file storage&quot;
+    JN, S = ns[&quot;JsonNotes&quot;], ns[&quot;NotesService&quot;]
+    s = S(JN(&quot;notes.json&quot;))
+    s.create(&quot;A&quot;, &quot;x&quot;, [&quot;T&quot;])
+    n = s.repo.get(1)
+    n.title = &quot;changed&quot;
+    assert s.repo.get(1).title == &quot;A&quot;
+    again = S(JN(&quot;notes.json&quot;))
+    assert again.create(&quot;B&quot;, &quot;y&quot;, []) == 2 and again.find(&quot;t&quot;) == [&quot;A&quot;]
+    again.remove(1)
+    assert [n.note_id for n in JN(&quot;notes.json&quot;).all()] == [2]
+    try:
+        again.tag(1, &quot;x&quot;)
+        assert False
+    except ns[&quot;NoSuchNote&quot;]:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import json
+from dataclasses import dataclass, field, asdict, replace
+
+@dataclass
+class Note:
+    note_id: int
+    title: str
+    body: str
+    tags: list = field(default_factory=list)
+
+class NotesError(Exception):
+    pass
+
+class NoSuchNote(NotesError):
+    pass
+
+class BadNote(NotesError):
+    pass
+
+def copy_note(n):
+    return replace(n, tags=list(n.tags))
+
+class MemoryNotes:
+    def __init__(self):
+        self._notes = {}
+
+    def add(self, note):
+        self._notes[note.note_id] = copy_note(note)
+
+    def get(self, note_id):
+        n = self._notes.get(note_id)
+        return copy_note(n) if n else None
+
+    def save(self, note):
+        self._notes[note.note_id] = copy_note(note)
+
+    def delete(self, note_id):
+        del self._notes[note_id]
+
+    def all(self):
+        return [copy_note(self._notes[k]) for k in sorted(self._notes)]
+
+class JsonNotes:
+    def __init__(self, path):
+        self.path = path
+
+    def _load(self):
+        try:
+            with open(self.path) as f:
+                return {d[&quot;note_id&quot;]: Note(**d) for d in json.load(f)}
+        except FileNotFoundError:
+            return {}
+
+    def _write(self, notes):
+        with open(self.path, &quot;w&quot;) as f:
+            json.dump([asdict(n) for n in notes.values()], f)
+
+    def add(self, note):
+        notes = self._load()
+        notes[note.note_id] = note
+        self._write(notes)
+
+    def get(self, note_id):
+        return self._load().get(note_id)
+
+    def save(self, note):
+        self.add(note)
+
+    def delete(self, note_id):
+        notes = self._load()
+        del notes[note_id]
+        self._write(notes)
+
+    def all(self):
+        notes = self._load()
+        return [notes[k] for k in sorted(notes)]
+
+class NotesService:
+    def __init__(self, repo):
+        self.repo = repo
+
+    def _get(self, note_id):
+        note = self.repo.get(note_id)
+        if note is None:
+            raise NoSuchNote(f&quot;no note {note_id}&quot;)
+        return note
+
+    def create(self, title, body, tags):
+        if not title.strip():
+            raise BadNote(&quot;a note needs a title&quot;)
+        ids = [n.note_id for n in self.repo.all()]
+        note_id = max(ids, default=0) + 1
+        clean = []
+        for t in tags:
+            t = t.strip().lower()
+            if t and t not in clean:
+                clean.append(t)
+        self.repo.add(Note(note_id, title.strip(), body.strip(), clean))
+        return note_id
+
+    def tag(self, note_id, tag):
+        note = self._get(note_id)
+        tag = tag.strip().lower()
+        if tag not in note.tags:
+            note.tags.append(tag)
+            self.repo.save(note)
+
+    def find(self, tag):
+        tag = tag.lower()
+        return sorted(n.title for n in self.repo.all() if tag in n.tags)
+
+    def remove(self, note_id):
+        self._get(note_id)
+        self.repo.delete(note_id)
+
+def handle(line, service):
+    command, _, rest = line.partition(&quot; &quot;)
+    try:
+        if command == &quot;new&quot;:
+            parts = rest.split(&quot;|&quot;)
+            if len(parts) != 3:
+                return &quot;error: use new &lt;title&gt; | &lt;body&gt; | &lt;tags&gt;&quot;
+            title, body, tags = parts
+            note_id = service.create(title, body, tags.split(&quot;,&quot;))
+            return f&quot;created note {note_id}&quot;
+        if command == &quot;tag&quot;:
+            note_id, tag = rest.split()
+            service.tag(int(note_id), tag)
+            return &quot;tagged&quot;
+        if command == &quot;find&quot;:
+            titles = service.find(rest.strip())
+            return &quot;, &quot;.join(titles) if titles else f&quot;nothing tagged {rest.strip()}&quot;
+        if command == &quot;rm&quot;:
+            service.remove(int(rest))
+            return &quot;removed&quot;
+        return &quot;unknown command&quot;
+    except NotesError as err:
+        return f&quot;error: {err}&quot;</textarea><template class="pc-src pc-hint">Parse <code>new</code> by splitting the rest of the line on <code>"|"</code> into three parts and splitting the tags on commas, dropping blanks. The service does the lower-casing and the id numbering.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Sketch the layers of a program you&rsquo;d like to build: name two domain classes, two use cases, one kind of storage and one interface. Tomorrow: dependency injection at the scale of a whole program, building on Week 34.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w036d3.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w036d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w036d4", "week": 36, "day": 4, "title": "Layered architecture", "exercises": [{"id": "w036d4-layers", "title": "Which layer?", "points": 10}, {"id": "w036d4-repos", "title": "Two repositories, one interface", "points": 15}, {"id": "w036d4-service", "title": "A service layer", "points": 15}, {"id": "w036d4-imports", "title": "Checking the dependency rule", "points": 15}, {"id": "w036d4-bug1", "title": "A domain that prints", "points": 10}, {"id": "w036d4-bug2", "title": "Around the repository", "points": 10}, {"id": "w036d4-bug3", "title": "A rule in the wrong layer", "points": 10}, {"id": "w036d4-trace", "title": "Predict them", "points": 10}, {"id": "w036d4-challenge", "title": "Challenge: a layered notes app", "points": 25}], "points": 120}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=8fe38f9496"></script>
+</body>
+</html>
