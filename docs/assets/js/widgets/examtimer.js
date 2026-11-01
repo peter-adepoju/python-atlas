@@ -1,6 +1,6 @@
 // Exam timer: start it when you begin; it counts down, survives a page reload, and tells you
 // when time is up. It never locks anything: the exam is for you.
-import { h } from "../site.js?v=588dc67651";
+import { h } from "../site.js?v=871ff52039";
 
 export default function examtimer(el, { minutes = 120, key = "exam" } = {}) {
   const store = "atlas-timer:" + key;

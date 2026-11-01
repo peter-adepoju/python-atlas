@@ -1,8 +1,8 @@
 // Trace table: the table you'd draw by hand, built one row at a time.
 // Each row is one line Python ran, with every variable's value after it,
 // the condition's value for while and if lines, and anything printed.
-import { h } from "../site.js?v=588dc67651";
-import { py } from "../runtime.js?v=588dc67651";
+import { h } from "../site.js?v=871ff52039";
+import { py } from "../runtime.js?v=871ff52039";
 
 export default function tracetable(el, { code = "n = 1\ntotal = 0\nwhile n <= 3:\n    total += n\n    n += 1\nprint(total)", inputs = [], editable = true } = {}) {
   const area = h("textarea", { class: "w-input", spellcheck: "false", rows: Math.max(4, code.split("\n").length), style: "width:100%;font-family:var(--f-code);line-height:1.6;resize:vertical", "aria-label": "Program to trace" });

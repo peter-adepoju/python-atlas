@@ -1,6 +1,6 @@
 // Towers of Hanoi: step through the moves the recursive solution makes, and see which call
 // (which size of tower, from which peg to which) each move belongs to.
-import { h } from "../site.js?v=588dc67651";
+import { h } from "../site.js?v=871ff52039";
 
 export default function hanoi(el, { n = 3, max = 6 } = {}) {
   let discs = n, step = 0, moves = [], timer = null;
