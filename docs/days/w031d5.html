@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="8fe38f9496">
+<title>Week 31 Day 5: __slots__ and memory | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=8fe38f9496">
+<link rel="stylesheet" href="../assets/css/site.css?v=8fe38f9496">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=8fe38f9496"></script>
+<script src="../assets/vendor/codemirror.js?v=8fe38f9496" defer></script>
+<meta name="description" content="Every object you’ve made so far keeps its attributes in its own dictionary, which is why you can add any attribute to any object at any time. That...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w031d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 31 Day 5: __slots__ and memory">
+<meta property="og:description" content="Every object you’ve made so far keeps its attributes in its own dictionary, which is why you can add any attribute to any object at any time. That...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w031d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-31">Week 31: The Python data model</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#where-attributes-live" data-sec="where-attributes-live">Where attributes live</a></li><li><a href="#measuring-memory" data-sec="measuring-memory">Measuring memory</a></li><li><a href="#slots" data-sec="slots">slots</a></li><li><a href="#slots-and-inheritance" data-sec="slots-and-inheritance">Slots and inheritance</a></li><li><a href="#values-that-can-t-change" data-sec="values-that-can-t-change">Values that can’t change</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w031d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-3">Phase 3: Objects and design</a></li><li><a href="../map.html#week-31">Week 31: The Python data model</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 31, Day 5</span></p>
+      <h1>__slots__ and memory</h1>
+      <div class="day-intro"><p>Every object you&rsquo;ve made so far keeps its attributes in its own dictionary, which is why you can add any attribute to any object at any time. That flexibility costs memory, and for a program with hundreds of thousands of small objects (points, readings, pixels, transactions) the cost adds up. Today you&rsquo;ll see where attributes live, measure what objects really use, and meet <code>__slots__</code>, which gives a class a fixed list of attributes and no dictionary. You&rsquo;ll also see what slots cost you, how they work with inheritance, and how to make objects whose values can&rsquo;t change.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain where an object&rsquo;s attributes are stored, and what vars() shows</li><li>Measure the memory used by many objects with tracemalloc, and know the limits of sys.getsizeof</li><li>Declare <strong>slots</strong>, and explain what it saves, what it catches and what it gives up</li><li>Use <strong>slots</strong> correctly with inheritance and mixins</li><li>Make an object&rsquo;s attributes unchangeable with <strong>setattr</strong></li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Where attributes live: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Measuring memory: 20 min"></span><span class="plan-seg s1" style="flex:25" title="__slots__: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Slots and inheritance: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Values that can&#x27;t change: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Where attributes live</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Measuring memory</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what"><strong>slots</strong></span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Slots and inheritance</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Values that can&rsquo;t change</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w031d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w031d5.ipynb" download>download it</a>. Exercises today are worth 120 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w031d5-p1"><textarea class="pc-src pc-code" hidden>class Point:
+    __slots__ = (&quot;x&quot;, &quot;y&quot;)
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+p = Point(1, 2)
+p.x = 10
+try:
+    p.z = 3
+except AttributeError:
+    print(&quot;no z&quot;)
+print(p.x, hasattr(p, &quot;__dict__&quot;))</textarea></div>
+<p><code>Point</code> lists its attributes in <code>__slots__</code>, so its objects can hold <code>x</code> and <code>y</code> and nothing else. Changing <code>x</code> is fine; adding <code>z</code> isn&rsquo;t. And the object has no <code>__dict__</code>, the dictionary that every other object you&rsquo;ve made carries around. Today is about that dictionary, what it costs, and when it&rsquo;s worth giving up.</p>
+<h2 id="where-attributes-live">Where attributes live</h2>
+<p>An ordinary object stores its attributes in a dictionary of its own, <code>obj.__dict__</code>, which <code>vars(obj)</code> shows (you&rsquo;ve used it since Week 28). Methods and class attributes live in the <strong>class&rsquo;s</strong> dictionary, shared by every object, so each object only pays for its own attribute values.</p>
+<div class="pc pc-example" data-kind="example" data-id="w031d5-e2"><textarea class="pc-src pc-code" hidden>class Reading:
+    def __init__(self, sensor, celsius):
+        self.sensor = sensor
+        self.celsius = celsius
+
+r = Reading(&quot;kitchen&quot;, 21.5)
+print(vars(r))
+r.note = &quot;door open&quot;            # any object can grow a new attribute
+r.celsuis = 30                  # including a misspelt one, silently
+print(vars(r))
+print(&quot;__init__&quot; in vars(Reading), &quot;sensor&quot; in vars(Reading))</textarea></div>
+<p>That flexibility has two costs:</p>
+<ul>
+<li><strong>Memory.</strong> A dictionary per object is more than the values alone need. One object doesn&rsquo;t matter; half a million do.</li>
+<li><strong>Typos pass silently.</strong> <code>r.celsuis = 30</code> created a new attribute instead of failing. The real <code>celsius</code> is unchanged, and the bug shows up somewhere else, later.</li>
+</ul>
+<h2 id="measuring-memory">Measuring memory</h2>
+<p><code>sys.getsizeof(x)</code> gives the size in bytes of one object <strong>on its own</strong>, not counting the objects it refers to. That makes it easy to misread: it doesn&rsquo;t count a list&rsquo;s items, a dictionary&rsquo;s keys and values, or (in recent Pythons) an object&rsquo;s attribute storage properly. To see what a program really uses, measure a large batch of objects with <code>tracemalloc</code>, the standard library&rsquo;s memory tracer:</p>
+<div class="pc pc-example" data-kind="example" data-id="w031d5-e3"><textarea class="pc-src pc-code" hidden>import tracemalloc
+
+class Plain:
+    def __init__(self, x, y, z):
+        self.x, self.y, self.z = x, y, z
+
+class Slotted:
+    __slots__ = (&quot;x&quot;, &quot;y&quot;, &quot;z&quot;)
+
+    def __init__(self, x, y, z):
+        self.x, self.y, self.z = x, y, z
+
+def bytes_each(cls, n=50_000):
+    tracemalloc.start()
+    objects = [cls(i, i, i) for i in range(n)]
+    used, _ = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    return used // n
+
+print(&quot;plain:  &quot;, bytes_each(Plain), &quot;bytes per object&quot;)
+print(&quot;slotted:&quot;, bytes_each(Slotted), &quot;bytes per object&quot;)</textarea></div>
+<p>The numbers include the list holding the objects and the integers inside them, so they&rsquo;re &ldquo;the cost of one more object&rdquo; in a realistic program. The exact figures depend on the Python version, but slotted objects come out clearly smaller. Recent versions of Python have made ordinary objects much leaner than they used to be, so the saving is smaller than older books and articles describe. Measure before you decide it matters.</p>
+<h2 id="slots"><strong>slots</strong></h2>
+<p>A class attribute named <code>__slots__</code>, holding a tuple of attribute names, tells Python to give each object a fixed place for exactly those attributes, and <strong>no</strong> <code>__dict__</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w031d5-e4"><textarea class="pc-src pc-code" hidden>class Reading:
+    __slots__ = (&quot;sensor&quot;, &quot;celsius&quot;)
+
+    def __init__(self, sensor, celsius):
+        self.sensor = sensor
+        self.celsius = celsius
+
+    def __repr__(self):
+        return f&quot;Reading({self.sensor!r}, {self.celsius})&quot;
+
+r = Reading(&quot;kitchen&quot;, 21.5)
+r.celsius = 22.0                     # changing a slot is fine
+print(r)
+for name, value in [(&quot;celsuis&quot;, 30), (&quot;note&quot;, &quot;door open&quot;)]:
+    try:
+        setattr(r, name, value)
+    except AttributeError as err:
+        print(&quot;AttributeError:&quot;, err)
+try:
+    vars(r)
+except TypeError as err:
+    print(&quot;TypeError:&quot;, err)</textarea></div>
+<p>What you get:</p>
+<ul>
+<li><strong>Less memory per object</strong>, which matters when there are very many.</li>
+<li><strong>Typos caught</strong>: assigning an attribute that isn&rsquo;t a slot raises <code>AttributeError</code> at once.</li>
+<li>Slightly <strong>faster</strong> attribute access (a small effect; don&rsquo;t use slots for speed alone).</li>
+</ul>
+<p>What you give up:</p>
+<ul>
+<li><strong>No new attributes</strong> on objects, ever, even ones that would be useful later.</li>
+<li><strong>No <code>__dict__</code></strong>, so <code>vars(obj)</code> fails, and code (yours or a library&rsquo;s) that relies on it breaks. Read slot values with <code>getattr(obj, name)</code> instead.</li>
+<li><strong>No class attribute with a slot&rsquo;s name.</strong> A default like <code>size = 10</code> in the class body clashes with a slot called <code>size</code>, and Python refuses to create the class. Set defaults in <code>__init__</code> instead.</li>
+</ul>
+<p>So slots are for classes with a fixed, known set of attributes that you&rsquo;ll make <strong>in large numbers</strong>: points, pixels, readings, cells of a grid, records loaded from a big file. For a class with a handful of objects, the dictionary&rsquo;s flexibility is worth more. Week 32&rsquo;s dataclasses can add slots for you with <code>slots=True</code>.</p>
+<h2 id="slots-and-inheritance">Slots and inheritance</h2>
+<p>Slots are declared per class, and a child class gets a <code>__dict__</code> back unless it declares <code>__slots__</code> too:</p>
+<div class="pc pc-example" data-kind="example" data-id="w031d5-e5"><textarea class="pc-src pc-code" hidden>class Reading:
+    __slots__ = (&quot;sensor&quot;, &quot;celsius&quot;)
+
+    def __init__(self, sensor, celsius):
+        self.sensor, self.celsius = sensor, celsius
+
+class Loose(Reading):
+    pass
+
+class Humid(Reading):
+    __slots__ = (&quot;humidity&quot;,)          # only the NEW name
+
+    def __init__(self, sensor, celsius, humidity):
+        super().__init__(sensor, celsius)
+        self.humidity = humidity
+
+a = Loose(&quot;hall&quot;, 19.0)
+a.anything = 1                         # Loose has a __dict__ again
+h = Humid(&quot;bathroom&quot;, 23.5, 80)
+print(vars(a), hasattr(h, &quot;__dict__&quot;), h.sensor, h.humidity)</textarea></div>
+<p>The rules:</p>
+<ul>
+<li>Every class in the family must declare <code>__slots__</code> for objects to have no <code>__dict__</code>. A child with nothing new to add writes <code>__slots__ = ()</code>.</li>
+<li>A child lists only its <strong>new</strong> attributes. Repeating a parent&rsquo;s slot wastes space and hides the parent&rsquo;s.</li>
+<li><strong>Mixins</strong> that hold no data should declare <code>__slots__ = ()</code>, so they don&rsquo;t bring a <code>__dict__</code> with them.</li>
+<li>Two parents that <strong>both</strong> have non-empty slots can&rsquo;t be combined: <code>class C(A, B)</code> fails with &ldquo;multiple bases have instance lay-out conflict&rdquo;. Keep slots in one branch of a family, and empty slots in mixins.</li>
+</ul>
+<p>Code that wants to list a slotted object&rsquo;s attributes can walk the MRO (Week 30, Day 3), because each class&rsquo;s <code>__slots__</code> holds only its own names:</p>
+<div class="pc pc-example" data-kind="example" data-id="w031d5-e6"><textarea class="pc-src pc-code" hidden>def slot_names(obj):
+    names = []
+    for cls in reversed(type(obj).__mro__):
+        names.extend(getattr(cls, &quot;__slots__&quot;, ()))
+    return names
+
+class Reading:
+    __slots__ = (&quot;sensor&quot;, &quot;celsius&quot;)
+    def __init__(self, sensor, celsius):
+        self.sensor, self.celsius = sensor, celsius
+
+class Humid(Reading):
+    __slots__ = (&quot;humidity&quot;,)
+    def __init__(self, sensor, celsius, humidity):
+        super().__init__(sensor, celsius)
+        self.humidity = humidity
+
+h = Humid(&quot;bathroom&quot;, 23.5, 80)
+print({name: getattr(h, name) for name in slot_names(h)})</textarea></div>
+<h2 id="values-that-can-t-change">Values that can&rsquo;t change</h2>
+<p>Slots fix <strong>which</strong> attributes an object has, not their <strong>values</strong>. For value objects that must never change, such as anything used as a dictionary key (Week 29, Day 2), you can go one step further. <code>obj.name = value</code> calls <code>type(obj).__setattr__(obj, "name", value)</code>, so a class can refuse every assignment, and set its own values in <code>__init__</code> by calling <code>object</code>&rsquo;s version directly:</p>
+<div class="pc pc-example" data-kind="example" data-id="w031d5-e7"><textarea class="pc-src pc-code" hidden>class Coord:
+    __slots__ = (&quot;lat&quot;, &quot;lon&quot;)
+
+    def __init__(self, lat, lon):
+        object.__setattr__(self, &quot;lat&quot;, lat)       # bypass our own __setattr__
+        object.__setattr__(self, &quot;lon&quot;, lon)
+
+    def __setattr__(self, name, value):
+        raise AttributeError(f&quot;Coord is immutable: can&#x27;t set {name}&quot;)
+
+    def __eq__(self, other):
+        if not isinstance(other, Coord):
+            return NotImplemented
+        return (self.lat, self.lon) == (other.lat, other.lon)
+
+    def __hash__(self):
+        return hash((self.lat, self.lon))
+
+    def __repr__(self):
+        return f&quot;Coord({self.lat}, {self.lon})&quot;
+
+lagos = Coord(6.45, 3.39)
+print(lagos, {lagos: &quot;Lagos&quot;}[Coord(6.45, 3.39)])
+try:
+    lagos.lat = 0
+except AttributeError as err:
+    print(&quot;AttributeError:&quot;, err)</textarea></div>
+<p>Compared with Week 29&rsquo;s read-only properties, this needs no property per attribute, and with slots there&rsquo;s no <code>__dict__</code> to change behind its back either. (A determined programmer can still call <code>object.__setattr__</code> themselves: Python trusts adults. The aim is to stop accidents, not attacks.) Week 32&rsquo;s <code>@dataclass(frozen=True)</code> writes this for you.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Ordinary objects keep their attributes in a per-object <code>__dict__</code> (shown by <code>vars</code>), which allows new attributes at any time but costs memory and lets typos pass. <code>sys.getsizeof</code> measures one object shallowly; <code>tracemalloc</code> measures what a batch of objects really uses. <code>__slots__ = ("a", "b")</code> gives a fixed set of attributes and no <code>__dict__</code>: less memory and typos caught, but no new attributes, no <code>vars()</code>, and no class attribute with a slot&rsquo;s name. Every class in a family needs <code>__slots__</code> (only its new names; <code>()</code> for mixins), and two parents with non-empty slots can&rsquo;t be combined. Overriding <code>__setattr__</code> to raise, and setting values with <code>object.__setattr__</code> in <code>__init__</code>, makes objects immutable.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w031d5-pixel" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A slotted pixel</div><div class="pc-prompt"><p>Write <code>Pixel(x, y, colour)</code> with <code>__slots__</code> for its three attributes, and a <code>repr</code> like <code>Pixel(3, 4, '#ff0000')</code>. Objects must have no <code>__dict__</code>, and assigning any other attribute must raise <code>AttributeError</code>. <code>colour</code> defaults to <code>"#000000"</code>; don&rsquo;t make it a class attribute.</p></div><textarea class="pc-src pc-code" hidden>class Pixel:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_pixel():
+    &quot;pixels&quot;
+    P = ns[&quot;Pixel&quot;]
+    p = P(3, 4, &quot;#ff0000&quot;)
+    assert (p.x, p.y, p.colour) == (3, 4, &quot;#ff0000&quot;) and repr(p) == &quot;Pixel(3, 4, &#x27;#ff0000&#x27;)&quot;
+    assert P(0, 0).colour == &quot;#000000&quot; and not hasattr(p, &quot;__dict__&quot;)
+    p.colour = &quot;#00ff00&quot;
+    assert p.colour == &quot;#00ff00&quot;
+    try:
+        p.color = &quot;#0000ff&quot;
+        assert False, &quot;a misspelt attribute should raise AttributeError&quot;
+    except AttributeError:
+        pass
+    assert set(P.__slots__) == {&quot;x&quot;, &quot;y&quot;, &quot;colour&quot;}</textarea><textarea class="pc-src pc-solution" hidden>class Pixel:
+    __slots__ = (&quot;x&quot;, &quot;y&quot;, &quot;colour&quot;)
+
+    def __init__(self, x, y, colour=&quot;#000000&quot;):
+        self.x = x
+        self.y = y
+        self.colour = colour
+
+    def __repr__(self):
+        return f&quot;Pixel({self.x}, {self.y}, {self.colour!r})&quot;</textarea><template class="pc-src pc-hint">Put the default in <code>__init__</code>&rsquo;s parameters: <code>def __init__(self, x, y, colour="#000000")</code>.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w031d5-family" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A slotted family</div><div class="pc-prompt"><p>Write a family of shapes where <strong>no</strong> object has a <code>__dict__</code>:</p>
+<ul>
+<li><code>Shape(name)</code> with a slot for <code>name</code>, and <code>describe()</code> returning <code>"Circle 'wheel': area 3.14"</code> (class name, the name with <code>repr</code>, and <code>area()</code> to 2 places);</li>
+<li><code>Circle(name, radius)</code>, <code>Rect(name, width, height)</code> and <code>Square(name, side)</code> (a kind of <code>Rect</code> with width and height both <code>side</code>, adding no new attributes).</li>
+</ul>
+<p>Each class lists only its own new slots, uses <code>super().__init__</code>, and inherits <code>describe</code>.</p></div><textarea class="pc-src pc-code" hidden>import math
+
+class Shape:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_shapes():
+    &quot;shapes&quot;
+    C, R, S = ns[&quot;Circle&quot;], ns[&quot;Rect&quot;], ns[&quot;Square&quot;]
+    assert C(&quot;wheel&quot;, 1).describe() == &quot;Circle &#x27;wheel&#x27;: area 3.14&quot; and R(&quot;door&quot;, 2, 0.5).describe() == &quot;Rect &#x27;door&#x27;: area 1.00&quot;
+    assert S(&quot;tile&quot;, 3).describe() == &quot;Square &#x27;tile&#x27;: area 9.00&quot; and (S(&quot;t&quot;, 3).width, S(&quot;t&quot;, 3).height) == (3, 3)
+def test_slots():
+    &quot;slots in every class&quot;
+    Sh, C, R, S = ns[&quot;Shape&quot;], ns[&quot;Circle&quot;], ns[&quot;Rect&quot;], ns[&quot;Square&quot;]
+    for obj in [Sh(&quot;x&quot;), C(&quot;x&quot;, 1), R(&quot;x&quot;, 1, 2), S(&quot;x&quot;, 1)]:
+        assert not hasattr(obj, &quot;__dict__&quot;), f&quot;{type(obj).__name__} objects shouldn&#x27;t have a __dict__&quot;
+    assert tuple(Sh.__slots__) == (&quot;name&quot;,) and tuple(C.__slots__) == (&quot;radius&quot;,)
+    assert set(R.__slots__) == {&quot;width&quot;, &quot;height&quot;} and tuple(S.__slots__) == (), &quot;list only new names in each class&quot;
+    assert issubclass(S, R) and all(&quot;describe&quot; not in vars(k) for k in (C, R, S))</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+class Shape:
+    __slots__ = (&quot;name&quot;,)
+
+    def __init__(self, name):
+        self.name = name
+
+    def area(self):
+        raise NotImplementedError
+
+    def describe(self):
+        return f&quot;{type(self).__name__} {self.name!r}: area {self.area():.2f}&quot;
+
+class Circle(Shape):
+    __slots__ = (&quot;radius&quot;,)
+
+    def __init__(self, name, radius):
+        super().__init__(name)
+        self.radius = radius
+
+    def area(self):
+        return math.pi * self.radius ** 2
+
+class Rect(Shape):
+    __slots__ = (&quot;width&quot;, &quot;height&quot;)
+
+    def __init__(self, name, width, height):
+        super().__init__(name)
+        self.width = width
+        self.height = height
+
+    def area(self):
+        return self.width * self.height
+
+class Square(Rect):
+    __slots__ = ()
+
+    def __init__(self, name, side):
+        super().__init__(name, side, side)</textarea><template class="pc-src pc-hint"><code>Square</code> still needs <code>__slots__ = ()</code>; without it, its objects get a <code>__dict__</code>. <code>Shape.area</code> can raise <code>NotImplementedError</code>.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w031d5-slotrepr" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A mixin for slotted classes</div><div class="pc-prompt"><p>Write <code>SlotsMixin</code>, a mixin with <strong>empty</strong> slots that gives any slotted class three things, using the slot names from every class in its MRO (parents&rsquo; names first):</p>
+<ul>
+<li><code>__repr__</code>: <code>Point(x=1, y=2)</code>, with each value shown by <code>repr</code>;</li>
+<li><code>__eq__</code>: equal when the other object has exactly the same class and all slot values are equal (otherwise <code>NotImplemented</code>);</li>
+<li><code>as_dict()</code>: a dictionary from slot name to value.</li>
+</ul>
+<p>Then write <code>Point(x, y)</code> and <code>Point3(x, y, z)</code> (a kind of <code>Point</code>) using it, with no <code>__dict__</code>.</p></div><textarea class="pc-src pc-code" hidden>class SlotsMixin:
+    ___
+
+class Point(SlotsMixin):
+    ___
+
+class Point3(Point):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_mixin():
+    &quot;the mixin&quot;
+    M, P, P3 = ns[&quot;SlotsMixin&quot;], ns[&quot;Point&quot;], ns[&quot;Point3&quot;]
+    assert tuple(M.__slots__) == () and not hasattr(P(1, 2), &quot;__dict__&quot;) and not hasattr(P3(1, 2, 3), &quot;__dict__&quot;)
+    assert repr(P(1, 2)) == &quot;Point(x=1, y=2)&quot; and repr(P3(1, &quot;a&quot;, 3)) == &quot;Point3(x=1, y=&#x27;a&#x27;, z=3)&quot;
+    assert P3(1, 2, 3).as_dict() == {&quot;x&quot;: 1, &quot;y&quot;: 2, &quot;z&quot;: 3}
+    assert P(1, 2) == P(1, 2) and P(1, 2) != P(2, 1) and P(1, 2) != P3(1, 2, 0) and P(1, 2).__eq__((1, 2)) is NotImplemented
+    class Pair(M):
+        __slots__ = (&quot;a&quot;, &quot;b&quot;)
+        def __init__(self, a, b):
+            self.a, self.b = a, b
+    assert repr(Pair(5, [1])) == &quot;Pair(a=5, b=[1])&quot;</textarea><textarea class="pc-src pc-solution" hidden>class SlotsMixin:
+    __slots__ = ()
+
+    def _slot_names(self):
+        names = []
+        for cls in reversed(type(self).__mro__):
+            names.extend(getattr(cls, &quot;__slots__&quot;, ()))
+        return names
+
+    def as_dict(self):
+        return {name: getattr(self, name) for name in self._slot_names()}
+
+    def __repr__(self):
+        inside = &quot;, &quot;.join(f&quot;{k}={v!r}&quot; for k, v in self.as_dict().items())
+        return f&quot;{type(self).__name__}({inside})&quot;
+
+    def __eq__(self, other):
+        if type(other) is not type(self):
+            return NotImplemented
+        return self.as_dict() == other.as_dict()
+
+class Point(SlotsMixin):
+    __slots__ = (&quot;x&quot;, &quot;y&quot;)
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+class Point3(Point):
+    __slots__ = (&quot;z&quot;,)
+
+    def __init__(self, x, y, z):
+        super().__init__(x, y)
+        self.z = z</textarea><template class="pc-src pc-hint">Collect the names with <code>for cls in reversed(type(self).__mro__): names.extend(getattr(cls, "__slots__", ()))</code>, in a helper method that the other three use. Remember that <code>SlotsMixin.__slots__</code> is empty, so it adds nothing.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w031d5-frozen" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A frozen colour</div><div class="pc-prompt"><p>Write <code>Colour(r, g, b)</code> (each a whole number from 0 to 255, otherwise <code>ValueError</code>), slotted and <strong>immutable</strong>: any assignment after it&rsquo;s made raises <code>AttributeError</code>, and so does deleting an attribute (<code>del c.r</code>; that calls <code>__delattr__</code>). It has <code>==</code>, a matching <code>__hash__</code>, <code>repr</code> like <code>Colour(255, 128, 0)</code>, and <code>mix(other)</code>, returning a <strong>new</strong> colour with each channel the average of the two, rounded down.</p></div><textarea class="pc-src pc-code" hidden>class Colour:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_colour():
+    &quot;colours&quot;
+    C = ns[&quot;Colour&quot;]
+    c = C(255, 128, 0)
+    assert repr(c) == &quot;Colour(255, 128, 0)&quot; and c == C(255, 128, 0) and c != C(255, 128, 1) and len({c, C(255, 128, 0)}) == 1
+    assert c.mix(C(0, 0, 255)) == C(127, 64, 127) and not hasattr(c, &quot;__dict__&quot;)
+    for f in [lambda: setattr(c, &quot;r&quot;, 0), lambda: setattr(c, &quot;alpha&quot;, 1), lambda: delattr(c, &quot;g&quot;)]:
+        try:
+            f()
+            assert False, &quot;colours can&#x27;t be changed&quot;
+        except AttributeError:
+            pass
+    assert c == C(255, 128, 0)
+    for bad in [(256, 0, 0), (0, -1, 0), (0, 0, 1.5), (True, 0, 0)]:
+        try:
+            C(*bad)
+            assert False, f&quot;Colour{bad} should raise ValueError&quot;
+        except ValueError:
+            pass</textarea><textarea class="pc-src pc-solution" hidden>class Colour:
+    __slots__ = (&quot;r&quot;, &quot;g&quot;, &quot;b&quot;)
+
+    def __init__(self, r, g, b):
+        for v in (r, g, b):
+            if not isinstance(v, int) or isinstance(v, bool) or not 0 &lt;= v &lt;= 255:
+                raise ValueError(f&quot;channel must be 0 to 255, not {v!r}&quot;)
+        object.__setattr__(self, &quot;r&quot;, r)
+        object.__setattr__(self, &quot;g&quot;, g)
+        object.__setattr__(self, &quot;b&quot;, b)
+
+    def __setattr__(self, name, value):
+        raise AttributeError(f&quot;Colour is immutable: can&#x27;t set {name}&quot;)
+
+    def __delattr__(self, name):
+        raise AttributeError(f&quot;Colour is immutable: can&#x27;t delete {name}&quot;)
+
+    def __eq__(self, other):
+        if not isinstance(other, Colour):
+            return NotImplemented
+        return (self.r, self.g, self.b) == (other.r, other.g, other.b)
+
+    def __hash__(self):
+        return hash((self.r, self.g, self.b))
+
+    def __repr__(self):
+        return f&quot;Colour({self.r}, {self.g}, {self.b})&quot;
+
+    def mix(self, other):
+        return Colour((self.r + other.r) // 2, (self.g + other.g) // 2, (self.b + other.b) // 2)</textarea><template class="pc-src pc-hint">Check the values first, then set each one with <code>object.__setattr__(self, name, value)</code>. <code>__delattr__(self, name)</code> can raise <code>AttributeError</code> just like <code>__setattr__</code>.</template></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w031d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A default that clashes</div><div class="pc-prompt"><p>The program crashes before it starts, with <code>ValueError: 'size' in __slots__ conflicts with class variable</code>. Keep the slots and the default size of 10, and fix it so it prints <code>10 14</code>.</p></div><textarea class="pc-src pc-code" hidden>class Font:
+    __slots__ = (&quot;name&quot;, &quot;size&quot;)
+    size = 10
+
+    def __init__(self, name):
+        self.name = name
+
+body = Font(&quot;Georgia&quot;)
+title = Font(&quot;Georgia&quot;)
+title.size = 14
+print(body.size, title.size)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;sizes&quot;
+    expect_output(&quot;10 14&quot;)
+    assert not hasattr(ns[&quot;Font&quot;](&quot;x&quot;), &quot;__dict__&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Font:
+    __slots__ = (&quot;name&quot;, &quot;size&quot;)
+
+    def __init__(self, name, size=10):
+        self.name = name
+        self.size = size
+
+body = Font(&quot;Georgia&quot;)
+title = Font(&quot;Georgia&quot;)
+title.size = 14
+print(body.size, title.size)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w031d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The typo that got through</div><div class="pc-prompt"><p><code>Parcel</code> uses slots so that misspelt attributes are caught, but <code>Express</code> parcels let a typo through: this prints <code>weight not changed: 500</code> instead of <code>typo caught</code>. Fix <code>Express</code>.</p></div><textarea class="pc-src pc-code" hidden>class Parcel:
+    __slots__ = (&quot;code&quot;, &quot;weight&quot;)
+
+    def __init__(self, code, weight):
+        self.code = code
+        self.weight = weight
+
+class Express(Parcel):
+    def label(self):
+        return f&quot;EXPRESS {self.code}&quot;
+
+e = Express(&quot;EX1&quot;, 500)
+try:
+    e.wieght = 750
+    print(&quot;weight not changed:&quot;, e.weight)
+except AttributeError:
+    print(&quot;typo caught&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;caught&quot;
+    expect_output(&quot;typo caught&quot;)
+    assert ns[&quot;Express&quot;](&quot;A&quot;, 1).label() == &quot;EXPRESS A&quot;</textarea><textarea class="pc-src pc-solution" hidden>class Parcel:
+    __slots__ = (&quot;code&quot;, &quot;weight&quot;)
+
+    def __init__(self, code, weight):
+        self.code = code
+        self.weight = weight
+
+class Express(Parcel):
+    __slots__ = ()
+
+    def label(self):
+        return f&quot;EXPRESS {self.code}&quot;
+
+e = Express(&quot;EX1&quot;, 500)
+try:
+    e.wieght = 750
+    print(&quot;weight not changed:&quot;, e.weight)
+except AttributeError:
+    print(&quot;typo caught&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w031d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">vars on a slotted object</div><div class="pc-prompt"><p>After <code>Sample</code> was given slots, <code>show</code> crashes with <code>TypeError: vars() argument must have __dict__ attribute</code>. Fix <code>show</code> (not the class) so it prints <code>site=Kano, ppm=412</code>.</p></div><textarea class="pc-src pc-code" hidden>class Sample:
+    __slots__ = (&quot;site&quot;, &quot;ppm&quot;)
+
+    def __init__(self, site, ppm):
+        self.site = site
+        self.ppm = ppm
+
+def show(obj):
+    return &quot;, &quot;.join(f&quot;{k}={v}&quot; for k, v in vars(obj).items())
+
+print(show(Sample(&quot;Kano&quot;, 412)))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;shown&quot;
+    expect_output(&quot;site=Kano, ppm=412&quot;)
+    assert &quot;__slots__&quot; in vars(ns[&quot;Sample&quot;])</textarea><textarea class="pc-src pc-solution" hidden>class Sample:
+    __slots__ = (&quot;site&quot;, &quot;ppm&quot;)
+
+    def __init__(self, site, ppm):
+        self.site = site
+        self.ppm = ppm
+
+def show(obj):
+    return &quot;, &quot;.join(f&quot;{k}={getattr(obj, k)}&quot; for k in type(obj).__slots__)
+
+print(show(Sample(&quot;Kano&quot;, 412)))</textarea><template class="pc-src pc-hint">Read the names from <code>type(obj).__slots__</code>, and the values with <code>getattr</code>.</template></div>
+<div class="parsons" data-id="w031d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A slotted reading</div><div class="pc-prompt"><p>Arrange the lines into a class whose objects hold exactly a station name and a rainfall amount. One line is a trap.</p></div><script type="application/json">{"lines": ["class Rainfall:", "    __slots__ = (\"station\", \"mm\")", "    def __init__(self, station, mm):", "        self.station = station", "        self.mm = mm", "    def wet(self):", "        return self.mm > 1"], "distractors": ["        self.recorded = True"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w031d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>class A:
+    __slots__ = (&quot;x&quot;,)
+    def __init__(self):
+        self.x = 1
+
+class B(A):
+    pass
+
+class C(A):
+    __slots__ = (&quot;y&quot;,)
+    def __init__(self):
+        super().__init__()
+        self.y = 2
+
+p = ___   # hasattr(A(), &quot;__dict__&quot;)
+q = ___   # hasattr(B(), &quot;__dict__&quot;)
+r = ___   # hasattr(C(), &quot;__dict__&quot;)
+s = ___   # C.__slots__
+t = ___   # [k for cls in reversed(C.__mro__) for k in getattr(cls, &quot;__slots__&quot;, ())]</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert (p, q, r) == (False, True, False), &quot;p to r&quot;
+    assert tuple(s) == (&quot;y&quot;,) and t == [&quot;x&quot;, &quot;y&quot;]</textarea><textarea class="pc-src pc-solution" hidden>class A:
+    __slots__ = (&quot;x&quot;,)
+    def __init__(self):
+        self.x = 1
+
+class B(A):
+    pass
+
+class C(A):
+    __slots__ = (&quot;y&quot;,)
+    def __init__(self):
+        super().__init__()
+        self.y = 2
+
+p = False
+q = True
+r = False
+s = (&quot;y&quot;,)
+t = [&quot;x&quot;, &quot;y&quot;]</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w031d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Where does an ordinary object keep its attributes?", "answer": 1, "explain": "vars(obj) shows it.", "options": ["In the class", "In its own dictionary, obj.<strong>dict</strong>", "In a global table", "In a list"]}, {"type": "mc", "q": "What does sys.getsizeof(obj) measure?", "answer": 1, "explain": "Use tracemalloc to measure a batch of objects properly.", "options": ["The object and everything it refers to", "Only the object itself, shallowly", "The class", "The whole program"]}, {"type": "mc", "q": "What does <strong>slots</strong> = (&ldquo;x&rdquo;, &ldquo;y&rdquo;) do?", "answer": 1, "explain": "Other attributes can&rsquo;t be added.", "options": ["Makes x and y read-only", "Gives objects fixed places for x and y and no <strong>dict</strong>", "Makes the class faster to define", "Limits the class to two objects"]}, {"type": "mc", "q": "What happens when you assign a misspelt attribute on a slotted object?", "answer": 1, "explain": "That&rsquo;s one of the main benefits.", "options": ["A new attribute is made", "AttributeError", "Nothing", "The nearest slot is set"]}, {"type": "mc", "q": "Why can&rsquo;t a slotted class have size = 10 in its body when size is a slot?", "answer": 1, "explain": "Put the default in <strong>init</strong>.", "options": ["It can", "The class attribute would clash with the slot, so Python refuses to create the class", "Numbers can&rsquo;t be defaults", "Slots must be strings"]}, {"type": "mc", "q": "A child of a slotted class doesn&rsquo;t declare <strong>slots</strong>. What happens?", "answer": 1, "explain": "Every class in the family needs <strong>slots</strong> (() if nothing new).", "options": ["It inherits the slots and still has no <strong>dict</strong>", "Its objects get a <strong>dict</strong> again", "Python raises an error", "It can&rsquo;t have attributes"]}, {"type": "mc", "q": "What should a child&rsquo;s <strong>slots</strong> contain?", "answer": 1, "explain": "Repeating a parent&rsquo;s slot wastes space.", "options": ["All the parent&rsquo;s names too", "Only its new attribute names", "Nothing, ever", "Its method names"]}, {"type": "mc", "q": "When are slots worth using?", "answer": 1, "explain": "Measure before deciding.", "options": ["Always", "For classes with a fixed set of attributes made in very large numbers", "Only for classes with methods", "For speed in every program"]}, {"type": "mc", "q": "How does an immutable class set its own attributes in <strong>init</strong> when its <strong>setattr</strong> always raises?", "answer": 1, "explain": "That bypasses the class&rsquo;s own <strong>setattr</strong>.", "options": ["It can&rsquo;t", "object.<strong>setattr</strong>(self, name, value)", "self.<strong>dict</strong>[name] = value", "super().name = value"]}, {"type": "output", "q": "What does this print?", "answer": "False False", "explain": "A slot exists, but has no value until it&rsquo;s set.", "code": "class P:\n    __slots__ = (\"a\",)\np = P()\nprint(hasattr(p, \"a\"), hasattr(p, \"__dict__\"))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w031d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a vector that behaves</div><div class="pc-prompt"><p>Write <code>Vec(x, y)</code>, a 2D vector that uses most of this week&rsquo;s special methods. It must be slotted (no <code>__dict__</code>) and immutable (assigning or deleting any attribute raises <code>AttributeError</code>).</p>
+<ul>
+<li><code>repr</code> gives <code>Vec(3, 4)</code>. <code>==</code> and <code>hash</code> use both coordinates.</li>
+<li><code>v + w</code> and <code>v - w</code> with another <code>Vec</code>; <code>v * k</code> and <code>k * v</code> with a number. Anything else gives <code>TypeError</code> (return <code>NotImplemented</code>).</li>
+<li><code>abs(v)</code> is the length (<code>math.hypot(x, y)</code>); <code>bool(v)</code> is False only for <code>Vec(0, 0)</code>.</li>
+<li>It&rsquo;s a small sequence: <code>len(v)</code> is 2, <code>v[0]</code> and <code>v[1]</code> (and <code>v[-1]</code>, <code>v[-2]</code>) give the coordinates, any other index raises <code>IndexError</code>, and iterating gives <code>x</code> then <code>y</code>, so <code>x, y = v</code> and <code>list(v)</code> work.</li>
+<li>Vectors have <strong>no</strong> order: <code>Vec(1, 2) &lt; Vec(3, 4)</code> raises <code>TypeError</code>.</li>
+</ul>
+<p>Then write <code>centre(vecs)</code>, the mean of a list of vectors as a <code>Vec</code>, raising <code>ValueError</code> for an empty list.</p></div><textarea class="pc-src pc-code" hidden>import math
+
+class Vec:
+    ___
+
+def centre(vecs):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def V(*a):
+    return ns[&quot;Vec&quot;](*a)
+def test_basics():
+    &quot;repr, equality, immutability&quot;
+    v = V(3, 4)
+    assert repr(v) == &quot;Vec(3, 4)&quot; and v == V(3, 4) and v != V(4, 3) and len({v, V(3, 4)}) == 1
+    assert not hasattr(v, &quot;__dict__&quot;)
+    for f in [lambda: setattr(v, &quot;x&quot;, 0), lambda: setattr(v, &quot;z&quot;, 1), lambda: delattr(v, &quot;y&quot;)]:
+        try:
+            f()
+            assert False, &quot;vectors can&#x27;t be changed&quot;
+        except AttributeError:
+            pass
+    assert v == V(3, 4)
+def test_maths():
+    &quot;arithmetic&quot;
+    v, w = V(3, 4), V(1, -2)
+    assert v + w == V(4, 2) and v - w == V(2, 6) and v * 2 == V(6, 8) and 0.5 * v == V(1.5, 2.0)
+    assert abs(v) == 5.0 and bool(v) and not V(0, 0)
+    for f in [lambda: v + 1, lambda: v * w, lambda: &quot;a&quot; * v, lambda: v &lt; w]:
+        try:
+            f()
+            assert False, &quot;should raise TypeError&quot;
+        except TypeError:
+            pass
+def test_sequence():
+    &quot;a small sequence&quot;
+    v = V(3, 4)
+    x, y = v
+    assert (x, y) == (3, 4) and list(v) == [3, 4] and len(v) == 2 and v[0] == 3 and v[-1] == 4 and v[-2] == 3
+    for i in [2, -3]:
+        try:
+            v[i]
+            assert False, f&quot;v[{i}] should raise IndexError&quot;
+        except IndexError:
+            pass
+def test_centre():
+    &quot;the centre&quot;
+    assert centre([V(0, 0), V(4, 0), V(4, 2), V(0, 2)]) == V(2, 1)
+    assert centre([V(1, 1)]) == V(1, 1)
+    try:
+        centre([])
+        assert False, &quot;an empty list should raise ValueError&quot;
+    except ValueError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+class Vec:
+    __slots__ = (&quot;x&quot;, &quot;y&quot;)
+
+    def __init__(self, x, y):
+        object.__setattr__(self, &quot;x&quot;, x)
+        object.__setattr__(self, &quot;y&quot;, y)
+
+    def __setattr__(self, name, value):
+        raise AttributeError(f&quot;Vec is immutable: can&#x27;t set {name}&quot;)
+
+    def __delattr__(self, name):
+        raise AttributeError(f&quot;Vec is immutable: can&#x27;t delete {name}&quot;)
+
+    def __repr__(self):
+        return f&quot;Vec({self.x}, {self.y})&quot;
+
+    def __eq__(self, other):
+        if not isinstance(other, Vec):
+            return NotImplemented
+        return (self.x, self.y) == (other.x, other.y)
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+    def __add__(self, other):
+        if not isinstance(other, Vec):
+            return NotImplemented
+        return Vec(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other):
+        if not isinstance(other, Vec):
+            return NotImplemented
+        return Vec(self.x - other.x, self.y - other.y)
+
+    def __mul__(self, k):
+        if not isinstance(k, (int, float)) or isinstance(k, bool):
+            return NotImplemented
+        return Vec(self.x * k, self.y * k)
+
+    def __rmul__(self, k):
+        return self.__mul__(k)
+
+    def __abs__(self):
+        return math.hypot(self.x, self.y)
+
+    def __bool__(self):
+        return self.x != 0 or self.y != 0
+
+    def __len__(self):
+        return 2
+
+    def __getitem__(self, i):
+        return (self.x, self.y)[i]
+
+    def __iter__(self):
+        return iter((self.x, self.y))
+
+def centre(vecs):
+    if not vecs:
+        raise ValueError(&quot;no vectors&quot;)
+    n = len(vecs)
+    return Vec(sum(v.x for v in vecs) / n, sum(v.y for v in vecs) / n)</textarea><template class="pc-src pc-hint">Store the coordinates with <code>object.__setattr__</code> in <code>__init__</code>, as in today&rsquo;s <code>Coord</code>. <code>__getitem__</code> can hand the index to the tuple <code>(self.x, self.y)</code>, which raises <code>IndexError</code> for you; <code>__iter__</code> can return <code>iter((self.x, self.y))</code>.</template><template class="pc-src pc-hint">For <code>k * v</code>, write <code>__rmul__</code>. Check the number with <code>isinstance(k, (int, float))</code>. Don&rsquo;t write <code>__lt__</code>: without it, <code>&lt;</code> raises <code>TypeError</code> by itself.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Think of a program you might write that makes very many small objects of one kind (readings from a sensor, rows of a large file, cells of a game board), and decide whether slots would be worth it there. Tomorrow is the Forge: a week of special methods, put together.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w031d4.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w031d5", "week": 31, "day": 5, "title": "__slots__ and memory", "exercises": [{"id": "w031d5-pixel", "title": "A slotted pixel", "points": 10}, {"id": "w031d5-family", "title": "A slotted family", "points": 15}, {"id": "w031d5-slotrepr", "title": "A mixin for slotted classes", "points": 15}, {"id": "w031d5-frozen", "title": "A frozen colour", "points": 15}, {"id": "w031d5-bug1", "title": "A default that clashes", "points": 10}, {"id": "w031d5-bug2", "title": "The typo that got through", "points": 10}, {"id": "w031d5-bug3", "title": "vars on a slotted object", "points": 10}, {"id": "w031d5-trace", "title": "Predict them", "points": 10}, {"id": "w031d5-challenge", "title": "Challenge: a vector that behaves", "points": 25}], "points": 120}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=8fe38f9496"></script>
+</body>
+</html>
