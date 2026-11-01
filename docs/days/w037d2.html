@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="8fe38f9496">
+<title>Week 37 Day 2: Custom exceptions | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=8fe38f9496">
+<link rel="stylesheet" href="../assets/css/site.css?v=8fe38f9496">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=8fe38f9496"></script>
+<script src="../assets/vendor/codemirror.js?v=8fe38f9496" defer></script>
+<meta name="description" content="You’ve been writing your own exception classes since Week 30. Today is about doing it well, for a whole program: one base class per program or package, a...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w037d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 37 Day 2: Custom exceptions">
+<meta property="og:description" content="You’ve been writing your own exception classes since Week 30. Today is about doing it well, for a whole program: one base class per program or package, a...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w037d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-37">Week 37: Robust programs</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#designing-a-family" data-sec="designing-a-family">Designing a family</a></li><li><a href="#errors-that-carry-details" data-sec="errors-that-carry-details">Errors that carry details</a></li><li><a href="#chaining-with-raise-from" data-sec="chaining-with-raise-from">Chaining with raise from</a></li><li><a href="#re-raising-and-notes" data-sec="re-raising-and-notes">Re-raising and notes</a></li><li><a href="#translating-at-the-boundary" data-sec="translating-at-the-boundary">Translating at the boundary</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w037d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-3">Phase 3: Objects and design</a></li><li><a href="../map.html#week-37">Week 37: Robust programs</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 37, Day 2</span></p>
+      <h1>Custom exceptions</h1>
+      <div class="day-intro"><p>You&rsquo;ve been writing your own exception classes since Week 30. Today is about doing it well, for a whole program: one base class per program or package, a family shaped by what callers need to tell apart, errors that carry the details a caller needs, and errors that keep the story of what caused them. You&rsquo;ll chain exceptions with <code>raise ... from</code>, add notes to an error on its way up, and translate low-level errors into your program&rsquo;s own at the boundary between layers, so a missing file deep inside storage reaches the interface as something it understands.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Design a family of exceptions with one base class, shaped by what callers need to distinguish</li><li>Give exceptions useful attributes and messages, and inherit from a built-in when the error really is one</li><li>Chain exceptions with raise from, and read <strong>cause</strong> and <strong>context</strong> in a traceback</li><li>Re-raise with a bare raise, and add context to an error with add_note</li><li>Translate low-level errors into your own at the boundary between layers</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Designing a family: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Errors that carry details: 20 min"></span><span class="plan-seg s1" style="flex:25" title="Chaining with raise from: 25 min"></span><span class="plan-seg s0" style="flex:15" title="Re-raising and notes: 15 min"></span><span class="plan-seg s1" style="flex:20" title="Translating at the boundary: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Designing a family</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Errors that carry details</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Chaining with raise from</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Re-raising and notes</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Translating at the boundary</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w037d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w037d2.ipynb" download>download it</a>. Exercises today are worth 120 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w037d2-p1"><textarea class="pc-src pc-code" hidden>def load(text):
+    try:
+        return int(text)
+    except ValueError as err:
+        raise RuntimeError(&quot;couldn&#x27;t load the setting&quot;) from err
+
+try:
+    load(&quot;ten&quot;)
+except RuntimeError as err:
+    print(err)
+    print(type(err.__cause__).__name__)
+    print(err.__cause__)</textarea></div>
+<p>The <code>RuntimeError</code> remembers the <code>ValueError</code> that caused it, in <code>__cause__</code>. The caller gets an error at the right level (&ldquo;couldn&rsquo;t load the setting&rdquo;), and anyone debugging still sees the original detail. That&rsquo;s today&rsquo;s main tool. First, though: what should your own exceptions look like?</p>
+<h2 id="designing-a-family">Designing a family</h2>
+<p>A program, or a package (Week 20), should have <strong>one base exception</strong>, with everything it raises on purpose underneath:</p>
+<div class="pc pc-example" data-kind="example" data-id="w037d2-e2"><textarea class="pc-src pc-code" hidden>class ShopError(Exception):
+    &quot;&quot;&quot;Base class for every error the shop raises on purpose.&quot;&quot;&quot;
+
+class NotFound(ShopError):
+    &quot;&quot;&quot;Something asked for doesn&#x27;t exist.&quot;&quot;&quot;
+
+class OutOfStock(ShopError):
+    &quot;&quot;&quot;The item exists but there aren&#x27;t enough.&quot;&quot;&quot;
+
+class PaymentFailed(ShopError):
+    &quot;&quot;&quot;The payment service said no.&quot;&quot;&quot;
+
+class CardDeclined(PaymentFailed):
+    &quot;&quot;&quot;The bank refused the card.&quot;&quot;&quot;
+
+for cls in [NotFound, CardDeclined]:
+    print(cls.__name__, &quot;-&gt;&quot;, &quot; -&gt; &quot;.join(c.__name__ for c in cls.__mro__[1:-2]))</textarea></div>
+<p>The base class gives callers a choice of how precise to be: <code>except CardDeclined</code> for one case, <code>except PaymentFailed</code> for a group, <code>except ShopError</code> for &ldquo;anything the shop reported&rdquo;, and bugs (<code>TypeError</code>, <code>AttributeError</code>) still get through to be found and fixed.</p>
+<p>How many classes? Make one for each thing a <strong>caller would handle differently</strong>, and no more. If every caller treats &ldquo;name too long&rdquo; and &ldquo;name has bad characters&rdquo; the same way, one <code>InvalidName</code> with a good message is enough. Python&rsquo;s own <code>OSError</code> is a good model: one class, a handful of subclasses (<code>FileNotFoundError</code>, <code>PermissionError</code>, &hellip;) for the cases people actually handle separately.</p>
+<p><strong>Should it also be a built-in?</strong> If your error really is a kind of <code>ValueError</code> or <code>LookupError</code>, inherit from both your base and the built-in. Then code that already catches the built-in still works:</p>
+<div class="pc pc-example" data-kind="example" data-id="w037d2-e3"><textarea class="pc-src pc-code" hidden>class ShopError(Exception):
+    pass
+
+class NotFound(ShopError, LookupError):
+    pass
+
+class BadQuantity(ShopError, ValueError):
+    pass
+
+def parse_quantity(text):
+    if not text.isdigit() or int(text) == 0:
+        raise BadQuantity(f&quot;quantity must be a whole number above 0, not {text!r}&quot;)
+    return int(text)
+
+try:
+    parse_quantity(&quot;-2&quot;)
+except ValueError as err:          # an older caller that knows nothing of ShopError
+    print(&quot;ValueError caught:&quot;, err)
+print(issubclass(NotFound, LookupError), isinstance(NotFound(&quot;x&quot;), ShopError))</textarea></div>
+<p>Choose <code>LookupError</code> rather than <code>KeyError</code> for &ldquo;not found&rdquo;: a <code>KeyError</code> subclass shows its message in quotes (<code>str(KeyError("book 7"))</code> is <code>'book 7'</code>), which looks odd in a message for people.</p>
+<h2 id="errors-that-carry-details">Errors that carry details</h2>
+<p>A message is for people; <strong>attributes</strong> are for code. When a caller might want to act on the details (show the missing item, retry after a delay), keep them on the exception, as in Week 30:</p>
+<div class="pc pc-example" data-kind="example" data-id="w037d2-e4"><textarea class="pc-src pc-code" hidden>class ShopError(Exception):
+    pass
+
+class OutOfStock(ShopError):
+    def __init__(self, item, wanted, available):
+        super().__init__(f&quot;{item}: wanted {wanted}, only {available} left&quot;)
+        self.item = item
+        self.wanted = wanted
+        self.available = available
+
+try:
+    raise OutOfStock(&quot;tea&quot;, 5, 2)
+except OutOfStock as err:
+    print(err)
+    print(f&quot;Would you like the {err.available} we have?&quot;)</textarea></div>
+<p>Good messages say <strong>what</strong> was wrong, <strong>with which value</strong>, and if possible <strong>what would be right</strong>: <code>quantity must be a whole number above 0, not '-2'</code> beats <code>invalid input</code>. Use <code>!r</code> so empty strings and stray spaces show up.</p>
+<h2 id="chaining-with-raise-from">Chaining with raise from</h2>
+<p>When you catch one error and raise another, write <code>raise NewError(...) from err</code>. The new error&rsquo;s <code>__cause__</code> is the old one, and a traceback shows both:</p>
+<div class="pc pc-example" data-kind="example" data-id="w037d2-e5"><textarea class="pc-src pc-code" hidden>import json
+
+class ConfigError(Exception):
+    pass
+
+def read_config(text):
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as err:
+        raise ConfigError(&quot;the settings file isn&#x27;t valid JSON&quot;) from err
+
+read_config(&#x27;{&quot;theme&quot;: &quot;dark&quot;,}&#x27;)</textarea></div>
+<p>The traceback reads &ldquo;The above exception was the direct cause of the following exception&rdquo;. There are three ways to raise inside an <code>except</code>:</p>
+<table>
+<thead>
+<tr>
+<th>You write</th>
+<th><code>__cause__</code></th>
+<th><code>__context__</code></th>
+<th>The traceback shows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>raise New(...) from err</code></td>
+<td><code>err</code></td>
+<td><code>err</code></td>
+<td>both, &ldquo;direct cause&rdquo;</td>
+</tr>
+<tr>
+<td><code>raise New(...)</code></td>
+<td><code>None</code></td>
+<td><code>err</code></td>
+<td>both, &ldquo;<strong>During handling</strong> of the above exception, another exception occurred&rdquo;</td>
+</tr>
+<tr>
+<td><code>raise New(...) from None</code></td>
+<td><code>None</code></td>
+<td><code>err</code> (hidden)</td>
+<td>only the new error</td>
+</tr>
+</tbody>
+</table>
+<div class="pc pc-example" data-kind="example" data-id="w037d2-e6"><textarea class="pc-src pc-code" hidden>def attempt(how):
+    try:
+        {}[&quot;missing&quot;]
+    except KeyError as err:
+        if how == &quot;from err&quot;:
+            raise ValueError(&quot;bad&quot;) from err
+        if how == &quot;plain&quot;:
+            raise ValueError(&quot;bad&quot;)
+        raise ValueError(&quot;bad&quot;) from None
+
+for how in [&quot;from err&quot;, &quot;plain&quot;, &quot;from None&quot;]:
+    try:
+        attempt(how)
+    except ValueError as e:
+        print(f&quot;{how:&lt;10} cause={e.__cause__!r:&lt;16} context={e.__context__!r:&lt;16} hide context={e.__suppress_context__}&quot;)</textarea></div>
+<ul>
+<li><code>from err</code> says &ldquo;this was deliberate: the new error <strong>means</strong> the old one&rdquo;. Use it whenever you translate an error.</li>
+<li>A plain <code>raise</code> inside <code>except</code> suggests an <strong>accident</strong>: something went wrong while handling the first error. Seeing &ldquo;During handling of&hellip;&rdquo; in a traceback is often a clue to a bug in an <code>except</code> block.</li>
+<li><code>from None</code> hides the original, as Week 25&rsquo;s <code>spend</code> did for damaged JSON. Use it only when the original adds nothing for whoever reads the traceback.</li>
+</ul>
+<h2 id="re-raising-and-notes">Re-raising and notes</h2>
+<p>Sometimes you catch an error only to do something (record it, tidy up) and then let it carry on. A <strong>bare <code>raise</code></strong> re-raises the error being handled, traceback intact:</p>
+<div class="pc pc-example" data-kind="example" data-id="w037d2-e7"><textarea class="pc-src pc-code" hidden>attempts = []
+
+def charge(amount):
+    try:
+        if amount &gt; 100:
+            raise ValueError(&quot;over the limit&quot;)
+        return &quot;charged&quot;
+    except ValueError as err:
+        attempts.append(f&quot;failed: {err}&quot;)
+        raise
+
+try:
+    charge(250)
+except ValueError as err:
+    print(&quot;caller saw:&quot;, err)
+print(attempts)</textarea></div>
+<p>Write <code>raise</code>, not <code>raise err</code>: both work, but the bare form says &ldquo;the same error, carrying on&rdquo; and keeps the traceback cleanest.</p>
+<p>Since Python 3.11, <code>err.add_note(text)</code> attaches <strong>extra context</strong> without changing the error&rsquo;s type or message. Notes show at the end of the traceback, and live in <code>err.__notes__</code>:</p>
+<div class="pc pc-example" data-kind="example" data-id="w037d2-e8"><textarea class="pc-src pc-code" hidden>def parse_row(row):
+    name, age = row.split(&quot;,&quot;)
+    return name, int(age)
+
+def parse_file(lines):
+    people = []
+    for number, line in enumerate(lines, start=1):
+        try:
+            people.append(parse_row(line))
+        except ValueError as err:
+            err.add_note(f&quot;in line {number}: {line!r}&quot;)
+            raise
+    return people
+
+parse_file([&quot;Ada,36&quot;, &quot;Bo,40&quot;, &quot;Chi,forty&quot;])</textarea></div>
+<p>Notes are good when the error&rsquo;s <strong>type</strong> is right but it lacks the <strong>where</strong>: a line number, a file name, the record being processed. The caller can still <code>except ValueError</code>.</p>
+<h2 id="translating-at-the-boundary">Translating at the boundary</h2>
+<p>Week 36 built programs in layers: interface, services, domain, storage. Errors should be translated at the edges between them. The storage layer knows about files and <code>OSError</code>s; the services above shouldn&rsquo;t have to. So the storage layer catches the low-level error and raises one of the program&rsquo;s own, chained with <code>from</code>:</p>
+<div class="pc pc-example" data-kind="example" data-id="w037d2-e9"><textarea class="pc-src pc-code" hidden>import json
+
+class ShopError(Exception):
+    pass
+
+class StorageError(ShopError):
+    pass
+
+class JsonOrders:
+    def __init__(self, path):
+        self.path = path
+
+    def load(self):
+        try:
+            with open(self.path) as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return []                                   # no file yet: no orders
+        except (OSError, json.JSONDecodeError) as err:
+            raise StorageError(f&quot;couldn&#x27;t read orders from {self.path}&quot;) from err
+
+with open(&quot;orders.json&quot;, &quot;w&quot;) as f:
+    f.write(&quot;[1, 2,&quot;)
+for path in [&quot;none-yet.json&quot;, &quot;orders.json&quot;]:
+    try:
+        print(JsonOrders(path).load())
+    except ShopError as err:
+        print(f&quot;{err} ({type(err.__cause__).__name__})&quot;)</textarea></div>
+<ul>
+<li>Errors it can <strong>handle</strong> (no file yet), it handles.</li>
+<li>Errors it can&rsquo;t handle are <strong>translated</strong>: the service layer and the interface catch <code>ShopError</code> and never import <code>json</code>. Swap the storage for a database and they don&rsquo;t change.</li>
+<li>The original is kept as <code>__cause__</code>, so the detail isn&rsquo;t lost for debugging.</li>
+<li>At the very top, the interface turns <code>ShopError</code>s into friendly messages and exit codes (Week 21), and lets bugs crash with a full traceback, because a bug hidden behind &ldquo;something went wrong&rdquo; never gets fixed.</li>
+</ul>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Give a program one base exception, with subclasses for the cases callers handle differently, and inherit from a built-in too (<code>ValueError</code>, <code>LookupError</code>) when the error really is one. Messages are for people (what was wrong, the value, what&rsquo;s expected); attributes are for code. <code>raise New(...) from err</code> chains deliberately, setting <code>__cause__</code>; a plain raise in <code>except</code> sets only <code>__context__</code> (&ldquo;during handling&rdquo;, often an accident); <code>from None</code> hides the original. A bare <code>raise</code> re-raises unchanged, and <code>add_note</code> adds where it happened. Translate low-level errors into your own at each layer boundary, keeping the original as the cause.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w037d2-family" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A family for a booking system</div><div class="pc-prompt"><p>Create the exceptions for a booking system: <code>BookingError</code> (from <code>Exception</code>); <code>NoSuchRoom</code> (a <code>BookingError</code> and a <code>LookupError</code>); <code>RoomTaken</code> (a <code>BookingError</code>) whose <code>__init__(self, room, by)</code> stores <code>room</code> and <code>by</code> and has the message <code>"room R is taken by B"</code>; and <code>BadDates</code> (a <code>BookingError</code> and a <code>ValueError</code>).</p></div><textarea class="pc-src pc-code" hidden>class BookingError(Exception):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_family():
+    &quot;the family&quot;
+    assert issubclass(NoSuchRoom, BookingError) and issubclass(NoSuchRoom, LookupError)
+    assert issubclass(BadDates, BookingError) and issubclass(BadDates, ValueError)
+    assert issubclass(RoomTaken, BookingError) and not issubclass(RoomTaken, (LookupError, ValueError))
+    assert issubclass(BookingError, Exception) and not issubclass(BookingError, (LookupError, ValueError))
+def test_taken():
+    &quot;RoomTaken&quot;
+    e = RoomTaken(12, &quot;Ada&quot;)
+    assert str(e) == &quot;room 12 is taken by Ada&quot; and e.room == 12 and e.by == &quot;Ada&quot;</textarea><textarea class="pc-src pc-solution" hidden>class BookingError(Exception):
+    &quot;&quot;&quot;Base class for booking errors.&quot;&quot;&quot;
+
+class NoSuchRoom(BookingError, LookupError):
+    &quot;&quot;&quot;There&#x27;s no room with that number.&quot;&quot;&quot;
+
+class RoomTaken(BookingError):
+    def __init__(self, room, by):
+        super().__init__(f&quot;room {room} is taken by {by}&quot;)
+        self.room = room
+        self.by = by
+
+class BadDates(BookingError, ValueError):
+    &quot;&quot;&quot;The dates don&#x27;t make sense.&quot;&quot;&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w037d2-translate" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Translating a lookup</div><div class="pc-prompt"><p><code>ConfigError</code> is given. Write <code>get_port(settings)</code>, which returns <code>int(settings["port"])</code>. If the key is missing, raise <code>ConfigError("no port setting")</code> chained <strong>from</strong> the <code>KeyError</code>; if it isn&rsquo;t a number, raise <code>ConfigError</code> with the message <code>"port must be a number, not 'abc'"</code> (using the value&rsquo;s <code>repr</code>), chained from the <code>ValueError</code>. Ports outside 1 to 65535 raise <code>ConfigError("port out of range: 70000")</code>, with no cause.</p></div><textarea class="pc-src pc-code" hidden>class ConfigError(Exception):
+    pass
+
+def get_port(settings):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_ok():
+    &quot;good ports&quot;
+    assert get_port({&quot;port&quot;: &quot;8080&quot;}) == 8080 and get_port({&quot;port&quot;: 1}) == 1
+def test_errors():
+    &quot;each error&quot;
+    cases = [({}, &quot;no port setting&quot;, KeyError), ({&quot;port&quot;: &quot;abc&quot;}, &quot;port must be a number, not &#x27;abc&#x27;&quot;, ValueError), ({&quot;port&quot;: &quot;70000&quot;}, &quot;port out of range: 70000&quot;, type(None))]
+    for settings, message, cause in cases:
+        try:
+            get_port(settings)
+            assert False, f&quot;{settings} should raise ConfigError&quot;
+        except ConfigError as err:
+            assert str(err) == message, f&quot;got {str(err)!r}&quot;
+            assert type(err.__cause__) is cause, f&quot;{settings}: the cause should be {cause.__name__}, got {err.__cause__!r}&quot;</textarea><textarea class="pc-src pc-solution" hidden>class ConfigError(Exception):
+    pass
+
+def get_port(settings):
+    try:
+        raw = settings[&quot;port&quot;]
+    except KeyError as err:
+        raise ConfigError(&quot;no port setting&quot;) from err
+    try:
+        port = int(raw)
+    except ValueError as err:
+        raise ConfigError(f&quot;port must be a number, not {raw!r}&quot;) from err
+    if not 1 &lt;= port &lt;= 65535:
+        raise ConfigError(f&quot;port out of range: {port}&quot;)
+    return port</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w037d2-story" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Telling the whole story</div><div class="pc-prompt"><p>Write <code>explain(err)</code>, which follows an exception&rsquo;s chain back to the start and returns a list of strings, newest first, each <code>"TypeName: message"</code>. Follow <code>__cause__</code> if it&rsquo;s set; otherwise follow <code>__context__</code>, unless <code>__suppress_context__</code> is true. Then add each error&rsquo;s notes, if it has any (<code>getattr(err, "__notes__", [])</code>), as <code>"  note: text"</code> straight after that error&rsquo;s line.</p></div><textarea class="pc-src pc-code" hidden>def explain(err):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def make(how):
+    try:
+        try:
+            try:
+                int(&quot;x&quot;)
+            except ValueError as e:
+                e.add_note(&quot;reading age&quot;)
+                raise
+        except ValueError as e:
+            if how == &quot;from&quot;:
+                raise KeyError(&quot;age&quot;) from e
+            if how == &quot;plain&quot;:
+                raise KeyError(&quot;age&quot;)
+            raise KeyError(&quot;age&quot;) from None
+    except KeyError as e:
+        try:
+            raise RuntimeError(&quot;load failed&quot;) from e
+        except RuntimeError as r:
+            return r
+def test_chain():
+    &quot;the chain&quot;
+    want = [&quot;RuntimeError: load failed&quot;, &quot;KeyError: &#x27;age&#x27;&quot;, &quot;ValueError: invalid literal for int() with base 10: &#x27;x&#x27;&quot;, &quot;  note: reading age&quot;]
+    assert explain(make(&quot;from&quot;)) == want, f&quot;got {explain(make(&#x27;from&#x27;))}&quot;
+    assert explain(make(&quot;plain&quot;)) == want, &quot;follow __context__ when there&#x27;s no cause&quot;
+    assert explain(make(&quot;none&quot;)) == want[:2], &quot;from None hides the context&quot;
+    assert explain(ValueError(&quot;alone&quot;)) == [&quot;ValueError: alone&quot;]</textarea><textarea class="pc-src pc-solution" hidden>def explain(err):
+    lines = []
+    while err is not None:
+        lines.append(f&quot;{type(err).__name__}: {err}&quot;)
+        for note in getattr(err, &quot;__notes__&quot;, []):
+            lines.append(f&quot;  note: {note}&quot;)
+        if err.__cause__ is not None:
+            err = err.__cause__
+        elif err.__suppress_context__:
+            err = None
+        else:
+            err = err.__context__
+    return lines</textarea><template class="pc-src pc-hint">Loop while <code>err</code> isn&rsquo;t <code>None</code>: add its line and notes, then move to <code>err.__cause__</code> if that isn&rsquo;t <code>None</code>, else to <code>None</code> if <code>err.__suppress_context__</code>, else to <code>err.__context__</code>.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w037d2-notes" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Saying where</div><div class="pc-prompt"><p>Write <code>parse_scores(lines)</code>. Each line is <code>"name:score"</code>; return a dictionary from name to <code>int</code> score. If a line fails with a <code>ValueError</code> (a missing colon or a bad number), add the note <code>"line N: 'the line'"</code> (N counting from 1, the line shown with <code>repr</code>) and re-raise the <strong>same</strong> error with a bare <code>raise</code>.</p></div><textarea class="pc-src pc-code" hidden>def parse_scores(lines):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_ok():
+    &quot;good lines&quot;
+    assert parse_scores([&quot;ada:9&quot;, &quot;bo:7&quot;]) == {&quot;ada&quot;: 9, &quot;bo&quot;: 7} and parse_scores([]) == {}
+def test_notes():
+    &quot;a note on the way up&quot;
+    for lines, note in [([&quot;ada:9&quot;, &quot;bo:seven&quot;], &quot;line 2: &#x27;bo:seven&#x27;&quot;), ([&quot;nocolon&quot;], &quot;line 1: &#x27;nocolon&#x27;&quot;)]:
+        try:
+            parse_scores(lines)
+            assert False, &quot;should raise ValueError&quot;
+        except ValueError as err:
+            assert getattr(err, &quot;__notes__&quot;, None) == [note], f&quot;notes: {getattr(err, &#x27;__notes__&#x27;, None)}&quot;
+            assert err.__cause__ is None and err.__context__ is None, &quot;re-raise the same error, don&#x27;t make a new one&quot;</textarea><textarea class="pc-src pc-solution" hidden>def parse_scores(lines):
+    scores = {}
+    for number, line in enumerate(lines, start=1):
+        try:
+            name, score = line.split(&quot;:&quot;)
+            scores[name] = int(score)
+        except ValueError as err:
+            err.add_note(f&quot;line {number}: {line!r}&quot;)
+            raise
+    return scores</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w037d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The empty message</div><div class="pc-prompt"><p><code>Overdrawn</code> should print <code>balance 20, tried to take 50</code>, but its <code>__init__</code> never passes the message to <code>Exception</code>, so <code>str(err)</code> is empty. Fix the class.</p></div><textarea class="pc-src pc-code" hidden>class Overdrawn(Exception):
+    def __init__(self, balance, amount):
+        self.balance = balance
+        self.amount = amount
+        self.message = f&quot;balance {balance}, tried to take {amount}&quot;
+
+try:
+    raise Overdrawn(20, 50)
+except Overdrawn as err:
+    print(err)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the message&quot;
+    expect_output(&quot;balance 20, tried to take 50&quot;)
+    e = Overdrawn(1, 2)
+    assert e.balance == 1 and e.amount == 2</textarea><textarea class="pc-src pc-solution" hidden>class Overdrawn(Exception):
+    def __init__(self, balance, amount):
+        super().__init__(f&quot;balance {balance}, tried to take {amount}&quot;)
+        self.balance = balance
+        self.amount = amount
+
+try:
+    raise Overdrawn(20, 50)
+except Overdrawn as err:
+    print(err)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w037d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The lost cause</div><div class="pc-prompt"><p><code>load_user</code> translates a <code>KeyError</code> into a <code>UserError</code>, but it throws the original away with <code>from None</code>, so the caller can&rsquo;t see which key was missing. Keep the original as the cause, so this prints <code>no such user</code> then <code>'u42'</code>.</p></div><textarea class="pc-src pc-code" hidden>class UserError(Exception):
+    pass
+
+USERS = {&quot;u1&quot;: &quot;Ada&quot;}
+
+def load_user(uid):
+    try:
+        return USERS[uid]
+    except KeyError:
+        raise UserError(&quot;no such user&quot;) from None
+
+try:
+    load_user(&quot;u42&quot;)
+except UserError as err:
+    print(err)
+    print(err.__cause__)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;keep the cause&quot;
+    expect_output(&quot;no such user\n&#x27;u42&#x27;&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class UserError(Exception):
+    pass
+
+USERS = {&quot;u1&quot;: &quot;Ada&quot;}
+
+def load_user(uid):
+    try:
+        return USERS[uid]
+    except KeyError as err:
+        raise UserError(&quot;no such user&quot;) from err
+
+try:
+    load_user(&quot;u42&quot;)
+except UserError as err:
+    print(err)
+    print(err.__cause__)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w037d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Translated too much</div><div class="pc-prompt"><p>The storage layer should translate only the errors it understands. This one catches <code>Exception</code>, so a bug (a <code>TypeError</code> from passing a number instead of a string) is disguised as a <code>StorageError</code>, and the caller prints <code>storage problem</code> when it should crash and show the bug. Catch only <code>OSError</code>, so the output is <code>storage problem</code> for the missing folder and then <code>bug: TypeError</code>.</p></div><textarea class="pc-src pc-code" hidden>class StorageError(Exception):
+    pass
+
+def save(path, text):
+    try:
+        with open(path, &quot;w&quot;) as f:
+            f.write(text)
+    except Exception as err:
+        raise StorageError(f&quot;couldn&#x27;t save to {path}&quot;) from err
+
+for path, text in [(&quot;no-such-folder/x.txt&quot;, &quot;hi&quot;), (&quot;ok.txt&quot;, 42)]:
+    try:
+        save(path, text)
+    except StorageError:
+        print(&quot;storage problem&quot;)
+    except Exception as err:
+        print(&quot;bug:&quot;, type(err).__name__)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;only what it understands&quot;
+    expect_output(&quot;storage problem\nbug: TypeError&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class StorageError(Exception):
+    pass
+
+def save(path, text):
+    try:
+        with open(path, &quot;w&quot;) as f:
+            f.write(text)
+    except OSError as err:
+        raise StorageError(f&quot;couldn&#x27;t save to {path}&quot;) from err
+
+for path, text in [(&quot;no-such-folder/x.txt&quot;, &quot;hi&quot;), (&quot;ok.txt&quot;, 42)]:
+    try:
+        save(path, text)
+    except StorageError:
+        print(&quot;storage problem&quot;)
+    except Exception as err:
+        print(&quot;bug:&quot;, type(err).__name__)</textarea></div>
+<div class="parsons" data-id="w037d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Translating an error</div><div class="pc-prompt"><p>Arrange the lines into a repository method that turns a missing record into the program&rsquo;s own error, keeping the original as the cause. One line is a trap.</p></div><script type="application/json">{"lines": ["def get(self, key):", "    try:", "        return self.rows[key]", "    except KeyError as err:", "        raise NotFound(f\"no record {key!r}\") from err"], "distractors": ["        raise NotFound(f\"no record {key!r}\") from None"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w037d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>class AppError(Exception):
+    pass
+
+class Missing(AppError, LookupError):
+    pass
+
+def f(how):
+    try:
+        [][0]
+    except IndexError as err:
+        if how == 1:
+            raise Missing(&quot;gone&quot;) from err
+        if how == 2:
+            raise Missing(&quot;gone&quot;)
+        raise Missing(&quot;gone&quot;) from None
+
+results = []
+for how in [1, 2, 3]:
+    try:
+        f(how)
+    except LookupError as e:
+        results.append((type(e.__cause__).__name__, type(e.__context__).__name__, e.__suppress_context__))
+
+p = ___   # results[0]
+q = ___   # results[1]
+r = ___   # results[2]
+s = ___   # str(Missing(&quot;gone&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == (&quot;IndexError&quot;, &quot;IndexError&quot;, True), &quot;p&quot;
+    assert q == (&quot;NoneType&quot;, &quot;IndexError&quot;, False), &quot;q&quot;
+    assert r == (&quot;NoneType&quot;, &quot;IndexError&quot;, True) and s == &quot;gone&quot;, &quot;r and s&quot;</textarea><textarea class="pc-src pc-solution" hidden>class AppError(Exception):
+    pass
+
+class Missing(AppError, LookupError):
+    pass
+
+def f(how):
+    try:
+        [][0]
+    except IndexError as err:
+        if how == 1:
+            raise Missing(&quot;gone&quot;) from err
+        if how == 2:
+            raise Missing(&quot;gone&quot;)
+        raise Missing(&quot;gone&quot;) from None
+
+results = []
+for how in [1, 2, 3]:
+    try:
+        f(how)
+    except LookupError as e:
+        results.append((type(e.__cause__).__name__, type(e.__context__).__name__, e.__suppress_context__))
+
+p = (&quot;IndexError&quot;, &quot;IndexError&quot;, True)
+q = (&quot;NoneType&quot;, &quot;IndexError&quot;, False)
+r = (&quot;NoneType&quot;, &quot;IndexError&quot;, True)
+s = &quot;gone&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w037d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why give a program one base exception class?", "answer": 1, "explain": "And they can still be precise with the subclasses.", "options": ["Python requires it", "Callers can catch everything the program raises on purpose, while bugs still get through", "It&rsquo;s faster", "To stop all errors"]}, {"type": "mc", "q": "How many exception classes should you make?", "answer": 1, "explain": "Messages can tell similar cases apart.", "options": ["One per function", "One per case a caller would handle differently", "One per message", "Always exactly three"]}, {"type": "mc", "q": "Why might class NotFound(ShopError, LookupError) be better than class NotFound(ShopError)?", "answer": 1, "explain": "It really is a lookup error.", "options": ["It isn&rsquo;t", "Code that already catches LookupError keeps working", "It&rsquo;s shorter", "It hides the message"]}, {"type": "mc", "q": "What does raise New() from err set?", "answer": 1, "explain": "And the traceback says &lsquo;direct cause&rsquo;.", "options": ["Nothing", "New&rsquo;s <strong>cause</strong> to err", "err&rsquo;s <strong>cause</strong> to New", "Only the message"]}, {"type": "mc", "q": "What does a traceback saying &lsquo;During handling of the above exception, another exception occurred&rsquo; suggest?", "answer": 1, "explain": "Look for a bug in the except block.", "options": ["Everything is fine", "An error was raised inside an except block without from, often by accident", "A syntax error", "A warning"]}, {"type": "mc", "q": "What does raise New() from None do?", "answer": 1, "explain": "Use it only when the original adds nothing.", "options": ["Raises nothing", "Hides the original error in the traceback", "Deletes the original", "Sets <strong>cause</strong> to the original"]}, {"type": "mc", "q": "What does a bare raise inside an except block do?", "answer": 1, "explain": "Handy after recording or tidying up.", "options": ["Raises a new RuntimeError", "Re-raises the error being handled, unchanged", "Nothing", "Raises the first error ever seen"]}, {"type": "mc", "q": "What does err.add_note(text) do?", "answer": 1, "explain": "The notes are in err.<strong>notes</strong>.", "options": ["Changes the message", "Attaches extra context that shows at the end of the traceback, keeping the type and message", "Logs the error", "Raises it"]}, {"type": "mc", "q": "Where should a FileNotFoundError from the storage layer be translated into the program&rsquo;s own error?", "answer": 1, "explain": "Then storage can change without the rest changing.", "options": ["In the interface", "At the storage layer&rsquo;s boundary, so the layers above don&rsquo;t need to know about files", "Never", "In every function"]}, {"type": "output", "q": "What does this print?", "answer": "ZeroDivisionError", "explain": "The cause is the original.", "code": "try:\n    try:\n        1 / 0\n    except ZeroDivisionError as e:\n        raise ValueError(\"bad\") from e\nexcept ValueError as e:\n    print(type(e.__cause__).__name__)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w037d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a layered loader</div><div class="pc-prompt"><p>Build a small layered loader for member records (one per line, <code>"id,name,age"</code>).</p>
+<ul>
+<li><code>LoadError(Exception)</code> is the base. <code>SourceMissing(LoadError)</code> is for a missing file. <code>BadRecord(LoadError, ValueError)</code> has <code>__init__(self, line_no, reason)</code>, stores both, and has the message <code>"line N: reason"</code>.</li>
+<li><code>read_lines(path)</code> returns the file&rsquo;s lines (without line endings), or raises <code>SourceMissing(f"no file {path}")</code> <strong>from</strong> the <code>FileNotFoundError</code>.</li>
+<li><code>parse(line_no, line)</code> returns <code>(id, name, age)</code> with <code>id</code> and <code>age</code> as ints. A line without exactly three fields raises <code>BadRecord(line_no, "expected 3 fields, got K")</code>; a bad number raises <code>BadRecord(line_no, "bad number")</code> <strong>from</strong> the <code>ValueError</code>. A name that is empty after <code>strip()</code> raises <code>BadRecord(line_no, "empty name")</code>.</li>
+<li><code>load(path)</code> reads and parses every non-blank line (line numbers count every line, from 1) and returns the list of tuples.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>class LoadError(Exception):
+    pass
+
+def read_lines(path):
+    ___
+
+def parse(line_no, line):
+    ___
+
+def load(path):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_classes():
+    &quot;the family&quot;
+    assert issubclass(SourceMissing, LoadError) and issubclass(BadRecord, LoadError) and issubclass(BadRecord, ValueError)
+    e = BadRecord(3, &quot;empty name&quot;)
+    assert str(e) == &quot;line 3: empty name&quot; and e.line_no == 3 and e.reason == &quot;empty name&quot;
+def test_parse():
+    &quot;parsing&quot;
+    assert parse(1, &quot;7,Ada,36&quot;) == (7, &quot;Ada&quot;, 36)
+    for line, reason, cause in [(&quot;7,Ada&quot;, &quot;expected 3 fields, got 2&quot;, type(None)), (&quot;x,Ada,36&quot;, &quot;bad number&quot;, ValueError), (&quot;7, ,36&quot;, &quot;empty name&quot;, type(None))]:
+        try:
+            parse(4, line)
+            assert False, f&quot;{line!r} should raise&quot;
+        except BadRecord as err:
+            assert str(err) == f&quot;line 4: {reason}&quot;, f&quot;got {str(err)!r}&quot;
+            assert type(err.__cause__) is cause, f&quot;{line!r}: cause {err.__cause__!r}&quot;
+def test_load():
+    &quot;loading&quot;
+    write_file(&quot;members.txt&quot;, &quot;1,Ada,36\n\n2,Bo,40\n&quot;)
+    assert load(&quot;members.txt&quot;) == [(1, &quot;Ada&quot;, 36), (2, &quot;Bo&quot;, 40)]
+    write_file(&quot;bad.txt&quot;, &quot;1,Ada,36\n\n2,Bo\n&quot;)
+    try:
+        load(&quot;bad.txt&quot;)
+        assert False
+    except BadRecord as err:
+        assert err.line_no == 3, &quot;line numbers count blank lines too&quot;
+    try:
+        load(&quot;nowhere.txt&quot;)
+        assert False
+    except SourceMissing as err:
+        assert str(err) == &quot;no file nowhere.txt&quot; and isinstance(err.__cause__, FileNotFoundError)</textarea><textarea class="pc-src pc-solution" hidden>class LoadError(Exception):
+    pass
+
+class SourceMissing(LoadError):
+    pass
+
+class BadRecord(LoadError, ValueError):
+    def __init__(self, line_no, reason):
+        super().__init__(f&quot;line {line_no}: {reason}&quot;)
+        self.line_no = line_no
+        self.reason = reason
+
+def read_lines(path):
+    try:
+        with open(path) as f:
+            return f.read().splitlines()
+    except FileNotFoundError as err:
+        raise SourceMissing(f&quot;no file {path}&quot;) from err
+
+def parse(line_no, line):
+    fields = line.split(&quot;,&quot;)
+    if len(fields) != 3:
+        raise BadRecord(line_no, f&quot;expected 3 fields, got {len(fields)}&quot;)
+    raw_id, name, raw_age = fields
+    try:
+        member_id, age = int(raw_id), int(raw_age)
+    except ValueError as err:
+        raise BadRecord(line_no, &quot;bad number&quot;) from err
+    if not name.strip():
+        raise BadRecord(line_no, &quot;empty name&quot;)
+    return member_id, name, age
+
+def load(path):
+    records = []
+    for line_no, line in enumerate(read_lines(path), start=1):
+        if line.strip():
+            records.append(parse(line_no, line))
+    return records</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Look at the errors a program of yours raises. Is there one base class? Do the messages say which value was wrong? Where does a low-level error leak up into code that shouldn&rsquo;t know about it? Tomorrow: EAFP and LBYL in depth, and why &ldquo;check first&rdquo; can go wrong even when it looks safer.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w037d1.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w037d2", "week": 37, "day": 2, "title": "Custom exceptions", "exercises": [{"id": "w037d2-family", "title": "A family for a booking system", "points": 10}, {"id": "w037d2-translate", "title": "Translating a lookup", "points": 15}, {"id": "w037d2-story", "title": "Telling the whole story", "points": 15}, {"id": "w037d2-notes", "title": "Saying where", "points": 15}, {"id": "w037d2-bug1", "title": "The empty message", "points": 10}, {"id": "w037d2-bug2", "title": "The lost cause", "points": 10}, {"id": "w037d2-bug3", "title": "Translated too much", "points": 10}, {"id": "w037d2-trace", "title": "Predict them", "points": 10}, {"id": "w037d2-challenge", "title": "Challenge: a layered loader", "points": 25}], "points": 120}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=8fe38f9496"></script>
+</body>
+</html>
