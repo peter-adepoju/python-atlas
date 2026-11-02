@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="871ff52039">
+<title>Week 48 Day 5: Autocomplete project | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=871ff52039">
+<link rel="stylesheet" href="../assets/css/site.css?v=871ff52039">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=871ff52039"></script>
+<script src="../assets/vendor/codemirror.js?v=871ff52039" defer></script>
+<meta name="description" content="Today you’ll build the thing that started the week: an autocomplete engine. Given a list of words with how often each is used, it suggests the most likely...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w048d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 48 Day 5: Autocomplete project">
+<meta property="og:description" content="Today you’ll build the thing that started the week: an autocomplete engine. Given a list of words with how often each is used, it suggests the most likely...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w048d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-48">Week 48: Tries and string algorithms</a>
+      <ol class="rail-toc"><li><a href="#the-plan" data-sec="the-plan">The plan</a></li><li><a href="#step-1-loading-the-words" data-sec="step-1-loading-the-words">Step 1: loading the words</a></li><li><a href="#step-2-top-suggestions" data-sec="step-2-top-suggestions">Step 2: top suggestions</a></li><li><a href="#step-3-answers-on-every-key-press" data-sec="step-3-answers-on-every-key-press">Step 3: answers on every key press</a></li><li><a href="#step-4-learning-from-choices" data-sec="step-4-learning-from-choices">Step 4: learning from choices</a></li><li><a href="#step-5-forgiving-a-typo" data-sec="step-5-forgiving-a-typo">Step 5: forgiving a typo</a></li><li><a href="#checkpoint-and-quiz" data-sec="checkpoint-and-quiz">Checkpoint and quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w048d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-48">Week 48: Tries and string algorithms</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 48, Day 5</span></p>
+      <h1>Autocomplete project</h1>
+      <div class="day-intro"><p>Today you&rsquo;ll build the thing that started the week: an autocomplete engine. Given a list of words with how often each is used, it suggests the most likely completions of whatever has been typed so far, fast enough to run on every key press. You&rsquo;ll build it in steps: load the word list carefully, find the top suggestions for a prefix with a trie and a heap, make that instant by caching each node&rsquo;s best words, learn from what people actually choose, and forgive a typing mistake. Every step uses something from the last two weeks: tries, heaps, top-k, and the care with untrusted input from Phase 3.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Load a word-frequency file defensively into a trie</li><li>Find the k most frequent completions of a prefix with a trie walk and a heap</li><li>Cache each node&rsquo;s best completions so a query costs O(prefix length + k)</li><li>Update rankings as users choose suggestions, keeping caches correct</li><li>Suggest completions despite one typing mistake, ranking exact matches first</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:15" title="The plan: 15 min"></span><span class="plan-seg s1" style="flex:20" title="Step 1: loading the words: 20 min"></span><span class="plan-seg s0" style="flex:30" title="Step 2: top suggestions: 30 min"></span><span class="plan-seg s1" style="flex:30" title="Step 3: answers on every key press: 30 min"></span><span class="plan-seg s0" style="flex:20" title="Step 4: learning from choices: 20 min"></span><span class="plan-seg s1" style="flex:30" title="Step 5: forgiving a typo: 30 min"></span><span class="plan-seg s0" style="flex:20" title="Checkpoint and quiz: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">The plan</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:15</span><span class="plan-what">Step 1: loading the words</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Step 2: top suggestions</span><span class="plan-min">30 min</span></li><li><span class="plan-at">1:05</span><span class="plan-what">Step 3: answers on every key press</span><span class="plan-min">30 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Step 4: learning from choices</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Step 5: forgiving a typo</span><span class="plan-min">30 min</span></li><li><span class="plan-at">2:25</span><span class="plan-what">Checkpoint and quiz</span><span class="plan-min">20 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w048d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w048d5.ipynb" download>download it</a>. Exercises today are worth 130 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="the-plan">The plan</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w048d5-p1"><textarea class="pc-src pc-code" hidden>import heapq
+
+freq = {&quot;python&quot;: 90, &quot;pytest&quot;: 40, &quot;pyramid&quot;: 25, &quot;pie&quot;: 60, &quot;pilot&quot;: 30, &quot;pyre&quot;: 5}
+
+def suggest(prefix, k):
+    matches = [(f, w) for w, f in freq.items() if w.startswith(prefix)]
+    return [w for f, w in heapq.nlargest(k, matches)]
+
+print(suggest(&quot;py&quot;, 2), suggest(&quot;pi&quot;, 3), suggest(&quot;q&quot;, 2))</textarea></div>
+<p>That&rsquo;s autocomplete in four lines, and for six words it&rsquo;s perfect. For a million words, every key press would scan all million. The rest of today makes the same answers come back in time proportional to what you typed, not to the size of the dictionary.</p>
+<p>The engine&rsquo;s behaviour, which every step keeps:</p>
+<ul>
+<li>Suggestions for a prefix are the words that <strong>start with</strong> it, most frequent first, <strong>ties alphabetical</strong>, at most k of them.</li>
+<li>Words are stored in lower case; queries are lower-cased and stripped of surrounding spaces before use.</li>
+<li>The word itself counts as a completion of its own prefix: typing &ldquo;python&rdquo; suggests &ldquo;python&rdquo; first.</li>
+</ul>
+<div class="filebox"><div class="filebox-head">The file used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>words.txt</code></summary><pre class="pc-filetext"># word frequency, one per line
+python 90
+pytest 40
+pyramid 25
+pie 60
+pilot 30
+pyre 5
+Pythonic 12
+pile 30
+pine 18
+pizza 75
+pizza 1
+plan 55
+plane 20
+planet 33
+planner 9
+play 80
+player 44
+playful 7
+please 70
+pleasant 15
+pledge 6
+bad line here
+plot -4
+plum 0
+</pre></details><script type="application/json" class="page-files">{"words.txt": "# word frequency, one per line\npython 90\npytest 40\npyramid 25\npie 60\npilot 30\npyre 5\nPythonic 12\npile 30\npine 18\npizza 75\npizza 1\nplan 55\nplane 20\nplanet 33\nplanner 9\nplay 80\nplayer 44\nplayful 7\nplease 70\npleasant 15\npledge 6\nbad line here\nplot -4\nplum 0\n"}</script></div>
+<h2 id="step-1-loading-the-words">Step 1: loading the words</h2>
+<p>The word list comes from a file you didn&rsquo;t write, so the loader checks every line (Week 37, Week 46 Day 5). Each useful line is <code>word frequency</code>. Lines that are blank or start with <code>#</code> are skipped quietly. A line is <strong>bad</strong> (counted, then skipped) if it doesn&rsquo;t have exactly two parts, the word isn&rsquo;t made only of letters, or the frequency isn&rsquo;t a whole number greater than 0. A word listed twice gets the <strong>larger</strong> frequency. Words are lower-cased.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w048d5-load" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Step 1: loading</div><div class="pc-prompt"><p>Write <code>load_words(path)</code>, returning <code>(freq, bad)</code>: a dict from word to frequency, and the number of bad lines, following the rules above. Read the file a line at a time.</p></div><textarea class="pc-src pc-code" hidden>def load_words(path):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_load():
+    &quot;the example file&quot;
+    reset_files()
+    freq, bad = load_words(&quot;words.txt&quot;)
+    assert bad == 3, bad
+    assert freq[&quot;python&quot;] == 90 and freq[&quot;pythonic&quot;] == 12 and freq[&quot;pizza&quot;] == 75 and &quot;plot&quot; not in freq and &quot;plum&quot; not in freq
+    assert len(freq) == 20
+def test_edges():
+    &quot;edge cases&quot;
+    write_file(&quot;w.txt&quot;, &quot;\n# comment\n  Apple 3  \napple 5\nbanana x\ncherry 2 extra\nd4te 9\n&quot;)
+    assert load_words(&quot;w.txt&quot;) == ({&quot;apple&quot;: 5}, 3)
+    write_file(&quot;e.txt&quot;, &quot;&quot;)
+    assert load_words(&quot;e.txt&quot;) == ({}, 0)</textarea><textarea class="pc-src pc-solution" hidden>def load_words(path):
+    freq, bad = {}, 0
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith(&quot;#&quot;):
+                continue
+            parts = line.split()
+            if len(parts) != 2 or not parts[0].isalpha() or not parts[1].isdigit() or int(parts[1]) &lt;= 0:
+                bad += 1
+                continue
+            word, n = parts[0].lower(), int(parts[1])
+            freq[word] = max(freq.get(word, 0), n)
+    return freq, bad</textarea></div>
+<h2 id="step-2-top-suggestions">Step 2: top suggestions</h2>
+<p>Put the words in a trie whose nodes hold the frequency of the word ending there (0 if none). For a prefix, walk to its node, then visit the subtree, keeping the best k with a heap of size k (Day 4 of last week): that&rsquo;s O(L + size of subtree × log k). A short prefix like &ldquo;p&rdquo; still visits a large subtree, but a longer one is already much faster than scanning every word.</p>
+<p>&ldquo;Best&rdquo; means higher frequency, then alphabetically earlier. To keep the k best in a min-heap whose top is the <strong>worst</strong> kept, the heap&rsquo;s order must put worse entries first: lower frequency first, and among equal frequencies, the alphabetically <strong>later</strong> word first. Python can&rsquo;t negate a string, so a small wrapper class with its own <code>__lt__</code> keeps it clear:</p>
+<div class="pc pc-example" data-kind="example" data-id="w048d5-e2"><textarea class="pc-src pc-code" hidden>import heapq
+
+class Rank:
+    &quot;&quot;&quot;Orders (freq, word) so that the WORSE suggestion is smaller.&quot;&quot;&quot;
+    def __init__(self, freq, word):
+        self.freq, self.word = freq, word
+    def __lt__(self, other):
+        if self.freq != other.freq:
+            return self.freq &lt; other.freq
+        return self.word &gt; other.word
+
+def best_k(pairs, k):
+    heap = []
+    for word, f in pairs:
+        r = Rank(f, word)
+        if len(heap) &lt; k:
+            heapq.heappush(heap, r)
+        elif heap[0] &lt; r:
+            heapq.heapreplace(heap, r)
+    return [r.word for r in sorted(heap, reverse=True)]
+
+print(best_k([(&quot;pile&quot;, 30), (&quot;pilot&quot;, 30), (&quot;pie&quot;, 60), (&quot;pine&quot;, 18)], 3))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w048d5-suggest" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Step 2: suggestions from a trie</div><div class="pc-prompt"><p>Write <code>Autocomplete(freq)</code> (a dict like Step 1&rsquo;s) that builds a trie of <code>Node</code>s, and <code>suggest(prefix, k=5)</code>: the k best completions, by walking to the prefix&rsquo;s node and visiting its subtree with an explicit stack, keeping a size-k heap. Normalise the prefix (strip, lower-case). An unknown prefix gives <code>[]</code>.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+
+class Node:
+    def __init__(self):
+        self.children = {}
+        self.freq = 0
+
+class Rank:
+    def __init__(self, freq, word):
+        self.freq, self.word = freq, word
+    def __lt__(self, other):
+        if self.freq != other.freq:
+            return self.freq &lt; other.freq
+        return self.word &gt; other.word
+
+class Autocomplete:
+    def __init__(self, freq):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def slow(freq, prefix, k):
+    prefix = prefix.strip().lower()
+    return sorted((w for w in freq if w.startswith(prefix)), key=lambda w: (-freq[w], w))[:k]
+FREQ = {&quot;python&quot;: 90, &quot;pytest&quot;: 40, &quot;pyramid&quot;: 25, &quot;pie&quot;: 60, &quot;pilot&quot;: 30, &quot;pyre&quot;: 5, &quot;pythonic&quot;: 12, &quot;pile&quot;: 30, &quot;pine&quot;: 18, &quot;pizza&quot;: 75}
+def test_suggest():
+    &quot;suggestions&quot;
+    a = Autocomplete(FREQ)
+    assert a.suggest(&quot;py&quot;, 2) == [&quot;python&quot;, &quot;pytest&quot;] and a.suggest(&quot;pi&quot;, 3) == [&quot;pizza&quot;, &quot;pie&quot;, &quot;pile&quot;]
+    assert a.suggest(&quot;  PYTHON &quot;) == [&quot;python&quot;, &quot;pythonic&quot;] and a.suggest(&quot;q&quot;) == [] and a.suggest(&quot;p&quot;, 0) == []
+def test_random():
+    &quot;against sorting&quot;
+    rng = random.Random(1)
+    freq = {&quot;&quot;.join(rng.choice(&quot;abc&quot;) for _ in range(rng.randint(1, 6))): rng.randint(1, 20) for _ in range(300)}
+    a = Autocomplete(freq)
+    for _ in range(200):
+        p = &quot;&quot;.join(rng.choice(&quot;abc&quot;) for _ in range(rng.randint(0, 4)))
+        k = rng.randint(1, 8)
+        assert a.suggest(p, k) == slow(freq, p, k), (p, k)</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+
+class Node:
+    def __init__(self):
+        self.children = {}
+        self.freq = 0
+
+class Rank:
+    def __init__(self, freq, word):
+        self.freq, self.word = freq, word
+    def __lt__(self, other):
+        if self.freq != other.freq:
+            return self.freq &lt; other.freq
+        return self.word &gt; other.word
+
+class Autocomplete:
+    def __init__(self, freq):
+        self.root = Node()
+        for word, f in freq.items():
+            node = self.root
+            for ch in word:
+                node = node.children.setdefault(ch, Node())
+            node.freq = f
+
+    def suggest(self, prefix, k=5):
+        prefix = prefix.strip().lower()
+        node = self.root
+        for ch in prefix:
+            node = node.children.get(ch)
+            if node is None:
+                return []
+        if k &lt;= 0:
+            return []
+        heap, stack = [], [(node, prefix)]
+        while stack:
+            node, word = stack.pop()
+            if node.freq:
+                r = Rank(node.freq, word)
+                if len(heap) &lt; k:
+                    heapq.heappush(heap, r)
+                elif heap[0] &lt; r:
+                    heapq.heapreplace(heap, r)
+            for ch, child in node.children.items():
+                stack.append((child, word + ch))
+        return [r.word for r in sorted(heap, reverse=True)]</textarea></div>
+<h2 id="step-3-answers-on-every-key-press">Step 3: answers on every key press</h2>
+<p>Visiting the subtree on every key press is still too slow for a big dictionary and a one-letter prefix. Trade memory for time: store in <strong>every node</strong> a short list, <code>top</code>, of the best K completions passing through it (K being the most suggestions the engine will ever show, say 10). Then a query walks to the node and reads its list: <strong>O(L + k)</strong>, however big the subtree.</p>
+<p>The lists are built as words are inserted: for each node on the new word&rsquo;s path, add the word to that node&rsquo;s list, re-sort by rank, and cut it back to K. That&rsquo;s O(L × K log K) per insertion, done once, rather than on every key press. Memory grows by up to K entries per node, which is why K stays small.</p>
+<div class="pc pc-example" data-kind="example" data-id="w048d5-e3"><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self):
+        self.children, self.freq, self.top = {}, 0, []
+
+K = 3
+root = Node()
+for word, f in [(&quot;pie&quot;, 60), (&quot;pizza&quot;, 75), (&quot;pile&quot;, 30), (&quot;pilot&quot;, 30), (&quot;pine&quot;, 18)]:
+    node = root
+    path = [root]
+    for ch in word:
+        node = node.children.setdefault(ch, Node())
+        path.append(node)
+    node.freq = f
+    for n in path:
+        n.top = sorted(n.top + [(f, word)], key=lambda p: (-p[0], p[1]))[:K]
+
+node = root.children[&quot;p&quot;].children[&quot;i&quot;]
+print([w for f, w in node.top])
+print([w for f, w in node.children[&quot;l&quot;].top])</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w048d5-cached" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Step 3: cached suggestions</div><div class="pc-prompt"><p>Write <code>CachedAutocomplete(freq, K=10)</code> that keeps a <code>top</code> list of at most K <code>(freq, word)</code> pairs in each node, best first, built during insertion as described, and <code>suggest(prefix, k=5)</code> that only walks to the node and reads its list (k may be at most K; raise <code>ValueError</code> for more). The checks count nodes visited per query.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self):
+        self.children = {}
+        self.freq = 0
+        self.top = []
+
+class CachedAutocomplete:
+    def __init__(self, freq, K=10):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+class Counting(dict):
+    gets = 0
+    def get(self, key, default=None):
+        Counting.gets += 1
+        return dict.get(self, key, default)
+def slow(freq, prefix, k):
+    prefix = prefix.strip().lower()
+    return sorted((w for w in freq if w.startswith(prefix)), key=lambda w: (-freq[w], w))[:k]
+def test_cached():
+    &quot;the same answers&quot;
+    rng = random.Random(2)
+    freq = {&quot;&quot;.join(rng.choice(&quot;abc&quot;) for _ in range(rng.randint(1, 6))): rng.randint(1, 20) for _ in range(300)}
+    a = CachedAutocomplete(freq, K=6)
+    for _ in range(300):
+        p = &quot;&quot;.join(rng.choice(&quot;abc&quot;) for _ in range(rng.randint(0, 4)))
+        k = rng.randint(1, 6)
+        assert a.suggest(p, k) == slow(freq, p, k), (p, k)
+    try:
+        a.suggest(&quot;a&quot;, 7)
+        assert False
+    except ValueError:
+        pass
+    assert a.suggest(&quot; A &quot;, 2) == slow(freq, &quot;a&quot;, 2) and a.suggest(&quot;zz&quot;, 3) == []
+def test_lists():
+    &quot;lists stay short&quot;
+    a = CachedAutocomplete({&quot;pie&quot;: 60, &quot;pizza&quot;: 75, &quot;pile&quot;: 30, &quot;pilot&quot;: 30, &quot;pine&quot;: 18}, K=3)
+    node = a.root.children[&quot;p&quot;].children[&quot;i&quot;]
+    assert node.top == [(75, &quot;pizza&quot;), (60, &quot;pie&quot;), (30, &quot;pile&quot;)]
+    stack = [a.root]
+    while stack:
+        n = stack.pop()
+        assert len(n.top) &lt;= 3
+        stack.extend(n.children.values())</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self):
+        self.children = {}
+        self.freq = 0
+        self.top = []
+
+class CachedAutocomplete:
+    def __init__(self, freq, K=10):
+        self.K = K
+        self.root = Node()
+        for word, f in freq.items():
+            self._insert(word, f)
+
+    def _insert(self, word, f):
+        node, path = self.root, [self.root]
+        for ch in word:
+            node = node.children.setdefault(ch, Node())
+            path.append(node)
+        node.freq = f
+        for n in path:
+            entries = [p for p in n.top if p[1] != word] + [(f, word)]
+            n.top = sorted(entries, key=lambda p: (-p[0], p[1]))[:self.K]
+
+    def suggest(self, prefix, k=5):
+        if k &gt; self.K:
+            raise ValueError(f&quot;at most {self.K} suggestions&quot;)
+        node = self.root
+        for ch in prefix.strip().lower():
+            node = node.children.get(ch)
+            if node is None:
+                return []
+        return [w for f, w in node.top[:k]]</textarea></div>
+<h2 id="step-4-learning-from-choices">Step 4: learning from choices</h2>
+<p>When someone picks a suggestion, it should rank higher next time. <code>choose(word)</code> adds 1 to the word&rsquo;s frequency (adding the word with frequency 1 if it&rsquo;s new). Because frequencies only ever <strong>go up</strong>, the cached lists stay correct if every node on the word&rsquo;s path updates its own list: a word can only enter a node&rsquo;s top K by rising, and any node it rises in is on its path. (If frequencies could go <strong>down</strong>, a word dropping out of a list would need a replacement from elsewhere in the subtree, and the cache would need rebuilding from the subtree.)</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w048d5-choose" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Step 4: learning</div><div class="pc-prompt"><p>Extend Step 3&rsquo;s engine with <code>choose(word)</code> (normalised like a query; raise <code>ValueError</code> if it isn&rsquo;t made only of letters), and <code>frequency(word)</code>. Keep every cached list correct. The checks make thousands of random choices and compare with a slow version.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self):
+        self.children = {}
+        self.freq = 0
+        self.top = []
+
+class LearningAutocomplete:
+    def __init__(self, freq, K=10):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def slow(freq, prefix, k):
+    return sorted((w for w in freq if w.startswith(prefix)), key=lambda w: (-freq[w], w))[:k]
+def test_learning():
+    &quot;learning&quot;
+    a = LearningAutocomplete({&quot;pie&quot;: 60, &quot;pizza&quot;: 75, &quot;pile&quot;: 30}, K=3)
+    assert a.suggest(&quot;pi&quot;, 2) == [&quot;pizza&quot;, &quot;pie&quot;]
+    for _ in range(31):
+        a.choose(&quot;pile&quot;)
+    assert a.suggest(&quot;pi&quot;, 2) == [&quot;pizza&quot;, &quot;pile&quot;] and a.frequency(&quot;pile&quot;) == 61
+    a.choose(&quot; Pint &quot;)
+    assert a.frequency(&quot;pint&quot;) == 1 and a.suggest(&quot;pin&quot;, 1) == [&quot;pint&quot;] and a.frequency(&quot;zzz&quot;) == 0
+    try:
+        a.choose(&quot;pi3&quot;)
+        assert False
+    except ValueError:
+        pass
+    rng = random.Random(3)
+    freq = {&quot;&quot;.join(rng.choice(&quot;ab&quot;) for _ in range(rng.randint(1, 5))): rng.randint(1, 5) for _ in range(40)}
+    a, ref = LearningAutocomplete(dict(freq), K=4), dict(freq)
+    for _ in range(3000):
+        w = &quot;&quot;.join(rng.choice(&quot;ab&quot;) for _ in range(rng.randint(1, 5)))
+        a.choose(w)
+        ref[w] = ref.get(w, 0) + 1
+        p = w[:rng.randint(0, len(w))]
+        assert a.suggest(p, 4) == slow(ref, p, 4)</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self):
+        self.children = {}
+        self.freq = 0
+        self.top = []
+
+class LearningAutocomplete:
+    def __init__(self, freq, K=10):
+        self.K = K
+        self.root = Node()
+        for word, f in freq.items():
+            self._set(word, f)
+
+    def _set(self, word, f):
+        node, path = self.root, [self.root]
+        for ch in word:
+            node = node.children.setdefault(ch, Node())
+            path.append(node)
+        node.freq = f
+        for n in path:
+            entries = [p for p in n.top if p[1] != word] + [(f, word)]
+            n.top = sorted(entries, key=lambda p: (-p[0], p[1]))[:self.K]
+
+    def frequency(self, word):
+        node = self.root
+        for ch in word.strip().lower():
+            node = node.children.get(ch)
+            if node is None:
+                return 0
+        return node.freq
+
+    def choose(self, word):
+        word = word.strip().lower()
+        if not word.isalpha():
+            raise ValueError(f&quot;not a word: {word!r}&quot;)
+        self._set(word, self.frequency(word) + 1)
+
+    def suggest(self, prefix, k=5):
+        if k &gt; self.K:
+            raise ValueError(f&quot;at most {self.K} suggestions&quot;)
+        node = self.root
+        for ch in prefix.strip().lower():
+            node = node.children.get(ch)
+            if node is None:
+                return []
+        return [w for f, w in node.top[:k]]</textarea></div>
+<h2 id="step-5-forgiving-a-typo">Step 5: forgiving a typo</h2>
+<p>People mistype. If &ldquo;pyhton&rdquo; has no completions, the engine should still offer &ldquo;python&rdquo;. A simple, effective approach comes from Peter Norvig&rsquo;s essay &ldquo;How to Write a Spelling Corrector&rdquo;: generate every string <strong>one edit</strong> away from what was typed (delete a character, swap two neighbours, replace a character, or insert one), and look each one up. For a prefix of length L over 26 letters that&rsquo;s about 54L + 25 candidates, and each costs one O(L + k) cached lookup.</p>
+<p>Ranking: completions of the exact prefix come first (the user may not have made a mistake at all); then the completions of the edited prefixes, best first, without repeats.</p>
+<div class="pc pc-example" data-kind="example" data-id="w048d5-e4"><textarea class="pc-src pc-code" hidden>def one_edit(s, letters=&quot;abcdefghijklmnopqrstuvwxyz&quot;):
+    splits = [(s[:i], s[i:]) for i in range(len(s) + 1)]
+    deletes = [a + b[1:] for a, b in splits if b]
+    swaps = [a + b[1] + b[0] + b[2:] for a, b in splits if len(b) &gt; 1]
+    replaces = [a + c + b[1:] for a, b in splits if b for c in letters]
+    inserts = [a + c + b for a, b in splits for c in letters]
+    return set(deletes + swaps + replaces + inserts) - {s}
+
+edits = one_edit(&quot;pyhton&quot;)
+print(len(edits), &quot;pyhotn&quot; in edits, &quot;python&quot; in edits, &quot;pyton&quot; in edits)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w048d5-fuzzy" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Step 5: one mistake allowed</div><div class="pc-prompt"><p>Write <code>one_edit(s)</code> (as above, with lower-case letters) and <code>fuzzy_suggest(engine, prefix, k)</code>, using an engine with a <code>suggest(prefix, k)</code> method (a simple one is provided). Return up to k words: first the exact prefix&rsquo;s suggestions, then, if there&rsquo;s room, the best suggestions from <strong>all</strong> one-edit prefixes together (ranked by frequency, ties alphabetical, skipping words already listed). Use <code>engine.freq(word)</code> for ranking.</p></div><textarea class="pc-src pc-code" hidden>class SimpleEngine:
+    def __init__(self, freq):
+        self._f = freq
+
+    def freq(self, word):
+        return self._f.get(word, 0)
+
+    def suggest(self, prefix, k):
+        return sorted((w for w in self._f if w.startswith(prefix)), key=lambda w: (-self._f[w], w))[:k]
+
+def one_edit(s):
+    ___
+
+def fuzzy_suggest(engine, prefix, k):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>FREQ = {&quot;python&quot;: 90, &quot;pytest&quot;: 40, &quot;pyramid&quot;: 25, &quot;pie&quot;: 60, &quot;pilot&quot;: 30, &quot;pyre&quot;: 5, &quot;pythonic&quot;: 12, &quot;pizza&quot;: 75, &quot;play&quot;: 80}
+def test_edits():
+    &quot;edits&quot;
+    e = one_edit(&quot;ab&quot;)
+    assert &quot;b&quot; in e and &quot;a&quot; in e and &quot;ba&quot; in e and &quot;cb&quot; in e and &quot;abz&quot; in e and &quot;ab&quot; not in e and len(e) == len(set(e))
+    assert len(one_edit(&quot;pyhton&quot;)) == len({x for x in one_edit(&quot;pyhton&quot;)})
+def test_fuzzy():
+    &quot;suggestions&quot;
+    eng = SimpleEngine(FREQ)
+    assert fuzzy_suggest(eng, &quot;pyhton&quot;, 3) == [&quot;python&quot;, &quot;pythonic&quot;]
+    assert fuzzy_suggest(eng, &quot;py&quot;, 3) == [&quot;python&quot;, &quot;pytest&quot;, &quot;pyramid&quot;]
+    assert fuzzy_suggest(eng, &quot;pyth&quot;, 3) == [&quot;python&quot;, &quot;pythonic&quot;, &quot;pytest&quot;]
+    assert fuzzy_suggest(eng, &quot;xyz&quot;, 3) == [] and fuzzy_suggest(eng, &quot;pla&quot;, 1) == [&quot;play&quot;]</textarea><textarea class="pc-src pc-solution" hidden>class SimpleEngine:
+    def __init__(self, freq):
+        self._f = freq
+
+    def freq(self, word):
+        return self._f.get(word, 0)
+
+    def suggest(self, prefix, k):
+        return sorted((w for w in self._f if w.startswith(prefix)), key=lambda w: (-self._f[w], w))[:k]
+
+def one_edit(s, letters=&quot;abcdefghijklmnopqrstuvwxyz&quot;):
+    splits = [(s[:i], s[i:]) for i in range(len(s) + 1)]
+    deletes = [a + b[1:] for a, b in splits if b]
+    swaps = [a + b[1] + b[0] + b[2:] for a, b in splits if len(b) &gt; 1]
+    replaces = [a + c + b[1:] for a, b in splits if b for c in letters]
+    inserts = [a + c + b for a, b in splits for c in letters]
+    return set(deletes + swaps + replaces + inserts) - {s}
+
+def fuzzy_suggest(engine, prefix, k):
+    out = engine.suggest(prefix, k)
+    if len(out) &lt; k:
+        seen = set(out)
+        extra = set()
+        for p in one_edit(prefix):
+            extra.update(w for w in engine.suggest(p, k) if w not in seen)
+        out += sorted(extra, key=lambda w: (-engine.freq(w), w))[:k - len(out)]
+    return out</textarea></div>
+<h2 id="checkpoint-and-quiz">Checkpoint and quiz</h2>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w048d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Best first, or worst first?</div><div class="pc-prompt"><p>This keeps the k best suggestions in a heap but replaces the top when a newcomer is <strong>worse</strong>, so the weakest words keep getting in: this prints <code>['pizza', 'pine']</code>. Replace only when the newcomer beats the top, so it prints <code>['pizza', 'pie']</code>.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+
+freq = {&quot;pie&quot;: 60, &quot;pizza&quot;: 75, &quot;pile&quot;: 30, &quot;pine&quot;: 18}
+heap = []
+for w, f in freq.items():
+    if len(heap) &lt; 2:
+        heapq.heappush(heap, (f, w))
+    elif (f, w) &lt; heap[0]:
+        heapq.heapreplace(heap, (f, w))
+print([w for f, w in sorted(heap, reverse=True)])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;beat the weakest&quot;
+    expect_output(&quot;[&#x27;pizza&#x27;, &#x27;pie&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+
+freq = {&quot;pie&quot;: 60, &quot;pizza&quot;: 75, &quot;pile&quot;: 30, &quot;pine&quot;: 18}
+heap = []
+for w, f in freq.items():
+    if len(heap) &lt; 2:
+        heapq.heappush(heap, (f, w))
+    elif heap[0] &lt; (f, w):
+        heapq.heapreplace(heap, (f, w))
+print([w for f, w in sorted(heap, reverse=True)])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w048d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A stale cache</div><div class="pc-prompt"><p>When a word&rsquo;s frequency rises, this updates only the word&rsquo;s <strong>own</strong> node&rsquo;s list, not the lists of the nodes above it, so short prefixes keep suggesting the old order: this prints <code>['pizza']</code>. Update every node on the path so it prints <code>['pile']</code>.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self):
+        self.children, self.freq, self.top = {}, 0, []
+
+def put(root, word, f, K=1):
+    node, path = root, [root]
+    for ch in word:
+        node = node.children.setdefault(ch, Node())
+        path.append(node)
+    node.freq = f
+    for n in path[-1:]:
+        entries = [p for p in n.top if p[1] != word] + [(f, word)]
+        n.top = sorted(entries, key=lambda p: (-p[0], p[1]))[:K]
+
+root = Node()
+for w, f in [(&quot;pizza&quot;, 75), (&quot;pile&quot;, 30)]:
+    put(root, w, f)
+put(root, &quot;pile&quot;, 99)
+print([w for f, w in root.children[&quot;p&quot;].children[&quot;i&quot;].top])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the whole path&quot;
+    expect_output(&quot;[&#x27;pile&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self):
+        self.children, self.freq, self.top = {}, 0, []
+
+def put(root, word, f, K=1):
+    node, path = root, [root]
+    for ch in word:
+        node = node.children.setdefault(ch, Node())
+        path.append(node)
+    node.freq = f
+    for n in path:
+        entries = [p for p in n.top if p[1] != word] + [(f, word)]
+        n.top = sorted(entries, key=lambda p: (-p[0], p[1]))[:K]
+
+root = Node()
+for w, f in [(&quot;pizza&quot;, 75), (&quot;pile&quot;, 30)]:
+    put(root, w, f)
+put(root, &quot;pile&quot;, 99)
+print([w for f, w in root.children[&quot;p&quot;].children[&quot;i&quot;].top])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w048d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A word listed twice</div><div class="pc-prompt"><p>When a word&rsquo;s frequency changes, this adds the new entry to the cached list without removing the old one, so the word can appear twice: this prints <code>['pile', 'pile']</code>. Remove the word&rsquo;s old entry first so it prints <code>['pile', 'pizza']</code>.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self):
+        self.children, self.freq, self.top = {}, 0, []
+
+def put(root, word, f, K=2):
+    node, path = root, [root]
+    for ch in word:
+        node = node.children.setdefault(ch, Node())
+        path.append(node)
+    node.freq = f
+    for n in path:
+        entries = n.top + [(f, word)]
+        n.top = sorted(entries, key=lambda p: (-p[0], p[1]))[:K]
+
+root = Node()
+for w, f in [(&quot;pizza&quot;, 75), (&quot;pile&quot;, 80), (&quot;pile&quot;, 99)]:
+    put(root, w, f)
+print([w for f, w in root.top])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;no repeats&quot;
+    expect_output(&quot;[&#x27;pile&#x27;, &#x27;pizza&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self):
+        self.children, self.freq, self.top = {}, 0, []
+
+def put(root, word, f, K=2):
+    node, path = root, [root]
+    for ch in word:
+        node = node.children.setdefault(ch, Node())
+        path.append(node)
+    node.freq = f
+    for n in path:
+        entries = [p for p in n.top if p[1] != word] + [(f, word)]
+        n.top = sorted(entries, key=lambda p: (-p[0], p[1]))[:K]
+
+root = Node()
+for w, f in [(&quot;pizza&quot;, 75), (&quot;pile&quot;, 80), (&quot;pile&quot;, 99)]:
+    put(root, w, f)
+print([w for f, w in root.top])</textarea></div>
+<div class="parsons" data-id="w048d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Updating the cached lists</div><div class="pc-prompt"><p>Arrange the lines to set a word&rsquo;s frequency and update every cached list on its path. One line is a trap.</p></div><script type="application/json">{"lines": ["def put(root, word, f, K):", "    node, path = root, [root]", "    for ch in word:", "        node = node.children.setdefault(ch, Node())", "        path.append(node)", "    node.freq = f", "    for n in path:", "        entries = [p for p in n.top if p[1] != word] + [(f, word)]", "        n.top = sorted(entries, key=lambda p: (-p[0], p[1]))[:K]"], "distractors": ["        n.top = sorted(entries)[:K]"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w048d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden># The engine holds: pie 60, pizza 75, pile 30, pilot 30, pine 18, with K = 3.
+
+p = ___   # suggest(&quot;pi&quot;, 3)
+q = ___   # suggest(&quot;pil&quot;, 3)
+r = ___   # the cached top list at the node for &quot;pin&quot;, as (freq, word) pairs
+s = ___   # suggest(&quot;pi&quot;, 3) after choose(&quot;pine&quot;) is called 50 times
+t = ___   # True or False: &quot;pyhton&quot; and &quot;python&quot; are one edit apart</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [&quot;pizza&quot;, &quot;pie&quot;, &quot;pile&quot;] and q == [&quot;pile&quot;, &quot;pilot&quot;] and r == [(18, &quot;pine&quot;)], &quot;p, q and r&quot;
+    assert s == [&quot;pizza&quot;, &quot;pine&quot;, &quot;pie&quot;] and t is True, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden># The engine holds: pie 60, pizza 75, pile 30, pilot 30, pine 18, with K = 3.
+
+p = [&quot;pizza&quot;, &quot;pie&quot;, &quot;pile&quot;]
+q = [&quot;pile&quot;, &quot;pilot&quot;]
+r = [(18, &quot;pine&quot;)]
+s = [&quot;pizza&quot;, &quot;pine&quot;, &quot;pie&quot;]
+t = True</textarea></div>
+<div class="quiz" data-id="w048d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why is scanning every word on each key press a problem?", "answer": 1, "explain": "Fine for six words, not for a million.", "options": ["It gives wrong answers", "It costs O(number of words) per key press", "It can&rsquo;t rank", "It needs a trie"]}, {"type": "mc", "q": "What does a trie give autocomplete?", "answer": 1, "explain": "Walk to the prefix&rsquo;s node; its subtree is the answer set.", "options": ["Sorting", "Direct access to exactly the words with a given prefix", "Spelling correction", "Frequencies"]}, {"type": "mc", "q": "In a size-k heap of the best suggestions, what&rsquo;s on top?", "answer": 1, "explain": "As in last week&rsquo;s top-k.", "options": ["The best", "The worst of the k kept, the one a newcomer must beat", "A random one", "The newest"]}, {"type": "mc", "q": "Why can&rsquo;t the heap entry simply be (\u2212freq, word) with nlargest?", "answer": 1, "explain": "Mixed directions need care.", "options": ["It can", "Ties must be alphabetical, so the word&rsquo;s direction has to be flipped too, which a wrapper class does cleanly", "Strings can&rsquo;t go in heaps", "Frequencies are negative"]}, {"type": "mc", "q": "What does caching top K in every node buy?", "answer": 1, "explain": "The work moves to insertion time.", "options": ["Less memory", "Queries in O(prefix length + k)", "Faster loading", "Typo tolerance"]}, {"type": "mc", "q": "Which nodes&rsquo; lists change when a word&rsquo;s frequency rises?", "answer": 1, "explain": "Those are the prefixes the word completes.", "options": ["All nodes", "Every node on the word&rsquo;s path", "Only the word&rsquo;s node", "Only the root"]}, {"type": "mc", "q": "Why do cached lists stay correct when frequencies only rise?", "answer": 1, "explain": "Falling frequencies would need replacements from elsewhere.", "options": ["Luck", "A word can only enter a list by rising, and every list it could enter is on its path", "They don&rsquo;t", "Sorting fixes it"]}, {"type": "mc", "q": "How many strings are one edit from a prefix of length L, over 26 letters?", "answer": 1, "explain": "Deletes, swaps, replaces and inserts.", "options": ["About L", "About 54L + 25", "26^L", "L\u00b2"]}, {"type": "mc", "q": "Why do exact-prefix suggestions come before corrected ones?", "answer": 1, "explain": "Corrections fill the remaining places.", "options": ["They&rsquo;re shorter", "The user may not have made a mistake", "They&rsquo;re alphabetical", "They&rsquo;re cached"]}, {"type": "output", "q": "What does this print?", "answer": "['a', 'b']", "explain": "The two single deletions.", "code": "s = \"ab\"\nprint(sorted({s[:i] + s[i + 1:] for i in range(len(s))}))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w048d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: the finished engine</div><div class="pc-prompt"><p>Put it together as one class, <code>Engine</code>, with a small command interface:</p>
+<ul>
+<li><code>Engine.from_file(path, K=10)</code>: load with Step 1&rsquo;s rules (keep <code>bad</code>, the number of bad lines, as an attribute) and build the cached trie.</li>
+<li><code>suggest(prefix, k=5)</code>: cached suggestions (Step 3); if there are fewer than k, fill up with one-edit corrections (Step 5) ranked by frequency then alphabetically, never repeating a word.</li>
+<li><code>choose(word)</code>: as in Step 4.</li>
+<li><code>handle(line)</code>: one command as text, returning the reply as a string. <code>"? pre"</code> replies with the suggestions joined by spaces (or <code>"(none)"</code>); <code>"! word"</code> chooses the word and replies <code>"ok"</code>; anything else, including a bad word, replies <code>"error: ..."</code> with a short message, never raising.</li>
+<li><code>save(path)</code>: write the current frequencies in the Step 1 format, one <code>word frequency</code> line per word in alphabetical order, so <code>from_file</code> can reload them.</li>
+</ul>
+<p>The checks load the example file, run a session of commands, save, reload, and compare.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self):
+        self.children = {}
+        self.freq = 0
+        self.top = []
+
+class Engine:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_session():
+    &quot;a session&quot;
+    reset_files()
+    e = Engine.from_file(&quot;words.txt&quot;, K=5)
+    assert e.bad == 3
+    assert e.handle(&quot;? py&quot;) == &quot;python pytest pyramid pythonic pyre&quot;
+    assert e.handle(&quot;? pyhton&quot;) == &quot;python pythonic&quot;
+    assert e.handle(&quot;? zzzz&quot;) == &quot;(none)&quot;
+    assert e.handle(&quot;! pyre&quot;) == &quot;ok&quot;
+    for _ in range(40):
+        e.handle(&quot;! pyre&quot;)
+    assert e.handle(&quot;? py&quot;).split()[:2] == [&quot;python&quot;, &quot;pyre&quot;]
+    assert e.handle(&quot;! py3&quot;).startswith(&quot;error&quot;) and e.handle(&quot;nonsense&quot;).startswith(&quot;error&quot;) and e.handle(&quot;&quot;).startswith(&quot;error&quot;)
+    e.save(&quot;saved.txt&quot;)
+    lines = read_file(&quot;saved.txt&quot;).splitlines()
+    assert lines[0] == &quot;pie 60&quot; and &quot;pyre 46&quot; in lines and lines == sorted(lines, key=lambda l: l.split()[0])
+    again = Engine.from_file(&quot;saved.txt&quot;, K=5)
+    assert again.bad == 0 and again.handle(&quot;? py&quot;) == e.handle(&quot;? py&quot;) and again.handle(&quot;? pl&quot;) == e.handle(&quot;? pl&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self):
+        self.children = {}
+        self.freq = 0
+        self.top = []
+
+def _one_edit(s, letters=&quot;abcdefghijklmnopqrstuvwxyz&quot;):
+    splits = [(s[:i], s[i:]) for i in range(len(s) + 1)]
+    deletes = [a + b[1:] for a, b in splits if b]
+    swaps = [a + b[1] + b[0] + b[2:] for a, b in splits if len(b) &gt; 1]
+    replaces = [a + c + b[1:] for a, b in splits if b for c in letters]
+    inserts = [a + c + b for a, b in splits for c in letters]
+    return set(deletes + swaps + replaces + inserts) - {s}
+
+class Engine:
+    def __init__(self, freq, K=10, bad=0):
+        self.K, self.bad = K, bad
+        self.root = Node()
+        self.words = {}
+        for word, f in freq.items():
+            self._set(word, f)
+
+    @classmethod
+    def from_file(cls, path, K=10):
+        freq, bad = {}, 0
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith(&quot;#&quot;):
+                    continue
+                parts = line.split()
+                if len(parts) != 2 or not parts[0].isalpha() or not parts[1].isdigit() or int(parts[1]) &lt;= 0:
+                    bad += 1
+                    continue
+                word = parts[0].lower()
+                freq[word] = max(freq.get(word, 0), int(parts[1]))
+        return cls(freq, K, bad)
+
+    def _set(self, word, f):
+        self.words[word] = f
+        node, path = self.root, [self.root]
+        for ch in word:
+            node = node.children.setdefault(ch, Node())
+            path.append(node)
+        node.freq = f
+        for n in path:
+            entries = [p for p in n.top if p[1] != word] + [(f, word)]
+            n.top = sorted(entries, key=lambda p: (-p[0], p[1]))[:self.K]
+
+    def _cached(self, prefix, k):
+        node = self.root
+        for ch in prefix:
+            node = node.children.get(ch)
+            if node is None:
+                return []
+        return [w for f, w in node.top[:k]]
+
+    def suggest(self, prefix, k=5):
+        prefix = prefix.strip().lower()
+        k = min(k, self.K)
+        out = self._cached(prefix, k)
+        if len(out) &lt; k:
+            seen, extra = set(out), set()
+            for p in _one_edit(prefix):
+                extra.update(w for w in self._cached(p, k) if w not in seen)
+            out += sorted(extra, key=lambda w: (-self.words[w], w))[:k - len(out)]
+        return out
+
+    def choose(self, word):
+        word = word.strip().lower()
+        if not word.isalpha():
+            raise ValueError(f&quot;not a word: {word!r}&quot;)
+        self._set(word, self.words.get(word, 0) + 1)
+
+    def handle(self, line):
+        line = line.strip()
+        if line.startswith(&quot;? &quot;):
+            found = self.suggest(line[2:])
+            return &quot; &quot;.join(found) if found else &quot;(none)&quot;
+        if line.startswith(&quot;! &quot;):
+            try:
+                self.choose(line[2:])
+            except ValueError as e:
+                return f&quot;error: {e}&quot;
+            return &quot;ok&quot;
+        return &quot;error: commands are &#x27;? prefix&#x27; or &#x27;! word&#x27;&quot;
+
+    def save(self, path):
+        with open(path, &quot;w&quot;) as f:
+            for word in sorted(self.words):
+                f.write(f&quot;{word} {self.words[word]}\n&quot;)</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Type slowly into a search box on your phone and watch the suggestions change with each letter. Which of today&rsquo;s ideas do you think it uses, and what does it do that yours doesn&rsquo;t (context, your own history, other languages)? Tomorrow is the Forge.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w048d4.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w048d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w048d5", "week": 48, "day": 5, "title": "Autocomplete project", "exercises": [{"id": "w048d5-load", "title": "Step 1: loading", "points": 10}, {"id": "w048d5-suggest", "title": "Step 2: suggestions from a trie", "points": 15}, {"id": "w048d5-cached", "title": "Step 3: cached suggestions", "points": 15}, {"id": "w048d5-choose", "title": "Step 4: learning", "points": 10}, {"id": "w048d5-fuzzy", "title": "Step 5: one mistake allowed", "points": 15}, {"id": "w048d5-bug1", "title": "Best first, or worst first?", "points": 10}, {"id": "w048d5-bug2", "title": "A stale cache", "points": 10}, {"id": "w048d5-bug3", "title": "A word listed twice", "points": 10}, {"id": "w048d5-trace", "title": "Predict them", "points": 10}, {"id": "w048d5-challenge", "title": "Challenge: the finished engine", "points": 25}], "points": 130}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=871ff52039"></script>
+</body>
+</html>

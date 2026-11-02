@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="871ff52039">
+<title>Week 48 Day 6: Forge | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=871ff52039">
+<link rel="stylesheet" href="../assets/css/site.css?v=871ff52039">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=871ff52039"></script>
+<script src="../assets/vendor/codemirror.js?v=871ff52039" defer></script>
+<meta name="description" content="This week was about strings: tries for prefixes, the prefix function and KMP for matching one pattern without ever backing up, prefix hashes for comparing...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w048d6.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 48 Day 6: Forge">
+<meta property="og:description" content="This week was about strings: tries for prefixes, the prefix function and KMP for matching one pattern without ever backing up, prefix hashes for comparing...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w048d6.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-48">Week 48: Tries and string algorithms</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#mixed-review" data-sec="mixed-review">Mixed review</a></li><li><a href="#forge-many-patterns-at-once" data-sec="forge-many-patterns-at-once">Forge: many patterns at once</a></li><li><a href="#forge-bonus-shared-passages" data-sec="forge-bonus-shared-passages">Forge bonus: shared passages</a></li><li><a href="#weekly-quiz" data-sec="weekly-quiz">Weekly quiz</a></li><li><a href="#week-48-review" data-sec="week-48-review">Week 48 review</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w048d6.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-48">Week 48: Tries and string algorithms</a></li><li aria-current="page">Day 6 of 6</li></ol>
+      <p class="day-where"><span>Week 48, Day 6</span><span class="forge-tag">Forge day</span></p>
+      <h1>Forge</h1>
+      <div class="day-intro"><p>This week was about strings: tries for prefixes, the prefix function and KMP for matching one pattern without ever backing up, prefix hashes for comparing any two substrings in O(1), palindromes from centres to Manacher, and an autocomplete engine built from all of them. Today&rsquo;s Forge combines the first two: the <strong>Aho-Corasick</strong> automaton, which matches hundreds of patterns at once in a single pass over the text by adding KMP-style failure links to a trie. The bonus uses rolling hashes to find passages two documents share. The weekly quiz and review finish the week.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Build a trie of patterns and add failure links breadth-first, as KMP does for one pattern</li><li>Match many patterns in one pass, streaming, in time proportional to the text plus the matches</li><li>Use the matches to count and censor</li><li>Find shared passages between documents with rolling hashes over words</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:15" title="Warm-up: predict: 15 min"></span><span class="plan-seg s1" style="flex:30" title="Mixed review practice: 30 min"></span><span class="plan-seg s0" style="flex:60" title="Forge: many patterns at once: 60 min"></span><span class="plan-seg s1" style="flex:40" title="Forge bonus: shared passages: 40 min"></span><span class="plan-seg s0" style="flex:25" title="Weekly quiz: 25 min"></span><span class="plan-seg s1" style="flex:10" title="Week 48 review: 10 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up: predict</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:15</span><span class="plan-what">Mixed review practice</span><span class="plan-min">30 min</span></li><li><span class="plan-at">0:45</span><span class="plan-what">Forge: many patterns at once</span><span class="plan-min">60 min</span></li><li><span class="plan-at">1:45</span><span class="plan-what">Forge bonus: shared passages</span><span class="plan-min">40 min</span></li><li><span class="plan-at">2:25</span><span class="plan-what">Weekly quiz</span><span class="plan-min">25 min</span></li><li><span class="plan-at">2:50</span><span class="plan-what">Week 48 review</span><span class="plan-min">10 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w048d6.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w048d6.ipynb" download>download it</a>. Exercises today are worth 100 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w048d6-p1"><textarea class="pc-src pc-code" hidden>root = {}
+for w in [&quot;to&quot;, &quot;tea&quot;, &quot;ten&quot;, &quot;inn&quot;]:
+    node = root
+    for ch in w:
+        node = node.setdefault(ch, {})
+    node[&quot;$&quot;] = True
+
+print(sorted(root), sorted(root[&quot;t&quot;]), &quot;$&quot; in root[&quot;t&quot;][&quot;e&quot;][&quot;n&quot;])</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w048d6-p2"><textarea class="pc-src pc-code" hidden>def prefix_function(s):
+    pi, k = [0] * len(s), 0
+    for i in range(1, len(s)):
+        while k &gt; 0 and s[i] != s[k]:
+            k = pi[k - 1]
+        if s[i] == s[k]:
+            k += 1
+        pi[i] = k
+    return pi
+
+print(prefix_function(&quot;abcabcab&quot;), len(&quot;abcabcab&quot;) - prefix_function(&quot;abcabcab&quot;)[-1])</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w048d6-p3"><textarea class="pc-src pc-code" hidden>B, M = 10, 10**9 + 7
+s = &quot;1234512&quot;
+h = [0]
+for ch in s:
+    h.append((h[-1] * B + int(ch)) % M)
+get = lambda i, j: (h[j] - h[i] * B ** (j - i)) % M
+print(get(0, 2), get(5, 7), get(0, 2) == get(5, 7))</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w048d6-p4"><textarea class="pc-src pc-code" hidden>s = &quot;abaxyzzyxf&quot;
+best = &quot;&quot;
+for c in range(2 * len(s) - 1):
+    lo, hi = c // 2, c // 2 + c % 2
+    while lo &gt;= 0 and hi &lt; len(s) and s[lo] == s[hi]:
+        lo, hi = lo - 1, hi + 1
+    if hi - lo - 1 &gt; len(best):
+        best = s[lo + 1:hi]
+print(best)</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w048d6-p5"><textarea class="pc-src pc-code" hidden>import heapq
+
+freq = {&quot;pie&quot;: 60, &quot;pizza&quot;: 75, &quot;pile&quot;: 30, &quot;pilot&quot;: 30}
+print(heapq.nsmallest(3, freq, key=lambda w: (-freq[w], w)))</textarea></div>
+<p>If any surprised you, revisit <a href="w048d1.html">tries</a>, <a href="w048d2.html">KMP</a>, <a href="w048d3.html">rolling hashes</a>, <a href="w048d4.html">palindromes</a> or <a href="w048d5.html">the autocomplete project</a>.</p>
+<h2 id="mixed-review">Mixed review</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w048d6-mix_distinct" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Every distinct substring</div><div class="pc-prompt"><p>Every substring of s is a prefix of some suffix of s. So insert every suffix into a trie, and each node other than the root is exactly one distinct substring. Write <code>count_distinct_substrings(s)</code> that way (fine for strings of a few hundred characters: the trie has O(n²) nodes), and <code>nth_substring(s, n)</code>: the nth distinct substring in alphabetical order (n from 1), by walking the trie in sorted order with a stack. <code>IndexError</code> if there aren&rsquo;t n.</p></div><textarea class="pc-src pc-code" hidden>def count_distinct_substrings(s):
+    ___
+
+def nth_substring(s, n):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_distinct():
+    &quot;distinct substrings&quot;
+    assert count_distinct_substrings(&quot;abab&quot;) == 7 and count_distinct_substrings(&quot;&quot;) == 0 and count_distinct_substrings(&quot;aaa&quot;) == 3
+    assert nth_substring(&quot;abab&quot;, 1) == &quot;a&quot; and nth_substring(&quot;abab&quot;, 3) == &quot;aba&quot; and nth_substring(&quot;abab&quot;, 7) == &quot;bab&quot;
+    try:
+        nth_substring(&quot;ab&quot;, 4)
+        assert False
+    except IndexError:
+        pass
+    rng = random.Random(4)
+    for _ in range(100):
+        s = &quot;&quot;.join(rng.choice(&quot;abc&quot;) for _ in range(rng.randint(0, 12)))
+        subs = sorted({s[i:j] for i in range(len(s)) for j in range(i + 1, len(s) + 1)})
+        assert count_distinct_substrings(s) == len(subs)
+        if subs:
+            n = rng.randint(1, len(subs))
+            assert nth_substring(s, n) == subs[n - 1]</textarea><textarea class="pc-src pc-solution" hidden>def _suffix_trie(s):
+    root = {}
+    for i in range(len(s)):
+        node = root
+        for ch in s[i:]:
+            node = node.setdefault(ch, {})
+    return root
+
+def count_distinct_substrings(s):
+    count, stack = 0, [_suffix_trie(s)]
+    while stack:
+        node = stack.pop()
+        count += len(node)
+        stack.extend(node.values())
+    return count
+
+def nth_substring(s, n):
+    stack = [(ch, child) for ch, child in sorted(_suffix_trie(s).items(), reverse=True)]
+    while stack:
+        word, node = stack.pop()
+        n -= 1
+        if n == 0:
+            return word
+        for ch, child in sorted(node.items(), reverse=True):
+            stack.append((word + ch, child))
+    raise IndexError(&quot;not that many distinct substrings&quot;)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w048d6-mix_dna" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Repeated sequences</div><div class="pc-prompt"><p>Write <code>repeated_sequences(dna, k=10)</code>: every length-k substring that occurs more than once in a DNA string, in order of first appearance. Encode A, C, G and T as 0 to 3 and keep a <strong>rolling</strong> value in base 4, so each window&rsquo;s number is updated in O(1) (with only four letters and k ≤ 30, the numbers stay small and are exact, so there are no collisions to worry about). Raise <code>ValueError</code> for any other character.</p></div><textarea class="pc-src pc-code" hidden>def repeated_sequences(dna, k=10):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_dna():
+    &quot;repeats&quot;
+    assert repeated_sequences(&quot;AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT&quot;) == [&quot;AAAAACCCCC&quot;, &quot;CCCCCAAAAA&quot;]
+    assert repeated_sequences(&quot;AAAAAAAAAAAAA&quot;) == [&quot;AAAAAAAAAA&quot;] and repeated_sequences(&quot;ACGT&quot;, 10) == []
+    try:
+        repeated_sequences(&quot;ACGU&quot;)
+        assert False
+    except ValueError:
+        pass
+    rng = random.Random(5)
+    for _ in range(100):
+        s = &quot;&quot;.join(rng.choice(&quot;ACGT&quot;) for _ in range(rng.randint(0, 60)))
+        k = rng.randint(1, 5)
+        seen, out = {}, []
+        for i in range(len(s) - k + 1):
+            seen[s[i:i + k]] = seen.get(s[i:i + k], 0) + 1
+        want = [w for w in seen if seen[w] &gt; 1]
+        assert repeated_sequences(s, k) == want</textarea><textarea class="pc-src pc-solution" hidden>def repeated_sequences(dna, k=10):
+    code = {&quot;A&quot;: 0, &quot;C&quot;: 1, &quot;G&quot;: 2, &quot;T&quot;: 3}
+    for ch in dna:
+        if ch not in code:
+            raise ValueError(f&quot;not a DNA letter: {ch!r}&quot;)
+    if k &gt; len(dna):
+        return []
+    top = 4 ** (k - 1)
+    v = 0
+    for ch in dna[:k]:
+        v = v * 4 + code[ch]
+    counts, first = {v: 1}, {v: 0}
+    for i in range(k, len(dna)):
+        v = (v - code[dna[i - k]] * top) * 4 + code[dna[i]]
+        counts[v] = counts.get(v, 0) + 1
+        first.setdefault(v, i - k + 1)
+    return [dna[first[v]:first[v] + k] for v in first if counts[v] &gt; 1]</textarea></div>
+<h2 id="forge-many-patterns-at-once">Forge: many patterns at once</h2>
+<p>A message filter has a list of a thousand banned phrases, and must check every message for all of them. Running KMP once per phrase reads each message a thousand times. In 1975 Alfred Aho and Margaret Corasick, working on a bibliographic search tool, combined this week&rsquo;s two big ideas so the text is read <strong>once</strong>:</p>
+<ol>
+<li>Put all the patterns in a <strong>trie</strong> (Day 1). Each node is &ldquo;the last few characters read match this prefix of some pattern&rdquo;.</li>
+<li>Give every node a <strong>failure link</strong> (Day 2&rsquo;s prefix function, generalised): the node for the <strong>longest proper suffix</strong> of its string that is also a prefix of some pattern (a path in the trie). On a mismatch, follow failure links until a node has the needed child, or the root is reached, exactly as KMP falls back with <code>pi</code>.</li>
+<li>Compute the links <strong>breadth-first</strong> (Week 43): a node&rsquo;s failure link is found from its parent&rsquo;s, which is shallower and so already done. For a child reached from <code>node</code> by character <code>c</code>: start at <code>node.fail</code>, follow failure links until one has a child <code>c</code> (or you reach the root); that child (or the root, if even the root has none) is the link.</li>
+<li>Give every node an <strong>output list</strong>: the patterns ending exactly there, followed by the output list of its failure link (patterns that end at the same place but are shorter, like &ldquo;he&rdquo; inside &ldquo;she&rdquo;).</li>
+</ol>
+<p>Then scanning the text is KMP with a trie: for each character, step (falling back as needed), and report everything in the current node&rsquo;s output list. The time is O(text length + total pattern length + number of matches).</p>
+<pre><code class="language-text">patterns: he, she, his, hers
+          (root)
+          /    \
+         h      s
+        / \      \
+       e*  i      h
+       |    \      \
+       r     s*     e*     failure links: &quot;sh&quot; -&gt; &quot;h&quot;, &quot;she&quot; -&gt; &quot;he&quot;,
+       |                    &quot;hi&quot; -&gt; root, &quot;his&quot; -&gt; &quot;s&quot;, &quot;her&quot; -&gt; root, ...
+       s*                   output of &quot;she&quot;: she, he
+</code></pre>
+<p>Write <code>AhoCorasick(patterns)</code>:</p>
+<ul>
+<li>Patterns must be non-empty strings (<code>ValueError</code> otherwise); repeats are ignored. Keep the distinct patterns in <code>patterns</code>, in first-seen order.</li>
+<li><code>find_all(text)</code>: every match as <code>(start, pattern)</code>, sorted.</li>
+<li><code>count(text)</code>: a dict from each pattern to how many times it occurs (overlaps count).</li>
+<li><code>feed(ch)</code> and <code>reset()</code>: a streaming interface; <code>feed</code> returns the list of patterns that end with this character, longest first.</li>
+<li><code>censor(text, mask="*")</code>: the text with every character that&rsquo;s part of <strong>any</strong> match replaced by <code>mask</code>. Do it in O(n): the longest match ending at each position covers all shorter ones, so mark its start and end in a difference array (Week 41&rsquo;s prefix sums) and sweep once.</li>
+</ul>
+<p>No recursion. The checks compare with brute force on random patterns and texts, and time 1,000 patterns against a 100,000-character text.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w048d6-forge" data-points="50"><div class="pc-label"><span>Exercise</span><span class="pc-pts">50 points</span></div><div class="pc-title">Forge: many patterns at once</div><div class="pc-prompt"><p>Write <code>AhoCorasick</code> to the specification above.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+class ACNode:
+    def __init__(self):
+        self.children = {}
+        self.fail = None
+        self.out = []
+
+class AhoCorasick:
+    def __init__(self, patterns):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>import random, time
+def brute(patterns, text):
+    ps = sorted(set(patterns))
+    return sorted((i, p) for p in ps for i in range(len(text) - len(p) + 1) if text[i:i + len(p)] == p)
+def test_example():
+    &quot;the classic example&quot;
+    ac = AhoCorasick([&quot;he&quot;, &quot;she&quot;, &quot;his&quot;, &quot;hers&quot;])
+    assert ac.find_all(&quot;ushers&quot;) == [(1, &quot;she&quot;), (2, &quot;he&quot;), (2, &quot;hers&quot;)]
+    assert ac.count(&quot;ushers his&quot;) == {&quot;he&quot;: 1, &quot;she&quot;: 1, &quot;his&quot;: 1, &quot;hers&quot;: 1}
+    assert ac.censor(&quot;ushers his hat&quot;) == &quot;u***** *** hat&quot;
+    ac.reset()
+    assert [ac.feed(c) for c in &quot;she&quot;] == [[], [], [&quot;she&quot;, &quot;he&quot;]]
+    for bad in ([&quot;&quot;], [&quot;a&quot;, 3]):
+        try:
+            AhoCorasick(bad)
+            assert False
+        except ValueError:
+            pass
+    assert AhoCorasick([&quot;a&quot;, &quot;a&quot;]).count(&quot;aa&quot;) == {&quot;a&quot;: 2} and AhoCorasick([]).find_all(&quot;abc&quot;) == []
+def test_random():
+    &quot;against brute force&quot;
+    rng = random.Random(1)
+    for _ in range(300):
+        pats = [&quot;&quot;.join(rng.choice(&quot;ab&quot;) for _ in range(rng.randint(1, 4))) for _ in range(rng.randint(1, 6))]
+        text = &quot;&quot;.join(rng.choice(&quot;abc&quot;) for _ in range(rng.randint(0, 40)))
+        ac = AhoCorasick(pats)
+        want = brute(pats, text)
+        assert ac.find_all(text) == want, (pats, text)
+        assert ac.count(text) == {p: sum(1 for _, q in want if q == p) for p in set(pats)}
+        cover = [False] * len(text)
+        for i, p in want:
+            for j in range(i, i + len(p)):
+                cover[j] = True
+        assert ac.censor(text, &quot;#&quot;) == &quot;&quot;.join(&quot;#&quot; if c else ch for c, ch in zip(cover, text))
+def test_speed():
+    &quot;many patterns, long text&quot;
+    rng = random.Random(2)
+    pats = [&quot;&quot;.join(rng.choice(&quot;abcd&quot;) for _ in range(rng.randint(3, 8))) for _ in range(1000)]
+    text = &quot;&quot;.join(rng.choice(&quot;abcd&quot;) for _ in range(100_000))
+    t0 = time.perf_counter()
+    ac = AhoCorasick(pats)
+    total = sum(ac.count(text).values())
+    assert total &gt; 0 and time.perf_counter() - t0 &lt; 6</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+class ACNode:
+    def __init__(self):
+        self.children = {}
+        self.fail = None
+        self.out = []          # patterns ending exactly here, longest first
+
+class AhoCorasick:
+    def __init__(self, patterns):
+        self.root = ACNode()
+        self.patterns = []
+        for p in patterns:
+            if not isinstance(p, str) or not p:
+                raise ValueError(f&quot;bad pattern: {p!r}&quot;)
+            node = self.root
+            for ch in p:
+                node = node.children.setdefault(ch, ACNode())
+            if not node.out:
+                node.out.append(p)
+                self.patterns.append(p)
+        self._link()
+        self._state = self.root
+
+    def _link(self):
+        root = self.root
+        root.fail = root
+        queue = deque()
+        for child in root.children.values():
+            child.fail = root
+            queue.append(child)
+        while queue:
+            node = queue.popleft()
+            for ch, child in node.children.items():
+                f = node.fail
+                while f is not root and ch not in f.children:
+                    f = f.fail
+                child.fail = f.children[ch] if ch in f.children and f.children[ch] is not child else root
+                child.out = child.out + child.fail.out
+                queue.append(child)
+
+    def _step(self, node, ch):
+        while node is not self.root and ch not in node.children:
+            node = node.fail
+        return node.children.get(ch, self.root)
+
+    def feed(self, ch):
+        self._state = self._step(self._state, ch)
+        return list(self._state.out)
+
+    def reset(self):
+        self._state = self.root
+
+    def find_all(self, text):
+        node, found = self.root, []
+        for i, ch in enumerate(text):
+            node = self._step(node, ch)
+            for p in node.out:
+                found.append((i - len(p) + 1, p))
+        return sorted(found)
+
+    def count(self, text):
+        counts = {p: 0 for p in self.patterns}
+        node = self.root
+        for ch in text:
+            node = self._step(node, ch)
+            for p in node.out:
+                counts[p] += 1
+        return counts
+
+    def censor(self, text, mask=&quot;*&quot;):
+        diff = [0] * (len(text) + 1)            # +1 where a match starts, -1 just after it ends
+        node = self.root
+        for i, ch in enumerate(text):
+            node = self._step(node, ch)
+            if node.out:
+                diff[i - len(node.out[0]) + 1] += 1     # the longest match ending here covers the rest
+                diff[i + 1] -= 1
+        out, depth = [], 0
+        for i, ch in enumerate(text):
+            depth += diff[i]
+            out.append(mask if depth &gt; 0 else ch)
+        return &quot;&quot;.join(out)</textarea><template class="pc-src pc-hint">Build the trie first; mark each node that ends a pattern by putting the pattern in its <code>out</code>. Then: set every child of the root to fail to the root and queue them; for each node popped, for each <code>(ch, child)</code>, find <code>f = node.fail</code>, walk <code>f = f.fail</code> while <code>f</code> isn&rsquo;t the root and has no child <code>ch</code>, and set <code>child.fail</code> to <code>f.children[ch]</code> if it exists, otherwise the root; then <code>child.out = child.out + child.fail.out</code>, and queue the child. A <code>_step(node, ch)</code> helper that falls back and then moves is used by everything else.</template></div>
+<aside class="callout c-think"><div class="callout-t">Two ideas, one structure</div><p>Aho-Corasick is what you get when two of this week&rsquo;s ideas meet. The trie shares work between patterns that <strong>start</strong> the same way; the failure links share work between positions in the text, never re-reading a character, as KMP did for a single pattern. Building the links breadth-first is the same &ldquo;use what you&rsquo;ve already computed&rdquo; move as the prefix function&rsquo;s <code>k = pi[k - 1]</code>, applied to a tree instead of a line. The algorithm is still at the heart of tools that scan text for many fixed strings at once: the original <code>fgrep</code> command was built on it, and network intrusion detection and virus scanners use descendants of it to check traffic against thousands of signatures.</p></aside>
+<h2 id="forge-bonus-shared-passages">Forge bonus: shared passages</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w048d6-forge2" data-points="30"><div class="pc-label"><span>Exercise</span><span class="pc-pts">30 points</span></div><div class="pc-title">Forge bonus: shared passages</div><div class="pc-prompt"><p>Yesterday&rsquo;s winnowing gave a similarity score; now find the actual passages two documents share, measured in <strong>words</strong>.</p>
+<ul>
+<li><code>words(text)</code>: the lower-cased runs of letters and digits, using <code>re.findall(r"[a-z0-9]+", text.lower())</code>.</li>
+<li><code>shared_passages(a, b, min_words)</code>: every <strong>maximal</strong> shared passage of at least <code>min_words</code> words, as <code>(i, j, length)</code>: <code>words(a)[i:i + length] == words(b)[j:j + length]</code>, and it can&rsquo;t be extended (the words just before both, or just after both, differ or don&rsquo;t exist). Sorted. Give each distinct word a number, hash every <code>min_words</code>-word window of both documents with a rolling hash (random base, modulus 2⁶¹ − 1), and look a&rsquo;s windows up in a dict of b&rsquo;s. For each matching pair that <strong>starts</strong> a passage (no equal words just before both), confirm the window really matches (a collision is possible), then extend it word by word.</li>
+<li><code>coverage(a, b, min_words)</code>: the fraction of a&rsquo;s words that lie in at least one shared passage (0.0 if a has no words).</li>
+<li><code>report(a, b, min_words)</code>: one line per passage: <code>words 0-4 of a = words 1-5 of b: the quick brown fox jumps</code>.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import random, re
+
+MOD = (1 &lt;&lt; 61) - 1
+
+def words(text):
+    ___
+
+def shared_passages(a, b, min_words):
+    ___
+
+def coverage(a, b, min_words):
+    ___
+
+def report(a, b, min_words):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def brute(a, b, m):
+    wa, wb = words(a), words(b)
+    out = []
+    for i in range(len(wa)):
+        for j in range(len(wb)):
+            if i &gt; 0 and j &gt; 0 and wa[i - 1] == wb[j - 1]:
+                continue
+            L = 0
+            while i + L &lt; len(wa) and j + L &lt; len(wb) and wa[i + L] == wb[j + L]:
+                L += 1
+            if L &gt;= m:
+                out.append((i, j, L))
+    return sorted(out)
+def test_example():
+    &quot;an example&quot;
+    a = &quot;The quick brown fox jumps over the lazy dog. It was a sunny day.&quot;
+    b = &quot;Yesterday, the quick brown fox jumps! Then over the lazy dog it ran.&quot;
+    assert words(&quot;Hello, World 2!&quot;) == [&quot;hello&quot;, &quot;world&quot;, &quot;2&quot;]
+    assert shared_passages(a, b, 3) == [(0, 1, 5), (5, 7, 5)]
+    assert report(a, b, 3)[0] == &quot;words 0-4 of a = words 1-5 of b: the quick brown fox jumps&quot;
+    assert coverage(a, b, 3) == 10 / 14 and coverage(&quot;&quot;, b, 3) == 0.0 and shared_passages(a, b, 6) == []
+def test_random():
+    &quot;against brute force&quot;
+    rng = random.Random(3)
+    for _ in range(200):
+        a = &quot; &quot;.join(rng.choice(&quot;x y z w&quot;) for _ in range(rng.randint(0, 25)))
+        b = &quot; &quot;.join(rng.choice(&quot;x y z w&quot;) for _ in range(rng.randint(0, 25)))
+        m = rng.randint(1, 4)
+        assert shared_passages(a, b, m) == brute(a, b, m), (a, b, m)</textarea><textarea class="pc-src pc-solution" hidden>import random, re
+
+MOD = (1 &lt;&lt; 61) - 1
+
+def words(text):
+    return re.findall(r&quot;[a-z0-9]+&quot;, text.lower())
+
+def _window_hashes(ids, m, base):
+    &quot;&quot;&quot;The hash of every length-m window of a list of whole numbers.&quot;&quot;&quot;
+    if m &gt; len(ids):
+        return []
+    high = pow(base, m - 1, MOD)
+    v = 0
+    for x in ids[:m]:
+        v = (v * base + x) % MOD
+    out = [v]
+    for i in range(m, len(ids)):
+        v = ((v - ids[i - m] * high) * base + ids[i]) % MOD
+        out.append(v)
+    return out
+
+def shared_passages(a, b, min_words):
+    wa, wb = words(a), words(b)
+    vocab = {}
+    ia = [vocab.setdefault(w, len(vocab) + 1) for w in wa]
+    ib = [vocab.setdefault(w, len(vocab) + 1) for w in wb]
+    base = random.randrange(1 &lt;&lt; 20, 1 &lt;&lt; 40)
+    where = {}
+    for j, h in enumerate(_window_hashes(ib, min_words, base)):
+        where.setdefault(h, []).append(j)
+    found = []
+    for i, h in enumerate(_window_hashes(ia, min_words, base)):
+        for j in where.get(h, ()):
+            if i &gt; 0 and j &gt; 0 and ia[i - 1] == ib[j - 1]:
+                continue                       # not the start of a maximal run
+            if ia[i:i + min_words] != ib[j:j + min_words]:
+                continue                       # a hash collision
+            length = min_words
+            while i + length &lt; len(ia) and j + length &lt; len(ib) and ia[i + length] == ib[j + length]:
+                length += 1
+            found.append((i, j, length))
+    return sorted(found)
+
+def coverage(a, b, min_words):
+    n = len(words(a))
+    if n == 0:
+        return 0.0
+    covered = set()
+    for i, _, length in shared_passages(a, b, min_words):
+        covered.update(range(i, i + length))
+    return len(covered) / n
+
+def report(a, b, min_words):
+    wa = words(a)
+    lines = []
+    for i, j, length in shared_passages(a, b, min_words):
+        lines.append(f&quot;words {i}-{i + length - 1} of a = words {j}-{j + length - 1} of b: {&#x27; &#x27;.join(wa[i:i + length])}&quot;)
+    return lines</textarea></div>
+<h2 id="weekly-quiz">Weekly quiz</h2>
+<div class="quiz" data-id="w048d6-weekly"><div class="pc-label"><span>Quiz</span><span>15 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does a trie node&rsquo;s end flag record?", "answer": 1, "explain": "A word can end at a node that continues further.", "options": ["That it&rsquo;s a leaf", "That the path to it spells a whole stored word", "Its depth", "Its frequency"]}, {"type": "mc", "q": "What does looking up a word of length L in a trie cost?", "answer": 1, "explain": "Independent of the number of words.", "options": ["O(n)", "O(L)", "O(L log n)", "O(1)"]}, {"type": "mc", "q": "How can a trie count words with a prefix in O(L)?", "answer": 1, "explain": "Update the counts on insert and delete.", "options": ["Count the subtree each time", "Keep a count of words in each node", "Use a heap", "It can&rsquo;t"]}, {"type": "mc", "q": "What is the prefix function&rsquo;s value at i?", "answer": 1, "explain": "The longest border.", "options": ["The position of a match", "The length of the longest proper prefix of s[:i + 1] that is also its suffix", "A hash", "The number of borders"]}, {"type": "mc", "q": "Why does KMP never back up in the text?", "answer": 1, "explain": "O(n + m), and it works on streams.", "options": ["It does", "On a mismatch it falls back in the pattern using the prefix function", "It hashes", "It sorts"]}, {"type": "mc", "q": "What is the shortest period of s?", "answer": 1, "explain": "&ldquo;abcabcab&rdquo; has period 3.", "options": ["pi[-1]", "len(s) \u2212 pi[-1]", "len(s) // 2", "1"]}, {"type": "mc", "q": "With prefix hashes, how long does comparing two substrings take?", "answer": 1, "explain": "Compare their hashes.", "options": ["O(length)", "O(1)", "O(log n)", "O(n)"]}, {"type": "mc", "q": "Why choose the hash base at random?", "answer": 1, "explain": "And use a large prime modulus.", "options": ["Speed", "So collisions can&rsquo;t be planned in advance", "To avoid negative numbers", "Tradition"]}, {"type": "mc", "q": "How does binary search on the answer find the longest repeated substring?", "answer": 1, "explain": "O(n log n) with hashing.", "options": ["It sorts the substrings", "Repeating is monotonic in length, so binary search the largest length that repeats", "It can&rsquo;t", "It uses a trie"]}, {"type": "mc", "q": "How many centres does a string of length n have?", "answer": 1, "explain": "On characters and between them.", "options": ["n", "2n \u2212 1", "n\u00b2", "n + 1"]}, {"type": "mc", "q": "What does Manacher&rsquo;s algorithm reuse?", "answer": 1, "explain": "O(n) in total.", "options": ["Hashes", "The radius at the mirror position inside the rightmost palindrome", "The prefix function", "A heap"]}, {"type": "mc", "q": "How does an autocomplete engine answer in O(prefix length + k)?", "answer": 1, "explain": "The work moves to insertion time.", "options": ["It scans every word", "It caches each node&rsquo;s best completions", "It sorts on each key press", "It uses KMP"]}, {"type": "mc", "q": "What does an Aho-Corasick failure link point to?", "answer": 1, "explain": "KMP&rsquo;s fallback, on a trie.", "options": ["The parent", "The node for the longest proper suffix of the current string that is also a prefix of some pattern", "The root always", "The next pattern"]}, {"type": "mc", "q": "Why are failure links computed breadth-first?", "answer": 1, "explain": "Level by level, using a queue.", "options": ["It&rsquo;s shorter", "A node&rsquo;s link depends on its parent&rsquo;s, which is shallower and so already computed", "Depth-first would loop", "For sorting"]}, {"type": "mc", "q": "Why must a node&rsquo;s output list include its failure link&rsquo;s outputs?", "answer": 1, "explain": "Otherwise those matches would be missed.", "options": ["It needn&rsquo;t", "Shorter patterns can end at the same place, like &ldquo;he&rdquo; inside &ldquo;she&rdquo;", "For counting nodes", "To sort them"]}]</script></div>
+<h2 id="week-48-review">Week 48 review</h2>
+<p>Tick off each one honestly. If one feels shaky, go back and redo two exercises from that day.</p>
+<ul>
+<li>I can build a trie, count and list words by prefix, and delete words cleanly. (<a href="w048d1.html">Day 1</a>)</li>
+<li>I can compute the prefix function, search with KMP on a stream, and find periods and borders. (<a href="w048d2.html">Day 2</a>)</li>
+<li>I can hash any substring in O(1), keep collisions rare, and binary search lengths with hashes. (<a href="w048d3.html">Day 3</a>)</li>
+<li>I can find and count palindromic substrings, make the shortest palindrome, and explain Manacher&rsquo;s algorithm. (<a href="w048d4.html">Day 4</a>)</li>
+<li>I built an autocomplete engine with cached suggestions, learning and typo tolerance. (<a href="w048d5.html">Day 5</a>)</li>
+<li>I built an Aho-Corasick matcher and a shared-passage finder. (Today)</li>
+</ul>
+<p>Tomorrow is a <strong>rest day</strong>. Next week is a <strong>consolidation week</strong>: reviews of the linear structures and of trees and heaps, two timed problem sets, and a mock interview with a debrief.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w048d5.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w048d6", "week": 48, "day": 6, "title": "Forge", "exercises": [{"id": "w048d6-mix_distinct", "title": "Every distinct substring", "points": 10}, {"id": "w048d6-mix_dna", "title": "Repeated sequences", "points": 10}, {"id": "w048d6-forge", "title": "Forge: many patterns at once", "points": 50}, {"id": "w048d6-forge2", "title": "Forge bonus: shared passages", "points": 30}], "points": 100}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=871ff52039"></script>
+</body>
+</html>
