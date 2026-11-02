@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="871ff52039">
+<title>Week 43 Day 3: Monotonic stacks | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=871ff52039">
+<link rel="stylesheet" href="../assets/css/site.css?v=871ff52039">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=871ff52039"></script>
+<script src="../assets/vendor/codemirror.js?v=871ff52039" defer></script>
+<meta name="description" content="Some questions ask, for every item in a list, about its nearest neighbour of a certain kind: the next day that’s warmer, the previous price that was lower,...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w043d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 43 Day 3: Monotonic stacks">
+<meta property="og:description" content="Some questions ask, for every item in a list, about its nearest neighbour of a certain kind: the next day that’s warmer, the previous price that was lower,...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w043d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-43">Week 43: Stacks and queues</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#the-next-greater-item" data-sec="the-next-greater-item">The next greater item</a></li><li><a href="#four-variations" data-sec="four-variations">Four variations</a></li><li><a href="#why-it-s-o-n" data-sec="why-it-s-o-n">Why it’s O(n)</a></li><li><a href="#the-largest-rectangle" data-sec="the-largest-rectangle">The largest rectangle</a></li><li><a href="#a-monotonic-deque" data-sec="a-monotonic-deque">A monotonic deque</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w043d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-43">Week 43: Stacks and queues</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 43, Day 3</span></p>
+      <h1>Monotonic stacks</h1>
+      <div class="day-intro"><p>Some questions ask, for every item in a list, about its <strong>nearest</strong> neighbour of a certain kind: the next day that&rsquo;s warmer, the previous price that was lower, the nearest taller building. Checking each item against all the others is O(n²). A <strong>monotonic stack</strong> answers all of them in one pass, O(n): a stack kept in increasing (or decreasing) order, where each new item first pops off every item it settles. Today you&rsquo;ll learn the pattern and its variations, use it on histograms, and then put the same idea in a deque to find the maximum of every sliding window, which Week 41 couldn&rsquo;t do.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Find the next greater (or smaller) item for every item in one pass with a monotonic stack</li><li>Choose the direction, the comparison and what to store (values or indexes) for each variation</li><li>Explain why a monotonic stack is O(n) even with a loop inside a loop</li><li>Find the largest rectangle in a histogram with a monotonic stack</li><li>Find every sliding window&rsquo;s maximum with a monotonic deque</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="The next greater item: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Four variations: 20 min"></span><span class="plan-seg s1" style="flex:10" title="Why it&#x27;s O(n): 10 min"></span><span class="plan-seg s0" style="flex:25" title="The largest rectangle: 25 min"></span><span class="plan-seg s1" style="flex:25" title="A monotonic deque: 25 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">The next greater item</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Four variations</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Why it&rsquo;s O(n)</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:05</span><span class="plan-what">The largest rectangle</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">A monotonic deque</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w043d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w043d3.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w043d3-p1"><textarea class="pc-src pc-code" hidden>temps = [13, 12, 15, 11, 9, 12, 16]
+wait = [0] * len(temps)
+stack = []                                   # indexes of days still waiting for a warmer one
+for day, t in enumerate(temps):
+    while stack and temps[stack[-1]] &lt; t:
+        earlier = stack.pop()
+        wait[earlier] = day - earlier
+    stack.append(day)
+print(wait, stack)</textarea></div>
+<p>For each day, how many days until a warmer one? The stack holds the days still waiting, and their temperatures <strong>decrease</strong> from bottom to top. Each new day answers every waiting day colder than itself, popping them, then waits itself. The day with 16 never finds a warmer one, so it&rsquo;s still on the stack at the end with a 0.</p>
+<h2 id="the-next-greater-item">The next greater item</h2>
+<p>The question: for each item, what&rsquo;s the first item to its <strong>right</strong> that&rsquo;s bigger? The brute-force answer checks every later item, O(n²). The stack answer is one pass:</p>
+<div class="pc pc-example" data-kind="example" data-id="w043d3-e2"><textarea class="pc-src pc-code" hidden>def next_greater(nums):
+    answer = [-1] * len(nums)
+    stack = []                                 # indexes, with values decreasing from bottom to top
+    for i, x in enumerate(nums):
+        while stack and nums[stack[-1]] &lt; x:
+            answer[stack.pop()] = x            # x is the first bigger item to the right of that one
+        stack.append(i)
+    return answer
+
+print(next_greater([2, 1, 2, 4, 3]))
+print(next_greater([5, 4, 3, 2, 1]), next_greater([1, 2, 3]))</textarea></div>
+<p>The reasoning, as a story: items wait on the stack until someone bigger arrives. An item can&rsquo;t be answered by anyone it&rsquo;s bigger than, so the waiting items are always in <strong>decreasing</strong> order: the stack is <strong>monotonic</strong> (always moving one way). When a new item arrives, it settles every waiting item smaller than it, from the top down, then joins the wait.</p>
+<p>Store <strong>indexes</strong> on the stack, not values: the index lets you write the answer into the right place, and work out distances (as with the days until warmer).</p>
+<h2 id="four-variations">Four variations</h2>
+<p>Two choices make four versions. Which way are you looking, and for bigger or smaller?</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Loop</th>
+<th>Pop while the top is&hellip;</th>
+<th>Stack order (bottom to top)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>next <strong>greater</strong> to the right</td>
+<td>left to right</td>
+<td><strong>smaller</strong> than the new item; the new item answers it</td>
+<td>decreasing</td>
+</tr>
+<tr>
+<td>next <strong>smaller</strong> to the right</td>
+<td>left to right</td>
+<td><strong>bigger</strong> than the new item</td>
+<td>increasing</td>
+</tr>
+<tr>
+<td>previous <strong>greater</strong> to the left</td>
+<td>left to right</td>
+<td><strong>not bigger</strong> (smaller or equal); after popping, the top is the answer for the <strong>new</strong> item</td>
+<td>decreasing</td>
+</tr>
+<tr>
+<td>previous <strong>smaller</strong> to the left</td>
+<td>left to right</td>
+<td><strong>not smaller</strong>; the top after popping answers the new item</td>
+<td>increasing</td>
+</tr>
+</tbody>
+</table>
+<p>For the &ldquo;previous&rdquo; versions, the answer belongs to the new item, not the popped ones: after popping everything that can&rsquo;t be the answer, whatever is left on top is the nearest one that can. <strong>Equal values</strong> need a decision: should an equal item count as &ldquo;greater&rdquo;? The choice between <code>&lt;</code> and <code>&lt;=</code> in the <code>while</code> decides, and getting it wrong is the commonest bug.</p>
+<div class="pc pc-example" data-kind="example" data-id="w043d3-e3"><textarea class="pc-src pc-code" hidden>def stock_span(prices):
+    &quot;&quot;&quot;For each day, how many days in a row up to and including it had a price at most today&#x27;s.&quot;&quot;&quot;
+    spans = []
+    stack = []                                   # indexes of earlier days with higher prices
+    for i, p in enumerate(prices):
+        while stack and prices[stack[-1]] &lt;= p:
+            stack.pop()
+        spans.append(i - stack[-1] if stack else i + 1)   # the previous greater day, or none
+        stack.append(i)
+    return spans
+
+print(stock_span([100, 80, 60, 70, 60, 75, 85]))</textarea></div>
+<h2 id="why-it-s-o-n">Why it&rsquo;s O(n)</h2>
+<p>A <code>while</code> inside a <code>for</code> looks like O(n²). But every index is <strong>pushed once</strong> and <strong>popped at most once</strong>, over the whole run. So the inner loop runs at most n times <strong>in total</strong>, not n times per item: O(n) altogether. It&rsquo;s the same amortised argument as Week 41&rsquo;s sliding window: one item may pop many, but every pop uses up an item that can never be popped again.</p>
+<h2 id="the-largest-rectangle">The largest rectangle</h2>
+<p>A histogram is a row of bars of width 1 and different heights. What&rsquo;s the largest rectangle that fits under the bars? For each bar, the widest rectangle <strong>as tall as that bar</strong> stretches left and right until it meets a shorter bar: so each bar needs its previous smaller and next smaller bars. An increasing stack finds both at once: when a bar is popped by a shorter one, the shorter one is its next smaller, and the bar beneath it on the stack is its previous smaller.</p>
+<div class="pc pc-example" data-kind="example" data-id="w043d3-e4"><textarea class="pc-src pc-code" hidden>def largest_rectangle(heights):
+    best = 0
+    stack = []                                       # indexes, heights increasing upwards
+    for i, h in enumerate(heights + [0]):            # a final 0 pops everything left
+        while stack and heights[stack[-1]] &gt; h:
+            top = stack.pop()
+            left = stack[-1] if stack else -1        # the previous smaller bar
+            width = i - left - 1                     # i is the next smaller bar
+            best = max(best, heights[top] * width)
+        stack.append(i)
+    return best
+
+print(largest_rectangle([2, 1, 5, 6, 2, 3]), largest_rectangle([4, 4, 4]), largest_rectangle([]))</textarea></div>
+<p>The extra <code>0</code> at the end is a <strong>sentinel</strong> (Week 42&rsquo;s idea in another form): it&rsquo;s shorter than every bar, so it settles everything still waiting, with no separate clean-up loop.</p>
+<h2 id="a-monotonic-deque">A monotonic deque</h2>
+<p>Week 41 slid a window along a list, keeping its total. The <strong>maximum</strong> of each window is harder: when the biggest item leaves the window, what&rsquo;s the next biggest? A <strong>monotonic deque</strong> keeps the candidates: indexes whose values <strong>decrease</strong> from front to back.</p>
+<ul>
+<li>When a new item arrives, pop from the <strong>back</strong> every index with a value no bigger than it: they can never be a window&rsquo;s maximum again, because the new item is bigger and will stay in the window longer.</li>
+<li>Pop from the <strong>front</strong> any index that has slid out of the window.</li>
+<li>The <strong>front</strong> is then the current window&rsquo;s maximum.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w043d3-e5"><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def window_max(nums, k):
+    out = []
+    window = deque()                                  # indexes; their values decrease front to back
+    for i, x in enumerate(nums):
+        while window and nums[window[-1]] &lt;= x:
+            window.pop()
+        window.append(i)
+        if window[0] &lt;= i - k:
+            window.popleft()                          # slid out of the window
+        if i &gt;= k - 1:
+            out.append(nums[window[0]])
+    return out
+
+print(window_max([1, 3, -1, -3, 5, 3, 6, 7], 3))</textarea></div>
+<p>Each index enters and leaves the deque once, so it&rsquo;s O(n) in all, however big <code>k</code> is; recomputing <code>max</code> of each window would be O(nk).</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A monotonic stack keeps its items in increasing or decreasing order: each new item first pops every item it settles. For the next greater item, pop while the top is smaller (the new item is their answer); for the previous greater, pop while the top isn&rsquo;t bigger, and the top left over is the new item&rsquo;s answer; smaller versions flip the comparison. Store indexes, and decide carefully between <code>&lt;</code> and <code>&lt;=</code> for equal values. Every index is pushed and popped once, so it&rsquo;s O(n). The largest rectangle in a histogram uses an increasing stack and a final 0 as a sentinel; a monotonic deque gives every sliding window&rsquo;s maximum in O(n).</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d3-greater" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">The next greater value</div><div class="pc-prompt"><p>Write <code>next_greater(nums)</code>: for each item, the first value to its right that is <strong>strictly</strong> bigger, or <code>-1</code> if there&rsquo;s none. One pass with a stack of indexes, O(n); the checks use 100,000 numbers.</p></div><textarea class="pc-src pc-code" hidden>def next_greater(nums):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def slow(nums):
+    return [next((y for y in nums[i + 1:] if y &gt; x), -1) for i, x in enumerate(nums)]
+def test_small():
+    &quot;small&quot;
+    assert next_greater([2, 1, 2, 4, 3]) == [4, 2, 4, -1, -1] and next_greater([]) == [] and next_greater([3, 3]) == [-1, -1]
+    rng = random.Random(1)
+    for _ in range(200):
+        nums = [rng.randint(0, 5) for _ in range(rng.randint(0, 12))]
+        assert next_greater(nums) == slow(nums), nums
+def test_big():
+    &quot;100,000&quot;
+    nums = list(range(100_000, 0, -1)) + [10 ** 6]
+    assert next_greater(nums)[:3] == [10 ** 6] * 3</textarea><textarea class="pc-src pc-solution" hidden>def next_greater(nums):
+    answer = [-1] * len(nums)
+    stack = []
+    for i, x in enumerate(nums):
+        while stack and nums[stack[-1]] &lt; x:
+            answer[stack.pop()] = x
+        stack.append(i)
+    return answer</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d3-warmer" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Days until warmer</div><div class="pc-prompt"><p>Write <code>days_until_warmer(temps)</code>: for each day, how many days later the first <strong>strictly</strong> warmer day comes, or 0 if none does. One pass with a monotonic stack.</p></div><textarea class="pc-src pc-code" hidden>def days_until_warmer(temps):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def slow(t):
+    return [next((j - i for j in range(i + 1, len(t)) if t[j] &gt; t[i]), 0) for i in range(len(t))]
+def test_warmer():
+    &quot;warmer days&quot;
+    assert days_until_warmer([73, 74, 75, 71, 69, 72, 76, 73]) == [1, 1, 4, 2, 1, 1, 0, 0] and days_until_warmer([30, 30, 31]) == [2, 1, 0]
+    rng = random.Random(2)
+    for _ in range(200):
+        t = [rng.randint(10, 15) for _ in range(rng.randint(0, 12))]
+        assert days_until_warmer(t) == slow(t), t</textarea><textarea class="pc-src pc-solution" hidden>def days_until_warmer(temps):
+    wait = [0] * len(temps)
+    stack = []
+    for day, t in enumerate(temps):
+        while stack and temps[stack[-1]] &lt; t:
+            earlier = stack.pop()
+            wait[earlier] = day - earlier
+        stack.append(day)
+    return wait</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d3-prev_smaller" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">The previous smaller value</div><div class="pc-prompt"><p>Write <code>previous_smaller(nums)</code>: for each item, the <strong>index</strong> of the nearest item to its left that is strictly smaller, or <code>-1</code>. Loop left to right; pop while the top isn&rsquo;t smaller, then the top (if any) is the answer for the new item.</p></div><textarea class="pc-src pc-code" hidden>def previous_smaller(nums):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def slow(nums):
+    return [next((j for j in range(i - 1, -1, -1) if nums[j] &lt; nums[i]), -1) for i in range(len(nums))]
+def test_prev():
+    &quot;previous smaller&quot;
+    assert previous_smaller([4, 5, 2, 10, 8]) == [-1, 0, -1, 2, 2] and previous_smaller([1, 1, 1]) == [-1, -1, -1]
+    rng = random.Random(3)
+    for _ in range(200):
+        nums = [rng.randint(0, 5) for _ in range(rng.randint(0, 12))]
+        assert previous_smaller(nums) == slow(nums), nums</textarea><textarea class="pc-src pc-solution" hidden>def previous_smaller(nums):
+    answer = []
+    stack = []
+    for i, x in enumerate(nums):
+        while stack and nums[stack[-1]] &gt;= x:
+            stack.pop()
+        answer.append(stack[-1] if stack else -1)
+        stack.append(i)
+    return answer</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d3-span" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The stock span</div><div class="pc-prompt"><p>Write <code>StockSpanner</code> with <code>next(price)</code>, called once per day: return today&rsquo;s <strong>span</strong>, the number of consecutive days up to and including today on which the price was at most today&rsquo;s. Each call must be O(1) amortised: keep a stack of <code>(price, span)</code> pairs, and when today&rsquo;s price is at least the top&rsquo;s, pop it and add its span to today&rsquo;s.</p></div><textarea class="pc-src pc-code" hidden>class StockSpanner:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_span():
+    &quot;spans&quot;
+    s = StockSpanner()
+    assert [s.next(p) for p in [100, 80, 60, 70, 60, 75, 85]] == [1, 1, 1, 2, 1, 4, 6]
+    rng = random.Random(4)
+    prices = [rng.randint(1, 20) for _ in range(300)]
+    s = StockSpanner()
+    for i, p in enumerate(prices):
+        want = 0
+        while i - want &gt;= 0 and prices[i - want] &lt;= p:
+            want += 1
+        assert s.next(p) == want
+def test_fast():
+    &quot;many days&quot;
+    s = StockSpanner()
+    for p in range(100_000):
+        span = s.next(p)
+    assert span == 100_000</textarea><textarea class="pc-src pc-solution" hidden>class StockSpanner:
+    def __init__(self):
+        self._stack = []
+
+    def next(self, price):
+        span = 1
+        while self._stack and self._stack[-1][0] &lt;= price:
+            span += self._stack.pop()[1]
+        self._stack.append((price, span))
+        return span</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d3-window" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Sliding window maximum</div><div class="pc-prompt"><p>Write <code>window_max(nums, k)</code>: the maximum of every window of <code>k</code> neighbouring items, in order, with a monotonic <code>deque</code> of indexes, in O(n). <code>k</code> must be from 1 to <code>len(nums)</code>, else <code>ValueError</code>. The checks use 200,000 numbers with <code>k = 1000</code>, far too slow for <code>max</code> of each window.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def window_max(nums, k):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_small():
+    &quot;small&quot;
+    assert window_max([1, 3, -1, -3, 5, 3, 6, 7], 3) == [3, 3, 5, 5, 6, 7] and window_max([4], 1) == [4] and window_max([2, 2, 2], 2) == [2, 2]
+    rng = random.Random(5)
+    for _ in range(200):
+        nums = [rng.randint(-5, 5) for _ in range(rng.randint(1, 12))]
+        k = rng.randint(1, len(nums))
+        assert window_max(nums, k) == [max(nums[i:i + k]) for i in range(len(nums) - k + 1)], (nums, k)
+    for bad in [0, 4]:
+        try:
+            window_max([1, 2, 3], bad)
+            assert False
+        except ValueError:
+            pass
+def test_big():
+    &quot;200,000 numbers&quot;
+    rng = random.Random(6)
+    nums = [rng.randint(0, 10 ** 6) for _ in range(200_000)]
+    got = window_max(nums, 1000)
+    assert len(got) == 199_001 and got[0] == max(nums[:1000]) and got[-1] == max(nums[-1000:])</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+def window_max(nums, k):
+    if not 1 &lt;= k &lt;= len(nums):
+        raise ValueError(&quot;k must be from 1 to the number of items&quot;)
+    out = []
+    window = deque()
+    for i, x in enumerate(nums):
+        while window and nums[window[-1]] &lt;= x:
+            window.pop()
+        window.append(i)
+        if window[0] &lt;= i - k:
+            window.popleft()
+        if i &gt;= k - 1:
+            out.append(nums[window[0]])
+    return out</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d3-rectangle" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The largest rectangle</div><div class="pc-prompt"><p>Write <code>largest_rectangle(heights)</code>: the area of the largest rectangle under a histogram whose bars have width 1 and the given heights. Use an increasing stack of indexes and a final <code>0</code> sentinel, O(n); the checks use 100,000 bars.</p></div><textarea class="pc-src pc-code" hidden>def largest_rectangle(heights):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def slow(h):
+    return max((min(h[i:j]) * (j - i) for i in range(len(h)) for j in range(i + 1, len(h) + 1)), default=0)
+def test_small():
+    &quot;small&quot;
+    assert largest_rectangle([2, 1, 5, 6, 2, 3]) == 10 and largest_rectangle([2, 4]) == 4 and largest_rectangle([]) == 0 and largest_rectangle([5]) == 5
+    rng = random.Random(7)
+    for _ in range(200):
+        h = [rng.randint(0, 6) for _ in range(rng.randint(0, 10))]
+        assert largest_rectangle(h) == slow(h), h
+def test_big():
+    &quot;100,000 bars&quot;
+    assert largest_rectangle(list(range(1, 100_001))) == 2_500_050_000 and largest_rectangle([7] * 100_000) == 700_000</textarea><textarea class="pc-src pc-solution" hidden>def largest_rectangle(heights):
+    best = 0
+    stack = []
+    bars = list(heights) + [0]
+    for i, h in enumerate(bars):
+        while stack and bars[stack[-1]] &gt; h:
+            top = stack.pop()
+            left = stack[-1] if stack else -1
+            best = max(best, bars[top] * (i - left - 1))
+        stack.append(i)
+    return best</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w043d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Equal isn&rsquo;t greater</div><div class="pc-prompt"><p><code>next_greater</code> should find the next <strong>strictly</strong> bigger value, but it pops while the top is <strong>at most</strong> the new item, so an equal value answers it: this prints <code>[2, 3, 3, -1]</code>. Fix the comparison so it prints <code>[3, 3, -1, -1]</code>.</p></div><textarea class="pc-src pc-code" hidden>def next_greater(nums):
+    answer = [-1] * len(nums)
+    stack = []
+    for i, x in enumerate(nums):
+        while stack and nums[stack[-1]] &lt;= x:
+            answer[stack.pop()] = x
+        stack.append(i)
+    return answer
+
+print(next_greater([2, 2, 3, 1]))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;strictly greater&quot;
+    expect_output(&quot;[3, 3, -1, -1]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def next_greater(nums):
+    answer = [-1] * len(nums)
+    stack = []
+    for i, x in enumerate(nums):
+        while stack and nums[stack[-1]] &lt; x:
+            answer[stack.pop()] = x
+        stack.append(i)
+    return answer
+
+print(next_greater([2, 2, 3, 1]))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w043d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Values can&rsquo;t count days</div><div class="pc-prompt"><p>This stack holds <strong>temperatures</strong> instead of day indexes, so when a warmer day arrives it can&rsquo;t tell which day it&rsquo;s answering or how far back it was: it treats a temperature as a day number, and this prints <code>[0, 0, 0, 0, 0]</code>. Store indexes, so it prints <code>[2, 1, 0, 0, 0]</code>.</p></div><textarea class="pc-src pc-code" hidden>def days_until_warmer(temps):
+    wait = [0] * len(temps)
+    stack = []
+    for day, t in enumerate(temps):
+        while stack and stack[-1] &lt; t:
+            earlier = stack.pop()
+            if earlier &lt; len(wait):
+                wait[earlier] = day - earlier
+        stack.append(t)
+    return wait
+
+print(days_until_warmer([20, 19, 21, 18, 17]))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;indexes on the stack&quot;
+    expect_output(&quot;[2, 1, 0, 0, 0]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def days_until_warmer(temps):
+    wait = [0] * len(temps)
+    stack = []
+    for day, t in enumerate(temps):
+        while stack and temps[stack[-1]] &lt; t:
+            earlier = stack.pop()
+            wait[earlier] = day - earlier
+        stack.append(day)
+    return wait
+
+print(days_until_warmer([20, 19, 21, 18, 17]))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w043d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A maximum that has left</div><div class="pc-prompt"><p>This window-maximum deque never removes indexes that have slid out of the window, so an old big value keeps being reported: this prints <code>[9, 9, 9, 9]</code>. Drop the front index when it&rsquo;s out of the window, so it prints <code>[9, 4, 4, 5]</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def window_max(nums, k):
+    out = []
+    window = deque()
+    for i, x in enumerate(nums):
+        while window and nums[window[-1]] &lt;= x:
+            window.pop()
+        window.append(i)
+        if i &gt;= k - 1:
+            out.append(nums[window[0]])
+    return out
+
+print(window_max([9, 1, 4, 2, 5], 2))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;drop what&#x27;s left the window&quot;
+    expect_output(&quot;[9, 4, 4, 5]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+def window_max(nums, k):
+    out = []
+    window = deque()
+    for i, x in enumerate(nums):
+        while window and nums[window[-1]] &lt;= x:
+            window.pop()
+        window.append(i)
+        if window[0] &lt;= i - k:
+            window.popleft()
+        if i &gt;= k - 1:
+            out.append(nums[window[0]])
+    return out
+
+print(window_max([9, 1, 4, 2, 5], 2))</textarea></div>
+<div class="parsons" data-id="w043d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Next smaller to the right</div><div class="pc-prompt"><p>Arrange the lines into a function giving, for each item, the next strictly smaller value to its right (or -1). One line is a trap.</p></div><script type="application/json">{"lines": ["def next_smaller(nums):", "    answer = [-1] * len(nums)", "    stack = []", "    for i, x in enumerate(nums):", "        while stack and nums[stack[-1]] > x:", "            answer[stack.pop()] = x", "        stack.append(i)", "    return answer"], "distractors": ["        while stack and nums[stack[-1]] < x:"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>nums = [3, 7, 1, 7, 2]
+stack, pops = [], 0
+for i, x in enumerate(nums):
+    while stack and nums[stack[-1]] &lt; x:
+        stack.pop()
+        pops += 1
+    stack.append(i)
+
+p = ___   # stack at the end
+q = ___   # pops
+r = ___   # the most pushes a monotonic stack can make for a list of 5 items
+s = ___   # the order of values from bottom to top in a next-greater stack: &quot;increasing&quot; or &quot;decreasing&quot;
+t = ___   # the cost of window_max with a monotonic deque: &quot;O(n)&quot; or &quot;O(nk)&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [1, 3, 4] and q == 2 and r == 5, &quot;p, q and r&quot;
+    assert s == &quot;decreasing&quot; and t == &quot;O(n)&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>nums = [3, 7, 1, 7, 2]
+stack, pops = [], 0
+for i, x in enumerate(nums):
+    while stack and nums[stack[-1]] &lt; x:
+        stack.pop()
+        pops += 1
+    stack.append(i)
+
+p = [1, 3, 4]
+q = 2
+r = 5
+s = &quot;decreasing&quot;
+t = &quot;O(n)&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w043d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does a monotonic stack keep true?", "answer": 1, "explain": "Each new item pops whatever would break the order.", "options": ["It&rsquo;s sorted alphabetically", "Its items are always in increasing (or always in decreasing) order from bottom to top", "It has at most k items", "It&rsquo;s empty at the end"]}, {"type": "mc", "q": "For the next greater item, when do you pop?", "answer": 1, "explain": "Waiting items are settled by the first bigger arrival.", "options": ["While the top is bigger than the new item", "While the top is smaller than the new item, which then answers it", "Never", "Once per item"]}, {"type": "mc", "q": "Why store indexes rather than values on the stack?", "answer": 1, "explain": "Days until warmer needs the distance.", "options": ["Speed", "So you know where to write each answer, and can measure distances", "Values can&rsquo;t be stored", "Style"]}, {"type": "mc", "q": "Why is a monotonic stack O(n) with a while inside a for?", "answer": 1, "explain": "Amortised.", "options": ["It isn&rsquo;t", "Each index is pushed once and popped at most once over the whole run", "The while runs once", "Python optimises it"]}, {"type": "mc", "q": "In &lsquo;previous smaller&rsquo;, whose answer is the top of the stack after popping?", "answer": 1, "explain": "What&rsquo;s left is the nearest smaller to the left.", "options": ["The popped items&rsquo;", "The new item&rsquo;s", "Nobody&rsquo;s", "The first item&rsquo;s"]}, {"type": "mc", "q": "What usually decides how equal values are treated?", "answer": 1, "explain": "The commonest bug.", "options": ["The stack&rsquo;s size", "Whether the while uses &lt; or &lt;=", "The input order", "Nothing"]}, {"type": "mc", "q": "In the largest rectangle method, what does the final 0 do?", "answer": 1, "explain": "No separate clean-up loop.", "options": ["Nothing", "Acts as a sentinel shorter than every bar, settling everything still on the stack", "Counts the bars", "Avoids an empty list"]}, {"type": "mc", "q": "In the window-maximum deque, which end holds the current maximum?", "answer": 1, "explain": "Values decrease front to back.", "options": ["The back", "The front", "The middle", "Either"]}, {"type": "mc", "q": "Why can an item no bigger than a newer item be dropped from the window deque for good?", "answer": 1, "explain": "It&rsquo;s dominated.", "options": ["It can&rsquo;t", "The newer item is bigger and stays in the window longer, so the older one can never be a maximum again", "To save memory only", "It&rsquo;s out of the window"]}, {"type": "output", "q": "What does this print?", "answer": "[-1, -1, 1]", "explain": "Previous strictly smaller indexes.", "code": "heights = [3, 1, 3]\nstack, out = [], []\nfor i, h in enumerate(heights):\n    while stack and heights[stack[-1]] >= h:\n        stack.pop()\n    out.append(stack[-1] if stack else -1)\n    stack.append(i)\nprint(out)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: the largest rectangle of ones</div><div class="pc-prompt"><p><code>grid</code> is a list of equal-length strings of <code>"1"</code> and <code>"0"</code>. Write <code>largest_block(grid)</code>: the area of the largest rectangle made only of <code>"1"</code>s. Treat each row as the floor of a histogram: the height of column <code>c</code> is how many <code>"1"</code>s in a row end at that row in that column (0 if this row&rsquo;s square is <code>"0"</code>). Update the heights row by row and run the largest-rectangle method on each, for O(rows × columns) in all. The checks use a 200 by 200 grid.</p></div><textarea class="pc-src pc-code" hidden>def largest_block(grid):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def slow(grid):
+    rows, cols = len(grid), len(grid[0]) if grid else 0
+    best = 0
+    for r1 in range(rows):
+        for r2 in range(r1, rows):
+            for c1 in range(cols):
+                for c2 in range(c1, cols):
+                    if all(grid[r][c] == &quot;1&quot; for r in range(r1, r2 + 1) for c in range(c1, c2 + 1)):
+                        best = max(best, (r2 - r1 + 1) * (c2 - c1 + 1))
+    return best
+def test_small():
+    &quot;small&quot;
+    assert largest_block([&quot;10100&quot;, &quot;10111&quot;, &quot;11111&quot;, &quot;10010&quot;]) == 6 and largest_block([&quot;0&quot;]) == 0 and largest_block([&quot;1&quot;]) == 1 and largest_block([]) == 0
+    rng = random.Random(8)
+    for _ in range(100):
+        cols = rng.randint(1, 5)
+        g = [&quot;&quot;.join(rng.choice(&quot;110&quot;) for _ in range(cols)) for _ in range(rng.randint(1, 5))]
+        assert largest_block(g) == slow(g), g
+def test_big():
+    &quot;200 by 200&quot;
+    g = [&quot;1&quot; * 200] * 200
+    assert largest_block(g) == 40_000
+    rng = random.Random(9)
+    g = [&quot;&quot;.join(rng.choice(&quot;1111110&quot;) for _ in range(200)) for _ in range(200)]
+    assert largest_block(g) &gt; 0</textarea><textarea class="pc-src pc-solution" hidden>def _largest(heights):
+    best = 0
+    stack = []
+    bars = heights + [0]
+    for i, h in enumerate(bars):
+        while stack and bars[stack[-1]] &gt; h:
+            top = stack.pop()
+            left = stack[-1] if stack else -1
+            best = max(best, bars[top] * (i - left - 1))
+        stack.append(i)
+    return best
+
+def largest_block(grid):
+    if not grid:
+        return 0
+    heights = [0] * len(grid[0])
+    best = 0
+    for row in grid:
+        for c, ch in enumerate(row):
+            heights[c] = heights[c] + 1 if ch == &quot;1&quot; else 0
+        best = max(best, _largest(heights))
+    return best</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>For each of the four variations, write the <code>while</code> condition and say whose answer gets written when you pop. Then predict what changes if you swap <code>&lt;</code> for <code>&lt;=</code>. Tomorrow: brackets and undo, where stacks parse and evaluate whole expressions, and undo and redo get a proper design.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w043d2.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w043d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w043d3", "week": 43, "day": 3, "title": "Monotonic stacks", "exercises": [{"id": "w043d3-greater", "title": "The next greater value", "points": 10}, {"id": "w043d3-warmer", "title": "Days until warmer", "points": 10}, {"id": "w043d3-prev_smaller", "title": "The previous smaller value", "points": 10}, {"id": "w043d3-span", "title": "The stock span", "points": 15}, {"id": "w043d3-window", "title": "Sliding window maximum", "points": 15}, {"id": "w043d3-rectangle", "title": "The largest rectangle", "points": 15}, {"id": "w043d3-bug1", "title": "Equal isn't greater", "points": 10}, {"id": "w043d3-bug2", "title": "Values can't count days", "points": 10}, {"id": "w043d3-bug3", "title": "A maximum that has left", "points": 10}, {"id": "w043d3-trace", "title": "Predict them", "points": 10}, {"id": "w043d3-challenge", "title": "Challenge: the largest rectangle of ones", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=871ff52039"></script>
+</body>
+</html>
