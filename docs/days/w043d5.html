@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="871ff52039">
+<title>Week 43 Day 5: Circular buffers | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=871ff52039">
+<link rel="stylesheet" href="../assets/css/site.css?v=871ff52039">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=871ff52039"></script>
+<script src="../assets/vendor/codemirror.js?v=871ff52039" defer></script>
+<meta name="description" content="A queue on linked nodes makes a new object for every item; a deque is clever but not something you can build in a few lines. A circular buffer (or ring...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w043d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 43 Day 5: Circular buffers">
+<meta property="og:description" content="A queue on linked nodes makes a new object for every item; a deque is clever but not something you can build in a few lines. A circular buffer (or ring...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w043d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-43">Week 43: Stacks and queues</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#wrapping-round" data-sec="wrapping-round">Wrapping round</a></li><li><a href="#full-or-empty" data-sec="full-or-empty">Full or empty?</a></li><li><a href="#when-it-s-full" data-sec="when-it-s-full">When it’s full</a></li><li><a href="#growing-a-ring" data-sec="growing-a-ring">Growing a ring</a></li><li><a href="#both-ends-and-uses" data-sec="both-ends-and-uses">Both ends, and uses</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w043d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-43">Week 43: Stacks and queues</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 43, Day 5</span></p>
+      <h1>Circular buffers</h1>
+      <div class="day-intro"><p>A queue on linked nodes makes a new object for every item; a deque is clever but not something you can build in a few lines. A <strong>circular buffer</strong> (or ring buffer) is the simplest fast queue there is: one fixed block of slots, an index for the front, and a count. Items are added after the back and taken from the front, and when an index runs off the end of the block, it <strong>wraps round</strong> to the start. Nothing ever shifts, and nothing is allocated after the start. Today you&rsquo;ll build ring queues that refuse, overwrite or grow when full, a ring that works at both ends, and see why the same idea runs inside audio players, keyboards and network cards.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain how a circular buffer wraps its indexes round a fixed block with modulo arithmetic</li><li>Build a ring queue with O(1) operations, and tell full from empty</li><li>Choose between refusing, overwriting and growing when the buffer is full</li><li>Grow a ring by copying its items in order into a bigger block</li><li>Use a ring for both ends, and for running statistics over the latest items</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Wrapping round: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Full or empty?: 20 min"></span><span class="plan-seg s1" style="flex:20" title="When it&#x27;s full: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Growing a ring: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Both ends, and uses: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Wrapping round</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Full or empty?</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">When it&rsquo;s full</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Growing a ring</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Both ends, and uses</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w043d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w043d5.ipynb" download>download it</a>. Exercises today are worth 130 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w043d5-p1"><textarea class="pc-src pc-code" hidden>capacity = 5
+slots = [None] * capacity
+head, size = 0, 0
+for item in &quot;abcdefg&quot;:
+    if size == capacity:            # full: drop the oldest
+        head = (head + 1) % capacity
+        size -= 1
+    slots[(head + size) % capacity] = item
+    size += 1
+print(slots, head, size)
+print([slots[(head + i) % capacity] for i in range(size)])</textarea></div>
+<p>Seven items went into five slots. The last two <strong>wrapped round</strong> and overwrote the oldest, <code>a</code> and <code>b</code>. The block itself says <code>['f', 'g', 'c', 'd', 'e']</code>, but reading from <code>head</code>, wrapping as you go, gives the items oldest first: <code>c d e f g</code>.</p>
+<h2 id="wrapping-round">Wrapping round</h2>
+<p>A circular buffer is a fixed block of <code>capacity</code> slots, used as if its end joined back on to its start:</p>
+<pre><code class="language-text"> capacity 6, head = 4, size = 4
+
+ slot:    0     1     2     3     4     5
+        +-----+-----+-----+-----+-----+-----+
+        |  c  |  d  |     |     |  a  |  b  |
+        +-----+-----+-----+-----+-----+-----+
+                       ^           ^
+                    next free     head (the oldest)
+
+ item i (oldest first) is in slot (head + i) % capacity
+ the next free slot is (head + size) % capacity
+</code></pre>
+<p>The <code>% capacity</code> (Week 2&rsquo;s remainder) is the wrap: index 6 becomes 0, 7 becomes 1. With that, the queue operations are each a couple of lines:</p>
+<div class="pc pc-example" data-kind="example" data-id="w043d5-e2"><textarea class="pc-src pc-code" hidden>class RingQueue:
+    def __init__(self, capacity):
+        self._slots = [None] * capacity
+        self._head = 0                         # slot of the oldest item
+        self._size = 0
+
+    def enqueue(self, item):
+        if self._size == len(self._slots):
+            raise OverflowError(&quot;queue is full&quot;)
+        self._slots[(self._head + self._size) % len(self._slots)] = item
+        self._size += 1
+
+    def dequeue(self):
+        if self._size == 0:
+            raise IndexError(&quot;dequeue from empty queue&quot;)
+        item = self._slots[self._head]
+        self._slots[self._head] = None         # let go of the reference
+        self._head = (self._head + 1) % len(self._slots)
+        self._size -= 1
+        return item
+
+q = RingQueue(3)
+for x in [1, 2, 3]:
+    q.enqueue(x)
+print(q.dequeue(), q.dequeue())
+q.enqueue(4)
+q.enqueue(5)
+print(q._slots, q._head, [q.dequeue() for _ in range(3)])</textarea></div>
+<p>Every operation is <strong>O(1) in the worst case</strong> (not just amortised), touches one slot, and creates no objects. That&rsquo;s why circular buffers are used where timing must be predictable: audio and video playback, the keyboard buffer, data arriving from a network card.</p>
+<h2 id="full-or-empty">Full or empty?</h2>
+<p>There&rsquo;s a classic trap. Some ring buffers keep a <strong>head</strong> and a <strong>tail</strong> index and no size. Then <code>head == tail</code> happens in two situations: when the buffer is <strong>empty</strong>, and when it&rsquo;s <strong>completely full</strong> (the tail has wrapped all the way round to meet the head). Three ways out:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>How</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>keep a <strong>size</strong> count</td>
+<td>full is <code>size == capacity</code>, empty is <code>size == 0</code></td>
+<td>one extra number</td>
+</tr>
+<tr>
+<td>keep one slot <strong>always empty</strong></td>
+<td>full is <code>(tail + 1) % capacity == head</code></td>
+<td>one wasted slot</td>
+</tr>
+<tr>
+<td>keep a <strong>full flag</strong></td>
+<td>set when the tail catches the head</td>
+<td>one extra flag, and more cases</td>
+</tr>
+</tbody>
+</table>
+<p>This course keeps a size, which makes <code>len</code> free too. Low-level code often prefers the empty-slot method, because it needs no shared counter when one part of a program only adds and another only removes.</p>
+<h2 id="when-it-s-full">When it&rsquo;s full</h2>
+<p>What should happen when an item arrives and there&rsquo;s no room? It depends on what the buffer is for:</p>
+<table>
+<thead>
+<tr>
+<th>Policy</th>
+<th>Behaviour</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>refuse</strong></td>
+<td>raise an error, or tell the producer to wait</td>
+<td>job queues where nothing may be lost</td>
+</tr>
+<tr>
+<td><strong>overwrite</strong></td>
+<td>drop the oldest item to make room</td>
+<td>logs of recent events, the last few seconds of audio or sensor data</td>
+</tr>
+<tr>
+<td><strong>grow</strong></td>
+<td>move to a bigger block</td>
+<td>general-purpose queues (Python&rsquo;s <code>deque</code> grows block by block)</td>
+</tr>
+</tbody>
+</table>
+<p>Overwriting is what <code>deque(maxlen=n)</code> does (Day 2). It&rsquo;s the right choice when only the <strong>most recent</strong> data matters, and the wrong one when every item is precious, such as orders in a shop.</p>
+<h2 id="growing-a-ring">Growing a ring</h2>
+<p>To grow, make a bigger block and copy the items across <strong>in order</strong>, oldest first, starting from slot 0 of the new block. Copying the slots in their physical order would be wrong, because after wrapping, the oldest item isn&rsquo;t in slot 0:</p>
+<div class="pc pc-example" data-kind="example" data-id="w043d5-e3"><textarea class="pc-src pc-code" hidden>class GrowingQueue:
+    def __init__(self):
+        self._slots = [None]
+        self._head = self._size = 0
+
+    def enqueue(self, item):
+        if self._size == len(self._slots):
+            old, cap = self._slots, len(self._slots)
+            self._slots = [old[(self._head + i) % cap] for i in range(self._size)] + [None] * cap
+            self._head = 0                         # the oldest is now in slot 0
+        self._slots[(self._head + self._size) % len(self._slots)] = item
+        self._size += 1
+
+    def dequeue(self):
+        item = self._slots[self._head]
+        self._slots[self._head] = None
+        self._head = (self._head + 1) % len(self._slots)
+        self._size -= 1
+        return item
+
+q = GrowingQueue()
+order = []
+for i in range(10):
+    q.enqueue(i)
+    if i % 3 == 2:
+        order.append(q.dequeue())
+while q._size:
+    order.append(q.dequeue())
+print(order, len(q._slots))</textarea></div>
+<p>Doubling gives O(1) amortised enqueues, for the same reason as Week 41&rsquo;s dynamic array.</p>
+<h2 id="both-ends-and-uses">Both ends, and uses</h2>
+<p>A ring can work at <strong>both</strong> ends: to add at the front, step the head <strong>back</strong> one slot, <code>(head - 1) % capacity</code> (in Python, <code>-1 % 5</code> is 4, so this wraps correctly), and write there. That&rsquo;s a deque on a fixed block.</p>
+<p>Rings are also handy for <strong>running statistics over the latest n values</strong>: keep the last n readings in a ring and a running total; each new reading subtracts the one it overwrites and adds itself, so the average of the latest n is O(1) per reading, with no window to slide over a list (Week 41&rsquo;s sliding window, as a structure).</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A circular buffer is a fixed block with a head index and a size: item <code>i</code> is in slot <code>(head + i) % capacity</code>, the next free slot is <code>(head + size) % capacity</code>, and every operation is O(1) in the worst case, with nothing shifted or allocated. With only head and tail indexes, <code>head == tail</code> can mean full or empty: keep a size (or one empty slot) to tell them apart. When full, a ring can refuse, overwrite the oldest, or grow by copying its items in order, oldest first, into a bigger block. Stepping the head back with <code>(head - 1) % capacity</code> adds at the front, making a deque.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d5-ring" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A ring queue</div><div class="pc-prompt"><p>Write <code>RingQueue(capacity)</code> on a fixed block <code>[None] * capacity</code> with a head index and a size. It needs <code>enqueue</code> (raising <code>OverflowError("queue is full")</code>), <code>dequeue</code> and <code>peek</code> (raising <code>IndexError("dequeue from empty queue")</code> and <code>IndexError("peek at empty queue")</code>), <code>__len__</code>, <code>is_full()</code>, <code>__iter__</code> (oldest first, without <code>yield</code>), and <code>__repr__</code> like <code>RingQueue([3, 4], capacity=3)</code>. <code>dequeue</code> sets its freed slot back to <code>None</code>. A capacity below 1 raises <code>ValueError</code>.</p></div><textarea class="pc-src pc-code" hidden>class RingQueue:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import ast
+def test_ring():
+    &quot;a ring&quot;
+    q = RingQueue(3)
+    for x in [1, 2, 3]:
+        q.enqueue(x)
+    assert q.is_full() and len(q) == 3
+    try:
+        q.enqueue(4)
+        assert False
+    except OverflowError as err:
+        assert str(err) == &quot;queue is full&quot;
+    assert q.dequeue() == 1 and q.dequeue() == 2
+    q.enqueue(4)
+    q.enqueue(5)
+    assert list(q) == [3, 4, 5] and repr(q) == &quot;RingQueue([3, 4, 5], capacity=3)&quot; and q.peek() == 3
+    assert q._slots.count(None) == 0 and len(q._slots) == 3
+    assert [q.dequeue() for _ in range(3)] == [3, 4, 5] and q._slots == [None, None, None] and len(q) == 0
+    for name, message in [(&quot;dequeue&quot;, &quot;dequeue from empty queue&quot;), (&quot;peek&quot;, &quot;peek at empty queue&quot;)]:
+        try:
+            getattr(q, name)()
+            assert False
+        except IndexError as err:
+            assert str(err) == message
+    try:
+        RingQueue(0)
+        assert False
+    except ValueError:
+        pass
+def test_fixed():
+    &quot;a fixed block&quot;
+    q = RingQueue(4)
+    for i in range(10_000):
+        q.enqueue(i)
+        assert q.dequeue() == i
+    assert len(q._slots) == 4
+    calls = [n for n in ast.walk(ast.parse(source)) if isinstance(n, ast.Call) and getattr(n.func, &quot;attr&quot;, &quot;&quot;) in (&quot;append&quot;, &quot;pop&quot;, &quot;insert&quot;)]
+    assert not calls and &quot;yield&quot; not in source, &quot;index into the block; no list methods&quot;</textarea><textarea class="pc-src pc-solution" hidden>class RingQueue:
+    def __init__(self, capacity):
+        if capacity &lt; 1:
+            raise ValueError(&quot;capacity must be at least 1&quot;)
+        self._slots = [None] * capacity
+        self._head = 0
+        self._size = 0
+
+    def enqueue(self, item):
+        if self._size == len(self._slots):
+            raise OverflowError(&quot;queue is full&quot;)
+        self._slots[(self._head + self._size) % len(self._slots)] = item
+        self._size += 1
+
+    def dequeue(self):
+        if self._size == 0:
+            raise IndexError(&quot;dequeue from empty queue&quot;)
+        item = self._slots[self._head]
+        self._slots[self._head] = None
+        self._head = (self._head + 1) % len(self._slots)
+        self._size -= 1
+        return item
+
+    def peek(self):
+        if self._size == 0:
+            raise IndexError(&quot;peek at empty queue&quot;)
+        return self._slots[self._head]
+
+    def __len__(self):
+        return self._size
+
+    def is_full(self):
+        return self._size == len(self._slots)
+
+    def _items(self):
+        cap = len(self._slots)
+        return [self._slots[(self._head + i) % cap] for i in range(self._size)]
+
+    def __iter__(self):
+        return iter(self._items())
+
+    def __repr__(self):
+        return f&quot;RingQueue({self._items()!r}, capacity={len(self._slots)})&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d5-log" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A log that keeps the latest</div><div class="pc-prompt"><p>Write <code>RingLog(capacity)</code>: <code>add(entry)</code> stores an entry, overwriting the <strong>oldest</strong> when full; <code>entries()</code> returns them oldest first; <code>latest(n)</code> returns the newest <code>n</code> (or all, if there are fewer), newest first; <code>len</code> is how many are kept. Use a fixed block and a head index; don&rsquo;t use <code>deque</code>.</p></div><textarea class="pc-src pc-code" hidden>class RingLog:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_log():
+    &quot;the latest entries&quot;
+    log = RingLog(3)
+    for e in &quot;abcde&quot;:
+        log.add(e)
+    assert log.entries() == [&quot;c&quot;, &quot;d&quot;, &quot;e&quot;] and len(log) == 3 and log.latest(2) == [&quot;e&quot;, &quot;d&quot;] and log.latest(10) == [&quot;e&quot;, &quot;d&quot;, &quot;c&quot;]
+    small = RingLog(5)
+    small.add(&quot;x&quot;)
+    assert small.entries() == [&quot;x&quot;] and small.latest(3) == [&quot;x&quot;] and len(small._slots) == 5
+    assert &quot;deque&quot; not in source</textarea><textarea class="pc-src pc-solution" hidden>class RingLog:
+    def __init__(self, capacity):
+        self._slots = [None] * capacity
+        self._head = 0
+        self._size = 0
+
+    def add(self, entry):
+        cap = len(self._slots)
+        if self._size == cap:
+            self._slots[self._head] = entry
+            self._head = (self._head + 1) % cap
+        else:
+            self._slots[(self._head + self._size) % cap] = entry
+            self._size += 1
+
+    def entries(self):
+        cap = len(self._slots)
+        return [self._slots[(self._head + i) % cap] for i in range(self._size)]
+
+    def latest(self, n):
+        return self.entries()[::-1][:n]
+
+    def __len__(self):
+        return self._size</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d5-grow" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A ring that grows</div><div class="pc-prompt"><p>Write <code>GrowingQueue()</code>: a ring queue starting at capacity 1 that <strong>doubles</strong> when full, copying its items oldest first into the new block (with the oldest in slot 0). It needs <code>enqueue</code>, <code>dequeue</code> (raising <code>IndexError</code> when empty), <code>__len__</code> and a read-only property <code>capacity</code>. The checks mix enqueues and dequeues so the ring has wrapped before it grows.</p></div><textarea class="pc-src pc-code" hidden>class GrowingQueue:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+from collections import deque
+def test_grow():
+    &quot;against a deque&quot;
+    rng = random.Random(1)
+    q, ref = GrowingQueue(), deque()
+    for i in range(3000):
+        if ref and rng.random() &lt; 0.4:
+            assert q.dequeue() == ref.popleft()
+        else:
+            q.enqueue(i)
+            ref.append(i)
+        assert len(q) == len(ref)
+    while ref:
+        assert q.dequeue() == ref.popleft()
+    try:
+        q.dequeue()
+        assert False
+    except IndexError:
+        pass
+def test_capacity():
+    &quot;doubling&quot;
+    q = GrowingQueue()
+    caps = []
+    for i in range(9):
+        q.enqueue(i)
+        caps.append(q.capacity)
+    assert caps == [1, 2, 4, 4, 8, 8, 8, 8, 16]
+    try:
+        q.capacity = 3
+        assert False
+    except AttributeError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>class GrowingQueue:
+    def __init__(self):
+        self._slots = [None]
+        self._head = 0
+        self._size = 0
+
+    @property
+    def capacity(self):
+        return len(self._slots)
+
+    def enqueue(self, item):
+        cap = len(self._slots)
+        if self._size == cap:
+            new = [None] * (2 * cap)
+            for i in range(self._size):
+                new[i] = self._slots[(self._head + i) % cap]
+            self._slots, self._head, cap = new, 0, 2 * cap
+        self._slots[(self._head + self._size) % cap] = item
+        self._size += 1
+
+    def dequeue(self):
+        if self._size == 0:
+            raise IndexError(&quot;dequeue from empty queue&quot;)
+        item = self._slots[self._head]
+        self._slots[self._head] = None
+        self._head = (self._head + 1) % len(self._slots)
+        self._size -= 1
+        return item
+
+    def __len__(self):
+        return self._size</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d5-ringdeque" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A deque on a ring</div><div class="pc-prompt"><p>Write <code>RingDeque(capacity)</code> on a fixed block: <code>push_front</code>, <code>push_back</code> (both raising <code>OverflowError</code> when full), <code>pop_front</code>, <code>pop_back</code> (both raising <code>IndexError</code> when empty), <code>__len__</code> and <code>items()</code> (front to back). Adding at the front steps the head back with <code>(head - 1) % capacity</code>.</p></div><textarea class="pc-src pc-code" hidden>class RingDeque:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+from collections import deque
+def test_deque():
+    &quot;both ends&quot;
+    d = RingDeque(4)
+    d.push_back(2); d.push_front(1); d.push_back(3); d.push_front(0)
+    assert d.items() == [0, 1, 2, 3] and len(d) == 4
+    try:
+        d.push_back(9)
+        assert False
+    except OverflowError:
+        pass
+    assert d.pop_back() == 3 and d.pop_front() == 0 and d.items() == [1, 2]
+    rng = random.Random(2)
+    d, ref = RingDeque(6), deque()
+    for i in range(2000):
+        op = rng.choice([&quot;pf&quot;, &quot;pb&quot;, &quot;of&quot;, &quot;ob&quot;])
+        if op in (&quot;pf&quot;, &quot;pb&quot;) and len(ref) &lt; 6:
+            (d.push_front if op == &quot;pf&quot; else d.push_back)(i)
+            (ref.appendleft if op == &quot;pf&quot; else ref.append)(i)
+        elif op in (&quot;of&quot;, &quot;ob&quot;) and ref:
+            assert (d.pop_front() if op == &quot;of&quot; else d.pop_back()) == (ref.popleft() if op == &quot;of&quot; else ref.pop())
+        assert d.items() == list(ref)
+    assert len(d._slots) == 6</textarea><textarea class="pc-src pc-solution" hidden>class RingDeque:
+    def __init__(self, capacity):
+        self._slots = [None] * capacity
+        self._head = 0
+        self._size = 0
+
+    def _full(self):
+        if self._size == len(self._slots):
+            raise OverflowError(&quot;deque is full&quot;)
+
+    def _empty(self):
+        if self._size == 0:
+            raise IndexError(&quot;pop from empty deque&quot;)
+
+    def push_back(self, item):
+        self._full()
+        self._slots[(self._head + self._size) % len(self._slots)] = item
+        self._size += 1
+
+    def push_front(self, item):
+        self._full()
+        self._head = (self._head - 1) % len(self._slots)
+        self._slots[self._head] = item
+        self._size += 1
+
+    def pop_front(self):
+        self._empty()
+        item = self._slots[self._head]
+        self._slots[self._head] = None
+        self._head = (self._head + 1) % len(self._slots)
+        self._size -= 1
+        return item
+
+    def pop_back(self):
+        self._empty()
+        i = (self._head + self._size - 1) % len(self._slots)
+        item = self._slots[i]
+        self._slots[i] = None
+        self._size -= 1
+        return item
+
+    def __len__(self):
+        return self._size
+
+    def items(self):
+        cap = len(self._slots)
+        return [self._slots[(self._head + i) % cap] for i in range(self._size)]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d5-average" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Average of the latest readings</div><div class="pc-prompt"><p>Write <code>LatestAverage(n)</code> with <code>add(x)</code>, which stores a reading and returns the average of the latest <code>n</code> readings (or of all of them, if there are fewer than <code>n</code> so far), in O(1): keep the readings in a ring and a running total, subtracting a reading when it&rsquo;s overwritten.</p></div><textarea class="pc-src pc-code" hidden>class LatestAverage:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_avg():
+    &quot;averages&quot;
+    a = LatestAverage(3)
+    assert [a.add(x) for x in [3, 6, 9, 12, 3]] == [3.0, 4.5, 6.0, 9.0, 8.0]
+    rng = random.Random(3)
+    xs = [rng.randint(0, 100) for _ in range(500)]
+    a = LatestAverage(7)
+    for i, x in enumerate(xs):
+        want = sum(xs[max(0, i - 6):i + 1]) / min(i + 1, 7)
+        assert abs(a.add(x) - want) &lt; 1e-9
+def test_fast():
+    &quot;O(1)&quot;
+    a = LatestAverage(10_000)
+    for x in range(200_000):
+        last = a.add(x)
+    assert last == sum(range(190_000, 200_000)) / 10_000</textarea><textarea class="pc-src pc-solution" hidden>class LatestAverage:
+    def __init__(self, n):
+        self._slots = [0] * n
+        self._next = 0
+        self._count = 0
+        self._total = 0
+
+    def add(self, x):
+        if self._count == len(self._slots):
+            self._total -= self._slots[self._next]
+        else:
+            self._count += 1
+        self._slots[self._next] = x
+        self._total += x
+        self._next = (self._next + 1) % len(self._slots)
+        return self._total / self._count</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w043d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Off the end of the block</div><div class="pc-prompt"><p><code>enqueue</code> works out the next free slot as <code>head + size</code> without wrapping, so once the ring has moved round it writes past the end of the block and crashes with <code>IndexError</code>. Fix it so this prints <code>[3, 4, 5]</code>.</p></div><textarea class="pc-src pc-code" hidden>slots = [None] * 3
+head, size = 0, 0
+
+def enqueue(item):
+    global size
+    slots[head + size] = item
+    size += 1
+
+def dequeue():
+    global head, size
+    item = slots[head]
+    head = (head + 1) % len(slots)
+    size -= 1
+    return item
+
+for x in [1, 2, 3]:
+    enqueue(x)
+dequeue(); dequeue()
+enqueue(4); enqueue(5)
+print([slots[(head + i) % 3] for i in range(size)])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;wrap with %&quot;
+    expect_output(&quot;[3, 4, 5]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>slots = [None] * 3
+head, size = 0, 0
+
+def enqueue(item):
+    global size
+    slots[(head + size) % len(slots)] = item
+    size += 1
+
+def dequeue():
+    global head, size
+    item = slots[head]
+    head = (head + 1) % len(slots)
+    size -= 1
+    return item
+
+for x in [1, 2, 3]:
+    enqueue(x)
+dequeue(); dequeue()
+enqueue(4); enqueue(5)
+print([slots[(head + i) % 3] for i in range(size)])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w043d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Full looks empty</div><div class="pc-prompt"><p>This ring keeps a head and a tail and no size, and decides it&rsquo;s empty when <code>head == tail</code>. But a <strong>full</strong> ring also has <code>head == tail</code>, so after filling it, it claims to be empty: this prints <code>True</code>. Add a size count, and use it for both tests, so this prints <code>False 3</code>.</p></div><textarea class="pc-src pc-code" hidden>class Ring:
+    def __init__(self, capacity):
+        self.slots = [None] * capacity
+        self.head = self.tail = 0
+
+    def push(self, item):
+        self.slots[self.tail] = item
+        self.tail = (self.tail + 1) % len(self.slots)
+
+    def is_empty(self):
+        return self.head == self.tail
+
+r = Ring(3)
+for x in &quot;abc&quot;:
+    r.push(x)
+print(r.is_empty())</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;tell full from empty&quot;
+    expect_output(&quot;False 3&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Ring:
+    def __init__(self, capacity):
+        self.slots = [None] * capacity
+        self.head = self.tail = 0
+        self.size = 0
+
+    def push(self, item):
+        if self.size == len(self.slots):
+            raise OverflowError(&quot;ring is full&quot;)
+        self.slots[self.tail] = item
+        self.tail = (self.tail + 1) % len(self.slots)
+        self.size += 1
+
+    def is_empty(self):
+        return self.size == 0
+
+r = Ring(3)
+for x in &quot;abc&quot;:
+    r.push(x)
+print(r.is_empty(), r.size)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w043d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Grown out of order</div><div class="pc-prompt"><p>When this ring grows, it copies the slots in their <strong>physical</strong> order, slot 0 first, but after wrapping the oldest item isn&rsquo;t in slot 0, so the queue comes out jumbled: this prints <code>[2, 0, 1, 3]</code>. Copy oldest first, <code>(head + i) % cap</code>, so it prints <code>[0, 1, 2, 3]</code>.</p></div><textarea class="pc-src pc-code" hidden>slots, head, size = [None] * 3, 0, 0
+
+def enqueue(item):
+    global slots, head, size
+    cap = len(slots)
+    if size == cap:
+        slots = slots + [None] * cap
+        head = 0
+        cap *= 2
+    slots[(head + size) % cap] = item
+    size += 1
+
+def dequeue():
+    global head, size
+    item = slots[head]
+    head = (head + 1) % len(slots)
+    size -= 1
+    return item
+
+enqueue(&quot;x&quot;); enqueue(0); dequeue()
+enqueue(1); enqueue(2)            # wraps: 2 goes into slot 0
+enqueue(3)                        # full: grows
+print([dequeue() for _ in range(4)])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;oldest first&quot;
+    expect_output(&quot;[0, 1, 2, 3]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>slots, head, size = [None] * 3, 0, 0
+
+def enqueue(item):
+    global slots, head, size
+    cap = len(slots)
+    if size == cap:
+        slots = [slots[(head + i) % cap] for i in range(size)] + [None] * cap
+        head = 0
+        cap *= 2
+    slots[(head + size) % cap] = item
+    size += 1
+
+def dequeue():
+    global head, size
+    item = slots[head]
+    head = (head + 1) % len(slots)
+    size -= 1
+    return item
+
+enqueue(&quot;x&quot;); enqueue(0); dequeue()
+enqueue(1); enqueue(2)            # wraps: 2 goes into slot 0
+enqueue(3)                        # full: grows
+print([dequeue() for _ in range(4)])</textarea></div>
+<div class="parsons" data-id="w043d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Dequeue from a ring</div><div class="pc-prompt"><p>Arrange the lines into a ring queue&rsquo;s <code>dequeue</code>. One line is a trap.</p></div><script type="application/json">{"lines": ["    def dequeue(self):", "        if self._size == 0:", "            raise IndexError(\"dequeue from empty queue\")", "        item = self._slots[self._head]", "        self._slots[self._head] = None", "        self._head = (self._head + 1) % len(self._slots)", "        self._size -= 1", "        return item"], "distractors": ["        self._head = self._head + 1"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>capacity, head, size = 5, 3, 4
+
+a = (head + size) % capacity
+b = [(head + i) % capacity for i in range(size)]
+c = (0 - 1) % capacity
+d = (head + size - 1) % capacity
+
+p = ___   # a: the next free slot
+q = ___   # b: the slots holding items, oldest first
+r = ___   # c
+s = ___   # d: the slot of the newest item
+t = ___   # the worst-case cost of a fixed ring&#x27;s enqueue: &quot;O(1)&quot; or &quot;O(n)&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 2 and q == [3, 4, 0, 1] and r == 4, &quot;p, q and r&quot;
+    assert s == 1 and t == &quot;O(1)&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>capacity, head, size = 5, 3, 4
+
+a = (head + size) % capacity
+b = [(head + i) % capacity for i in range(size)]
+c = (0 - 1) % capacity
+d = (head + size - 1) % capacity
+
+p = 2
+q = [3, 4, 0, 1]
+r = 4
+s = 1
+t = &quot;O(1)&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w043d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "In a ring with head h, size n and capacity c, where is the i-th oldest item?", "answer": 1, "explain": "Wrapping with %.", "options": ["Slot i", "Slot (h + i) % c", "Slot h - i", "Slot (h + n) % c"]}, {"type": "mc", "q": "Why is a fixed ring queue&rsquo;s enqueue O(1) in the worst case, not just amortised?", "answer": 1, "explain": "That&rsquo;s why audio and keyboards use rings.", "options": ["It isn&rsquo;t", "It writes one slot and never moves or allocates anything", "Python is fast", "It uses a deque"]}, {"type": "mc", "q": "With only head and tail indexes, what can head == tail mean?", "answer": 1, "explain": "Keep a size, or leave one slot empty.", "options": ["Only empty", "Empty or completely full", "Only full", "An error"]}, {"type": "mc", "q": "When is overwriting the oldest item the right policy?", "answer": 1, "explain": "deque(maxlen=n) does this.", "options": ["For bank payments", "When only the most recent data matters, like recent log lines", "Always", "Never"]}, {"type": "mc", "q": "When a ring grows, how must the items be copied?", "answer": 1, "explain": "After wrapping, slot 0 isn&rsquo;t the oldest.", "options": ["Slot by slot in physical order", "Oldest first, from (head + i) % capacity, into slots 0, 1, 2, &hellip;", "Newest first", "In any order"]}, {"type": "mc", "q": "How does a ring add at the front?", "answer": 1, "explain": "In Python, -1 % 5 is 4.", "options": ["It shifts everything", "It steps the head back with (head - 1) % capacity and writes there", "It can&rsquo;t", "It grows"]}, {"type": "mc", "q": "Why set a dequeued slot back to None?", "answer": 1, "explain": "Let go of references you no longer need.", "options": ["Speed", "So the ring doesn&rsquo;t keep the old object alive", "Python requires it", "To mark it full"]}, {"type": "mc", "q": "How does a ring give the average of the latest n readings in O(1)?", "answer": 1, "explain": "A sliding window as a structure.", "options": ["It sums the ring each time", "It keeps a running total, subtracting each reading as it&rsquo;s overwritten", "It sorts", "It can&rsquo;t"]}, {"type": "mc", "q": "What does a queue refusing new items when full suit?", "answer": 1, "explain": "Refuse, overwrite or grow: choose by purpose.", "options": ["Recent audio", "Work where nothing may be lost, so the producer must wait", "Logs", "Nothing"]}, {"type": "output", "q": "What does this print?", "answer": "[4, 5, 2, 3] 2", "explain": "The two oldest were overwritten.", "code": "slots, head, size = [None] * 4, 0, 0\nfor x in range(6):\n    if size == 4:\n        head = (head + 1) % 4\n        size -= 1\n    slots[(head + size) % 4] = x\n    size += 1\nprint(slots, head)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a hit counter in fixed memory</div><div class="pc-prompt"><p>A website wants to know how many requests arrived in the last <code>window</code> seconds, using memory that <strong>doesn&rsquo;t grow</strong> with traffic: millions of requests a second must still fit. Write <code>HitCounter(window)</code> with <code>hit(t)</code> (a request at whole second <code>t</code>; times never go backwards) and <code>count(t)</code> (requests at times <code>t - window + 1</code> to <code>t</code>; <code>t</code> is never before the latest hit). Use two fixed rings of <code>window</code> slots, indexed by <code>t % window</code>: one holds the <strong>second</strong> each slot was last used for, the other the <strong>number</strong> of hits in that second. When a slot is reused for a newer second, reset its count. Both methods must be O(window) at worst, and <code>hit</code> O(1). The checks make a million hits.</p></div><textarea class="pc-src pc-code" hidden>class HitCounter:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+from collections import Counter
+def test_counts():
+    &quot;against a simple version&quot;
+    rng = random.Random(4)
+    for window in [1, 5, 60]:
+        h = HitCounter(window)
+        hits, t = [], 0
+        for _ in range(500):
+            t += rng.choice([0, 0, 1, 2, 7])
+            if rng.random() &lt; 0.7:
+                h.hit(t)
+                hits.append(t)
+            assert h.count(t) == sum(1 for x in hits if t - window &lt; x &lt;= t), (window, t)
+        assert h.count(t + window) == 0
+def test_memory():
+    &quot;fixed memory&quot;
+    h = HitCounter(300)
+    for i in range(1_000_000):
+        h.hit(i // 1000)
+    assert h.count(999) == 300_000 and h.count(1100) == 199_000
+    assert all(len(v) == 300 for v in vars(h).values() if isinstance(v, list)), &quot;only fixed rings&quot;</textarea><textarea class="pc-src pc-solution" hidden>class HitCounter:
+    def __init__(self, window):
+        self.window = window
+        self._times = [-1] * window
+        self._counts = [0] * window
+
+    def hit(self, t):
+        slot = t % self.window
+        if self._times[slot] != t:
+            self._times[slot] = t
+            self._counts[slot] = 1
+        else:
+            self._counts[slot] += 1
+
+    def count(self, t):
+        return sum(c for when, c in zip(self._times, self._counts) if when &gt; t - self.window)</textarea><template class="pc-src pc-hint">In <code>hit(t)</code>, the slot is <code>t % window</code>: if <code>self._times[slot] != t</code>, it holds an older second, so set it to <code>t</code> and its count to 1; otherwise add 1. In <code>count(t)</code>, add up the counts of the slots whose time is greater than <code>t - window</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Draw a ring of 5 slots on paper and run the warm-up by hand, marking the head after each item. Then decide, for three programs you use, whether a full buffer should refuse, overwrite or grow. Tomorrow is the Forge: a print shop&rsquo;s job system built from this week&rsquo;s stacks, queues and rings.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w043d4.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w043d5", "week": 43, "day": 5, "title": "Circular buffers", "exercises": [{"id": "w043d5-ring", "title": "A ring queue", "points": 15}, {"id": "w043d5-log", "title": "A log that keeps the latest", "points": 10}, {"id": "w043d5-grow", "title": "A ring that grows", "points": 15}, {"id": "w043d5-ringdeque", "title": "A deque on a ring", "points": 15}, {"id": "w043d5-average", "title": "Average of the latest readings", "points": 10}, {"id": "w043d5-bug1", "title": "Off the end of the block", "points": 10}, {"id": "w043d5-bug2", "title": "Full looks empty", "points": 10}, {"id": "w043d5-bug3", "title": "Grown out of order", "points": 10}, {"id": "w043d5-trace", "title": "Predict them", "points": 10}, {"id": "w043d5-challenge", "title": "Challenge: a hit counter in fixed memory", "points": 25}], "points": 130}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=871ff52039"></script>
+</body>
+</html>
