@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="871ff52039">
+<title>Week 42 Day 5: Cycle detection | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=871ff52039">
+<link rel="stylesheet" href="../assets/css/site.css?v=871ff52039">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=871ff52039"></script>
+<script src="../assets/vendor/codemirror.js?v=871ff52039" defer></script>
+<meta name="description" content="A linked list should end in None. But a bug (like yesterday’s missing head.next = None) can make the last node point back into the list, and then every loop...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w042d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 42 Day 5: Cycle detection">
+<meta property="og:description" content="A linked list should end in None. But a bug (like yesterday’s missing head.next = None) can make the last node point back into the list, and then every loop...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w042d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-42">Week 42: Linked lists</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#when-a-list-doesn-t-end" data-sec="when-a-list-doesn-t-end">When a list doesn’t end</a></li><li><a href="#remembering-where-you-ve-been" data-sec="remembering-where-you-ve-been">Remembering where you’ve been</a></li><li><a href="#the-tortoise-and-the-hare" data-sec="the-tortoise-and-the-hare">The tortoise and the hare</a></li><li><a href="#where-the-cycle-starts" data-sec="where-the-cycle-starts">Where the cycle starts</a></li><li><a href="#cycles-everywhere" data-sec="cycles-everywhere">Cycles everywhere</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w042d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-42">Week 42: Linked lists</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 42, Day 5</span></p>
+      <h1>Cycle detection</h1>
+      <div class="day-intro"><p>A linked list should end in <code>None</code>. But a bug (like yesterday&rsquo;s missing <code>head.next = None</code>) can make the last node point back into the list, and then every loop that walks it runs for ever. Today you&rsquo;ll detect such <strong>cycles</strong>: first with a set of visited nodes, then with Floyd&rsquo;s tortoise and hare, which needs only two pointers and no extra memory. You&rsquo;ll find where a cycle starts and how long it is, and then see that the same idea solves problems that don&rsquo;t look like linked lists at all: repeating number sequences, and finding a duplicate in a list without changing it.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain what a cycle in a linked list is, and why it breaks ordinary loops</li><li>Detect a cycle with a set of visited nodes, comparing nodes by identity</li><li>Detect a cycle in O(1) space with Floyd&rsquo;s tortoise and hare, and explain why the pointers must meet</li><li>Find where a cycle starts, and how long it is</li><li>Use cycle detection on sequences such as x, f(x), f(f(x)), &hellip;</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="When a list doesn&#x27;t end: 15 min"></span><span class="plan-seg s0" style="flex:15" title="Remembering where you&#x27;ve been: 15 min"></span><span class="plan-seg s1" style="flex:30" title="The tortoise and the hare: 30 min"></span><span class="plan-seg s0" style="flex:25" title="Where the cycle starts: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Cycles everywhere: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">When a list doesn&rsquo;t end</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">Remembering where you&rsquo;ve been</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:40</span><span class="plan-what">The tortoise and the hare</span><span class="plan-min">30 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Where the cycle starts</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Cycles everywhere</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w042d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w042d5.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w042d5-p1"><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+a, b, c, d = Node(&quot;a&quot;), Node(&quot;b&quot;), Node(&quot;c&quot;), Node(&quot;d&quot;)
+a.next, b.next, c.next, d.next = b, c, d, b       # d points back to b
+
+out, node = [], a
+while node is not None and len(out) &lt; 10:
+    out.append(node.value)
+    node = node.next
+print(&quot;&quot;.join(out))</textarea></div>
+<p>Without the <code>len(out) &lt; 10</code> guard, that loop would never stop: after <code>d</code> comes <code>b</code> again, for ever. The list has a <strong>cycle</strong>, <code>b → c → d → b</code>, with a <strong>tail</strong> of one node, <code>a</code>, leading into it.</p>
+<h2 id="when-a-list-doesn-t-end">When a list doesn&rsquo;t end</h2>
+<pre><code class="language-text">a -&gt; b -&gt; c -&gt; d
+     ^         |
+     +---------+
+</code></pre>
+<p>A list with a cycle has no last node: following <code>next</code> from the head eventually goes round and round the same nodes. Every function that loops <code>while node is not None</code> (counting, printing, searching for something missing) hangs. Cycles come from bugs in relinking code, or from data built elsewhere (a file of &ldquo;next&rdquo; ids, a chain of redirects). Defensive code (Week 37) checks for them before trusting a list.</p>
+<p>Two facts shape every method today:</p>
+<ul>
+<li>Cycles are about <strong>nodes</strong>, not values. Two different nodes can hold the same value without any cycle, so compare with <code>is</code> (or <code>id</code>), never <code>==</code>.</li>
+<li>A list either ends in <code>None</code> or has exactly one cycle, reached after a tail of zero or more nodes: once you&rsquo;re in a loop, there&rsquo;s no way out.</li>
+</ul>
+<h2 id="remembering-where-you-ve-been">Remembering where you&rsquo;ve been</h2>
+<p>The straightforward way: walk the list, keeping a set of every node seen. Meeting a node twice means a cycle, and the first node met twice is where the cycle starts:</p>
+<div class="pc pc-example" data-kind="example" data-id="w042d5-e2"><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def first_repeat(head):
+    seen = set()
+    node = head
+    while node is not None:
+        if id(node) in seen:
+            return node
+        seen.add(id(node))
+        node = node.next
+    return None
+
+a, b, c, d = Node(&quot;a&quot;), Node(&quot;b&quot;), Node(&quot;c&quot;), Node(&quot;d&quot;)
+a.next, b.next, c.next, d.next = b, c, d, b
+print(first_repeat(a).value)
+d.next = None
+print(first_repeat(a))
+twins = Node(1, Node(1, Node(1)))                  # repeated values, no cycle
+print(first_repeat(twins))</textarea></div>
+<p>It&rsquo;s O(n) time, but O(n) extra <strong>space</strong>. (<code>id(node)</code> gives a number unique to each live object. Our <code>Node</code> doesn&rsquo;t define <code>__eq__</code>, so a set of the nodes themselves would also work, by identity; using <code>id</code> makes the intention clear, and still works if someone adds an <code>__eq__</code> later.)</p>
+<h2 id="the-tortoise-and-the-hare">The tortoise and the hare</h2>
+<p>Robert Floyd&rsquo;s method (published by Donald Knuth, who credits it to Floyd) uses two pointers and nothing else. The <strong>tortoise</strong> moves one node at a time; the <strong>hare</strong> moves two. If the list ends, the hare reaches <code>None</code> first. If there&rsquo;s a cycle, both end up going round it, and the hare catches the tortoise from behind:</p>
+<div class="pc pc-example" data-kind="example" data-id="w042d5-e3"><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def has_cycle(head):
+    slow = fast = head
+    while fast is not None and fast.next is not None:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast:
+            return True
+    return False
+
+nodes = [Node(i) for i in range(6)]
+for x, y in zip(nodes, nodes[1:]):
+    x.next = y
+print(has_cycle(nodes[0]))
+nodes[-1].next = nodes[2]
+print(has_cycle(nodes[0]))
+print(has_cycle(None), has_cycle(Node(0)))</textarea></div>
+<p><strong>Why must they meet?</strong> Once both are inside the cycle, look at the distance from the tortoise forward to the hare, going round the cycle. Each step, the hare moves 2 and the tortoise 1, so the gap <strong>closes by exactly 1</strong>. A gap that shrinks by one each step must reach 0: the hare can&rsquo;t jump over the tortoise. And it happens quickly: the tortoise is caught before it completes one lap, so the whole thing is O(n) time, O(1) space.</p>
+<p>Notice the loop moves <strong>then</strong> compares. Comparing first would find <code>slow is fast</code> at the start, when both are at the head, and report a cycle in every list.</p>
+<h2 id="where-the-cycle-starts">Where the cycle starts</h2>
+<p>When the pointers meet, one more trick finds the <strong>start</strong> of the cycle: put one pointer back at the head, and move <strong>both</strong> one step at a time. They meet again exactly at the cycle&rsquo;s first node.</p>
+<div class="pc pc-example" data-kind="example" data-id="w042d5-e4"><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def cycle_start(head):
+    slow = fast = head
+    while fast is not None and fast.next is not None:
+        slow, fast = slow.next, fast.next.next
+        if slow is fast:
+            break
+    else:
+        return None                          # the loop ended normally: no cycle
+    slow = head
+    while slow is not fast:
+        slow, fast = slow.next, fast.next
+    return slow
+
+nodes = [Node(c) for c in &quot;abcdefg&quot;]
+for x, y in zip(nodes, nodes[1:]):
+    x.next = y
+nodes[-1].next = nodes[3]                    # g -&gt; d
+print(cycle_start(nodes[0]).value)</textarea></div>
+<p>Why it works, in outline: say the tail has <code>t</code> nodes before the cycle, the cycle has length <code>c</code>, and they meet <code>m</code> steps into the cycle. The tortoise walked <code>t + m</code>; the hare walked twice that, which is also <code>t + m</code> plus some whole number of laps, <code>k × c</code>. So <code>t + m = k × c</code>, which means <code>t = k × c - m</code>: walking <code>t</code> steps from the meeting point brings you round to the cycle&rsquo;s start, exactly as walking <code>t</code> steps from the head does. (The <code>while ... else</code> form, from Week 6, runs <code>else</code> only if the loop ended without <code>break</code>.)</p>
+<p>The cycle&rsquo;s <strong>length</strong> is then easy: from any node in the cycle, walk until you come back, counting.</p>
+<h2 id="cycles-everywhere">Cycles everywhere</h2>
+<p>The tortoise and hare work on <strong>any</strong> sequence where each item decides the next: <code>x, f(x), f(f(x)), ...</code>. If there are only finitely many possible values, such a sequence must eventually repeat, so it&rsquo;s a &ldquo;linked list&rdquo; whose <code>next</code> is <code>f</code>, and it ends in a cycle.</p>
+<p><strong>Happy numbers.</strong> Replace a number by the sum of the squares of its digits, again and again: 19 → 82 → 68 → 100 → 1. A number is &ldquo;happy&rdquo; if this reaches 1 (which then repeats for ever); otherwise it falls into a cycle that never includes 1.</p>
+<div class="pc pc-example" data-kind="example" data-id="w042d5-e5"><textarea class="pc-src pc-code" hidden>def step(n):
+    return sum(int(d) ** 2 for d in str(n))
+
+def is_happy(n):
+    slow = fast = n
+    while True:
+        slow = step(slow)
+        fast = step(step(fast))
+        if slow == fast:                     # values, this time: the &quot;nodes&quot; are numbers
+            return slow == 1
+
+print([n for n in range(1, 50) if is_happy(n)])</textarea></div>
+<p><strong>A duplicate in a list.</strong> A list of <code>n + 1</code> numbers, each from 1 to <code>n</code>, must contain a repeat. Read it as a linked list where position <code>i</code> points to position <code>nums[i]</code>; the repeated value is a node with two arrows into it, which is exactly where a cycle starts. Floyd&rsquo;s method finds it in O(n) time and O(1) space, without sorting or changing the list. You&rsquo;ll write it in the practice.</p>
+<p>There&rsquo;s a faster relative, Brent&rsquo;s method (Richard Brent, 1980), which moves only one pointer and teleports the other; Floyd&rsquo;s is the one to know first.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A cycle makes a list loop for ever; detect it before trusting the list. A set of visited node <code>id</code>s finds the first repeated node in O(n) time and O(n) space. Floyd&rsquo;s tortoise (one step) and hare (two steps) need O(1) space: if the hare reaches <code>None</code> there&rsquo;s no cycle; otherwise the gap between them closes by one each step, so they meet. Move, then compare. To find the cycle&rsquo;s start, reset one pointer to the head and step both one at a time until they meet. Compare nodes by identity, not value. The same method works on any sequence <code>x, f(x), f(f(x)), ...</code>: happy numbers, and finding a duplicate in a read-only list.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w042d5-seen" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A set of visited nodes</div><div class="pc-prompt"><p>Write <code>first_repeat(head)</code>: walk the list keeping a set of the <code>id</code>s of nodes seen, and return the first node visited twice (the start of the cycle), or <code>None</code> if the list ends. Nodes with equal values are <strong>different</strong> nodes.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def first_repeat(head):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def chain(values, back=None):
+    nodes = [Node(v) for v in values]
+    for x, y in zip(nodes, nodes[1:]):
+        x.next = y
+    if back is not None and nodes:
+        nodes[-1].next = nodes[back]
+    return nodes
+def test_repeat():
+    &quot;repeats&quot;
+    n = chain(&quot;abcde&quot;, back=2)
+    assert first_repeat(n[0]) is n[2]
+    n = chain(&quot;aaaa&quot;)
+    assert first_repeat(n[0]) is None, &quot;equal values aren&#x27;t a cycle&quot;
+    n = chain(&quot;x&quot;, back=0)
+    assert first_repeat(n[0]) is n[0] and first_repeat(None) is None</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def first_repeat(head):
+    seen = set()
+    node = head
+    while node is not None:
+        if id(node) in seen:
+            return node
+        seen.add(id(node))
+        node = node.next
+    return None</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w042d5-floyd" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Tortoise and hare</div><div class="pc-prompt"><p>Write <code>has_cycle(head)</code> with Floyd&rsquo;s method: two pointers, one moving one step and one moving two, no sets, lists or dictionaries. Return <code>True</code> if there&rsquo;s a cycle.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def has_cycle(head):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import ast
+def chain(n, back=None):
+    nodes = [Node(i) for i in range(n)]
+    for x, y in zip(nodes, nodes[1:]):
+        x.next = y
+    if back is not None and nodes:
+        nodes[-1].next = nodes[back]
+    return nodes[0] if nodes else None
+def test_floyd():
+    &quot;cycles&quot;
+    assert not has_cycle(None) and not has_cycle(chain(1)) and not has_cycle(chain(2)) and not has_cycle(chain(7))
+    assert has_cycle(chain(1, 0)) and has_cycle(chain(2, 0)) and has_cycle(chain(2, 1)) and has_cycle(chain(9, 4))
+    assert not has_cycle(chain(50_000)) and has_cycle(chain(50_000, 1))
+    tree = ast.parse(source)
+    assert not any(isinstance(n, (ast.Set, ast.Dict, ast.List, ast.SetComp, ast.DictComp, ast.ListComp)) for n in ast.walk(tree))
+    assert not any(isinstance(n, ast.Call) and getattr(n.func, &quot;id&quot;, &quot;&quot;) in (&quot;set&quot;, &quot;dict&quot;, &quot;list&quot;) for n in ast.walk(tree)), &quot;O(1) space&quot;</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def has_cycle(head):
+    slow = fast = head
+    while fast is not None and fast.next is not None:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast:
+            return True
+    return False</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w042d5-start" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Where it starts, and how long</div><div class="pc-prompt"><p>Write <code>cycle_info(head)</code>: return <code>(start, length)</code> for a list with a cycle, where <code>start</code> is the cycle&rsquo;s first node and <code>length</code> the number of nodes in it; <code>(None, 0)</code> if there&rsquo;s no cycle. Use Floyd&rsquo;s method to meet, reset one pointer to the head to find the start, then walk once round to count. O(1) space.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def cycle_info(head):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def chain(n, back=None):
+    nodes = [Node(i) for i in range(n)]
+    for x, y in zip(nodes, nodes[1:]):
+        x.next = y
+    if back is not None and nodes:
+        nodes[-1].next = nodes[back]
+    return nodes
+def test_info():
+    &quot;start and length&quot;
+    rng = random.Random(8)
+    for _ in range(200):
+        n = rng.randint(1, 30)
+        if rng.random() &lt; 0.2:
+            nodes = chain(n)
+            assert cycle_info(nodes[0]) == (None, 0)
+        else:
+            back = rng.randint(0, n - 1)
+            nodes = chain(n, back)
+            start, length = cycle_info(nodes[0])
+            assert start is nodes[back] and length == n - back, (n, back)
+    assert cycle_info(None) == (None, 0)</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def cycle_info(head):
+    slow = fast = head
+    while fast is not None and fast.next is not None:
+        slow, fast = slow.next, fast.next.next
+        if slow is fast:
+            break
+    else:
+        return None, 0
+    slow = head
+    while slow is not fast:
+        slow, fast = slow.next, fast.next
+    length, node = 1, slow.next
+    while node is not slow:
+        length += 1
+        node = node.next
+    return slow, length</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w042d5-safe_len" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A safe length</div><div class="pc-prompt"><p>Write <code>safe_length(head)</code>: the number of <strong>distinct</strong> nodes in the list, whether it ends or loops. For a list with a cycle, that&rsquo;s the tail plus the cycle. Use <code>cycle_info</code> from the starter (it&rsquo;s correct), and O(1) space.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def cycle_info(head):
+    slow = fast = head
+    while fast is not None and fast.next is not None:
+        slow, fast = slow.next, fast.next.next
+        if slow is fast:
+            break
+    else:
+        return None, 0
+    slow = head
+    while slow is not fast:
+        slow, fast = slow.next, fast.next
+    length, node = 1, slow.next
+    while node is not slow:
+        length += 1
+        node = node.next
+    return slow, length
+
+def safe_length(head):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def chain(n, back=None):
+    nodes = [Node(i) for i in range(n)]
+    for x, y in zip(nodes, nodes[1:]):
+        x.next = y
+    if back is not None and nodes:
+        nodes[-1].next = nodes[back]
+    return nodes[0] if nodes else None
+def test_len():
+    &quot;lengths&quot;
+    assert safe_length(None) == 0 and safe_length(chain(5)) == 5 and safe_length(chain(5, 0)) == 5 and safe_length(chain(5, 3)) == 5 and safe_length(chain(1, 0)) == 1
+    assert safe_length(chain(20_000, 7)) == 20_000</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def cycle_info(head):
+    slow = fast = head
+    while fast is not None and fast.next is not None:
+        slow, fast = slow.next, fast.next.next
+        if slow is fast:
+            break
+    else:
+        return None, 0
+    slow = head
+    while slow is not fast:
+        slow, fast = slow.next, fast.next
+    length, node = 1, slow.next
+    while node is not slow:
+        length += 1
+        node = node.next
+    return slow, length
+
+def safe_length(head):
+    start, cycle = cycle_info(head)
+    count, node = 0, head
+    while node is not None and node is not start:
+        count += 1
+        node = node.next
+    return count + cycle</textarea><template class="pc-src pc-hint">With no cycle, count normally. With a cycle, count the tail by walking from the head until you reach <code>start</code>, then add the cycle&rsquo;s length.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w042d5-happy" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Happy numbers</div><div class="pc-prompt"><p>Write <code>digit_squares(n)</code> (the sum of the squares of <code>n</code>&rsquo;s digits) and <code>is_happy(n)</code>: does repeating <code>digit_squares</code> from <code>n</code> reach 1? Use the tortoise and hare on the sequence (no sets). Then set <code>first_ten</code> to the first ten happy numbers.</p></div><textarea class="pc-src pc-code" hidden>def digit_squares(n):
+    ___
+
+def is_happy(n):
+    ___
+
+first_ten = ___</textarea><textarea class="pc-src pc-tests" hidden>def test_happy():
+    &quot;happy numbers&quot;
+    assert digit_squares(19) == 82 and digit_squares(100) == 1 and digit_squares(0) == 0
+    assert is_happy(19) and is_happy(1) and is_happy(7) and not is_happy(2) and not is_happy(4)
+    assert first_ten == [1, 7, 10, 13, 19, 23, 28, 31, 32, 44]
+    assert &quot;set(&quot; not in source</textarea><textarea class="pc-src pc-solution" hidden>def digit_squares(n):
+    total = 0
+    while n:
+        n, d = divmod(n, 10)
+        total += d * d
+    return total
+
+def is_happy(n):
+    slow = fast = n
+    while True:
+        slow = digit_squares(slow)
+        fast = digit_squares(digit_squares(fast))
+        if slow == fast:
+            return slow == 1
+
+first_ten = [n for n in range(1, 100) if is_happy(n)][:10]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w042d5-dup" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The duplicate, without changing anything</div><div class="pc-prompt"><p><code>nums</code> has <code>n + 1</code> numbers, each from 1 to <code>n</code>, so at least one value repeats; exactly one value appears more than once (possibly many times). Write <code>find_duplicate(nums)</code>, which returns it in O(n) time and <strong>O(1)</strong> extra space, <strong>without changing</strong> <code>nums</code> and without sorting. Treat position <code>i</code> as a node whose <code>next</code> is position <code>nums[i]</code>, start at position 0, and find where the cycle starts.</p></div><textarea class="pc-src pc-code" hidden>def find_duplicate(nums):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import ast
+import random
+def test_dup():
+    &quot;duplicates&quot;
+    assert find_duplicate([1, 3, 4, 2, 2]) == 2 and find_duplicate([3, 1, 3, 4, 2]) == 3 and find_duplicate([1, 1]) == 1 and find_duplicate([2, 2, 2, 2, 2]) == 2
+    rng = random.Random(9)
+    for _ in range(100):
+        n = rng.randint(1, 50)
+        dup = rng.randint(1, n)
+        others = [x for x in range(1, n + 1) if x != dup]
+        keep = rng.sample(others, rng.randint(0, len(others)))
+        nums = keep + [dup] * (n + 1 - len(keep))
+        rng.shuffle(nums)
+        before = list(nums)
+        assert find_duplicate(nums) == dup and nums == before, (nums, dup)
+    tree = ast.parse(source)
+    assert not any(isinstance(n, ast.Call) and getattr(n.func, &quot;id&quot;, getattr(n.func, &quot;attr&quot;, &quot;&quot;)) in (&quot;set&quot;, &quot;sorted&quot;, &quot;sort&quot;, &quot;Counter&quot;, &quot;dict&quot;) for n in ast.walk(tree)), &quot;O(1) space, no sorting&quot;</textarea><textarea class="pc-src pc-solution" hidden>def find_duplicate(nums):
+    slow = fast = 0
+    while True:
+        slow = nums[slow]
+        fast = nums[nums[fast]]
+        if slow == fast:
+            break
+    slow = 0
+    while slow != fast:
+        slow = nums[slow]
+        fast = nums[fast]
+    return slow</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w042d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The hare trips at the end</div><div class="pc-prompt"><p>This moves the hare two steps without checking that the first step exists, so on a list with an <strong>odd</strong> number of nodes and no cycle it crashes with <code>AttributeError: 'NoneType' object has no attribute 'next'</code>. Fix the loop condition so this prints <code>False True</code>.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def has_cycle(head):
+    slow = fast = head
+    while fast is not None:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast:
+            return True
+    return False
+
+a = Node(1, Node(2, Node(3)))
+b = Node(1, Node(2))
+b.next.next = b
+print(has_cycle(a), has_cycle(b))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;check fast.next too&quot;
+    expect_output(&quot;False True&quot;)
+    assert has_cycle(Node(1)) is False and has_cycle(None) is False</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def has_cycle(head):
+    slow = fast = head
+    while fast is not None and fast.next is not None:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast:
+            return True
+    return False
+
+a = Node(1, Node(2, Node(3)))
+b = Node(1, Node(2))
+b.next.next = b
+print(has_cycle(a), has_cycle(b))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w042d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Same value, different node</div><div class="pc-prompt"><p>This remembers the <strong>values</strong> it has seen rather than the nodes, so a list that merely repeats a value is reported as having a cycle: this prints <code>True</code>. Remember the nodes, so it prints <code>False</code>.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def has_cycle(head):
+    seen = set()
+    node = head
+    while node is not None:
+        if node.value in seen:
+            return True
+        seen.add(node.value)
+        node = node.next
+    return False
+
+print(has_cycle(Node(&quot;hi&quot;, Node(&quot;there&quot;, Node(&quot;hi&quot;)))))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;nodes, not values&quot;
+    expect_output(&quot;False&quot;)
+    a = Node(1)
+    a.next = a
+    assert has_cycle(a)</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def has_cycle(head):
+    seen = set()
+    node = head
+    while node is not None:
+        if id(node) in seen:
+            return True
+        seen.add(id(node))
+        node = node.next
+    return False
+
+print(has_cycle(Node(&quot;hi&quot;, Node(&quot;there&quot;, Node(&quot;hi&quot;)))))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w042d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Caught before the race begins</div><div class="pc-prompt"><p>This compares the two pointers <strong>before</strong> moving them. Both start at the head, so every list is reported as having a cycle: this prints <code>True</code>. Move first, then compare, so it prints <code>False</code>.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def has_cycle(head):
+    slow = fast = head
+    while fast is not None and fast.next is not None:
+        if slow is fast:
+            return True
+        slow = slow.next
+        fast = fast.next.next
+    return False
+
+print(has_cycle(Node(1, Node(2, Node(3, Node(4))))))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;move, then compare&quot;
+    expect_output(&quot;False&quot;)
+    a = Node(1, Node(2))
+    a.next.next = a
+    assert has_cycle(a)</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def has_cycle(head):
+    slow = fast = head
+    while fast is not None and fast.next is not None:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast:
+            return True
+    return False
+
+print(has_cycle(Node(1, Node(2, Node(3, Node(4))))))</textarea></div>
+<div class="parsons" data-id="w042d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Finding the start</div><div class="pc-prompt"><p>Arrange the second half of <code>cycle_start</code>: after the pointers have met, find the first node of the cycle. One line is a trap.</p></div><script type="application/json">{"lines": ["    slow = head", "    while slow is not fast:", "        slow = slow.next", "        fast = fast.next", "    return slow"], "distractors": ["        fast = fast.next.next"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w042d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden># Answer without running code.
+
+p = ___   # the extra space of Floyd&#x27;s method: &quot;O(1)&quot; or &quot;O(n)&quot;
+q = ___   # by how much the gap between hare and tortoise closes each step inside the cycle
+r = ___   # the sequence from 4 under digit_squares: 4, 16, 37, 58, 89, 145, 42, 20, then?
+s = ___   # True or False: two nodes holding equal values mean the list has a cycle
+t = ___   # in [2, 3, 1, 3], following i -&gt; nums[i] from position 0, the first position visited twice</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;O(1)&quot; and q == 1 and r == 4, &quot;p, q and r&quot;
+    assert s is False and t == 3, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden># Answer without running code.
+
+p = &quot;O(1)&quot;
+q = 1
+r = 4
+s = False
+t = 3</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w042d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why does an ordinary while node is not None loop hang on a list with a cycle?", "answer": 1, "explain": "Detect cycles before trusting a list.", "options": ["It&rsquo;s slow", "There&rsquo;s no last node: following next goes round the cycle for ever", "Python detects it", "It doesn&rsquo;t"]}, {"type": "mc", "q": "Why compare nodes with is (or id) rather than ==?", "answer": 1, "explain": "Identity, not value.", "options": ["Speed", "A cycle means the same node twice; different nodes can hold equal values", "== doesn&rsquo;t work on nodes", "Style"]}, {"type": "mc", "q": "What does the visited-set method cost?", "answer": 1, "explain": "Floyd&rsquo;s method saves the space.", "options": ["O(1) time and space", "O(n) time and O(n) space", "O(n\u00b2) time", "O(log n) space"]}, {"type": "mc", "q": "In Floyd&rsquo;s method, what does it mean if the hare reaches None?", "answer": 1, "explain": "It reaches the end first.", "options": ["There&rsquo;s a cycle", "The list ends: no cycle", "The tortoise is lost", "An error"]}, {"type": "mc", "q": "Why must the hare catch the tortoise inside a cycle?", "answer": 1, "explain": "It can&rsquo;t jump over.", "options": ["Luck", "The gap between them closes by exactly 1 each step, so it reaches 0", "The hare is twice as fast so it jumps over", "They always start together"]}, {"type": "mc", "q": "Why move the pointers before comparing them?", "answer": 1, "explain": "Move, then compare.", "options": ["Speed", "Both start at the head, so comparing first reports a cycle in every list", "Python requires it", "It doesn&rsquo;t matter"]}, {"type": "mc", "q": "After the pointers meet, how do you find where the cycle starts?", "answer": 1, "explain": "They meet at the start.", "options": ["Count to n", "Put one pointer back at the head and move both one step at a time until they meet", "Reverse the list", "Use a set"]}, {"type": "mc", "q": "Why does a sequence x, f(x), f(f(x)), &hellip; with finitely many possible values always end in a cycle?", "answer": 1, "explain": "So Floyd&rsquo;s method applies.", "options": ["It doesn&rsquo;t", "Eventually a value repeats, and from then on the sequence repeats too", "Because f is fast", "Python limits it"]}, {"type": "mc", "q": "What does the while &hellip; else form do in cycle_start?", "answer": 1, "explain": "From Week 6.", "options": ["Runs else every time", "Runs else only if the loop ended without break: here, when no cycle was found", "Catches errors", "Repeats the loop"]}, {"type": "output", "q": "What does this print?", "answer": "9 1\n1 1\n1 1\n1 1", "explain": "3, 9, 1, 1, &hellip;: the sequence settles into a cycle of length 1.", "code": "def f(n):\n    return n * n % 10\nslow = fast = 3\nfor _ in range(4):\n    slow, fast = f(slow), f(f(fast))\n    print(slow, fast)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w042d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: repairing and joining lists</div><div class="pc-prompt"><p>Two more classic problems, both in O(1) extra space:</p>
+<ol>
+<li><code>break_cycle(head)</code>: if the list has a cycle, cut it, by setting the <code>next</code> of the cycle&rsquo;s <strong>last</strong> node (the one that points back to the start) to <code>None</code>, so the list becomes an ordinary list with every node in it once. Return the number of nodes. A list without a cycle is left alone.</li>
+<li><code>meeting_point(a, b)</code>: two ordinary lists (no cycles) may <strong>join</strong> at some node and share everything after it, like a <code>Y</code>. Return the first shared node, or <code>None</code> if they never join. Hint: walk two pointers, one along each list; when one runs off the end, send it to the start of the <strong>other</strong> list. After at most <code>len(a) + len(b)</code> steps, they&rsquo;re at the same node (or both at <code>None</code>).</li>
+</ol></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def break_cycle(head):
+    ___
+
+def meeting_point(a, b):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def chain(n, back=None):
+    nodes = [Node(i) for i in range(n)]
+    for x, y in zip(nodes, nodes[1:]):
+        x.next = y
+    if back is not None and nodes:
+        nodes[-1].next = nodes[back]
+    return nodes
+def walk(head, limit=10_000):
+    out = []
+    while head is not None and len(out) &lt; limit:
+        out.append(head)
+        head = head.next
+    return out
+def test_break():
+    &quot;breaking cycles&quot;
+    rng = random.Random(10)
+    for _ in range(100):
+        n = rng.randint(1, 25)
+        back = rng.randint(0, n - 1) if rng.random() &lt; 0.8 else None
+        nodes = chain(n, back)
+        assert break_cycle(nodes[0]) == n
+        assert walk(nodes[0]) == nodes, (n, back)
+    assert break_cycle(None) == 0
+def test_join():
+    &quot;joining&quot;
+    rng = random.Random(11)
+    for _ in range(100):
+        shared = chain(rng.randint(0, 6))
+        a_own, b_own = chain(rng.randint(0, 6)), chain(rng.randint(0, 6))
+        join = shared[0] if shared else None
+        if a_own:
+            a_own[-1].next = join
+        if b_own:
+            b_own[-1].next = join
+        a = a_own[0] if a_own else join
+        b = b_own[0] if b_own else join
+        assert meeting_point(a, b) is join
+    x, y = chain(3), chain(4)
+    assert meeting_point(x[0], y[0]) is None</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self, value, next=None):
+        self.value, self.next = value, next
+
+def break_cycle(head):
+    slow = fast = head
+    while fast is not None and fast.next is not None:
+        slow, fast = slow.next, fast.next.next
+        if slow is fast:
+            break
+    else:
+        count, node = 0, head
+        while node is not None:
+            count += 1
+            node = node.next
+        return count
+    start = head
+    while start is not fast:
+        start, fast = start.next, fast.next
+    count, node = 0, head
+    while node is not start:
+        count += 1
+        node = node.next
+    last = start
+    count += 1
+    while last.next is not start:
+        last = last.next
+        count += 1
+    last.next = None
+    return count
+
+def meeting_point(a, b):
+    p, q = a, b
+    while p is not q:
+        p = b if p is None else p.next
+        q = a if q is None else q.next
+    return p</textarea><template class="pc-src pc-hint">For <code>break_cycle</code>, find the cycle&rsquo;s start with Floyd&rsquo;s method, then walk round from the start until you reach the node whose <code>next</code> is the start: that&rsquo;s the last node. Count the tail and the cycle as in <code>safe_length</code>. For <code>meeting_point</code>, loop <code>while p is not q</code>, moving each one on (or switching it to the other list&rsquo;s head when it reaches <code>None</code>).</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Draw a list with a tail of 3 nodes and a cycle of 4, and play the tortoise and hare by hand: where do they meet, and does resetting one to the head bring them together at the cycle&rsquo;s start? Tomorrow is the Forge, where this week&rsquo;s linked-list skills build a text editor&rsquo;s buffer.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w042d4.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w042d5", "week": 42, "day": 5, "title": "Cycle detection", "exercises": [{"id": "w042d5-seen", "title": "A set of visited nodes", "points": 10}, {"id": "w042d5-floyd", "title": "Tortoise and hare", "points": 10}, {"id": "w042d5-start", "title": "Where it starts, and how long", "points": 15}, {"id": "w042d5-safe_len", "title": "A safe length", "points": 10}, {"id": "w042d5-happy", "title": "Happy numbers", "points": 15}, {"id": "w042d5-dup", "title": "The duplicate, without changing anything", "points": 15}, {"id": "w042d5-bug1", "title": "The hare trips at the end", "points": 10}, {"id": "w042d5-bug2", "title": "Same value, different node", "points": 10}, {"id": "w042d5-bug3", "title": "Caught before the race begins", "points": 10}, {"id": "w042d5-trace", "title": "Predict them", "points": 10}, {"id": "w042d5-challenge", "title": "Challenge: repairing and joining lists", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=871ff52039"></script>
+</body>
+</html>
