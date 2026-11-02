@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="871ff52039">
+<title>Week 46 Day 5: Serialising trees | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=871ff52039">
+<link rel="stylesheet" href="../assets/css/site.css?v=871ff52039">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=871ff52039"></script>
+<script src="../assets/vendor/codemirror.js?v=871ff52039" defer></script>
+<meta name="description" content="A tree in memory is a web of objects and references; to save it to a file, send it over a network or store it in a database, you have to serialise it into a...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w046d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 46 Day 5: Serialising trees">
+<meta property="og:description" content="A tree in memory is a web of objects and references; to save it to a file, send it over a network or store it in a database, you have to serialise it into a...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w046d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-46">Week 46: Trees II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#bsts-need-no-markers" data-sec="bsts-need-no-markers">BSTs need no markers</a></li><li><a href="#level-order-lists" data-sec="level-order-lists">Level-order lists</a></li><li><a href="#trees-as-json" data-sec="trees-as-json">Trees as JSON</a></li><li><a href="#formats-change-versions-and-round-trips" data-sec="formats-change-versions-and-round-trips">Formats change: versions and round trips</a></li><li><a href="#loading-data-you-didn-t-write" data-sec="loading-data-you-didn-t-write">Loading data you didn’t write</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w046d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-46">Week 46: Trees II</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 46, Day 5</span></p>
+      <h1>Serialising trees</h1>
+      <div class="day-intro"><p>A tree in memory is a web of objects and references; to save it to a file, send it over a network or store it in a database, you have to <strong>serialise</strong> it into a flat sequence of characters or bytes, and later <strong>deserialise</strong> it back into the same shape. Last week you saved binary trees in pre-order with <code>#</code> for each missing child. Today goes further: BSTs that need no markers at all, the level-order lists many websites use for tree puzzles, JSON for trees with any number of children, a <code>Codec</code> class that versions its format, and, most importantly, loading data you didn&rsquo;t write without letting bad input crash or fool your program.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Save a BST as plain pre-order values and rebuild it in O(n) using its order</li><li>Convert binary trees to and from level-order lists with None for missing children</li><li>Save general trees as nested JSON, and know the limits of nesting</li><li>Design a format with a version number, and test it with round trips</li><li>Load untrusted tree data safely, with clear errors for every kind of bad input</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="BSTs need no markers: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Level-order lists: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Trees as JSON: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Formats change: versions and round trips: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Loading data you didn&#x27;t write: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">BSTs need no markers</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Level-order lists</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Trees as JSON</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Formats change: versions and round trips</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Loading data you didn&rsquo;t write</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w046d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w046d5.ipynb" download>download it</a>. Exercises today are worth 135 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w046d5-p1"><textarea class="pc-src pc-code" hidden>class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def preorder(n):
+    return [] if n is None else [n.val] + preorder(n.left) + preorder(n.right)
+
+T = TreeNode
+a = T(2, T(1))                 # 1 is the left child of 2
+b = T(2, None, T(1))           # 1 is the right child of 2: not a BST
+print(preorder(a), preorder(b), preorder(a) == preorder(b))</textarea></div>
+<p>Two different trees, one pre-order list: for a general binary tree, values alone lose the shape, which is why last week&rsquo;s format needed <code>#</code> markers. But only one of these is a BST. For a BST, the values themselves say where everything goes: 1 is less than 2, so it <strong>must</strong> be on the left.</p>
+<h2 id="bsts-need-no-markers">BSTs need no markers</h2>
+<p>Given the pre-order values of a BST, the first is the root; the values after it that are <strong>smaller</strong> form the left subtree, and the rest the right subtree. Splitting by searching for the first larger value at every level is O(n²) for a chain. To do it in O(n), pass an <strong>upper bound</strong> down, as on Day 1: build a subtree from the next values for as long as they&rsquo;re below the bound.</p>
+<div class="pc pc-example" data-kind="example" data-id="w046d5-e2"><textarea class="pc-src pc-code" hidden>class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def load_bst(values):
+    position = [0]
+    def build(bound):
+        i = position[0]
+        if i == len(values) or values[i] &gt; bound:
+            return None
+        node = TreeNode(values[i])
+        position[0] += 1
+        node.left = build(node.val)       # left subtree: values below this one
+        node.right = build(bound)         # right subtree: values up to the old bound
+        return node
+    return build(float(&quot;inf&quot;))
+
+def preorder(n):
+    return [] if n is None else [n.val] + preorder(n.left) + preorder(n.right)
+
+def inorder(n):
+    return [] if n is None else inorder(n.left) + [n.val] + inorder(n.right)
+
+saved = &quot;50 30 20 40 35 70 60 80 90&quot;
+root = load_bst([int(v) for v in saved.split()])
+print(preorder(root) == [int(v) for v in saved.split()], inorder(root))</textarea></div>
+<p>Each value is read once, so it&rsquo;s O(n). The same job can be done with an explicit stack, a monotonic stack like Week 43&rsquo;s: the stack holds the path of nodes still waiting for a right child, and each new value pops every node smaller than it (the last one popped is its parent, on the right); otherwise it&rsquo;s the left child of the top. That version has no recursion limit, and the exercises ask for it.</p>
+<p>Saving is just the pre-order values. It works because the tree is a BST; if the data has been tampered with or the &ldquo;BST&rdquo; wasn&rsquo;t one, the load produces a different tree, so check with Day 1&rsquo;s <code>is_bst</code> or by comparing pre-orders.</p>
+<h2 id="level-order-lists">Level-order lists</h2>
+<p>Many puzzle websites write binary trees as a <strong>level-order list</strong>: values level by level, left to right, with <code>None</code> (or <code>null</code> in JSON) for a missing child, and trailing <code>None</code>s dropped. Only children of real nodes get a slot, so a sparse tree doesn&rsquo;t fill a whole level:</p>
+<pre><code class="language-text">        1
+       / \          [1, 2, 3, None, 4, None, 5]
+      2   3         2 has no left child; 3 has no left child;
+       \   \        4 and 5 have no children (trailing Nones dropped)
+        4   5
+</code></pre>
+<p>Loading uses a queue (Week 43): take the next parent from the queue, and give it the next two items from the list as its left and right children, adding any real ones to the queue.</p>
+<div class="pc pc-example" data-kind="example" data-id="w046d5-e3"><textarea class="pc-src pc-code" hidden>from collections import deque
+
+class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def to_list(root):
+    out, queue = [], deque([root])
+    while queue:
+        node = queue.popleft()
+        if node is None:
+            out.append(None)
+        else:
+            out.append(node.val)
+            queue.append(node.left)
+            queue.append(node.right)
+    while out and out[-1] is None:
+        out.pop()
+    return out
+
+def from_list(items):
+    if not items or items[0] is None:
+        return None
+    root = TreeNode(items[0])
+    queue, i = deque([root]), 1
+    while queue and i &lt; len(items):
+        parent = queue.popleft()
+        for side in (&quot;left&quot;, &quot;right&quot;):
+            if i &lt; len(items) and items[i] is not None:
+                child = TreeNode(items[i])
+                setattr(parent, side, child)
+                queue.append(child)
+            i += 1
+    return root
+
+T = TreeNode
+saved = to_list(T(1, T(2, None, T(4)), T(3, None, T(5))))
+print(saved, to_list(from_list(saved)) == saved)</textarea></div>
+<h2 id="trees-as-json">Trees as JSON</h2>
+<p>For trees whose nodes have any number of children (Week 45&rsquo;s general trees: folders, organisation charts, menus), the natural format is <strong>nested JSON</strong> (Week 23 Day 3): each node becomes an object holding its data and a list of its children.</p>
+<div class="pc pc-example" data-kind="example" data-id="w046d5-e4"><textarea class="pc-src pc-code" hidden>import json
+
+class Node:
+    def __init__(self, name, children=None):
+        self.name, self.children = name, children or []
+
+def to_dict(node):
+    return {&quot;name&quot;: node.name, &quot;children&quot;: [to_dict(c) for c in node.children]}
+
+def from_dict(d):
+    return Node(d[&quot;name&quot;], [from_dict(c) for c in d[&quot;children&quot;]])
+
+menu = Node(&quot;File&quot;, [Node(&quot;New&quot;), Node(&quot;Open&quot;, [Node(&quot;Recent&quot;), Node(&quot;Browse&quot;)]), Node(&quot;Quit&quot;)])
+text = json.dumps(to_dict(menu))
+print(text)
+again = from_dict(json.loads(text))
+print([c.name for c in again.children], again.children[1].children[0].name)</textarea></div>
+<p>Nested JSON is easy to read, and every language can load it. Its weakness is <strong>depth</strong>: each level of nesting is a level of recursion, both in your <code>to_dict</code> and inside the <code>json</code> module itself, which raises <code>RecursionError</code> for very deeply nested input. For trees that can be thousands of levels deep (a long chain of replies in a discussion, say), use a <strong>flat</strong> format instead: a list of <code>{"id": ..., "parent": ..., ...}</code> records, which is also how databases store trees (Week 45 Day 1 built a tree from a parent map).</p>
+<h2 id="formats-change-versions-and-round-trips">Formats change: versions and round trips</h2>
+<p>A format you save today must still load next year, after you&rsquo;ve changed the program. Two habits help:</p>
+<ul>
+<li><strong>Put a version in the data.</strong> Start the saved form with something like <code>{"format": "atlas-tree", "version": 2, ...}</code>. The loader checks the version, converts older ones, and refuses versions it doesn&rsquo;t know rather than guessing.</li>
+<li><strong>Test with round trips.</strong> For any tree <code>t</code>, <code>load(save(t))</code> must equal <code>t</code>. Checking that over many random trees (including empty trees, single nodes, chains and awkward values like negative numbers or strings with spaces) catches most serialisation bugs. This is an example of <strong>property-based testing</strong>: instead of hand-picking inputs and outputs, you state a property that must always hold and test it on lots of generated inputs (the <code>hypothesis</code> library automates it).</li>
+</ul>
+<p>Wrapping both directions in one class with <code>dumps</code> and <code>loads</code> methods (the names the <code>json</code> and <code>pickle</code> modules use) keeps them together, so they can&rsquo;t drift apart:</p>
+<div class="pc pc-example" data-kind="example" data-id="w046d5-e5"><textarea class="pc-src pc-code" hidden>import json
+
+class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+class Codec:
+    VERSION = 2
+
+    def dumps(self, root):
+        return json.dumps({&quot;format&quot;: &quot;tree&quot;, &quot;version&quot;: self.VERSION, &quot;root&quot;: self._enc(root)})
+
+    def _enc(self, n):
+        return None if n is None else [n.val, self._enc(n.left), self._enc(n.right)]
+
+    def loads(self, text):
+        data = json.loads(text)
+        if data.get(&quot;version&quot;) != self.VERSION:
+            raise ValueError(f&quot;unsupported version: {data.get(&#x27;version&#x27;)!r}&quot;)
+        return self._dec(data[&quot;root&quot;])
+
+    def _dec(self, item):
+        return None if item is None else TreeNode(item[0], self._dec(item[1]), self._dec(item[2]))
+
+c = Codec()
+text = c.dumps(TreeNode(&quot;b&quot;, TreeNode(&quot;a&quot;), TreeNode(&quot;c d&quot;)))
+print(text)
+print(c.dumps(c.loads(text)) == text)
+try:
+    c.loads(&#x27;{&quot;format&quot;: &quot;tree&quot;, &quot;version&quot;: 3, &quot;root&quot;: null}&#x27;)
+except ValueError as e:
+    print(&quot;ValueError:&quot;, e)</textarea></div>
+<h2 id="loading-data-you-didn-t-write">Loading data you didn&rsquo;t write</h2>
+<p>Saved data comes back from files people can edit, from networks, from other programs. Treat it as <strong>untrusted</strong> (Week 37&rsquo;s defensive programming): a loader should either return a correct tree or raise one clear error, never crash with an <code>IndexError</code> from deep inside, loop for ever, or quietly build something wrong. Check:</p>
+<ul>
+<li><strong>Types</strong>: is each node the shape you expect (a list of three, an object with the right keys)? Is each value the right type?</li>
+<li><strong>Structure</strong>: does the data actually describe a tree? In a flat format, an id can appear twice, a parent can be missing, or parents can form a cycle.</li>
+<li><strong>Size and depth</strong>: set limits, so a file of a billion nodes or a million levels is refused before it uses all your memory or overflows the stack.</li>
+<li><strong>Meaning</strong>: if it&rsquo;s meant to be a BST, is it one?</li>
+</ul>
+<p>And never load untrusted data with <code>eval</code> or <code>pickle</code>: both can run arbitrary code. The <code>pickle</code> documentation itself warns that it is &ldquo;not secure&rdquo; and that you should &ldquo;only unpickle data you trust&rdquo;. JSON, plain text and careful checks are the safe route.</p>
+<div class="pc pc-example" data-kind="example" data-id="w046d5-e6"><textarea class="pc-src pc-code" hidden>def check_node(item, depth=0, limit=100):
+    if depth &gt; limit:
+        raise ValueError(&quot;tree too deep&quot;)
+    if item is None:
+        return 0
+    if not (isinstance(item, list) and len(item) == 3):
+        raise ValueError(f&quot;bad node: {item!r}&quot;)
+    if not isinstance(item[0], int) or isinstance(item[0], bool):
+        raise ValueError(f&quot;bad value: {item[0]!r}&quot;)
+    return 1 + check_node(item[1], depth + 1, limit) + check_node(item[2], depth + 1, limit)
+
+for data in [[2, [1, None, None], None], [2, [1, None], None], [True, None, None], &quot;tree&quot;]:
+    try:
+        print(&quot;ok,&quot;, check_node(data), &quot;nodes&quot;)
+    except ValueError as e:
+        print(&quot;ValueError:&quot;, e)</textarea></div>
+<p>(<code>bool</code> is a subclass of <code>int</code> in Python, so <code>isinstance(True, int)</code> is <code>True</code>; a careful check excludes it explicitly.)</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A BST can be saved as its plain pre-order values: the loader rebuilds it in O(n) by passing an upper bound down, or with a monotonic stack. Level-order lists use None for missing children of real nodes, with trailing Nones dropped; load them with a queue. General trees suit nested JSON, but deep nesting hits recursion limits, so very deep trees use a flat list of id and parent records. Put a format name and version in saved data, keep <code>dumps</code> and <code>loads</code> together in one class, and test with round trips over many random trees. Treat loaded data as untrusted: check types, structure, size and depth, raise one clear <code>ValueError</code>, and never use <code>eval</code> or <code>pickle</code> on it.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w046d5-bstload" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A BST from its values</div><div class="pc-prompt"><p>Write <code>save_bst(root)</code> (the pre-order values separated by spaces; <code>""</code> for an empty tree) and <code>load_bst(text)</code>, rebuilding it in O(n) with a <strong>monotonic stack</strong> and no recursion. The checks load a 20,000-value chain.</p></div><textarea class="pc-src pc-code" hidden>class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def save_bst(root):
+    ___
+
+def load_bst(text):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random, time
+def ins(n, v):
+    if n is None:
+        return TreeNode(v)
+    if v &lt; n.val:
+        n.left = ins(n.left, v)
+    else:
+        n.right = ins(n.right, v)
+    return n
+def shape(n):
+    out, stack = [], [n]
+    while stack:
+        x = stack.pop()
+        if x is None:
+            out.append(&quot;#&quot;)
+        else:
+            out.append(x.val)
+            stack += [x.right, x.left]
+    return out
+def test_roundtrip():
+    &quot;round trips&quot;
+    rng = random.Random(16)
+    for _ in range(100):
+        root = None
+        for v in rng.sample(range(-500, 500), rng.randint(0, 40)):
+            root = ins(root, v)
+        assert shape(load_bst(save_bst(root))) == shape(root)
+    assert save_bst(None) == &quot;&quot; and load_bst(&quot;&quot;) is None
+    T = TreeNode
+    assert save_bst(T(50, T(30, T(20), T(40, T(35))), T(70))) == &quot;50 30 20 40 35 70&quot;
+def test_long():
+    &quot;a chain, quickly&quot;
+    text = &quot; &quot;.join(str(v) for v in range(20_000, 0, -1))
+    t0 = time.perf_counter()
+    root = load_bst(text)
+    assert time.perf_counter() - t0 &lt; 2 and save_bst(root) == text</textarea><textarea class="pc-src pc-solution" hidden>class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def save_bst(root):
+    out, stack = [], [root] if root else []
+    while stack:
+        node = stack.pop()
+        out.append(str(node.val))
+        for child in (node.right, node.left):
+            if child is not None:
+                stack.append(child)
+    return &quot; &quot;.join(out)
+
+def load_bst(text):
+    values = [int(v) for v in text.split()]
+    if not values:
+        return None
+    root = TreeNode(values[0])
+    stack = [root]
+    for v in values[1:]:
+        node = TreeNode(v)
+        if v &lt; stack[-1].val:
+            stack[-1].left = node
+        else:
+            parent = None
+            while stack and stack[-1].val &lt; v:
+                parent = stack.pop()
+            parent.right = node
+        stack.append(node)
+    return root</textarea><template class="pc-src pc-hint">For each value: make a node. If the stack is empty or the value is below the top&rsquo;s value, it&rsquo;s the top&rsquo;s left child. Otherwise pop while the top is smaller; the last node popped gets it as its right child. Push the new node either way.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w046d5-preorder_ok" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Could this be a BST&rsquo;s pre-order?</div><div class="pc-prompt"><p>Write <code>is_bst_preorder(values)</code>: whether some BST with distinct values has exactly this pre-order, in O(n) with a stack. Keep a <strong>lower bound</strong>: when a value pops smaller values off the stack (moving into some node&rsquo;s right subtree), the last popped becomes the bound, and every later value must exceed it.</p></div><textarea class="pc-src pc-code" hidden>def is_bst_preorder(values):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random, itertools
+def ins(n, v):
+    if n is None:
+        return [v, None, None]
+    i = 1 if v &lt; n[0] else 2
+    n[i] = ins(n[i], v)
+    return n
+def pre(n):
+    return [] if n is None else [n[0]] + pre(n[1]) + pre(n[2])
+def test_check():
+    &quot;checking&quot;
+    assert is_bst_preorder([50, 30, 20, 40, 35, 70, 60, 80]) and is_bst_preorder([]) and is_bst_preorder([1])
+    assert not is_bst_preorder([5, 2, 6, 1, 7]), &quot;1 comes after moving right of 5&quot;
+    assert not is_bst_preorder([2, 2])
+    good = set()
+    for perm in itertools.permutations(range(5)):
+        root = None
+        for v in perm:
+            root = ins(root, v)
+        good.add(tuple(pre(root)))
+    for perm in itertools.permutations(range(5)):
+        assert is_bst_preorder(list(perm)) == (perm in good), perm</textarea><textarea class="pc-src pc-solution" hidden>def is_bst_preorder(values):
+    low, stack = float(&quot;-inf&quot;), []
+    for v in values:
+        if v &lt;= low:
+            return False
+        while stack and stack[-1] &lt; v:
+            low = stack.pop()
+        if stack and stack[-1] == v:
+            return False
+        stack.append(v)
+    return True</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w046d5-levels" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Level-order lists</div><div class="pc-prompt"><p>Write <code>to_list(root)</code> and <code>from_list(items)</code> for level-order lists with <code>None</code> for missing children and trailing <code>None</code>s dropped. Then <code>to_json(root)</code> and <code>from_json(text)</code>, which use the same list written as JSON (so <code>None</code> appears as <code>null</code>).</p></div><textarea class="pc-src pc-code" hidden>import json
+from collections import deque
+
+class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def to_list(root):
+    ___
+
+def from_list(items):
+    ___
+
+def to_json(root):
+    ___
+
+def from_json(text):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+T = TreeNode
+def shape(n):
+    return None if n is None else (n.val, shape(n.left), shape(n.right))
+def rand_tree(rng, n):
+    if n == 0:
+        return None
+    k = rng.randint(0, n - 1)
+    return T(rng.randint(-9, 9), rand_tree(rng, k), rand_tree(rng, n - 1 - k))
+def test_lists():
+    &quot;level-order lists&quot;
+    t = T(1, T(2, None, T(4)), T(3, None, T(5)))
+    assert to_list(t) == [1, 2, 3, None, 4, None, 5] and to_list(None) == [] and from_list([]) is None
+    assert shape(from_list([5, None, 7, 6])) == (5, None, (7, (6, None, None), None))
+    assert to_json(t) == &quot;[1, 2, 3, null, 4, null, 5]&quot; and shape(from_json(&quot;[1, null, 2]&quot;)) == (1, None, (2, None, None))
+    rng = random.Random(17)
+    for _ in range(200):
+        t = rand_tree(rng, rng.randint(0, 30))
+        assert shape(from_list(to_list(t))) == shape(t) and shape(from_json(to_json(t))) == shape(t)</textarea><textarea class="pc-src pc-solution" hidden>import json
+from collections import deque
+
+class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def to_list(root):
+    out, queue = [], deque([root])
+    while queue:
+        node = queue.popleft()
+        if node is None:
+            out.append(None)
+        else:
+            out.append(node.val)
+            queue.append(node.left)
+            queue.append(node.right)
+    while out and out[-1] is None:
+        out.pop()
+    return out
+
+def from_list(items):
+    if not items or items[0] is None:
+        return None
+    root = TreeNode(items[0])
+    queue, i = deque([root]), 1
+    while queue and i &lt; len(items):
+        parent = queue.popleft()
+        for side in (&quot;left&quot;, &quot;right&quot;):
+            if i &lt; len(items) and items[i] is not None:
+                child = TreeNode(items[i])
+                setattr(parent, side, child)
+                queue.append(child)
+            i += 1
+    return root
+
+def to_json(root):
+    return json.dumps(to_list(root))
+
+def from_json(text):
+    return from_list(json.loads(text))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w046d5-flat" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Deep trees, flat records</div><div class="pc-prompt"><p>General trees (<code>Node</code> with <code>name</code> and <code>children</code>) can be too deep for nested JSON. Write <code>to_records(root)</code>: a list of dicts <code>{"id": i, "parent": p, "name": ...}</code> in pre-order, with ids 0, 1, 2, &hellip; and <code>parent</code> <code>None</code> for the root; and <code>from_records(records)</code>, rebuilding the tree (children in record order). Both must use loops, not recursion: the checks use a chain 50,000 deep and go through <code>json.dumps</code> and <code>json.loads</code>.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    def __init__(self, name, children=None):
+        self.name, self.children = name, children or []
+
+def to_records(root):
+    ___
+
+def from_records(records):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import json
+def names(n):
+    out, stack = [], [n]
+    while stack:
+        x = stack.pop()
+        out.append((x.name, len(x.children)))
+        stack.extend(reversed(x.children))
+    return out
+def test_records():
+    &quot;records&quot;
+    menu = Node(&quot;File&quot;, [Node(&quot;New&quot;), Node(&quot;Open&quot;, [Node(&quot;Recent&quot;), Node(&quot;Browse&quot;)]), Node(&quot;Quit&quot;)])
+    recs = to_records(menu)
+    assert recs[:3] == [{&quot;id&quot;: 0, &quot;parent&quot;: None, &quot;name&quot;: &quot;File&quot;}, {&quot;id&quot;: 1, &quot;parent&quot;: 0, &quot;name&quot;: &quot;New&quot;}, {&quot;id&quot;: 2, &quot;parent&quot;: 0, &quot;name&quot;: &quot;Open&quot;}]
+    assert recs[3] == {&quot;id&quot;: 3, &quot;parent&quot;: 2, &quot;name&quot;: &quot;Recent&quot;} and len(recs) == 6
+    assert names(from_records(json.loads(json.dumps(recs)))) == names(menu)
+    assert to_records(None) == [] and from_records([]) is None
+def test_deep():
+    &quot;very deep&quot;
+    root = Node(0)
+    node = root
+    for i in range(1, 50_000):
+        child = Node(i)
+        node.children.append(child)
+        node = child
+    again = from_records(json.loads(json.dumps(to_records(root))))
+    n, depth = again, 0
+    while n.children:
+        n, depth = n.children[0], depth + 1
+    assert depth == 49_999 and n.name == 49_999</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self, name, children=None):
+        self.name, self.children = name, children or []
+
+def to_records(root):
+    if root is None:
+        return []
+    out, stack = [], [(root, None)]
+    while stack:
+        node, parent = stack.pop()
+        my_id = len(out)
+        out.append({&quot;id&quot;: my_id, &quot;parent&quot;: parent, &quot;name&quot;: node.name})
+        for child in reversed(node.children):
+            stack.append((child, my_id))
+    return out
+
+def from_records(records):
+    nodes, root = {}, None
+    for r in records:
+        node = Node(r[&quot;name&quot;])
+        nodes[r[&quot;id&quot;]] = node
+        if r[&quot;parent&quot;] is None:
+            root = node
+        else:
+            nodes[r[&quot;parent&quot;]].children.append(node)
+    return root</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w046d5-safe" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A careful loader</div><div class="pc-prompt"><p>Write <code>safe_load(text, max_nodes=1000)</code>, which loads a level-order JSON list (as in &ldquo;Level-order lists&rdquo;) <strong>from an untrusted source</strong>. Return the tree, or raise <code>ValueError</code> (and only <code>ValueError</code>) if:</p>
+<ul>
+<li>the text isn&rsquo;t valid JSON (catch <code>json.JSONDecodeError</code>, a subclass of <code>ValueError</code>, and re-raise with your own message), or isn&rsquo;t a list;</li>
+<li>any item is neither <code>None</code> nor an <code>int</code> (and <code>bool</code> doesn&rsquo;t count as an <code>int</code>);</li>
+<li>the list is longer than <code>2 * max_nodes + 1</code> items, or holds more than <code>max_nodes</code> values;</li>
+<li>the first item is <code>None</code> but others follow, or the list ends with <code>None</code>;</li>
+<li>there are more items than the parents can take (each real node takes exactly two slots).</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import json
+from collections import deque
+
+class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def safe_load(text, max_nodes=1000):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def shape(n):
+    return None if n is None else (n.val, shape(n.left), shape(n.right))
+def test_good():
+    &quot;good input&quot;
+    assert shape(safe_load(&quot;[1, 2, 3, null, 4]&quot;)) == (1, (2, None, (4, None, None)), (3, None, None))
+    assert safe_load(&quot;[]&quot;) is None and shape(safe_load(&quot;[7]&quot;)) == (7, None, None)
+def test_bad():
+    &quot;bad input&quot;
+    bad = [&quot;&quot;, &quot;[1, 2&quot;, &#x27;{&quot;a&quot;: 1}&#x27;, &quot;[1, true]&quot;, &#x27;[1, &quot;2&quot;]&#x27;, &quot;[1.5]&quot;, &quot;[null, 1]&quot;, &quot;[1, 2, null]&quot;,
+           &quot;[1, null, null, 4]&quot;, &quot;[1, [2]]&quot;, &quot;5&quot;, &quot;[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]&quot;]
+    for text in bad:
+        try:
+            safe_load(text, max_nodes=10)
+            assert False, f&quot;accepted {text!r}&quot;
+        except ValueError:
+            pass
+    big = &quot;[&quot; + &quot;, &quot;.join([&quot;1&quot;] * 11) + &quot;]&quot;
+    try:
+        safe_load(big, max_nodes=10)
+        assert False, &quot;too many values&quot;
+    except ValueError:
+        pass
+    assert shape(safe_load(&quot;[&quot; + &quot;, &quot;.join([&quot;1&quot;] * 10) + &quot;]&quot;, max_nodes=10)) is not None</textarea><textarea class="pc-src pc-solution" hidden>import json
+from collections import deque
+
+class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def safe_load(text, max_nodes=1000):
+    try:
+        items = json.loads(text)
+    except json.JSONDecodeError as e:
+        raise ValueError(f&quot;not valid JSON: {e}&quot;) from None
+    if not isinstance(items, list):
+        raise ValueError(&quot;expected a list&quot;)
+    if len(items) &gt; 2 * max_nodes + 1:
+        raise ValueError(&quot;too many items&quot;)
+    for item in items:
+        if item is not None and (not isinstance(item, int) or isinstance(item, bool)):
+            raise ValueError(f&quot;bad item: {item!r}&quot;)
+    if sum(item is not None for item in items) &gt; max_nodes:
+        raise ValueError(&quot;too many values&quot;)
+    if not items:
+        return None
+    if items[0] is None or items[-1] is None:
+        raise ValueError(&quot;a list must start and end with a value&quot;)
+    root = TreeNode(items[0])
+    queue, i = deque([root]), 1
+    while i &lt; len(items):
+        if not queue:
+            raise ValueError(&quot;more items than places for them&quot;)
+        parent = queue.popleft()
+        for side in (&quot;left&quot;, &quot;right&quot;):
+            if i &lt; len(items) and items[i] is not None:
+                child = TreeNode(items[i])
+                setattr(parent, side, child)
+                queue.append(child)
+            i += 1
+    return root</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w046d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Children for nobody</div><div class="pc-prompt"><p>This loader gives children to <code>None</code> slots as well as real nodes, by queueing missing children as if they were nodes; the later items land in the wrong places and it crashes. Only queue real children, so it prints <code>[1, None, 2, 3]</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def from_list(items):
+    root = TreeNode(items[0])
+    queue, i = deque([root]), 1
+    while queue and i &lt; len(items):
+        parent = queue.popleft()
+        for side in (&quot;left&quot;, &quot;right&quot;):
+            child = TreeNode(items[i]) if i &lt; len(items) and items[i] is not None else None
+            if parent is not None:
+                setattr(parent, side, child)
+            queue.append(child)
+            i += 1
+    return root
+
+root = from_list([1, None, 2, 3])
+print([root.val, root.left, root.right.val, root.right.left.val])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;only real nodes&quot;
+    expect_output(&quot;[1, None, 2, 3]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def from_list(items):
+    root = TreeNode(items[0])
+    queue, i = deque([root]), 1
+    while queue and i &lt; len(items):
+        parent = queue.popleft()
+        for side in (&quot;left&quot;, &quot;right&quot;):
+            if i &lt; len(items) and items[i] is not None:
+                child = TreeNode(items[i])
+                setattr(parent, side, child)
+                queue.append(child)
+            i += 1
+    return root
+
+root = from_list([1, None, 2, 3])
+print([root.val, root.left, root.right.val, root.right.left.val])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w046d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The bound that never tightens</div><div class="pc-prompt"><p>This BST loader passes the same upper bound to the left subtree as to the right, so every value after the root ends up on the left: the tree comes back as a chain and saving it again gives the wrong pre-order. The left subtree&rsquo;s bound should be the node&rsquo;s own value. Fix it so it prints <code>True</code>.</p></div><textarea class="pc-src pc-code" hidden>class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def load_bst(values):
+    position = [0]
+    def build(bound):
+        i = position[0]
+        if i == len(values) or values[i] &gt; bound:
+            return None
+        node = TreeNode(values[i])
+        position[0] += 1
+        node.left = build(bound)
+        node.right = build(bound)
+        return node
+    return build(float(&quot;inf&quot;))
+
+def inorder(n):
+    return [] if n is None else inorder(n.left) + [n.val] + inorder(n.right)
+
+values = [50, 30, 20, 40, 70, 60]
+print(inorder(load_bst(values)) == sorted(values))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;tighten on the left&quot;
+    expect_output(&quot;True&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def load_bst(values):
+    position = [0]
+    def build(bound):
+        i = position[0]
+        if i == len(values) or values[i] &gt; bound:
+            return None
+        node = TreeNode(values[i])
+        position[0] += 1
+        node.left = build(node.val)
+        node.right = build(bound)
+        return node
+    return build(float(&quot;inf&quot;))
+
+def inorder(n):
+    return [] if n is None else inorder(n.left) + [n.val] + inorder(n.right)
+
+values = [50, 30, 20, 40, 70, 60]
+print(inorder(load_bst(values)) == sorted(values))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w046d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A string is not a list</div><div class="pc-prompt"><p>This loader trusts that <code>children</code> is a list. Given a string, it loops over the characters, treats each one as a node, and reports <code>bad tree: each node needs a name</code>, which points at the wrong problem. Check the type and raise <code>ValueError("children must be a list")</code>, so it prints <code>bad tree: children must be a list</code>.</p></div><textarea class="pc-src pc-code" hidden>import json
+
+class Node:
+    def __init__(self, name, children=None):
+        self.name, self.children = name, children or []
+
+def from_dict(d):
+    if not isinstance(d, dict) or not isinstance(d.get(&quot;name&quot;), str):
+        raise ValueError(&quot;each node needs a name&quot;)
+    kids = d.get(&quot;children&quot;, [])
+    return Node(d[&quot;name&quot;], [from_dict(c) for c in kids])
+
+try:
+    from_dict(json.loads(&#x27;{&quot;name&quot;: &quot;File&quot;, &quot;children&quot;: &quot;ab&quot;}&#x27;))
+except ValueError as e:
+    print(&quot;bad tree:&quot;, e)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;check the type&quot;
+    expect_output(&quot;bad tree: children must be a list&quot;)
+    assert from_dict({&quot;name&quot;: &quot;a&quot;, &quot;children&quot;: [{&quot;name&quot;: &quot;b&quot;}]}).children[0].name == &quot;b&quot;</textarea><textarea class="pc-src pc-solution" hidden>import json
+
+class Node:
+    def __init__(self, name, children=None):
+        self.name, self.children = name, children or []
+
+def from_dict(d):
+    if not isinstance(d, dict) or not isinstance(d.get(&quot;name&quot;), str):
+        raise ValueError(&quot;each node needs a name&quot;)
+    kids = d.get(&quot;children&quot;, [])
+    if not isinstance(kids, list):
+        raise ValueError(&quot;children must be a list&quot;)
+    return Node(d[&quot;name&quot;], [from_dict(c) for c in kids])
+
+try:
+    from_dict(json.loads(&#x27;{&quot;name&quot;: &quot;File&quot;, &quot;children&quot;: &quot;ab&quot;}&#x27;))
+except ValueError as e:
+    print(&quot;bad tree:&quot;, e)</textarea></div>
+<div class="parsons" data-id="w046d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Rebuilding a BST from pre-order</div><div class="pc-prompt"><p>Arrange the lines into the bound-passing loader. One line is a trap.</p></div><script type="application/json">{"lines": ["def load_bst(values):", "    position = [0]", "    def build(bound):", "        i = position[0]", "        if i == len(values) or values[i] > bound:", "            return None", "        node = TreeNode(values[i])", "        position[0] += 1", "        node.left = build(node.val)", "        node.right = build(bound)", "        return node", "    return build(float(\"inf\"))"], "distractors": ["        node.right = build(node.val)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w046d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden># The tree:        8
+#                /   \
+#               3     10
+#              / \      \
+#             1   6      14
+
+p = ___   # its pre-order values (a list), all a BST needs
+q = ___   # its level-order list, with None for missing children and trailing Nones dropped
+r = ___   # the in-order traversal of load_bst([5, 3, 4, 9, 7])
+s = ___   # True or False: is [5, 3, 6, 4] the pre-order of some BST?
+t = ___   # True or False: isinstance(True, int)</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [8, 3, 1, 6, 10, 14] and q == [8, 3, 10, 1, 6, None, 14] and r == [3, 4, 5, 7, 9], &quot;p, q and r&quot;
+    assert s is False and t is True, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden># The tree:        8
+#                /   \
+#               3     10
+#              / \      \
+#             1   6      14
+
+p = [8, 3, 1, 6, 10, 14]
+q = [8, 3, 10, 1, 6, None, 14]
+r = [3, 4, 5, 7, 9]
+s = False
+t = True</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w046d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why can a BST be saved without markers for missing children?", "answer": 1, "explain": "Pre-order values alone determine a BST.", "options": ["It can&rsquo;t", "Its order says where each value goes: smaller ones after a node belong on its left", "BSTs have no missing children", "Because it&rsquo;s balanced"]}, {"type": "mc", "q": "How does the O(n) BST loader know when a left subtree ends?", "answer": 1, "explain": "Pass bounds down, as in Day 1&rsquo;s check.", "options": ["It counts", "The next value exceeds the bound (the parent&rsquo;s value)", "It finds a #", "It sorts"]}, {"type": "mc", "q": "In a level-order list, which children get a slot?", "answer": 1, "explain": "And trailing Nones are dropped.", "options": ["Every position in every level", "Only children of real nodes", "Only leaves", "Only left children"]}, {"type": "mc", "q": "What&rsquo;s the weakness of nested JSON for trees?", "answer": 1, "explain": "Use flat id and parent records instead.", "options": ["It can&rsquo;t hold strings", "Very deep trees hit recursion limits in your code and in the json module", "It&rsquo;s unreadable", "It&rsquo;s binary"]}, {"type": "mc", "q": "Why put a version number in saved data?", "answer": 1, "explain": "Formats change; files outlive programs.", "options": ["Decoration", "So a later program can recognise old formats, convert them, and refuse unknown ones", "For speed", "JSON requires it"]}, {"type": "mc", "q": "What is a round-trip test?", "answer": 1, "explain": "A property that must always hold.", "options": ["Saving twice", "Checking that load(save(t)) equals t, over many trees", "Testing on a network", "Timing a save"]}, {"type": "mc", "q": "Why never load untrusted data with pickle or eval?", "answer": 1, "explain": "The pickle documentation says so itself.", "options": ["They&rsquo;re slow", "Both can run arbitrary code", "They can&rsquo;t read files", "They only work for lists"]}, {"type": "mc", "q": "What should a loader do with bad input?", "answer": 1, "explain": "Never build something quietly wrong.", "options": ["Crash wherever it happens", "Raise one clear error, such as ValueError with a message", "Return None silently", "Fix it by guessing"]}, {"type": "mc", "q": "Is isinstance(True, int) true in Python?", "answer": 1, "explain": "Exclude bool explicitly when you mean numbers.", "options": ["No", "Yes, bool is a subclass of int", "Only in Python 2", "It raises TypeError"]}, {"type": "output", "q": "What does this print?", "answer": "[1, null, 2]", "explain": "None becomes null in JSON.", "code": "import json\nprint(json.dumps([1, None, 2]))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w046d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a compact binary format</div><div class="pc-prompt"><p>Text is easy to read but large. Write <code>pack(root)</code> and <code>unpack(data)</code> for binary trees of integers, producing and reading <code>bytes</code>:</p>
+<ul>
+<li>4 bytes: the number of nodes n, as an unsigned big-endian integer (<code>n.to_bytes(4, "big")</code>);</li>
+<li>the tree&rsquo;s <strong>shape</strong> in pre-order, one bit per position: 1 for a node, 0 for a missing child (so 2n + 1 bits), packed 8 to a byte, first bit in the highest place, the last byte padded with zero bits;</li>
+<li>then each value in pre-order as 4 bytes, signed big-endian (<code>v.to_bytes(4, "big", signed=True)</code>; values must fit, or raise <code>ValueError</code>).</li>
+</ul>
+<p><code>unpack</code> reverses it with <code>int.from_bytes(...)</code> and must raise <code>ValueError</code> (and nothing else) for any malformed input: too short, too long, shape bits that don&rsquo;t describe exactly n nodes, or non-zero padding. Use loops and stacks, not recursion (the checks use a 20,000-node chain), and check that 1,000 random trees survive the round trip. A 1,000-node tree takes 4 + 251 + 4,000 bytes this way, against about 10,000 characters of text.</p></div><textarea class="pc-src pc-code" hidden>class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def pack(root):
+    ___
+
+def unpack(data):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+T = TreeNode
+def shape(n):
+    out, stack = [], [n]
+    while stack:
+        x = stack.pop()
+        if x is None:
+            out.append(None)
+        else:
+            out.append(x.val)
+            stack += [x.right, x.left]
+    return out
+def rand_tree(rng, n):
+    if n == 0:
+        return None
+    k = rng.randint(0, n - 1)
+    return T(rng.randint(-2**31, 2**31 - 1), rand_tree(rng, k), rand_tree(rng, n - 1 - k))
+def test_format():
+    &quot;the exact bytes&quot;
+    assert pack(None) == bytes([0, 0, 0, 0, 0])
+    assert pack(T(1, T(2), None)) == bytes([0, 0, 0, 2, 0b11000000, 0, 0, 0, 1, 0, 0, 0, 2])
+    assert pack(T(-1)) == bytes([0, 0, 0, 1, 0b10000000, 255, 255, 255, 255])
+    assert unpack(bytes([0, 0, 0, 0, 0])) is None
+def test_roundtrip():
+    &quot;round trips&quot;
+    rng = random.Random(18)
+    for _ in range(1000):
+        t = rand_tree(rng, rng.randint(0, 12))
+        assert shape(unpack(pack(t))) == shape(t)
+    chain = None
+    for v in range(20_000):
+        chain = T(v, None, chain)
+    data = pack(chain)
+    assert len(data) == 4 + (2 * 20_000 + 1 + 7) // 8 + 4 * 20_000 and shape(unpack(data)) == shape(chain)
+def test_bad():
+    &quot;malformed input&quot;
+    good = pack(T(1, T(2), None))
+    bad = [b&quot;&quot;, good[:3], good[:-1], good + b&quot;\x00&quot;, bytes([0, 0, 0, 2, 0b10000000]) + bytes(8),
+           bytes([0, 0, 0, 1, 0b10100000]) + bytes(4), bytes([0, 0, 0, 1, 0b10000001]) + bytes(4),
+           bytes([0, 0, 0, 0, 0b10000000]), bytes([255, 255, 255, 255])]
+    for data in bad:
+        try:
+            unpack(data)
+            assert False, data
+        except ValueError:
+            pass
+    try:
+        pack(T(2**31))
+        assert False
+    except ValueError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>class TreeNode:
+    def __init__(self, val, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+
+def pack(root):
+    bits, values, stack = [], [], [root]
+    while stack:
+        node = stack.pop()
+        if node is None:
+            bits.append(0)
+        else:
+            bits.append(1)
+            values.append(node.val)
+            stack.append(node.right)
+            stack.append(node.left)
+    while len(bits) % 8:
+        bits.append(0)
+    shape = bytes(int(&quot;&quot;.join(map(str, bits[i:i + 8])), 2) for i in range(0, len(bits), 8))
+    try:
+        body = b&quot;&quot;.join(v.to_bytes(4, &quot;big&quot;, signed=True) for v in values)
+    except OverflowError:
+        raise ValueError(&quot;a value does not fit in 4 bytes&quot;) from None
+    return len(values).to_bytes(4, &quot;big&quot;) + shape + body
+
+def unpack(data):
+    if len(data) &lt; 4:
+        raise ValueError(&quot;too short&quot;)
+    n = int.from_bytes(data[:4], &quot;big&quot;)
+    shape_len = (2 * n + 1 + 7) // 8
+    if len(data) != 4 + shape_len + 4 * n:
+        raise ValueError(&quot;wrong length&quot;)
+    bits = []
+    for byte in data[4:4 + shape_len]:
+        bits.extend((byte &gt;&gt; k) &amp; 1 for k in range(7, -1, -1))
+    values = [int.from_bytes(data[i:i + 4], &quot;big&quot;, signed=True) for i in range(4 + shape_len, len(data), 4)]
+    holder = TreeNode(None)
+    slots, used, made = [(holder, &quot;left&quot;)], 0, 0
+    while slots:
+        if used == len(bits):
+            raise ValueError(&quot;shape ends too soon&quot;)
+        parent, side = slots.pop()
+        bit = bits[used]
+        used += 1
+        if bit:
+            if made == n:
+                raise ValueError(&quot;more nodes than the count&quot;)
+            node = TreeNode(values[made])
+            made += 1
+            setattr(parent, side, node)
+            slots.append((node, &quot;right&quot;))
+            slots.append((node, &quot;left&quot;))
+    if made != n or used != 2 * n + 1 or any(bits[used:]):
+        raise ValueError(&quot;shape does not match the count&quot;)
+    return holder.left</textarea><template class="pc-src pc-hint">Shape bits: walk pre-order with a stack that also holds <code>None</code> children, appending 1 or 0. Reading: rebuild with a stack of &ldquo;slots&rdquo; to fill, like the monotonic BST loader but driven by the bits: each 1 makes a node, fills the current slot, and pushes its right slot then its left slot; each 0 leaves the slot empty. The bits must run out exactly when the slots do.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Pick a format you&rsquo;ve seen in the wild (a playlist file, a saved game, a settings file) and list what a careful loader for it should check. Tomorrow is the Forge: a tree-backed index with range queries, saved and loaded safely.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w046d4.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w046d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w046d5", "week": 46, "day": 5, "title": "Serialising trees", "exercises": [{"id": "w046d5-bstload", "title": "A BST from its values", "points": 15}, {"id": "w046d5-preorder_ok", "title": "Could this be a BST's pre-order?", "points": 10}, {"id": "w046d5-levels", "title": "Level-order lists", "points": 15}, {"id": "w046d5-flat", "title": "Deep trees, flat records", "points": 15}, {"id": "w046d5-safe", "title": "A careful loader", "points": 15}, {"id": "w046d5-bug1", "title": "Children for nobody", "points": 10}, {"id": "w046d5-bug2", "title": "The bound that never tightens", "points": 10}, {"id": "w046d5-bug3", "title": "A string is not a list", "points": 10}, {"id": "w046d5-trace", "title": "Predict them", "points": 10}, {"id": "w046d5-challenge", "title": "Challenge: a compact binary format", "points": 25}], "points": 135}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=871ff52039"></script>
+</body>
+</html>
