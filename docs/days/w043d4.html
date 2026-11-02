@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="871ff52039">
+<title>Week 43 Day 4: Brackets and undo | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=871ff52039">
+<link rel="stylesheet" href="../assets/css/site.css?v=871ff52039">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=871ff52039"></script>
+<script src="../assets/vendor/codemirror.js?v=871ff52039" defer></script>
+<meta name="description" content="Week 8 checked brackets with a stack. Today takes the same idea much further. Stacks parse nested structure (brackets, tags), and they evaluate expressions:...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w043d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 43 Day 4: Brackets and undo">
+<meta property="og:description" content="Week 8 checked brackets with a stack. Today takes the same idea much further. Stacks parse nested structure (brackets, tags), and they evaluate expressions:...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w043d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-43">Week 43: Stacks and queues</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#nesting-with-positions" data-sec="nesting-with-positions">Nesting, with positions</a></li><li><a href="#postfix" data-sec="postfix">Postfix</a></li><li><a href="#shunting-yard" data-sec="shunting-yard">Shunting-yard</a></li><li><a href="#a-calculator" data-sec="a-calculator">A calculator</a></li><li><a href="#undo-properly" data-sec="undo-properly">Undo, properly</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w043d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-43">Week 43: Stacks and queues</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 43, Day 4</span></p>
+      <h1>Brackets and undo</h1>
+      <div class="day-intro"><p>Week 8 checked brackets with a stack. Today takes the same idea much further. Stacks parse nested structure (brackets, tags), and they <strong>evaluate expressions</strong>: a calculator turns <code>2 * (3 + 4)</code> into a form with no brackets at all, then works it out with one stack. You&rsquo;ll write that calculator, using Edsger Dijkstra&rsquo;s shunting-yard algorithm. Then you&rsquo;ll go back to undo (Week 36 built it with commands and two stacks) and make it fit for a real editor: limited history, and typing grouped into sensible undo steps.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Check nesting of brackets and tags, reporting where the first problem is</li><li>Evaluate postfix (reverse Polish) expressions with a stack</li><li>Convert infix expressions to postfix with the shunting-yard algorithm, respecting precedence and associativity</li><li>Build a working calculator from a tokeniser, shunting-yard and a postfix evaluator</li><li>Design undo and redo with limited history and grouped steps</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Nesting, with positions: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Postfix: 20 min"></span><span class="plan-seg s1" style="flex:30" title="Shunting-yard: 30 min"></span><span class="plan-seg s0" style="flex:20" title="A calculator: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Undo, properly: 20 min"></span><span class="plan-seg s0" style="flex:45" title="Practice: 45 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Nesting, with positions</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Postfix</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Shunting-yard</span><span class="plan-min">30 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">A calculator</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">Undo, properly</span><span class="plan-min">20 min</span></li><li><span class="plan-at">2:00</span><span class="plan-what">Practice</span><span class="plan-min">45 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w043d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w043d4.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w043d4-p1"><textarea class="pc-src pc-code" hidden>tokens = &quot;3 4 + 2 *&quot;.split()
+stack = []
+for t in tokens:
+    if t in &quot;+-*/&quot;:
+        b, a = stack.pop(), stack.pop()
+        stack.append((a + b if t == &quot;+&quot; else a - b if t == &quot;-&quot; else a * b if t == &quot;*&quot; else a / b))
+    else:
+        stack.append(int(t))
+    print(t, stack)</textarea></div>
+<p><code>3 4 + 2 *</code> is <code>(3 + 4) * 2</code> written in <strong>postfix</strong>: each operator comes after its two operands, so no brackets or precedence rules are needed, and one stack works it out. Notice <code>b</code> is popped before <code>a</code>: the second operand is on top.</p>
+<h2 id="nesting-with-positions">Nesting, with positions</h2>
+<p>The stack pattern for nesting: push each opener (with its position, so errors can say where); for each closer, the top must be its partner; at the end the stack must be empty. A dictionary of partners keeps it tidy:</p>
+<div class="pc pc-example" data-kind="example" data-id="w043d4-e2"><textarea class="pc-src pc-code" hidden>PARTNER = {&quot;)&quot;: &quot;(&quot;, &quot;]&quot;: &quot;[&quot;, &quot;}&quot;: &quot;{&quot;}
+
+def first_problem(text):
+    &quot;&quot;&quot;The position of the first bracket that&#x27;s wrong, or -1 if they all match.&quot;&quot;&quot;
+    stack = []
+    for i, ch in enumerate(text):
+        if ch in &quot;([{&quot;:
+            stack.append((ch, i))
+        elif ch in PARTNER:
+            if not stack or stack[-1][0] != PARTNER[ch]:
+                return i                     # a closer with no matching opener
+            stack.pop()
+    return stack[0][1] if stack else -1      # the earliest opener never closed
+
+for text in [&quot;f(a[1], {b: 2})&quot;, &quot;f(a[1)]&quot;, &quot;((x)&quot;, &quot;x)&quot;]:
+    print(repr(text), first_problem(text))</textarea></div>
+<p>The same shape checks anything nested: HTML or XML tags (<code>&lt;b&gt;</code> must close with <code>&lt;/b&gt;</code>), <code>begin</code> and <code>end</code> blocks, indentation levels. Only what counts as an opener and a closer changes.</p>
+<h2 id="postfix">Postfix</h2>
+<p>In <strong>postfix</strong> (also called reverse Polish notation, after the Polish logician Jan Łukasiewicz, whose &ldquo;Polish notation&rdquo; put operators <strong>before</strong> operands), operators come after their operands. Ordinary notation, with operators between operands, is <strong>infix</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Infix</th>
+<th>Postfix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>3 + 4</code></td>
+<td><code>3 4 +</code></td>
+</tr>
+<tr>
+<td><code>(3 + 4) * 2</code></td>
+<td><code>3 4 + 2 *</code></td>
+</tr>
+<tr>
+<td><code>3 + 4 * 2</code></td>
+<td><code>3 4 2 * +</code></td>
+</tr>
+<tr>
+<td><code>10 - 2 - 3</code></td>
+<td><code>10 2 - 3 -</code></td>
+</tr>
+</tbody>
+</table>
+<p>Evaluating postfix needs one stack and one rule: a number is pushed; an operator pops two numbers (the <strong>second</strong> operand first), applies itself, and pushes the result. At the end, exactly one number should remain. (The evaluators here pick the operation with a conditional expression. A dictionary of results such as <code>{"+": a + b, "/": a / b}[t]</code> looks neater, but it works out <strong>every</strong> result before choosing one, so <code>5 - 0</code> would crash dividing by zero.) Postfix needs no brackets because the order of the tokens already says what happens first. Some calculators and programming languages (and the bytecode Python itself runs) work this way.</p>
+<h2 id="shunting-yard">Shunting-yard</h2>
+<p>People write infix, so a calculator must convert infix to postfix first. Dijkstra&rsquo;s <strong>shunting-yard algorithm</strong> (1961, named after a railway yard where carriages are sorted using a side track) does it with one stack of <strong>operators</strong>:</p>
+<ul>
+<li>A <strong>number</strong> goes straight to the output.</li>
+<li>An <strong>operator</strong> first pops to the output every operator on the stack that should happen <strong>before</strong> it: those with higher precedence, or equal precedence if the new one is left-associative. Then it&rsquo;s pushed.</li>
+<li><code>(</code> is pushed. <code>)</code> pops operators to the output until the matching <code>(</code>, which is thrown away.</li>
+<li>At the end, pop every remaining operator to the output.</li>
+</ul>
+<p><strong>Precedence</strong> says <code>*</code> binds tighter than <code>+</code>. <strong>Associativity</strong> says what happens with equal precedence: <code>10 - 2 - 3</code> means <code>(10 - 2) - 3</code> (left-associative), but powers usually group to the right: <code>2 ^ 3 ^ 2</code> means <code>2 ^ (3 ^ 2)</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w043d4-e3"><textarea class="pc-src pc-code" hidden>PRECEDENCE = {&quot;+&quot;: 1, &quot;-&quot;: 1, &quot;*&quot;: 2, &quot;/&quot;: 2, &quot;^&quot;: 3}
+RIGHT = {&quot;^&quot;}
+
+def to_postfix(tokens):
+    out, ops = [], []
+    for t in tokens:
+        if t in PRECEDENCE:
+            while ops and ops[-1] != &quot;(&quot; and (PRECEDENCE[ops[-1]] &gt; PRECEDENCE[t]
+                                               or (PRECEDENCE[ops[-1]] == PRECEDENCE[t] and t not in RIGHT)):
+                out.append(ops.pop())
+            ops.append(t)
+        elif t == &quot;(&quot;:
+            ops.append(t)
+        elif t == &quot;)&quot;:
+            while ops[-1] != &quot;(&quot;:
+                out.append(ops.pop())
+            ops.pop()                          # throw away the &quot;(&quot;
+        else:
+            out.append(t)
+    while ops:
+        out.append(ops.pop())
+    return out
+
+for expr in [&quot;3 + 4 * 2&quot;, &quot;( 3 + 4 ) * 2&quot;, &quot;10 - 2 - 3&quot;, &quot;2 ^ 3 ^ 2&quot;, &quot;1 + 2 * ( 3 - 4 ) / 5&quot;]:
+    print(f&quot;{expr:&lt;22} -&gt; {&#x27; &#x27;.join(to_postfix(expr.split()))}&quot;)</textarea></div>
+<p>Each token is pushed and popped at most once, so the conversion is O(n).</p>
+<h2 id="a-calculator">A calculator</h2>
+<p>A calculator is three small parts, each easy to test on its own (Week 34&rsquo;s single responsibility):</p>
+<ol>
+<li>A <strong>tokeniser</strong> turns <code>"2*(3+4.5)"</code> into <code>["2", "*", "(", "3", "+", "4.5", ")"]</code>, handling numbers of several digits and spaces.</li>
+<li><strong>Shunting-yard</strong> turns the tokens into postfix.</li>
+<li>A <strong>postfix evaluator</strong> works it out.</li>
+</ol>
+<div class="pc pc-example" data-kind="example" data-id="w043d4-e4"><textarea class="pc-src pc-code" hidden>PRECEDENCE = {&quot;+&quot;: 1, &quot;-&quot;: 1, &quot;*&quot;: 2, &quot;/&quot;: 2}
+
+def tokenise(text):
+    tokens, number = [], &quot;&quot;
+    for ch in text + &quot; &quot;:                       # a final space flushes the last number
+        if ch.isdigit() or ch == &quot;.&quot;:
+            number += ch
+            continue
+        if number:
+            tokens.append(number)
+            number = &quot;&quot;
+        if ch in &quot;+-*/()&quot;:
+            tokens.append(ch)
+        elif not ch.isspace():
+            raise ValueError(f&quot;unexpected {ch!r}&quot;)
+    return tokens
+
+def to_postfix(tokens):
+    out, ops = [], []
+    for t in tokens:
+        if t in PRECEDENCE:
+            while ops and ops[-1] != &quot;(&quot; and PRECEDENCE[ops[-1]] &gt;= PRECEDENCE[t]:
+                out.append(ops.pop())
+            ops.append(t)
+        elif t == &quot;(&quot;:
+            ops.append(t)
+        elif t == &quot;)&quot;:
+            while ops[-1] != &quot;(&quot;:
+                out.append(ops.pop())
+            ops.pop()
+        else:
+            out.append(t)
+    return out + ops[::-1]
+
+def evaluate(postfix):
+    stack = []
+    for t in postfix:
+        if t in PRECEDENCE:
+            b, a = stack.pop(), stack.pop()
+            stack.append((a + b if t == &quot;+&quot; else a - b if t == &quot;-&quot; else a * b if t == &quot;*&quot; else a / b))
+        else:
+            stack.append(float(t))
+    return stack[0]
+
+for text in [&quot;2*(3+4.5)&quot;, &quot;10 - 2 - 3&quot;, &quot;7 / 2 + 1&quot;, &quot;((1))&quot;]:
+    print(f&quot;{text:&lt;12} = {evaluate(to_postfix(tokenise(text)))}&quot;)</textarea></div>
+<p>This one has no error checking beyond the tokeniser (try <code>"2 +"</code>); today&rsquo;s challenge makes it robust, and adds negative numbers.</p>
+<h2 id="undo-properly">Undo, properly</h2>
+<p>Week 36 built undo and redo with two stacks of commands: do a command, push it on the undo stack and clear the redo stack; undo pops from undo, reverses it, and pushes it on redo. Real editors add two refinements.</p>
+<p><strong>Limited history.</strong> Keeping every change for ever uses ever more memory. A <code>deque(maxlen=n)</code> as the undo stack keeps the most recent n steps and silently forgets the oldest (Day 2). The redo stack never needs a limit: it can&rsquo;t hold more than the undo stack once did.</p>
+<p><strong>Grouped steps.</strong> Undo after typing &ldquo;hello&rdquo; should remove the word, not one letter. Editors <strong>coalesce</strong> consecutive actions of the same kind into one undo step: typing letters joins the previous typing step, until something else happens (a space, a deletion, moving the cursor, or a pause).</p>
+<div class="pc pc-example" data-kind="example" data-id="w043d4-e5"><textarea class="pc-src pc-code" hidden>from collections import deque
+
+class Typist:
+    def __init__(self, limit=100):
+        self.text = &quot;&quot;
+        self._undo = deque(maxlen=limit)     # each step: the text before it
+        self._redo = []
+        self._typing = False                 # is the last step a run of letters we can extend?
+
+    def type(self, s):
+        letters = s.isalpha()
+        if not (letters and self._typing):
+            self._undo.append(self.text)     # start a new step
+        self._typing = letters
+        self.text += s
+        self._redo.clear()
+
+    def undo(self):
+        if not self._undo:
+            return False
+        self._redo.append(self.text)
+        self.text = self._undo.pop()
+        self._typing = False
+        return True
+
+    def redo(self):
+        if not self._redo:
+            return False
+        self._undo.append(self.text)
+        self.text = self._redo.pop()
+        self._typing = False
+        return True
+
+t = Typist()
+for piece in [&quot;h&quot;, &quot;e&quot;, &quot;l&quot;, &quot;l&quot;, &quot;o&quot;, &quot; &quot;, &quot;w&quot;, &quot;o&quot;, &quot;r&quot;, &quot;l&quot;, &quot;d&quot;]:
+    t.type(piece)
+t.undo(); print(repr(t.text))
+t.undo(); print(repr(t.text))
+t.redo(); print(repr(t.text))</textarea></div>
+<p>Storing a copy of the whole text before each step is the simplest design, and fine for short texts; for long documents, store commands (Week 36) that know how to reverse themselves instead.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Nesting problems push openers (with positions) and check each closer against the top; leftovers at the end were never closed. Postfix puts operators after their operands, so one stack evaluates it: push numbers; an operator pops the second operand, then the first, and pushes the result. Dijkstra&rsquo;s shunting-yard converts infix to postfix with an operator stack: numbers go straight out; an operator first pops anything of higher precedence (or equal, if it&rsquo;s left-associative); <code>)</code> pops back to <code>(</code>. A calculator is a tokeniser, shunting-yard and an evaluator. Real undo keeps limited history (<code>deque(maxlen=...)</code>) and groups related actions into one step.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d4-problem" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Where&rsquo;s the first problem?</div><div class="pc-prompt"><p>Write <code>first_problem(text)</code>: the position of the first bracket that&rsquo;s wrong, or <code>-1</code> if all of <code>()[]{}</code> match and nest properly. A closer that doesn&rsquo;t match the most recent open bracket (or comes when none is open) is wrong at its own position; if the text ends with brackets still open, the answer is the position of the <strong>earliest</strong> one still open. Other characters are ignored.</p></div><textarea class="pc-src pc-code" hidden>PARTNER = {&quot;)&quot;: &quot;(&quot;, &quot;]&quot;: &quot;[&quot;, &quot;}&quot;: &quot;{&quot;}
+
+def first_problem(text):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_problems():
+    &quot;problems&quot;
+    cases = {&quot;f(a[1], {b: 2})&quot;: -1, &quot;&quot;: -1, &quot;f(a[1)]&quot;: 5, &quot;((x)&quot;: 0, &quot;x)&quot;: 1, &quot;([)]&quot;: 2, &quot;(()&quot;: 0, &quot;{[]}(&quot;: 4, &quot;a(b)c]d&quot;: 5}
+    for text, want in cases.items():
+        assert first_problem(text) == want, (text, first_problem(text))</textarea><textarea class="pc-src pc-solution" hidden>PARTNER = {&quot;)&quot;: &quot;(&quot;, &quot;]&quot;: &quot;[&quot;, &quot;}&quot;: &quot;{&quot;}
+
+def first_problem(text):
+    stack = []
+    for i, ch in enumerate(text):
+        if ch in &quot;([{&quot;:
+            stack.append((ch, i))
+        elif ch in PARTNER:
+            if not stack or stack[-1][0] != PARTNER[ch]:
+                return i
+            stack.pop()
+    return stack[0][1] if stack else -1</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d4-tags" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Nested tags</div><div class="pc-prompt"><p>Write <code>check_tags(html)</code> for text with simple tags like <code>&lt;b&gt;</code>, <code>&lt;/b&gt;</code> and <code>&lt;br/&gt;</code> (a self-closing tag, which needs no partner). Return <code>"ok"</code> if every tag is closed in the right order; otherwise <code>"unexpected &lt;/X&gt;"</code> for a closing tag that doesn&rsquo;t match, or <code>"unclosed &lt;X&gt;"</code> for the <strong>innermost</strong> tag still open at the end. Tag names are compared in lower case. Anything between <code>&lt;</code> and <code>&gt;</code> is a tag; text outside tags is ignored.</p></div><textarea class="pc-src pc-code" hidden>def check_tags(html):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_tags():
+    &quot;tags&quot;
+    cases = {&quot;&lt;p&gt;Hi &lt;b&gt;there&lt;/b&gt;&lt;/p&gt;&quot;: &quot;ok&quot;, &quot;plain&quot;: &quot;ok&quot;, &quot;&lt;p&gt;&lt;b&gt;x&lt;/p&gt;&lt;/b&gt;&quot;: &quot;unexpected &lt;/p&gt;&quot;, &quot;&lt;p&gt;&lt;i&gt;x&lt;/i&gt;&quot;: &quot;unclosed &lt;p&gt;&quot;,
+             &quot;&lt;div&gt;&lt;p&gt;a&lt;br/&gt;b&lt;/p&gt;&lt;/div&gt;&quot;: &quot;ok&quot;, &quot;&lt;/b&gt;&quot;: &quot;unexpected &lt;/b&gt;&quot;, &quot;&lt;P&gt;x&lt;/p&gt;&quot;: &quot;ok&quot;, &quot;&lt;ul&gt;&lt;li&gt;a&lt;li&gt;b&lt;/ul&gt;&quot;: &quot;unexpected &lt;/ul&gt;&quot;,
+             &quot;&lt;a&gt;&lt;b&gt;&quot;: &quot;unclosed &lt;b&gt;&quot;}
+    for html, want in cases.items():
+        assert check_tags(html) == want, (html, check_tags(html))</textarea><textarea class="pc-src pc-solution" hidden>def check_tags(html):
+    stack = []
+    i = 0
+    while True:
+        start = html.find(&quot;&lt;&quot;, i)
+        if start == -1:
+            break
+        end = html.find(&quot;&gt;&quot;, start)
+        name = html[start + 1:end].strip().lower()
+        i = end + 1
+        if name.endswith(&quot;/&quot;):
+            continue
+        if name.startswith(&quot;/&quot;):
+            if not stack or stack[-1] != name[1:]:
+                return f&quot;unexpected &lt;{name}&gt;&quot;
+            stack.pop()
+        else:
+            stack.append(name)
+    return f&quot;unclosed &lt;{stack[-1]}&gt;&quot; if stack else &quot;ok&quot;</textarea><template class="pc-src pc-hint">Find each tag with <code>html.find("&lt;", i)</code> and <code>html.find("&gt;", start)</code>. A name starting with <code>/</code> closes; one ending with <code>/</code> closes itself. Push opening names; for a closing name, the top must match.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d4-fewest" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Fewest brackets to add</div><div class="pc-prompt"><p>Write <code>brackets_to_add(text)</code> for a string of <code>(</code> and <code>)</code> only: the fewest brackets that must be <strong>added</strong> (anywhere) to make it balanced. You don&rsquo;t need a real stack: a count of open brackets is a stack of identical items.</p></div><textarea class="pc-src pc-code" hidden>def brackets_to_add(text):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def slow(text):
+    s = text
+    while &quot;()&quot; in s:
+        s = s.replace(&quot;()&quot;, &quot;&quot;)
+    return len(s)
+def test_add():
+    &quot;fewest&quot;
+    assert brackets_to_add(&quot;())&quot;) == 1 and brackets_to_add(&quot;(((&quot;) == 3 and brackets_to_add(&quot;()&quot;) == 0 and brackets_to_add(&quot;)(&quot;) == 2 and brackets_to_add(&quot;&quot;) == 0
+    rng = random.Random(1)
+    for _ in range(200):
+        t = &quot;&quot;.join(rng.choice(&quot;()&quot;) for _ in range(rng.randint(0, 12)))
+        assert brackets_to_add(t) == slow(t), t</textarea><textarea class="pc-src pc-solution" hidden>def brackets_to_add(text):
+    open_count, missing_openers = 0, 0
+    for ch in text:
+        if ch == &quot;(&quot;:
+            open_count += 1
+        elif open_count:
+            open_count -= 1
+        else:
+            missing_openers += 1
+    return open_count + missing_openers</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d4-rpn" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Evaluating postfix</div><div class="pc-prompt"><p>Write <code>eval_postfix(tokens)</code> for a list of tokens: whole numbers (possibly negative, like <code>"-3"</code>) and the operators <code>+</code>, <code>-</code>, <code>*</code> and <code>/</code> (true division). Return the value. Raise <code>ValueError("too few operands")</code> if an operator finds fewer than two numbers, and <code>ValueError("leftover operands")</code> if more than one number is left at the end (or none at all).</p></div><textarea class="pc-src pc-code" hidden>def eval_postfix(tokens):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_rpn():
+    &quot;postfix&quot;
+    assert eval_postfix(&quot;3 4 + 2 *&quot;.split()) == 14 and eval_postfix(&quot;10 2 - 3 -&quot;.split()) == 5 and eval_postfix(&quot;7 2 /&quot;.split()) == 3.5
+    assert eval_postfix([&quot;-3&quot;, &quot;4&quot;, &quot;*&quot;]) == -12 and eval_postfix([&quot;5&quot;]) == 5
+    for tokens, message in [([&quot;1&quot;, &quot;+&quot;], &quot;too few operands&quot;), ([&quot;1&quot;, &quot;2&quot;], &quot;leftover operands&quot;), ([], &quot;leftover operands&quot;)]:
+        try:
+            eval_postfix(tokens)
+            assert False, tokens
+        except ValueError as err:
+            assert str(err) == message</textarea><textarea class="pc-src pc-solution" hidden>def eval_postfix(tokens):
+    stack = []
+    for t in tokens:
+        if t in (&quot;+&quot;, &quot;-&quot;, &quot;*&quot;, &quot;/&quot;):
+            if len(stack) &lt; 2:
+                raise ValueError(&quot;too few operands&quot;)
+            b, a = stack.pop(), stack.pop()
+            stack.append((a + b if t == &quot;+&quot; else a - b if t == &quot;-&quot; else a * b if t == &quot;*&quot; else a / b))
+        else:
+            stack.append(int(t))
+    if len(stack) != 1:
+        raise ValueError(&quot;leftover operands&quot;)
+    return stack[0]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d4-yard" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Shunting-yard</div><div class="pc-prompt"><p>Write <code>to_postfix(tokens)</code> with Dijkstra&rsquo;s shunting-yard algorithm, for numbers, <code>+ - * / ^</code> and brackets. <code>^</code> (power) has the highest precedence and is <strong>right</strong>-associative; the others are left-associative, with <code>* /</code> above <code>+ -</code>. Raise <code>ValueError("mismatched brackets")</code> for a <code>)</code> with no <code>(</code> or a <code>(</code> never closed.</p></div><textarea class="pc-src pc-code" hidden>PRECEDENCE = {&quot;+&quot;: 1, &quot;-&quot;: 1, &quot;*&quot;: 2, &quot;/&quot;: 2, &quot;^&quot;: 3}
+
+def to_postfix(tokens):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_yard():
+    &quot;converting&quot;
+    cases = {&quot;3 + 4 * 2&quot;: &quot;3 4 2 * +&quot;, &quot;( 3 + 4 ) * 2&quot;: &quot;3 4 + 2 *&quot;, &quot;10 - 2 - 3&quot;: &quot;10 2 - 3 -&quot;, &quot;2 ^ 3 ^ 2&quot;: &quot;2 3 2 ^ ^&quot;,
+             &quot;1 + 2 * ( 3 - 4 ) / 5&quot;: &quot;1 2 3 4 - * 5 / +&quot;, &quot;8 / 4 / 2&quot;: &quot;8 4 / 2 /&quot;, &quot;2 * 3 ^ 2&quot;: &quot;2 3 2 ^ *&quot;, &quot;( ( 7 ) )&quot;: &quot;7&quot;}
+    for expr, want in cases.items():
+        assert &quot; &quot;.join(to_postfix(expr.split())) == want, (expr, to_postfix(expr.split()))
+    for bad in [&quot;( 1 + 2&quot;, &quot;1 + 2 )&quot;, &quot;) (&quot;]:
+        try:
+            to_postfix(bad.split())
+            assert False, bad
+        except ValueError as err:
+            assert str(err) == &quot;mismatched brackets&quot;</textarea><textarea class="pc-src pc-solution" hidden>PRECEDENCE = {&quot;+&quot;: 1, &quot;-&quot;: 1, &quot;*&quot;: 2, &quot;/&quot;: 2, &quot;^&quot;: 3}
+
+def to_postfix(tokens):
+    out, ops = [], []
+    for t in tokens:
+        if t in PRECEDENCE:
+            while ops and ops[-1] != &quot;(&quot; and (PRECEDENCE[ops[-1]] &gt; PRECEDENCE[t]
+                                               or (PRECEDENCE[ops[-1]] == PRECEDENCE[t] and t != &quot;^&quot;)):
+                out.append(ops.pop())
+            ops.append(t)
+        elif t == &quot;(&quot;:
+            ops.append(t)
+        elif t == &quot;)&quot;:
+            while ops and ops[-1] != &quot;(&quot;:
+                out.append(ops.pop())
+            if not ops:
+                raise ValueError(&quot;mismatched brackets&quot;)
+            ops.pop()
+        else:
+            out.append(t)
+    while ops:
+        op = ops.pop()
+        if op == &quot;(&quot;:
+            raise ValueError(&quot;mismatched brackets&quot;)
+        out.append(op)
+    return out</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d4-undo" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Undo with a limit and groups</div><div class="pc-prompt"><p>Write <code>Editor(limit)</code> for a line of text, with <code>type(s)</code>, <code>delete(n)</code> (remove up to <code>n</code> characters from the end), <code>undo()</code> and <code>redo()</code> (both return <code>True</code> if they did something), and a <code>text</code> attribute. The undo history keeps at most <code>limit</code> steps (a <code>deque</code> with <code>maxlen</code>). Consecutive <code>type</code> calls whose text is all letters join one step; anything else (a non-letter typed, a delete, an undo or a redo) ends the group. Any new <code>type</code> or <code>delete</code> clears the redo stack.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+class Editor:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_groups():
+    &quot;grouped steps&quot;
+    e = Editor(10)
+    for piece in [&quot;h&quot;, &quot;i&quot;, &quot; &quot;, &quot;y&quot;, &quot;o&quot;, &quot;u&quot;]:
+        e.type(piece)
+    assert e.text == &quot;hi you&quot;
+    assert e.undo() and e.text == &quot;hi &quot; and e.undo() and e.text == &quot;hi&quot; and e.undo() and e.text == &quot;&quot; and not e.undo()
+    assert e.redo() and e.text == &quot;hi&quot; and e.redo() and e.redo() and e.text == &quot;hi you&quot; and not e.redo()
+def test_delete():
+    &quot;delete and redo&quot;
+    e = Editor(10)
+    e.type(&quot;abc&quot;)
+    e.delete(2)
+    assert e.text == &quot;a&quot; and e.undo() and e.text == &quot;abc&quot;
+    e.type(&quot;d&quot;)
+    assert not e.redo(), &quot;a new action clears redo&quot;
+    e.delete(99)
+    assert e.text == &quot;&quot; and e.undo() and e.text == &quot;abcd&quot;
+def test_limit():
+    &quot;limited history&quot;
+    e = Editor(3)
+    for piece in [&quot;a&quot;, &quot;1&quot;, &quot;b&quot;, &quot;2&quot;, &quot;c&quot;]:
+        e.type(piece)
+    count = 0
+    while e.undo():
+        count += 1
+    assert count == 3 and e.text == &quot;a1&quot;</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+class Editor:
+    def __init__(self, limit):
+        self.text = &quot;&quot;
+        self._undo = deque(maxlen=limit)
+        self._redo = []
+        self._typing = False
+
+    def type(self, s):
+        letters = s.isalpha()
+        if not (letters and self._typing):
+            self._undo.append(self.text)
+        self._typing = letters
+        self.text += s
+        self._redo.clear()
+
+    def delete(self, n):
+        self._undo.append(self.text)
+        self._typing = False
+        self.text = self.text[:max(0, len(self.text) - n)]
+        self._redo.clear()
+
+    def undo(self):
+        if not self._undo:
+            return False
+        self._redo.append(self.text)
+        self.text = self._undo.pop()
+        self._typing = False
+        return True
+
+    def redo(self):
+        if not self._redo:
+            return False
+        self._undo.append(self.text)
+        self.text = self._redo.pop()
+        self._typing = False
+        return True</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w043d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Operands the wrong way round</div><div class="pc-prompt"><p>This postfix evaluator pops the operands into the wrong names, so subtraction and division come out backwards: <code>10 2 -</code> gives <code>-8</code> and <code>8 2 /</code> gives <code>0.25</code>. Fix it so this prints <code>8 4.0</code>.</p></div><textarea class="pc-src pc-code" hidden>def eval_postfix(tokens):
+    stack = []
+    for t in tokens:
+        if t in &quot;+-*/&quot;:
+            a, b = stack.pop(), stack.pop()
+            stack.append((a + b if t == &quot;+&quot; else a - b if t == &quot;-&quot; else a * b if t == &quot;*&quot; else a / b))
+        else:
+            stack.append(int(t))
+    return stack[0]
+
+print(eval_postfix(&quot;10 2 -&quot;.split()), eval_postfix(&quot;8 2 /&quot;.split()))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the second operand is on top&quot;
+    expect_output(&quot;8 4.0&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def eval_postfix(tokens):
+    stack = []
+    for t in tokens:
+        if t in &quot;+-*/&quot;:
+            b, a = stack.pop(), stack.pop()
+            stack.append((a + b if t == &quot;+&quot; else a - b if t == &quot;-&quot; else a * b if t == &quot;*&quot; else a / b))
+        else:
+            stack.append(int(t))
+    return stack[0]
+
+print(eval_postfix(&quot;10 2 -&quot;.split()), eval_postfix(&quot;8 2 /&quot;.split()))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w043d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Operators left behind</div><div class="pc-prompt"><p>This shunting-yard forgets to pop the operators still on the stack at the end, so they never reach the output: this prints <code>3 4 2</code>. Fix it so it prints <code>3 4 2 * +</code>.</p></div><textarea class="pc-src pc-code" hidden>PRECEDENCE = {&quot;+&quot;: 1, &quot;-&quot;: 1, &quot;*&quot;: 2, &quot;/&quot;: 2}
+
+def to_postfix(tokens):
+    out, ops = [], []
+    for t in tokens:
+        if t in PRECEDENCE:
+            while ops and ops[-1] != &quot;(&quot; and PRECEDENCE[ops[-1]] &gt;= PRECEDENCE[t]:
+                out.append(ops.pop())
+            ops.append(t)
+        elif t == &quot;(&quot;:
+            ops.append(t)
+        elif t == &quot;)&quot;:
+            while ops[-1] != &quot;(&quot;:
+                out.append(ops.pop())
+            ops.pop()
+        else:
+            out.append(t)
+    return out
+
+print(&quot; &quot;.join(to_postfix(&quot;3 + 4 * 2&quot;.split())))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;flush the stack&quot;
+    expect_output(&quot;3 4 2 * +&quot;)</textarea><textarea class="pc-src pc-solution" hidden>PRECEDENCE = {&quot;+&quot;: 1, &quot;-&quot;: 1, &quot;*&quot;: 2, &quot;/&quot;: 2}
+
+def to_postfix(tokens):
+    out, ops = [], []
+    for t in tokens:
+        if t in PRECEDENCE:
+            while ops and ops[-1] != &quot;(&quot; and PRECEDENCE[ops[-1]] &gt;= PRECEDENCE[t]:
+                out.append(ops.pop())
+            ops.append(t)
+        elif t == &quot;(&quot;:
+            ops.append(t)
+        elif t == &quot;)&quot;:
+            while ops[-1] != &quot;(&quot;:
+                out.append(ops.pop())
+            ops.pop()
+        else:
+            out.append(t)
+    while ops:
+        out.append(ops.pop())
+    return out
+
+print(&quot; &quot;.join(to_postfix(&quot;3 + 4 * 2&quot;.split())))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w043d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Never closed, never noticed</div><div class="pc-prompt"><p>This tag checker checks every closing tag, but never checks whether tags are <strong>still open</strong> at the end, so unclosed tags pass: this prints <code>ok</code>. Fix it so it prints <code>unclosed &lt;i&gt;</code>.</p></div><textarea class="pc-src pc-code" hidden>def check_tags(html):
+    stack = []
+    i = 0
+    while html.find(&quot;&lt;&quot;, i) != -1:
+        start = html.find(&quot;&lt;&quot;, i)
+        end = html.find(&quot;&gt;&quot;, start)
+        name = html[start + 1:end].lower()
+        i = end + 1
+        if name.startswith(&quot;/&quot;):
+            if not stack or stack[-1] != name[1:]:
+                return f&quot;unexpected &lt;{name}&gt;&quot;
+            stack.pop()
+        else:
+            stack.append(name)
+    return &quot;ok&quot;
+
+print(check_tags(&quot;&lt;b&gt;x&lt;/b&gt;&lt;p&gt;&lt;i&gt;y&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;check the leftovers&quot;
+    expect_output(&quot;unclosed &lt;i&gt;&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def check_tags(html):
+    stack = []
+    i = 0
+    while html.find(&quot;&lt;&quot;, i) != -1:
+        start = html.find(&quot;&lt;&quot;, i)
+        end = html.find(&quot;&gt;&quot;, start)
+        name = html[start + 1:end].lower()
+        i = end + 1
+        if name.startswith(&quot;/&quot;):
+            if not stack or stack[-1] != name[1:]:
+                return f&quot;unexpected &lt;{name}&gt;&quot;
+            stack.pop()
+        else:
+            stack.append(name)
+    return f&quot;unclosed &lt;{stack[-1]}&gt;&quot; if stack else &quot;ok&quot;
+
+print(check_tags(&quot;&lt;b&gt;x&lt;/b&gt;&lt;p&gt;&lt;i&gt;y&quot;))</textarea></div>
+<div class="parsons" data-id="w043d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Evaluating postfix</div><div class="pc-prompt"><p>Arrange the lines into a postfix evaluator. One line is a trap.</p></div><script type="application/json">{"lines": ["def evaluate(tokens):", "    stack = []", "    for t in tokens:", "        if t in OPS:", "            b = stack.pop()", "            a = stack.pop()", "            stack.append(OPS[t](a, b))", "        else:", "            stack.append(float(t))", "    return stack.pop()"], "distractors": ["            stack.append(OPS[t](b, a))"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden># Answer without running code (write postfix as a string with single spaces).
+
+p = ___   # &quot;5 - 3 + 1&quot; in postfix
+q = ___   # &quot;5 - ( 3 + 1 )&quot; in postfix
+r = ___   # the value of &quot;2 3 4 * +&quot;
+s = ___   # the value of &quot;2 3 ^ 2 ^&quot; (where ^ is power)
+t = ___   # &quot;2 ^ 3 ^ 2&quot; in postfix, with ^ right-associative</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;5 3 - 1 +&quot; and q == &quot;5 3 1 + -&quot; and r == 14, &quot;p, q and r&quot;
+    assert s == 64 and t == &quot;2 3 2 ^ ^&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden># Answer without running code (write postfix as a string with single spaces).
+
+p = &quot;5 3 - 1 +&quot;
+q = &quot;5 3 1 + -&quot;
+r = 14
+s = 64
+t = &quot;2 3 2 ^ ^&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w043d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "In a bracket checker, what does a non-empty stack at the end mean?", "answer": 1, "explain": "Report the earliest still open.", "options": ["Everything matched", "Some brackets were opened and never closed", "A closer had no opener", "Nothing"]}, {"type": "mc", "q": "What is postfix notation?", "answer": 1, "explain": "Reverse Polish.", "options": ["Operators between operands", "Operators after their operands, so no brackets are needed", "Operators before operands", "Numbers in reverse"]}, {"type": "mc", "q": "Evaluating postfix, an operator pops two numbers. Which is the second operand?", "answer": 0, "explain": "b, a = stack.pop(), stack.pop().", "options": ["The first one popped", "The second one popped", "The smaller", "The bigger"]}, {"type": "mc", "q": "What does shunting-yard convert?", "answer": 1, "explain": "Dijkstra, 1961.", "options": ["Postfix to infix", "Infix to postfix", "Strings to numbers", "Brackets to tags"]}, {"type": "mc", "q": "In shunting-yard, when an operator arrives, which stacked operators are popped to the output first?", "answer": 1, "explain": "They happen first.", "options": ["None", "Those with higher precedence, or equal precedence if the new one is left-associative", "All of them", "Only brackets"]}, {"type": "mc", "q": "Why is ^ treated as right-associative?", "answer": 1, "explain": "So equal precedence doesn&rsquo;t pop.", "options": ["Speed", "2 ^ 3 ^ 2 conventionally means 2 ^ (3 ^ 2)", "It&rsquo;s rare", "Python requires it"]}, {"type": "mc", "q": "What happens to ( and ) in the postfix output?", "answer": 1, "explain": "Postfix needs no brackets.", "options": ["They&rsquo;re kept", "They never appear: ) pops back to its ( and both are thrown away", "They become *", "They move to the end"]}, {"type": "mc", "q": "Why does a calculator split into tokeniser, converter and evaluator?", "answer": 1, "explain": "Single responsibility.", "options": ["Python needs three functions", "Each part has one job and can be tested on its own", "It&rsquo;s faster", "To use three stacks"]}, {"type": "mc", "q": "How do editors make undo remove a whole word instead of one letter?", "answer": 1, "explain": "Coalescing.", "options": ["They can&rsquo;t", "They group consecutive typing into one undo step", "They undo twice", "They store words"]}, {"type": "output", "q": "What does this print?", "answer": "[0.0]", "explain": "6 / 2 is 3.0, then 3.0 - 3.", "code": "stack = []\nfor t in \"6 2 / 3 -\".split():\n    if t in \"+-*/\":\n        b, a = stack.pop(), stack.pop()\n        stack.append(a / b if t == \"/\" else a - b)\n    else:\n        stack.append(int(t))\nprint(stack)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w043d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a robust calculator</div><div class="pc-prompt"><p>Write <code>calculate(text)</code>: work out an expression with decimal numbers, <code>+ - * /</code>, brackets and spaces, using a tokeniser, shunting-yard and a postfix evaluator. Two extras:</p>
+<ul>
+<li><strong>Unary minus</strong>: a <code>-</code> at the start, after <code>(</code> or after another operator, makes the next number (or bracket) negative: <code>-3 + 5</code> is 2, <code>2 * -(1 + 1)</code> is -4. Hint: when you meet a unary minus, put a special operator <code>"neg"</code> with the <strong>highest</strong> precedence, right-associative, that pops <strong>one</strong> operand.</li>
+<li><strong>Errors</strong>: raise <code>ValueError</code> (with any message) for anything malformed: unknown characters, a number like <code>1.2.3</code>, mismatched brackets, an operator with a missing operand (<code>"2 +"</code>, <code>"* 3"</code>), two numbers in a row (<code>"2 3"</code>), or empty input. Division by zero raises <code>ZeroDivisionError</code> as usual.</li>
+</ul>
+<p>Return a <code>float</code>. Don&rsquo;t use <code>eval</code>.</p></div><textarea class="pc-src pc-code" hidden>def calculate(text):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;values&quot;
+    cases = {&quot;2*(3+4.5)&quot;: 15.0, &quot;10 - 2 - 3&quot;: 5.0, &quot;7 / 2 + 1&quot;: 4.5, &quot;-3 + 5&quot;: 2.0, &quot;2 * -(1 + 1)&quot;: -4.0, &quot;--2&quot;: 2.0, &quot;1 - -1&quot;: 2.0,
+             &quot;((1))&quot;: 1.0, &quot;8 / 4 / 2&quot;: 1.0, &quot;2 + 3 * 4 - 5&quot;: 9.0, &quot;-(2)&quot;: -2.0, &quot;3 * (2 - (1 + 1))&quot;: 0.0}
+    for text, want in cases.items():
+        got = calculate(text)
+        assert isinstance(got, float) and abs(got - want) &lt; 1e-9, (text, got)
+def test_errors():
+    &quot;errors&quot;
+    for bad in [&quot;2 +&quot;, &quot;* 3&quot;, &quot;2 3&quot;, &quot;&quot;, &quot;   &quot;, &quot;(1 + 2&quot;, &quot;1 + 2)&quot;, &quot;1.2.3&quot;, &quot;2 $ 3&quot;, &quot;()&quot;, &quot;4 (2)&quot;]:
+        try:
+            calculate(bad)
+            assert False, f&quot;{bad!r} should raise ValueError&quot;
+        except ValueError:
+            pass
+    try:
+        calculate(&quot;1 / (2 - 2)&quot;)
+        assert False
+    except ZeroDivisionError:
+        pass
+    assert &quot;eval(&quot; not in source</textarea><textarea class="pc-src pc-solution" hidden>PRECEDENCE = {&quot;+&quot;: 1, &quot;-&quot;: 1, &quot;*&quot;: 2, &quot;/&quot;: 2, &quot;neg&quot;: 3}
+
+def _tokenise(text):
+    tokens, number = [], &quot;&quot;
+    for ch in text + &quot; &quot;:
+        if ch.isdigit() or ch == &quot;.&quot;:
+            number += ch
+            continue
+        if number:
+            if number.count(&quot;.&quot;) &gt; 1 or number == &quot;.&quot;:
+                raise ValueError(f&quot;bad number {number!r}&quot;)
+            tokens.append(number)
+            number = &quot;&quot;
+        if ch in &quot;+-*/()&quot;:
+            tokens.append(ch)
+        elif not ch.isspace():
+            raise ValueError(f&quot;unexpected {ch!r}&quot;)
+    return tokens
+
+def _to_postfix(tokens):
+    out, ops = [], []
+    expect_value = True
+    for t in tokens:
+        if expect_value:
+            if t == &quot;-&quot;:
+                t = &quot;neg&quot;
+            elif t == &quot;(&quot;:
+                ops.append(t)
+                continue
+            elif t in PRECEDENCE or t == &quot;)&quot;:
+                raise ValueError(f&quot;expected a value, found {t!r}&quot;)
+            else:
+                out.append(t)
+                expect_value = False
+                continue
+        else:
+            if t == &quot;)&quot;:
+                while ops and ops[-1] != &quot;(&quot;:
+                    out.append(ops.pop())
+                if not ops:
+                    raise ValueError(&quot;mismatched brackets&quot;)
+                ops.pop()
+                continue
+            if t not in PRECEDENCE:
+                raise ValueError(f&quot;expected an operator, found {t!r}&quot;)
+            expect_value = True
+        while ops and ops[-1] != &quot;(&quot; and t != &quot;neg&quot; and PRECEDENCE[ops[-1]] &gt;= PRECEDENCE[t]:
+            out.append(ops.pop())
+        ops.append(t)
+    if expect_value:
+        raise ValueError(&quot;the expression ends too soon&quot;)
+    while ops:
+        op = ops.pop()
+        if op == &quot;(&quot;:
+            raise ValueError(&quot;mismatched brackets&quot;)
+        out.append(op)
+    return out
+
+def _evaluate(postfix):
+    stack = []
+    for t in postfix:
+        if t == &quot;neg&quot;:
+            stack.append(-stack.pop())
+        elif t in PRECEDENCE:
+            b, a = stack.pop(), stack.pop()
+            stack.append((a + b if t == &quot;+&quot; else a - b if t == &quot;-&quot; else a * b if t == &quot;*&quot; else a / b))
+        else:
+            stack.append(float(t))
+    return stack[0]
+
+def calculate(text):
+    return _evaluate(_to_postfix(_tokenise(text)))</textarea><template class="pc-src pc-hint">Tokenise, then mark unary minuses: a <code>-</code> is unary when it&rsquo;s the first token or follows <code>(</code> or an operator. While converting, also check the <strong>shape</strong>: keep a flag saying whether you expect a value next (at the start, after an operator or <code>(</code>) or an operator (after a number or <code>)</code>); a token of the wrong kind is an error. At the end you must be expecting an operator. That catches <code>"2 3"</code>, <code>"()"</code>, <code>"* 3"</code> and <code>"2 +"</code> in one place.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Run the shunting-yard example by hand on <code>1 + 2 * ( 3 - 4 ) / 5</code>, writing the output and the operator stack after each token. Tomorrow: circular buffers, a fixed block of slots used as a queue that never needs to move anything.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w043d3.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w043d4", "week": 43, "day": 4, "title": "Brackets and undo", "exercises": [{"id": "w043d4-problem", "title": "Where's the first problem?", "points": 10}, {"id": "w043d4-tags", "title": "Nested tags", "points": 15}, {"id": "w043d4-fewest", "title": "Fewest brackets to add", "points": 10}, {"id": "w043d4-rpn", "title": "Evaluating postfix", "points": 10}, {"id": "w043d4-yard", "title": "Shunting-yard", "points": 15}, {"id": "w043d4-undo", "title": "Undo with a limit and groups", "points": 15}, {"id": "w043d4-bug1", "title": "Operands the wrong way round", "points": 10}, {"id": "w043d4-bug2", "title": "Operators left behind", "points": 10}, {"id": "w043d4-bug3", "title": "Never closed, never noticed", "points": 10}, {"id": "w043d4-trace", "title": "Predict them", "points": 10}, {"id": "w043d4-challenge", "title": "Challenge: a robust calculator", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=871ff52039"></script>
+</body>
+</html>
