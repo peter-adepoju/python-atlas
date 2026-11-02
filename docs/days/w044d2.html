@@ -1,0 +1,983 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="871ff52039">
+<title>Week 44 Day 2: Build a hash map with chaining | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=871ff52039">
+<link rel="stylesheet" href="../assets/css/site.css?v=871ff52039">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=871ff52039"></script>
+<script src="../assets/vendor/codemirror.js?v=871ff52039" defer></script>
+<meta name="description" content="Yesterday’s hash functions choose a slot for each key, and collisions are certain. Today you’ll build a complete hash map that handles them the simplest...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w044d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 44 Day 2: Build a hash map with chaining">
+<meta property="og:description" content="Yesterday’s hash functions choose a slot for each key, and collisions are certain. Today you’ll build a complete hash map that handles them the simplest...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w044d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-44">Week 44: Hash tables</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#chains-of-pairs" data-sec="chains-of-pairs">Chains of pairs</a></li><li><a href="#getting-putting-deleting" data-sec="getting-putting-deleting">Getting, putting, deleting</a></li><li><a href="#the-load-factor-and-resizing" data-sec="the-load-factor-and-resizing">The load factor and resizing</a></li><li><a href="#how-fast-really" data-sec="how-fast-really">How fast, really?</a></li><li><a href="#behaving-like-a-dict" data-sec="behaving-like-a-dict">Behaving like a dict</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w044d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-44">Week 44: Hash tables</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 44, Day 2</span></p>
+      <h1>Build a hash map with chaining</h1>
+      <div class="day-intro"><p>Yesterday&rsquo;s hash functions choose a slot for each key, and collisions are certain. Today you&rsquo;ll build a complete hash map that handles them the simplest way: <strong>separate chaining</strong>, where each slot holds a short list (a chain) of every key that landed there. You&rsquo;ll write get, put and delete, keep the chains short by growing the table when it gets too full, measure why lookups are O(1) on average, and give the map the same special methods as a Python dictionary, so it can be used like one.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Build a hash map whose slots hold chains of key-value pairs</li><li>Get, put and delete keys, updating existing keys rather than duplicating them</li><li>Explain the load factor, and resize by rehashing every key into a bigger table</li><li>Explain why operations are O(1) on average and O(n) in the worst case</li><li>Give a hash map Python&rsquo;s mapping methods, so it works like a dict</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Chains of pairs: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Getting, putting, deleting: 20 min"></span><span class="plan-seg s1" style="flex:25" title="The load factor and resizing: 25 min"></span><span class="plan-seg s0" style="flex:15" title="How fast, really?: 15 min"></span><span class="plan-seg s1" style="flex:20" title="Behaving like a dict: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Chains of pairs</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Getting, putting, deleting</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">The load factor and resizing</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">How fast, really?</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Behaving like a dict</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w044d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w044d2.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w044d2-p1"><textarea class="pc-src pc-code" hidden>buckets = [[] for _ in range(4)]
+
+def put(key, value):
+    chain = buckets[key % 4]
+    for pair in chain:
+        if pair[0] == key:
+            pair[1] = value
+            return
+    chain.append([key, value])
+
+for k, v in [(5, &quot;a&quot;), (9, &quot;b&quot;), (2, &quot;c&quot;), (5, &quot;d&quot;), (13, &quot;e&quot;)]:
+    put(k, v)
+print(buckets)</textarea></div>
+<p>Keys 5, 9 and 13 all have remainder 1, so they share slot 1&rsquo;s chain; putting 5 a second time <strong>updated</strong> its pair instead of adding another. That&rsquo;s a whole hash map, in miniature: the rest of today is making it correct, fast and convenient.</p>
+<h2 id="chains-of-pairs">Chains of pairs</h2>
+<p>A chaining hash map is an array of <code>m</code> <strong>buckets</strong>, each a list of <code>[key, value]</code> pairs:</p>
+<pre><code class="language-text"> index = hash(key) % m
+
+ bucket 0: []
+ bucket 1: [[5, &quot;d&quot;], [9, &quot;b&quot;], [13, &quot;e&quot;]]      &lt;- a chain: keys that collided
+ bucket 2: [[2, &quot;c&quot;]]
+ bucket 3: []
+</code></pre>
+<p>Every operation does the same two things: work out the bucket from the key&rsquo;s hash, then search that one <strong>short</strong> chain, comparing keys with <code>==</code>. The hash narrows the search to one bucket; equality picks the right key within it. That&rsquo;s why Week 29 insisted that equal keys must have equal hashes: otherwise two equal keys could sit in different buckets, and neither would ever be found by the other.</p>
+<p>(Chains can be linked lists of nodes, as in Week 42, and in many languages they are. In Python, a short list of pairs is simpler and faster.)</p>
+<h2 id="getting-putting-deleting">Getting, putting, deleting</h2>
+<div class="pc pc-example" data-kind="example" data-id="w044d2-e2"><textarea class="pc-src pc-code" hidden>class HashMap:
+    def __init__(self, capacity=8):
+        self._buckets = [[] for _ in range(capacity)]
+        self._size = 0
+
+    def _chain(self, key):
+        return self._buckets[hash(key) % len(self._buckets)]
+
+    def put(self, key, value):
+        chain = self._chain(key)
+        for pair in chain:
+            if pair[0] == key:
+                pair[1] = value                   # an existing key: update it
+                return
+        chain.append([key, value])                # a new key
+        self._size += 1
+
+    def get(self, key, default=None):
+        for k, v in self._chain(key):
+            if k == key:
+                return v
+        return default
+
+    def delete(self, key):
+        chain = self._chain(key)
+        for i, (k, _) in enumerate(chain):
+            if k == key:
+                chain.pop(i)                       # order inside a chain doesn&#x27;t matter
+                self._size -= 1
+                return
+        raise KeyError(key)
+
+m = HashMap()
+for word in &quot;the cat sat on the mat&quot;.split():
+    m.put(word, m.get(word, 0) + 1)
+print(m.get(&quot;the&quot;), m.get(&quot;cat&quot;), m.get(&quot;dog&quot;), m._size)
+m.delete(&quot;cat&quot;)
+print(m.get(&quot;cat&quot;, &quot;gone&quot;), m._size)</textarea></div>
+<p>Three details are easy to miss: <code>put</code> must <strong>update</strong> an existing key rather than append a second pair (or <code>len</code> and lookups go wrong); <code>delete</code> must raise <code>KeyError</code> for a missing key, like a dict; and the size counter must change only when a key is really added or removed.</p>
+<h2 id="the-load-factor-and-resizing">The load factor and resizing</h2>
+<p>The <strong>load factor</strong> is the number of keys divided by the number of buckets: α = n / m. With a good hash, an average chain holds α keys, so a lookup checks about α pairs. Keep α small and lookups stay fast; let it grow and the map slowly turns into a handful of long lists.</p>
+<p>So when α passes a threshold (0.75 is a common choice), <strong>resize</strong>: make a table about twice as big and <strong>rehash</strong> every key into it. Every key must be re-placed, because its bucket depends on <code>m</code>: a key in bucket 5 of 8 might belong in bucket 13 of 16.</p>
+<div class="pc pc-example" data-kind="example" data-id="w044d2-e3"><textarea class="pc-src pc-code" hidden>class HashMap:
+    def __init__(self, capacity=8, max_load=0.75):
+        self._buckets = [[] for _ in range(capacity)]
+        self._size = 0
+        self.max_load = max_load
+        self.resizes = 0
+
+    def _index(self, key, buckets):
+        return hash(key) % len(buckets)
+
+    def put(self, key, value):
+        chain = self._buckets[self._index(key, self._buckets)]
+        for pair in chain:
+            if pair[0] == key:
+                pair[1] = value
+                return
+        chain.append([key, value])
+        self._size += 1
+        if self._size / len(self._buckets) &gt; self.max_load:
+            self._resize(2 * len(self._buckets))
+
+    def _resize(self, capacity):
+        new = [[] for _ in range(capacity)]
+        for chain in self._buckets:
+            for pair in chain:
+                new[self._index(pair[0], new)].append(pair)    # every key moves to its new bucket
+        self._buckets = new
+        self.resizes += 1
+
+    def longest_chain(self):
+        return max(len(c) for c in self._buckets)
+
+m = HashMap()
+for i in range(1000):
+    m.put(i * 7, i)
+print(len(m._buckets), m.resizes, m._size / len(m._buckets), m.longest_chain())</textarea></div>
+<p>A resize is O(n), but like Week 41&rsquo;s dynamic array, doubling makes it rare enough that <code>put</code> is O(1) <strong>amortised</strong>: n puts cause resizes copying fewer than 2n keys in total.</p>
+<h2 id="how-fast-really">How fast, really?</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Average (good hash, α kept below a constant)</th>
+<th>Worst case (every key in one bucket)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>get, put, delete</td>
+<td>O(1)</td>
+<td>O(n)</td>
+</tr>
+<tr>
+<td>resize</td>
+<td>O(n), but O(1) amortised per put</td>
+<td>O(n)</td>
+</tr>
+<tr>
+<td>iterate over all keys</td>
+<td>O(n + m)</td>
+<td>O(n + m)</td>
+</tr>
+</tbody>
+</table>
+<p>The average depends on the keys being spread evenly, which depends on the hash function (Day 1). The worst case is real: a bad hash function, or an attacker who knows the hash (hash flooding), puts everything in one chain. That&rsquo;s why Python randomises its string hashes, and why some languages switch long chains to balanced trees.</p>
+<div class="pc pc-example" data-kind="example" data-id="w044d2-e4"><textarea class="pc-src pc-code" hidden>class BadKey:
+    def __init__(self, n):
+        self.n = n
+    def __eq__(self, other):
+        return self.n == other.n
+    def __hash__(self):
+        return 42                                 # every key collides
+
+import time
+for kind in [int, BadKey]:
+    start = time.perf_counter()
+    d = {}
+    for i in range(3000):
+        d[kind(i)] = i
+    print(f&quot;{kind.__name__:&lt;7} {1000 * (time.perf_counter() - start):6.1f} ms&quot;)</textarea></div>
+<p>Even Python&rsquo;s own, carefully built dictionary slows to a crawl when every key has the same hash.</p>
+<h2 id="behaving-like-a-dict">Behaving like a dict</h2>
+<p>Week 31&rsquo;s container protocols let a hash map work with Python&rsquo;s own syntax: <code>__getitem__</code> for <code>m[key]</code> (raising <code>KeyError</code> if missing), <code>__setitem__</code> for <code>m[key] = value</code>, <code>__delitem__</code> for <code>del m[key]</code>, <code>__contains__</code> for <code>in</code>, <code>__len__</code> and <code>__iter__</code> (over the keys, as a dict does). With those, <code>m["cat"] += 1</code> and <code>for key in m</code> work as expected.</p>
+<p>One difference from a real dict: our map&rsquo;s keys come out in <strong>bucket order</strong>, which depends on the hashes, so it&rsquo;s effectively arbitrary (and, with string keys, different each run). Python&rsquo;s dict remembers the order keys were added; Day 4 shows how.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A chaining hash map is an array of buckets, each a list of key-value pairs; a key&rsquo;s bucket is <code>hash(key) % m</code>, and the right pair is found by comparing keys with <code>==</code>. <code>put</code> updates an existing key or appends a new pair; <code>delete</code> removes the pair or raises <code>KeyError</code>. The load factor α = n/m is the average chain length; when it passes a threshold, double the table and rehash every key (O(1) amortised). Operations are O(1) on average with a good hash and O(n) in the worst case, when everything collides. The special methods <code>__getitem__</code>, <code>__setitem__</code>, <code>__delitem__</code>, <code>__contains__</code>, <code>__len__</code> and <code>__iter__</code> make it work like a dict, though its key order is arbitrary.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d2-basic" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A chaining hash map</div><div class="pc-prompt"><p>Write <code>HashMap(capacity=8)</code>: <code>capacity</code> empty buckets (each a list), with <code>put(key, value)</code> (updating an existing key), <code>get(key, default=None)</code>, <code>contains(key)</code> and <code>__len__</code>. Use <code>hash(key) % len(self._buckets)</code> to choose a bucket. No resizing yet, and don&rsquo;t use a dict or set inside.</p></div><textarea class="pc-src pc-code" hidden>class HashMap:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_map():
+    &quot;a map&quot;
+    m = HashMap(4)
+    for k, v in [(&quot;a&quot;, 1), (&quot;b&quot;, 2), (&quot;c&quot;, 3), (&quot;a&quot;, 10)]:
+        m.put(k, v)
+    assert len(m) == 3 and m.get(&quot;a&quot;) == 10 and m.get(&quot;b&quot;) == 2 and m.get(&quot;z&quot;) is None and m.get(&quot;z&quot;, 0) == 0
+    assert m.contains(&quot;c&quot;) and not m.contains(&quot;d&quot;) and len(m._buckets) == 4
+    for i in range(100):
+        m.put(i, i * i)
+    assert len(m) == 103 and m.get(9) == 81 and all(isinstance(b, list) for b in m._buckets)
+    m.put(1.0, &quot;one&quot;)
+    assert m.get(1) == &quot;one&quot; and len(m) == 103, &quot;1 and 1.0 are the same key&quot;
+def test_no_dict():
+    &quot;built from buckets&quot;
+    import ast
+    assert not any(isinstance(n, (ast.Dict, ast.Set, ast.DictComp, ast.SetComp)) or (isinstance(n, ast.Name) and n.id in (&quot;dict&quot;, &quot;set&quot;)) for n in ast.walk(ast.parse(source)))</textarea><textarea class="pc-src pc-solution" hidden>class HashMap:
+    def __init__(self, capacity=8):
+        self._buckets = [[] for _ in range(capacity)]
+        self._size = 0
+
+    def _chain(self, key):
+        return self._buckets[hash(key) % len(self._buckets)]
+
+    def put(self, key, value):
+        chain = self._chain(key)
+        for pair in chain:
+            if pair[0] == key:
+                pair[1] = value
+                return
+        chain.append([key, value])
+        self._size += 1
+
+    def get(self, key, default=None):
+        for k, v in self._chain(key):
+            if k == key:
+                return v
+        return default
+
+    def contains(self, key):
+        return any(k == key for k, _ in self._chain(key))
+
+    def __len__(self):
+        return self._size</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d2-remove" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Deleting</div><div class="pc-prompt"><p>Add <code>delete(key)</code> to the starter&rsquo;s map: remove the key&rsquo;s pair and return its value, or raise <code>KeyError(key)</code> if it isn&rsquo;t there. The size must stay right.</p></div><textarea class="pc-src pc-code" hidden>class HashMap:
+    def __init__(self, capacity=8):
+        self._buckets = [[] for _ in range(capacity)]
+        self._size = 0
+
+    def _chain(self, key):
+        return self._buckets[hash(key) % len(self._buckets)]
+
+    def put(self, key, value):
+        chain = self._chain(key)
+        for pair in chain:
+            if pair[0] == key:
+                pair[1] = value
+                return
+        chain.append([key, value])
+        self._size += 1
+
+    def get(self, key, default=None):
+        for k, v in self._chain(key):
+            if k == key:
+                return v
+        return default
+
+    def __len__(self):
+        return self._size
+
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_delete():
+    &quot;deleting&quot;
+    m = HashMap(2)
+    for i in range(10):
+        m.put(i, str(i))
+    assert m.delete(4) == &quot;4&quot; and m.get(4) is None and len(m) == 9 and m.get(6) == &quot;6&quot;
+    try:
+        m.delete(4)
+        assert False
+    except KeyError as err:
+        assert err.args == (4,)
+    for i in range(10):
+        if i != 4:
+            m.delete(i)
+    assert len(m) == 0 and all(b == [] for b in m._buckets)</textarea><textarea class="pc-src pc-solution" hidden>class HashMap:
+    def __init__(self, capacity=8):
+        self._buckets = [[] for _ in range(capacity)]
+        self._size = 0
+
+    def _chain(self, key):
+        return self._buckets[hash(key) % len(self._buckets)]
+
+    def put(self, key, value):
+        chain = self._chain(key)
+        for pair in chain:
+            if pair[0] == key:
+                pair[1] = value
+                return
+        chain.append([key, value])
+        self._size += 1
+
+    def get(self, key, default=None):
+        for k, v in self._chain(key):
+            if k == key:
+                return v
+        return default
+
+    def __len__(self):
+        return self._size
+
+    def delete(self, key):
+        chain = self._chain(key)
+        for i, (k, v) in enumerate(chain):
+            if k == key:
+                chain.pop(i)
+                self._size -= 1
+                return v
+        raise KeyError(key)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d2-resize" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Growing the table</div><div class="pc-prompt"><p>Give the starter&rsquo;s map a load-factor limit: after <code>put</code> adds a <strong>new</strong> key, if <code>len / number of buckets</code> is more than <code>max_load</code> (default 0.75), double the number of buckets and rehash every pair into the new ones. Keep a count <code>resizes</code> and a read-only property <code>capacity</code> (the number of buckets).</p></div><textarea class="pc-src pc-code" hidden>class HashMap:
+    def __init__(self, capacity=8, max_load=0.75):
+        self._buckets = [[] for _ in range(capacity)]
+        self._size = 0
+        self.max_load = max_load
+        self.resizes = 0
+
+    def _chain(self, key):
+        return self._buckets[hash(key) % len(self._buckets)]
+
+    def get(self, key, default=None):
+        for k, v in self._chain(key):
+            if k == key:
+                return v
+        return default
+
+    def __len__(self):
+        return self._size
+
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_resize():
+    &quot;resizing&quot;
+    m = HashMap(4)
+    caps = []
+    for i in range(13):
+        m.put(f&quot;k{i}&quot;, i)
+        caps.append(m.capacity)
+    assert caps == [4, 4, 4, 8, 8, 8, 16, 16, 16, 16, 16, 16, 32], caps
+    assert all(m.get(f&quot;k{i}&quot;) == i for i in range(13)) and len(m) == 13 and m.resizes == 3
+    m.put(&quot;k0&quot;, &quot;updated&quot;)
+    assert m.capacity == 32 and m.get(&quot;k0&quot;) == &quot;updated&quot; and m.resizes == 3, &quot;updating doesn&#x27;t resize&quot;
+    try:
+        m.capacity = 3
+        assert False
+    except AttributeError:
+        pass
+def test_many():
+    &quot;many keys stay quick&quot;
+    m = HashMap()
+    for i in range(50_000):
+        m.put(i, i)
+    assert m.capacity == 131072 and max(len(b) for b in m._buckets) &lt;= 3</textarea><textarea class="pc-src pc-solution" hidden>class HashMap:
+    def __init__(self, capacity=8, max_load=0.75):
+        self._buckets = [[] for _ in range(capacity)]
+        self._size = 0
+        self.max_load = max_load
+        self.resizes = 0
+
+    def _chain(self, key):
+        return self._buckets[hash(key) % len(self._buckets)]
+
+    def get(self, key, default=None):
+        for k, v in self._chain(key):
+            if k == key:
+                return v
+        return default
+
+    def __len__(self):
+        return self._size
+
+    @property
+    def capacity(self):
+        return len(self._buckets)
+
+    def put(self, key, value):
+        chain = self._chain(key)
+        for pair in chain:
+            if pair[0] == key:
+                pair[1] = value
+                return
+        chain.append([key, value])
+        self._size += 1
+        if self._size / len(self._buckets) &gt; self.max_load:
+            self._resize(2 * len(self._buckets))
+
+    def _resize(self, capacity):
+        new = [[] for _ in range(capacity)]
+        for chain in self._buckets:
+            for pair in chain:
+                new[hash(pair[0]) % capacity].append(pair)
+        self._buckets = new
+        self.resizes += 1</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d2-protocol" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Behaving like a dict</div><div class="pc-prompt"><p>Give the starter&rsquo;s map the mapping methods: <code>m[key]</code> (raising <code>KeyError(key)</code> if missing), <code>m[key] = value</code>, <code>del m[key]</code>, <code>key in m</code>, <code>len(m)</code>, iteration over the keys (in any order, without <code>yield</code>), <code>items()</code> (a list of <code>(key, value)</code> tuples), and <code>__repr__</code> like <code>HashMap({'a': 1})</code> with the pairs <strong>sorted by key</strong>, so it doesn&rsquo;t depend on hashing.</p></div><textarea class="pc-src pc-code" hidden>class HashMap:
+    def __init__(self, capacity=8):
+        self._buckets = [[] for _ in range(capacity)]
+        self._size = 0
+
+    def _chain(self, key):
+        return self._buckets[hash(key) % len(self._buckets)]
+
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_protocol():
+    &quot;like a dict&quot;
+    m = HashMap()
+    for w in &quot;the cat sat on the mat the end&quot;.split():
+        if w in m:
+            m[w] += 1
+        else:
+            m[w] = 1
+    assert m[&quot;the&quot;] == 3 and len(m) == 6 and sorted(m) == [&quot;cat&quot;, &quot;end&quot;, &quot;mat&quot;, &quot;on&quot;, &quot;sat&quot;, &quot;the&quot;]
+    assert sorted(m.items()) == [(&quot;cat&quot;, 1), (&quot;end&quot;, 1), (&quot;mat&quot;, 1), (&quot;on&quot;, 1), (&quot;sat&quot;, 1), (&quot;the&quot;, 3)]
+    del m[&quot;the&quot;]
+    assert &quot;the&quot; not in m and len(m) == 5 and repr(HashMap()) == &quot;HashMap({})&quot;
+    for bad in [lambda: m[&quot;zebra&quot;], lambda: m.__delitem__(&quot;zebra&quot;)]:
+        try:
+            bad()
+            assert False
+        except KeyError:
+            pass
+    small = HashMap()
+    small[&quot;b&quot;], small[&quot;a&quot;] = 2, 1
+    assert repr(small) == &quot;HashMap({&#x27;a&#x27;: 1, &#x27;b&#x27;: 2})&quot; and &quot;yield&quot; not in source</textarea><textarea class="pc-src pc-solution" hidden>class HashMap:
+    def __init__(self, capacity=8):
+        self._buckets = [[] for _ in range(capacity)]
+        self._size = 0
+
+    def _chain(self, key):
+        return self._buckets[hash(key) % len(self._buckets)]
+
+    def __getitem__(self, key):
+        for k, v in self._chain(key):
+            if k == key:
+                return v
+        raise KeyError(key)
+
+    def __setitem__(self, key, value):
+        chain = self._chain(key)
+        for pair in chain:
+            if pair[0] == key:
+                pair[1] = value
+                return
+        chain.append([key, value])
+        self._size += 1
+
+    def __delitem__(self, key):
+        chain = self._chain(key)
+        for i, (k, _) in enumerate(chain):
+            if k == key:
+                chain.pop(i)
+                self._size -= 1
+                return
+        raise KeyError(key)
+
+    def __contains__(self, key):
+        return any(k == key for k, _ in self._chain(key))
+
+    def __len__(self):
+        return self._size
+
+    def items(self):
+        return [(k, v) for chain in self._buckets for k, v in chain]
+
+    def __iter__(self):
+        return iter([k for k, _ in self.items()])
+
+    def __repr__(self):
+        body = &quot;, &quot;.join(f&quot;{k!r}: {v!r}&quot; for k, v in sorted(self.items()))
+        return f&quot;HashMap({{{body}}})&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d2-stats" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Measuring the chains</div><div class="pc-prompt"><p>Write <code>chain_stats(keys, m, hash_fn)</code>: put the keys (assumed distinct) into <code>m</code> buckets by <code>hash_fn(key) % m</code>, and return <code>(longest, average_nonempty, empty)</code>: the longest chain, the average length of the <strong>non-empty</strong> chains (rounded to 2 places), and how many buckets are empty. Then set <code>good</code> and <code>awful</code> to the stats for the numbers 0 to 999 in 100 buckets, hashing with <code>lambda n: n * 2654435761 % 2**32</code> and with <code>lambda n: n * 100</code>.</p></div><textarea class="pc-src pc-code" hidden>def chain_stats(keys, m, hash_fn):
+    ___
+
+good = ___
+awful = ___</textarea><textarea class="pc-src pc-tests" hidden>def test_stats():
+    &quot;chains&quot;
+    assert chain_stats([1, 2, 3, 5], 4, lambda n: n) == (2, 1.33, 1) and chain_stats([], 3, lambda n: n) == (0, 0, 3)
+    assert awful == (1000, 1000.0, 99) and good[0] &lt; 25 and good[2] &lt; 5</textarea><textarea class="pc-src pc-solution" hidden>def chain_stats(keys, m, hash_fn):
+    lengths = [0] * m
+    for k in keys:
+        lengths[hash_fn(k) % m] += 1
+    used = [n for n in lengths if n]
+    average = round(sum(used) / len(used), 2) if used else 0
+    return max(lengths), average, m - len(used)
+
+good = chain_stats(range(1000), 100, lambda n: n * 2654435761 % 2 ** 32)
+awful = chain_stats(range(1000), 100, lambda n: n * 100)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d2-hashset" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A set from a map</div><div class="pc-prompt"><p>A set is a map with no values. Write <code>HashSet(items=())</code> on the starter&rsquo;s <code>HashMap</code> (composition, Week 30: hold one, don&rsquo;t inherit), with <code>add</code>, <code>discard</code> (no error if missing), <code>__contains__</code>, <code>__len__</code>, <code>__iter__</code>, and <code>union(other)</code> and <code>intersection(other)</code> returning new <code>HashSet</code>s.</p></div><textarea class="pc-src pc-code" hidden>class HashMap:
+    def __init__(self):
+        self._buckets = [[] for _ in range(64)]
+        self._size = 0
+
+    def _chain(self, key):
+        return self._buckets[hash(key) % len(self._buckets)]
+
+    def put(self, key, value):
+        chain = self._chain(key)
+        for pair in chain:
+            if pair[0] == key:
+                pair[1] = value
+                return
+        chain.append([key, value])
+        self._size += 1
+
+    def contains(self, key):
+        return any(k == key for k, _ in self._chain(key))
+
+    def delete(self, key):
+        chain = self._chain(key)
+        for i, (k, _) in enumerate(chain):
+            if k == key:
+                chain.pop(i)
+                self._size -= 1
+                return
+        raise KeyError(key)
+
+    def keys(self):
+        return [k for chain in self._buckets for k, _ in chain]
+
+    def __len__(self):
+        return self._size
+
+class HashSet:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_set():
+    &quot;a set&quot;
+    s = HashSet([3, 1, 3, 2])
+    assert len(s) == 3 and 3 in s and 9 not in s and sorted(s) == [1, 2, 3]
+    s.add(9)
+    s.discard(1)
+    s.discard(100)
+    assert sorted(s) == [2, 3, 9]
+    t = HashSet([3, 4])
+    assert sorted(s.union(t)) == [2, 3, 4, 9] and sorted(s.intersection(t)) == [3] and isinstance(s.union(t), HashSet)
+    assert sorted(s) == [2, 3, 9] and not issubclass(HashSet, HashMap)</textarea><textarea class="pc-src pc-solution" hidden>class HashMap:
+    def __init__(self):
+        self._buckets = [[] for _ in range(64)]
+        self._size = 0
+
+    def _chain(self, key):
+        return self._buckets[hash(key) % len(self._buckets)]
+
+    def put(self, key, value):
+        chain = self._chain(key)
+        for pair in chain:
+            if pair[0] == key:
+                pair[1] = value
+                return
+        chain.append([key, value])
+        self._size += 1
+
+    def contains(self, key):
+        return any(k == key for k, _ in self._chain(key))
+
+    def delete(self, key):
+        chain = self._chain(key)
+        for i, (k, _) in enumerate(chain):
+            if k == key:
+                chain.pop(i)
+                self._size -= 1
+                return
+        raise KeyError(key)
+
+    def keys(self):
+        return [k for chain in self._buckets for k, _ in chain]
+
+    def __len__(self):
+        return self._size
+
+class HashSet:
+    def __init__(self, items=()):
+        self._map = HashMap()
+        for item in items:
+            self.add(item)
+
+    def add(self, item):
+        self._map.put(item, True)
+
+    def discard(self, item):
+        if self._map.contains(item):
+            self._map.delete(item)
+
+    def __contains__(self, item):
+        return self._map.contains(item)
+
+    def __len__(self):
+        return len(self._map)
+
+    def __iter__(self):
+        return iter(self._map.keys())
+
+    def union(self, other):
+        return HashSet(list(self) + list(other))
+
+    def intersection(self, other):
+        return HashSet([x for x in self if x in other])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w044d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The same key twice</div><div class="pc-prompt"><p><code>put</code> always appends a new pair, even when the key is already there, so the map holds two pairs for <code>"a"</code>, <code>len</code> says 3, and <code>get</code> finds the old value: this prints <code>3 1</code>. Make <code>put</code> update an existing key, so it prints <code>2 5</code>.</p></div><textarea class="pc-src pc-code" hidden>class HashMap:
+    def __init__(self):
+        self._buckets = [[] for _ in range(8)]
+        self._size = 0
+
+    def put(self, key, value):
+        self._buckets[hash(key) % 8].append([key, value])
+        self._size += 1
+
+    def get(self, key):
+        for k, v in self._buckets[hash(key) % 8]:
+            if k == key:
+                return v
+
+m = HashMap()
+m.put(&quot;a&quot;, 1)
+m.put(&quot;b&quot;, 2)
+m.put(&quot;a&quot;, 5)
+print(m._size, m.get(&quot;a&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;update, don&#x27;t duplicate&quot;
+    expect_output(&quot;2 5&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class HashMap:
+    def __init__(self):
+        self._buckets = [[] for _ in range(8)]
+        self._size = 0
+
+    def put(self, key, value):
+        chain = self._buckets[hash(key) % 8]
+        for pair in chain:
+            if pair[0] == key:
+                pair[1] = value
+                return
+        chain.append([key, value])
+        self._size += 1
+
+    def get(self, key):
+        for k, v in self._buckets[hash(key) % 8]:
+            if k == key:
+                return v
+
+m = HashMap()
+m.put(&quot;a&quot;, 1)
+m.put(&quot;b&quot;, 2)
+m.put(&quot;a&quot;, 5)
+print(m._size, m.get(&quot;a&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w044d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Moved, but not rehashed</div><div class="pc-prompt"><p>When this map grows, it copies each bucket into the <strong>same index</strong> of the bigger table instead of rehashing each key, so after a resize most keys are in the wrong bucket and can&rsquo;t be found: this prints a number below 20. Rehash every pair into its new bucket, so it prints <code>20</code>.</p></div><textarea class="pc-src pc-code" hidden>class HashMap:
+    def __init__(self):
+        self._buckets = [[] for _ in range(4)]
+        self._size = 0
+
+    def put(self, key, value):
+        self._buckets[key % len(self._buckets)].append([key, value])
+        self._size += 1
+        if self._size &gt; len(self._buckets):
+            new = [[] for _ in range(2 * len(self._buckets))]
+            for i, chain in enumerate(self._buckets):
+                new[i] = chain
+            self._buckets = new
+
+    def get(self, key):
+        for k, v in self._buckets[key % len(self._buckets)]:
+            if k == key:
+                return v
+
+m = HashMap()
+for k in range(20):
+    m.put(k, k)
+print(sum(1 for k in range(20) if m.get(k) == k))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;rehash on resize&quot;
+    expect_output(&quot;20&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class HashMap:
+    def __init__(self):
+        self._buckets = [[] for _ in range(4)]
+        self._size = 0
+
+    def put(self, key, value):
+        self._buckets[key % len(self._buckets)].append([key, value])
+        self._size += 1
+        if self._size &gt; len(self._buckets):
+            new = [[] for _ in range(2 * len(self._buckets))]
+            for chain in self._buckets:
+                for pair in chain:
+                    new[pair[0] % len(new)].append(pair)
+            self._buckets = new
+
+    def get(self, key):
+        for k, v in self._buckets[key % len(self._buckets)]:
+            if k == key:
+                return v
+
+m = HashMap()
+for k in range(20):
+    m.put(k, k)
+print(sum(1 for k in range(20) if m.get(k) == k))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w044d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A fixed number in the formula</div><div class="pc-prompt"><p>This map grows its table, but <code>_index</code> still takes the remainder by the <strong>original</strong> 8, so only the first 8 buckets are ever used and the extra space is wasted: this prints <code>8 56</code> (buckets used, buckets empty). Use the current number of buckets, so it prints <code>40 24</code>.</p></div><textarea class="pc-src pc-code" hidden>class HashMap:
+    def __init__(self):
+        self._buckets = [[] for _ in range(8)]
+        self._size = 0
+
+    def _index(self, key):
+        return hash(key) % 8
+
+    def put(self, key, value):
+        self._buckets[self._index(key)].append([key, value])
+        self._size += 1
+        if self._size &gt; len(self._buckets) * 0.75:
+            old = self._buckets
+            self._buckets = [[] for _ in range(2 * len(old))]
+            for chain in old:
+                for pair in chain:
+                    self._buckets[self._index(pair[0])].append(pair)
+
+m = HashMap()
+for k in range(40):
+    m.put(k, k)
+used = sum(1 for b in m._buckets if b)
+print(used, len(m._buckets) - used)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;use the current size&quot;
+    expect_output(&quot;40 24&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class HashMap:
+    def __init__(self):
+        self._buckets = [[] for _ in range(8)]
+        self._size = 0
+
+    def _index(self, key):
+        return hash(key) % len(self._buckets)
+
+    def put(self, key, value):
+        self._buckets[self._index(key)].append([key, value])
+        self._size += 1
+        if self._size &gt; len(self._buckets) * 0.75:
+            old = self._buckets
+            self._buckets = [[] for _ in range(2 * len(old))]
+            for chain in old:
+                for pair in chain:
+                    self._buckets[self._index(pair[0])].append(pair)
+
+m = HashMap()
+for k in range(40):
+    m.put(k, k)
+used = sum(1 for b in m._buckets if b)
+print(used, len(m._buckets) - used)</textarea></div>
+<div class="parsons" data-id="w044d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Get from a chain</div><div class="pc-prompt"><p>Arrange the lines into a hash map&rsquo;s <code>__getitem__</code>. One line is a trap.</p></div><script type="application/json">{"lines": ["    def __getitem__(self, key):", "        chain = self._buckets[hash(key) % len(self._buckets)]", "        for k, v in chain:", "            if k == key:", "                return v", "        raise KeyError(key)"], "distractors": ["            if hash(k) == hash(key):"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden># Answer without running code.
+
+p = ___   # the load factor of a map with 12 keys in 16 buckets
+q = ___   # the bucket for key 21 in a table of 8 buckets, using hash(n) == n
+r = ___   # after doubling to 16 buckets, the bucket for key 21
+s = ___   # the average-case cost of get with a good hash and a bounded load factor: &quot;O(1)&quot; or &quot;O(n)&quot;
+t = ___   # the worst-case cost of get if every key has the same hash: &quot;O(1)&quot; or &quot;O(n)&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 0.75 and q == 5 and r == 5, &quot;p, q and r&quot;
+    assert s == &quot;O(1)&quot; and t == &quot;O(n)&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden># Answer without running code.
+
+p = 0.75
+q = 5
+r = 5
+s = &quot;O(1)&quot;
+t = &quot;O(n)&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w044d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "In a chaining hash map, what does each bucket hold?", "answer": 1, "explain": "Collisions share a chain.", "options": ["One key", "A list (chain) of the key-value pairs whose keys landed in it", "A sorted array", "A tree"]}, {"type": "mc", "q": "Inside a chain, how is the right pair found?", "answer": 1, "explain": "The hash picks the bucket; equality picks the key.", "options": ["By hash", "By comparing keys with ==", "By position", "By value"]}, {"type": "mc", "q": "What must put do when the key is already there?", "answer": 1, "explain": "Otherwise len and get go wrong.", "options": ["Add another pair", "Update the existing pair&rsquo;s value", "Raise an error", "Ignore it"]}, {"type": "mc", "q": "What is the load factor?", "answer": 1, "explain": "The average chain length.", "options": ["The longest chain", "Keys divided by buckets", "Buckets divided by keys", "The number of resizes"]}, {"type": "mc", "q": "Why must every key be rehashed when the table grows?", "answer": 1, "explain": "hash % 8 and hash % 16 differ.", "options": ["Speed", "A key&rsquo;s bucket depends on the number of buckets, so it changes", "To sort them", "It needn&rsquo;t be"]}, {"type": "mc", "q": "Why is put O(1) amortised despite occasional O(n) resizes?", "answer": 1, "explain": "Like the dynamic array.", "options": ["It isn&rsquo;t", "Doubling makes resizes rare: n puts copy fewer than 2n keys in total", "Resizes are free", "Python caches"]}, {"type": "mc", "q": "When is get O(n)?", "answer": 1, "explain": "The worst case.", "options": ["Never", "When many keys collide into one chain: a bad hash, or an attack", "When the map is empty", "Always"]}, {"type": "mc", "q": "Which method makes key in m work?", "answer": 1, "explain": "Falls back to iterating otherwise.", "options": ["<strong>in</strong>", "<strong>contains</strong>", "<strong>has</strong>", "<strong>iter</strong> only"]}, {"type": "mc", "q": "In what order does our chaining map iterate over its keys?", "answer": 1, "explain": "Python&rsquo;s dict keeps insertion order: Day 4.", "options": ["Insertion order", "Bucket order: effectively arbitrary", "Sorted", "Reverse insertion"]}, {"type": "output", "q": "What does this print?", "answer": "[0, 3, 1]", "explain": "4, 7 and 10 all leave remainder 1.", "code": "buckets = [[] for _ in range(3)]\nfor k in [4, 7, 10, 2]:\n    buckets[k % 3].append(k)\nprint([len(b) for b in buckets])"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a fuller map</div><div class="pc-prompt"><p>Write <code>HashMap</code> with chaining that grows <strong>and shrinks</strong>: it starts with 8 buckets; after adding a new key, if the load factor is above 0.75, double; after removing a key, if it&rsquo;s below 0.25 and there are more than 8 buckets, halve (rehashing every key either way). Give it all of:</p>
+<ul>
+<li><code>m[key]</code>, <code>m[key] = value</code>, <code>del m[key]</code>, <code>in</code>, <code>len</code>, iteration over keys, and a read-only <code>capacity</code>;</li>
+<li><code>get(key, default=None)</code>, <code>pop(key, *default)</code> (like <code>dict.pop</code>: removes and returns the value; if missing, returns the default if one was given, else raises <code>KeyError</code>), <code>setdefault(key, default=None)</code> (returns the value, first storing <code>default</code> if the key is missing);</li>
+<li><code>update(other)</code> (from a dict or another <code>HashMap</code>), and <code>__eq__</code>: equal to another <code>HashMap</code> <strong>or a dict</strong> with the same keys and values.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>class HashMap:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_basics():
+    &quot;the basics&quot;
+    m = HashMap()
+    m[&quot;a&quot;] = 1
+    m.update({&quot;b&quot;: 2, &quot;c&quot;: 3})
+    assert m == {&quot;a&quot;: 1, &quot;b&quot;: 2, &quot;c&quot;: 3} and len(m) == 3 and sorted(m) == [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+    assert m.setdefault(&quot;a&quot;, 9) == 1 and m.setdefault(&quot;z&quot;, 26) == 26 and m[&quot;z&quot;] == 26
+    assert m.pop(&quot;z&quot;) == 26 and m.pop(&quot;z&quot;, &quot;none&quot;) == &quot;none&quot; and m.get(&quot;q&quot;) is None
+    try:
+        m.pop(&quot;z&quot;)
+        assert False
+    except KeyError:
+        pass
+    n = HashMap()
+    n.update(m)
+    assert n == m and m == n and (m == [1]) is False
+    del n[&quot;a&quot;]
+    assert n != m
+def test_sizes():
+    &quot;growing and shrinking&quot;
+    m = HashMap()
+    for i in range(100):
+        m[i] = i
+    assert m.capacity == 256
+    for i in range(95):
+        del m[i]
+    assert m.capacity == 16 and sorted(m) == [95, 96, 97, 98, 99]
+    for i in range(95, 100):
+        del m[i]
+    assert m.capacity == 8 and len(m) == 0
+def test_random():
+    &quot;against a dict&quot;
+    rng = random.Random(5)
+    m, ref = HashMap(), {}
+    for _ in range(5000):
+        k = rng.randint(0, 300)
+        op = rng.random()
+        if op &lt; 0.5:
+            m[k] = ref[k] = rng.randint(0, 9)
+        elif op &lt; 0.8 and k in ref:
+            del m[k], ref[k]
+        else:
+            assert m.get(k, &quot;x&quot;) == ref.get(k, &quot;x&quot;)
+    assert m == ref and len(m) == len(ref)</textarea><textarea class="pc-src pc-solution" hidden>class HashMap:
+    MIN = 8
+
+    def __init__(self):
+        self._buckets = [[] for _ in range(self.MIN)]
+        self._size = 0
+
+    @property
+    def capacity(self):
+        return len(self._buckets)
+
+    def _find(self, key):
+        chain = self._buckets[hash(key) % len(self._buckets)]
+        for i, (k, _) in enumerate(chain):
+            if k == key:
+                return chain, i
+        return chain, -1
+
+    def _resize(self, capacity):
+        new = [[] for _ in range(capacity)]
+        for chain in self._buckets:
+            for pair in chain:
+                new[hash(pair[0]) % capacity].append(pair)
+        self._buckets = new
+
+    def __setitem__(self, key, value):
+        chain, i = self._find(key)
+        if i &gt;= 0:
+            chain[i][1] = value
+            return
+        chain.append([key, value])
+        self._size += 1
+        if self._size / len(self._buckets) &gt; 0.75:
+            self._resize(2 * len(self._buckets))
+
+    def __getitem__(self, key):
+        chain, i = self._find(key)
+        if i &lt; 0:
+            raise KeyError(key)
+        return chain[i][1]
+
+    def __delitem__(self, key):
+        chain, i = self._find(key)
+        if i &lt; 0:
+            raise KeyError(key)
+        chain.pop(i)
+        self._size -= 1
+        if len(self._buckets) &gt; self.MIN and self._size / len(self._buckets) &lt; 0.25:
+            self._resize(len(self._buckets) // 2)
+
+    def __contains__(self, key):
+        return self._find(key)[1] &gt;= 0
+
+    def __len__(self):
+        return self._size
+
+    def items(self):
+        return [(k, v) for chain in self._buckets for k, v in chain]
+
+    def __iter__(self):
+        return iter([k for k, _ in self.items()])
+
+    def get(self, key, default=None):
+        chain, i = self._find(key)
+        return chain[i][1] if i &gt;= 0 else default
+
+    def pop(self, key, *default):
+        if key in self:
+            value = self[key]
+            del self[key]
+            return value
+        if default:
+            return default[0]
+        raise KeyError(key)
+
+    def setdefault(self, key, default=None):
+        if key not in self:
+            self[key] = default
+        return self[key]
+
+    def update(self, other):
+        pairs = other.items()
+        for k, v in pairs:
+            self[k] = v
+
+    def __eq__(self, other):
+        if not isinstance(other, (HashMap, dict)):
+            return NotImplemented
+        if len(self) != len(other):
+            return False
+        return all(k in other and other[k] == v for k, v in self.items())</textarea><template class="pc-src pc-hint">Write one <code>_resize(capacity)</code> used for both growing and shrinking, and one <code>_find(key)</code> that returns <code>(chain, index)</code> (index -1 if missing), so every method is a few lines. For <code>pop</code>, <code>*default</code> collects zero or one extra argument: <code>if default: return default[0]</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Explain to yourself, without notes, what goes wrong if <code>put</code> forgets to check for an existing key, and what goes wrong if a resize copies buckets without rehashing. Tomorrow: open addressing, where there are no chains at all and every key lives directly in the table.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w044d1.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w044d2", "week": 44, "day": 2, "title": "Build a hash map with chaining", "exercises": [{"id": "w044d2-basic", "title": "A chaining hash map", "points": 15}, {"id": "w044d2-remove", "title": "Deleting", "points": 10}, {"id": "w044d2-resize", "title": "Growing the table", "points": 15}, {"id": "w044d2-protocol", "title": "Behaving like a dict", "points": 15}, {"id": "w044d2-stats", "title": "Measuring the chains", "points": 10}, {"id": "w044d2-hashset", "title": "A set from a map", "points": 10}, {"id": "w044d2-bug1", "title": "The same key twice", "points": 10}, {"id": "w044d2-bug2", "title": "Moved, but not rehashed", "points": 10}, {"id": "w044d2-bug3", "title": "A fixed number in the formula", "points": 10}, {"id": "w044d2-trace", "title": "Predict them", "points": 10}, {"id": "w044d2-challenge", "title": "Challenge: a fuller map", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=871ff52039"></script>
+</body>
+</html>
