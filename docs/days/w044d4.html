@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="871ff52039">
+<title>Week 44 Day 4: How Python&#x27;s dict works | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=871ff52039">
+<link rel="stylesheet" href="../assets/css/site.css?v=871ff52039">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=871ff52039"></script>
+<script src="../assets/vendor/codemirror.js?v=871ff52039" defer></script>
+<meta name="description" content="You’ve used dictionaries since Week 10, and this week you’ve built two kinds of hash table. Today the two meet: Python’s dict is an open-addressed hash...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w044d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 44 Day 4: How Python&#x27;s dict works">
+<meta property="og:description" content="You’ve used dictionaries since Week 10, and this week you’ve built two kinds of hash table. Today the two meet: Python’s dict is an open-addressed hash...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w044d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-44">Week 44: Hash tables</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#two-tables-not-one" data-sec="two-tables-not-one">Two tables, not one</a></li><li><a href="#order-for-free" data-sec="order-for-free">Order for free</a></li><li><a href="#the-probe-sequence" data-sec="the-probe-sequence">The probe sequence</a></li><li><a href="#comparing-keys-quickly" data-sec="comparing-keys-quickly">Comparing keys quickly</a></li><li><a href="#growing-and-what-it-means-for-you" data-sec="growing-and-what-it-means-for-you">Growing, and what it means for you</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w044d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-44">Week 44: Hash tables</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 44, Day 4</span></p>
+      <h1>How Python&#x27;s dict works</h1>
+      <div class="day-intro"><p>You&rsquo;ve used dictionaries since Week 10, and this week you&rsquo;ve built two kinds of hash table. Today the two meet: Python&rsquo;s <code>dict</code> is an open-addressed hash table, but with three clever ideas that make it smaller, faster and <strong>ordered</strong>. Keys are kept in a dense list in the order they were added, while a separate, sparse table of small numbers does the hashing; probing mixes in more and more bits of the hash, so even poor hashes spread out; and each entry stores its key&rsquo;s hash, so most mismatches are spotted without ever calling <code>==</code>. You&rsquo;ll build a working model of it, and see what the design means for your own code.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain the compact dict layout, with a sparse index table and a dense list of entries</li><li>Explain why dicts keep insertion order, and what deleting and re-adding a key does to it</li><li>Follow CPython&rsquo;s probe sequence, which mixes higher bits of the hash in as it goes</li><li>Explain why entries store their hash, and the order in which keys are compared</li><li>Build a working model of a compact, ordered hash table</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Two tables, not one: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Order for free: 20 min"></span><span class="plan-seg s1" style="flex:20" title="The probe sequence: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Comparing keys quickly: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Growing, and what it means for you: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Two tables, not one</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Order for free</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">The probe sequence</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Comparing keys quickly</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Growing, and what it means for you</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w044d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w044d4.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w044d4-p1"><textarea class="pc-src pc-code" hidden>d = {&quot;b&quot;: 1, &quot;a&quot;: 2, &quot;c&quot;: 3}
+del d[&quot;b&quot;]
+d[&quot;b&quot;] = 4
+d[&quot;a&quot;] = 5
+print(list(d), d)
+print({1: &quot;int&quot;, True: &quot;bool&quot;, 1.0: &quot;float&quot;})</textarea></div>
+<p>Two surprises. A dict lists its keys in the order they were <strong>first added</strong>, and updating a value doesn&rsquo;t move a key, but deleting and re-adding it does. And <code>1</code>, <code>True</code> and <code>1.0</code> are equal and hash alike (Day 1), so they&rsquo;re <strong>one</strong> key: the first spelling (<code>1</code>) is kept, and each later assignment just replaces the value.</p>
+<h2 id="two-tables-not-one">Two tables, not one</h2>
+<p>Until Python 3.6, a dict was one big open-addressed table of <code>(hash, key, value)</code> entries, about a third of them empty at any time, each empty slot as big as a full one. In 2012, Raymond Hettinger proposed splitting it in two (the design was built into CPython 3.6 by INADA Naoki):</p>
+<ul>
+<li>a dense list of <strong>entries</strong>, <code>(hash, key, value)</code>, in the order keys were added, with no gaps except for deletions;</li>
+<li>a sparse <strong>index table</strong>, a power-of-two number of slots, each holding just a small whole number: the position of an entry, or a marker for empty or deleted.</li>
+</ul>
+<pre><code class="language-text">d = {&quot;timmy&quot;: &quot;red&quot;, &quot;barry&quot;: &quot;green&quot;, &quot;guido&quot;: &quot;blue&quot;}
+
+indices:  [None, 1, None, None, None, 0, None, 2]        (8 slots, small numbers)
+
+entries:  0: (hash(&quot;timmy&quot;), &quot;timmy&quot;, &quot;red&quot;)
+          1: (hash(&quot;barry&quot;), &quot;barry&quot;, &quot;green&quot;)             (in insertion order)
+          2: (hash(&quot;guido&quot;), &quot;guido&quot;, &quot;blue&quot;)
+</code></pre>
+<p>Hashing and probing happen in the index table; the slots there hold only small numbers, so the empty ones cost very little. The entries hold the real data, packed tightly. A dict of a few keys uses a fraction of the memory the old layout needed, and looping over it walks the dense entries list, which is fast.</p>
+<h2 id="order-for-free">Order for free</h2>
+<p>Because entries are appended in order, the dict <strong>remembers insertion order</strong> without any extra work: iterating over <code>entries</code> gives keys in the order they were added. CPython 3.6 did this as a side effect of the new layout; Python 3.7 made it a promise of the language, so you can rely on it.</p>
+<p>What happens to order on each operation:</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Effect on order</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>add a new key</td>
+<td>it goes to the end</td>
+</tr>
+<tr>
+<td>update an existing key&rsquo;s value</td>
+<td>it stays where it is</td>
+</tr>
+<tr>
+<td>delete a key</td>
+<td>its entry is marked empty; the others keep their order</td>
+</tr>
+<tr>
+<td>delete, then add the same key again</td>
+<td>it goes to the end, as a new key</td>
+</tr>
+<tr>
+<td>the dict grows (resizes)</td>
+<td>entries are copied in order, and the deleted gaps are squeezed out</td>
+</tr>
+</tbody>
+</table>
+<p>That&rsquo;s why <code>dict.fromkeys(items)</code> removes duplicates while keeping the first appearance of each (Week 10), and why <code>collections.OrderedDict</code> is now needed only for its extra methods, like <code>move_to_end</code> (Week 42&rsquo;s LRU cache).</p>
+<h2 id="the-probe-sequence">The probe sequence</h2>
+<p>The index table uses open addressing (Day 3), but not linear probing. CPython&rsquo;s probe sequence starts at <code>hash &amp; mask</code> (the low bits of the hash, where <code>mask</code> is the table size minus 1), and then moves with a recurrence that gradually mixes in the <strong>higher</strong> bits of the hash:</p>
+<pre><code class="language-text">perturb = hash                          (as an unsigned number)
+i = hash &amp; mask
+while slot i is taken by a different key:
+    perturb &gt;&gt;= 5
+    i = (5 * i + perturb + 1) &amp; mask
+</code></pre>
+<p>The <code>5 * i + 1</code> part alone would visit every slot of a power-of-two table eventually; adding <code>perturb</code> makes keys whose hashes differ only in their high bits take different paths, instead of crowding together as they would with linear probing. After a few steps <code>perturb</code> becomes 0 and the plain recurrence takes over, so the search always ends. (The full explanation is in the comments of CPython&rsquo;s <code>Objects/dictobject.c</code>, which are well worth reading.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w044d4-e2"><textarea class="pc-src pc-code" hidden>def probes(h, size, count):
+    mask = size - 1
+    perturb = h
+    i = h &amp; mask
+    order = [i]
+    for _ in range(count - 1):
+        perturb &gt;&gt;= 5
+        i = (5 * i + perturb + 1) &amp; mask
+        order.append(i)
+    return order
+
+print(probes(12345, 8, 8))
+print(probes(12345 + 8 * 1000, 8, 8))        # same low bits, so the same first slot, then different paths
+print(probes(0, 8, 8))                       # perturb is 0: the plain 5i + 1 sequence visits every slot</textarea></div>
+<p>Notice that ints hash to themselves, so a dict of the keys 0 to 7 needs no probing at all: each goes straight to its own slot.</p>
+<h2 id="comparing-keys-quickly">Comparing keys quickly</h2>
+<p>When a probe reaches a slot holding an entry, is it the key we want? CPython checks in the cheapest order:</p>
+<ol>
+<li><strong>Is it the very same object?</strong> (<code>entry_key is key</code>): free, and very common, because names and strings are often the same object.</li>
+<li><strong>Do the stored hashes differ?</strong> If so, the keys are certainly different (equal keys have equal hashes), and no <code>==</code> is needed. This is why entries store the hash: it also avoids recomputing hashes when the table grows.</li>
+<li>Only then: <strong><code>entry_key == key</code></strong>.</li>
+</ol>
+<div class="pc pc-example" data-kind="example" data-id="w044d4-e3"><textarea class="pc-src pc-code" hidden>class Noisy:
+    def __init__(self, name, h):
+        self.name, self.h = name, h
+    def __hash__(self):
+        return self.h
+    def __eq__(self, other):
+        print(f&quot;  comparing {self.name} with {other.name}&quot;)
+        return self.name == other.name
+
+a, b, c = Noisy(&quot;a&quot;, 1), Noisy(&quot;b&quot;, 9), Noisy(&quot;c&quot;, 1)
+d = {a: 1, b: 2}
+print(&quot;lookup a itself:&quot;); d[a]
+print(&quot;lookup c (same hash as a, different key):&quot;); print(c in d)
+print(&quot;lookup b&#x27;s twin (same hash, equal name):&quot;); print(Noisy(&quot;b&quot;, 9) in d)</textarea></div>
+<p>Looking up <code>a</code> itself needed no comparison at all; <code>c</code> shared <code>a</code>&rsquo;s hash, so <code>==</code> was called; and the twin of <code>b</code> was found with one comparison. Strings also <strong>cache</strong> their hash the first time it&rsquo;s computed, so using the same string as a key again and again costs nothing extra.</p>
+<h2 id="growing-and-what-it-means-for-you">Growing, and what it means for you</h2>
+<p>A dict starts with an index table of 8 slots and lets at most two thirds of them be used; when it runs out of room, it builds a bigger table (several times the number of entries, rounded up to a power of two) and reinserts every entry, in order. As always with doubling-style growth, that&rsquo;s O(1) amortised per insert.</p>
+<div class="pc pc-example" data-kind="example" data-id="w044d4-e4"><textarea class="pc-src pc-code" hidden>import sys
+
+d = {}
+last = sys.getsizeof(d)
+for i in range(50):
+    d[i] = i
+    size = sys.getsizeof(d)
+    if size != last:
+        print(f&quot;after {len(d):&gt;2} keys: {size} bytes&quot;)
+        last = size</textarea></div>
+<p>(The exact numbers vary between Python versions and computers.) What all this means in everyday code:</p>
+<ul>
+<li><strong>Lookups, inserts and deletes are O(1) on average</strong>, but only if keys hash well. Your own classes&rsquo; <code>__hash__</code> should mix all the fields that <code>__eq__</code> compares (hashing a tuple of them does that).</li>
+<li><strong>Iteration follows insertion order</strong>, and is guaranteed to.</li>
+<li><strong>Don&rsquo;t add or remove keys while looping over a dict</strong>: it raises <code>RuntimeError: dictionary changed size during iteration</code>. Loop over <code>list(d)</code> instead.</li>
+<li><strong>A dict uses more memory than a list</strong> of the same values, for the index table and the stored hashes. For millions of small records, a list of tuples, or the <code>array</code> module, can be much smaller.</li>
+</ul>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>CPython&rsquo;s dict is a compact, open-addressed hash table: a dense list of <code>(hash, key, value)</code> entries in insertion order, and a sparse power-of-two index table of small numbers pointing into it (Raymond Hettinger&rsquo;s design, in CPython since 3.6). Iterating the entries gives insertion order, which Python 3.7 guarantees; updating a value keeps a key&rsquo;s place, deleting and re-adding moves it to the end. Probing starts at <code>hash &amp; mask</code> and follows <code>i = 5i + perturb + 1</code>, shifting <code>perturb</code> right by 5 each step to mix in the high bits. Keys are compared by identity, then by stored hash, then by <code>==</code>. Tables grow before two thirds full, O(1) amortised.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d4-order" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Order rules</div><div class="pc-prompt"><p>Write <code>final_order(ops)</code>: run a list of operations on an empty dict and return its keys in order. Each operation is <code>("set", key, value)</code>, <code>("del", key)</code> or <code>("update", other_dict)</code>. Use a real dict (the point is to learn its rules). Then set the four answers below, which describe what the rules do.</p></div><textarea class="pc-src pc-code" hidden>def final_order(ops):
+    ___
+
+p = ___   # final_order([(&quot;set&quot;, &quot;a&quot;, 1), (&quot;set&quot;, &quot;b&quot;, 2), (&quot;set&quot;, &quot;a&quot;, 3)])
+q = ___   # final_order([(&quot;set&quot;, &quot;a&quot;, 1), (&quot;set&quot;, &quot;b&quot;, 2), (&quot;del&quot;, &quot;a&quot;), (&quot;set&quot;, &quot;a&quot;, 3)])
+r = ___   # final_order([(&quot;set&quot;, &quot;x&quot;, 1), (&quot;update&quot;, {&quot;y&quot;: 2, &quot;x&quot;: 3, &quot;z&quot;: 4})])
+s = ___   # list({True: &quot;a&quot;, 1: &quot;b&quot;, 1.0: &quot;c&quot;}.items())</textarea><textarea class="pc-src pc-tests" hidden>def test_order():
+    &quot;dict order&quot;
+    assert final_order([]) == [] and final_order([(&quot;set&quot;, 3, 0), (&quot;set&quot;, 1, 0), (&quot;set&quot;, 2, 0)]) == [3, 1, 2]
+    assert p == [&quot;a&quot;, &quot;b&quot;] and q == [&quot;b&quot;, &quot;a&quot;] and r == [&quot;x&quot;, &quot;y&quot;, &quot;z&quot;] and s == [(True, &quot;c&quot;)]</textarea><textarea class="pc-src pc-solution" hidden>def final_order(ops):
+    d = {}
+    for op in ops:
+        if op[0] == &quot;set&quot;:
+            d[op[1]] = op[2]
+        elif op[0] == &quot;del&quot;:
+            del d[op[1]]
+        else:
+            d.update(op[1])
+    return list(d)
+
+p = [&quot;a&quot;, &quot;b&quot;]
+q = [&quot;b&quot;, &quot;a&quot;]
+r = [&quot;x&quot;, &quot;y&quot;, &quot;z&quot;]
+s = [(True, &quot;c&quot;)]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d4-probe" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">CPython&rsquo;s probe sequence</div><div class="pc-prompt"><p>Write <code>probe_slots(h, size, n)</code>: the first <code>n</code> slots that CPython&rsquo;s probe sequence visits for a hash <code>h</code> (a whole number of 0 or more) in an index table of <code>size</code> slots (a power of two): start at <code>h &amp; mask</code>; then, each step, shift <code>perturb</code> (starting as <code>h</code>) right by 5 and move to <code>(5 * i + perturb + 1) &amp; mask</code>. Then write <code>covers_all(size)</code>: true if the plain sequence (<code>h = 0</code>) visits every slot within <code>size</code> steps.</p></div><textarea class="pc-src pc-code" hidden>def probe_slots(h, size, n):
+    ___
+
+def covers_all(size):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_probe():
+    &quot;probing&quot;
+    assert probe_slots(0, 8, 8) == [0, 1, 6, 7, 4, 5, 2, 3] and probe_slots(5, 8, 1) == [5]
+    assert probe_slots(12345, 8, 4) == [1, 7, 0, 1]
+    assert covers_all(8) and covers_all(16) and covers_all(1024)
+    assert probe_slots(1, 8, 3) != probe_slots(1 + 32, 8, 3), &quot;high bits change the path&quot;</textarea><textarea class="pc-src pc-solution" hidden>def probe_slots(h, size, n):
+    mask = size - 1
+    perturb = h
+    i = h &amp; mask
+    out = [i]
+    for _ in range(n - 1):
+        perturb &gt;&gt;= 5
+        i = (5 * i + perturb + 1) &amp; mask
+        out.append(i)
+    return out
+
+def covers_all(size):
+    return sorted(probe_slots(0, size, size)) == list(range(size))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d4-compact" data-points="20"><div class="pc-label"><span>Exercise</span><span class="pc-pts">20 points</span></div><div class="pc-title">A compact, ordered table</div><div class="pc-prompt"><p>Build <code>CompactDict</code>, a model of CPython&rsquo;s layout: <code>_indices</code>, a list of <code>size</code> slots (start with 8) holding <code>None</code> or a position in <code>_entries</code>; and <code>_entries</code>, a list of <code>[hash, key, value]</code> in insertion order. Probe CPython&rsquo;s way, as in <code>probe_slots</code>. Write <code>__setitem__</code> (updating an existing key keeps its place), <code>__getitem__</code> (<code>KeyError</code> if missing), <code>__len__</code>, <code>__iter__</code> (keys in insertion order) and <code>items()</code>. When the number of entries would go over two thirds of <code>size</code>, rebuild with <code>size</code> doubled, reinserting the entries in order. Compare keys by identity, then by stored hash, then by <code>==</code>.</p></div><textarea class="pc-src pc-code" hidden>class CompactDict:
+    def __init__(self):
+        self._indices = [None] * 8
+        self._entries = []
+
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_basic():
+    &quot;a compact dict&quot;
+    d = CompactDict()
+    for k, v in [(&quot;b&quot;, 1), (&quot;a&quot;, 2), (&quot;c&quot;, 3), (&quot;a&quot;, 9)]:
+        d[k] = v
+    assert list(d) == [&quot;b&quot;, &quot;a&quot;, &quot;c&quot;] and d[&quot;a&quot;] == 9 and len(d) == 3 and d.items() == [(&quot;b&quot;, 1), (&quot;a&quot;, 9), (&quot;c&quot;, 3)]
+    try:
+        d[&quot;z&quot;]
+        assert False
+    except KeyError:
+        pass
+    assert all(isinstance(x, int) or x is None for x in d._indices) and len(d._entries) == 3
+def test_growth():
+    &quot;growing keeps order&quot;
+    d = CompactDict()
+    keys = random.Random(1).sample(range(10 ** 6), 500)
+    for i, k in enumerate(keys):
+        d[k] = i
+    assert list(d) == keys and all(d[k] == i for i, k in enumerate(keys))
+    assert len(d._indices) &gt;= 750 and len(d._indices) &amp; (len(d._indices) - 1) == 0, &quot;a power of two, at most two thirds full&quot;
+    d[1] = &quot;one&quot;
+    d[1.0] = &quot;float&quot;
+    assert d[True] == &quot;float&quot; and list(d)[-1] == 1 and len(d) == 501</textarea><textarea class="pc-src pc-solution" hidden>class CompactDict:
+    def __init__(self):
+        self._indices = [None] * 8
+        self._entries = []
+
+    def _slot(self, key, h):
+        mask = len(self._indices) - 1
+        perturb = h &amp; 0xFFFFFFFFFFFFFFFF
+        i = perturb &amp; mask
+        while True:
+            p = self._indices[i]
+            if p is None:
+                return i
+            eh, ek, _ = self._entries[p]
+            if ek is key or (eh == h and ek == key):
+                return i
+            perturb &gt;&gt;= 5
+            i = (5 * i + perturb + 1) &amp; mask
+
+    def _rebuild(self, size):
+        self._indices = [None] * size
+        for p, (h, k, _) in enumerate(self._entries):
+            self._indices[self._slot(k, h)] = p
+
+    def __setitem__(self, key, value):
+        h = hash(key)
+        i = self._slot(key, h)
+        p = self._indices[i]
+        if p is not None:
+            self._entries[p][2] = value
+            return
+        if (len(self._entries) + 1) * 3 &gt; len(self._indices) * 2:
+            self._entries.append([h, key, value])
+            self._rebuild(2 * len(self._indices))
+            return
+        self._indices[i] = len(self._entries)
+        self._entries.append([h, key, value])
+
+    def __getitem__(self, key):
+        p = self._indices[self._slot(key, hash(key))]
+        if p is None:
+            raise KeyError(key)
+        return self._entries[p][2]
+
+    def __len__(self):
+        return len(self._entries)
+
+    def items(self):
+        return [(k, v) for _, k, v in self._entries]
+
+    def __iter__(self):
+        return iter([k for _, k, _ in self._entries])</textarea><template class="pc-src pc-hint">Write a method <code>_slot(key, h)</code> that walks the probe sequence (start at <code>h &amp; mask</code>, then the perturb recurrence) and returns the index-table slot that either points at this key&rsquo;s entry or is empty. For each slot holding a position <code>p</code>, compare <code>self._entries[p]</code> with the key: <code>entry_key is key or (entry_hash == h and entry_key == key)</code>.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d4-cheap" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Counting comparisons</div><div class="pc-prompt"><p><code>Key</code> (in the starter) counts every call of its <code>__eq__</code> in <code>Key.comparisons</code>. Set the four answers to the number of <code>==</code> comparisons each lookup makes, by experiment or by reasoning from today&rsquo;s three-step check. Then write <code>same_object_free(d, key)</code>: look <code>key</code> up in <code>d</code> and return <code>True</code> if that lookup made <strong>no</strong> comparisons.</p></div><textarea class="pc-src pc-code" hidden>class Key:
+    comparisons = 0
+    def __init__(self, name, h):
+        self.name, self.h = name, h
+    def __hash__(self):
+        return self.h
+    def __eq__(self, other):
+        Key.comparisons += 1
+        return isinstance(other, Key) and self.name == other.name
+
+a, b = Key(&quot;a&quot;, 1), Key(&quot;b&quot;, 2)
+d = {a: &quot;A&quot;, b: &quot;B&quot;}
+
+def same_object_free(d, key):
+    ___
+
+p = ___   # comparisons for d[a]: the very same object
+q = ___   # comparisons for d[Key(&quot;a&quot;, 1)]: an equal key, a different object
+r = ___   # comparisons for Key(&quot;z&quot;, 3) in d: a hash nothing else has
+s = ___   # comparisons for Key(&quot;c&quot;, 1) in d: same hash as a, but not equal</textarea><textarea class="pc-src pc-tests" hidden>def test_counts():
+    &quot;cheap comparisons&quot;
+    def count(f):
+        Key.comparisons = 0
+        f()
+        return Key.comparisons
+    assert p == count(lambda: d[a]) == 0
+    assert q == count(lambda: d[Key(&quot;a&quot;, 1)]) == 1
+    assert r == count(lambda: Key(&quot;z&quot;, 3) in d) == 0
+    assert s == count(lambda: Key(&quot;c&quot;, 1) in d) &gt;= 1
+    assert same_object_free(d, a) is True and same_object_free(d, Key(&quot;a&quot;, 1)) is False</textarea><textarea class="pc-src pc-solution" hidden>class Key:
+    comparisons = 0
+    def __init__(self, name, h):
+        self.name, self.h = name, h
+    def __hash__(self):
+        return self.h
+    def __eq__(self, other):
+        Key.comparisons += 1
+        return isinstance(other, Key) and self.name == other.name
+
+a, b = Key(&quot;a&quot;, 1), Key(&quot;b&quot;, 2)
+d = {a: &quot;A&quot;, b: &quot;B&quot;}
+
+def same_object_free(d, key):
+    before = Key.comparisons
+    d.get(key)
+    return Key.comparisons == before
+
+p = 0
+q = 1
+r = 0
+s = 1</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d4-dedupe" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Using the order</div><div class="pc-prompt"><p>Dicts keep insertion order, so they can do jobs that once needed extra work. Write three one-pass functions, each using a dict: <code>unique(items)</code> (the first appearance of each item, in order); <code>last_seen(events)</code> (for a list of <code>(name, time)</code> pairs, a dict from each name to its latest time, with the names ordered by when they were <strong>last</strong> seen, earliest first: delete and re-add a name to move it to the end); and <code>first_repeat(items)</code> (the first item that appears for a second time, or <code>None</code>).</p></div><textarea class="pc-src pc-code" hidden>def unique(items):
+    ___
+
+def last_seen(events):
+    ___
+
+def first_repeat(items):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_order_tricks():
+    &quot;using the order&quot;
+    assert unique([3, 1, 3, 2, 1, 4]) == [3, 1, 2, 4] and unique([]) == []
+    got = last_seen([(&quot;ada&quot;, 1), (&quot;bo&quot;, 2), (&quot;ada&quot;, 3), (&quot;chi&quot;, 4), (&quot;bo&quot;, 5)])
+    assert got == {&quot;ada&quot;: 3, &quot;chi&quot;: 4, &quot;bo&quot;: 5} and list(got) == [&quot;ada&quot;, &quot;chi&quot;, &quot;bo&quot;]
+    assert first_repeat(&quot;abcbad&quot;) == &quot;b&quot; and first_repeat([1, 2, 3]) is None</textarea><textarea class="pc-src pc-solution" hidden>def unique(items):
+    return list(dict.fromkeys(items))
+
+def last_seen(events):
+    latest = {}
+    for name, time in events:
+        if name in latest:
+            del latest[name]
+        latest[name] = time
+    return latest
+
+def first_repeat(items):
+    seen = {}
+    for item in items:
+        if item in seen:
+            return item
+        seen[item] = True
+    return None</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w044d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Looping in hash order</div><div class="pc-prompt"><p>This model iterates over the <strong>index table</strong>, which is in hash order, instead of over the entries, so the keys come out in slot order, not insertion order: it prints <code>[0, 1, 2, 4, 9]</code>. Iterate over the entries, so it prints <code>[9, 1, 4, 0, 2]</code>.</p></div><textarea class="pc-src pc-code" hidden>indices = [None] * 16
+entries = []
+
+def add(key, value):
+    i = hash(key) &amp; 15
+    while indices[i] is not None:
+        i = (i + 1) &amp; 15
+    indices[i] = len(entries)
+    entries.append((key, value))
+
+def keys():
+    return [entries[p][0] for p in indices if p is not None]
+
+for k in [9, 1, 4, 0, 2]:
+    add(k, str(k))
+print(keys())</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;insertion order&quot;
+    expect_output(&quot;[9, 1, 4, 0, 2]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>indices = [None] * 16
+entries = []
+
+def add(key, value):
+    i = hash(key) &amp; 15
+    while indices[i] is not None:
+        i = (i + 1) &amp; 15
+    indices[i] = len(entries)
+    entries.append((key, value))
+
+def keys():
+    return [k for k, _ in entries]
+
+for k in [9, 1, 4, 0, 2]:
+    add(k, str(k))
+print(keys())</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w044d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The mask that isn&rsquo;t</div><div class="pc-prompt"><p>For a table of 8 slots, the mask must be <code>7</code> (binary <code>111</code>), so <code>h &amp; mask</code> is from 0 to 7. This uses the size itself (<code>8</code>, binary <code>1000</code>), so <code>h &amp; 8</code> is only ever 0 or 8, and slot 8 doesn&rsquo;t exist: it crashes with <code>IndexError</code>. Fix the mask so this prints <code>[None, 9, 2, None, None, None, None, 15]</code>.</p></div><textarea class="pc-src pc-code" hidden>size = 8
+mask = size
+slots = [None] * size
+for key in [9, 2, 15]:
+    i = key &amp; mask
+    while slots[i] is not None:
+        i = (i + 1) &amp; mask
+    slots[i] = key
+print(slots)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;size minus one&quot;
+    expect_output(&quot;[None, 9, 2, None, None, None, None, 15]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>size = 8
+mask = size - 1
+slots = [None] * size
+for key in [9, 2, 15]:
+    i = key &amp; mask
+    while slots[i] is not None:
+        i = (i + 1) &amp; mask
+    slots[i] = key
+print(slots)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w044d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Equal hashes aren&rsquo;t equal keys</div><div class="pc-prompt"><p>This lookup decides it has found the key as soon as the stored <strong>hash</strong> matches, without comparing the keys themselves, so a different key that happens to share a hash gets the wrong value: this prints <code>apple</code>. Compare the keys too, so it prints <code>None</code>.</p></div><textarea class="pc-src pc-code" hidden>entries = []
+
+def add(key, value):
+    entries.append((hash(key), key, value))
+
+def get(key):
+    h = hash(key)
+    for eh, ek, v in entries:
+        if eh == h:
+            return v
+    return None
+
+class Code:
+    def __init__(self, s):
+        self.s = s
+    def __hash__(self):
+        return len(self.s)
+    def __eq__(self, other):
+        return isinstance(other, Code) and self.s == other.s
+
+add(Code(&quot;AB1&quot;), &quot;apple&quot;)
+print(get(Code(&quot;XY9&quot;)))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;compare the keys&quot;
+    expect_output(&quot;None&quot;)
+    assert get(Code(&quot;AB1&quot;)) == &quot;apple&quot;</textarea><textarea class="pc-src pc-solution" hidden>entries = []
+
+def add(key, value):
+    entries.append((hash(key), key, value))
+
+def get(key):
+    h = hash(key)
+    for eh, ek, v in entries:
+        if eh == h and (ek is key or ek == key):
+            return v
+    return None
+
+class Code:
+    def __init__(self, s):
+        self.s = s
+    def __hash__(self):
+        return len(self.s)
+    def __eq__(self, other):
+        return isinstance(other, Code) and self.s == other.s
+
+add(Code(&quot;AB1&quot;), &quot;apple&quot;)
+print(get(Code(&quot;XY9&quot;)))</textarea></div>
+<div class="parsons" data-id="w044d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">CPython&rsquo;s probe loop</div><div class="pc-prompt"><p>Arrange the lines into a function that finds the index-table slot for a hash, CPython&rsquo;s way. One line is a trap.</p></div><script type="application/json">{"lines": ["def find_slot(indices, h, taken):", "    mask = len(indices) - 1", "    perturb = h", "    i = h & mask", "    while taken(i):", "        perturb >>= 5", "        i = (5 * i + perturb + 1) & mask", "    return i"], "distractors": ["        i = (i + 1) % len(indices)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>d = {&quot;x&quot;: 1, &quot;y&quot;: 2}
+d[&quot;x&quot;] = 10
+a = list(d)
+del d[&quot;x&quot;]
+d[&quot;x&quot;] = 11
+b = list(d)
+c = {**{&quot;a&quot;: 1, &quot;b&quot;: 2}, **{&quot;b&quot;: 3, &quot;c&quot;: 4}}
+
+p = ___   # a
+q = ___   # b
+r = ___   # list(c.items())
+s = ___   # 12345 &amp; 7
+t = ___   # the fraction of the index table a CPython dict lets be used before growing</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [&quot;x&quot;, &quot;y&quot;] and q == [&quot;y&quot;, &quot;x&quot;] and r == [(&quot;a&quot;, 1), (&quot;b&quot;, 3), (&quot;c&quot;, 4)], &quot;p, q and r&quot;
+    assert s == 1 and t in (&quot;2/3&quot;, 2 / 3), &quot;s and t (write t as the string &#x27;2/3&#x27; or the number)&quot;</textarea><textarea class="pc-src pc-solution" hidden>d = {&quot;x&quot;: 1, &quot;y&quot;: 2}
+d[&quot;x&quot;] = 10
+a = list(d)
+del d[&quot;x&quot;]
+d[&quot;x&quot;] = 11
+b = list(d)
+c = {**{&quot;a&quot;: 1, &quot;b&quot;: 2}, **{&quot;b&quot;: 3, &quot;c&quot;: 4}}
+
+p = [&quot;x&quot;, &quot;y&quot;]
+q = [&quot;y&quot;, &quot;x&quot;]
+r = [(&quot;a&quot;, 1), (&quot;b&quot;, 3), (&quot;c&quot;, 4)]
+s = 1
+t = &quot;2/3&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w044d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What are the two parts of CPython&rsquo;s compact dict?", "answer": 1, "explain": "Raymond Hettinger&rsquo;s design.", "options": ["Keys and values lists", "A sparse index table of small numbers, and a dense list of (hash, key, value) entries", "Two hash tables", "A tree and a list"]}, {"type": "mc", "q": "Why does a dict remember insertion order?", "answer": 1, "explain": "Guaranteed since Python 3.7.", "options": ["It sorts", "Entries are appended to a dense list in the order keys are added, and iteration walks that list", "It stores timestamps", "By accident"]}, {"type": "mc", "q": "What happens to a key&rsquo;s position when you update its value?", "answer": 1, "explain": "Delete and re-add to move it.", "options": ["It moves to the end", "Nothing: it keeps its place", "It moves to the front", "It&rsquo;s removed"]}, {"type": "mc", "q": "Why does CPython&rsquo;s probe sequence add perturb?", "answer": 1, "explain": "perturb &gt;&gt;= 5 each step.", "options": ["Randomness", "To mix in the hash&rsquo;s higher bits, so keys whose low bits agree take different paths", "Speed", "To avoid tombstones"]}, {"type": "mc", "q": "Why do entries store each key&rsquo;s hash?", "answer": 1, "explain": "Cheap checks first.", "options": ["Tradition", "Different stored hashes rule a key out without calling ==, and growing needn&rsquo;t recompute hashes", "For sorting", "For printing"]}, {"type": "mc", "q": "In what order does a lookup check whether an entry is the key?", "answer": 1, "explain": "Cheapest first.", "options": ["== first", "Same object (is), then equal hashes, then ==", "Hash only", "Random"]}, {"type": "mc", "q": "How full can CPython&rsquo;s index table get before it grows?", "answer": 1, "explain": "USABLE_FRACTION in dictobject.c.", "options": ["Completely", "About two thirds", "Half", "A quarter"]}, {"type": "mc", "q": "What happens if you add keys to a dict while looping over it?", "answer": 1, "explain": "Loop over list(d) instead.", "options": ["Nothing", "RuntimeError: dictionary changed size during iteration", "They&rsquo;re skipped", "The loop restarts"]}, {"type": "mc", "q": "What does {1: &lsquo;a&rsquo;, True: &lsquo;b&rsquo;} give?", "answer": 1, "explain": "One key: the first spelling stays, the last value wins.", "options": ["{1: &lsquo;a&rsquo;, True: &lsquo;b&rsquo;}", "{1: &lsquo;b&rsquo;}", "{True: &lsquo;b&rsquo;}", "An error"]}, {"type": "output", "q": "What does this print?", "answer": "ban", "explain": "First appearances, in order.", "code": "d = dict.fromkeys(\"banana\")\nprint(\"\".join(d))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a complete compact dict</div><div class="pc-prompt"><p>Extend the compact model into <code>OrderedTable</code> with deletion. Keep CPython&rsquo;s design: <code>_indices</code> (power-of-two size, starting at 8) holding <code>None</code> (empty), <code>DELETED</code> (a deleted slot, like Day 3&rsquo;s tombstone) or an entry position; and <code>_entries</code>, where a deleted entry becomes <code>None</code> (so the others keep their positions and order). Give it <code>__setitem__</code>, <code>__getitem__</code>, <code>__delitem__</code> (<code>KeyError</code> if missing), <code>__contains__</code>, <code>__len__</code> (live entries), <code>__iter__</code> (insertion order, skipping deleted entries), <code>items()</code>, and <code>popitem()</code> (remove and return the <strong>most recently added</strong> live pair, as <code>dict.popitem</code> does; <code>KeyError</code> if empty). When <code>len(_entries)</code> (including deleted) would go over two thirds of the index size, rebuild: squeeze out deleted entries, and choose the smallest power-of-two size (at least 8) that keeps the live entries under a third full. Use CPython&rsquo;s probe sequence.</p></div><textarea class="pc-src pc-code" hidden>DELETED = object()
+
+class OrderedTable:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_basic():
+    &quot;basics&quot;
+    t = OrderedTable()
+    for k in &quot;dbca&quot;:
+        t[k] = k.upper()
+    del t[&quot;b&quot;]
+    t[&quot;b&quot;] = &quot;again&quot;
+    assert list(t) == [&quot;d&quot;, &quot;c&quot;, &quot;a&quot;, &quot;b&quot;] and len(t) == 4 and t[&quot;b&quot;] == &quot;again&quot; and &quot;b&quot; in t and &quot;z&quot; not in t
+    assert t.popitem() == (&quot;b&quot;, &quot;again&quot;) and t.popitem() == (&quot;a&quot;, &quot;A&quot;) and list(t) == [&quot;d&quot;, &quot;c&quot;]
+    for bad in [lambda: t[&quot;b&quot;], lambda: t.__delitem__(&quot;b&quot;), lambda: OrderedTable().popitem()]:
+        try:
+            bad()
+            assert False
+        except KeyError:
+            pass
+def test_random():
+    &quot;against a dict&quot;
+    rng = random.Random(3)
+    t, ref = OrderedTable(), {}
+    for _ in range(6000):
+        k = rng.randint(0, 200)
+        r = rng.random()
+        if r &lt; 0.55:
+            t[k] = ref[k] = rng.randint(0, 9)
+        elif r &lt; 0.85 and k in ref:
+            del t[k], ref[k]
+        elif r &lt; 0.9 and ref:
+            assert t.popitem() == ref.popitem()
+        assert (k in t) == (k in ref) and len(t) == len(ref)
+    assert list(t) == list(ref) and t.items() == list(ref.items())
+    size = len(t._indices)
+    assert size &amp; (size - 1) == 0 and len(t._entries) * 3 &lt;= size * 2</textarea><textarea class="pc-src pc-solution" hidden>DELETED = object()
+
+class OrderedTable:
+    def __init__(self):
+        self._indices = [None] * 8
+        self._entries = []
+        self._live = 0
+
+    def _slot(self, key, h):
+        mask = len(self._indices) - 1
+        perturb = h &amp; 0xFFFFFFFFFFFFFFFF
+        i = perturb &amp; mask
+        free = -1
+        while True:
+            p = self._indices[i]
+            if p is None:
+                return -1, (free if free &gt;= 0 else i)
+            if p is DELETED:
+                if free &lt; 0:
+                    free = i
+            else:
+                eh, ek, _ = self._entries[p]
+                if ek is key or (eh == h and ek == key):
+                    return i, -1
+            perturb &gt;&gt;= 5
+            i = (5 * i + perturb + 1) &amp; mask
+
+    def _rebuild(self):
+        live = [e for e in self._entries if e is not None]
+        size = 8
+        while len(live) * 3 &gt;= size:
+            size *= 2
+        self._indices = [None] * size
+        self._entries = []
+        for h, k, v in live:
+            _, free = self._slot(k, h)
+            self._indices[free] = len(self._entries)
+            self._entries.append([h, k, v])
+
+    def __setitem__(self, key, value):
+        h = hash(key)
+        found, free = self._slot(key, h)
+        if found &gt;= 0:
+            self._entries[self._indices[found]][2] = value
+            return
+        if (len(self._entries) + 1) * 3 &gt; len(self._indices) * 2:
+            self._entries.append([h, key, value])
+            self._live += 1
+            self._rebuild()
+            return
+        self._indices[free] = len(self._entries)
+        self._entries.append([h, key, value])
+        self._live += 1
+
+    def __getitem__(self, key):
+        found, _ = self._slot(key, hash(key))
+        if found &lt; 0:
+            raise KeyError(key)
+        return self._entries[self._indices[found]][2]
+
+    def __delitem__(self, key):
+        found, _ = self._slot(key, hash(key))
+        if found &lt; 0:
+            raise KeyError(key)
+        self._entries[self._indices[found]] = None
+        self._indices[found] = DELETED
+        self._live -= 1
+
+    def __contains__(self, key):
+        return self._slot(key, hash(key))[0] &gt;= 0
+
+    def __len__(self):
+        return self._live
+
+    def items(self):
+        return [(k, v) for e in self._entries if e is not None for _, k, v in [e]]
+
+    def __iter__(self):
+        return iter([k for k, _ in self.items()])
+
+    def popitem(self):
+        while self._entries and self._entries[-1] is None:
+            self._entries.pop()
+        if not self._entries:
+            raise KeyError(&quot;popitem(): table is empty&quot;)
+        h, k, v = self._entries[-1]
+        del self[k]
+        self._entries.pop()
+        return k, v</textarea><template class="pc-src pc-hint"><code>_slot(key, h)</code> walks the probe sequence and returns <code>(slot_of_key or -1, first_deleted_or_empty_slot_for_inserting)</code>: stop at <code>None</code>; remember the first <code>DELETED</code>; for a position, check <code>_entries[p]</code> (it&rsquo;s never <code>None</code> when an index points at it, because deleting sets the index slot to <code>DELETED</code> too). For <code>popitem</code>, drop trailing <code>None</code>s from <code>_entries</code> first, then the last entry is the newest live one.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Read the long comment near the top of CPython&rsquo;s <code>Objects/dictobject.c</code> (search the web for it). You&rsquo;ll recognise almost every idea in it from this week. Tomorrow: hashing problems, a day of classic puzzles that a dictionary or set turns from O(n²) into O(n).</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w044d3.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w044d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w044d4", "week": 44, "day": 4, "title": "How Python's dict works", "exercises": [{"id": "w044d4-order", "title": "Order rules", "points": 10}, {"id": "w044d4-probe", "title": "CPython's probe sequence", "points": 10}, {"id": "w044d4-compact", "title": "A compact, ordered table", "points": 20}, {"id": "w044d4-cheap", "title": "Counting comparisons", "points": 10}, {"id": "w044d4-dedupe", "title": "Using the order", "points": 10}, {"id": "w044d4-bug1", "title": "Looping in hash order", "points": 10}, {"id": "w044d4-bug2", "title": "The mask that isn't", "points": 10}, {"id": "w044d4-bug3", "title": "Equal hashes aren't equal keys", "points": 10}, {"id": "w044d4-trace", "title": "Predict them", "points": 10}, {"id": "w044d4-challenge", "title": "Challenge: a complete compact dict", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=871ff52039"></script>
+</body>
+</html>

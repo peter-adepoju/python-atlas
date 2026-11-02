@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="871ff52039">
+<title>Week 44 Day 3: Open addressing | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=871ff52039">
+<link rel="stylesheet" href="../assets/css/site.css?v=871ff52039">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=871ff52039"></script>
+<script src="../assets/vendor/codemirror.js?v=871ff52039" defer></script>
+<meta name="description" content="Chaining keeps a little list in every bucket. Open addressing keeps no lists at all: every key lives directly in the table, and when a key’s slot is taken,...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w044d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 44 Day 3: Open addressing">
+<meta property="og:description" content="Chaining keeps a little list in every bucket. Open addressing keeps no lists at all: every key lives directly in the table, and when a key’s slot is taken,...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w044d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-44">Week 44: Hash tables</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#probing" data-sec="probing">Probing</a></li><li><a href="#deleting-needs-tombstones" data-sec="deleting-needs-tombstones">Deleting needs tombstones</a></li><li><a href="#load-and-resizing" data-sec="load-and-resizing">Load and resizing</a></li><li><a href="#clusters" data-sec="clusters">Clusters</a></li><li><a href="#chaining-or-open-addressing" data-sec="chaining-or-open-addressing">Chaining or open addressing?</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w044d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-44">Week 44: Hash tables</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 44, Day 3</span></p>
+      <h1>Open addressing</h1>
+      <div class="day-intro"><p>Chaining keeps a little list in every bucket. <strong>Open addressing</strong> keeps no lists at all: every key lives directly in the table, and when a key&rsquo;s slot is taken, it tries the next slot, and the next, following a fixed <strong>probe sequence</strong> until it finds room. Lookups follow the same sequence. It&rsquo;s how Python&rsquo;s own dictionary works (tomorrow). Today you&rsquo;ll build it with linear probing, discover why deleting needs <strong>tombstones</strong>, see how keys bunch into clusters, and compare the two designs.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Insert and find keys by probing a fixed sequence of slots, wrapping round the table</li><li>Explain why deleting must leave a tombstone, and how lookups and inserts treat it</li><li>Keep the load factor low, and resize by reinserting every live key</li><li>Explain primary clustering, and how quadratic probing and double hashing reduce it</li><li>Compare open addressing with chaining</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Probing: 25 min"></span><span class="plan-seg s0" style="flex:25" title="Deleting needs tombstones: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Load and resizing: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Clusters: 20 min"></span><span class="plan-seg s1" style="flex:10" title="Chaining or open addressing?: 10 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Probing</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Deleting needs tombstones</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:00</span><span class="plan-what">Load and resizing</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Clusters</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">Chaining or open addressing?</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w044d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w044d3.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w044d3-p1"><textarea class="pc-src pc-code" hidden>slots = [None] * 7
+for key in [10, 3, 17, 24, 5]:
+    i = key % 7
+    probes = 1
+    while slots[i] is not None:
+        i = (i + 1) % 7
+        probes += 1
+    slots[i] = key
+    print(key, &quot;-&gt; slot&quot;, i, &quot;after&quot;, probes, &quot;probes&quot;)
+print(slots)</textarea></div>
+<p>10, 17 and 24 all want slot 3. The first gets it; the others step along to the next free slots, 4 and 5; then 5 wants slot 5 too, finds it taken, and steps on to 6. No lists anywhere: collisions are settled by <strong>moving along</strong>.</p>
+<h2 id="probing">Probing</h2>
+<p>With <strong>linear probing</strong>, a key whose home slot <code>h = hash(key) % m</code> is taken tries <code>h + 1</code>, <code>h + 2</code>, &hellip; (wrapping round with <code>% m</code>) until it finds an empty slot. To <strong>find</strong> a key, follow exactly the same path: check <code>h</code>, then <code>h + 1</code>, &hellip;, stopping when you find the key (success) or reach an <strong>empty</strong> slot (the key isn&rsquo;t there, because if it were, it would have been put here or earlier).</p>
+<div class="pc pc-example" data-kind="example" data-id="w044d3-e2"><textarea class="pc-src pc-code" hidden>EMPTY = None
+
+class OpenMap:
+    def __init__(self, capacity=8):
+        self._keys = [EMPTY] * capacity
+        self._values = [EMPTY] * capacity
+        self._size = 0
+
+    def _probe(self, key):
+        &quot;&quot;&quot;The slot holding key, or the first empty slot on its path.&quot;&quot;&quot;
+        m = len(self._keys)
+        i = hash(key) % m
+        while self._keys[i] is not EMPTY and self._keys[i] != key:
+            i = (i + 1) % m
+        return i
+
+    def put(self, key, value):
+        i = self._probe(key)
+        if self._keys[i] is EMPTY:
+            self._keys[i] = key
+            self._size += 1
+        self._values[i] = value
+
+    def get(self, key, default=None):
+        i = self._probe(key)
+        return default if self._keys[i] is EMPTY else self._values[i]
+
+m = OpenMap()
+for k, v in [(10, &quot;a&quot;), (18, &quot;b&quot;), (26, &quot;c&quot;), (3, &quot;d&quot;), (18, &quot;B&quot;)]:
+    m.put(k, v)
+print(m._keys, m.get(18), m.get(26), m.get(34, &quot;missing&quot;), m._size)</textarea></div>
+<p>Two keys and two values sit in <strong>parallel arrays</strong> at the same index. (A single array of pairs would work too.) The loop in <code>_probe</code> always ends as long as the table is never completely full, so a resize must happen well before that.</p>
+<h2 id="deleting-needs-tombstones">Deleting needs tombstones</h2>
+<p>Deleting is where open addressing gets subtle. Suppose 10, 18 and 26 all wanted slot 2 of 8, and sit in slots 2, 3 and 4. Delete 18 by emptying slot 3, and then look for 26: the search starts at slot 2 (holding 10), moves to slot 3, finds it <strong>empty</strong>, and stops. 26 is still in slot 4, but nobody can reach it.</p>
+<p>The fix is a <strong>tombstone</strong>: a special marker that means &ldquo;something was here&rdquo;. Deleting replaces the key with a tombstone.</p>
+<ul>
+<li><strong>Lookups</strong> treat a tombstone as occupied: keep probing past it.</li>
+<li><strong>Inserts</strong> may reuse a tombstone&rsquo;s slot, but only after checking the key isn&rsquo;t already further along the path.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w044d3-e3"><textarea class="pc-src pc-code" hidden>EMPTY, DELETED = None, object()          # object() makes a unique marker nothing else equals
+
+def probe_find(keys, key):
+    m, i = len(keys), hash(key) % len(keys)
+    while keys[i] is not EMPTY:
+        if keys[i] is not DELETED and keys[i] == key:
+            return i
+        i = (i + 1) % m
+    return -1
+
+keys = [EMPTY] * 8
+for k in [10, 18, 26]:                      # all want slot 2
+    i = k % 8
+    while keys[i] is not EMPTY:
+        i = (i + 1) % 8
+    keys[i] = k
+print([k if k is not DELETED else &quot;†&quot; for k in keys])
+
+keys[probe_find(keys, 18)] = EMPTY          # the wrong way
+print(&quot;emptied:&quot;, probe_find(keys, 26))
+keys[3] = 18
+keys[probe_find(keys, 18)] = DELETED        # the right way
+print(&quot;tombstone:&quot;, probe_find(keys, 26), [k if k is not DELETED else &quot;†&quot; for k in keys])</textarea></div>
+<p><code>DELETED = object()</code> creates a marker that is equal only to itself, so it can never be mistaken for a real key. Compare with <code>is</code>, not <code>==</code>.</p>
+<p>Tombstones have a cost: they make probe paths longer, and they never go away on their own. So a map counts its tombstones and, when there are too many, <strong>rebuilds</strong> the table (reinserting only live keys), which clears them all.</p>
+<h2 id="load-and-resizing">Load and resizing</h2>
+<p>Open addressing is much more sensitive to the load factor than chaining. As the table fills, the runs of occupied slots get longer, and the number of probes grows sharply. Donald Knuth worked out the expected number of probes for linear probing with load factor α:</p>
+<table>
+<thead>
+<tr>
+<th>α</th>
+<th>probes to find a key that&rsquo;s there</th>
+<th>probes to discover a key isn&rsquo;t there</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.25</td>
+<td>about 1.2</td>
+<td>about 1.4</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>1.5</td>
+<td>2.5</td>
+</tr>
+<tr>
+<td>0.75</td>
+<td>2.5</td>
+<td>8.5</td>
+</tr>
+<tr>
+<td>0.9</td>
+<td>5.5</td>
+<td>50.5</td>
+</tr>
+</tbody>
+</table>
+<p>(The formulas are ½(1 + 1/(1 − α)) and ½(1 + 1/(1 − α)²), from <em>The Art of Computer Programming</em>, volume 3.) So open-addressed tables usually resize at α around 0.5 to 0.7, counting tombstones as used slots, since they lengthen paths just as keys do. Resizing reinserts every <strong>live</strong> key into a bigger empty table: tombstones are simply left behind.</p>
+<h2 id="clusters">Clusters</h2>
+<p>Linear probing has a weakness: <strong>primary clustering</strong>. Once a few neighbouring slots are full, any key whose home is anywhere in that run lands at its end, making it longer, which makes it even more likely to catch the next key. Runs merge into long clusters.</p>
+<p>Two common fixes change the probe sequence:</p>
+<ul>
+<li><strong>Quadratic probing</strong>: try <code>h</code>, <code>h + 1</code>, <code>h + 4</code>, <code>h + 9</code>, &hellip; (adding squares), so keys with nearby homes spread out quickly.</li>
+<li><strong>Double hashing</strong>: use a <strong>second</strong> hash function to pick the step size: try <code>h</code>, <code>h + s</code>, <code>h + 2s</code>, &hellip;, where <code>s = hash2(key)</code>. Keys with the same home slot follow different paths. The step must never be 0, and should share no factor with <code>m</code> (a prime <code>m</code> makes every step work), so the sequence visits every slot.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w044d3-e4"><textarea class="pc-src pc-code" hidden>def longest_run(keys, m, step_for):
+    slots = [None] * m
+    for k in keys:
+        i, s = k % m, step_for(k)
+        while slots[i] is not None:
+            i = (i + s) % m
+        slots[i] = k
+    run = best = 0
+    for x in slots + slots:                  # twice round, to count runs that wrap
+        run = run + 1 if x is not None else 0
+        best = max(best, run)
+    return min(best, m)
+
+import random
+rng = random.Random(1)
+keys = rng.sample(range(10 ** 6), 700)
+m = 1009                                      # a prime
+print(&quot;linear :&quot;, longest_run(keys, m, lambda k: 1))
+print(&quot;double :&quot;, longest_run(keys, m, lambda k: 1 + k % (m - 1)))</textarea></div>
+<p>Linear probing is still widely used, because walking to the very next slot is fast for the computer&rsquo;s memory (the same reason Python lists beat linked lists, Week 42). Python&rsquo;s dict uses its own probe sequence that mixes in more and more of the hash&rsquo;s bits (tomorrow).</p>
+<h2 id="chaining-or-open-addressing">Chaining or open addressing?</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Chaining</th>
+<th>Open addressing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>collisions</td>
+<td>share a list in the bucket</td>
+<td>probe for another slot</td>
+</tr>
+<tr>
+<td>load factor</td>
+<td>can exceed 1 (chains just get longer)</td>
+<td>must stay below 1, usually under 0.7</td>
+</tr>
+<tr>
+<td>deleting</td>
+<td>easy: remove from the chain</td>
+<td>needs tombstones</td>
+</tr>
+<tr>
+<td>memory</td>
+<td>a list per bucket, plus pairs</td>
+<td>just the arrays; no extra objects</td>
+</tr>
+<tr>
+<td>speed in practice</td>
+<td>following pointers</td>
+<td>neighbouring slots: friendly to memory</td>
+</tr>
+</tbody>
+</table>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Open addressing stores every key directly in the table. A key whose home slot is taken probes along a fixed sequence (linear probing: the next slot, wrapping round); lookups follow the same path and stop at an empty slot. Deleting must leave a tombstone, which lookups probe past and inserts may reuse; rebuild the table to clear them. Probes grow sharply with the load factor, so resize early (around 0.5 to 0.7, counting tombstones), reinserting live keys only. Linear probing causes primary clustering; quadratic probing and double hashing spread keys out. Open addressing saves memory and is memory-friendly; chaining handles deletes and high load more simply.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d3-insert" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Linear probing by hand</div><div class="pc-prompt"><p>Write <code>insert(slots, key)</code> for a list of slots (<code>None</code> for empty) and a whole-number key whose home slot is <code>key % len(slots)</code>: put the key in the first free slot from its home (wrapping round), and return <code>(index, probes)</code>, where <code>probes</code> counts every slot looked at, including the one used. A full table raises <code>OverflowError</code>. Then set <code>layout</code> to the slots after inserting <code>[12, 22, 32, 5, 15, 9]</code> into 10 empty slots.</p></div><textarea class="pc-src pc-code" hidden>def insert(slots, key):
+    ___
+
+layout = ___</textarea><textarea class="pc-src pc-tests" hidden>def test_insert():
+    &quot;probing&quot;
+    s = [None] * 5
+    assert insert(s, 7) == (2, 1) and insert(s, 12) == (3, 2) and insert(s, 4) == (4, 1) and insert(s, 9) == (0, 2)
+    assert s == [9, None, 7, 12, 4]
+    s = [1, 2]
+    try:
+        insert(s, 3)
+        assert False
+    except OverflowError:
+        pass
+    assert layout == [None, None, 12, 22, 32, 5, 15, None, None, 9]</textarea><textarea class="pc-src pc-solution" hidden>def insert(slots, key):
+    m = len(slots)
+    i = key % m
+    for probes in range(1, m + 1):
+        if slots[i] is None:
+            slots[i] = key
+            return i, probes
+        i = (i + 1) % m
+    raise OverflowError(&quot;table is full&quot;)
+
+layout = [None] * 10
+for k in [12, 22, 32, 5, 15, 9]:
+    insert(layout, k)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d3-openmap" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">An open-addressed map</div><div class="pc-prompt"><p>Write <code>OpenMap(capacity=8)</code> with linear probing over two parallel lists, <code>_keys</code> and <code>_values</code>, using <code>None</code> for an empty slot: <code>put</code> (updating an existing key), <code>get(key, default=None)</code>, <code>__contains__</code> and <code>__len__</code>. After adding a new key, if <code>len / capacity</code> is more than 0.5, double the capacity and reinsert every key. Keep <code>capacity</code> as a read-only property. Keys are never <code>None</code>.</p></div><textarea class="pc-src pc-code" hidden>class OpenMap:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_map():
+    &quot;a map&quot;
+    m = OpenMap(4)
+    for k, v in [(&quot;a&quot;, 1), (&quot;b&quot;, 2), (&quot;a&quot;, 3)]:
+        m.put(k, v)
+    assert len(m) == 2 and m.get(&quot;a&quot;) == 3 and m.get(&quot;z&quot;, 0) == 0 and &quot;b&quot; in m and &quot;z&quot; not in m and m.capacity == 4
+    caps = []
+    for i in range(20):
+        m.put(i, i * 2)
+        caps.append(m.capacity)
+    assert all(m.get(i) == i * 2 for i in range(20)) and len(m) == 22 and m.capacity == 64
+    assert len(m._keys) == len(m._values) == m.capacity
+    assert all(c &gt;= 2 * n for c, n in zip(caps, range(3, 23)))
+def test_no_lists_of_lists():
+    &quot;no chains&quot;
+    m = OpenMap()
+    for i in range(1000):
+        m.put(i, i)
+    assert not any(isinstance(k, list) for k in m._keys) and m.get(999) == 999</textarea><textarea class="pc-src pc-solution" hidden>class OpenMap:
+    def __init__(self, capacity=8):
+        self._keys = [None] * capacity
+        self._values = [None] * capacity
+        self._size = 0
+
+    @property
+    def capacity(self):
+        return len(self._keys)
+
+    def _slot(self, key):
+        m = len(self._keys)
+        i = hash(key) % m
+        while self._keys[i] is not None and self._keys[i] != key:
+            i = (i + 1) % m
+        return i
+
+    def put(self, key, value):
+        i = self._slot(key)
+        if self._keys[i] is None:
+            self._keys[i] = key
+            self._size += 1
+            self._values[i] = value
+            if self._size / len(self._keys) &gt; 0.5:
+                self._resize(2 * len(self._keys))
+        else:
+            self._values[i] = value
+
+    def _resize(self, capacity):
+        pairs = [(k, v) for k, v in zip(self._keys, self._values) if k is not None]
+        self._keys = [None] * capacity
+        self._values = [None] * capacity
+        self._size = 0
+        for k, v in pairs:
+            i = self._slot(k)
+            self._keys[i], self._values[i] = k, v
+            self._size += 1
+
+    def get(self, key, default=None):
+        i = self._slot(key)
+        return default if self._keys[i] is None else self._values[i]
+
+    def __contains__(self, key):
+        return self._keys[self._slot(key)] is not None
+
+    def __len__(self):
+        return self._size</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d3-tombstones" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Deleting with tombstones</div><div class="pc-prompt"><p>Add <code>delete(key)</code> to the starter&rsquo;s map: replace the key with the <code>DELETED</code> marker (and its value with <code>None</code>), and return the value; a missing key raises <code>KeyError(key)</code>. Then fix the other methods so that lookups <strong>probe past</strong> tombstones, and <code>put</code> of a <strong>new</strong> key reuses the <strong>first</strong> tombstone on its path (but only after checking the key isn&rsquo;t further along). Count tombstones in <code>self._tombstones</code>.</p></div><textarea class="pc-src pc-code" hidden>EMPTY, DELETED = None, object()
+
+class OpenMap:
+    def __init__(self, capacity=16):
+        self._keys = [EMPTY] * capacity
+        self._values = [None] * capacity
+        self._size = 0
+        self._tombstones = 0
+
+    def _slot(self, key):
+        m = len(self._keys)
+        i = hash(key) % m
+        while self._keys[i] is not EMPTY and self._keys[i] != key:
+            i = (i + 1) % m
+        return i
+
+    def put(self, key, value):
+        i = self._slot(key)
+        if self._keys[i] is EMPTY:
+            self._keys[i] = key
+            self._size += 1
+        self._values[i] = value
+
+    def get(self, key, default=None):
+        i = self._slot(key)
+        return default if self._keys[i] is EMPTY else self._values[i]
+
+    def __len__(self):
+        return self._size
+
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_delete():
+    &quot;tombstones&quot;
+    m = OpenMap(16)
+    for k in [1, 17, 33]:            # all want slot 1
+        m.put(k, str(k))
+    assert m.delete(17) == &quot;17&quot; and m.get(33) == &quot;33&quot; and m.get(17) is None and len(m) == 2 and m._tombstones == 1
+    assert m._keys[2] is DELETED
+    m.put(49, &quot;49&quot;)
+    assert m._keys[2] == 49 and m._tombstones == 0, &quot;reuse the first tombstone&quot;
+    m.delete(1)
+    m.put(33, &quot;again&quot;)
+    assert m.get(33) == &quot;again&quot; and len(m) == 2 and sum(1 for k in m._keys if k == 33) == 1, &quot;don&#x27;t put a second copy into the tombstone&quot;
+    try:
+        m.delete(1)
+        assert False
+    except KeyError:
+        pass
+def test_random():
+    &quot;against a dict&quot;
+    import random
+    rng = random.Random(1)
+    m, ref = OpenMap(512), {}
+    for _ in range(3000):
+        k = rng.randint(0, 120)
+        if rng.random() &lt; 0.5:
+            m.put(k, k)
+            ref[k] = k
+        elif k in ref:
+            assert m.delete(k) == ref.pop(k)
+        assert m.get(k) == ref.get(k) and len(m) == len(ref)</textarea><textarea class="pc-src pc-solution" hidden>EMPTY, DELETED = None, object()
+
+class OpenMap:
+    def __init__(self, capacity=16):
+        self._keys = [EMPTY] * capacity
+        self._values = [None] * capacity
+        self._size = 0
+        self._tombstones = 0
+
+    def _find(self, key):
+        &quot;&quot;&quot;(slot of key or -1, first tombstone or -1, empty slot where the search stopped)&quot;&quot;&quot;
+        m = len(self._keys)
+        i = hash(key) % m
+        tomb = -1
+        while self._keys[i] is not EMPTY:
+            if self._keys[i] is DELETED:
+                if tomb &lt; 0:
+                    tomb = i
+            elif self._keys[i] == key:
+                return i, tomb, -1
+            i = (i + 1) % m
+        return -1, tomb, i
+
+    def put(self, key, value):
+        found, tomb, empty = self._find(key)
+        if found &gt;= 0:
+            self._values[found] = value
+            return
+        if tomb &gt;= 0:
+            i = tomb
+            self._tombstones -= 1
+        else:
+            i = empty
+        self._keys[i], self._values[i] = key, value
+        self._size += 1
+
+    def get(self, key, default=None):
+        found, _, _ = self._find(key)
+        return self._values[found] if found &gt;= 0 else default
+
+    def __len__(self):
+        return self._size
+
+    def delete(self, key):
+        found, _, _ = self._find(key)
+        if found &lt; 0:
+            raise KeyError(key)
+        value = self._values[found]
+        self._keys[found], self._values[found] = DELETED, None
+        self._size -= 1
+        self._tombstones += 1
+        return value</textarea><template class="pc-src pc-hint">Write one <code>_find(key)</code> that returns <code>(index_of_key, first_tombstone)</code>: walk the path; remember the first <code>DELETED</code> slot; stop at the key (return its index) or at <code>EMPTY</code> (return -1 for the key). <code>put</code> of a new key goes into the first tombstone if there was one, else into the empty slot where the walk stopped.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d3-experiment" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Probes against load</div><div class="pc-prompt"><p>Write <code>average_probes(load, m=1009, seed=1)</code>: insert <code>int(load * m)</code> random distinct keys (use <code>random.Random(seed).sample(range(10**7), n)</code>) into <code>m</code> slots with linear probing, then return the average number of probes needed to <strong>find</strong> each key (rounded to 2 places), where finding a key takes as many probes as inserting it did. Then set <code>table</code> to a list of <code>average_probes</code> for loads 0.25, 0.5, 0.75 and 0.9.</p></div><textarea class="pc-src pc-code" hidden>import random
+
+def average_probes(load, m=1009, seed=1):
+    ___
+
+table = ___</textarea><textarea class="pc-src pc-tests" hidden>def test_probes():
+    &quot;the experiment&quot;
+    assert average_probes(0.0) == 0
+    assert table[0] &lt; table[1] &lt; table[2] &lt; table[3] and table[0] &lt; 1.4 and table[3] &gt; 3
+    assert abs(table[1] - 1.5) &lt; 0.4, &quot;close to Knuth&#x27;s 1.5 at half full&quot;</textarea><textarea class="pc-src pc-solution" hidden>import random
+
+def average_probes(load, m=1009, seed=1):
+    n = int(load * m)
+    if n == 0:
+        return 0.0
+    keys = random.Random(seed).sample(range(10 ** 7), n)
+    slots = [None] * m
+    total = 0
+    for k in keys:
+        i, probes = k % m, 1
+        while slots[i] is not None:
+            i = (i + 1) % m
+            probes += 1
+        slots[i] = k
+        total += probes
+    return round(total / n, 2)
+
+table = [average_probes(a) for a in (0.25, 0.5, 0.75, 0.9)]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d3-double" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Double hashing</div><div class="pc-prompt"><p>Write <code>probe_sequence(key, m)</code> for double hashing: the list of all <code>m</code> slot indexes the key would try, starting at <code>key % m</code> and stepping by <code>1 + key % (m - 1)</code> each time (wrapping with <code>% m</code>). Then <code>visits_all(m)</code>: true if, for every key from 0 to <code>m * 3</code>, the sequence visits <strong>every</strong> slot exactly once. (It&rsquo;s true when <code>m</code> is prime.)</p></div><textarea class="pc-src pc-code" hidden>def probe_sequence(key, m):
+    ___
+
+def visits_all(m):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_double():
+    &quot;double hashing&quot;
+    assert probe_sequence(10, 7) == [3, 1, 6, 4, 2, 0, 5]
+    assert probe_sequence(3, 5) == [3, 2, 1, 0, 4]
+    assert visits_all(7) and visits_all(11) and visits_all(13) and not visits_all(8) and not visits_all(9)</textarea><textarea class="pc-src pc-solution" hidden>def probe_sequence(key, m):
+    i, step = key % m, 1 + key % (m - 1)
+    out = []
+    for _ in range(m):
+        out.append(i)
+        i = (i + step) % m
+    return out
+
+def visits_all(m):
+    return all(sorted(probe_sequence(k, m)) == list(range(m)) for k in range(m * 3 + 1))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w044d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Stopped by a tombstone</div><div class="pc-prompt"><p>This lookup stops at a tombstone as if it were empty, so a key placed after the deleted one can&rsquo;t be found: this prints <code>None</code>. Make lookups probe past tombstones, so it prints <code>c</code>.</p></div><textarea class="pc-src pc-code" hidden>EMPTY, DELETED = None, object()
+keys = [EMPTY] * 8
+values = [None] * 8
+for k, v in [(2, &quot;a&quot;), (10, &quot;b&quot;), (18, &quot;c&quot;)]:        # all want slot 2
+    i = k % 8
+    while keys[i] is not EMPTY:
+        i = (i + 1) % 8
+    keys[i], values[i] = k, v
+keys[3] = DELETED                                     # 10 was deleted
+
+def get(key):
+    i = key % 8
+    while keys[i] is not EMPTY and keys[i] is not DELETED:
+        if keys[i] == key:
+            return values[i]
+        i = (i + 1) % 8
+    return None
+
+print(get(18))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;probe past tombstones&quot;
+    expect_output(&quot;c&quot;)</textarea><textarea class="pc-src pc-solution" hidden>EMPTY, DELETED = None, object()
+keys = [EMPTY] * 8
+values = [None] * 8
+for k, v in [(2, &quot;a&quot;), (10, &quot;b&quot;), (18, &quot;c&quot;)]:        # all want slot 2
+    i = k % 8
+    while keys[i] is not EMPTY:
+        i = (i + 1) % 8
+    keys[i], values[i] = k, v
+keys[3] = DELETED                                     # 10 was deleted
+
+def get(key):
+    i = key % 8
+    while keys[i] is not EMPTY:
+        if keys[i] is not DELETED and keys[i] == key:
+            return values[i]
+        i = (i + 1) % 8
+    return None
+
+print(get(18))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w044d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Deleted by emptying</div><div class="pc-prompt"><p>This <code>delete</code> empties the slot, which breaks the probe path of every key placed after it: deleting 10 makes 18 unreachable, and this prints <code>False</code>. Leave a tombstone instead (and make <code>contains</code> probe past it), so it prints <code>True</code>.</p></div><textarea class="pc-src pc-code" hidden>EMPTY = None
+keys = [EMPTY] * 8
+
+def add(key):
+    i = key % 8
+    while keys[i] is not EMPTY:
+        i = (i + 1) % 8
+    keys[i] = key
+
+def contains(key):
+    i = key % 8
+    while keys[i] is not EMPTY:
+        if keys[i] == key:
+            return True
+        i = (i + 1) % 8
+    return False
+
+def delete(key):
+    i = key % 8
+    while keys[i] != key:
+        i = (i + 1) % 8
+    keys[i] = EMPTY
+
+for k in [2, 10, 18]:
+    add(k)
+delete(10)
+print(contains(18))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a tombstone&quot;
+    expect_output(&quot;True&quot;)
+    assert not contains(10)</textarea><textarea class="pc-src pc-solution" hidden>EMPTY, DELETED = None, object()
+keys = [EMPTY] * 8
+
+def add(key):
+    i = key % 8
+    while keys[i] is not EMPTY:
+        i = (i + 1) % 8
+    keys[i] = key
+
+def contains(key):
+    i = key % 8
+    while keys[i] is not EMPTY:
+        if keys[i] is not DELETED and keys[i] == key:
+            return True
+        i = (i + 1) % 8
+    return False
+
+def delete(key):
+    i = key % 8
+    while keys[i] != key:
+        i = (i + 1) % 8
+    keys[i] = DELETED
+
+for k in [2, 10, 18]:
+    add(k)
+delete(10)
+print(contains(18))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w044d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Off the end</div><div class="pc-prompt"><p>This probe moves to the next slot without wrapping round, so a key whose home is near the end of the table runs off it and crashes with <code>IndexError</code>. Fix it so this prints <code>[13, None, None, None, None, None, 6]</code>.</p></div><textarea class="pc-src pc-code" hidden>slots = [None] * 7
+
+def insert(key):
+    i = key % 7
+    while slots[i] is not None:
+        i = i + 1
+    slots[i] = key
+
+insert(6)
+insert(13)
+print(slots)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;wrap round&quot;
+    expect_output(&quot;[13, None, None, None, None, None, 6]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>slots = [None] * 7
+
+def insert(key):
+    i = key % 7
+    while slots[i] is not None:
+        i = (i + 1) % 7
+    slots[i] = key
+
+insert(6)
+insert(13)
+print(slots)</textarea></div>
+<div class="parsons" data-id="w044d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Finding a key</div><div class="pc-prompt"><p>Arrange the lines into a lookup for an open-addressed table with tombstones. One line is a trap.</p></div><script type="application/json">{"lines": ["def find(keys, key):", "    m = len(keys)", "    i = hash(key) % m", "    while keys[i] is not EMPTY:", "        if keys[i] is not DELETED and keys[i] == key:", "            return i", "        i = (i + 1) % m", "    return -1"], "distractors": ["    while keys[i] is not EMPTY and keys[i] is not DELETED:"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden># Answer without running code. Tables use linear probing and hash(n) == n.
+
+p = ___   # the slot 15 ends up in, inserted into 8 empty slots after 7 and 23 (in that order)
+q = ___   # how many probes a search for a missing key takes in a completely empty table
+r = ___   # True or False: an open-addressed table can hold more keys than it has slots
+s = ___   # what a lookup does at a tombstone: &quot;stop&quot; or &quot;continue&quot;
+t = ___   # what a lookup does at an empty slot: &quot;stop&quot; or &quot;continue&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 1 and q == 1 and r is False, &quot;p, q and r: 7 goes in 7, 23 in 0, then 15 in 1&quot;
+    assert s == &quot;continue&quot; and t == &quot;stop&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden># Answer without running code. Tables use linear probing and hash(n) == n.
+
+p = 1
+q = 1
+r = False
+s = &quot;continue&quot;
+t = &quot;stop&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w044d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "In open addressing, where does a key go when its home slot is taken?", "answer": 1, "explain": "Linear probing tries the next slot.", "options": ["Into a chain", "Along a fixed probe sequence to the first free slot", "Into a second table", "It&rsquo;s refused"]}, {"type": "mc", "q": "When does a lookup for a missing key stop?", "answer": 1, "explain": "The key would have been placed there or earlier.", "options": ["At a tombstone", "At an empty slot", "After one probe", "Never"]}, {"type": "mc", "q": "Why can&rsquo;t delete simply empty the slot?", "answer": 1, "explain": "Use a tombstone.", "options": ["It can", "Keys placed further along the same path would become unreachable", "Memory", "Python forbids it"]}, {"type": "mc", "q": "What does an insert of a new key do with a tombstone on its path?", "answer": 1, "explain": "Otherwise the key could end up twice.", "options": ["Stops there immediately", "May reuse it, after checking the key isn&rsquo;t further along", "Removes it", "Ignores it for ever"]}, {"type": "mc", "q": "Why is DELETED = object() a good marker?", "answer": 1, "explain": "Compare with is.", "options": ["It&rsquo;s small", "It equals only itself, so no real key can be mistaken for it", "It&rsquo;s None", "It&rsquo;s fast"]}, {"type": "mc", "q": "Roughly how many probes does finding a missing key take with linear probing at 90% full?", "answer": 1, "explain": "Knuth&rsquo;s formula: \u00bd(1 + 1/(1 \u2212 0.9)\u00b2).", "options": ["2", "50", "5", "1"]}, {"type": "mc", "q": "What is primary clustering?", "answer": 1, "explain": "Linear probing&rsquo;s weakness.", "options": ["Keys sorting themselves", "Runs of full slots growing and merging, because any key landing in a run extends it", "Two tables sharing keys", "Chains getting long"]}, {"type": "mc", "q": "How does double hashing reduce clustering?", "answer": 1, "explain": "A prime table size makes every step visit all slots.", "options": ["It uses two tables", "A second hash picks each key&rsquo;s step size, so keys with the same home follow different paths", "It doubles the table", "It hashes twice and adds"]}, {"type": "mc", "q": "Why do open-addressed tables resize at a lower load factor than chained ones?", "answer": 1, "explain": "Around 0.5 to 0.7.", "options": ["Tradition", "Probe counts rise steeply as the table fills, and it can never be completely full", "Memory", "They don&rsquo;t"]}, {"type": "output", "q": "What does this print?", "answer": "[13, 1, None, 3, 8]", "explain": "3, 8 and 13 all want slot 3; 13 wraps round to 0.", "code": "slots = [None] * 5\nfor k in [3, 8, 13, 1]:\n    i = k % 5\n    while slots[i] is not None:\n        i = (i + 1) % 5\n    slots[i] = k\nprint(slots)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w044d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a complete open-addressed map</div><div class="pc-prompt"><p>Write <code>OpenDict</code> with linear probing over parallel <code>_keys</code> and <code>_values</code> lists, tombstones for deletion, and these rules: start with 8 slots; after adding a new key, if <code>(live keys + tombstones) / capacity</code> is more than 0.6, rebuild: to <strong>double</strong> the capacity if live keys alone are more than 0.3 of it, otherwise at the <strong>same</strong> capacity (just clearing the tombstones). Give it <code>d[key]</code> (with <code>KeyError</code>), <code>d[key] = value</code>, <code>del d[key]</code>, <code>in</code>, <code>len</code>, iteration over keys, <code>items()</code>, <code>get</code>, and read-only <code>capacity</code> and <code>tombstones</code> properties. A key must never appear twice.</p></div><textarea class="pc-src pc-code" hidden>EMPTY, DELETED = None, object()
+
+class OpenDict:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_basic():
+    &quot;basics&quot;
+    d = OpenDict()
+    d[&quot;a&quot;], d[&quot;b&quot;] = 1, 2
+    d[&quot;a&quot;] = 10
+    assert d[&quot;a&quot;] == 10 and len(d) == 2 and &quot;b&quot; in d and sorted(d) == [&quot;a&quot;, &quot;b&quot;] and sorted(d.items()) == [(&quot;a&quot;, 10), (&quot;b&quot;, 2)]
+    del d[&quot;a&quot;]
+    assert &quot;a&quot; not in d and d.get(&quot;a&quot;, &quot;x&quot;) == &quot;x&quot; and d.tombstones == 1
+    for bad in [lambda: d[&quot;a&quot;], lambda: d.__delitem__(&quot;a&quot;)]:
+        try:
+            bad()
+            assert False
+        except KeyError:
+            pass
+def test_churn():
+    &quot;many adds and deletes keep the table small&quot;
+    d = OpenDict()
+    for i in range(10_000):
+        d[i] = i
+        del d[i]
+    assert len(d) == 0 and d.capacity == 8 and d.tombstones &lt;= 5
+def test_random():
+    &quot;against a dict&quot;
+    rng = random.Random(9)
+    d, ref = OpenDict(), {}
+    for _ in range(8000):
+        k = rng.randint(0, 400)
+        r = rng.random()
+        if r &lt; 0.5:
+            d[k] = ref[k] = rng.randint(0, 9)
+        elif r &lt; 0.8 and k in ref:
+            del d[k], ref[k]
+        assert d.get(k) == ref.get(k) and len(d) == len(ref)
+    assert sorted(d.items()) == sorted(ref.items())
+    live = [k for k in d._keys if k is not EMPTY and k is not DELETED]
+    assert len(live) == len(set(live)) == len(ref)
+    assert (len(ref) + d.tombstones) / d.capacity &lt;= 0.6</textarea><textarea class="pc-src pc-solution" hidden>EMPTY, DELETED = None, object()
+
+class OpenDict:
+    def __init__(self):
+        self._keys = [EMPTY] * 8
+        self._values = [None] * 8
+        self._size = 0
+        self._dead = 0
+
+    @property
+    def capacity(self):
+        return len(self._keys)
+
+    @property
+    def tombstones(self):
+        return self._dead
+
+    def _find(self, key):
+        m = len(self._keys)
+        i = hash(key) % m
+        tomb = -1
+        while self._keys[i] is not EMPTY:
+            if self._keys[i] is DELETED:
+                if tomb &lt; 0:
+                    tomb = i
+            elif self._keys[i] == key:
+                return i, tomb, -1
+            i = (i + 1) % m
+        return -1, tomb, i
+
+    def _rebuild(self, capacity):
+        pairs = self.items()
+        self._keys = [EMPTY] * capacity
+        self._values = [None] * capacity
+        self._dead = 0
+        for k, v in pairs:
+            i = hash(k) % capacity
+            while self._keys[i] is not EMPTY:
+                i = (i + 1) % capacity
+            self._keys[i], self._values[i] = k, v
+
+    def __setitem__(self, key, value):
+        found, tomb, empty = self._find(key)
+        if found &gt;= 0:
+            self._values[found] = value
+            return
+        if tomb &gt;= 0:
+            i = tomb
+            self._dead -= 1
+        else:
+            i = empty
+        self._keys[i], self._values[i] = key, value
+        self._size += 1
+        cap = len(self._keys)
+        if (self._size + self._dead) / cap &gt; 0.6:
+            self._rebuild(2 * cap if self._size / cap &gt; 0.3 else cap)
+
+    def __getitem__(self, key):
+        found, _, _ = self._find(key)
+        if found &lt; 0:
+            raise KeyError(key)
+        return self._values[found]
+
+    def __delitem__(self, key):
+        found, _, _ = self._find(key)
+        if found &lt; 0:
+            raise KeyError(key)
+        self._keys[found], self._values[found] = DELETED, None
+        self._size -= 1
+        self._dead += 1
+
+    def __contains__(self, key):
+        return self._find(key)[0] &gt;= 0
+
+    def __len__(self):
+        return self._size
+
+    def items(self):
+        return [(k, v) for k, v in zip(self._keys, self._values) if k is not EMPTY and k is not DELETED]
+
+    def __iter__(self):
+        return iter([k for k, _ in self.items()])
+
+    def get(self, key, default=None):
+        found, _, _ = self._find(key)
+        return self._values[found] if found &gt;= 0 else default</textarea><template class="pc-src pc-hint">Reuse Day 3&rsquo;s <code>_find(key)</code> returning <code>(index_of_key, first_tombstone, empty_slot)</code>. <code>_rebuild(capacity)</code> collects the live pairs, makes fresh lists, and reinserts them with a simple probe (there are no tombstones in a fresh table). Check the load after inserting into a new slot.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Draw a table of 8 slots, insert 2, 10, 18 and 26 with linear probing, delete 10, then search for 26 twice: once as if deleting emptied the slot, once with a tombstone. Tomorrow: how Python&rsquo;s own dictionary works, with open addressing, a clever probe sequence, and insertion order kept for free.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w044d2.html">Previous day</a><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w044d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w044d3", "week": 44, "day": 3, "title": "Open addressing", "exercises": [{"id": "w044d3-insert", "title": "Linear probing by hand", "points": 10}, {"id": "w044d3-openmap", "title": "An open-addressed map", "points": 15}, {"id": "w044d3-tombstones", "title": "Deleting with tombstones", "points": 15}, {"id": "w044d3-experiment", "title": "Probes against load", "points": 10}, {"id": "w044d3-double", "title": "Double hashing", "points": 10}, {"id": "w044d3-bug1", "title": "Stopped by a tombstone", "points": 10}, {"id": "w044d3-bug2", "title": "Deleted by emptying", "points": 10}, {"id": "w044d3-bug3", "title": "Off the end", "points": 10}, {"id": "w044d3-trace", "title": "Predict them", "points": 10}, {"id": "w044d3-challenge", "title": "Challenge: a complete open-addressed map", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=871ff52039"></script>
+</body>
+</html>
