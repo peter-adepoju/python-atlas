@@ -1,7 +1,7 @@
 // Recursion figure: step through every call and return of a recursive function.
 // Left: the call stack (the calls still waiting). Right: the tree of every call so far.
-import { h } from "../site.js?v=871ff52039";
-import { py } from "../runtime.js?v=871ff52039";
+import { h } from "../site.js?v=7343aa5d1b";
+import { py } from "../runtime.js?v=7343aa5d1b";
 
 export default function calltree(el, { code, call, calls = [] }) {
   const area = h("textarea", { class: "w-input", spellcheck: "false", rows: Math.max(4, code.split("\n").length), style: "width:100%;font-family:var(--f-code);line-height:1.55;resize:vertical", "aria-label": "Function" });

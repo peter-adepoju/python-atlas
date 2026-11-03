@@ -3,20 +3,36 @@
 // Each account has its own space on the device. Signing out removes the account's copy from the
 // device (after saving anything unsent), so the next person sees nothing of it.
 //
-// When nobody is signed in, progress is kept only for this browser session (sessionStorage): it's
-// gone once the browser or tab is closed, so a shared or borrowed device shows nothing of anyone's
-// work. Progress made before signing in is added to the account you sign in to. (If accounts aren't
-// switched on for this copy of the course, the device is the only place to keep progress, so it
-// stays in localStorage.)
+// When nobody is signed in, progress is kept on this device (localStorage), so a lesson can be
+// done bit by bit: close the page, come back tomorrow, and everything solved or typed so far is
+// still there. On a shared or borrowed device, "Forget progress on this device" on the account
+// page clears it. Progress made before signing in is added to the account you sign in to.
 import { SITE, today } from "./site.js";
 
 const GUEST = "atlas.progress.guest";
 const LEGACY = "atlas.progress.v1";   // the old signed-out space, kept on the device until sign-in
 const ACCOUNTS = !!(SITE.supabaseUrl && SITE.supabaseKey);
 const userKey = (id) => "atlas.progress.u." + id;
-function store(key) {
-  return key.startsWith(GUEST) && ACCOUNTS ? sessionStorage : localStorage;
+function store() {
+  return localStorage;
 }
+// Earlier versions kept signed-out progress only for the browser session; bring any of it across.
+(function keepSessionProgress() {
+  try {
+    for (const k of [GUEST, GUEST + ".dirty"]) {
+      const old = sessionStorage.getItem(k);
+      if (old === null) continue;
+      if (k === GUEST) {
+        const merged = JSON.parse(localStorage.getItem(k) || "{}");
+        for (const [key, e] of Object.entries(JSON.parse(old) || {})) if (!merged[key] || merged[key].t < e.t) merged[key] = e;
+        localStorage.setItem(k, JSON.stringify(merged));
+      } else if (localStorage.getItem(k) === null) {
+        localStorage.setItem(k, old);
+      }
+      sessionStorage.removeItem(k);
+    }
+  } catch { /* storage blocked */ }
+})();
 const subs = new Set();
 let KEY = GUEST;
 let client = null;
@@ -258,6 +274,28 @@ export async function signOut() {
   switchTo(null);
   setSync("off");
   authSubs.forEach((f) => f(null));
+}
+
+/** Save now: on this device at once, and to the account if signed in. Says where it went. */
+export async function saveNow() {
+  save();
+  if (user) {
+    await push();
+    return dirty.size ? "device" : "account";
+  }
+  return "device";
+}
+
+/** Signed out only: remove the progress kept on this device (for shared or borrowed devices). */
+export function forgetDevice() {
+  if (user) return false;
+  try {
+    for (const k of [GUEST, GUEST + ".dirty", LEGACY, LEGACY + ".dirty", "atlas.progress.dirty"]) localStorage.removeItem(k);
+  } catch { /* ignore */ }
+  state = {};
+  dirty.clear();
+  emit("*");
+  return true;
 }
 
 /** Fetch from the account and send anything waiting, now. */

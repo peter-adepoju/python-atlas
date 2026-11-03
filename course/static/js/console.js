@@ -81,6 +81,14 @@ export class PyConsole {
     const kids = [];
     if (this.kind === "predict") {
       this.guess = h("textarea", { class: "pc-guess", rows: 2, placeholder: "Type exactly what you think it will print…", "aria-label": "Your prediction" });
+      if (this.id) {
+        const g = progress.get("guess:" + this.id);
+        if (g && typeof g.text === "string") this.guess.value = g.text;
+        this.guess.addEventListener("input", () => {
+          clearTimeout(this.guessT);
+          this.guessT = setTimeout(() => progress.set("guess:" + this.id, { text: this.guess.value }), 600);
+        });
+      }
       this.runBtn.textContent = "Run and compare";
       kids.push(h("label", { class: "pc-guesslabel" }, "Predict first. What will this print?"), this.guess);
     }

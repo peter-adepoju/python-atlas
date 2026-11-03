@@ -1,5 +1,5 @@
 // Pseudocode beside Python: hover or tap a line on either side to light up the lines it matches.
-import { h } from "../site.js?v=871ff52039";
+import { h } from "../site.js?v=7343aa5d1b";
 
 export default function pseudomap(el, { steps }) {
   // steps: [[pseudocode line, python lines (string, may hold several lines)], ...]

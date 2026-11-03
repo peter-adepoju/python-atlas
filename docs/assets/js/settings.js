@@ -36,14 +36,14 @@ export function update(patch, { sync = true } = {}) {
   try { localStorage.setItem(KEY, JSON.stringify(current)); } catch { /* storage blocked */ }
   apply();
   subs.forEach((f) => f(current));
-  if (sync) import("./progress.js?v=871ff52039").then(({ progress }) => progress.set("settings", current));
+  if (sync) import("./progress.js?v=7343aa5d1b").then(({ progress }) => progress.set("settings", current));
 }
 
 export function reset() { update({ ...DEFAULTS }); }
 export function onSettings(fn) { subs.add(fn); return () => subs.delete(fn); }
 
 // When signed in on another device, the account's settings arrive with the progress sync.
-import("./progress.js?v=871ff52039").then(({ progress }) => {
+import("./progress.js?v=7343aa5d1b").then(({ progress }) => {
   progress.subscribe((key) => {
     if (key !== "settings" && key !== "*") return;
     const remote = progress.get("settings");
