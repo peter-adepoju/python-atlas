@@ -1,7 +1,7 @@
-import "./common.js?v=871ff52039";
-import { $, h, SITE } from "../site.js?v=871ff52039";
-import { progress, getClient, onAuth, onSync, syncNow, signOut } from "../progress.js?v=871ff52039";
-import { displayName, avatar } from "../user.js?v=871ff52039";
+import "./common.js?v=7343aa5d1b";
+import { $, h, SITE } from "../site.js?v=7343aa5d1b";
+import { progress, getClient, onAuth, onSync, syncNow, signOut, forgetDevice } from "../progress.js?v=7343aa5d1b";
+import { displayName, avatar } from "../user.js?v=7343aa5d1b";
 
 const client = await getClient().catch(() => null);
 let mode = "in"; // "in" or "up"
@@ -35,13 +35,33 @@ function stats() {
   $("#stats").replaceChildren(card(days, "days complete"), card(solvedList.length, "exercises solved"), card(points, "points"), card(progress.streak(), "day streak"));
 }
 
+// Signed out, progress lives on this device. Say so, and offer a way to clear it on a shared device.
+function deviceNote(host) {
+  if (!host || host.querySelector(".device-note")) return;
+  const count = progress.all("ex:").filter(([, v]) => v && v.solved).length;
+  const btn = h("button", { type: "button", class: "btn btn-quiet" }, "Forget progress on this device");
+  const note = h("div", { class: "panel device-note" },
+    h("h2", { class: "mini" }, "Progress on this device"),
+    h("p", {}, (count ? `This browser is keeping your progress (${count} exercise${count === 1 ? "" : "s"} solved so far), ` : "This browser keeps your progress, ")
+      + "so you can do a lesson bit by bit and carry on later. Sign in to keep it on every device. On a shared or borrowed computer, clear it when you've finished."),
+    btn);
+  btn.addEventListener("click", () => {
+    if (!confirm("Remove all the progress kept in this browser? Solved exercises, code you've typed and quiz answers will be gone from this device.")) return;
+    forgetDevice();
+    note.querySelector("p").textContent = "Done. Nothing of your progress is kept in this browser now.";
+    btn.remove();
+  });
+  host.append(note);
+}
+
 if (!client) {
   $("#acct-off").hidden = false;
+  deviceNote($("#acct-off"));
 } else {
   onAuth((user) => {
     $("#acct-signin").hidden = !!user;
     $("#acct-in").hidden = !user;
-    if (!user) return;
+    if (!user) { deviceNote($("#acct-signin")); return; }
     $("#p-name").textContent = displayName(user);
     $("#p-email").textContent = user.email || "";
     avatar(user, $("#p-avatar"));
@@ -107,7 +127,7 @@ if (!client) {
     e.preventDefault();
     const full_name = $("#name-edit").value.trim();
     const { error } = await client.auth.updateUser({ data: { full_name } });
-    const { toast } = await import("../site.js?v=871ff52039");
+    const { toast } = await import("../site.js?v=7343aa5d1b");
     toast(error ? "Couldn't save your name. Try again." : "Name saved", error ? "info" : "ok");
   };
   $("#signout").onclick = () => signOut();
@@ -122,6 +142,6 @@ $("#export").onclick = () => {
 $("#import").onchange = async (e) => {
   const f = e.target.files[0];
   if (!f) return;
-  const { toast } = await import("../site.js?v=871ff52039");
+  const { toast } = await import("../site.js?v=7343aa5d1b");
   try { progress.import(await f.text()); toast("Progress loaded", "ok"); } catch { toast("That file couldn't be read."); }
 };

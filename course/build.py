@@ -600,6 +600,7 @@ def build():
         nav = []
         if prev_d:
             nav.append(f'<a class="btn btn-quiet" href="{prev_d[1]["id"]}.html">Previous day</a>')
+        nav.append('<button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button>')
         nav.append('<button type="button" class="btn btn-run" id="mark-done">Mark today complete</button>')
         if next_d:
             nav.append(f'<a class="btn btn-step" href="{next_d[1]["id"]}.html">Next day</a>')

@@ -1,12 +1,12 @@
 // Quizzes and Parsons puzzles.
-import { h, $, $$ } from "./site.js?v=871ff52039";
-import { progress } from "./progress.js?v=871ff52039";
-import { makeEditor } from "./editor.js?v=871ff52039";
+import { h, $, $$ } from "./site.js?v=7343aa5d1b";
+import { progress } from "./progress.js?v=7343aa5d1b";
+import { makeEditor } from "./editor.js?v=7343aa5d1b";
 
 const clean = (s) => String(s).trim().replace(/\s+/g, " ").toLowerCase();
 const normOut = (s) => String(s).split("\n").map((l) => l.replace(/\s+$/, "")).join("\n").trim();
 
-export function renderQuestion(q, { onAnswer } = {}) {
+export function renderQuestion(q, { onAnswer, saved, onSave } = {}) {
   const box = h("div", { class: "q" });
   box.append(h("div", { class: "q-text", html: q.q }));
   if (q.code) {
@@ -14,7 +14,7 @@ export function renderQuestion(q, { onAnswer } = {}) {
     box.append(cw);
     makeEditor(cw, q.code, { readOnly: true, minLines: 1 });
   }
-  let read;
+  let read, fill;
   if (q.type === "mc" || q.type === "multi") {
     const name = "q" + Math.random().toString(36).slice(2);
     const opts = q.options.map((o, i) => {
@@ -26,8 +26,9 @@ export function renderQuestion(q, { onAnswer } = {}) {
       const picked = $$("input", box).filter((x) => x.checked).map((x) => +x.value);
       if (!picked.length) return null;
       const want = [].concat(q.answer).map(Number).sort();
-      return { ok: JSON.stringify(picked.sort()) === JSON.stringify(want), picked };
+      return { ok: JSON.stringify(picked.sort()) === JSON.stringify(want), value: picked };
     };
+    fill = (v) => $$("input", box).forEach((x) => { x.checked = [].concat(v).includes(+x.value); });
   } else {
     const multiline = q.type === "output";
     const field = multiline
@@ -39,14 +40,13 @@ export function renderQuestion(q, { onAnswer } = {}) {
       if (!v.trim()) return null;
       const answers = [].concat(q.answer).map(String);
       const ok = multiline ? answers.some((a) => normOut(a) === normOut(v)) : answers.some((a) => clean(a) === clean(v));
-      return { ok };
+      return { ok, value: v };
     };
+    fill = (v) => { field.value = String(v); };
   }
   const fb = h("div", { class: "q-fb", "aria-live": "polite" });
   const btn = h("button", { type: "button", class: "btn btn-check" }, "Check");
-  btn.addEventListener("click", () => {
-    const r = read();
-    if (!r) { fb.textContent = "Choose or type an answer first."; return; }
+  const show = (r) => {
     box.classList.remove("is-ok", "is-no");
     box.classList.add(r.ok ? "is-ok" : "is-no");
     const right = q.type === "mc" || q.type === "multi"
@@ -54,8 +54,28 @@ export function renderQuestion(q, { onAnswer } = {}) {
       : [].concat(q.answer)[0];
     fb.innerHTML = (r.ok ? "<strong>Correct.</strong> " : `<strong>Not this time.</strong> The answer is <code class="q-ans"></code>. `) + (q.explain || "");
     if (!r.ok) $(".q-ans", fb).textContent = right;
-    if (!box.dataset.answered) { box.dataset.answered = "1"; onAnswer && onAnswer(r.ok); }
+  };
+  // An answer given on an earlier visit comes back as it was, so a quiz can be finished later.
+  let first = saved ? saved.first : undefined;
+  btn.addEventListener("click", () => {
+    const r = read();
+    if (!r) { fb.textContent = "Choose or type an answer first."; return; }
+    show(r);
+    if (first === undefined) first = r.ok;
+    if (onSave) onSave({ value: r.value, first });
+    if (!box.dataset.answered) { box.dataset.answered = "1"; if (onAnswer) onAnswer(first, { restored: false }); }
   });
+  if (saved && saved.value !== undefined) {
+    try {
+      fill(saved.value);
+      const r = read();
+      if (r) {
+        show(r);
+        box.dataset.answered = "1";
+        if (onAnswer) onAnswer(first, { restored: true });
+      }
+    } catch { /* an old answer that no longer fits the question */ }
+  }
   box.append(h("div", { class: "q-actions" }, btn), fb);
   return box;
 }
@@ -69,17 +89,24 @@ export function mountQuizzes(root = document) {
     const prev = progress.get("quiz:" + id);
     if (prev) score.textContent = `Your best so far: ${prev.best} of ${qs.length}.`;
     qs.forEach((q, i) => {
+      const answerKey = `qa:${id}#${i}`;
       el.append(h("div", { class: "q-num" }, `Question ${i + 1} of ${qs.length}`), renderQuestion(q, {
-        onAnswer: (ok) => {
+        saved: id ? progress.get(answerKey) : undefined,
+        onSave: (v) => { if (id) progress.set(answerKey, v); },
+        onAnswer: (ok, { restored } = {}) => {
           answered++; if (ok) right++;
-          // Every quiz question becomes a review card; a wrong first answer brings it back sooner.
-          const ck = `srs:${id}#${i}`;
-          if (!progress.get(ck)) progress.set(ck, { due: Date.now() + (ok ? 2 : 1) * 864e5, interval: ok ? 2 : 1, ease: 2.5, reps: ok ? 1 : 0 });
-          if (answered === qs.length) {
-            progress.update("quiz:" + id, (p) => ({ score: right, total: qs.length, best: Math.max((p && p.best) || 0, right) }));
-            score.textContent = `You got ${right} of ${qs.length} on the first try.` + (right < qs.length ? " The ones you missed will come back in your daily review." : "");
+          if (!restored) {
+            // Every quiz question becomes a review card; a wrong first answer brings it back sooner.
+            const ck = `srs:${id}#${i}`;
+            if (!progress.get(ck)) progress.set(ck, { due: Date.now() + (ok ? 2 : 1) * 864e5, interval: ok ? 2 : 1, ease: 2.5, reps: ok ? 1 : 0 });
+            progress.activity(ok ? 2 : 1);
           }
-          progress.activity(ok ? 2 : 1);
+          if (answered === qs.length) {
+            if (!restored) progress.update("quiz:" + id, (p) => ({ score: right, total: qs.length, best: Math.max((p && p.best) || 0, right) }));
+            score.textContent = `You got ${right} of ${qs.length} on the first try.` + (right < qs.length ? " The ones you missed will come back in your daily review." : "");
+          } else {
+            score.textContent = `${answered} of ${qs.length} answered so far. Your answers are saved, so you can finish later.`;
+          }
         },
       }));
     });
@@ -97,11 +124,21 @@ export function mountParsons(root = document) {
     const pieces = [...solution.map((s, i) => ({ ...s, key: "s" + i })), ...(data.distractors || []).map((t, i) => ({ text: t.trim(), indent: 0, key: "d" + i }))];
     for (let i = pieces.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pieces[i], pieces[j]] = [pieces[j], pieces[i]]; }
     let answer = [];
+    // An arrangement from an earlier visit comes back as it was left.
+    const savedKey = id ? "pzlines:" + id : null;
+    const keep = () => { if (savedKey) progress.set(savedKey, answer.map((a) => ({ key: a.ref.key, indent: a.indent }))); };
+    try {
+      for (const s of (savedKey && progress.get(savedKey)) || []) {
+        const ref = pieces.find((p) => p.key === s.key);
+        if (ref && !answer.some((a) => a.ref === ref)) answer.push({ text: ref.text, indent: s.indent | 0, ref });
+      }
+    } catch { answer = []; }
     const pool = h("ul", { class: "pz-pool", "aria-label": "Lines to use" });
     const ans = h("ul", { class: "pz-ans", "aria-label": "Your program" });
     const fb = h("div", { class: "pz-fb", "aria-live": "polite" });
 
     const draw = () => {
+      keep();
       const left = pieces.filter((p) => !answer.some((a) => a.ref === p));
       pool.replaceChildren(...left.map((p) =>
         h("li", {}, h("button", { type: "button", class: "pz-line", onclick: () => { answer.push({ text: p.text, indent: 0, ref: p }); draw(); } }, h("code", {}, p.text)))));
@@ -117,7 +154,7 @@ export function mountParsons(root = document) {
       if (!answer.length) ans.append(h("li", { class: "pz-empty" }, "Click lines on the left to build the program here."));
     };
 
-    const check = () => {
+    const check = (restoring = false) => {
       el.classList.remove("is-ok");
       const got = answer.map((a) => a.text + "|" + a.indent);
       const want = solution.map((s) => s.text + "|" + s.indent);
@@ -127,8 +164,8 @@ export function mountParsons(root = document) {
       if (firstBad === -1) {
         el.classList.add("is-ok");
         fb.textContent = "Correct. Every line is in the right place with the right indentation.";
-        if (id) progress.update("pz:" + id, () => ({ solved: true }));
-        progress.activity(3);
+        if (id && !restoring) progress.update("pz:" + id, () => ({ solved: true }));
+        if (!restoring) progress.activity(3);
       } else if (firstBad >= got.length) {
         fb.textContent = `So far so good. The program needs ${want.length - got.length} more line(s).`;
       } else {
@@ -142,8 +179,9 @@ export function mountParsons(root = document) {
       }
     };
     el.append(h("div", { class: "pz-grid" }, h("div", {}, h("div", { class: "pz-head" }, "Lines"), pool), h("div", {}, h("div", { class: "pz-head" }, "Your program"), ans)),
-      h("div", { class: "pz-actions" }, h("button", { type: "button", class: "btn btn-check", onclick: check }, "Check order"),
+      h("div", { class: "pz-actions" }, h("button", { type: "button", class: "btn btn-check", onclick: () => check() }, "Check order"),
         h("button", { type: "button", class: "btn btn-quiet", onclick: () => { answer = []; fb.textContent = ""; draw(); } }, "Start again")), fb);
     draw();
+    if (answer.length) check(true);
   });
 }

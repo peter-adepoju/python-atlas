@@ -1,6 +1,6 @@
 // Nested loops as a grid: the outer loop picks the row, the inner loop walks across it.
 // Step through and watch the order in which the cells are visited.
-import { h, reducedMotion } from "../site.js?v=871ff52039";
+import { h, reducedMotion } from "../site.js?v=7343aa5d1b";
 
 export default function nested(el, { rows = 3, cols = 4, outer = "i", inner = "j", body = "print(i, j)", triangle = false } = {}) {
   const ir = h("input", { type: "number", min: 1, max: 9, class: "w-input", value: rows, style: "width:4.5em", "aria-label": "rows" });

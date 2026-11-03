@@ -1,7 +1,7 @@
 // List lab: a list drawn as indexed boxes. Run an operation and see the list before and after,
 // what the operation returned, and whether x is still the same list object.
-import { h } from "../site.js?v=871ff52039";
-import { py } from "../runtime.js?v=871ff52039";
+import { h } from "../site.js?v=7343aa5d1b";
+import { py } from "../runtime.js?v=7343aa5d1b";
 
 const DEFAULT_OPS = ["x.append(8)", "x.insert(1, 5)", "x.pop()", "x.pop(0)", "x.remove(3)", "x.sort()", "x.reverse()",
   "x[1:3]", "x[-1]", "x[0] = 99", "x.index(4)", "x.count(1)", "len(x)", "x + [0]", "x = x + [0]", "x += [0]", "sorted(x)"];

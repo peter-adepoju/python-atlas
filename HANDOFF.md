@@ -78,6 +78,10 @@ Every day must be something a beginner can learn from alone, and every check mus
 
 Commit messages end with the attribution lines required by your environment, if any.
 
+## Saving progress part-way through a lesson (3 November 2026)
+
+Peter asked for lessons to be doable bit by bit across days. Everything a learner does on a lesson page is saved as they go (`course/static/js/progress.js`), on the device and, when signed in, to their account: solved exercises (`ex:`), code drafts (`code:`), quiz answers per question (`qa:<quiz>#<n>`, restored with their feedback; the first-try result still counts for scores and review cards), typed predictions (`guess:`), Parsons arrangements (`pzlines:`) and the last section read (`pos:<day>`). Signed-out progress now stays in `localStorage` between visits (it used to be session-only); the account page has "Forget progress on this device" for shared computers, and the privacy page says so. A lesson revisited part-way shows a "Welcome back" box with a button to continue at the first unsolved exercise or the last section read, and the bottom of every lesson has a "Save progress" button (saving is automatic; the button saves at once and says where it went).
+
 ## 7. Outstanding items for Peter (not for you to do)
 
 - Run in Supabase: `grant select, insert, update, delete on table public.progress to authenticated;`

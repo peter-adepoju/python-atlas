@@ -1,6 +1,6 @@
 // What a float really stores: the exact binary value behind a decimal you typed.
-import { h } from "../site.js?v=871ff52039";
-import { py } from "../runtime.js?v=871ff52039";
+import { h } from "../site.js?v=7343aa5d1b";
+import { py } from "../runtime.js?v=7343aa5d1b";
 
 export default function floatlab(el, { start = "0.1" } = {}) {
   const input = h("input", { class: "w-input", value: start, spellcheck: "false", style: "width:10em;font-size:1.1rem", "aria-label": "A decimal number" });

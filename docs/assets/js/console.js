@@ -1,9 +1,9 @@
 // Code consoles: editable Python with Run, X-ray, Check and a real-feeling terminal.
-import { h, $, $$, toast } from "./site.js?v=871ff52039";
-import { py, onStatus, stop } from "./runtime.js?v=871ff52039";
-import { makeEditor } from "./editor.js?v=871ff52039";
-import { XRay } from "./xray.js?v=871ff52039";
-import { progress } from "./progress.js?v=871ff52039";
+import { h, $, $$, toast } from "./site.js?v=7343aa5d1b";
+import { py, onStatus, stop } from "./runtime.js?v=7343aa5d1b";
+import { makeEditor } from "./editor.js?v=7343aa5d1b";
+import { XRay } from "./xray.js?v=7343aa5d1b";
+import { progress } from "./progress.js?v=7343aa5d1b";
 
 const norm = (s) => String(s).split("\n").map((l) => l.replace(/\s+$/, "")).join("\n").replace(/\n+$/, "");
 
@@ -81,6 +81,14 @@ export class PyConsole {
     const kids = [];
     if (this.kind === "predict") {
       this.guess = h("textarea", { class: "pc-guess", rows: 2, placeholder: "Type exactly what you think it will print…", "aria-label": "Your prediction" });
+      if (this.id) {
+        const g = progress.get("guess:" + this.id);
+        if (g && typeof g.text === "string") this.guess.value = g.text;
+        this.guess.addEventListener("input", () => {
+          clearTimeout(this.guessT);
+          this.guessT = setTimeout(() => progress.set("guess:" + this.id, { text: this.guess.value }), 600);
+        });
+      }
       this.runBtn.textContent = "Run and compare";
       kids.push(h("label", { class: "pc-guesslabel" }, "Predict first. What will this print?"), this.guess);
     }

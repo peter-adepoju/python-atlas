@@ -1,5 +1,5 @@
 // Eight switches: the same bits read as a number, as binary and as a character.
-import { h } from "../site.js?v=871ff52039";
+import { h } from "../site.js?v=7343aa5d1b";
 
 export default function bits(el, { start = 65 } = {}) {
   let value = start;
