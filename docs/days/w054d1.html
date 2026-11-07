@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 54 Day 1: LCS and edit distance | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Two strings, one table. Week 16 found the length of the longest common subsequence and the edit distance by memoised recursion. This week starts by...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w054d1.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 54 Day 1: LCS and edit distance">
+<meta property="og:description" content="Two strings, one table. Week 16 found the length of the longest common subsequence and the edit distance by memoised recursion. This week starts by...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w054d1.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-54">Week 54: Dynamic programming II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#the-lcs-table" data-sec="the-lcs-table">The LCS table</a></li><li><a href="#reading-it-back" data-sec="reading-it-back">Reading it back</a></li><li><a href="#diff" data-sec="diff">Diff</a></li><li><a href="#edit-distance-with-the-edits" data-sec="edit-distance-with-the-edits">Edit distance, with the edits</a></li><li><a href="#in-disguise" data-sec="in-disguise">In disguise</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w054d1.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-54">Week 54: Dynamic programming II</a></li><li aria-current="page">Day 1 of 6</li></ol>
+      <p class="day-where"><span>Week 54, Day 1</span></p>
+      <h1>LCS and edit distance</h1>
+      <div class="day-intro"><p>Two strings, one table. Week 16 found the length of the <strong>longest common subsequence</strong> and the <strong>edit distance</strong> by memoised recursion. This week starts by tabulating both over a grid of prefix pairs, and then doing what the length alone can&rsquo;t: reading the table back to produce the subsequence itself, a <strong>diff</strong> of two files line by line, the list of edits that turns one word into another, and an alignment you can print. These two tables sit behind version control, spell checkers, plagiarism detectors and DNA comparison.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Tabulate the LCS over prefixes and reconstruct a common subsequence from the table</li><li>Produce a line-by-line diff of two texts from an LCS table</li><li>Tabulate edit distance and recover the edits, with costs per operation</li><li>Reduce the memory of both tables to two rows when only the number is needed</li><li>Recognise problems that are LCS or edit distance in disguise</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="The LCS table: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Reading it back: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Diff: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Edit distance, with the edits: 25 min"></span><span class="plan-seg s1" style="flex:15" title="In disguise: 15 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">The LCS table</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Reading it back</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Diff</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Edit distance, with the edits</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">In disguise</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w054d1.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w054d1.ipynb" download>download it</a>. Exercises today are worth 130 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w054d1-p1"><textarea class="pc-src pc-code" hidden>a, b = &quot;ABCBDAB&quot;, &quot;BDCABA&quot;
+L = [[0] * (len(b) + 1) for _ in range(len(a) + 1)]
+for i in range(1, len(a) + 1):
+    for j in range(1, len(b) + 1):
+        if a[i - 1] == b[j - 1]:
+            L[i][j] = L[i - 1][j - 1] + 1
+        else:
+            L[i][j] = max(L[i - 1][j], L[i][j - 1])
+print(L[-1][-1])
+print(L[3])</textarea></div>
+<p><code>L[i][j]</code> is the length of the LCS of the first i characters of <code>a</code> and the first j of <code>b</code>. Row 3 is about <code>"ABC"</code> against every prefix of <code>"BDCABA"</code>.</p>
+<h2 id="the-lcs-table">The LCS table</h2>
+<p>Week 16&rsquo;s recursion worked on <strong>suffixes</strong> (positions i and j onwards). Tabulating is cleaner on <strong>prefixes</strong>:</p>
+<p><strong>L(i, j) = the length of the LCS of a[:i] and b[:j]</strong>,</p>
+<p>with L(0, j) = L(i, 0) = 0 (an empty string has nothing in common with anything). For i, j ≥ 1:</p>
+<ul>
+<li>if the last characters match, <code>a[i - 1] == b[j - 1]</code>, they can end the common subsequence: L(i, j) = L(i − 1, j − 1) + 1;</li>
+<li>otherwise at least one of them isn&rsquo;t used: L(i, j) = max(L(i − 1, j), L(i, j − 1)).</li>
+</ul>
+<p>Each entry reads the one above, the one to the left and the diagonal, so row-major order works, exactly as in Thursday&rsquo;s grids. Time and memory O(n × m). For the length alone, two rows suffice.</p>
+<p>Notice the indexing: row i is about the first i characters, so the character it adds is <code>a[i - 1]</code>. The extra row and column of zeros for empty prefixes are what make the recurrence work without special cases.</p>
+<h2 id="reading-it-back">Reading it back</h2>
+<p>To recover a longest common subsequence, start at (n, m) and walk back:</p>
+<ul>
+<li>if <code>a[i - 1] == b[j - 1]</code>, that character is in the LCS: record it and step diagonally to (i − 1, j − 1);</li>
+<li>otherwise step to whichever of (i − 1, j) and (i, j − 1) has the larger value (on a tie, either works; choose a fixed rule, such as up first, for predictable answers).</li>
+</ul>
+<p>Stop when i or j reaches 0, and reverse what you recorded. There may be many different LCSs of the same length; the tie rule picks one.</p>
+<div class="pc pc-example" data-kind="example" data-id="w054d1-e2"><textarea class="pc-src pc-code" hidden>def lcs(a, b):
+    n, m = len(a), len(b)
+    L = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            if a[i - 1] == b[j - 1]:
+                L[i][j] = L[i - 1][j - 1] + 1
+            else:
+                L[i][j] = max(L[i - 1][j], L[i][j - 1])
+    out, i, j = [], n, m
+    while i and j:
+        if a[i - 1] == b[j - 1]:
+            out.append(a[i - 1])
+            i, j = i - 1, j - 1
+        elif L[i - 1][j] &gt;= L[i][j - 1]:
+            i -= 1
+        else:
+            j -= 1
+    return &quot;&quot;.join(reversed(out))
+
+print(lcs(&quot;ABCBDAB&quot;, &quot;BDCABA&quot;), lcs(&quot;AGGTAB&quot;, &quot;GXTXAYB&quot;))</textarea></div>
+<h2 id="diff">Diff</h2>
+<p>A <strong>diff</strong> shows how one text became another: lines kept, lines removed (<code>-</code>) and lines added (<code>+</code>). Treat each <strong>line</strong> as one symbol and find the LCS of the two lists of lines: those are the lines kept, and everything else was removed from the old text or added in the new one. Walking back through the table produces the diff from the end, so collect it and reverse.</p>
+<p>The classic Unix <code>diff</code> (Douglas McIlroy and James Hunt, 1976) was built on this idea; Git&rsquo;s default is Eugene Myers&rsquo; 1986 algorithm, which finds the same kind of answer faster when the texts are similar.</p>
+<div class="pc pc-example" data-kind="example" data-id="w054d1-e3"><textarea class="pc-src pc-code" hidden>def diff(old, new):
+    n, m = len(old), len(new)
+    L = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            L[i][j] = L[i - 1][j - 1] + 1 if old[i - 1] == new[j - 1] else max(L[i - 1][j], L[i][j - 1])
+    out, i, j = [], n, m
+    while i or j:
+        if i and j and old[i - 1] == new[j - 1]:
+            out.append(&quot;  &quot; + old[i - 1])
+            i, j = i - 1, j - 1
+        elif j and (not i or L[i][j - 1] &gt;= L[i - 1][j]):
+            out.append(&quot;+ &quot; + new[j - 1])
+            j -= 1
+        else:
+            out.append(&quot;- &quot; + old[i - 1])
+            i -= 1
+    return out[::-1]
+
+old = [&quot;eggs&quot;, &quot;milk&quot;, &quot;bread&quot;, &quot;tea&quot;]
+new = [&quot;eggs&quot;, &quot;bread&quot;, &quot;butter&quot;, &quot;tea&quot;, &quot;jam&quot;]
+print(&quot;\n&quot;.join(diff(old, new)))</textarea></div>
+<h2 id="edit-distance-with-the-edits">Edit distance, with the edits</h2>
+<p>The <strong>edit distance</strong> (Vladimir Levenshtein, 1965) counts the fewest insertions, deletions and replacements turning a into b. On prefixes:</p>
+<p><strong>D(i, j) = the edit distance from a[:i] to b[:j]</strong>,</p>
+<p>with D(i, 0) = i (delete everything) and D(0, j) = j (insert everything). For i, j ≥ 1, the last characters are matched (free if equal, a replacement if not), or a[i − 1] is deleted, or b[j − 1] is inserted:</p>
+<p>D(i, j) = min(D(i − 1, j − 1) + (0 if equal else 1), D(i − 1, j) + 1, D(i, j − 1) + 1).</p>
+<p>Different <strong>costs</strong> per operation fit in directly: replace the 1s with the costs. Spell checkers often make a replacement between neighbouring keys cheaper.</p>
+<p>To list the edits, walk back from (n, m) choosing, at each cell, an option that produced its value: diagonal (keep or replace), up (delete) or left (insert).</p>
+<div class="pc pc-example" data-kind="example" data-id="w054d1-e4"><textarea class="pc-src pc-code" hidden>def edits(a, b):
+    n, m = len(a), len(b)
+    D = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(n + 1):
+        D[i][0] = i
+    for j in range(m + 1):
+        D[0][j] = j
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            same = a[i - 1] == b[j - 1]
+            D[i][j] = min(D[i - 1][j - 1] + (0 if same else 1), D[i - 1][j] + 1, D[i][j - 1] + 1)
+    steps, i, j = [], n, m
+    while i or j:
+        if i and j and D[i][j] == D[i - 1][j - 1] + (a[i - 1] != b[j - 1]):
+            if a[i - 1] != b[j - 1]:
+                steps.append(f&quot;replace {a[i - 1]} with {b[j - 1]}&quot;)
+            i, j = i - 1, j - 1
+        elif i and D[i][j] == D[i - 1][j] + 1:
+            steps.append(f&quot;delete {a[i - 1]}&quot;)
+            i -= 1
+        else:
+            steps.append(f&quot;insert {b[j - 1]}&quot;)
+            j -= 1
+    return D[n][m], steps[::-1]
+
+print(edits(&quot;kitten&quot;, &quot;sitting&quot;))</textarea></div>
+<h2 id="in-disguise">In disguise</h2>
+<p>Many string problems are one of these two tables:</p>
+<ul>
+<li><strong>Shortest common supersequence</strong> (the shortest string containing both as subsequences): its length is n + m − LCS, and walking back through the LCS table builds it.</li>
+<li><strong>Longest palindromic subsequence</strong> of s: the LCS of s and its reverse.</li>
+<li><strong>Fewest deletions</strong> to make two strings equal: n + m − 2 × LCS.</li>
+<li><strong>Is a a subsequence of b?</strong> LCS equals len(a), though two pointers do it in O(n + m).</li>
+<li><strong>Fuzzy matching</strong>, &ldquo;did you mean&rdquo;: the dictionary words with the smallest edit distance.</li>
+</ul>
+<p>When only the number is needed and the strings are long, keep two rows: O(m) memory instead of O(n × m).</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Tabulate string DPs on prefixes, with an extra row and column for the empty prefix. The LCS table adds 1 diagonally on a match and takes the larger of up and left otherwise; edit distance starts its edges at i and j and takes the cheapest of a diagonal match or replacement, a deletion (up) or an insertion (left). Walk back from the bottom-right corner to recover the subsequence, a line-by-line diff, or the list of edits, choosing at each cell an option that produced its value. Supersequences, palindromic subsequences and deletion counts are these tables in disguise. Two rows suffice when you only need the number.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w054d1-lcs" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A common thread</div><div class="pc-prompt"><p>Write <code>lcs(a, b)</code>: one longest common subsequence of two sequences (strings or lists), returned as the same type as <code>a</code> (a string for strings, a list for lists). Walk back preferring a diagonal match, then <strong>up</strong>, then left. Then <code>lcs_length(a, b)</code>: the length only, with <strong>two rows</strong>.</p></div><textarea class="pc-src pc-code" hidden>def lcs(a, b):
+    ___
+
+def lcs_length(a, b):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, random
+def is_subseq(x, y):
+    it = iter(y)
+    return all(ch in it for ch in x)
+def test_lcs():
+    &quot;lcs&quot;
+    assert lcs(&quot;ABCBDAB&quot;, &quot;BDCABA&quot;) == &quot;BCBA&quot; and lcs(&quot;AGGTAB&quot;, &quot;GXTXAYB&quot;) == &quot;GTAB&quot;
+    assert lcs(&quot;&quot;, &quot;abc&quot;) == &quot;&quot; and lcs([1, 2, 3], [2, 3, 4]) == [2, 3]
+    rng = random.Random(1)
+    for _ in range(150):
+        a = &quot;&quot;.join(rng.choice(&quot;abc&quot;) for _ in range(rng.randint(0, 8)))
+        b = &quot;&quot;.join(rng.choice(&quot;abc&quot;) for _ in range(rng.randint(0, 8)))
+        best = max((r for r in range(len(a) + 1) for c in itertools.combinations(a, r) if is_subseq(c, b)), default=0)
+        s = lcs(a, b)
+        assert len(s) == best == lcs_length(a, b) and is_subseq(s, a) and is_subseq(s, b)
+    a = &quot;&quot;.join(rng.choice(&quot;ACGT&quot;) for _ in range(600))
+    b = &quot;&quot;.join(rng.choice(&quot;ACGT&quot;) for _ in range(600))
+    assert lcs_length(a, b) == len(lcs(a, b))</textarea><textarea class="pc-src pc-solution" hidden>def _table(a, b):
+    n, m = len(a), len(b)
+    L = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            if a[i - 1] == b[j - 1]:
+                L[i][j] = L[i - 1][j - 1] + 1
+            else:
+                L[i][j] = max(L[i - 1][j], L[i][j - 1])
+    return L
+
+def lcs(a, b):
+    L = _table(a, b)
+    out, i, j = [], len(a), len(b)
+    while i and j:
+        if a[i - 1] == b[j - 1]:
+            out.append(a[i - 1])
+            i, j = i - 1, j - 1
+        elif L[i - 1][j] &gt;= L[i][j - 1]:
+            i -= 1
+        else:
+            j -= 1
+    out.reverse()
+    return &quot;&quot;.join(out) if isinstance(a, str) else out
+
+def lcs_length(a, b):
+    prev = [0] * (len(b) + 1)
+    for i in range(1, len(a) + 1):
+        cur = [0] * (len(b) + 1)
+        for j in range(1, len(b) + 1):
+            if a[i - 1] == b[j - 1]:
+                cur[j] = prev[j - 1] + 1
+            else:
+                cur[j] = max(prev[j], cur[j - 1])
+        prev = cur
+    return prev[-1]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w054d1-diff" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">What changed?</div><div class="pc-prompt"><p>Write <code>diff(old, new)</code> for two lists of lines: a list of strings, each a line prefixed by <code>"  "</code> (kept), <code>"- "</code> (removed) or <code>"+ "</code> (added), from an LCS table walked back. At each step back: a match goes diagonally; otherwise output an <strong>addition</strong> if moving left keeps at least as much LCS as moving up, else a removal (so, reading forwards, removals come before additions in a changed block). Then <code>patch(old, changes)</code>: apply a diff to the old lines, returning the new lines (raise <code>ValueError</code> if a kept or removed line doesn&rsquo;t match).</p></div><textarea class="pc-src pc-code" hidden>def diff(old, new):
+    ___
+
+def patch(old, changes):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_diff():
+    &quot;diffs&quot;
+    old = [&quot;eggs&quot;, &quot;milk&quot;, &quot;bread&quot;, &quot;tea&quot;]
+    new = [&quot;eggs&quot;, &quot;bread&quot;, &quot;butter&quot;, &quot;tea&quot;, &quot;jam&quot;]
+    d = diff(old, new)
+    assert d == [&quot;  eggs&quot;, &quot;- milk&quot;, &quot;  bread&quot;, &quot;+ butter&quot;, &quot;  tea&quot;, &quot;+ jam&quot;], d
+    assert patch(old, d) == new
+    assert diff([], [&quot;a&quot;]) == [&quot;+ a&quot;] and diff([&quot;a&quot;], []) == [&quot;- a&quot;] and diff([&quot;x&quot;], [&quot;x&quot;]) == [&quot;  x&quot;]
+    assert diff([&quot;a&quot;, &quot;b&quot;], [&quot;c&quot;]) == [&quot;- a&quot;, &quot;- b&quot;, &quot;+ c&quot;]
+    try:
+        patch([&quot;x&quot;], [&quot;- y&quot;])
+        assert False
+    except ValueError:
+        pass
+    rng = random.Random(2)
+    for _ in range(100):
+        old = [rng.choice(&quot;abcde&quot;) for _ in range(rng.randint(0, 8))]
+        new = [rng.choice(&quot;abcde&quot;) for _ in range(rng.randint(0, 8))]
+        d = diff(old, new)
+        assert patch(old, d) == new
+        kept = sum(1 for line in d if line.startswith(&quot;  &quot;))
+        n, m = len(old), len(new)
+        L = [[0] * (m + 1) for _ in range(n + 1)]
+        for i in range(1, n + 1):
+            for j in range(1, m + 1):
+                L[i][j] = L[i - 1][j - 1] + 1 if old[i - 1] == new[j - 1] else max(L[i - 1][j], L[i][j - 1])
+        assert kept == L[n][m]</textarea><textarea class="pc-src pc-solution" hidden>def diff(old, new):
+    n, m = len(old), len(new)
+    L = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            if old[i - 1] == new[j - 1]:
+                L[i][j] = L[i - 1][j - 1] + 1
+            else:
+                L[i][j] = max(L[i - 1][j], L[i][j - 1])
+    out, i, j = [], n, m
+    while i or j:
+        if i and j and old[i - 1] == new[j - 1]:
+            out.append(&quot;  &quot; + old[i - 1])
+            i, j = i - 1, j - 1
+        elif j and (not i or L[i][j - 1] &gt;= L[i - 1][j]):
+            out.append(&quot;+ &quot; + new[j - 1])
+            j -= 1
+        else:
+            out.append(&quot;- &quot; + old[i - 1])
+            i -= 1
+    return out[::-1]
+
+def patch(old, changes):
+    result, k = [], 0
+    for line in changes:
+        mark, text = line[:2], line[2:]
+        if mark == &quot;+ &quot;:
+            result.append(text)
+            continue
+        if k &gt;= len(old) or old[k] != text:
+            raise ValueError(f&quot;the diff doesn&#x27;t match line {k + 1}&quot;)
+        if mark == &quot;  &quot;:
+            result.append(text)
+        k += 1
+    if k != len(old):
+        raise ValueError(&quot;the diff doesn&#x27;t cover every old line&quot;)
+    return result</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w054d1-editops" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Edits with prices</div><div class="pc-prompt"><p>Write <code>edit_cost(a, b, insert=1, delete=1, replace=1)</code>: the cheapest way to turn a into b with those operation costs (keeping an equal character is free). Then <code>edit_steps(a, b)</code>: with unit costs, a list of the edits as tuples <code>("insert", position, char)</code>, <code>("delete", position, char)</code> or <code>("replace", position, old, new)</code>, where positions refer to the string <strong>as it is when that edit is applied</strong>, applying them in order from left to right. The checks apply your steps to a and expect b.</p></div><textarea class="pc-src pc-code" hidden>def edit_cost(a, b, insert=1, delete=1, replace=1):
+    ___
+
+def edit_steps(a, b):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def apply(a, steps):
+    s = list(a)
+    for step in steps:
+        if step[0] == &quot;insert&quot;:
+            s.insert(step[1], step[2])
+        elif step[0] == &quot;delete&quot;:
+            assert s[step[1]] == step[2]
+            del s[step[1]]
+        else:
+            assert s[step[1]] == step[2]
+            s[step[1]] = step[3]
+    return &quot;&quot;.join(s)
+def ref(a, b, ins, dele, rep):
+    n, m = len(a), len(b)
+    D = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        D[i][0] = i * dele
+    for j in range(1, m + 1):
+        D[0][j] = j * ins
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            D[i][j] = min(D[i - 1][j - 1] + (0 if a[i - 1] == b[j - 1] else rep), D[i - 1][j] + dele, D[i][j - 1] + ins)
+    return D[n][m]
+def test_edits():
+    &quot;edits&quot;
+    assert edit_cost(&quot;kitten&quot;, &quot;sitting&quot;) == 3 and edit_cost(&quot;&quot;, &quot;abc&quot;) == 3 and edit_cost(&quot;abc&quot;, &quot;&quot;) == 3
+    assert edit_cost(&quot;abc&quot;, &quot;abd&quot;, replace=5) == 2 and edit_cost(&quot;ab&quot;, &quot;ba&quot;, insert=2, delete=2, replace=1) == 2
+    steps = edit_steps(&quot;kitten&quot;, &quot;sitting&quot;)
+    assert len(steps) == 3 and apply(&quot;kitten&quot;, steps) == &quot;sitting&quot;
+    rng = random.Random(3)
+    for _ in range(150):
+        a = &quot;&quot;.join(rng.choice(&quot;abc&quot;) for _ in range(rng.randint(0, 7)))
+        b = &quot;&quot;.join(rng.choice(&quot;abc&quot;) for _ in range(rng.randint(0, 7)))
+        costs = (rng.randint(1, 3), rng.randint(1, 3), rng.randint(1, 4))
+        assert edit_cost(a, b, *costs) == ref(a, b, *costs)
+        steps = edit_steps(a, b)
+        assert len(steps) == ref(a, b, 1, 1, 1) and apply(a, steps) == b, (a, b, steps)</textarea><textarea class="pc-src pc-solution" hidden>def _table(a, b, insert=1, delete=1, replace=1):
+    n, m = len(a), len(b)
+    D = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        D[i][0] = i * delete
+    for j in range(1, m + 1):
+        D[0][j] = j * insert
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            match = D[i - 1][j - 1] + (0 if a[i - 1] == b[j - 1] else replace)
+            D[i][j] = min(match, D[i - 1][j] + delete, D[i][j - 1] + insert)
+    return D
+
+def edit_cost(a, b, insert=1, delete=1, replace=1):
+    return _table(a, b, insert, delete, replace)[len(a)][len(b)]
+
+def edit_steps(a, b):
+    D = _table(a, b)
+    ops, i, j = [], len(a), len(b)
+    while i or j:
+        if i and j and D[i][j] == D[i - 1][j - 1] + (a[i - 1] != b[j - 1]):
+            if a[i - 1] != b[j - 1]:
+                ops.append((&quot;replace&quot;, i - 1, j - 1))
+            i, j = i - 1, j - 1
+        elif i and D[i][j] == D[i - 1][j] + 1:
+            ops.append((&quot;delete&quot;, i - 1, j))
+            i -= 1
+        else:
+            ops.append((&quot;insert&quot;, i, j - 1))
+            j -= 1
+    ops.reverse()
+    # Each op records (index in a, index in b). Working left to right, the string&#x27;s
+    # prefix before a[i] has already become b[:j], so the position is j.
+    steps = []
+    for op in ops:
+        if op[0] == &quot;replace&quot;:
+            _, ai, bj = op
+            steps.append((&quot;replace&quot;, bj, a[ai], b[bj]))
+        elif op[0] == &quot;delete&quot;:
+            _, ai, bj = op
+            steps.append((&quot;delete&quot;, bj, a[ai]))
+        else:
+            _, ai, bj = op
+            steps.append((&quot;insert&quot;, bj, b[bj]))
+    return steps</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w054d1-palsub" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Hidden palindromes</div><div class="pc-prompt"><p>Write <code>longest_palindrome_subseq(s)</code>: one longest palindromic subsequence of s (a palindrome you get by deleting characters). Its length is the LCS of s and its reverse, but an LCS of the two isn&rsquo;t always a palindrome itself, so build it with an <strong>interval</strong> DP instead: P(i, j) is the length for <code>s[i:j + 1]</code>; if the end characters match they wrap the best of the inside, otherwise drop one end. Fill i downwards and j upwards, then walk inwards from (0, n − 1), collecting matched ends. Then <code>fewest_insertions(s)</code>: the fewest characters to insert anywhere to make s a palindrome (len(s) minus that length).</p></div><textarea class="pc-src pc-code" hidden>def longest_palindrome_subseq(s):
+    ___
+
+def fewest_insertions(s):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, random
+def test_pal():
+    &quot;palindromes&quot;
+    assert len(longest_palindrome_subseq(&quot;bbbab&quot;)) == 4 and longest_palindrome_subseq(&quot;cbbd&quot;) == &quot;bb&quot;
+    assert longest_palindrome_subseq(&quot;&quot;) == &quot;&quot; and longest_palindrome_subseq(&quot;a&quot;) == &quot;a&quot;
+    assert fewest_insertions(&quot;mbadm&quot;) == 2 and fewest_insertions(&quot;leetcode&quot;) == 5 and fewest_insertions(&quot;aba&quot;) == 0
+    rng = random.Random(4)
+    for _ in range(100):
+        s = &quot;&quot;.join(rng.choice(&quot;abc&quot;) for _ in range(rng.randint(0, 9)))
+        best = max((r for r in range(len(s) + 1) for c in itertools.combinations(s, r) if c == c[::-1]), default=0)
+        p = longest_palindrome_subseq(s)
+        it = iter(s)
+        assert len(p) == best and p == p[::-1] and all(ch in it for ch in p), (s, p)
+        assert fewest_insertions(s) == len(s) - best</textarea><textarea class="pc-src pc-solution" hidden>def longest_palindrome_subseq(s):
+    n = len(s)
+    if n == 0:
+        return &quot;&quot;
+    P = [[0] * n for _ in range(n)]
+    for i in range(n - 1, -1, -1):
+        P[i][i] = 1
+        for j in range(i + 1, n):
+            if s[i] == s[j]:
+                P[i][j] = P[i + 1][j - 1] + 2 if j &gt; i + 1 else 2
+            else:
+                P[i][j] = max(P[i + 1][j], P[i][j - 1])
+    left, middle, i, j = [], &quot;&quot;, 0, n - 1
+    while i &lt;= j:
+        if i == j:
+            middle = s[i]
+            break
+        if s[i] == s[j]:
+            left.append(s[i])
+            i, j = i + 1, j - 1
+        elif P[i + 1][j] &gt;= P[i][j - 1]:
+            i += 1
+        else:
+            j -= 1
+    half = &quot;&quot;.join(left)
+    return half + middle + half[::-1]
+
+def fewest_insertions(s):
+    return len(s) - len(longest_palindrome_subseq(s))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w054d1-super" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">One string containing both</div><div class="pc-prompt"><p>Write <code>shortest_supersequence(a, b)</code>: one shortest string that has both a and b as subsequences, by walking back through the LCS table: a match contributes its character once; otherwise take the character of the side you step away from (prefer stepping <strong>up</strong>, which takes <code>a[i - 1]</code>); when one string runs out, take the rest of the other.</p></div><textarea class="pc-src pc-code" hidden>def shortest_supersequence(a, b):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def is_subseq(x, y):
+    it = iter(y)
+    return all(ch in it for ch in x)
+def test_super():
+    &quot;supersequences&quot;
+    s = shortest_supersequence(&quot;abac&quot;, &quot;cab&quot;)
+    assert len(s) == 5 and is_subseq(&quot;abac&quot;, s) and is_subseq(&quot;cab&quot;, s)
+    assert shortest_supersequence(&quot;&quot;, &quot;xy&quot;) == &quot;xy&quot; and shortest_supersequence(&quot;abc&quot;, &quot;abc&quot;) == &quot;abc&quot;
+    rng = random.Random(5)
+    for _ in range(150):
+        a = &quot;&quot;.join(rng.choice(&quot;abc&quot;) for _ in range(rng.randint(0, 8)))
+        b = &quot;&quot;.join(rng.choice(&quot;abc&quot;) for _ in range(rng.randint(0, 8)))
+        n, m = len(a), len(b)
+        L = [[0] * (m + 1) for _ in range(n + 1)]
+        for i in range(1, n + 1):
+            for j in range(1, m + 1):
+                L[i][j] = L[i - 1][j - 1] + 1 if a[i - 1] == b[j - 1] else max(L[i - 1][j], L[i][j - 1])
+        s = shortest_supersequence(a, b)
+        assert len(s) == n + m - L[n][m] and is_subseq(a, s) and is_subseq(b, s), (a, b, s)</textarea><textarea class="pc-src pc-solution" hidden>def shortest_supersequence(a, b):
+    n, m = len(a), len(b)
+    L = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            if a[i - 1] == b[j - 1]:
+                L[i][j] = L[i - 1][j - 1] + 1
+            else:
+                L[i][j] = max(L[i - 1][j], L[i][j - 1])
+    out, i, j = [], n, m
+    while i and j:
+        if a[i - 1] == b[j - 1]:
+            out.append(a[i - 1])
+            i, j = i - 1, j - 1
+        elif L[i - 1][j] &gt;= L[i][j - 1]:
+            out.append(a[i - 1])
+            i -= 1
+        else:
+            out.append(b[j - 1])
+            j -= 1
+    out.extend(reversed(a[:i]))
+    out.extend(reversed(b[:j]))
+    return &quot;&quot;.join(reversed(out))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w054d1-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">One character out</div><div class="pc-prompt"><p>Row i of the table adds the character <code>a[i - 1]</code>, but this compares <code>a[i]</code> and <code>b[j]</code>, so it checks the wrong characters (and would run off the end if the loops reached the last row). It prints <code>3</code> instead of <code>4</code> for <code>"ABCBDAB"</code> and <code>"BDCABA"</code>.</p></div><textarea class="pc-src pc-code" hidden>a, b = &quot;ABCBDAB&quot;, &quot;BDCABA&quot;
+L = [[0] * (len(b) + 1) for _ in range(len(a) + 1)]
+for i in range(1, len(a)):
+    for j in range(1, len(b)):
+        if a[i] == b[j]:
+            L[i][j] = L[i - 1][j - 1] + 1
+        else:
+            L[i][j] = max(L[i - 1][j], L[i][j - 1])
+print(max(max(row) for row in L))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;prefix indexing&quot;
+    expect_output(&quot;4&quot;)</textarea><textarea class="pc-src pc-solution" hidden>a, b = &quot;ABCBDAB&quot;, &quot;BDCABA&quot;
+L = [[0] * (len(b) + 1) for _ in range(len(a) + 1)]
+for i in range(1, len(a) + 1):
+    for j in range(1, len(b) + 1):
+        if a[i - 1] == b[j - 1]:
+            L[i][j] = L[i - 1][j - 1] + 1
+        else:
+            L[i][j] = max(L[i - 1][j], L[i][j - 1])
+print(max(max(row) for row in L))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w054d1-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Free deletions</div><div class="pc-prompt"><p>The edit-distance table&rsquo;s edges should be D(i, 0) = i and D(0, j) = j: turning a prefix into nothing costs a deletion per character. Leaving them at 0 makes deleting or inserting a whole prefix free, so <code>"abc"</code> to <code>""</code> costs nothing and this prints <code>[0, 3]</code>. Fill the edges so it prints <code>[3, 3]</code>.</p></div><textarea class="pc-src pc-code" hidden>def edit_distance(a, b):
+    n, m = len(a), len(b)
+    D = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            same = a[i - 1] == b[j - 1]
+            D[i][j] = min(D[i - 1][j - 1] + (0 if same else 1), D[i - 1][j] + 1, D[i][j - 1] + 1)
+    return D[n][m]
+
+print([edit_distance(&quot;abc&quot;, &quot;&quot;), edit_distance(&quot;kitten&quot;, &quot;sitting&quot;)])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the edges&quot;
+    expect_output(&quot;[3, 3]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def edit_distance(a, b):
+    n, m = len(a), len(b)
+    D = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(n + 1):
+        D[i][0] = i
+    for j in range(m + 1):
+        D[0][j] = j
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            same = a[i - 1] == b[j - 1]
+            D[i][j] = min(D[i - 1][j - 1] + (0 if same else 1), D[i - 1][j] + 1, D[i][j - 1] + 1)
+    return D[n][m]
+
+print([edit_distance(&quot;abc&quot;, &quot;&quot;), edit_distance(&quot;kitten&quot;, &quot;sitting&quot;)])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w054d1-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Two rows, one forgotten edge</div><div class="pc-prompt"><p>This two-row edit distance starts each new row with 0, but the first entry of row i is D(i, 0) = i. So deleting the leading <code>"ab"</code> costs nothing, and it prints <code>0</code> for <code>"abc"</code> to <code>"c"</code>. Start each row with i so it prints <code>2</code>.</p></div><textarea class="pc-src pc-code" hidden>def edit_distance(a, b):
+    prev = list(range(len(b) + 1))
+    for i in range(1, len(a) + 1):
+        cur = [0] * (len(b) + 1)
+        for j in range(1, len(b) + 1):
+            same = a[i - 1] == b[j - 1]
+            cur[j] = min(prev[j - 1] + (0 if same else 1), prev[j] + 1, cur[j - 1] + 1)
+        prev = cur
+    return prev[-1]
+
+print(edit_distance(&quot;abc&quot;, &quot;c&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;each row&#x27;s edge&quot;
+    expect_output(&quot;2&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def edit_distance(a, b):
+    prev = list(range(len(b) + 1))
+    for i in range(1, len(a) + 1):
+        cur = [i] + [0] * len(b)
+        for j in range(1, len(b) + 1):
+            same = a[i - 1] == b[j - 1]
+            cur[j] = min(prev[j - 1] + (0 if same else 1), prev[j] + 1, cur[j - 1] + 1)
+        prev = cur
+    return prev[-1]
+
+print(edit_distance(&quot;abc&quot;, &quot;c&quot;))</textarea></div>
+<div class="parsons" data-id="w054d1-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">The LCS walk back</div><div class="pc-prompt"><p>Arrange the lines that walk back through a filled LCS table <code>L</code>. One line is a trap.</p></div><script type="application/json">{"lines": ["out, i, j = [], len(a), len(b)", "while i and j:", "    if a[i - 1] == b[j - 1]:", "        out.append(a[i - 1])", "        i, j = i - 1, j - 1", "    elif L[i - 1][j] >= L[i][j - 1]:", "        i -= 1", "    else:", "        j -= 1", "answer = \"\".join(reversed(out))"], "distractors": ["        i -= 1", "        j -= 1"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w054d1-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the LCS length of &quot;abcd&quot; and &quot;acbd&quot;
+q = ___   # the edit distance from &quot;sunday&quot; to &quot;saturday&quot;
+r = ___   # D(3, 0) in any edit-distance table
+s = ___   # the length of the shortest common supersequence of &quot;abc&quot; and &quot;bcd&quot;
+t = ___   # the length of the longest palindromic subsequence of &quot;character&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 3 and q == 3 and r == 3, &quot;p, q and r&quot;
+    assert s == 4 and t == 5, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 3
+q = 3
+r = 3
+s = 4
+t = 5</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w054d1-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What is L(i, j) in the LCS table?", "answer": 1, "explain": "Prefixes, with row 0 and column 0 for empty ones.", "options": ["The LCS of a[i:] and b[j:]", "The LCS length of a[:i] and b[:j]", "The edit distance", "A boolean"]}, {"type": "mc", "q": "What happens on a match?", "answer": 1, "explain": "Both characters end the subsequence.", "options": ["Take the max of up and left", "Add 1 to the diagonal entry", "Reset to 0", "Add 1 to the entry above"]}, {"type": "mc", "q": "Which character does row i add?", "answer": 1, "explain": "Row i is the first i characters.", "options": ["a[i]", "a[i \u2212 1]", "b[i]", "None"]}, {"type": "mc", "q": "How do you recover an LCS?", "answer": 1, "explain": "Then reverse.", "options": ["Sort the table", "Walk back from (n, m): diagonal on a match, else towards the larger neighbour", "Read the last row", "You can&rsquo;t"]}, {"type": "mc", "q": "How does diff use the LCS?", "answer": 1, "explain": "Each line is one symbol.", "options": ["It doesn&rsquo;t", "The LCS of the lines is what&rsquo;s kept; the rest is removed or added", "It sorts the lines", "It hashes them"]}, {"type": "mc", "q": "What are the edges of the edit-distance table?", "answer": 1, "explain": "Delete or insert everything.", "options": ["All 0", "D(i, 0) = i and D(0, j) = j", "All infinity", "All 1"]}, {"type": "mc", "q": "In the edit-distance table, what does moving up mean?", "answer": 1, "explain": "Left is an insertion.", "options": ["Insert", "Delete a[i \u2212 1]", "Replace", "Match"]}, {"type": "mc", "q": "What is the shortest common supersequence&rsquo;s length?", "answer": 1, "explain": "The common part is written once.", "options": ["n + m", "n + m \u2212 LCS", "max(n, m)", "LCS"]}, {"type": "mc", "q": "How do you find the longest palindromic subsequence&rsquo;s length?", "answer": 1, "explain": "Or an interval DP.", "options": ["Sort", "The LCS of s and its reverse", "Kadane", "Edit distance to the reverse"]}, {"type": "output", "q": "What does this print?", "answer": "[[0, 1], [1, 1], [2, 1]]", "explain": "Delete the a, keep the b.", "code": "a, b = \"ab\", \"b\"\nD = [[i + j if i == 0 or j == 0 else 0 for j in range(2)] for i in range(3)]\nfor i in range(1, 3):\n    D[i][1] = min(D[i - 1][0] + (a[i - 1] != b[0]), D[i - 1][1] + 1, D[i][0] + 1)\nprint(D)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w054d1-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: did you mean?</div><div class="pc-prompt"><p>Typing errors are usually one of four kinds: a missing letter, an extra letter, a wrong letter, or two neighbouring letters <strong>swapped</strong> (&ldquo;teh&rdquo; for &ldquo;the&rdquo;). Levenshtein distance counts a swap as two edits; Fred Damerau (1964) counted it as one. Write:</p>
+<ul>
+<li><code>typo_distance(a, b)</code>: the edit distance where a swap of two <strong>adjacent</strong> characters also costs 1 (the &ldquo;optimal string alignment&rdquo; version: add to the recurrence D(i − 2, j − 2) + 1 when a[i − 1] == b[j − 2] and a[i − 2] == b[j − 1]).</li>
+<li><code>suggest(word, dictionary, limit=2, count=3)</code>: up to <code>count</code> dictionary words within <code>typo_distance</code> of <code>limit</code>, nearest first, ties alphabetical. The word itself, if in the dictionary, comes first (distance 0).</li>
+<li><code>suggest_fast(word, dictionary, limit=2, count=3)</code>: the same answers, faster: skip any dictionary word whose length differs from the word&rsquo;s by more than <code>limit</code> (it can&rsquo;t be close enough), and stop filling a word&rsquo;s table as soon as a whole row exceeds <code>limit</code> (no later entry can come back under it).</li>
+</ul></div><textarea class="pc-src pc-code" hidden>def typo_distance(a, b):
+    ___
+
+def suggest(word, dictionary, limit=2, count=3):
+    ___
+
+def suggest_fast(word, dictionary, limit=2, count=3):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random, time
+def test_typos():
+    &quot;swaps&quot;
+    assert typo_distance(&quot;teh&quot;, &quot;the&quot;) == 1 and typo_distance(&quot;ca&quot;, &quot;abc&quot;) == 3
+    assert typo_distance(&quot;kitten&quot;, &quot;sitting&quot;) == 3 and typo_distance(&quot;&quot;, &quot;ab&quot;) == 2 and typo_distance(&quot;ab&quot;, &quot;ba&quot;) == 1
+    assert typo_distance(&quot;abcdef&quot;, &quot;badcfe&quot;) == 3
+    words = [&quot;the&quot;, &quot;then&quot;, &quot;they&quot;, &quot;tea&quot;, &quot;ten&quot;, &quot;hen&quot;, &quot;theme&quot;]
+    assert suggest(&quot;teh&quot;, words) == [&quot;tea&quot;, &quot;ten&quot;, &quot;the&quot;]
+    assert suggest(&quot;the&quot;, words, count=2) == [&quot;the&quot;, &quot;then&quot;]
+    assert suggest(&quot;xyzzy&quot;, words) == []
+    rng = random.Random(6)
+    letters = &quot;abcde&quot;
+    dictionary = sorted({&quot;&quot;.join(rng.choice(letters) for _ in range(rng.randint(2, 7))) for _ in range(400)})
+    for _ in range(40):
+        w = &quot;&quot;.join(rng.choice(letters) for _ in range(rng.randint(2, 7)))
+        assert suggest_fast(w, dictionary) == suggest(w, dictionary)
+        assert suggest_fast(w, dictionary, limit=1, count=5) == suggest(w, dictionary, limit=1, count=5)
+def test_fast():
+    &quot;the fast version prunes&quot;
+    rng = random.Random(7)
+    dictionary = [&quot;&quot;.join(rng.choice(&quot;abcdefghij&quot;) for _ in range(rng.randint(3, 14))) for _ in range(3000)]
+    t0 = time.perf_counter()
+    for w in (&quot;abcdefg&quot;, &quot;hijabc&quot;, &quot;jjjjjjjj&quot;):
+        suggest(w, dictionary)
+    slow = time.perf_counter() - t0
+    t0 = time.perf_counter()
+    for w in (&quot;abcdefg&quot;, &quot;hijabc&quot;, &quot;jjjjjjjj&quot;):
+        suggest_fast(w, dictionary)
+    fast = time.perf_counter() - t0
+    assert fast &lt; slow / 2, (fast, slow)</textarea><textarea class="pc-src pc-solution" hidden>def _typo(a, b, limit=None):
+    n, m = len(a), len(b)
+    before, prev = None, list(range(m + 1))
+    for i in range(1, n + 1):
+        cur = [i] + [0] * m
+        for j in range(1, m + 1):
+            same = a[i - 1] == b[j - 1]
+            cur[j] = min(prev[j - 1] + (0 if same else 1), prev[j] + 1, cur[j - 1] + 1)
+            if i &gt; 1 and j &gt; 1 and a[i - 1] == b[j - 2] and a[i - 2] == b[j - 1]:
+                cur[j] = min(cur[j], before[j - 2] + 1)
+        if limit is not None and min(cur) &gt; limit:
+            return limit + 1
+        before, prev = prev, cur
+    return prev[m]
+
+def typo_distance(a, b):
+    return _typo(a, b)
+
+def suggest(word, dictionary, limit=2, count=3):
+    scored = sorted((typo_distance(word, w), w) for w in set(dictionary))
+    return [w for d, w in scored if d &lt;= limit][:count]
+
+def suggest_fast(word, dictionary, limit=2, count=3):
+    scored = []
+    for w in set(dictionary):
+        if abs(len(w) - len(word)) &gt; limit:
+            continue
+        d = _typo(word, w, limit)
+        if d &lt;= limit:
+            scored.append((d, w))
+    scored.sort()
+    return [w for _, w in scored[:count]]</textarea><template class="pc-src pc-hint">For the early stop, keep two (or three, for swaps) rows; after filling row i, if <code>min(cur) &gt; limit</code>, the word is too far away: return something larger than <code>limit</code>. Pass <code>limit</code> into a helper so <code>typo_distance</code> itself stays exact.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Write two short versions of a sentence, then work out (by hand, or with your <code>diff</code>) which words were kept, removed and added. Tomorrow: the longest increasing subsequence, and a beautiful O(n log n) method based on a game of patience.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w053d6.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w054d2.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w054d1", "week": 54, "day": 1, "title": "LCS and edit distance", "exercises": [{"id": "w054d1-lcs", "title": "A common thread", "points": 15}, {"id": "w054d1-diff", "title": "What changed?", "points": 15}, {"id": "w054d1-editops", "title": "Edits with prices", "points": 15}, {"id": "w054d1-palsub", "title": "Hidden palindromes", "points": 10}, {"id": "w054d1-super", "title": "One string containing both", "points": 10}, {"id": "w054d1-bug1", "title": "One character out", "points": 10}, {"id": "w054d1-bug2", "title": "Free deletions", "points": 10}, {"id": "w054d1-bug3", "title": "Two rows, one forgotten edge", "points": 10}, {"id": "w054d1-trace", "title": "Predict them", "points": 10}, {"id": "w054d1-challenge", "title": "Challenge: did you mean?", "points": 25}], "points": 130}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
