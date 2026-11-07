@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 61 Day 4: ExitStack | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="A with statement names its managers in the code. But sometimes you don’t know how many you’ll need until the program runs: open every file in a list,...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w061d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 61 Day 4: ExitStack">
+<meta property="og:description" content="A with statement names its managers in the code. But sometimes you don’t know how many you’ll need until the program runs: open every file in a list,...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w061d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-61">Week 61: Context managers</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#any-number-of-managers" data-sec="any-number-of-managers">Any number of managers</a></li><li><a href="#cleanup-functions" data-sec="cleanup-functions">Cleanup functions</a></li><li><a href="#undoing-what-went-before" data-sec="undoing-what-went-before">Undoing what went before</a></li><li><a href="#all-or-nothing-with-pop-all" data-sec="all-or-nothing-with-pop-all">All or nothing with pop_all</a></li><li><a href="#a-stack-in-a-class" data-sec="a-stack-in-a-class">A stack in a class</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w061d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-61">Week 61: Context managers</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 61, Day 4</span></p>
+      <h1>ExitStack</h1>
+      <div class="day-intro"><p>A <code>with</code> statement names its managers in the code. But sometimes you don&rsquo;t know how many you&rsquo;ll need until the program runs: open every file in a list, connect to each of a user&rsquo;s servers, undo however many steps had already happened when something failed. <code>contextlib.ExitStack</code> is a context manager that holds <strong>any number</strong> of other managers and cleanup functions, and releases them all, in reverse order, when its block ends. It also lets you set up several things and hand them on <strong>only if all of them succeeded</strong>. Today covers <code>enter_context</code>, <code>callback</code>, <code>pop_all</code>, and using a stack inside your own classes.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Enter a number of context managers decided at run time with ExitStack.enter_context</li><li>Register cleanup functions with callback and predict their reverse order</li><li>Undo completed steps when a later step fails</li><li>Hand resources on with pop_all only when every setup step succeeded</li><li>Give a class its own ExitStack to manage what it opens</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Any number of managers: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Cleanup functions: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Undoing what went before: 20 min"></span><span class="plan-seg s0" style="flex:20" title="All or nothing with pop_all: 20 min"></span><span class="plan-seg s1" style="flex:15" title="A stack in a class: 15 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Any number of managers</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Cleanup functions</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Undoing what went before</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">All or nothing with pop_all</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">A stack in a class</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:45</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w061d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w061d4.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w061d4-p1"><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+
+log = []
+with ExitStack() as stack:
+    for name in [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]:
+        log.append(f&quot;open {name}&quot;)
+        stack.callback(log.append, f&quot;close {name}&quot;)
+    log.append(&quot;work&quot;)
+print(log)</textarea></div>
+<p>Cleanups registered on the stack run when the <code>with</code> ends, <strong>last in, first out</strong>: like nested <code>with</code> statements, whatever was set up last is released first.</p>
+<h2 id="any-number-of-managers">Any number of managers</h2>
+<p><code>stack.enter_context(manager)</code> enters a context manager (calling its <code>__enter__</code>, and returning what it returns, like <code>as</code>) and remembers to exit it when the stack closes. So opening a list of files is a loop:</p>
+<pre><code class="language-python">with ExitStack() as stack:
+    files = [stack.enter_context(open(p)) for p in paths]
+    ...                          # every file is open here
+                                 # every file is closed here, even after an error
+</code></pre>
+<p>If opening the third file fails, the first two are still closed properly, because they&rsquo;re already on the stack. The stack passes exceptions to each manager&rsquo;s <code>__exit__</code> exactly as nested <code>with</code> statements would (Monday&rsquo;s challenge), including suppression.</p>
+<div class="pc pc-example" data-kind="example" data-id="w061d4-e2"><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+import heapq
+
+for name, lines in [(&quot;a.txt&quot;, &quot;1\n4\n9\n&quot;), (&quot;b.txt&quot;, &quot;2\n3\n10\n&quot;), (&quot;c.txt&quot;, &quot;5\n&quot;)]:
+    with open(name, &quot;w&quot;) as f:
+        f.write(lines)
+
+def merged_numbers(paths):
+    with ExitStack() as stack:
+        files = [stack.enter_context(open(p)) for p in paths]
+        streams = [(int(line) for line in f) for f in files]
+        return list(heapq.merge(*streams))
+
+print(merged_numbers([&quot;a.txt&quot;, &quot;b.txt&quot;, &quot;c.txt&quot;]))</textarea></div>
+<h2 id="cleanup-functions">Cleanup functions</h2>
+<p>Not everything that needs undoing is a context manager. <code>stack.callback(func, *args, **kwargs)</code> registers a plain function call to run at the end: deleting a temporary file, restoring a setting, printing a summary. Callbacks and entered managers share one stack, so they all unwind together in reverse order.</p>
+<p><code>stack.push(exit_function)</code> registers a function with <code>__exit__</code>&rsquo;s signature, <code>(exc_type, exc, tb)</code>, that sees the exception and may suppress it. It&rsquo;s rarely needed; <code>callback</code> covers most uses.</p>
+<div class="pc pc-example" data-kind="example" data-id="w061d4-e3"><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+import os
+
+with open(&quot;scratch.tmp&quot;, &quot;w&quot;) as f:
+    f.write(&quot;temporary data&quot;)
+
+settings = {&quot;verbose&quot;: False}
+with ExitStack() as stack:
+    stack.callback(os.remove, &quot;scratch.tmp&quot;)                # delete the file at the end
+    old = settings[&quot;verbose&quot;]
+    settings[&quot;verbose&quot;] = True
+    stack.callback(settings.__setitem__, &quot;verbose&quot;, old)   # restore the setting
+    print(&quot;inside:&quot;, settings[&quot;verbose&quot;], os.path.exists(&quot;scratch.tmp&quot;))
+print(&quot;after:&quot;, settings[&quot;verbose&quot;], os.path.exists(&quot;scratch.tmp&quot;))</textarea></div>
+<h2 id="undoing-what-went-before">Undoing what went before</h2>
+<p>A multi-step job (set up a user: create a folder, write a config file, add them to a list) should leave nothing half-done if a later step fails. With a stack: after each step succeeds, register its <strong>undo</strong> as a callback. If a later step raises, leaving the <code>with</code> runs the undos for every completed step, newest first. If everything succeeds, the stack would undo them too, unless you <strong>cancel</strong> the callbacks first: that&rsquo;s what <code>pop_all</code> is for.</p>
+<div class="pc pc-example" data-kind="example" data-id="w061d4-e4"><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+
+def run_steps(steps, log):
+    with ExitStack() as stack:
+        for name, do, undo in steps:
+            do()
+            log.append(f&quot;did {name}&quot;)
+            stack.callback(log.append, f&quot;undid {name}&quot;)
+            stack.callback(undo)
+        stack.pop_all()               # all succeeded: keep everything, cancel the undos
+
+def fail():
+    raise RuntimeError(&quot;disk full&quot;)
+
+log = []
+nothing = lambda: None
+try:
+    run_steps([(&quot;folder&quot;, nothing, nothing), (&quot;config&quot;, nothing, nothing), (&quot;index&quot;, fail, nothing)], log)
+except RuntimeError:
+    pass
+print(log)</textarea></div>
+<h2 id="all-or-nothing-with-pop-all">All or nothing with pop_all</h2>
+<p><code>stack.pop_all()</code> moves everything on the stack to a <strong>new</strong> <code>ExitStack</code> and returns it, leaving the original empty, so the original&rsquo;s <code>with</code> ends without cleaning anything up. That&rsquo;s how a function can set up several resources, keep them all if every setup succeeded, and hand them to its caller, while still closing the ones it managed to open if any setup failed:</p>
+<pre><code class="language-python">def open_all(paths):
+    with ExitStack() as stack:
+        files = [stack.enter_context(open(p)) for p in paths]
+        return files, stack.pop_all()      # the caller now owns the cleanup
+</code></pre>
+<p>If the third <code>open</code> fails, the <code>with</code> closes the first two. If all succeed, <code>pop_all</code> transfers them, and the caller later uses <code>with returned_stack:</code> or calls <code>returned_stack.close()</code>.</p>
+<h2 id="a-stack-in-a-class">A stack in a class</h2>
+<p>An object that opens things over its lifetime (a workspace with several files, a test fixture, a client with connections) can keep its own <code>ExitStack</code> as an attribute: <code>self._stack.enter_context(...)</code> whenever it opens something, and a <code>close()</code> method that calls <code>self._stack.close()</code>. Make the class a context manager too (<code>__enter__</code> returns self, <code>__exit__</code> calls <code>close()</code>), and users get <code>with Workspace() as ws:</code> with everything cleaned up at the end.</p>
+<div class="pc pc-example" data-kind="example" data-id="w061d4-e5"><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+
+class Workspace:
+    def __init__(self):
+        self._stack = ExitStack()
+        self.files = {}
+
+    def open(self, path, mode=&quot;r&quot;):
+        f = self._stack.enter_context(open(path, mode))
+        self.files[path] = f
+        return f
+
+    def close(self):
+        self._stack.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+        return False
+
+with Workspace() as ws:
+    ws.open(&quot;one.txt&quot;, &quot;w&quot;).write(&quot;1&quot;)
+    ws.open(&quot;two.txt&quot;, &quot;w&quot;).write(&quot;2&quot;)
+print([f.closed for f in ws.files.values()])</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>ExitStack holds any number of context managers and cleanup functions and releases them in reverse order when it closes, passing exceptions along as nested with statements would. enter_context enters a manager and returns its value; callback registers a plain function call; push registers an <strong>exit</strong>-style function. Register each completed step&rsquo;s undo as a callback, so a later failure undoes them all, newest first. pop_all moves everything to a new stack, cancelling the cleanup here: use it to keep resources (or completed work) only when every step succeeded, and hand the returned stack to whoever now owns the cleanup. Classes can keep an ExitStack attribute and close it in close() or <strong>exit</strong>.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d4-many" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Opening a list of files</div><div class="pc-prompt"><p>Write <code>read_all(paths)</code>: a dict from each path to the file&rsquo;s text, opening all the files with <strong>one</strong> <code>ExitStack</code> (all open at once). Then <code>total_size(paths)</code>: the total number of characters, the same way. If any file is missing, <code>FileNotFoundError</code> must propagate and every file already opened must be closed.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+
+def read_all(paths):
+    ___
+
+def total_size(paths):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_many():
+    &quot;enter_context&quot;
+    for name, text in [(&quot;x.txt&quot;, &quot;ab&quot;), (&quot;y.txt&quot;, &quot;cde&quot;)]:
+        with open(name, &quot;w&quot;) as f:
+            f.write(text)
+    assert read_all([&quot;x.txt&quot;, &quot;y.txt&quot;]) == {&quot;x.txt&quot;: &quot;ab&quot;, &quot;y.txt&quot;: &quot;cde&quot;} and total_size([&quot;x.txt&quot;, &quot;y.txt&quot;]) == 5
+    assert read_all([]) == {}
+    try:
+        read_all([&quot;x.txt&quot;, &quot;missing.txt&quot;])
+        assert False
+    except FileNotFoundError:
+        pass
+    assert &quot;enter_context(&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import ExitStack
+
+def read_all(paths):
+    with ExitStack() as stack:
+        files = {p: stack.enter_context(open(p)) for p in paths}
+        return {p: f.read() for p, f in files.items()}
+
+def total_size(paths):
+    return sum(len(text) for text in read_all(paths).values())</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d4-order" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Last in, first out</div><div class="pc-prompt"><p>Write <code>cleanup_order(names)</code>: register a callback for each name, in order, that appends <code>"clean " + name</code> to a log, run a body that appends <code>"work"</code>, and return the log. Then <code>with_failure(names, fail_at)</code>: register callbacks for the names one at a time but raise <code>RuntimeError</code> just <strong>before</strong> registering the name at position <code>fail_at</code>; catch the error outside the stack and return the log.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+
+def cleanup_order(names):
+    ___
+
+def with_failure(names, fail_at):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_order():
+    &quot;callbacks&quot;
+    assert cleanup_order([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]) == [&quot;work&quot;, &quot;clean c&quot;, &quot;clean b&quot;, &quot;clean a&quot;]
+    assert with_failure([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;], 2) == [&quot;clean b&quot;, &quot;clean a&quot;] and with_failure([&quot;a&quot;], 0) == []
+    assert cleanup_order([]) == [&quot;work&quot;]</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import ExitStack
+
+def cleanup_order(names):
+    log = []
+    with ExitStack() as stack:
+        for name in names:
+            stack.callback(log.append, &quot;clean &quot; + name)
+        log.append(&quot;work&quot;)
+    return log
+
+def with_failure(names, fail_at):
+    log = []
+    try:
+        with ExitStack() as stack:
+            for i, name in enumerate(names):
+                if i == fail_at:
+                    raise RuntimeError(&quot;failed&quot;)
+                stack.callback(log.append, &quot;clean &quot; + name)
+    except RuntimeError:
+        pass
+    return log</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d4-undo" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Steps that undo themselves</div><div class="pc-prompt"><p>Write <code>apply_changes(data, changes)</code>: <code>data</code> is a dict, <code>changes</code> a list of <code>(key, value)</code> pairs; set each one in turn, registering on an <code>ExitStack</code> an undo that restores the old value (or removes the key if it was new). A value of <code>None</code> is invalid: raise <code>ValueError(f"bad value for {key}")</code> when you reach it, which must undo every change already made. If every change succeeds, keep them (use <code>pop_all</code>). Return the number of changes applied.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+
+_MISSING = object()
+
+def apply_changes(data, changes):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_undo():
+    &quot;rollback with callbacks&quot;
+    d = {&quot;a&quot;: 1, &quot;b&quot;: 2}
+    assert apply_changes(d, [(&quot;a&quot;, 10), (&quot;c&quot;, 3)]) == 2 and d == {&quot;a&quot;: 10, &quot;b&quot;: 2, &quot;c&quot;: 3}
+    try:
+        apply_changes(d, [(&quot;a&quot;, 99), (&quot;new&quot;, 5), (&quot;b&quot;, None), (&quot;z&quot;, 1)])
+        assert False
+    except ValueError as e:
+        assert str(e) == &quot;bad value for b&quot;
+    assert d == {&quot;a&quot;: 10, &quot;b&quot;: 2, &quot;c&quot;: 3}
+    assert apply_changes(d, []) == 0
+    assert &quot;pop_all(&quot; in source and &quot;callback(&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import ExitStack
+
+_MISSING = object()
+
+def _restore(data, key, old):
+    if old is _MISSING:
+        data.pop(key, None)
+    else:
+        data[key] = old
+
+def apply_changes(data, changes):
+    with ExitStack() as stack:
+        for key, value in changes:
+            if value is None:
+                raise ValueError(f&quot;bad value for {key}&quot;)
+            old = data.get(key, _MISSING)
+            data[key] = value
+            stack.callback(_restore, data, key, old)
+        stack.pop_all()
+    return len(changes)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d4-handoff" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Handing files to the caller</div><div class="pc-prompt"><p>Write <code>open_for_writing(paths)</code>: open every path for writing; if they all open, return <code>(files, stack)</code>, where <code>stack</code> is an <code>ExitStack</code> (from <code>pop_all</code>) that closes them all; if any open fails, close the ones already opened and let the error propagate. Then <code>write_report(paths, lines)</code>: use it to write every line to every file, closing them all at the end with <code>with stack:</code>.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+
+def open_for_writing(paths):
+    ___
+
+def write_report(paths, lines):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import os
+def test_handoff():
+    &quot;pop_all&quot;
+    files, stack = open_for_writing([&quot;r1.txt&quot;, &quot;r2.txt&quot;])
+    assert all(not f.closed for f in files)
+    with stack:
+        files[0].write(&quot;x&quot;)
+    assert all(f.closed for f in files)
+    os.makedirs(&quot;locked_dir&quot;, exist_ok=True)
+    try:
+        open_for_writing([&quot;ok.txt&quot;, &quot;locked_dir&quot;])
+        assert False
+    except (IsADirectoryError, PermissionError, OSError):
+        pass
+    write_report([&quot;p.txt&quot;, &quot;q.txt&quot;], [&quot;one&quot;, &quot;two&quot;])
+    with open(&quot;q.txt&quot;) as f:
+        assert f.read() == &quot;one\ntwo\n&quot;</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import ExitStack
+
+def open_for_writing(paths):
+    with ExitStack() as stack:
+        files = [stack.enter_context(open(p, &quot;w&quot;)) for p in paths]
+        return files, stack.pop_all()
+
+def write_report(paths, lines):
+    files, stack = open_for_writing(paths)
+    with stack:
+        for f in files:
+            for line in lines:
+                f.write(line + &quot;\n&quot;)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d4-owner" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A class that owns its files</div><div class="pc-prompt"><p>Write <code>Logbook()</code>: a context manager class with its own <code>ExitStack</code>. <code>add(name)</code> opens <code>name + ".log"</code> for appending (keeping it open, managed by the stack) and returns nothing; <code>write(name, text)</code> writes a line to that log; <code>close()</code> closes every log; <code>open_logs()</code> is the sorted list of names whose files are still open. Using it in <code>with</code> closes everything at the end.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+
+class Logbook:
+    def __init__(self):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_owner():
+    &quot;a stack attribute&quot;
+    with Logbook() as book:
+        book.add(&quot;errors&quot;)
+        book.add(&quot;access&quot;)
+        book.write(&quot;errors&quot;, &quot;disk full&quot;)
+        book.write(&quot;access&quot;, &quot;ada logged in&quot;)
+        assert book.open_logs() == [&quot;access&quot;, &quot;errors&quot;]
+    assert book.open_logs() == []
+    with open(&quot;errors.log&quot;) as f:
+        assert f.read() == &quot;disk full\n&quot;
+    b2 = Logbook()
+    b2.add(&quot;x&quot;)
+    b2.close()
+    assert b2.open_logs() == []</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import ExitStack
+
+class Logbook:
+    def __init__(self):
+        self._stack = ExitStack()
+        self._files = {}
+
+    def add(self, name):
+        self._files[name] = self._stack.enter_context(open(name + &quot;.log&quot;, &quot;a&quot;))
+
+    def write(self, name, text):
+        self._files[name].write(text + &quot;\n&quot;)
+
+    def open_logs(self):
+        return sorted(n for n, f in self._files.items() if not f.closed)
+
+    def close(self):
+        self._stack.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+        return False</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w061d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A stack that&rsquo;s never closed</div><div class="pc-prompt"><p>The <code>ExitStack</code> is created but not used in a <code>with</code> (and never closed), so its files stay open and this prints <code>[False, False]</code>. Use it in a <code>with</code> statement so it prints <code>[True, True]</code>.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+
+for name in (&quot;m.txt&quot;, &quot;n.txt&quot;):
+    with open(name, &quot;w&quot;) as f:
+        f.write(name)
+
+stack = ExitStack()
+files = [stack.enter_context(open(p)) for p in (&quot;m.txt&quot;, &quot;n.txt&quot;)]
+texts = [f.read() for f in files]
+print([f.closed for f in files])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;with the stack&quot;
+    expect_output(&quot;[True, True]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import ExitStack
+
+for name in (&quot;m.txt&quot;, &quot;n.txt&quot;):
+    with open(name, &quot;w&quot;) as f:
+        f.write(name)
+
+with ExitStack() as stack:
+    files = [stack.enter_context(open(p)) for p in (&quot;m.txt&quot;, &quot;n.txt&quot;)]
+    texts = [f.read() for f in files]
+print([f.closed for f in files])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w061d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A callback called too early</div><div class="pc-prompt"><p><code>callback</code> takes the <strong>function</strong> and its arguments separately. Writing <code>stack.callback(log.append("closed"))</code> calls <code>append</code> immediately (logging too early) and registers its result, <code>None</code>, which fails when the stack closes with <code>TypeError</code>. Pass the function and its argument separately so this prints <code>['work', 'closed']</code>.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+
+log = []
+try:
+    with ExitStack() as stack:
+        stack.callback(log.append(&quot;closed&quot;))
+        log.append(&quot;work&quot;)
+except TypeError:
+    log.append(&quot;TypeError&quot;)
+print(log)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;function and arguments&quot;
+    expect_output(&quot;[&#x27;work&#x27;, &#x27;closed&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import ExitStack
+
+log = []
+try:
+    with ExitStack() as stack:
+        stack.callback(log.append, &quot;closed&quot;)
+        log.append(&quot;work&quot;)
+except TypeError:
+    log.append(&quot;TypeError&quot;)
+print(log)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w061d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Closed before the caller gets them</div><div class="pc-prompt"><p>Returning from inside the <code>with ExitStack()</code> closes everything on the stack, so the caller receives closed files and writing fails with <code>ValueError</code>. Return <code>stack.pop_all()</code> with the files, so this prints <code>written</code>.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+
+def open_two():
+    with ExitStack() as stack:
+        a = stack.enter_context(open(&quot;a1.txt&quot;, &quot;w&quot;))
+        b = stack.enter_context(open(&quot;b1.txt&quot;, &quot;w&quot;))
+        return a, b
+
+a, b = open_two()
+try:
+    a.write(&quot;x&quot;)
+    print(&quot;written&quot;)
+except ValueError:
+    print(&quot;closed already&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;pop_all&quot;
+    expect_output(&quot;written&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import ExitStack
+
+def open_two():
+    with ExitStack() as stack:
+        a = stack.enter_context(open(&quot;a1.txt&quot;, &quot;w&quot;))
+        b = stack.enter_context(open(&quot;b1.txt&quot;, &quot;w&quot;))
+        return (a, b), stack.pop_all()
+
+(a, b), owner = open_two()
+try:
+    a.write(&quot;x&quot;)
+    print(&quot;written&quot;)
+except ValueError:
+    print(&quot;closed already&quot;)
+owner.close()</textarea></div>
+<div class="parsons" data-id="w061d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Opening a list of files</div><div class="pc-prompt"><p>Arrange the lines that read every file in <code>paths</code> with all of them open at once. One line is a trap.</p></div><script type="application/json">{"lines": ["with ExitStack() as stack:", "    files = [stack.enter_context(open(p)) for p in paths]", "    texts = [f.read() for f in files]", "print(len(texts))"], "distractors": ["    files = [stack.callback(open(p)) for p in paths]"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the order callbacks run in: &quot;first in, first out&quot; or &quot;last in, first out&quot;
+q = ___   # what enter_context returns: &quot;the manager&quot; or &quot;what __enter__ returns&quot;
+r = ___   # True or False: pop_all leaves the original stack empty
+s = ___   # True or False: if the third of five opens fails, the first two files stay open
+t = ___   # the ExitStack method that runs everything now, without a with statement, as a string</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;last in, first out&quot; and q == &quot;what __enter__ returns&quot; and r is True, &quot;p, q and r&quot;
+    assert s is False and t == &quot;close&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;last in, first out&quot;
+q = &quot;what __enter__ returns&quot;
+r = True
+s = False
+t = &quot;close&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w061d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "When do you need ExitStack instead of a plain with?", "answer": 1, "explain": "A loop of enter_context calls.", "options": ["Never", "When the number of managers is only known at run time", "For one file", "For speed"]}, {"type": "mc", "q": "What does stack.enter_context(m) return?", "answer": 1, "explain": "Like as.", "options": ["The stack", "What m.<strong>enter</strong>() returns", "None", "m always"]}, {"type": "mc", "q": "In which order does an ExitStack clean up?", "answer": 1, "explain": "Like nested with statements.", "options": ["Registration order", "Reverse order: last in, first out", "Alphabetical", "Random"]}, {"type": "mc", "q": "What does callback register?", "answer": 1, "explain": "callback(func, *args).", "options": ["A context manager", "A function call to make at the end", "An exception handler only", "A generator"]}, {"type": "mc", "q": "If opening the third file fails, what happens to the first two?", "answer": 1, "explain": "They&rsquo;re already on the stack.", "options": ["They leak", "They&rsquo;re closed by the stack", "They&rsquo;re deleted", "Nothing"]}, {"type": "mc", "q": "What does pop_all do?", "answer": 1, "explain": "Ownership passes on.", "options": ["Closes everything", "Moves everything to a new stack and empties the original", "Removes the last item", "Raises"]}, {"type": "mc", "q": "Why use pop_all at the end of a successful multi-step job?", "answer": 1, "explain": "Undo only on failure.", "options": ["Speed", "To cancel the undo callbacks, keeping the work", "To close files", "To log"]}, {"type": "mc", "q": "How does a class manage what it opens over its lifetime?", "answer": 1, "explain": "One place to release everything.", "options": ["A list of files", "An ExitStack attribute closed in close() or <strong>exit</strong>", "Global variables", "It can&rsquo;t"]}, {"type": "mc", "q": "What&rsquo;s the danger of returning resources from inside a with ExitStack()?", "answer": 1, "explain": "Return stack.pop_all() too.", "options": ["None", "They&rsquo;re closed as the with ends, unless pop_all moved them", "They&rsquo;re copied", "They leak"]}, {"type": "output", "q": "What does this print?", "answer": "[2, 1, 3]", "explain": "The moved callbacks run when the new stack closes; the original then has nothing to do.", "code": "from contextlib import ExitStack\nout = []\nwith ExitStack() as s:\n    s.callback(out.append, 1)\n    s.callback(out.append, 2)\n    s.pop_all().close()\n    out.append(3)\nprint(out)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a deployment with rollbacks</div><div class="pc-prompt"><p>A deployment is a list of steps. Each step is a dict with a <code>"name"</code>, a <code>"do"</code> function, an optional <code>"undo"</code> function, and an optional <code>"uses"</code>: a list of context managers the step needs while it runs (opened before <code>do</code>, closed straight after). Write <code>deploy(steps)</code>:</p>
+<ul>
+<li>Run the steps in order. Each step&rsquo;s managers are entered (with their own <code>ExitStack</code>) just for that step.</li>
+<li>After each successful step, register its undo (if any) on the <strong>main</strong> stack.</li>
+<li>If a step fails, undo every completed step, newest first, and re-raise the error.</li>
+<li>If every step succeeds, cancel the undos.</li>
+<li>Return a report: a list of strings: <code>"ran NAME"</code> for each completed step, <code>"failed NAME: ERROR_TYPE"</code> for the failing one, and <code>"undid NAME"</code> for each undo that ran, in the order things happened. The report must be available even when the deployment fails, so <code>deploy</code> takes the <code>report</code> list as an argument, fills it in as it goes, and returns it on success.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>from contextlib import ExitStack
+
+def deploy(steps, report):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>from contextlib import contextmanager
+def test_deploy():
+    &quot;ExitStack in two layers&quot;
+    events = []
+    @contextmanager
+    def connection(name):
+        events.append(f&quot;connect {name}&quot;)
+        try:
+            yield name
+        finally:
+            events.append(f&quot;disconnect {name}&quot;)
+    def step(name, fail=False, undo=True, uses=()):
+        def do():
+            events.append(f&quot;do {name}&quot;)
+            if fail:
+                raise RuntimeError(name)
+        s = {&quot;name&quot;: name, &quot;do&quot;: do, &quot;uses&quot;: [connection(u) for u in uses]}
+        if undo:
+            s[&quot;undo&quot;] = lambda: events.append(f&quot;undo {name}&quot;)
+        return s
+    report = []
+    assert deploy([step(&quot;db&quot;, uses=[&quot;server&quot;]), step(&quot;files&quot;, undo=False), step(&quot;cache&quot;)], report) == [&quot;ran db&quot;, &quot;ran files&quot;, &quot;ran cache&quot;]
+    assert events == [&quot;connect server&quot;, &quot;do db&quot;, &quot;disconnect server&quot;, &quot;do files&quot;, &quot;do cache&quot;]
+    events.clear()
+    report = []
+    try:
+        deploy([step(&quot;db&quot;), step(&quot;files&quot;, undo=False), step(&quot;cache&quot;, fail=True, uses=[&quot;redis&quot;]), step(&quot;never&quot;)], report)
+        assert False
+    except RuntimeError:
+        pass
+    assert report == [&quot;ran db&quot;, &quot;ran files&quot;, &quot;failed cache: RuntimeError&quot;, &quot;undid db&quot;]
+    assert events == [&quot;do db&quot;, &quot;do files&quot;, &quot;connect redis&quot;, &quot;do cache&quot;, &quot;disconnect redis&quot;, &quot;undo db&quot;]</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import ExitStack
+
+def deploy(steps, report):
+    def undoer(step):
+        def run():
+            step[&quot;undo&quot;]()
+            report.append(f&quot;undid {step[&#x27;name&#x27;]}&quot;)
+        return run
+
+    with ExitStack() as main:
+        for step in steps:
+            try:
+                with ExitStack() as uses:
+                    for manager in step.get(&quot;uses&quot;, []):
+                        uses.enter_context(manager)
+                    step[&quot;do&quot;]()
+            except BaseException as error:
+                report.append(f&quot;failed {step[&#x27;name&#x27;]}: {type(error).__name__}&quot;)
+                raise
+            report.append(f&quot;ran {step[&#x27;name&#x27;]}&quot;)
+            if &quot;undo&quot; in step:
+                main.callback(undoer(step))
+        main.pop_all()
+    return report</textarea><template class="pc-src pc-hint"><code>with ExitStack() as main:</code> around a loop over the steps. For each step: <code>try:</code> a nested <code>with ExitStack() as uses:</code> entering each manager, then <code>step["do"]()</code>; <code>except BaseException as e:</code> append the failure and <code>raise</code>. After success append <code>"ran NAME"</code> and, if there&rsquo;s an undo, register a callback that runs it <strong>and</strong> appends <code>"undid NAME"</code> to the report. After the loop, <code>main.pop_all()</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Think of a job with several steps (installing something, moving into a new flat, setting up a group trip) and list each step&rsquo;s undo. Which order would they be undone in? Tomorrow: managing resources safely, with locks, temporary files and timeouts.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w061d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w061d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w061d4", "week": 61, "day": 4, "title": "ExitStack", "exercises": [{"id": "w061d4-many", "title": "Opening a list of files", "points": 10}, {"id": "w061d4-order", "title": "Last in, first out", "points": 10}, {"id": "w061d4-undo", "title": "Steps that undo themselves", "points": 15}, {"id": "w061d4-handoff", "title": "Handing files to the caller", "points": 15}, {"id": "w061d4-owner", "title": "A class that owns its files", "points": 10}, {"id": "w061d4-bug1", "title": "A stack that's never closed", "points": 10}, {"id": "w061d4-bug2", "title": "A callback called too early", "points": 10}, {"id": "w061d4-bug3", "title": "Closed before the caller gets them", "points": 10}, {"id": "w061d4-trace", "title": "Predict them", "points": 10}, {"id": "w061d4-challenge", "title": "Challenge: a deployment with rollbacks", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
