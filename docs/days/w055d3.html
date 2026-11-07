@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 55 Day 3: Primes and modular arithmetic | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Week 14 sieved for primes and Week 15 found greatest common divisors by recursion. Today builds the number theory that real programs rely on. A sieve that...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w055d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 55 Day 3: Primes and modular arithmetic">
+<meta property="og:description" content="Week 14 sieved for primes and Week 15 found greatest common divisors by recursion. Today builds the number theory that real programs rely on. A sieve that...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w055d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-55">Week 55: Bits and mathematics</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#sieves-that-remember" data-sec="sieves-that-remember">Sieves that remember</a></li><li><a href="#clock-arithmetic" data-sec="clock-arithmetic">Clock arithmetic</a></li><li><a href="#fast-powers" data-sec="fast-powers">Fast powers</a></li><li><a href="#inverses" data-sec="inverses">Inverses</a></li><li><a href="#combining-clocks" data-sec="combining-clocks">Combining clocks</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w055d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-55">Week 55: Bits and mathematics</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 55, Day 3</span></p>
+      <h1>Primes and modular arithmetic</h1>
+      <div class="day-intro"><p>Week 14 sieved for primes and Week 15 found greatest common divisors by recursion. Today builds the number theory that real programs rely on. A sieve that remembers each number&rsquo;s <strong>smallest prime factor</strong> factorises anything below a limit in a few steps. <strong>Modular arithmetic</strong>, arithmetic on a clock, keeps huge numbers small, and Python&rsquo;s three-argument <code>pow</code> raises numbers to enormous powers in milliseconds. The <strong>extended Euclidean algorithm</strong> finds inverses, so you can divide on the clock too; the <strong>Chinese remainder theorem</strong> combines clocks; and together they make a working (toy) version of RSA, the public-key system that secured the early web.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Build a smallest-prime-factor sieve and factorise numbers quickly</li><li>Use the rules of modular arithmetic and fast modular exponentiation</li><li>Find modular inverses with the extended Euclidean algorithm</li><li>Solve simultaneous remainders with the Chinese remainder theorem</li><li>Compute Euler&rsquo;s totient and explain how RSA uses it</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Sieves that remember: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Clock arithmetic: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Fast powers: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Inverses: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Combining clocks: 20 min"></span><span class="plan-seg s0" style="flex:45" title="Practice: 45 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Sieves that remember</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Clock arithmetic</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Fast powers</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Inverses</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">Combining clocks</span><span class="plan-min">20 min</span></li><li><span class="plan-at">2:00</span><span class="plan-what">Practice</span><span class="plan-min">45 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w055d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w055d3.ipynb" download>download it</a>. Exercises today are worth 130 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w055d3-p1"><textarea class="pc-src pc-code" hidden>print(17 % 5, -17 % 5, (3 * 4) % 5, (3 % 5) * (4 % 5) % 5)
+print(pow(2, 10, 1000), pow(2, 100, 1000), pow(3, -1, 7))
+print((3 * 5) % 7)</textarea></div>
+<p>Python&rsquo;s <code>%</code> always gives a result between 0 and the modulus minus 1, even for negative numbers. Remainders can be taken at any step of a product without changing the final remainder. <code>pow(a, b, m)</code> computes a^b mod m without ever building a^b, and <code>pow(3, -1, 7)</code> finds the number that multiplies by 3 to give 1 on a clock of 7.</p>
+<h2 id="sieves-that-remember">Sieves that remember</h2>
+<p>Week 14&rsquo;s sieve marked composites. A small change makes it far more useful: instead of a True/False flag, store each number&rsquo;s <strong>smallest prime factor</strong> (spf). When p is prime, mark every multiple from p² upwards whose entry is still empty with p.</p>
+<p>Then any number x below the limit factorises in O(log x) steps: divide by <code>spf[x]</code>, then by <code>spf[x // spf[x]]</code>, and so on, until 1. That&rsquo;s how you factorise millions of numbers quickly (counting divisors of everything below a limit, for example). Building the table takes about O(n log log n) time, like the ordinary sieve.</p>
+<p>For a single large number, <strong>trial division</strong> checks divisors up to √x: if x has no factor that small, it&rsquo;s prime (a composite has a factor no bigger than its square root). That&rsquo;s about √x steps: fine for x up to 10¹², slow for 10¹⁸. Friday&rsquo;s Miller-Rabin test checks primality of huge numbers fast.</p>
+<div class="pc pc-example" data-kind="example" data-id="w055d3-e2"><textarea class="pc-src pc-code" hidden>def spf_table(n):
+    spf = list(range(n + 1))                 # spf[x] == x means &quot;prime so far&quot;
+    p = 2
+    while p * p &lt;= n:
+        if spf[p] == p:
+            for multiple in range(p * p, n + 1, p):
+                if spf[multiple] == multiple:
+                    spf[multiple] = p
+        p += 1
+    return spf
+
+def factorise(x, spf):
+    factors = {}
+    while x &gt; 1:
+        p = spf[x]
+        factors[p] = factors.get(p, 0) + 1
+        x //= p
+    return factors
+
+spf = spf_table(1000)
+print(factorise(360, spf), factorise(997, spf), factorise(1000, spf))</textarea></div>
+<h2 id="clock-arithmetic">Clock arithmetic</h2>
+<p>Arithmetic <strong>mod m</strong> keeps only remainders: 0 to m − 1, wrapping round like a clock. Addition, subtraction and multiplication all <strong>respect</strong> remainders:</p>
+<ul>
+<li>(a + b) mod m = ((a mod m) + (b mod m)) mod m, and the same for − and ×.</li>
+</ul>
+<p>So you can reduce after every step, and numbers never grow beyond m². That&rsquo;s why programming contests ask for answers &ldquo;mod 1,000,000,007&rdquo; (a prime just above 10⁹), and why hash functions, checksums and random number generators work mod 2³² or 2⁶⁴. Python&rsquo;s integers never overflow, but reducing still keeps them small and fast.</p>
+<p>Two things don&rsquo;t carry over directly: <strong>division</strong> (you need an inverse, below) and comparing sizes (7 mod 5 is less than 4 mod 5, though 7 &gt; 4).</p>
+<h2 id="fast-powers">Fast powers</h2>
+<p>a^b mod m by repeated squaring (Week 16&rsquo;s fast powers, now mod m): write b in binary. a¹, a², a⁴, a⁸, &hellip; are each the square of the last; multiply together the ones whose bit is set in b. That&rsquo;s O(log b) multiplications of numbers below m, so 2^(10¹⁸) mod m takes about 60 steps. Python&rsquo;s built-in <code>pow(a, b, m)</code> does exactly this, in C.</p>
+<div class="pc pc-example" data-kind="example" data-id="w055d3-e3"><textarea class="pc-src pc-code" hidden>def power_mod(a, b, m):
+    result, a = 1, a % m
+    while b:
+        if b &amp; 1:
+            result = result * a % m
+        a = a * a % m
+        b &gt;&gt;= 1
+    return result
+
+print(power_mod(2, 10 ** 18, 10 ** 9 + 7), pow(2, 10 ** 18, 10 ** 9 + 7))
+print(power_mod(7, 222, 10))           # the last digit of 7 to the power 222</textarea></div>
+<p><strong>Fermat&rsquo;s little theorem</strong> (Pierre de Fermat, 1640): if p is prime and a isn&rsquo;t a multiple of p, then a^(p − 1) mod p = 1. It&rsquo;s the basis of Friday&rsquo;s primality tests, and it gives one inverse: a^(p − 2) times a is a^(p − 1), which is 1, so a^(p − 2) is the inverse of a mod a <strong>prime</strong> p.</p>
+<h2 id="inverses">Inverses</h2>
+<p>To divide by a mod m, multiply by its <strong>inverse</strong>: the x with a × x mod m = 1. It exists exactly when gcd(a, m) = 1 (a and m share no factor). Find it with the <strong>extended Euclidean algorithm</strong>, which returns g = gcd(a, b) together with whole numbers x and y such that a × x + b × y = g (Bézout&rsquo;s identity). If g is 1, then a × x mod b is 1, so x mod b is the inverse.</p>
+<p>The extension tracks how each remainder is made from a and b as Euclid&rsquo;s algorithm runs. Since Python 3.8, <code>pow(a, -1, m)</code> computes the inverse directly (and raises <code>ValueError</code> if it doesn&rsquo;t exist).</p>
+<div class="pc pc-example" data-kind="example" data-id="w055d3-e4"><textarea class="pc-src pc-code" hidden>def extended_gcd(a, b):
+    &quot;&quot;&quot;Return (g, x, y) with a * x + b * y == g == gcd(a, b).&quot;&quot;&quot;
+    x0, y0, x1, y1 = 1, 0, 0, 1
+    while b:
+        q = a // b
+        a, b = b, a - q * b
+        x0, x1 = x1, x0 - q * x1
+        y0, y1 = y1, y0 - q * y1
+    return a, x0, y0
+
+g, x, y = extended_gcd(240, 46)
+print(g, x, y, 240 * x + 46 * y)
+g, x, _ = extended_gcd(3, 7)
+print(x % 7, pow(3, -1, 7))</textarea></div>
+<h2 id="combining-clocks">Combining clocks</h2>
+<p>A number leaves remainder 2 when divided by 3, remainder 3 by 5, and remainder 2 by 7. What is it? The <strong>Chinese remainder theorem</strong> (in Sunzi&rsquo;s <em>Mathematical Classic</em>, around the 3rd to 5th century) says: if the moduli are pairwise coprime, there&rsquo;s exactly one answer modulo their product. Combine two at a time: from x ≡ r₁ (mod m₁) and x ≡ r₂ (mod m₂), write x = r₁ + m₁ × k, and solve m₁ × k ≡ r₂ − r₁ (mod m₂) using the inverse of m₁ mod m₂.</p>
+<p><strong>Euler&rsquo;s totient</strong> φ(n) counts the numbers from 1 to n coprime to n. From the factorisation, φ(n) = n × the product of (1 − 1/p) over its distinct primes. Euler&rsquo;s theorem generalises Fermat&rsquo;s: a^φ(n) mod n = 1 when gcd(a, n) = 1. That&rsquo;s the identity RSA rests on (today&rsquo;s challenge).</p>
+<div class="pc pc-example" data-kind="example" data-id="w055d3-e5"><textarea class="pc-src pc-code" hidden>def crt(r1, m1, r2, m2):
+    k = (r2 - r1) * pow(m1, -1, m2) % m2
+    return (r1 + m1 * k) % (m1 * m2), m1 * m2
+
+x, m = crt(2, 3, 3, 5)
+x, m = crt(x, m, 2, 7)
+print(x, m, [x % 3, x % 5, x % 7])</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A smallest-prime-factor sieve factorises any number below its limit in O(log x) steps; trial division to √x handles single numbers up to about 10¹². Mod m, addition, subtraction and multiplication respect remainders, so reduce at every step. Fast exponentiation squares and multiplies by the bits of the exponent: pow(a, b, m). An inverse of a mod m exists when gcd(a, m) = 1 and comes from the extended Euclidean algorithm (or pow(a, −1, m)); mod a prime p it is also a^(p − 2). The Chinese remainder theorem combines congruences with coprime moduli, and Euler&rsquo;s totient φ(n) gives a^φ(n) ≡ 1 (mod n).</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w055d3-factors" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Factorising fast</div><div class="pc-prompt"><p>Write <code>spf_table(n)</code> (the smallest prime factor of every number 0 to n, with <code>spf[0]</code> and <code>spf[1]</code> left as 0 and 1), <code>factorise(x, spf)</code> (a dict from prime to exponent, <code>{}</code> for 1), and <code>divisor_count(x, spf)</code>: the number of divisors of x, which is the product of (exponent + 1) over its primes.</p></div><textarea class="pc-src pc-code" hidden>def spf_table(n):
+    ___
+
+def factorise(x, spf):
+    ___
+
+def divisor_count(x, spf):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import math, random
+def test_factors():
+    &quot;sieves&quot;
+    spf = spf_table(1000)
+    assert spf[:12] == [0, 1, 2, 3, 2, 5, 2, 7, 2, 3, 2, 11] and spf[97] == 97 and spf[91] == 7
+    assert factorise(360, spf) == {2: 3, 3: 2, 5: 1} and factorise(1, spf) == {} and factorise(97, spf) == {97: 1}
+    assert divisor_count(60, spf) == 12 and divisor_count(1, spf) == 1
+    big = spf_table(200_000)
+    rng = random.Random(1)
+    for _ in range(300):
+        x = rng.randint(1, 200_000)
+        f = factorise(x, big)
+        assert math.prod(p ** e for p, e in f.items()) == x and all(big[p] == p for p in f)
+        if x &lt; 3000:
+            assert divisor_count(x, big) == sum(1 for d in range(1, x + 1) if x % d == 0)</textarea><textarea class="pc-src pc-solution" hidden>def spf_table(n):
+    spf = list(range(n + 1))
+    p = 2
+    while p * p &lt;= n:
+        if spf[p] == p:
+            for multiple in range(p * p, n + 1, p):
+                if spf[multiple] == multiple:
+                    spf[multiple] = p
+        p += 1
+    return spf
+
+def factorise(x, spf):
+    factors = {}
+    while x &gt; 1:
+        p = spf[x]
+        factors[p] = factors.get(p, 0) + 1
+        x //= p
+    return factors
+
+def divisor_count(x, spf):
+    count = 1
+    for e in factorise(x, spf).values():
+        count *= e + 1
+    return count</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w055d3-powers" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Square and multiply</div><div class="pc-prompt"><p>Write <code>power_mod(a, b, m)</code> by repeated squaring, without <code>pow</code> or <code>**</code> (b ≥ 0, m ≥ 1). Then <code>last_digits(a, b, k)</code>: the last k digits of a^b as a string with leading zeros (so the last 3 digits of 2^10 are <code>"024"</code>).</p></div><textarea class="pc-src pc-code" hidden>def power_mod(a, b, m):
+    ___
+
+def last_digits(a, b, k):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_powers():
+    &quot;fast powers&quot;
+    assert power_mod(2, 10, 1000) == 24 and power_mod(7, 0, 13) == 1 and power_mod(5, 3, 1) == 0
+    assert last_digits(2, 10, 3) == &quot;024&quot; and last_digits(7, 222, 1) == &quot;9&quot; and last_digits(3, 10 ** 15, 5) == f&quot;{pow(3, 10 ** 15, 10 ** 5):05d}&quot;
+    rng = random.Random(2)
+    for _ in range(300):
+        a, b, m = rng.randint(0, 10 ** 9), rng.randint(0, 10 ** 18), rng.randint(1, 10 ** 9)
+        assert power_mod(a, b, m) == pow(a, b, m)
+    assert &quot;pow(&quot; not in source and &quot;**&quot; not in source</textarea><textarea class="pc-src pc-solution" hidden>def power_mod(a, b, m):
+    result, a = 1 % m, a % m
+    while b:
+        if b &amp; 1:
+            result = result * a % m
+        a = a * a % m
+        b &gt;&gt;= 1
+    return result
+
+def last_digits(a, b, k):
+    m = 1
+    for _ in range(k):
+        m *= 10
+    return str(power_mod(a, b, m)).zfill(k)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w055d3-inverse" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Dividing on a clock</div><div class="pc-prompt"><p>Write <code>extended_gcd(a, b)</code> returning <code>(g, x, y)</code> with <code>a * x + b * y == g</code>, then <code>mod_inverse(a, m)</code>: the inverse of a mod m between 0 and m − 1, raising <code>ValueError</code> when it doesn&rsquo;t exist (don&rsquo;t use <code>pow</code>). Then <code>mod_divide(a, b, m)</code>: a &ldquo;divided by&rdquo; b mod m.</p></div><textarea class="pc-src pc-code" hidden>def extended_gcd(a, b):
+    ___
+
+def mod_inverse(a, m):
+    ___
+
+def mod_divide(a, b, m):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import math, random
+def test_inverse():
+    &quot;inverses&quot;
+    g, x, y = extended_gcd(240, 46)
+    assert g == 2 and 240 * x + 46 * y == 2
+    assert mod_inverse(3, 7) == 5 and mod_inverse(10, 17) == 12 and mod_divide(4, 3, 7) == 6
+    for bad in ((2, 4), (6, 9)):
+        try:
+            mod_inverse(*bad)
+            assert False
+        except ValueError:
+            pass
+    rng = random.Random(3)
+    for _ in range(300):
+        a, b = rng.randint(0, 10 ** 12), rng.randint(1, 10 ** 12)
+        g, x, y = extended_gcd(a, b)
+        assert g == math.gcd(a, b) and a * x + b * y == g
+        m = rng.randint(2, 10 ** 9)
+        if math.gcd(a, m) == 1:
+            inv = mod_inverse(a, m)
+            assert 0 &lt;= inv &lt; m and a * inv % m == 1
+    assert &quot;pow(&quot; not in source</textarea><textarea class="pc-src pc-solution" hidden>def extended_gcd(a, b):
+    x0, y0, x1, y1 = 1, 0, 0, 1
+    while b:
+        q = a // b
+        a, b = b, a - q * b
+        x0, x1 = x1, x0 - q * x1
+        y0, y1 = y1, y0 - q * y1
+    return a, x0, y0
+
+def mod_inverse(a, m):
+    g, x, _ = extended_gcd(a % m, m)
+    if g != 1:
+        raise ValueError(f&quot;{a} has no inverse mod {m}&quot;)
+    return x % m
+
+def mod_divide(a, b, m):
+    return a * mod_inverse(b, m) % m</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w055d3-crt" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Remainders together</div><div class="pc-prompt"><p>Write <code>crt(remainders, moduli)</code>: <code>(x, M)</code>, the smallest non-negative x with <code>x % m == r</code> for every pair, and M the product of the moduli, combining two at a time. The moduli must be pairwise coprime: raise <code>ValueError</code> otherwise. (You may use <code>pow(a, -1, m)</code> here.)</p></div><textarea class="pc-src pc-code" hidden>def crt(remainders, moduli):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import math, random
+def test_crt():
+    &quot;Chinese remainders&quot;
+    assert crt([2, 3, 2], [3, 5, 7]) == (23, 105) and crt([0], [7]) == (0, 7) and crt([], []) == (0, 1)
+    assert crt([1, 2, 3, 4], [5, 7, 9, 11])[0] % 9 == 3
+    try:
+        crt([1, 2], [4, 6])
+        assert False
+    except ValueError:
+        pass
+    rng = random.Random(4)
+    primes = [3, 5, 7, 11, 13, 17, 19, 23, 29, 31]
+    for _ in range(200):
+        ms = rng.sample(primes, rng.randint(1, 5))
+        x = rng.randrange(math.prod(ms))
+        got = crt([x % m for m in ms], ms)
+        assert got == (x, math.prod(ms))</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+def crt(remainders, moduli):
+    x, M = 0, 1
+    for r, m in zip(remainders, moduli):
+        if math.gcd(M, m) != 1:
+            raise ValueError(&quot;the moduli must be pairwise coprime&quot;)
+        k = (r - x) * pow(M, -1, m) % m
+        x, M = x + M * k, M * m
+    return x % M, M</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w055d3-totient" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Euler&rsquo;s totient</div><div class="pc-prompt"><p>Write <code>phi(n)</code>: Euler&rsquo;s totient of n ≥ 1, by trial division to find its distinct primes and the product formula (whole-number arithmetic only: <code>result -= result // p</code>). Then <code>phi_table(n)</code>: φ of every number 0 to n (with φ(0) = 0), by a sieve: start with <code>t[i] = i</code>, and for each prime p (where <code>t[p]</code> is still p), apply <code>t[k] -= t[k] // p</code> to every multiple k of p.</p></div><textarea class="pc-src pc-code" hidden>def phi(n):
+    ___
+
+def phi_table(n):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import math
+def test_phi():
+    &quot;totients&quot;
+    assert [phi(n) for n in range(1, 13)] == [1, 1, 2, 2, 4, 2, 6, 4, 6, 4, 10, 4]
+    assert phi(10 ** 9 + 7) == 10 ** 9 + 6 and phi(2 ** 40) == 2 ** 39
+    table = phi_table(2000)
+    assert table[:6] == [0, 1, 1, 2, 2, 4]
+    for n in range(1, 2001):
+        assert table[n] == phi(n)
+    for n in range(1, 200):
+        assert phi(n) == sum(1 for k in range(1, n + 1) if math.gcd(k, n) == 1)
+        for a in (2, 3, 7):
+            if math.gcd(a, n) == 1:
+                assert pow(a, phi(n), n) == 1 % n</textarea><textarea class="pc-src pc-solution" hidden>def phi(n):
+    result, p = n, 2
+    while p * p &lt;= n:
+        if n % p == 0:
+            while n % p == 0:
+                n //= p
+            result -= result // p
+        p += 1
+    if n &gt; 1:
+        result -= result // n
+    return result
+
+def phi_table(n):
+    t = list(range(n + 1))
+    for p in range(2, n + 1):
+        if t[p] == p:
+            for k in range(p, n + 1, p):
+                t[k] -= t[k] // p
+    return t</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w055d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Squares slip through</div><div class="pc-prompt"><p>Trial division must try every d with <code>d * d &lt;= n</code>. This stops at <code>d * d &lt; n</code>, so it never tries 2 for 4 or 7 for 49: every square of a prime slips through, and it prints <code>[4, 9, 25, 49]</code>. Fix the condition so it prints <code>[]</code>.</p></div><textarea class="pc-src pc-code" hidden>def is_prime(n):
+    if n &lt; 2:
+        return False
+    d = 2
+    while d * d &lt; n:
+        if n % d == 0:
+            return False
+        d += 1
+    return True
+
+print([n for n in (4, 9, 25, 49) if is_prime(n)])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;up to the square root&quot;
+    expect_output(&quot;[]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def is_prime(n):
+    if n &lt; 2:
+        return False
+    d = 2
+    while d * d &lt;= n:
+        if n % d == 0:
+            return False
+        d += 1
+    return True
+
+print([n for n in (4, 9, 25, 49) if is_prime(n)])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w055d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Fermat&rsquo;s inverse on a non-prime</div><div class="pc-prompt"><p><code>pow(a, m - 2, m)</code> is the inverse of a only when m is <strong>prime</strong>. For m = 8 it gives the wrong answer, and this prints <code>False</code>. Use <code>pow(a, -1, m)</code>, which works for any m with gcd(a, m) = 1, so it prints <code>True</code>.</p></div><textarea class="pc-src pc-code" hidden>a, m = 3, 8
+inv = pow(a, m - 2, m)
+print(a * inv % m == 1)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;general inverses&quot;
+    expect_output(&quot;True&quot;)</textarea><textarea class="pc-src pc-solution" hidden>a, m = 3, 8
+inv = pow(a, -1, m)
+print(a * inv % m == 1)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w055d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Squaring the result</div><div class="pc-prompt"><p>In square and multiply, it&rsquo;s the <strong>base</strong> that is squared each step, not the result. This squares <code>result</code> instead and prints <code>609</code> for 3¹³ mod 1000. Square <code>a</code> so it prints <code>323</code>.</p></div><textarea class="pc-src pc-code" hidden>def power_mod(a, b, m):
+    result = 1
+    while b:
+        if b &amp; 1:
+            result = result * a % m
+        result = result * result % m
+        b &gt;&gt;= 1
+    return result
+
+print(power_mod(3, 13, 1000))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;square the base&quot;
+    expect_output(&quot;323&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def power_mod(a, b, m):
+    result = 1
+    while b:
+        if b &amp; 1:
+            result = result * a % m
+        a = a * a % m
+        b &gt;&gt;= 1
+    return result
+
+print(power_mod(3, 13, 1000))</textarea></div>
+<div class="parsons" data-id="w055d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Extended Euclid</div><div class="pc-prompt"><p>Arrange the lines into the extended Euclidean algorithm. One line is a trap.</p></div><script type="application/json">{"lines": ["def extended_gcd(a, b):", "    x0, y0, x1, y1 = 1, 0, 0, 1", "    while b:", "        q = a // b", "        a, b = b, a - q * b", "        x0, x1 = x1, x0 - q * x1", "        y0, y1 = y1, y0 - q * y1", "    return a, x0, y0"], "distractors": ["        x0, x1 = x1, x0 + q * x1"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w055d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # -7 % 3
+q = ___   # pow(2, 20, 1000)
+r = ___   # the inverse of 4 mod 9
+s = ___   # phi(36)
+t = ___   # the smallest x with x % 4 == 3 and x % 5 == 2</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 2 and q == 576 and r == 7, &quot;p, q and r&quot;
+    assert s == 12 and t == 7, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 2
+q = 576
+r = 7
+s = 12
+t = 7</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w055d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does a smallest-prime-factor sieve let you do?", "answer": 1, "explain": "Divide by spf[x] repeatedly.", "options": ["Sort numbers", "Factorise any number below the limit in O(log x) steps", "Find gcds", "Test huge primes"]}, {"type": "mc", "q": "Why does trial division stop at \u221ax?", "answer": 1, "explain": "If none is found, x is prime.", "options": ["Speed only", "A composite has a factor no bigger than its square root", "Convention", "Primes are small"]}, {"type": "mc", "q": "Which operations respect remainders directly?", "answer": 1, "explain": "Division needs an inverse.", "options": ["All four", "Addition, subtraction and multiplication", "Only addition", "Division only"]}, {"type": "mc", "q": "How many multiplications does fast exponentiation need for a^b?", "answer": 1, "explain": "One square per bit, plus one multiply per 1 bit.", "options": ["b", "About log b", "\u221ab", "1"]}, {"type": "mc", "q": "When does a have an inverse mod m?", "answer": 1, "explain": "B\u00e9zout gives it.", "options": ["Always", "When gcd(a, m) = 1", "When m is even", "When a &lt; m"]}, {"type": "mc", "q": "What does the extended Euclidean algorithm return?", "answer": 1, "explain": "x mod b is the inverse when g = 1.", "options": ["gcd only", "g and x, y with a\u00b7x + b\u00b7y = g", "lcm", "A factorisation"]}, {"type": "mc", "q": "Mod a prime p, what is an inverse of a (a not a multiple of p)?", "answer": 1, "explain": "From Fermat&rsquo;s little theorem.", "options": ["a", "a^(p \u2212 2) mod p", "p \u2212 a", "a\u00b2"]}, {"type": "mc", "q": "What does the Chinese remainder theorem need?", "answer": 1, "explain": "Then the answer is unique mod the product.", "options": ["Prime moduli", "Pairwise coprime moduli", "Equal remainders", "Even moduli"]}, {"type": "mc", "q": "What is \u03c6(p) for a prime p?", "answer": 1, "explain": "Every smaller positive number is coprime to it.", "options": ["p", "p \u2212 1", "1", "2"]}, {"type": "output", "q": "What does this print?", "answer": "5 1", "explain": "10 \u00d7 5 = 50 = 7 \u00d7 7 + 1.", "code": "print(pow(10, -1, 7), 10 * pow(10, -1, 7) % 7)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w055d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a toy RSA</div><div class="pc-prompt"><p>In 1977 Ron Rivest, Adi Shamir and Leonard Adleman published a public-key system: anyone can <strong>encrypt</strong> with a public key, but only the holder of the private key can <strong>decrypt</strong>. (Clifford Cocks had found the same idea in 1973 at GCHQ, kept secret until 1997.) Build a toy version. It&rsquo;s for understanding only: real RSA uses primes hundreds of digits long and careful padding, and you should always use a tested library.</p>
+<ul>
+<li><code>make_keys(p, q, e=65537)</code>: from two distinct primes, n = p × q and φ = (p − 1)(q − 1); e must be coprime to φ (raise <code>ValueError</code> otherwise); d is the inverse of e mod φ. Return <code>((n, e), (n, d))</code>, the public and private keys.</li>
+<li><code>encrypt(m, public)</code> = m^e mod n and <code>decrypt(c, private)</code> = c^d mod n, for whole numbers 0 ≤ m &lt; n (<code>ValueError</code> otherwise).</li>
+<li><code>encrypt_text(text, public)</code>: turn the text into bytes (UTF-8), the bytes into one big number with <code>int.from_bytes(data, "big")</code>, check it&rsquo;s smaller than n, and encrypt; <code>decrypt_text(c, private)</code> reverses it (find the byte length from the number&rsquo;s <code>bit_length</code>).</li>
+<li><code>sign(m, private)</code> = m^d mod n, and <code>verify(m, signature, public)</code>: True if signature^e mod n equals m.</li>
+<li><code>crack(public)</code>: recover the private key by factorising n with trial division, which is only possible because the toy n is small. That is exactly why real n are enormous.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import math
+
+def make_keys(p, q, e=65537):
+    ___
+
+def encrypt(m, public):
+    ___
+
+def decrypt(c, private):
+    ___
+
+def encrypt_text(text, public):
+    ___
+
+def decrypt_text(c, private):
+    ___
+
+def sign(m, private):
+    ___
+
+def verify(m, signature, public):
+    ___
+
+def crack(public):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_rsa():
+    &quot;a toy RSA&quot;
+    public, private = make_keys(61, 53, 17)
+    assert public == (3233, 17) and private == (3233, 2753)
+    assert encrypt(65, public) == 2790 and decrypt(2790, private) == 65
+    try:
+        make_keys(61, 53, 6)
+        assert False
+    except ValueError:
+        pass
+    try:
+        encrypt(4000, public)
+        assert False
+    except ValueError:
+        pass
+    p, q = 1_000_003, 999_983
+    public, private = make_keys(p, q)
+    for m in (0, 1, 42, 123456789, p * q - 1):
+        assert decrypt(encrypt(m, public), private) == m
+    pub2, priv2 = make_keys(2_147_483_647, 2_305_843_009_213_693_951)
+    c = encrypt_text(&quot;hi, Atlas&quot;, pub2)
+    assert decrypt_text(c, priv2) == &quot;hi, Atlas&quot;
+    assert verify(99, sign(99, private), public) and not verify(98, sign(99, private), public)
+    assert crack(public) == private and crack(make_keys(61, 53, 17)[0]) == (3233, 2753)</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+def make_keys(p, q, e=65537):
+    n, phi = p * q, (p - 1) * (q - 1)
+    if math.gcd(e, phi) != 1:
+        raise ValueError(&quot;e must be coprime to (p - 1)(q - 1)&quot;)
+    d = pow(e, -1, phi)
+    return (n, e), (n, d)
+
+def _check(m, n):
+    if not 0 &lt;= m &lt; n:
+        raise ValueError(&quot;the message must be at least 0 and less than n&quot;)
+
+def encrypt(m, public):
+    n, e = public
+    _check(m, n)
+    return pow(m, e, n)
+
+def decrypt(c, private):
+    n, d = private
+    _check(c, n)
+    return pow(c, d, n)
+
+def encrypt_text(text, public):
+    m = int.from_bytes(text.encode(&quot;utf-8&quot;), &quot;big&quot;)
+    return encrypt(m, public)
+
+def decrypt_text(c, private):
+    m = decrypt(c, private)
+    data = m.to_bytes((m.bit_length() + 7) // 8, &quot;big&quot;)
+    return data.decode(&quot;utf-8&quot;)
+
+def sign(m, private):
+    n, d = private
+    _check(m, n)
+    return pow(m, d, n)
+
+def verify(m, signature, public):
+    n, e = public
+    return pow(signature, e, n) == m % n
+
+def crack(public):
+    n, e = public
+    p = 2
+    while n % p:
+        p += 1
+    q = n // p
+    return make_keys(p, q, e)[1]</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Find a number that leaves remainder 1 when divided by 2, 3, 4, 5 and 6, but is divisible by 7. (It&rsquo;s an old puzzle; try the Chinese remainder idea.) Tomorrow: counting and combinatorics.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w055d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w055d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w055d3", "week": 55, "day": 3, "title": "Primes and modular arithmetic", "exercises": [{"id": "w055d3-factors", "title": "Factorising fast", "points": 15}, {"id": "w055d3-powers", "title": "Square and multiply", "points": 10}, {"id": "w055d3-inverse", "title": "Dividing on a clock", "points": 15}, {"id": "w055d3-crt", "title": "Remainders together", "points": 15}, {"id": "w055d3-totient", "title": "Euler's totient", "points": 10}, {"id": "w055d3-bug1", "title": "Squares slip through", "points": 10}, {"id": "w055d3-bug2", "title": "Fermat's inverse on a non-prime", "points": 10}, {"id": "w055d3-bug3", "title": "Squaring the result", "points": 10}, {"id": "w055d3-trace", "title": "Predict them", "points": 10}, {"id": "w055d3-challenge", "title": "Challenge: a toy RSA", "points": 25}], "points": 130}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
