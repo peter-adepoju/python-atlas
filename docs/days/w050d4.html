@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 50 Day 4: Connected components | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Many graphs come in separate pieces: groups of friends who don’t know each other, islands on a map, networks of computers that can’t reach one another. Each...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w050d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 50 Day 4: Connected components">
+<meta property="og:description" content="Many graphs come in separate pieces: groups of friends who don’t know each other, islands on a map, networks of computers that can’t reach one another. Each...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w050d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-50">Week 50: Graphs I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#labelling-components" data-sec="labelling-components">Labelling components</a></li><li><a href="#islands" data-sec="islands">Islands</a></li><li><a href="#union-find" data-sec="union-find">Union-find</a></li><li><a href="#edges-that-keep-arriving" data-sec="edges-that-keep-arriving">Edges that keep arriving</a></li><li><a href="#directed-graphs" data-sec="directed-graphs">Directed graphs</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w050d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-50">Week 50: Graphs I</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 50, Day 4</span></p>
+      <h1>Connected components</h1>
+      <div class="day-intro"><p>Many graphs come in separate pieces: groups of friends who don&rsquo;t know each other, islands on a map, networks of computers that can&rsquo;t reach one another. Each piece is a <strong>connected component</strong>. Finding them is the first thing to do with an unfamiliar graph, and it&rsquo;s a direct use of BFS or DFS: search from any vertex not yet labelled, and everything the search reaches is one component. Today you&rsquo;ll label components, count islands in grids, and then meet a new structure built for graphs whose edges keep <strong>arriving</strong>: union-find, which answers &lsquo;are these two connected?&rsquo; in nearly constant time. The challenge extends components to directed graphs, where &lsquo;connected&rsquo; needs a more careful meaning.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Label the connected components of an undirected graph with repeated BFS or DFS, in O(V + E)</li><li>Find islands and their sizes in a grid</li><li>Build a union-find structure with path compression and union by size</li><li>Track components as edges arrive, and detect the edge that first makes a cycle</li><li>Distinguish weakly and strongly connected components in directed graphs</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Labelling components: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Islands: 20 min"></span><span class="plan-seg s1" style="flex:30" title="Union-find: 30 min"></span><span class="plan-seg s0" style="flex:20" title="Edges that keep arriving: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Directed graphs: 15 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Labelling components</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Islands</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Union-find</span><span class="plan-min">30 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Edges that keep arriving</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">Directed graphs</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w050d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w050d4.ipynb" download>download it</a>. Exercises today are worth 130 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w050d4-p1"><textarea class="pc-src pc-code" hidden>adj = {1: [2], 2: [1, 3], 3: [2], 4: [5], 5: [4], 6: []}
+
+label, count = {}, 0
+for s in adj:
+    if s in label:
+        continue
+    count += 1
+    stack = [s]
+    label[s] = count
+    while stack:
+        v = stack.pop()
+        for w in adj[v]:
+            if w not in label:
+                label[w] = count
+                stack.append(w)
+print(count, label)</textarea></div>
+<p>Three pieces: {1, 2, 3}, {4, 5} and the lonely 6. Each new search starts from a vertex no earlier search reached, and labels everything it finds.</p>
+<h2 id="labelling-components">Labelling components</h2>
+<p>In an undirected graph, two vertices are in the same <strong>connected component</strong> when there&rsquo;s a path between them. Components split the vertices into separate groups: every vertex is in exactly one.</p>
+<p>To find them all: go through the vertices; whenever one has no label yet, start a BFS or DFS from it and give everything it reaches a new label. Across all the searches, every vertex and edge is handled once, so the total is <strong>O(V + E)</strong>, however many components there are.</p>
+<p>With labels, &ldquo;are u and v connected?&rdquo; is a dict lookup, and component sizes, the largest component, or the number of isolated vertices all follow at once.</p>
+<div class="pc pc-example" data-kind="example" data-id="w050d4-e2"><textarea class="pc-src pc-code" hidden>from collections import deque, Counter
+
+def components(adj):
+    label = {}
+    for s in adj:
+        if s in label:
+            continue
+        label[s] = s                         # name each component after its first vertex
+        queue = deque([s])
+        while queue:
+            v = queue.popleft()
+            for w in adj[v]:
+                if w not in label:
+                    label[w] = s
+                    queue.append(w)
+    return label
+
+friends = {&quot;ana&quot;: [&quot;ben&quot;], &quot;ben&quot;: [&quot;ana&quot;, &quot;cy&quot;], &quot;cy&quot;: [&quot;ben&quot;], &quot;dee&quot;: [&quot;eve&quot;], &quot;eve&quot;: [&quot;dee&quot;], &quot;fay&quot;: []}
+label = components(friends)
+sizes = Counter(label.values())
+print(label, dict(sizes), label[&quot;ana&quot;] == label[&quot;cy&quot;], label[&quot;ana&quot;] == label[&quot;eve&quot;])</textarea></div>
+<h2 id="islands">Islands</h2>
+<p>A grid of land and water is an implicit graph (Monday): land cells are vertices, joined to land cells up, down, left and right. Its components are <strong>islands</strong>. Counting them, finding the largest, or measuring each one&rsquo;s coastline are all component problems, solved by searching from each unlabelled land cell. (Whether diagonal neighbours count as connected is a choice the problem must state; here they don&rsquo;t.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w050d4-e3"><textarea class="pc-src pc-code" hidden>def islands(grid):
+    rows, cols = len(grid), len(grid[0])
+    seen, sizes = set(), []
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] != &quot;#&quot; or (r, c) in seen:
+                continue
+            seen.add((r, c))
+            stack, size = [(r, c)], 0
+            while stack:
+                y, x = stack.pop()
+                size += 1
+                for ny, nx in ((y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)):
+                    if 0 &lt;= ny &lt; rows and 0 &lt;= nx &lt; cols and grid[ny][nx] == &quot;#&quot; and (ny, nx) not in seen:
+                        seen.add((ny, nx))
+                        stack.append((ny, nx))
+            sizes.append(size)
+    return sizes
+
+sea = [&quot;##..#&quot;,
+       &quot;#...#&quot;,
+       &quot;..#..&quot;,
+       &quot;....#&quot;]
+print(islands(sea))</textarea></div>
+<h2 id="union-find">Union-find</h2>
+<p>Labelling with a search works when the whole graph is known in advance. But often edges <strong>arrive</strong> one at a time (friendships made, cables laid, pixels joined) and after each you want to know: are these two connected now? How many pieces are there? Re-running a search after every edge costs O(V + E) each time.</p>
+<p>A <strong>union-find</strong> structure (also called a <strong>disjoint-set</strong> structure) handles this. Each component is a small tree, stored as a dict from each vertex to its <strong>parent</strong>; the root of the tree names the component.</p>
+<ul>
+<li><code>find(x)</code>: follow parents up to the root.</li>
+<li><code>union(a, b)</code>: find both roots; if they differ, make one root the parent of the other. That&rsquo;s the whole merge.</li>
+</ul>
+<p>Two improvements keep the trees very flat:</p>
+<ul>
+<li><strong>Union by size</strong>: hang the smaller tree under the larger root, so trees stay shallow (height at most log₂ n).</li>
+<li><strong>Path compression</strong>: after finding the root, point every vertex on the way directly at it, so the next find is immediate.</li>
+</ul>
+<p>With both, a long run of operations costs so little per operation that it&rsquo;s effectively constant: the exact bound, proved by Robert Tarjan in 1975, involves the inverse Ackermann function, which is at most 4 for any input that could ever exist. The structure itself goes back to Bernard Galler and Michael Fischer in 1964.</p>
+<div class="pc pc-example" data-kind="example" data-id="w050d4-e4"><textarea class="pc-src pc-code" hidden>class UnionFind:
+    def __init__(self):
+        self.parent, self.size = {}, {}
+
+    def add(self, x):
+        if x not in self.parent:
+            self.parent[x], self.size[x] = x, 1
+
+    def find(self, x):
+        self.add(x)
+        root = x
+        while self.parent[root] != root:
+            root = self.parent[root]
+        while self.parent[x] != root:                # path compression
+            self.parent[x], x = root, self.parent[x]
+        return root
+
+    def union(self, a, b):
+        ra, rb = self.find(a), self.find(b)
+        if ra == rb:
+            return False                              # already connected
+        if self.size[ra] &lt; self.size[rb]:
+            ra, rb = rb, ra
+        self.parent[rb] = ra                          # smaller tree under the larger
+        self.size[ra] += self.size[rb]
+        return True
+
+uf = UnionFind()
+for a, b in [(&quot;ana&quot;, &quot;ben&quot;), (&quot;cy&quot;, &quot;dee&quot;), (&quot;ben&quot;, &quot;cy&quot;)]:
+    uf.union(a, b)
+uf.add(&quot;eve&quot;)
+print(uf.find(&quot;ana&quot;) == uf.find(&quot;dee&quot;), uf.find(&quot;eve&quot;) == uf.find(&quot;ana&quot;), uf.size[uf.find(&quot;ana&quot;)])</textarea></div>
+<h2 id="edges-that-keep-arriving">Edges that keep arriving</h2>
+<p>With union-find, a running count of components is easy: start with one per vertex, and subtract one each time <code>union</code> actually merges two. Two classic questions:</p>
+<ul>
+<li><strong>When does everything become connected?</strong> Add edges in order until the count reaches 1.</li>
+<li><strong>Which edge first makes a cycle?</strong> The first edge whose two ends already have the same root: it joins two vertices that were connected already. (That&rsquo;s also how next week&rsquo;s Kruskal&rsquo;s algorithm avoids cycles while building a minimum spanning tree.)</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w050d4-e5"><textarea class="pc-src pc-code" hidden>class UnionFind:
+    def __init__(self, items):
+        self.parent = {x: x for x in items}
+        self.size = {x: 1 for x in items}
+        self.count = len(self.parent)
+
+    def find(self, x):
+        root = x
+        while self.parent[root] != root:
+            root = self.parent[root]
+        while self.parent[x] != root:
+            self.parent[x], x = root, self.parent[x]
+        return root
+
+    def union(self, a, b):
+        ra, rb = self.find(a), self.find(b)
+        if ra == rb:
+            return False
+        if self.size[ra] &lt; self.size[rb]:
+            ra, rb = rb, ra
+        self.parent[rb] = ra
+        self.size[ra] += self.size[rb]
+        self.count -= 1
+        return True
+
+cables = [(1, 2), (3, 4), (2, 3), (1, 4), (5, 6), (4, 5)]
+uf = UnionFind(range(1, 7))
+for a, b in cables:
+    merged = uf.union(a, b)
+    print(f&quot;cable {a}-{b}: {&#x27;joins two networks&#x27; if merged else &#x27;makes a loop&#x27;}, {uf.count} network(s)&quot;)</textarea></div>
+<h2 id="directed-graphs">Directed graphs</h2>
+<p>In a directed graph, &ldquo;connected&rdquo; has two meanings:</p>
+<ul>
+<li><strong>Weakly connected</strong>: connected if you ignore the directions. Find these by treating every edge as two-way.</li>
+<li><strong>Strongly connected</strong>: every vertex can reach every other <strong>following</strong> the directions. A one-way street system is usable only if it&rsquo;s strongly connected.</li>
+</ul>
+<p>The <strong>strongly connected components</strong> (SCCs) of a directed graph are its maximal strongly connected groups. Squash each into a single vertex and what&rsquo;s left is always a DAG, which is why SCCs are a standard first step in analysing dependencies, web links and state machines. Today&rsquo;s challenge finds them with two depth-first searches.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Connected components split an undirected graph&rsquo;s vertices into groups joined by paths. Label them by searching (BFS or DFS) from every unlabelled vertex: O(V + E) in total. Grid islands are components of an implicit graph. Union-find keeps components as trees of parent links: <code>find</code> follows parents to the root, <code>union</code> links two roots; with union by size and path compression each operation is effectively constant. It tracks components as edges arrive, counts them, and spots the first edge that closes a cycle. In directed graphs, weakly connected ignores directions; strongly connected components (everyone reaches everyone) squash into a DAG.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d4-label" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Labelling components</div><div class="pc-prompt"><p>Write <code>components(adj)</code>: a list of components, each a sorted list of vertices, the list sorted by each component&rsquo;s smallest vertex. Use an explicit stack or a queue (the checks use a 20,000-vertex chain). Then <code>connected(adj, u, v)</code> and <code>isolated(adj)</code>: the sorted list of vertices with no edges.</p></div><textarea class="pc-src pc-code" hidden>def components(adj):
+    ___
+
+def connected(adj, u, v):
+    ___
+
+def isolated(adj):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_components():
+    &quot;components&quot;
+    adj = {1: [2], 2: [1, 3], 3: [2], 4: [5], 5: [4], 6: []}
+    assert components(adj) == [[1, 2, 3], [4, 5], [6]]
+    assert connected(adj, 1, 3) and not connected(adj, 3, 4) and isolated(adj) == [6]
+    assert components({}) == []
+    chain = {i: [j for j in (i - 1, i + 1) if 0 &lt;= j &lt; 20_000] for i in range(20_000)}
+    assert len(components(chain)) == 1
+    rng = random.Random(1)
+    for _ in range(100):
+        n = rng.randint(1, 10)
+        g = {v: [] for v in range(n)}
+        for _ in range(rng.randint(0, 8)):
+            if n &gt; 1:
+                a, b = rng.sample(range(n), 2)
+                g[a].append(b)
+                g[b].append(a)
+        comps = components(g)
+        assert sorted(v for c in comps for v in c) == list(range(n))
+        for c in comps:
+            for v in c:
+                assert all(w in c for w in g[v])</textarea><textarea class="pc-src pc-solution" hidden>def components(adj):
+    seen, out = set(), []
+    for s in adj:
+        if s in seen:
+            continue
+        seen.add(s)
+        stack, comp = [s], []
+        while stack:
+            v = stack.pop()
+            comp.append(v)
+            for w in adj[v]:
+                if w not in seen:
+                    seen.add(w)
+                    stack.append(w)
+        out.append(sorted(comp))
+    return sorted(out, key=lambda c: c[0])
+
+def connected(adj, u, v):
+    seen, stack = {u}, [u]
+    while stack:
+        x = stack.pop()
+        if x == v:
+            return True
+        for w in adj[x]:
+            if w not in seen:
+                seen.add(w)
+                stack.append(w)
+    return False
+
+def isolated(adj):
+    return sorted(v for v, ns in adj.items() if not ns)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d4-islands" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Islands</div><div class="pc-prompt"><p>In a grid of <code>#</code> (land) and <code>.</code> (water), with land joined up, down, left and right only, write <code>island_sizes(grid)</code>: the sizes of all islands, largest first. Then <code>coastline(grid)</code>: for each island (in the same order), its perimeter, counting each side of a land cell that faces water or the edge of the grid. Then <code>lakes(grid)</code>: the number of water components that <strong>don&rsquo;t</strong> touch the edge of the grid.</p></div><textarea class="pc-src pc-code" hidden>def island_sizes(grid):
+    ___
+
+def coastline(grid):
+    ___
+
+def lakes(grid):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_islands():
+    &quot;islands&quot;
+    sea = [&quot;##..#&quot;,
+           &quot;#...#&quot;,
+           &quot;..#..&quot;,
+           &quot;....#&quot;]
+    assert island_sizes(sea) == [3, 2, 1, 1] and coastline(sea) == [8, 6, 4, 4]
+    assert island_sizes([&quot;....&quot;]) == [] and coastline([&quot;#&quot;]) == [4]
+    ring = [&quot;#####&quot;,
+            &quot;#...#&quot;,
+            &quot;#.#.#&quot;,
+            &quot;#####&quot;]
+    assert lakes(ring) == 1 and island_sizes(ring) == [15] and lakes(sea) == 0</textarea><textarea class="pc-src pc-solution" hidden>def _parts(grid, kind):
+    rows, cols = len(grid), len(grid[0])
+    seen, parts = set(), []
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] != kind or (r, c) in seen:
+                continue
+            seen.add((r, c))
+            stack, cells = [(r, c)], []
+            while stack:
+                y, x = stack.pop()
+                cells.append((y, x))
+                for ny, nx in ((y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)):
+                    if 0 &lt;= ny &lt; rows and 0 &lt;= nx &lt; cols and grid[ny][nx] == kind and (ny, nx) not in seen:
+                        seen.add((ny, nx))
+                        stack.append((ny, nx))
+            parts.append(cells)
+    return parts
+
+def _ordered_islands(grid):
+    return sorted(_parts(grid, &quot;#&quot;), key=lambda cells: (-len(cells), min(cells)))
+
+def island_sizes(grid):
+    return [len(cells) for cells in _ordered_islands(grid)]
+
+def coastline(grid):
+    rows, cols = len(grid), len(grid[0])
+    out = []
+    for cells in _ordered_islands(grid):
+        edges = 0
+        for y, x in cells:
+            for ny, nx in ((y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)):
+                if not (0 &lt;= ny &lt; rows and 0 &lt;= nx &lt; cols) or grid[ny][nx] != &quot;#&quot;:
+                    edges += 1
+        out.append(edges)
+    return out
+
+def lakes(grid):
+    rows, cols = len(grid), len(grid[0])
+    return sum(1 for cells in _parts(grid, &quot;.&quot;)
+               if all(0 &lt; y &lt; rows - 1 and 0 &lt; x &lt; cols - 1 for y, x in cells))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d4-uf" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Union-find</div><div class="pc-prompt"><p>Write <code>UnionFind()</code> with <code>add(x)</code>, <code>find(x)</code> (adding x if new), <code>union(a, b)</code> (returning whether two components merged), <code>connected(a, b)</code>, <code>size_of(x)</code> (the size of x&rsquo;s component), <code>count</code> (an attribute: the number of components), and <code>groups()</code>: a list of sorted lists, sorted by smallest member. Use union by size and path compression, both <strong>without recursion</strong> (the checks build a chain of 50,000 unions).</p></div><textarea class="pc-src pc-code" hidden>class UnionFind:
+    def __init__(self):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>import random, time
+def test_uf():
+    &quot;union-find&quot;
+    uf = UnionFind()
+    assert uf.union(&quot;ana&quot;, &quot;ben&quot;) and uf.union(&quot;cy&quot;, &quot;dee&quot;) and not uf.union(&quot;ben&quot;, &quot;ana&quot;)
+    uf.add(&quot;eve&quot;)
+    assert uf.count == 3 and uf.connected(&quot;ana&quot;, &quot;ben&quot;) and not uf.connected(&quot;ana&quot;, &quot;cy&quot;)
+    uf.union(&quot;ben&quot;, &quot;cy&quot;)
+    assert uf.size_of(&quot;dee&quot;) == 4 and uf.count == 2 and uf.groups() == [[&quot;ana&quot;, &quot;ben&quot;, &quot;cy&quot;, &quot;dee&quot;], [&quot;eve&quot;]]
+def test_random():
+    &quot;against labelling&quot;
+    rng = random.Random(2)
+    uf, edges = UnionFind(), []
+    for v in range(30):
+        uf.add(v)
+    for _ in range(40):
+        a, b = rng.sample(range(30), 2)
+        uf.union(a, b)
+        edges.append((a, b))
+        label = {v: v for v in range(30)}
+        changed = True
+        while changed:
+            changed = False
+            for x, y in edges:
+                m = min(label[x], label[y])
+                if label[x] != m or label[y] != m:
+                    label[x] = label[y] = m
+                    changed = True
+        for x in range(30):
+            for y in range(0, 30, 7):
+                assert uf.connected(x, y) == (label[x] == label[y])
+        assert uf.count == len(set(label.values()))
+def test_big():
+    &quot;fast and flat&quot;
+    uf = UnionFind()
+    t0 = time.perf_counter()
+    for i in range(50_000):
+        uf.union(i, i + 1)
+    for i in range(50_000):
+        uf.find(i)
+    assert uf.count == 1 and uf.size_of(0) == 50_001 and time.perf_counter() - t0 &lt; 3</textarea><textarea class="pc-src pc-solution" hidden>class UnionFind:
+    def __init__(self):
+        self.parent, self.size = {}, {}
+        self.count = 0
+
+    def add(self, x):
+        if x not in self.parent:
+            self.parent[x], self.size[x] = x, 1
+            self.count += 1
+
+    def find(self, x):
+        self.add(x)
+        root = x
+        while self.parent[root] != root:
+            root = self.parent[root]
+        while self.parent[x] != root:
+            self.parent[x], x = root, self.parent[x]
+        return root
+
+    def union(self, a, b):
+        ra, rb = self.find(a), self.find(b)
+        if ra == rb:
+            return False
+        if self.size[ra] &lt; self.size[rb]:
+            ra, rb = rb, ra
+        self.parent[rb] = ra
+        self.size[ra] += self.size[rb]
+        self.count -= 1
+        return True
+
+    def connected(self, a, b):
+        return self.find(a) == self.find(b)
+
+    def size_of(self, x):
+        return self.size[self.find(x)]
+
+    def groups(self):
+        out = {}
+        for x in self.parent:
+            out.setdefault(self.find(x), []).append(x)
+        return sorted((sorted(g) for g in out.values()), key=lambda g: g[0])</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d4-arriving" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">As the cables arrive</div><div class="pc-prompt"><p>Cables between computers 1 to n arrive in order. Write <code>networks_after_each(n, cables)</code>: the number of separate networks after each cable; <code>all_connected_at(n, cables)</code>: the 1-based number of the cable after which every computer is connected (<code>None</code> if never; 0 if n ≤ 1); and <code>first_loop(cables)</code>: the first cable <code>(a, b)</code> that joins two computers already connected, or <code>None</code>. Use union-find (write a small one, or reuse yours).</p></div><textarea class="pc-src pc-code" hidden>def networks_after_each(n, cables):
+    ___
+
+def all_connected_at(n, cables):
+    ___
+
+def first_loop(cables):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cables():
+    &quot;cables&quot;
+    cables = [(1, 2), (3, 4), (2, 3), (1, 4), (5, 6), (4, 5)]
+    assert networks_after_each(6, cables) == [5, 4, 3, 3, 2, 1]
+    assert all_connected_at(6, cables) == 6 and all_connected_at(7, cables) is None and all_connected_at(1, []) == 0
+    assert first_loop(cables) == (1, 4) and first_loop([(1, 2), (2, 3)]) is None</textarea><textarea class="pc-src pc-solution" hidden>def _uf(items):
+    parent = {x: x for x in items}
+    def find(x):
+        parent.setdefault(x, x)
+        root = x
+        while parent[root] != root:
+            root = parent[root]
+        while parent[x] != root:
+            parent[x], x = root, parent[x]
+        return root
+    return parent, find
+
+def networks_after_each(n, cables):
+    parent, find = _uf(range(1, n + 1))
+    count, out = n, []
+    for a, b in cables:
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+            count -= 1
+        out.append(count)
+    return out
+
+def all_connected_at(n, cables):
+    if n &lt;= 1:
+        return 0
+    for i, count in enumerate(networks_after_each(n, cables), start=1):
+        if count == 1:
+            return i
+    return None
+
+def first_loop(cables):
+    parent, find = _uf([])
+    for a, b in cables:
+        ra, rb = find(a), find(b)
+        if ra == rb:
+            return (a, b)
+        parent[ra] = rb
+    return None</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d4-merge" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Merging records</div><div class="pc-prompt"><p>A sign-up list has records <code>(name, emails)</code>; two records belong to the same person when they share <strong>any</strong> email address (directly or through a chain of shared addresses). Write <code>merge_people(records)</code>: a list of <code>(name, sorted emails)</code>, one per person, using the name from the <strong>first</strong> record of each group, sorted by the first email. Join each record&rsquo;s emails with union-find over email addresses.</p></div><textarea class="pc-src pc-code" hidden>def merge_people(records):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_merge():
+    &quot;merging&quot;
+    records = [(&quot;Ada&quot;, [&quot;ada@x.org&quot;, &quot;a.l@y.org&quot;]), (&quot;Ada L&quot;, [&quot;a.l@y.org&quot;, &quot;ada@z.net&quot;]),
+               (&quot;Bo&quot;, [&quot;bo@x.org&quot;]), (&quot;Ada&quot;, [&quot;ada@q.com&quot;]), (&quot;Bo Y&quot;, [&quot;bo@x.org&quot;, &quot;b@y.org&quot;])]
+    assert merge_people(records) == [
+        (&quot;Ada&quot;, [&quot;a.l@y.org&quot;, &quot;ada@x.org&quot;, &quot;ada@z.net&quot;]),
+        (&quot;Ada&quot;, [&quot;ada@q.com&quot;]),
+        (&quot;Bo&quot;, [&quot;b@y.org&quot;, &quot;bo@x.org&quot;]),
+    ]
+    assert merge_people([]) == [] and merge_people([(&quot;Cy&quot;, [&quot;c@x&quot;, &quot;c@x&quot;])]) == [(&quot;Cy&quot;, [&quot;c@x&quot;])]
+    chain = [(f&quot;p{i}&quot;, [f&quot;e{i}&quot;, f&quot;e{i + 1}&quot;]) for i in range(200)]
+    assert merge_people(chain) == [(&quot;p0&quot;, sorted(f&quot;e{i}&quot; for i in range(201)))]</textarea><textarea class="pc-src pc-solution" hidden>def merge_people(records):
+    parent, owner = {}, {}
+    def find(x):
+        parent.setdefault(x, x)
+        root = x
+        while parent[root] != root:
+            root = parent[root]
+        while parent[x] != root:
+            parent[x], x = root, parent[x]
+        return root
+    for name, emails in records:
+        for e in emails:
+            owner.setdefault(e, name)
+            parent[find(e)] = find(emails[0])
+    groups = {}
+    for name, emails in records:
+        for e in emails:
+            groups.setdefault(find(e), set()).add(e)
+    first_name = {}
+    for name, emails in records:
+        first_name.setdefault(find(emails[0]), name)
+    out = [(first_name[root], sorted(es)) for root, es in groups.items()]
+    return sorted(out, key=lambda p: p[1][0])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w050d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Linking the wrong things</div><div class="pc-prompt"><p>This union links <code>a</code> directly under <code>b</code> instead of linking their <strong>roots</strong>, so when <code>a</code> already has a parent, that link is overwritten and the old group falls apart: this prints <code>False</code>. Link root to root so it prints <code>True</code>.</p></div><textarea class="pc-src pc-code" hidden>parent = {x: x for x in &quot;abcd&quot;}
+
+def find(x):
+    while parent[x] != x:
+        x = parent[x]
+    return x
+
+def union(a, b):
+    parent[a] = b
+
+union(&quot;a&quot;, &quot;b&quot;)
+union(&quot;a&quot;, &quot;c&quot;)
+print(find(&quot;b&quot;) == find(&quot;c&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;roots&quot;
+    expect_output(&quot;True&quot;)</textarea><textarea class="pc-src pc-solution" hidden>parent = {x: x for x in &quot;abcd&quot;}
+
+def find(x):
+    while parent[x] != x:
+        x = parent[x]
+    return x
+
+def union(a, b):
+    parent[find(a)] = find(b)
+
+union(&quot;a&quot;, &quot;b&quot;)
+union(&quot;a&quot;, &quot;c&quot;)
+print(find(&quot;b&quot;) == find(&quot;c&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w050d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Counting the same piece twice</div><div class="pc-prompt"><p>This counts components but marks vertices as seen only when a search <strong>starts</strong> from them, so later vertices of a component already explored start searches of their own: this prints <code>5</code> for a graph with 3 components. Mark everything a search reaches, so it prints <code>3</code>.</p></div><textarea class="pc-src pc-code" hidden>adj = {1: [2], 2: [1, 3], 3: [2], 4: [5], 5: [4], 6: []}
+seen, count = set(), 0
+for s in adj:
+    if s in seen:
+        continue
+    seen.add(s)
+    count += 1
+    stack, local = [s], {s}
+    while stack:
+        v = stack.pop()
+        for w in adj[v]:
+            if w not in local:
+                local.add(w)
+                stack.append(w)
+print(count)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;mark what&#x27;s reached&quot;
+    expect_output(&quot;3&quot;)</textarea><textarea class="pc-src pc-solution" hidden>adj = {1: [2], 2: [1, 3], 3: [2], 4: [5], 5: [4], 6: []}
+seen, count = set(), 0
+for s in adj:
+    if s in seen:
+        continue
+    seen.add(s)
+    count += 1
+    stack = [s]
+    while stack:
+        v = stack.pop()
+        for w in adj[v]:
+            if w not in seen:
+                seen.add(w)
+                stack.append(w)
+print(count)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w050d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Corners that touch</div><div class="pc-prompt"><p>The problem says islands are joined up, down, left and right only, but this search also steps diagonally, so two separate islands that touch at a corner are counted as one: this prints <code>1</code>. Use the four straight directions so it prints <code>2</code>.</p></div><textarea class="pc-src pc-code" hidden>grid = [&quot;#.&quot;,
+        &quot;.#&quot;]
+seen, count = set(), 0
+for r in range(2):
+    for c in range(2):
+        if grid[r][c] == &quot;#&quot; and (r, c) not in seen:
+            count += 1
+            seen.add((r, c))
+            stack = [(r, c)]
+            while stack:
+                y, x = stack.pop()
+                for dy in (-1, 0, 1):
+                    for dx in (-1, 0, 1):
+                        ny, nx = y + dy, x + dx
+                        if 0 &lt;= ny &lt; 2 and 0 &lt;= nx &lt; 2 and grid[ny][nx] == &quot;#&quot; and (ny, nx) not in seen:
+                            seen.add((ny, nx))
+                            stack.append((ny, nx))
+print(count)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;four directions&quot;
+    expect_output(&quot;2&quot;)</textarea><textarea class="pc-src pc-solution" hidden>grid = [&quot;#.&quot;,
+        &quot;.#&quot;]
+seen, count = set(), 0
+for r in range(2):
+    for c in range(2):
+        if grid[r][c] == &quot;#&quot; and (r, c) not in seen:
+            count += 1
+            seen.add((r, c))
+            stack = [(r, c)]
+            while stack:
+                y, x = stack.pop()
+                for ny, nx in ((y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)):
+                    if 0 &lt;= ny &lt; 2 and 0 &lt;= nx &lt; 2 and grid[ny][nx] == &quot;#&quot; and (ny, nx) not in seen:
+                        seen.add((ny, nx))
+                        stack.append((ny, nx))
+print(count)</textarea></div>
+<div class="parsons" data-id="w050d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Union by size</div><div class="pc-prompt"><p>Arrange the lines into a union by size. One line is a trap.</p></div><script type="application/json">{"lines": ["    def union(self, a, b):", "        ra, rb = self.find(a), self.find(b)", "        if ra == rb:", "            return False", "        if self.size[ra] < self.size[rb]:", "            ra, rb = rb, ra", "        self.parent[rb] = ra", "        self.size[ra] += self.size[rb]", "        return True"], "distractors": ["        self.parent[a] = b"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden># Union-find on 1 to 6, with union by size (ties: the first argument&#x27;s root stays the root),
+# after union(1, 2), union(3, 4), union(2, 4), union(5, 6).
+
+p = ___   # the number of components
+q = ___   # the size of 3&#x27;s component
+r = ___   # True or False: 1 and 6 are connected
+s = ___   # the root of 4&#x27;s component
+t = ___   # how many islands in [&quot;#.#&quot;, &quot;###&quot;, &quot;...&quot;], joining up, down, left, right</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 2 and q == 4 and r is False, &quot;p, q and r&quot;
+    assert s == 1 and t == 1, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden># Union-find on 1 to 6, with union by size (ties: the first argument&#x27;s root stays the root),
+# after union(1, 2), union(3, 4), union(2, 4), union(5, 6).
+
+p = 2
+q = 4
+r = False
+s = 1
+t = 1</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w050d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "How do you find all connected components of an undirected graph?", "answer": 1, "explain": "O(V + E) across all the searches.", "options": ["One BFS from vertex 0", "Search from every vertex not yet labelled, labelling what each search reaches", "Sort the vertices", "Count edges"]}, {"type": "mc", "q": "What is an island in a grid?", "answer": 1, "explain": "A component of an implicit graph.", "options": ["A single land cell", "A connected component of land cells", "A row of land", "Any land touching water"]}, {"type": "mc", "q": "What does find(x) return in union-find?", "answer": 1, "explain": "Follow parents to the top.", "options": ["x&rsquo;s neighbours", "The root that names x&rsquo;s component", "x&rsquo;s size", "Whether x exists"]}, {"type": "mc", "q": "What does union by size do?", "answer": 1, "explain": "Height stays at most log n.", "options": ["Sorts the trees", "Hangs the smaller tree under the larger root, keeping trees shallow", "Deletes small trees", "Doubles the size"]}, {"type": "mc", "q": "What does path compression do?", "answer": 1, "explain": "So later finds are immediate.", "options": ["Shortens names", "Points every vertex on a find&rsquo;s path straight at the root", "Removes edges", "Compresses the dict"]}, {"type": "mc", "q": "With both improvements, roughly what does each union-find operation cost?", "answer": 1, "explain": "At most about 4 steps for any real input.", "options": ["O(n)", "Effectively constant (inverse Ackermann)", "O(log\u00b2 n)", "O(n log n)"]}, {"type": "mc", "q": "When is union-find better than labelling with BFS?", "answer": 1, "explain": "No need to search again after each edge.", "options": ["Never", "When edges keep arriving and you ask about connectivity after each", "On grids only", "For shortest paths"]}, {"type": "mc", "q": "Which arriving edge first makes a cycle?", "answer": 1, "explain": "It joins two vertices already connected.", "options": ["The longest", "The first whose two ends already have the same root", "The last", "Any edge to a new vertex"]}, {"type": "mc", "q": "What is a strongly connected component?", "answer": 1, "explain": "Weakly connected ignores directions.", "options": ["A component ignoring directions", "A maximal group where every vertex can reach every other following the directions", "A clique", "A tree"]}, {"type": "output", "q": "What does this print?", "answer": "1 4 True", "explain": "3&rsquo;s parent is 2, whose parent is 1, the root.", "code": "parent = {1: 1, 2: 1, 3: 2, 4: 4}\ndef find(x):\n    while parent[x] != x:\n        x = parent[x]\n    return x\nprint(find(3), find(4), find(3) == find(2))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: strongly connected components</div><div class="pc-prompt"><p>Find the <strong>strongly connected components</strong> of a directed graph with <strong>Kosaraju&rsquo;s algorithm</strong> (S. Rao Kosaraju, 1978; published by Micha Sharir in 1981):</p>
+<ol>
+<li>Run DFS over the whole graph and record the vertices in order of <strong>finish</strong> time (Wednesday&rsquo;s <code>finish_order</code>).</li>
+<li>Reverse every edge.</li>
+<li>Go through the vertices in <strong>decreasing</strong> finish time; from each one not yet assigned, run a DFS on the <strong>reversed</strong> graph: everything it reaches (and isn&rsquo;t assigned yet) is one SCC.</li>
+</ol>
+<p>It works because the vertex finishing last lies in a component that nothing outside it can reach in the reversed graph, so the second search can&rsquo;t leak out of it. Write <code>scc(adj)</code> returning a list of components, each sorted, the list sorted by smallest vertex, using <strong>explicit stacks</strong> for both passes (the checks use a 20,000-vertex cycle). Then <code>condensation(adj)</code>: the DAG of components, as a dict from each component&rsquo;s index in <code>scc(adj)</code> to the sorted list of component indices it has edges to (no self-loops). Then <code>can_reach_everywhere(adj)</code>: whether the whole graph is one SCC.</p></div><textarea class="pc-src pc-code" hidden>def scc(adj):
+    ___
+
+def condensation(adj):
+    ___
+
+def can_reach_everywhere(adj):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def reach(adj, s):
+    seen, stack = {s}, [s]
+    while stack:
+        v = stack.pop()
+        for w in adj[v]:
+            if w not in seen:
+                seen.add(w)
+                stack.append(w)
+    return seen
+def test_scc():
+    &quot;components&quot;
+    adj = {1: [2], 2: [3], 3: [1, 4], 4: [5], 5: [6], 6: [4], 7: [6, 8], 8: []}
+    assert scc(adj) == [[1, 2, 3], [4, 5, 6], [7], [8]]
+    assert condensation(adj) == {0: [1], 1: [], 2: [1, 3], 3: []}
+    assert not can_reach_everywhere(adj) and can_reach_everywhere({1: [2], 2: [1]}) and can_reach_everywhere({1: []})
+def test_random():
+    &quot;against reachability&quot;
+    rng = random.Random(3)
+    for _ in range(100):
+        n = rng.randint(1, 9)
+        g = {v: [w for w in range(n) if w != v and rng.random() &lt; 0.2] for v in range(n)}
+        r = {v: reach(g, v) for v in g}
+        want = sorted({tuple(sorted(w for w in g if w in r[v] and v in r[w])) for v in g})
+        assert scc(g) == [list(c) for c in want]
+def test_big():
+    &quot;deep&quot;
+    n = 20_000
+    cycle = {i: [(i + 1) % n] for i in range(n)}
+    assert len(scc(cycle)) == 1 and can_reach_everywhere(cycle)</textarea><textarea class="pc-src pc-solution" hidden>def scc(adj):
+    seen, order = set(), []
+    for s in adj:
+        if s in seen:
+            continue
+        seen.add(s)
+        stack = [(s, iter(adj[s]))]
+        while stack:
+            v, it = stack[-1]
+            for w in it:
+                if w not in seen:
+                    seen.add(w)
+                    stack.append((w, iter(adj[w])))
+                    break
+            else:
+                stack.pop()
+                order.append(v)
+    rev = {v: [] for v in adj}
+    for v, ns in adj.items():
+        for w in ns:
+            rev[w].append(v)
+    comp = {}
+    groups = []
+    for s in reversed(order):
+        if s in comp:
+            continue
+        comp[s] = len(groups)
+        members, stack = [], [s]
+        while stack:
+            v = stack.pop()
+            members.append(v)
+            for w in rev[v]:
+                if w not in comp:
+                    comp[w] = comp[s]
+                    stack.append(w)
+        groups.append(sorted(members))
+    return sorted(groups, key=lambda g: g[0])
+
+def condensation(adj):
+    groups = scc(adj)
+    index = {v: i for i, g in enumerate(groups) for v in g}
+    out = {i: set() for i in range(len(groups))}
+    for v, ns in adj.items():
+        for w in ns:
+            if index[v] != index[w]:
+                out[index[v]].add(index[w])
+    return {i: sorted(s) for i, s in out.items()}
+
+def can_reach_everywhere(adj):
+    return len(scc(adj)) &lt;= 1</textarea><template class="pc-src pc-hint">For pass 1, use the iterator-on-a-stack DFS from Wednesday&rsquo;s <code>times</code> exercise and append each vertex to <code>order</code> when its iterator runs out. For pass 2, a plain stack DFS on the reversed graph is enough. Assign each vertex a component number as you go, then build the components from the numbers.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Look at a map of islands, or a photo of spots on a surface, and count the pieces by hand. Then think: how would you count them if the picture arrived one pixel at a time? Tomorrow: topological sort, putting dependent tasks in an order that respects every dependency.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w050d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w050d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w050d4", "week": 50, "day": 4, "title": "Connected components", "exercises": [{"id": "w050d4-label", "title": "Labelling components", "points": 10}, {"id": "w050d4-islands", "title": "Islands", "points": 15}, {"id": "w050d4-uf", "title": "Union-find", "points": 15}, {"id": "w050d4-arriving", "title": "As the cables arrive", "points": 10}, {"id": "w050d4-merge", "title": "Merging records", "points": 15}, {"id": "w050d4-bug1", "title": "Linking the wrong things", "points": 10}, {"id": "w050d4-bug2", "title": "Counting the same piece twice", "points": 10}, {"id": "w050d4-bug3", "title": "Corners that touch", "points": 10}, {"id": "w050d4-trace", "title": "Predict them", "points": 10}, {"id": "w050d4-challenge", "title": "Challenge: strongly connected components", "points": 25}], "points": 130}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
