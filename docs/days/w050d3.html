@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 50 Day 3: Depth-first search | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Breadth-first search spreads out in rings. Depth-first search (DFS) does the opposite: it follows one path as far as it can go, and only when it’s stuck...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w050d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 50 Day 3: Depth-first search">
+<meta property="og:description" content="Breadth-first search spreads out in rings. Depth-first search (DFS) does the opposite: it follows one path as far as it can go, and only when it’s stuck...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w050d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-50">Week 50: Graphs I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#going-deep" data-sec="going-deep">Going deep</a></li><li><a href="#entering-and-leaving" data-sec="entering-and-leaving">Entering and leaving</a></li><li><a href="#cycles" data-sec="cycles">Cycles</a></li><li><a href="#every-path" data-sec="every-path">Every path</a></li><li><a href="#bfs-or-dfs" data-sec="bfs-or-dfs">BFS or DFS?</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w050d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-50">Week 50: Graphs I</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 50, Day 3</span></p>
+      <h1>Depth-first search</h1>
+      <div class="day-intro"><p>Breadth-first search spreads out in rings. Depth-first search (DFS) does the opposite: it follows one path as far as it can go, and only when it&rsquo;s stuck does it back up to the last place with an unexplored choice. That&rsquo;s how you&rsquo;d explore a maze with a ball of string, and it&rsquo;s the shape of every recursive search you&rsquo;ve written since Week 15. DFS doesn&rsquo;t find shortest paths, but it reveals a graph&rsquo;s <strong>structure</strong>: whether it has cycles, which edges lead back to where you came from, and (tomorrow and Friday) its connected pieces and a valid order for dependent tasks. Today you&rsquo;ll write it recursively and with a stack, record when each vertex is entered and left, detect cycles, and enumerate paths by backtracking.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Write depth-first search recursively and with an explicit stack, in O(V + E)</li><li>Record discovery and finish times, and colour vertices white, grey and black</li><li>Detect cycles in undirected and directed graphs, and return one</li><li>Find paths, and list every simple path by backtracking</li><li>Choose between BFS and DFS for a problem</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 55 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Going deep: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Entering and leaving: 20 min"></span><span class="plan-seg s1" style="flex:25" title="Cycles: 25 min"></span><span class="plan-seg s0" style="flex:15" title="Every path: 15 min"></span><span class="plan-seg s1" style="flex:10" title="BFS or DFS?: 10 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Going deep</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Entering and leaving</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Cycles</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Every path</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">BFS or DFS?</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:45</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:40</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w050d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w050d3.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w050d3-p1"><textarea class="pc-src pc-code" hidden>adj = {&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;], &quot;B&quot;: [&quot;D&quot;], &quot;C&quot;: [&quot;D&quot;], &quot;D&quot;: [&quot;E&quot;], &quot;E&quot;: []}
+
+order, seen = [], set()
+def visit(v):
+    seen.add(v)
+    order.append(v)
+    for w in adj[v]:
+        if w not in seen:
+            visit(w)
+
+visit(&quot;A&quot;)
+print(order)</textarea></div>
+<p>BFS from A would visit B and C before D. DFS goes A, B, D, E, and only then, with nothing left below, backs up all the way to A and takes its other branch, C, whose neighbour D has already been seen.</p>
+<h2 id="going-deep">Going deep</h2>
+<p>Depth-first search from s: mark s seen, then for each neighbour not yet seen, search from it, completely, before trying the next neighbour. Recursion makes it three lines, and the call stack does the backing up.</p>
+<p>Each vertex is visited once and each edge looked at once from each end, so DFS is <strong>O(V + E)</strong>, like BFS. But recursion has Python&rsquo;s limit of about 1,000 levels, and a long path in a graph means deep recursion. With an <strong>explicit stack</strong> there&rsquo;s no limit:</p>
+<ul>
+<li>Push the start. Repeatedly pop a vertex; if it&rsquo;s already seen, skip it; otherwise mark it, record it, and push its unseen neighbours.</li>
+<li>Pushing neighbours in <strong>reverse</strong> order makes the first neighbour pop first, matching the recursive order.</li>
+</ul>
+<p>With this version, a vertex can be pushed more than once (from several neighbours) before it&rsquo;s popped, which is why it checks on popping. That&rsquo;s fine: the stack holds at most O(E) entries. The idea goes back at least to Charles Pierre Trémaux, a 19th-century French engineer whose method for solving mazes by marking passages is a depth-first search; John Hopcroft and Robert Tarjan made it a central tool of graph algorithms in the 1970s.</p>
+<div class="pc pc-example" data-kind="example" data-id="w050d3-e2"><textarea class="pc-src pc-code" hidden>def dfs_recursive(adj, start):
+    order, seen = [], set()
+    def visit(v):
+        seen.add(v)
+        order.append(v)
+        for w in adj[v]:
+            if w not in seen:
+                visit(w)
+    visit(start)
+    return order
+
+def dfs_stack(adj, start):
+    order, seen, stack = [], set(), [start]
+    while stack:
+        v = stack.pop()
+        if v in seen:
+            continue
+        seen.add(v)
+        order.append(v)
+        for w in reversed(adj[v]):
+            if w not in seen:
+                stack.append(w)
+    return order
+
+adj = {&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;], &quot;B&quot;: [&quot;D&quot;], &quot;C&quot;: [&quot;D&quot;], &quot;D&quot;: [&quot;E&quot;], &quot;E&quot;: []}
+print(dfs_recursive(adj, &quot;A&quot;), dfs_stack(adj, &quot;A&quot;))
+chain = {i: [i + 1] for i in range(5000)}
+chain[5000] = []
+print(len(dfs_stack(chain, 0)))</textarea></div>
+<h2 id="entering-and-leaving">Entering and leaving</h2>
+<p>Each vertex has two moments in a DFS: when it&rsquo;s <strong>discovered</strong> (entered) and when it&rsquo;s <strong>finished</strong> (left, after everything reachable from it has been explored). Recording both with a shared clock gives each vertex an interval, and the intervals nest exactly like brackets: if w is discovered during v&rsquo;s visit, w finishes before v does. Many DFS-based algorithms use these times, including Friday&rsquo;s topological sort (which is just &ldquo;order by finish time, reversed&rdquo;).</p>
+<p>A common way to say the same thing is with three <strong>colours</strong>:</p>
+<ul>
+<li><strong>white</strong>: not yet discovered;</li>
+<li><strong>grey</strong>: discovered but not finished (it&rsquo;s on the current path, the recursion stack);</li>
+<li><strong>black</strong>: finished.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w050d3-e3"><textarea class="pc-src pc-code" hidden>def times(adj, start):
+    clock, disc, fin = [0], {}, {}
+    def visit(v):
+        clock[0] += 1
+        disc[v] = clock[0]
+        for w in adj[v]:
+            if w not in disc:
+                visit(w)
+        clock[0] += 1
+        fin[v] = clock[0]
+    visit(start)
+    return {v: (disc[v], fin[v]) for v in disc}
+
+adj = {&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;], &quot;B&quot;: [&quot;D&quot;], &quot;C&quot;: [&quot;D&quot;], &quot;D&quot;: [&quot;E&quot;], &quot;E&quot;: []}
+for v, (d, f) in times(adj, &quot;A&quot;).items():
+    print(v, d, f, &quot; &quot; * d + &quot;(&quot; + &quot;-&quot; * (f - d - 1) + &quot;)&quot;)</textarea></div>
+<p>The brackets show it: E&rsquo;s interval sits inside D&rsquo;s, inside B&rsquo;s, inside A&rsquo;s; C&rsquo;s comes after B&rsquo;s closes.</p>
+<h2 id="cycles">Cycles</h2>
+<p><strong>Directed graphs.</strong> During DFS, an edge v → w where w is <strong>grey</strong> points back to a vertex on the current path: a <strong>back edge</strong>, and it closes a cycle. An edge to a <strong>black</strong> vertex doesn&rsquo;t: w was finished earlier and nothing below it leads back. A directed graph has a cycle exactly when DFS finds a back edge. (Checking only &ldquo;seen&rdquo; isn&rsquo;t enough: in a diamond A → B → D, A → C → D, the edge C → D reaches a seen vertex without any cycle.)</p>
+<p><strong>Undirected graphs.</strong> Every edge can be walked both ways, so the edge back to the vertex you just came from doesn&rsquo;t count. An undirected graph has a cycle exactly when DFS meets an already-seen vertex that isn&rsquo;t the current vertex&rsquo;s <strong>parent</strong>.</p>
+<p>To return the cycle itself, keep parent links; when a back edge v → w is found, walk the parents from v up to w.</p>
+<div class="pc pc-example" data-kind="example" data-id="w050d3-e4"><textarea class="pc-src pc-code" hidden>WHITE, GREY, BLACK = 0, 1, 2
+
+def find_cycle(adj):
+    colour = {v: WHITE for v in adj}
+    parent = {}
+    def visit(v):
+        colour[v] = GREY
+        for w in adj[v]:
+            if colour[w] == GREY:                  # a back edge: v -&gt; w closes a cycle
+                cycle = [v]
+                while cycle[-1] != w:
+                    cycle.append(parent[cycle[-1]])
+                return cycle[::-1]
+            if colour[w] == WHITE:
+                parent[w] = v
+                found = visit(w)
+                if found:
+                    return found
+        colour[v] = BLACK
+        return None
+    for v in adj:
+        if colour[v] == WHITE:
+            found = visit(v)
+            if found:
+                return found
+    return None
+
+diamond = {&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;], &quot;B&quot;: [&quot;D&quot;], &quot;C&quot;: [&quot;D&quot;], &quot;D&quot;: []}
+loop = {&quot;A&quot;: [&quot;B&quot;], &quot;B&quot;: [&quot;C&quot;], &quot;C&quot;: [&quot;D&quot;, &quot;A&quot;], &quot;D&quot;: []}
+print(find_cycle(diamond), find_cycle(loop))</textarea></div>
+<h2 id="every-path">Every path</h2>
+<p>BFS finds one shortest path. Sometimes you need <strong>all</strong> the simple paths (no repeated vertex) between two vertices: every route through a small network, every way to arrange a puzzle. DFS with <strong>backtracking</strong> does it (Week 16): add a vertex to the path, explore, then <strong>remove it again</strong> so other paths may use it. There can be exponentially many paths, so this suits small graphs only.</p>
+<div class="pc pc-example" data-kind="example" data-id="w050d3-e5"><textarea class="pc-src pc-code" hidden>def all_paths(adj, start, goal):
+    out, path, on_path = [], [start], {start}
+    def extend(v):
+        if v == goal:
+            out.append(list(path))
+            return
+        for w in adj[v]:
+            if w not in on_path:
+                path.append(w)
+                on_path.add(w)
+                extend(w)
+                path.pop()                       # backtrack: let other paths use w
+                on_path.discard(w)
+    extend(start)
+    return out
+
+routes = {&quot;home&quot;: [&quot;park&quot;, &quot;shop&quot;], &quot;park&quot;: [&quot;school&quot;, &quot;shop&quot;], &quot;shop&quot;: [&quot;school&quot;], &quot;school&quot;: []}
+for p in all_paths(routes, &quot;home&quot;, &quot;school&quot;):
+    print(&quot; -&gt; &quot;.join(p))</textarea></div>
+<h2 id="bfs-or-dfs">BFS or DFS?</h2>
+<table>
+<thead>
+<tr>
+<th>question</th>
+<th>use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>shortest path in an unweighted graph</td>
+<td>BFS</td>
+</tr>
+<tr>
+<td>everything within k steps; nearest of many</td>
+<td>BFS (multi-source)</td>
+</tr>
+<tr>
+<td>is there any path? what can be reached?</td>
+<td>either (DFS is often shorter to write)</td>
+</tr>
+<tr>
+<td>cycles, back edges, finish order, topological sort</td>
+<td>DFS</td>
+</tr>
+<tr>
+<td>every path, every arrangement (backtracking)</td>
+<td>DFS</td>
+</tr>
+<tr>
+<td>very deep graphs</td>
+<td>BFS, or DFS with an explicit stack</td>
+</tr>
+</tbody>
+</table>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>DFS follows one path as far as possible before backing up: recursively (watch the recursion limit) or with an explicit stack (check &ldquo;seen&rdquo; when popping; push neighbours in reverse to match the recursive order). It&rsquo;s O(V + E). Discovery and finish times nest like brackets; white, grey and black mark unvisited, on the current path, and finished. A directed graph has a cycle exactly when DFS meets a grey vertex (a back edge); an undirected one when it meets a seen vertex other than the parent. Parent links recover the cycle. Backtracking DFS lists every simple path, removing each vertex from the path as it returns. Use BFS for shortest paths, DFS for structure.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d3-order" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Two ways down</div><div class="pc-prompt"><p>Write <code>dfs_recursive(adj, start)</code> and <code>dfs_stack(adj, start)</code> returning the visit order; the stack version must give the <strong>same</strong> order as the recursive one, and must handle a 20,000-vertex chain. Then <code>reachable(adj, start)</code>: the set of vertices reachable from <code>start</code>.</p></div><textarea class="pc-src pc-code" hidden>def dfs_recursive(adj, start):
+    ___
+
+def dfs_stack(adj, start):
+    ___
+
+def reachable(adj, start):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_order():
+    &quot;orders&quot;
+    adj = {&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;], &quot;B&quot;: [&quot;D&quot;], &quot;C&quot;: [&quot;D&quot;], &quot;D&quot;: [&quot;E&quot;], &quot;E&quot;: []}
+    assert dfs_recursive(adj, &quot;A&quot;) == [&quot;A&quot;, &quot;B&quot;, &quot;D&quot;, &quot;E&quot;, &quot;C&quot;] == dfs_stack(adj, &quot;A&quot;)
+    rng = random.Random(1)
+    for _ in range(100):
+        n = rng.randint(1, 9)
+        g = {v: rng.sample([w for w in range(n) if w != v], rng.randint(0, n - 1)) for v in range(n)}
+        assert dfs_stack(g, 0) == dfs_recursive(g, 0) and reachable(g, 0) == set(dfs_recursive(g, 0))
+    chain = {i: [i + 1] for i in range(20_000)}
+    chain[20_000] = []
+    assert len(dfs_stack(chain, 0)) == 20_001 and len(reachable(chain, 0)) == 20_001</textarea><textarea class="pc-src pc-solution" hidden>def dfs_recursive(adj, start):
+    order, seen = [], set()
+    def visit(v):
+        seen.add(v)
+        order.append(v)
+        for w in adj[v]:
+            if w not in seen:
+                visit(w)
+    visit(start)
+    return order
+
+def dfs_stack(adj, start):
+    order, seen, stack = [], set(), [start]
+    while stack:
+        v = stack.pop()
+        if v in seen:
+            continue
+        seen.add(v)
+        order.append(v)
+        for w in reversed(adj[v]):
+            if w not in seen:
+                stack.append(w)
+    return order
+
+def reachable(adj, start):
+    return set(dfs_stack(adj, start))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d3-times" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Discovery and finish</div><div class="pc-prompt"><p>Write <code>times(adj)</code>: run DFS from every undiscovered vertex in the dict&rsquo;s order, and return a dict from vertex to <code>(discovery, finish)</code> with one shared clock counting from 1 (each event adds one). Use an explicit stack: push <code>(vertex, iterator over its neighbours)</code> pairs, so each vertex is finished when its iterator runs out. Then <code>finish_order(adj)</code>: the vertices in order of finish time.</p></div><textarea class="pc-src pc-code" hidden>def times(adj):
+    ___
+
+def finish_order(adj):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def rec_times(adj):
+    clock, disc, fin = [0], {}, {}
+    def visit(v):
+        clock[0] += 1
+        disc[v] = clock[0]
+        for w in adj[v]:
+            if w not in disc:
+                visit(w)
+        clock[0] += 1
+        fin[v] = clock[0]
+    for v in adj:
+        if v not in disc:
+            visit(v)
+    return {v: (disc[v], fin[v]) for v in adj}
+def test_times():
+    &quot;times&quot;
+    adj = {&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;], &quot;B&quot;: [&quot;D&quot;], &quot;C&quot;: [&quot;D&quot;], &quot;D&quot;: [&quot;E&quot;], &quot;E&quot;: []}
+    assert times(adj) == {&quot;A&quot;: (1, 10), &quot;B&quot;: (2, 7), &quot;D&quot;: (3, 6), &quot;E&quot;: (4, 5), &quot;C&quot;: (8, 9)}
+    assert finish_order(adj) == [&quot;E&quot;, &quot;D&quot;, &quot;B&quot;, &quot;C&quot;, &quot;A&quot;]
+    rng = random.Random(2)
+    for _ in range(100):
+        n = rng.randint(1, 9)
+        g = {v: rng.sample([w for w in range(n) if w != v], rng.randint(0, min(3, n - 1))) for v in range(n)}
+        assert times(g) == rec_times(g)
+    chain = {i: [i + 1] for i in range(20_000)}
+    chain[20_000] = []
+    assert times(chain)[0] == (1, 40_002)</textarea><textarea class="pc-src pc-solution" hidden>def times(adj):
+    clock, disc, fin = 0, {}, {}
+    for s in adj:
+        if s in disc:
+            continue
+        clock += 1
+        disc[s] = clock
+        stack = [(s, iter(adj[s]))]
+        while stack:
+            v, it = stack[-1]
+            for w in it:
+                if w not in disc:
+                    clock += 1
+                    disc[w] = clock
+                    stack.append((w, iter(adj[w])))
+                    break
+            else:
+                stack.pop()
+                clock += 1
+                fin[v] = clock
+    return {v: (disc[v], fin[v]) for v in disc}
+
+def finish_order(adj):
+    t = times(adj)
+    return sorted(t, key=lambda v: t[v][1])</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d3-directed" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Cycles in a directed graph</div><div class="pc-prompt"><p>Write <code>find_cycle(adj)</code>: one cycle of a directed graph as a list of vertices <code>[v1, v2, ..., vk]</code> (with an edge from each to the next and from vk back to v1), or <code>None</code> if it&rsquo;s acyclic. Use white, grey and black, with an <strong>explicit stack</strong> (the checks use a 20,000-vertex chain). Then <code>is_dag(adj)</code>.</p></div><textarea class="pc-src pc-code" hidden>def find_cycle(adj):
+    ___
+
+def is_dag(adj):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def is_cycle(adj, c):
+    return c and len(set(c)) == len(c) and all(c[(i + 1) % len(c)] in adj[c[i]] for i in range(len(c)))
+def test_cycles():
+    &quot;cycles&quot;
+    diamond = {&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;], &quot;B&quot;: [&quot;D&quot;], &quot;C&quot;: [&quot;D&quot;], &quot;D&quot;: []}
+    loop = {&quot;A&quot;: [&quot;B&quot;], &quot;B&quot;: [&quot;C&quot;], &quot;C&quot;: [&quot;D&quot;, &quot;A&quot;], &quot;D&quot;: []}
+    assert find_cycle(diamond) is None and is_dag(diamond)
+    assert is_cycle(loop, find_cycle(loop)) and not is_dag(loop)
+    assert is_cycle({1: [1]}, find_cycle({1: [1]}))
+    rng = random.Random(3)
+    for _ in range(200):
+        n = rng.randint(1, 7)
+        g = {v: [w for w in range(n) if rng.random() &lt; 0.25] for v in range(n)}
+        c = find_cycle(g)
+        # brute force: is there a cycle?
+        has = False
+        for s in g:
+            stack, seen = list(g[s]), set()
+            while stack:
+                x = stack.pop()
+                if x == s:
+                    has = True
+                    break
+                if x not in seen:
+                    seen.add(x)
+                    stack.extend(g[x])
+            if has:
+                break
+        assert (c is not None) == has and (c is None or is_cycle(g, c))
+    chain = {i: [i + 1] for i in range(20_000)}
+    chain[20_000] = [0]
+    assert len(find_cycle(chain)) == 20_001</textarea><textarea class="pc-src pc-solution" hidden>WHITE, GREY, BLACK = 0, 1, 2
+
+def find_cycle(adj):
+    colour = {v: WHITE for v in adj}
+    parent = {}
+    for s in adj:
+        if colour[s] != WHITE:
+            continue
+        colour[s] = GREY
+        stack = [(s, iter(adj[s]))]
+        while stack:
+            v, it = stack[-1]
+            for w in it:
+                if colour[w] == GREY:
+                    cycle = [v]
+                    while cycle[-1] != w:
+                        cycle.append(parent[cycle[-1]])
+                    return cycle[::-1]
+                if colour[w] == WHITE:
+                    colour[w] = GREY
+                    parent[w] = v
+                    stack.append((w, iter(adj[w])))
+                    break
+            else:
+                colour[v] = BLACK
+                stack.pop()
+    return None
+
+def is_dag(adj):
+    return find_cycle(adj) is None</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d3-undirected" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Cycles in an undirected graph</div><div class="pc-prompt"><p>For an undirected graph (each edge listed in both vertices&rsquo; lists, no repeated edges), write <code>has_cycle(adj)</code>, using DFS with parent tracking and an explicit stack of <code>(vertex, parent)</code> pairs. Then <code>is_forest(adj)</code> (no cycles) and <code>is_tree(adj)</code> (no cycles, connected, at least one vertex). Cross-check with counting: a forest with c pieces has exactly V − c edges.</p></div><textarea class="pc-src pc-code" hidden>def has_cycle(adj):
+    ___
+
+def is_forest(adj):
+    ___
+
+def is_tree(adj):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_undirected():
+    &quot;undirected cycles&quot;
+    path = {1: [2], 2: [1, 3], 3: [2]}
+    tri = {1: [2, 3], 2: [1, 3], 3: [1, 2]}
+    assert not has_cycle(path) and is_tree(path) and has_cycle(tri) and not is_forest(tri)
+    two = {1: [2], 2: [1], 3: []}
+    assert is_forest(two) and not is_tree(two) and not is_tree({})
+    rng = random.Random(4)
+    for _ in range(200):
+        n = rng.randint(1, 8)
+        edges = {tuple(sorted(rng.sample(range(n), 2))) for _ in range(rng.randint(0, 8))} if n &gt; 1 else set()
+        g = {v: [] for v in range(n)}
+        for a, b in edges:
+            g[a].append(b)
+            g[b].append(a)
+        comp, seen = 0, set()
+        for v in g:
+            if v not in seen:
+                comp += 1
+                stack = [v]
+                while stack:
+                    x = stack.pop()
+                    if x not in seen:
+                        seen.add(x)
+                        stack.extend(g[x])
+        assert has_cycle(g) == (len(edges) &gt; n - comp)
+        assert is_tree(g) == (comp == 1 and len(edges) == n - 1)</textarea><textarea class="pc-src pc-solution" hidden>def has_cycle(adj):
+    seen = set()
+    for s in adj:
+        if s in seen:
+            continue
+        seen.add(s)
+        stack = [(s, None)]
+        while stack:
+            v, parent = stack.pop()
+            for w in adj[v]:
+                if w == parent:
+                    continue
+                if w in seen:
+                    return True
+                seen.add(w)
+                stack.append((w, v))
+    return False
+
+def is_forest(adj):
+    return not has_cycle(adj)
+
+def is_tree(adj):
+    if not adj or has_cycle(adj):
+        return False
+    start = next(iter(adj))
+    seen, stack = {start}, [start]
+    while stack:
+        v = stack.pop()
+        for w in adj[v]:
+            if w not in seen:
+                seen.add(w)
+                stack.append(w)
+    return len(seen) == len(adj)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d3-paths" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Every route</div><div class="pc-prompt"><p>Write <code>all_paths(adj, start, goal)</code>: every simple path from start to goal as a list of lists, in the order a DFS that tries neighbours in list order finds them. Then <code>count_paths_dag(adj, start, goal)</code> for a <strong>DAG</strong>: the number of paths, without listing them, using DFS with a memo dict (Week 16) from vertex to its number of paths to the goal, so it&rsquo;s O(V + E) even when there are millions of paths.</p></div><textarea class="pc-src pc-code" hidden>def all_paths(adj, start, goal):
+    ___
+
+def count_paths_dag(adj, start, goal):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_paths():
+    &quot;paths&quot;
+    routes = {&quot;home&quot;: [&quot;park&quot;, &quot;shop&quot;], &quot;park&quot;: [&quot;school&quot;, &quot;shop&quot;], &quot;shop&quot;: [&quot;school&quot;], &quot;school&quot;: []}
+    assert all_paths(routes, &quot;home&quot;, &quot;school&quot;) == [[&quot;home&quot;, &quot;park&quot;, &quot;school&quot;], [&quot;home&quot;, &quot;park&quot;, &quot;shop&quot;, &quot;school&quot;], [&quot;home&quot;, &quot;shop&quot;, &quot;school&quot;]]
+    assert count_paths_dag(routes, &quot;home&quot;, &quot;school&quot;) == 3 and all_paths(routes, &quot;school&quot;, &quot;home&quot;) == []
+    assert all_paths({1: [2], 2: [1, 3], 3: []}, 1, 3) == [[1, 2, 3]]
+    ladder = {i: [i + 1, i + 2] for i in range(60)}
+    ladder[60], ladder[61] = [61], []
+    assert count_paths_dag(ladder, 0, 61) == 4052739537881</textarea><textarea class="pc-src pc-solution" hidden>def all_paths(adj, start, goal):
+    out, path, on_path = [], [start], {start}
+    def extend(v):
+        if v == goal:
+            out.append(list(path))
+            return
+        for w in adj[v]:
+            if w not in on_path:
+                path.append(w)
+                on_path.add(w)
+                extend(w)
+                path.pop()
+                on_path.discard(w)
+    extend(start)
+    return out
+
+def count_paths_dag(adj, start, goal):
+    memo = {}
+    def ways(v):
+        if v == goal:
+            return 1
+        if v not in memo:
+            memo[v] = sum(ways(w) for w in adj[v])
+        return memo[v]
+    return ways(start)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w050d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The edge you came in on</div><div class="pc-prompt"><p>This undirected cycle check treats the edge back to the parent as a cycle, so even a simple path &ldquo;has a cycle&rdquo;: this prints <code>True</code>. Skip the parent so it prints <code>False</code>.</p></div><textarea class="pc-src pc-code" hidden>def has_cycle(adj):
+    seen = set()
+    for s in adj:
+        if s in seen:
+            continue
+        seen.add(s)
+        stack = [(s, None)]
+        while stack:
+            v, parent = stack.pop()
+            for w in adj[v]:
+                if w in seen:
+                    return True
+                seen.add(w)
+                stack.append((w, v))
+    return False
+
+print(has_cycle({1: [2], 2: [1, 3], 3: [2]}))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;skip the parent&quot;
+    expect_output(&quot;False&quot;)
+    assert has_cycle({1: [2, 3], 2: [1, 3], 3: [1, 2]})</textarea><textarea class="pc-src pc-solution" hidden>def has_cycle(adj):
+    seen = set()
+    for s in adj:
+        if s in seen:
+            continue
+        seen.add(s)
+        stack = [(s, None)]
+        while stack:
+            v, parent = stack.pop()
+            for w in adj[v]:
+                if w == parent:
+                    continue
+                if w in seen:
+                    return True
+                seen.add(w)
+                stack.append((w, v))
+    return False
+
+print(has_cycle({1: [2], 2: [1, 3], 3: [2]}))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w050d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Seen isn&rsquo;t the same as on the path</div><div class="pc-prompt"><p>This directed cycle check reports a cycle whenever it meets a vertex it has <strong>ever</strong> seen, so the diamond A → B → D, A → C → D looks cyclic: this prints <code>True</code>. Only a vertex still on the current path (grey) closes a cycle; track that separately so it prints <code>False</code>.</p></div><textarea class="pc-src pc-code" hidden>def has_cycle(adj):
+    seen = set()
+    def visit(v):
+        seen.add(v)
+        for w in adj[v]:
+            if w in seen:
+                return True
+            if visit(w):
+                return True
+        return False
+    return any(visit(v) for v in adj if v not in seen)
+
+print(has_cycle({&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;], &quot;B&quot;: [&quot;D&quot;], &quot;C&quot;: [&quot;D&quot;], &quot;D&quot;: []}))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;grey, not seen&quot;
+    expect_output(&quot;False&quot;)
+    assert has_cycle({&quot;A&quot;: [&quot;B&quot;], &quot;B&quot;: [&quot;A&quot;]})</textarea><textarea class="pc-src pc-solution" hidden>def has_cycle(adj):
+    seen, on_path = set(), set()
+    def visit(v):
+        seen.add(v)
+        on_path.add(v)
+        for w in adj[v]:
+            if w in on_path:
+                return True
+            if w not in seen and visit(w):
+                return True
+        on_path.discard(v)
+        return False
+    return any(visit(v) for v in adj if v not in seen)
+
+print(has_cycle({&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;], &quot;B&quot;: [&quot;D&quot;], &quot;C&quot;: [&quot;D&quot;], &quot;D&quot;: []}))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w050d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Forgetting to step back</div><div class="pc-prompt"><p>This path finder adds each vertex to <code>on_path</code> but never removes it when backtracking, so once a vertex has been used by one path, no later path may use it: this prints <code>2</code> instead of <code>3</code>. Remove it on the way back so it prints <code>3</code>.</p></div><textarea class="pc-src pc-code" hidden>def count_paths(adj, start, goal):
+    found, on_path = [0], {start}
+    def extend(v):
+        if v == goal:
+            found[0] += 1
+            return
+        for w in adj[v]:
+            if w not in on_path:
+                on_path.add(w)
+                extend(w)
+    extend(start)
+    return found[0]
+
+print(count_paths({&quot;home&quot;: [&quot;park&quot;, &quot;shop&quot;], &quot;park&quot;: [&quot;school&quot;, &quot;shop&quot;], &quot;shop&quot;: [&quot;school&quot;], &quot;school&quot;: []}, &quot;home&quot;, &quot;school&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;backtrack&quot;
+    expect_output(&quot;3&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def count_paths(adj, start, goal):
+    found, on_path = [0], {start}
+    def extend(v):
+        if v == goal:
+            found[0] += 1
+            return
+        for w in adj[v]:
+            if w not in on_path:
+                on_path.add(w)
+                extend(w)
+                on_path.discard(w)
+    extend(start)
+    return found[0]
+
+print(count_paths({&quot;home&quot;: [&quot;park&quot;, &quot;shop&quot;], &quot;park&quot;: [&quot;school&quot;, &quot;shop&quot;], &quot;shop&quot;: [&quot;school&quot;], &quot;school&quot;: []}, &quot;home&quot;, &quot;school&quot;))</textarea></div>
+<div class="parsons" data-id="w050d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">DFS with a stack</div><div class="pc-prompt"><p>Arrange the lines into an iterative DFS that matches the recursive order. One line is a trap.</p></div><script type="application/json">{"lines": ["def dfs_stack(adj, start):", "    order, seen, stack = [], set(), [start]", "    while stack:", "        v = stack.pop()", "        if v in seen:", "            continue", "        seen.add(v)", "        order.append(v)", "        for w in reversed(adj[v]):", "            if w not in seen:", "                stack.append(w)", "    return order"], "distractors": ["        v = stack.pop(0)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden># Directed graph: 1 -&gt; 2, 1 -&gt; 3, 2 -&gt; 4, 3 -&gt; 4, 4 -&gt; 2.
+# DFS from 1 tries neighbours in increasing order.
+
+p = ___   # the DFS visit order from 1
+q = ___   # the vertex finished first
+r = ___   # True or False: the graph has a cycle
+s = ___   # the edge that is a back edge, as a tuple
+t = ___   # BFS or DFS: which finds shortest paths in unweighted graphs?</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [1, 2, 4, 3] and q == 4 and r is True, &quot;p, q and r&quot;
+    assert s == (4, 2) and t == &quot;BFS&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden># Directed graph: 1 -&gt; 2, 1 -&gt; 3, 2 -&gt; 4, 3 -&gt; 4, 4 -&gt; 2.
+# DFS from 1 tries neighbours in increasing order.
+
+p = [1, 2, 4, 3]
+q = 4
+r = True
+s = (4, 2)
+t = &quot;BFS&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w050d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does DFS do when it reaches a vertex whose neighbours are all seen?", "answer": 1, "explain": "The recursion (or the stack) remembers where to resume.", "options": ["Stops completely", "Backs up to the most recent vertex with an unexplored neighbour", "Restarts from the start", "Moves to the next level"]}, {"type": "mc", "q": "What is DFS&rsquo;s running time on an adjacency list?", "answer": 1, "explain": "The same as BFS.", "options": ["O(V\u00b2)", "O(V + E)", "O(E log V)", "O(2^V)"]}, {"type": "mc", "q": "Why write DFS with an explicit stack in Python?", "answer": 1, "explain": "Long paths mean deep recursion.", "options": ["It&rsquo;s faster", "Recursion fails beyond about 1,000 levels", "Stacks sort", "It&rsquo;s shorter"]}, {"type": "mc", "q": "In the stack version, why push neighbours in reverse?", "answer": 1, "explain": "Either order visits everything; reverse matches recursion.", "options": ["Speed", "So the first neighbour is popped first, matching the recursive order", "To avoid cycles", "It doesn&rsquo;t matter for correctness"]}, {"type": "mc", "q": "What does a grey vertex mean?", "answer": 1, "explain": "White, grey, black.", "options": ["Not yet seen", "Discovered but not finished: on the current path", "Finished", "Unreachable"]}, {"type": "mc", "q": "In a directed graph, which edge shows a cycle?", "answer": 1, "explain": "Black vertices can&rsquo;t lead back.", "options": ["Any edge to a seen vertex", "An edge to a grey vertex (a back edge)", "An edge to a black vertex", "A tree edge"]}, {"type": "mc", "q": "In an undirected graph, which seen vertex does not show a cycle?", "answer": 1, "explain": "Every edge can be walked back.", "options": ["Any", "The parent you just came from", "The start", "A leaf"]}, {"type": "mc", "q": "Why remove a vertex from the path when backtracking?", "answer": 1, "explain": "Otherwise later paths are missed.", "options": ["To save memory", "So other paths can use it", "To avoid errors", "It isn&rsquo;t needed"]}, {"type": "mc", "q": "Which search would you use to find the shortest route in an unweighted maze?", "answer": 1, "explain": "DFS finds a route, not the shortest.", "options": ["DFS", "BFS", "Either gives shortest", "Backtracking"]}, {"type": "output", "q": "What does this print?", "answer": "[2, 3, 1]", "explain": "Vertices are added when they finish.", "code": "adj = {1: [2, 3], 2: [], 3: [2]}\nout, seen = [], set()\ndef go(v):\n    seen.add(v)\n    for w in adj[v]:\n        if w not in seen:\n            go(w)\n    out.append(v)\ngo(1)\nprint(out)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: making a maze</div><div class="pc-prompt"><p>DFS can <strong>make</strong> mazes as well as solve them. The &ldquo;recursive backtracker&rdquo; starts with a grid of cells, every wall standing. From a start cell, it repeatedly picks a random unvisited neighbour, knocks down the wall between, and moves there; when every neighbour has been visited, it backs up. Because DFS visits each cell once and each knocked-down wall is a tree edge, the result is a <strong>spanning tree</strong> of the grid: every cell reachable, exactly one route between any two, no loops. (Such a maze is called &ldquo;perfect&rdquo;.)</p>
+<p>Write <code>make_maze(rows, cols, seed)</code>: run the backtracker with an <strong>explicit stack</strong> from cell (0, 0), using <code>random.Random(seed)</code> and choosing among unvisited neighbours with <code>rng.choice</code> on the list ordered up, down, left, right. Return the set of passages, each a <code>frozenset</code> of two adjacent cells. Then <code>draw(rows, cols, passages)</code>: the maze as text, (2·rows + 1) lines of (2·cols + 1) characters, with <code>#</code> for walls and spaces for cells and opened walls. Then <code>route(rows, cols, passages)</code>: the cells on the path from (0, 0) to the bottom-right cell, found with BFS. The checks verify the maze is perfect (rows·cols − 1 passages, all connected) on mazes up to 60 × 60.</p></div><textarea class="pc-src pc-code" hidden>import random
+from collections import deque
+
+def make_maze(rows, cols, seed):
+    ___
+
+def draw(rows, cols, passages):
+    ___
+
+def route(rows, cols, passages):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_small():
+    &quot;a small maze&quot;
+    p = make_maze(3, 4, seed=1)
+    assert len(p) == 11 and all(len(x) == 2 for x in p)
+    for pair in p:
+        (a, b), (c, d) = sorted(pair)
+        assert abs(a - c) + abs(b - d) == 1, &quot;only adjacent cells&quot;
+    pic = draw(3, 4, p)
+    lines = pic.split(&quot;\n&quot;)
+    assert len(lines) == 7 and all(len(line) == 9 for line in lines) and lines[0] == &quot;#&quot; * 9
+    assert pic.count(&quot; &quot;) == 12 + 11
+    r = route(3, 4, p)
+    assert r[0] == (0, 0) and r[-1] == (2, 3) and all(frozenset((x, y)) in p for x, y in zip(r, r[1:]))
+    assert make_maze(3, 4, seed=1) == p and make_maze(1, 1, seed=0) == set()
+def test_perfect():
+    &quot;perfect mazes&quot;
+    for R, C, s in [(10, 10, 2), (60, 60, 3), (1, 30, 4), (25, 7, 5)]:
+        p = make_maze(R, C, s)
+        assert len(p) == R * C - 1
+        adj = {}
+        for pair in p:
+            a, b = tuple(pair)
+            adj.setdefault(a, []).append(b)
+            adj.setdefault(b, []).append(a)
+        seen, stack = {(0, 0)}, [(0, 0)]
+        while stack:
+            v = stack.pop()
+            for w in adj.get(v, []):
+                if w not in seen:
+                    seen.add(w)
+                    stack.append(w)
+        assert len(seen) == R * C
+        assert route(R, C, p)[-1] == (R - 1, C - 1)</textarea><textarea class="pc-src pc-solution" hidden>import random
+from collections import deque
+
+def _neighbours(r, c, rows, cols):
+    return [(nr, nc) for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)) if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols]
+
+def make_maze(rows, cols, seed):
+    rng = random.Random(seed)
+    visited, stack, passages = {(0, 0)}, [(0, 0)], set()
+    while stack:
+        r, c = stack[-1]
+        options = [n for n in _neighbours(r, c, rows, cols) if n not in visited]
+        if not options:
+            stack.pop()
+            continue
+        nxt = rng.choice(options)
+        passages.add(frozenset(((r, c), nxt)))
+        visited.add(nxt)
+        stack.append(nxt)
+    return passages
+
+def draw(rows, cols, passages):
+    grid = [[&quot;#&quot;] * (2 * cols + 1) for _ in range(2 * rows + 1)]
+    for r in range(rows):
+        for c in range(cols):
+            grid[2 * r + 1][2 * c + 1] = &quot; &quot;
+    for pair in passages:
+        (a, b), (c, d) = tuple(pair)
+        grid[a + c + 1][b + d + 1] = &quot; &quot;
+    return &quot;\n&quot;.join(&quot;&quot;.join(row) for row in grid)
+
+def route(rows, cols, passages):
+    start, goal = (0, 0), (rows - 1, cols - 1)
+    parent = {start: None}
+    queue = deque([start])
+    while queue:
+        v = queue.popleft()
+        if v == goal:
+            break
+        for w in _neighbours(v[0], v[1], rows, cols):
+            if w not in parent and frozenset((v, w)) in passages:
+                parent[w] = v
+                queue.append(w)
+    path, v = [], goal
+    while v is not None:
+        path.append(v)
+        v = parent[v]
+    return path[::-1]</textarea><template class="pc-src pc-hint">Keep <code>visited = {(0, 0)}</code> and <code>stack = [(0, 0)]</code>. While the stack isn&rsquo;t empty, look at the top cell&rsquo;s unvisited neighbours (in the order up, down, left, right); if there are none, pop; otherwise choose one with <code>rng.choice</code>, add the passage, mark it visited and push it. In the drawing, cell (r, c) is at row 2r + 1, column 2c + 1, and the wall between two cells is halfway between them.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Print a maze from today&rsquo;s challenge, then solve it with a pencil the depth-first way: keep a hand on one wall, and when you hit a dead end, walk back. Tomorrow: connected components, splitting a graph into its separate pieces, with DFS, BFS and a new structure, union-find.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w050d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w050d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w050d3", "week": 50, "day": 3, "title": "Depth-first search", "exercises": [{"id": "w050d3-order", "title": "Two ways down", "points": 10}, {"id": "w050d3-times", "title": "Discovery and finish", "points": 10}, {"id": "w050d3-directed", "title": "Cycles in a directed graph", "points": 15}, {"id": "w050d3-undirected", "title": "Cycles in an undirected graph", "points": 10}, {"id": "w050d3-paths", "title": "Every route", "points": 15}, {"id": "w050d3-bug1", "title": "The edge you came in on", "points": 10}, {"id": "w050d3-bug2", "title": "Seen isn't the same as on the path", "points": 10}, {"id": "w050d3-bug3", "title": "Forgetting to step back", "points": 10}, {"id": "w050d3-trace", "title": "Predict them", "points": 10}, {"id": "w050d3-challenge", "title": "Challenge: making a maze", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

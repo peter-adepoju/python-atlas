@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 50 Day 2: Breadth-first search | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Breadth-first search (BFS) explores a graph in rings: first the start, then everything one edge away, then everything two edges away, and so on, using a...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w050d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 50 Day 2: Breadth-first search">
+<meta property="og:description" content="Breadth-first search (BFS) explores a graph in rings: first the start, then everything one edge away, then everything two edges away, and so on, using a...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w050d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-50">Week 50: Graphs I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#the-algorithm" data-sec="the-algorithm">The algorithm</a></li><li><a href="#shortest-paths" data-sec="shortest-paths">Shortest paths</a></li><li><a href="#grids-and-puzzles" data-sec="grids-and-puzzles">Grids and puzzles</a></li><li><a href="#many-starting-points" data-sec="many-starting-points">Many starting points</a></li><li><a href="#two-colours" data-sec="two-colours">Two colours</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w050d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-50">Week 50: Graphs I</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 50, Day 2</span></p>
+      <h1>Breadth-first search</h1>
+      <div class="day-intro"><p>Breadth-first search (BFS) explores a graph in rings: first the start, then everything one edge away, then everything two edges away, and so on, using a queue. You did it on trees in Week 45 (level order) and on words in Week 49&rsquo;s ladder. On a general graph it needs one more ingredient, a record of what&rsquo;s been seen, because paths can loop back. In return, BFS gives something precious: in a graph where every edge counts the same, it finds the <strong>shortest path</strong> from the start to everything it reaches, in O(V + E). Today you&rsquo;ll write it, rebuild paths from it, run it on grids and puzzles, start it from many places at once, and use it to split a graph into two sides.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explore a graph breadth-first with a queue and a visited set, in O(V + E)</li><li>Find shortest distances and paths in unweighted graphs, using parent links</li><li>Run BFS on grids and on implicit graphs of puzzle states</li><li>Start BFS from several sources at once to find the nearest of many</li><li>Test whether a graph is bipartite by colouring it with BFS</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 55 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="The algorithm: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Shortest paths: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Grids and puzzles: 20 min"></span><span class="plan-seg s0" style="flex:15" title="Many starting points: 15 min"></span><span class="plan-seg s1" style="flex:15" title="Two colours: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">The algorithm</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Shortest paths</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Grids and puzzles</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Many starting points</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Two colours</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:45</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:40</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w050d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w050d2.ipynb" download>download it</a>. Exercises today are worth 130 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w050d2-p1"><textarea class="pc-src pc-code" hidden>from collections import deque
+
+adj = {&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;], &quot;B&quot;: [&quot;A&quot;, &quot;D&quot;], &quot;C&quot;: [&quot;A&quot;, &quot;D&quot;], &quot;D&quot;: [&quot;B&quot;, &quot;C&quot;, &quot;E&quot;], &quot;E&quot;: [&quot;D&quot;]}
+
+order, dist = [], {&quot;A&quot;: 0}
+queue = deque([&quot;A&quot;])
+while queue:
+    v = queue.popleft()
+    order.append(v)
+    for w in adj[v]:
+        if w not in dist:
+            dist[w] = dist[v] + 1
+            queue.append(w)
+print(order)
+print(dist)</textarea></div>
+<p>D is reachable two ways (through B and through C), but it&rsquo;s added to the queue once: the first time it&rsquo;s seen. And its distance, 2, is the length of the shortest path from A.</p>
+<h2 id="the-algorithm">The algorithm</h2>
+<p>Breadth-first search from a start vertex s:</p>
+<ol>
+<li>Mark s as seen and put it in a queue.</li>
+<li>While the queue isn&rsquo;t empty: take the vertex at the front; for each neighbour not yet seen, mark it seen and add it to the back.</li>
+</ol>
+<p>Two details matter:</p>
+<ul>
+<li><strong>Mark vertices when you add them to the queue, not when you take them out.</strong> Otherwise a vertex reachable from several queued vertices is added several times; it&rsquo;s still correct, but the queue can grow far beyond V and the work far beyond O(V + E).</li>
+<li><strong>Use a <code>deque</code></strong> (<code>popleft</code> is O(1)); <code>list.pop(0)</code> is O(n), which makes BFS quadratic.</li>
+</ul>
+<p>Each vertex enters the queue once and each edge is looked at once from each end (twice for undirected graphs), so BFS is <strong>O(V + E)</strong> time and O(V) extra space.</p>
+<p>BFS finds only what&rsquo;s <strong>reachable</strong> from s. Vertices in other pieces of the graph are never seen, which is itself useful: Thursday uses it to find a graph&rsquo;s connected pieces.</p>
+<p>The method is usually credited to Edward F. Moore, who described it in 1959 for finding the shortest path through a maze; C. Y. Lee published it independently in 1961 for routing wires on circuit boards.</p>
+<div class="pc pc-example" data-kind="example" data-id="w050d2-e2"><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def bfs_order(adj, start):
+    seen, order = {start}, []
+    queue = deque([start])
+    while queue:
+        v = queue.popleft()
+        order.append(v)
+        for w in adj[v]:
+            if w not in seen:
+                seen.add(w)
+                queue.append(w)
+    return order
+
+adj = {1: [2, 3], 2: [4], 3: [4], 4: [1], 5: [6], 6: []}
+print(bfs_order(adj, 1), bfs_order(adj, 5))</textarea></div>
+<h2 id="shortest-paths">Shortest paths</h2>
+<p>In an <strong>unweighted</strong> graph (every edge counts as 1), the order in which BFS first reaches a vertex is the order of distance: everything at distance 1 is reached before anything at distance 2, and so on. So setting <code>dist[w] = dist[v] + 1</code> when w is first seen gives the shortest distance from the start to every reachable vertex.</p>
+<p>To get the <strong>path</strong> itself, record each vertex&rsquo;s <strong>parent</strong>: the vertex it was first reached from. Then walk back from the target to the start and reverse. The parent links form a tree, the <strong>BFS tree</strong>, holding one shortest path to every reachable vertex.</p>
+<div class="pc pc-example" data-kind="example" data-id="w050d2-e3"><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def shortest_path(adj, start, goal):
+    parent = {start: None}
+    queue = deque([start])
+    while queue:
+        v = queue.popleft()
+        if v == goal:
+            break
+        for w in adj[v]:
+            if w not in parent:
+                parent[w] = v
+                queue.append(w)
+    if goal not in parent:
+        return None
+    path = []
+    while goal is not None:
+        path.append(goal)
+        goal = parent[goal]
+    return path[::-1]
+
+flights = {&quot;LOS&quot;: [&quot;ACC&quot;, &quot;LHR&quot;], &quot;ACC&quot;: [&quot;NBO&quot;], &quot;LHR&quot;: [&quot;NBO&quot;, &quot;JFK&quot;], &quot;NBO&quot;: [&quot;JNB&quot;], &quot;JFK&quot;: [], &quot;JNB&quot;: []}
+print(shortest_path(flights, &quot;LOS&quot;, &quot;JNB&quot;), shortest_path(flights, &quot;JFK&quot;, &quot;LOS&quot;))</textarea></div>
+<p>Stopping as soon as the goal is taken from the queue saves work when you only need one target. BFS is right <strong>only</strong> when every edge counts the same; with different weights (minutes, kilometres), the path with fewest edges may not be the quickest. Next week&rsquo;s Dijkstra&rsquo;s algorithm handles weights.</p>
+<h2 id="grids-and-puzzles">Grids and puzzles</h2>
+<p>A grid is an implicit graph (Monday), so BFS works on it unchanged, with cells as vertices: it finds the shortest route through a maze in O(rows × columns). The <code>dist</code> dict doubles as the seen set.</p>
+<p>Puzzle <strong>states</strong> are graphs too. Take the classic jug puzzle: a 3-litre jug and a 5-litre jug, a tap, a drain, and the task of measuring exactly 4 litres. A state is <code>(litres in small, litres in large)</code>; a move is filling a jug, emptying one, or pouring one into the other until one is empty or full. BFS from <code>(0, 0)</code> finds the fewest moves to any state with 4 litres in it.</p>
+<div class="pc pc-example" data-kind="example" data-id="w050d2-e4"><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def jug_moves(state, a_size=3, b_size=5):
+    a, b = state
+    pour_ab = min(a, b_size - b)
+    pour_ba = min(b, a_size - a)
+    return {(a_size, b), (a, b_size), (0, b), (a, 0), (a - pour_ab, b + pour_ab), (a + pour_ba, b - pour_ba)} - {state}
+
+def solve(target):
+    parent = {(0, 0): None}
+    queue = deque([(0, 0)])
+    while queue:
+        s = queue.popleft()
+        if target in s:
+            path = []
+            while s:
+                path.append(s)
+                s = parent[s]
+            return path[::-1]
+        for t in sorted(jug_moves(s)):
+            if t not in parent:
+                parent[t] = s
+                queue.append(t)
+
+print(solve(4))</textarea></div>
+<h2 id="many-starting-points">Many starting points</h2>
+<p>&ldquo;How far is every house from its <strong>nearest</strong> fire station?&rdquo; Running BFS from each station and taking the minimum would cost O(stations × (V + E)). Instead, start one BFS with <strong>all</strong> the stations in the queue at distance 0. The rings spread out from all of them together, and each house is first reached from whichever station is nearest. That&rsquo;s <strong>multi-source BFS</strong>: still O(V + E).</p>
+<div class="pc pc-example" data-kind="example" data-id="w050d2-e5"><textarea class="pc-src pc-code" hidden>from collections import deque
+
+town = [&quot;S..#&quot;,
+        &quot;..#.&quot;,
+        &quot;...S&quot;]
+
+def nearest(grid):
+    rows, cols = len(grid), len(grid[0])
+    dist = {(r, c): 0 for r in range(rows) for c in range(cols) if grid[r][c] == &quot;S&quot;}
+    queue = deque(dist)
+    while queue:
+        r, c = queue.popleft()
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols and grid[nr][nc] != &quot;#&quot; and (nr, nc) not in dist:
+                dist[(nr, nc)] = dist[(r, c)] + 1
+                queue.append((nr, nc))
+    return [&quot;&quot;.join(&quot;#&quot; if grid[r][c] == &quot;#&quot; else str(dist.get((r, c), &quot;?&quot;)) for c in range(cols)) for r in range(rows)]
+
+print(&quot;\n&quot;.join(nearest(town)))</textarea></div>
+<h2 id="two-colours">Two colours</h2>
+<p>Can a graph&rsquo;s vertices be split into two groups so that every edge goes <strong>between</strong> the groups, never within one? Such a graph is <strong>bipartite</strong>: people and the projects they work on, students and the courses they take. BFS answers it: colour the start 0, its neighbours 1, their neighbours 0, and so on; if an edge ever joins two vertices of the same colour, it&rsquo;s impossible. A graph is bipartite exactly when it has no cycle of odd length (a triangle can&rsquo;t be two-coloured).</p>
+<div class="pc pc-example" data-kind="example" data-id="w050d2-e6"><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def two_colour(adj):
+    colour = {}
+    for s in adj:                          # every piece of the graph
+        if s in colour:
+            continue
+        colour[s] = 0
+        queue = deque([s])
+        while queue:
+            v = queue.popleft()
+            for w in adj[v]:
+                if w not in colour:
+                    colour[w] = 1 - colour[v]
+                    queue.append(w)
+                elif colour[w] == colour[v]:
+                    return None             # an edge inside one group
+    return colour
+
+square = {1: [2, 4], 2: [1, 3], 3: [2, 4], 4: [3, 1]}
+triangle = {1: [2, 3], 2: [1, 3], 3: [1, 2]}
+print(two_colour(square), two_colour(triangle))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>BFS takes vertices from the front of a deque and adds unseen neighbours to the back, marking them seen when added: O(V + E), visiting only what&rsquo;s reachable. In an unweighted graph, BFS reaches vertices in order of distance, so <code>dist[w] = dist[v] + 1</code> gives shortest distances, and parent links rebuild shortest paths (the BFS tree). Grids and puzzle states are graphs BFS searches unchanged. Putting many sources in the queue at distance 0 finds each vertex&rsquo;s nearest source in one pass. Colouring with BFS tests whether a graph is bipartite (no odd cycle). For weighted graphs, BFS isn&rsquo;t enough: that&rsquo;s Dijkstra&rsquo;s algorithm, next week.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d2-distances" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Distances</div><div class="pc-prompt"><p>Write <code>distances(adj, start)</code>: a dict from every vertex reachable from <code>start</code> to its distance in edges, by BFS with a <code>deque</code>. Then <code>levels(adj, start)</code>: a list of lists, the vertices at distance 0, 1, 2, &hellip;, each list sorted. Then <code>farthest(adj, start)</code>: the largest distance and the sorted list of vertices at it.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def distances(adj, start):
+    ___
+
+def levels(adj, start):
+    ___
+
+def farthest(adj, start):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_dist():
+    &quot;distances&quot;
+    adj = {&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;], &quot;B&quot;: [&quot;A&quot;, &quot;D&quot;], &quot;C&quot;: [&quot;A&quot;, &quot;D&quot;], &quot;D&quot;: [&quot;B&quot;, &quot;C&quot;, &quot;E&quot;], &quot;E&quot;: [&quot;D&quot;], &quot;F&quot;: []}
+    assert distances(adj, &quot;A&quot;) == {&quot;A&quot;: 0, &quot;B&quot;: 1, &quot;C&quot;: 1, &quot;D&quot;: 2, &quot;E&quot;: 3} and distances(adj, &quot;F&quot;) == {&quot;F&quot;: 0}
+    assert levels(adj, &quot;A&quot;) == [[&quot;A&quot;], [&quot;B&quot;, &quot;C&quot;], [&quot;D&quot;], [&quot;E&quot;]] and farthest(adj, &quot;A&quot;) == (3, [&quot;E&quot;])
+    rng = random.Random(1)
+    for _ in range(50):
+        n = rng.randint(1, 10)
+        g = {v: [w for w in range(n) if w != v and rng.random() &lt; 0.25] for v in range(n)}
+        d = distances(g, 0)
+        # check: every edge changes the distance by at most 1, and each vertex but the start has a closer neighbour
+        for v in d:
+            for w in g[v]:
+                assert w in d and d[w] &lt;= d[v] + 1
+            if v != 0:
+                assert any(v in g[u] and d[u] == d[v] - 1 for u in d)</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+def distances(adj, start):
+    dist = {start: 0}
+    queue = deque([start])
+    while queue:
+        v = queue.popleft()
+        for w in adj[v]:
+            if w not in dist:
+                dist[w] = dist[v] + 1
+                queue.append(w)
+    return dist
+
+def levels(adj, start):
+    dist = distances(adj, start)
+    out = [[] for _ in range(max(dist.values()) + 1)]
+    for v, d in dist.items():
+        out[d].append(v)
+    return [sorted(level) for level in out]
+
+def farthest(adj, start):
+    lv = levels(adj, start)
+    return len(lv) - 1, lv[-1]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d2-path" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Shortest paths</div><div class="pc-prompt"><p>Write <code>shortest_path(adj, start, goal)</code>: a shortest path as a list of vertices, or <code>None</code> if the goal can&rsquo;t be reached (a path from a vertex to itself is <code>[start]</code>). Explore neighbours in the order the adjacency list gives them. Then <code>all_shortest_counts(adj, start)</code>: a dict from each reachable vertex to the <strong>number</strong> of different shortest paths reaching it from <code>start</code> (a vertex at distance d + 1 gets the sum of the counts of its neighbours at distance d).</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def shortest_path(adj, start, goal):
+    ___
+
+def all_shortest_counts(adj, start):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random, itertools
+def test_paths():
+    &quot;paths&quot;
+    flights = {&quot;LOS&quot;: [&quot;ACC&quot;, &quot;LHR&quot;], &quot;ACC&quot;: [&quot;NBO&quot;], &quot;LHR&quot;: [&quot;NBO&quot;, &quot;JFK&quot;], &quot;NBO&quot;: [&quot;JNB&quot;], &quot;JFK&quot;: [], &quot;JNB&quot;: []}
+    assert shortest_path(flights, &quot;LOS&quot;, &quot;JNB&quot;) == [&quot;LOS&quot;, &quot;ACC&quot;, &quot;NBO&quot;, &quot;JNB&quot;] and shortest_path(flights, &quot;JFK&quot;, &quot;LOS&quot;) is None
+    assert shortest_path(flights, &quot;ACC&quot;, &quot;ACC&quot;) == [&quot;ACC&quot;]
+    grid4 = {(r, c): [(r + 1, c), (r, c + 1)] if r &lt; 2 and c &lt; 2 else [(r + 1, c)] if r &lt; 2 else [(r, c + 1)] if c &lt; 2 else [] for r in range(3) for c in range(3)}
+    assert all_shortest_counts(grid4, (0, 0))[(2, 2)] == 6
+    rng = random.Random(2)
+    for _ in range(60):
+        n = rng.randint(2, 7)
+        g = {v: [w for w in range(n) if w != v and rng.random() &lt; 0.35] for v in range(n)}
+        counts = all_shortest_counts(g, 0)
+        for t in range(n):
+            paths = []
+            for L in range(n):
+                for mid in itertools.permutations([x for x in range(n) if x not in (0, t)], L):
+                    p = (0,) + mid + ((t,) if t else ())
+                    if all(b in g[a] for a, b in zip(p, p[1:])):
+                        paths.append(p)
+                if paths:
+                    break
+            if t == 0:
+                assert counts[0] == 1
+            elif paths:
+                assert counts[t] == len(paths) and len(shortest_path(g, 0, t)) == len(paths[0])
+            else:
+                assert t not in counts and shortest_path(g, 0, t) is None</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+def shortest_path(adj, start, goal):
+    parent = {start: None}
+    queue = deque([start])
+    while queue:
+        v = queue.popleft()
+        if v == goal:
+            break
+        for w in adj[v]:
+            if w not in parent:
+                parent[w] = v
+                queue.append(w)
+    if goal not in parent:
+        return None
+    path = []
+    while goal is not None:
+        path.append(goal)
+        goal = parent[goal]
+    return path[::-1]
+
+def all_shortest_counts(adj, start):
+    dist, count = {start: 0}, {start: 1}
+    queue = deque([start])
+    while queue:
+        v = queue.popleft()
+        for w in adj[v]:
+            if w not in dist:
+                dist[w] = dist[v] + 1
+                count[w] = count[v]
+                queue.append(w)
+            elif dist[w] == dist[v] + 1:
+                count[w] += count[v]
+    return count</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d2-maze" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Through the maze</div><div class="pc-prompt"><p>A maze is a list of strings: <code>#</code> walls, <code>.</code> open, one <code>S</code> (start) and one <code>E</code> (exit). Write <code>maze_steps(maze)</code>: the fewest moves (up, down, left, right) from S to E, or -1. Then <code>maze_route(maze)</code>: the maze as a list of strings with a shortest route&rsquo;s cells (not S or E) marked <code>*</code>, or <code>None</code> if there&rsquo;s no route; when several routes are shortest, explore neighbours in the order up, down, left, right.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def maze_steps(maze):
+    ___
+
+def maze_route(maze):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>MAZE = [&quot;S.#.....&quot;,
+        &quot;.##.###.&quot;,
+        &quot;......#E&quot;,
+        &quot;.####.#.&quot;,
+        &quot;........&quot;]
+def test_maze():
+    &quot;mazes&quot;
+    assert maze_steps(MAZE) == 13
+    route = maze_route(MAZE)
+    assert route[0] == &quot;S.#.....&quot;, route
+    assert sum(row.count(&quot;*&quot;) for row in route) == 12 and all(len(a) == len(b) for a, b in zip(route, MAZE))
+    assert maze_steps([&quot;S#E&quot;]) == -1 and maze_route([&quot;S#E&quot;]) is None and maze_steps([&quot;SE&quot;]) == 1 and maze_route([&quot;SE&quot;]) == [&quot;SE&quot;]
+    big = [&quot;S&quot; + &quot;.&quot; * 199] + [&quot;.&quot; * 200 for _ in range(198)] + [&quot;.&quot; * 199 + &quot;E&quot;]
+    assert maze_steps(big) == 398</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+def _search(maze):
+    rows, cols = len(maze), len(maze[0])
+    start = next((r, c) for r in range(rows) for c in range(cols) if maze[r][c] == &quot;S&quot;)
+    parent = {start: None}
+    queue = deque([start])
+    while queue:
+        r, c = queue.popleft()
+        if maze[r][c] == &quot;E&quot;:
+            return parent, (r, c)
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols and maze[nr][nc] != &quot;#&quot; and (nr, nc) not in parent:
+                parent[(nr, nc)] = (r, c)
+                queue.append((nr, nc))
+    return parent, None
+
+def maze_steps(maze):
+    parent, end = _search(maze)
+    if end is None:
+        return -1
+    steps = 0
+    while parent[end] is not None:
+        end, steps = parent[end], steps + 1
+    return steps
+
+def maze_route(maze):
+    parent, end = _search(maze)
+    if end is None:
+        return None
+    rows = [list(row) for row in maze]
+    cell = parent[end]
+    while cell is not None and parent[cell] is not None:
+        rows[cell[0]][cell[1]] = &quot;*&quot;
+        cell = parent[cell]
+    return [&quot;&quot;.join(row) for row in rows]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d2-multi" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The nearest of many</div><div class="pc-prompt"><p>A town map has <code>H</code> (hospitals), <code>#</code> (blocked) and <code>.</code> (streets). Write <code>distance_map(town)</code>: a list of lists of the distance from each cell to its nearest hospital (<code>None</code> for blocked or unreachable cells), with one multi-source BFS. Then <code>worst_served(town)</code>: the largest finite distance to a hospital, with the sorted list of cells at it (<code>(0, [])</code> if every open cell is a hospital or none is reachable).</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def distance_map(town):
+    ___
+
+def worst_served(town):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_multi():
+    &quot;nearest hospitals&quot;
+    town = [&quot;H..#&quot;,
+            &quot;..#.&quot;,
+            &quot;...H&quot;]
+    assert distance_map(town) == [[0, 1, 2, None], [1, 2, None, 1], [2, 2, 1, 0]]
+    assert worst_served(town) == (2, [(0, 2), (1, 1), (2, 0), (2, 1)])
+    assert distance_map([&quot;#.&quot;, &quot;.#&quot;]) == [[None, None], [None, None]] and worst_served([&quot;H&quot;]) == (0, [])
+    rng = random.Random(3)
+    for _ in range(30):
+        g = [&quot;&quot;.join(rng.choice(&quot;..#H&quot; if rng.random() &lt; 0.1 else &quot;..#&quot;) for _ in range(6)) for _ in range(5)]
+        dm = distance_map(g)
+        hs = [(r, c) for r in range(5) for c in range(6) if g[r][c] == &quot;H&quot;]
+        for r in range(5):
+            for c in range(6):
+                if g[r][c] == &quot;#&quot;:
+                    assert dm[r][c] is None
+                elif dm[r][c] is not None:
+                    assert dm[r][c] &gt;= min(abs(r - a) + abs(c - b) for a, b in hs)</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+def distance_map(town):
+    rows, cols = len(town), len(town[0])
+    dist = [[None] * cols for _ in range(rows)]
+    queue = deque()
+    for r in range(rows):
+        for c in range(cols):
+            if town[r][c] == &quot;H&quot;:
+                dist[r][c] = 0
+                queue.append((r, c))
+    while queue:
+        r, c = queue.popleft()
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols and town[nr][nc] != &quot;#&quot; and dist[nr][nc] is None:
+                dist[nr][nc] = dist[r][c] + 1
+                queue.append((nr, nc))
+    return dist
+
+def worst_served(town):
+    dm = distance_map(town)
+    best = max((d for row in dm for d in row if d is not None), default=0)
+    if best == 0:
+        return 0, []
+    return best, sorted((r, c) for r, row in enumerate(dm) for c, d in enumerate(row) if d == best)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d2-bipartite" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Two groups</div><div class="pc-prompt"><p>Write <code>two_groups(adj)</code> for an undirected graph: a pair of sorted lists <code>(group0, group1)</code> such that every edge joins the two groups, or <code>None</code> if the graph isn&rsquo;t bipartite. In each connected piece, the first of its vertices in the dict&rsquo;s order goes in group 0. Then <code>odd_cycle_exists(adj)</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def two_groups(adj):
+    ___
+
+def odd_cycle_exists(adj):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_groups():
+    &quot;groups&quot;
+    square = {1: [2, 4], 2: [1, 3], 3: [2, 4], 4: [3, 1]}
+    assert two_groups(square) == ([1, 3], [2, 4]) and not odd_cycle_exists(square)
+    assert two_groups({1: [2, 3], 2: [1, 3], 3: [1, 2]}) is None and odd_cycle_exists({1: [2, 3], 2: [1, 3], 3: [1, 2]})
+    assert two_groups({&quot;a&quot;: [], &quot;b&quot;: [&quot;c&quot;], &quot;c&quot;: [&quot;b&quot;]}) == ([&quot;a&quot;, &quot;b&quot;], [&quot;c&quot;])
+    rng = random.Random(4)
+    for _ in range(100):
+        n = rng.randint(1, 8)
+        edges = {tuple(sorted(rng.sample(range(n), 2))) for _ in range(rng.randint(0, 10))} if n &gt; 1 else set()
+        g = {v: [] for v in range(n)}
+        for a, b in edges:
+            g[a].append(b)
+            g[b].append(a)
+        res = two_groups(g)
+        if res is not None:
+            left = set(res[0])
+            assert all((a in left) != (b in left) for a, b in edges) and sorted(res[0] + res[1]) == list(range(n))
+        assert odd_cycle_exists(g) == (res is None)</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+def two_groups(adj):
+    colour = {}
+    for s in adj:
+        if s in colour:
+            continue
+        colour[s] = 0
+        queue = deque([s])
+        while queue:
+            v = queue.popleft()
+            for w in adj[v]:
+                if w not in colour:
+                    colour[w] = 1 - colour[v]
+                    queue.append(w)
+                elif colour[w] == colour[v]:
+                    return None
+    return sorted(v for v in colour if colour[v] == 0), sorted(v for v in colour if colour[v] == 1)
+
+def odd_cycle_exists(adj):
+    return two_groups(adj) is None</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w050d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Seen too late</div><div class="pc-prompt"><p>This BFS marks vertices as seen only when they&rsquo;re taken <strong>out</strong> of the queue, so a vertex reachable from several queued vertices is added several times. The answer is right but the work isn&rsquo;t: on this graph the queue receives 6 entries instead of 4, and it prints <code>6</code>. Mark vertices when they&rsquo;re added, so it prints <code>4</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+adj = {&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;, &quot;D&quot;], &quot;B&quot;: [&quot;D&quot;], &quot;C&quot;: [&quot;D&quot;], &quot;D&quot;: []}
+seen, added = set(), 0
+queue = deque([&quot;A&quot;])
+added += 1
+while queue:
+    v = queue.popleft()
+    if v in seen:
+        continue
+    seen.add(v)
+    for w in adj[v]:
+        if w not in seen:
+            queue.append(w)
+            added += 1
+print(added)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;mark when added&quot;
+    expect_output(&quot;4&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+adj = {&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;, &quot;D&quot;], &quot;B&quot;: [&quot;D&quot;], &quot;C&quot;: [&quot;D&quot;], &quot;D&quot;: []}
+seen, added = {&quot;A&quot;}, 0
+queue = deque([&quot;A&quot;])
+added += 1
+while queue:
+    v = queue.popleft()
+    for w in adj[v]:
+        if w not in seen:
+            seen.add(w)
+            queue.append(w)
+            added += 1
+print(added)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w050d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A stack, not a queue</div><div class="pc-prompt"><p>This &ldquo;BFS&rdquo; takes vertices from the <strong>end</strong> of the list, which makes it a depth-first search, so the distances it records aren&rsquo;t shortest: D gets distance 3 instead of 2. Take from the front with a <code>deque</code> so it prints <code>{'A': 0, 'B': 1, 'C': 1, 'D': 2, 'E': 2}</code>.</p></div><textarea class="pc-src pc-code" hidden>adj = {&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;], &quot;B&quot;: [&quot;D&quot;], &quot;C&quot;: [&quot;E&quot;], &quot;E&quot;: [&quot;D&quot;], &quot;D&quot;: []}
+dist = {&quot;A&quot;: 0}
+todo = [&quot;A&quot;]
+while todo:
+    v = todo.pop()
+    for w in adj[v]:
+        if w not in dist:
+            dist[w] = dist[v] + 1
+            todo.append(w)
+print({k: dist[k] for k in sorted(dist, key=lambda k: (dist[k], k))})</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;first in, first out&quot;
+    expect_output(&quot;{&#x27;A&#x27;: 0, &#x27;B&#x27;: 1, &#x27;C&#x27;: 1, &#x27;D&#x27;: 2, &#x27;E&#x27;: 2}&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+adj = {&quot;A&quot;: [&quot;B&quot;, &quot;C&quot;], &quot;B&quot;: [&quot;D&quot;], &quot;C&quot;: [&quot;E&quot;], &quot;E&quot;: [&quot;D&quot;], &quot;D&quot;: []}
+dist = {&quot;A&quot;: 0}
+todo = deque([&quot;A&quot;])
+while todo:
+    v = todo.popleft()
+    for w in adj[v]:
+        if w not in dist:
+            dist[w] = dist[v] + 1
+            todo.append(w)
+print({k: dist[k] for k in sorted(dist, key=lambda k: (dist[k], k))})</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w050d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Coming back to the start</div><div class="pc-prompt"><p>This BFS never marks the <strong>start</strong> as seen, so in a graph with a cycle it reaches the start again and gives it a distance of 3: this prints <code>{'A': 3, 'B': 1, 'C': 2}</code>. Mark the start before the loop so it prints <code>{'A': 0, 'B': 1, 'C': 2}</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+adj = {&quot;A&quot;: [&quot;B&quot;], &quot;B&quot;: [&quot;C&quot;], &quot;C&quot;: [&quot;A&quot;]}
+dist, depth = {}, {&quot;A&quot;: 0}
+queue = deque([&quot;A&quot;])
+while queue:
+    v = queue.popleft()
+    for w in adj[v]:
+        if w not in dist:
+            dist[w] = depth[v] + 1
+            depth[w] = dist[w]
+            queue.append(w)
+print(dict(sorted(dist.items())))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the start is seen&quot;
+    expect_output(&quot;{&#x27;A&#x27;: 0, &#x27;B&#x27;: 1, &#x27;C&#x27;: 2}&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+adj = {&quot;A&quot;: [&quot;B&quot;], &quot;B&quot;: [&quot;C&quot;], &quot;C&quot;: [&quot;A&quot;]}
+dist, depth = {&quot;A&quot;: 0}, {&quot;A&quot;: 0}
+queue = deque([&quot;A&quot;])
+while queue:
+    v = queue.popleft()
+    for w in adj[v]:
+        if w not in dist:
+            dist[w] = depth[v] + 1
+            depth[w] = dist[w]
+            queue.append(w)
+print(dict(sorted(dist.items())))</textarea></div>
+<div class="parsons" data-id="w050d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Breadth-first distances</div><div class="pc-prompt"><p>Arrange the lines into a BFS that records distances. One line is a trap.</p></div><script type="application/json">{"lines": ["def distances(adj, start):", "    dist = {start: 0}", "    queue = deque([start])", "    while queue:", "        v = queue.popleft()", "        for w in adj[v]:", "            if w not in dist:", "                dist[w] = dist[v] + 1", "                queue.append(w)", "    return dist"], "distractors": ["        v = queue.pop()"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden># BFS from 1 on the undirected graph with edges 1-2, 1-3, 2-4, 3-4, 4-5, 6-7.
+# Neighbours are explored in increasing order.
+
+p = ___   # the order BFS visits the vertices
+q = ___   # the distance from 1 to 5
+r = ___   # the parent of 4 in the BFS tree
+s = ___   # how many vertices BFS from 1 never reaches
+t = ___   # True or False: the graph is bipartite</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [1, 2, 3, 4, 5] and q == 3 and r == 2, &quot;p, q and r&quot;
+    assert s == 2 and t is True, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden># BFS from 1 on the undirected graph with edges 1-2, 1-3, 2-4, 3-4, 4-5, 6-7.
+# Neighbours are explored in increasing order.
+
+p = [1, 2, 3, 4, 5]
+q = 3
+r = 2
+s = 2
+t = True</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w050d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does BFS use to decide which vertex to explore next?", "answer": 1, "explain": "That&rsquo;s what makes it explore in rings.", "options": ["A stack", "A queue: first in, first out", "A heap", "Recursion"]}, {"type": "mc", "q": "When should BFS mark a vertex as seen?", "answer": 1, "explain": "Otherwise vertices can enter the queue many times.", "options": ["When it&rsquo;s taken out of the queue", "When it&rsquo;s added to the queue", "At the end", "Never"]}, {"type": "mc", "q": "What is BFS&rsquo;s running time on an adjacency list?", "answer": 1, "explain": "Each vertex once, each edge once from each end.", "options": ["O(V\u00b2)", "O(V + E)", "O(E log V)", "O(V \u00d7 E)"]}, {"type": "mc", "q": "Why use collections.deque for the queue?", "answer": 1, "explain": "Otherwise BFS becomes quadratic.", "options": ["It sorts", "popleft is O(1); list.pop(0) is O(n)", "It&rsquo;s required", "It removes duplicates"]}, {"type": "mc", "q": "When does BFS give shortest paths?", "answer": 1, "explain": "With weights, use Dijkstra&rsquo;s algorithm.", "options": ["Always", "When every edge counts the same (unweighted)", "Only in trees", "Only on grids"]}, {"type": "mc", "q": "How do you rebuild the shortest path to a vertex after BFS?", "answer": 1, "explain": "The parent links form the BFS tree.", "options": ["Run BFS backwards", "Follow parent links back to the start, then reverse", "Sort by distance", "Use a stack of all paths"]}, {"type": "mc", "q": "How do you find each cell&rsquo;s distance to its nearest exit, with many exits?", "answer": 1, "explain": "Multi-source BFS, still O(V + E).", "options": ["BFS from each exit", "One BFS with every exit in the queue at distance 0", "DFS", "Sort the exits"]}, {"type": "mc", "q": "When is a graph bipartite?", "answer": 1, "explain": "Two-colour it with BFS to check.", "options": ["When it&rsquo;s connected", "When it has no cycle of odd length", "When it has no cycles", "When it&rsquo;s directed"]}, {"type": "mc", "q": "Which vertices does BFS from s visit?", "answer": 1, "explain": "Other pieces of the graph stay unseen.", "options": ["All of them", "Only those reachable from s", "Only s&rsquo;s neighbours", "Only leaves"]}, {"type": "output", "q": "What does this print?", "answer": "2 4", "explain": "3 is two edges from 0, and all four vertices are reached.", "code": "from collections import deque\nadj = {0: [1, 2], 1: [3], 2: [3], 3: []}\ndist, q = {0: 0}, deque([0])\nwhile q:\n    v = q.popleft()\n    for w in adj[v]:\n        if w not in dist:\n            dist[w] = dist[v] + 1\n            q.append(w)\nprint(dist[3], len(dist))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w050d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: doors that cost</div><div class="pc-prompt"><p>A building&rsquo;s floor plan is a grid: <code>.</code> corridors, <code>D</code> doors, <code>#</code> walls, one <code>S</code> and one <code>E</code>. Walking into a corridor (or E) is free, but walking into a <strong>door</strong> costs 1 (you have to unlock it). Find the fewest doors needed to get from S to E.</p>
+<p>Plain BFS counts steps, not doors, and a full weighted-path algorithm is next week. But with edge costs of only 0 and 1 there&rsquo;s a neat trick, <strong>0-1 BFS</strong>: use a deque, and when you reach a neighbour by a <strong>free</strong> move, add it to the <strong>front</strong>; by a costly move, to the <strong>back</strong>. The deque then always holds vertices in order of cost, at most two different costs at a time, so each vertex is finally settled in order of door count. A vertex may be added more than once (if a cheaper way is found later), so keep <code>best[cell]</code>, the fewest doors known, and skip a popped cell if it&rsquo;s already been settled with fewer.</p>
+<p>Write <code>fewest_doors(plan)</code>: the fewest doors from S to E, or -1; and <code>doors_on_route(plan)</code>: the sorted list of door cells on one such best route (ties between routes may be broken any way, but the list must have exactly <code>fewest_doors</code> cells, each a door, on a real route). O(cells) time. The checks compare with a slow method on random plans.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def fewest_doors(plan):
+    ___
+
+def doors_on_route(plan):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random, heapq
+def slow(plan):
+    rows, cols = len(plan), len(plan[0])
+    s = next((r, c) for r in range(rows) for c in range(cols) if plan[r][c] == &quot;S&quot;)
+    best, heap = {s: 0}, [(0, s)]
+    while heap:
+        d, (r, c) = heapq.heappop(heap)
+        if plan[r][c] == &quot;E&quot;:
+            return d
+        if d &gt; best[(r, c)]:
+            continue
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols and plan[nr][nc] != &quot;#&quot;:
+                nd = d + (plan[nr][nc] == &quot;D&quot;)
+                if nd &lt; best.get((nr, nc), 10**9):
+                    best[(nr, nc)] = nd
+                    heapq.heappush(heap, (nd, (nr, nc)))
+    return -1
+def test_doors():
+    &quot;doors&quot;
+    plan = [&quot;S.D..&quot;,
+            &quot;##D#.&quot;,
+            &quot;E.D.D&quot;,
+            &quot;.....&quot;]
+    assert fewest_doors(plan) == 2
+    assert fewest_doors([&quot;SDE&quot;]) == 1 and fewest_doors([&quot;S#E&quot;]) == -1 and fewest_doors([&quot;SE&quot;]) == 0 and doors_on_route([&quot;SE&quot;]) == []
+    route = doors_on_route(plan)
+    assert len(route) == 2 and all(plan[r][c] == &quot;D&quot; for r, c in route)
+def test_random():
+    &quot;against a slow method&quot;
+    rng = random.Random(5)
+    for _ in range(200):
+        R, C = rng.randint(1, 6), rng.randint(2, 6)
+        cells = [[rng.choice(&quot;..D#&quot;) for _ in range(C)] for _ in range(R)]
+        cells[0][0], cells[R - 1][C - 1] = &quot;S&quot;, &quot;E&quot;
+        plan = [&quot;&quot;.join(row) for row in cells]
+        want = slow(plan)
+        assert fewest_doors(plan) == want, plan
+        route = doors_on_route(plan)
+        if want == -1:
+            assert route is None
+        else:
+            assert len(route) == want and all(plan[r][c] == &quot;D&quot; for r, c in route)</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+def _search(plan):
+    rows, cols = len(plan), len(plan[0])
+    start = next((r, c) for r in range(rows) for c in range(cols) if plan[r][c] == &quot;S&quot;)
+    best, parent = {start: 0}, {start: None}
+    dq = deque([start])
+    while dq:
+        r, c = dq.popleft()
+        if plan[r][c] == &quot;E&quot;:
+            return best, parent, (r, c)
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols and plan[nr][nc] != &quot;#&quot;:
+                step = 1 if plan[nr][nc] == &quot;D&quot; else 0
+                cost = best[(r, c)] + step
+                if cost &lt; best.get((nr, nc), float(&quot;inf&quot;)):
+                    best[(nr, nc)] = cost
+                    parent[(nr, nc)] = (r, c)
+                    if step:
+                        dq.append((nr, nc))
+                    else:
+                        dq.appendleft((nr, nc))
+    return best, parent, None
+
+def fewest_doors(plan):
+    best, parent, end = _search(plan)
+    return -1 if end is None else best[end]
+
+def doors_on_route(plan):
+    best, parent, end = _search(plan)
+    if end is None:
+        return None
+    doors, cell = [], end
+    while cell is not None:
+        if plan[cell[0]][cell[1]] == &quot;D&quot;:
+            doors.append(cell)
+        cell = parent[cell]
+    return sorted(doors)</textarea><template class="pc-src pc-hint">Start with <code>best = {S: 0}</code> and <code>dq = deque([S])</code>. Pop from the front; if the cell is E, you&rsquo;re done. For each open neighbour, the new cost is the cell&rsquo;s cost plus 1 if the neighbour is a door; if it&rsquo;s lower than <code>best.get(neighbour)</code>, record it (and the parent), and <code>appendleft</code> for a cost of 0 or <code>append</code> for 1. For the route, follow parent links from E and collect the doors.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On a map of your area, pick a place and colour everything one road junction away, then two, then three: that&rsquo;s BFS by hand. Tomorrow: depth-first search, which goes as deep as it can before backing up, and what it reveals about a graph&rsquo;s structure.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w050d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w050d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w050d2", "week": 50, "day": 2, "title": "Breadth-first search", "exercises": [{"id": "w050d2-distances", "title": "Distances", "points": 10}, {"id": "w050d2-path", "title": "Shortest paths", "points": 15}, {"id": "w050d2-maze", "title": "Through the maze", "points": 15}, {"id": "w050d2-multi", "title": "The nearest of many", "points": 15}, {"id": "w050d2-bipartite", "title": "Two groups", "points": 10}, {"id": "w050d2-bug1", "title": "Seen too late", "points": 10}, {"id": "w050d2-bug2", "title": "A stack, not a queue", "points": 10}, {"id": "w050d2-bug3", "title": "Coming back to the start", "points": 10}, {"id": "w050d2-trace", "title": "Predict them", "points": 10}, {"id": "w050d2-challenge", "title": "Challenge: doors that cost", "points": 25}], "points": 130}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
