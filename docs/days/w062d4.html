@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 62 Day 4: Shallow and deep copies | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Week 8 met copies briefly; Week 61 used copy.deepcopy for transactions and promised the full story. Here it is. A shallow copy makes a new outer container...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w062d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 62 Day 4: Shallow and deep copies">
+<meta property="og:description" content="Week 8 met copies briefly; Week 61 used copy.deepcopy for transactions and promised the full story. Here it is. A shallow copy makes a new outer container...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w062d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-62">Week 62: The memory model</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#shallow-copies" data-sec="shallow-copies">Shallow copies</a></li><li><a href="#deep-copies" data-sec="deep-copies">Deep copies</a></li><li><a href="#the-memo" data-sec="the-memo">The memo</a></li><li><a href="#copying-your-own-classes" data-sec="copying-your-own-classes">Copying your own classes</a></li><li><a href="#when-not-to-copy" data-sec="when-not-to-copy">When not to copy</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w062d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-62">Week 62: The memory model</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 62, Day 4</span></p>
+      <h1>Shallow and deep copies</h1>
+      <div class="day-intro"><p>Week 8 met copies briefly; Week 61 used <code>copy.deepcopy</code> for transactions and promised the full story. Here it is. A <strong>shallow</strong> copy makes a new outer container that still shares everything inside; a <strong>deep</strong> copy copies all the way down, and has to cope with objects that appear twice and with cycles. You&rsquo;ll see every way Python copies, write both kinds of copy yourself (including the memo that makes <code>deepcopy</code> work), control how your own classes are copied with <code>__copy__</code> and <code>__deepcopy__</code>, and learn when copying is the wrong answer.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>List the ways to make shallow copies and predict exactly what they share</li><li>Use copy.deepcopy and explain how its memo preserves sharing and handles cycles</li><li>Write shallow and deep copy functions by hand</li><li>Control copying of your own classes with <strong>copy</strong> and <strong>deepcopy</strong></li><li>Choose between copying, immutability and copy-on-write</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Shallow copies: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Deep copies: 20 min"></span><span class="plan-seg s1" style="flex:20" title="The memo: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Copying your own classes: 25 min"></span><span class="plan-seg s1" style="flex:15" title="When not to copy: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Shallow copies</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Deep copies</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">The memo</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Copying your own classes</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">When not to copy</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w062d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w062d4.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w062d4-p1"><textarea class="pc-src pc-code" hidden>import copy
+
+grid = [[1, 2], [3, 4]]
+shallow = list(grid)
+deep = copy.deepcopy(grid)
+grid[0].append(99)
+grid.append([5])
+print(shallow)
+print(deep)
+
+row = [0]
+pair = [row, row]
+twin = copy.deepcopy(pair)
+print(twin[0] is twin[1], twin[0] is row)</textarea></div>
+<p>The shallow copy has its own outer list (so it didn&rsquo;t get <code>[5]</code>) but shares the rows (so it did get <code>99</code>). The deep copy shares nothing with the original, yet it keeps the <strong>shape</strong> of the original: one row, appearing twice.</p>
+<h2 id="shallow-copies">Shallow copies</h2>
+<p>A <strong>shallow copy</strong> is a new container holding <strong>the same objects</strong> as the original. Python offers many ways to make one:</p>
+<table>
+<thead>
+<tr>
+<th>type</th>
+<th>shallow copy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>list</td>
+<td><code>items[:]</code>, <code>list(items)</code>, <code>items.copy()</code>, <code>[*items]</code></td>
+</tr>
+<tr>
+<td>dict</td>
+<td><code>dict(d)</code>, <code>d.copy()</code>, <code>{**d}</code></td>
+</tr>
+<tr>
+<td>set</td>
+<td><code>set(s)</code>, <code>s.copy()</code></td>
+</tr>
+<tr>
+<td>anything</td>
+<td><code>copy.copy(obj)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Adding, removing or replacing items in the copy doesn&rsquo;t affect the original. But the items are shared, so <strong>changing</strong> a mutable item (appending to an inner list, setting an attribute on an object) shows through both. For a flat list of numbers or strings, a shallow copy is all you need, because the items are immutable.</p>
+<p>Tuples, strings and frozensets are special: since they can&rsquo;t change, &ldquo;copying&rdquo; them gives back <strong>the same object</strong> (<code>tuple(t) is t</code>, <code>copy.copy(t) is t</code>). There&rsquo;s nothing to protect.</p>
+<p><code>copy.copy</code> of an instance of your own class makes a new instance whose <code>__dict__</code> is a shallow copy of the original&rsquo;s: new object, same attribute values.</p>
+<div class="pc pc-example" data-kind="example" data-id="w062d4-e2"><textarea class="pc-src pc-code" hidden>import copy
+
+menu = {&quot;tea&quot;: [&quot;milk&quot;], &quot;coffee&quot;: []}
+backup = dict(menu)
+backup[&quot;juice&quot;] = []                     # the copy&#x27;s own key
+menu[&quot;tea&quot;].append(&quot;sugar&quot;)              # a shared list
+print(sorted(backup), backup[&quot;tea&quot;], &quot;juice&quot; in menu)
+
+t = (1, 2)
+print(tuple(t) is t, copy.copy(t) is t, copy.copy(&quot;text&quot;) == &quot;text&quot;)
+
+class Basket:
+    def __init__(self):
+        self.items = [&quot;bread&quot;]
+
+b1 = Basket()
+b2 = copy.copy(b1)
+b2.items.append(&quot;jam&quot;)
+print(b1 is b2, b1.items)</textarea></div>
+<h2 id="deep-copies">Deep copies</h2>
+<p><code>copy.deepcopy(obj)</code> copies <strong>recursively</strong>: containers inside containers, objects&rsquo; attributes, everything mutable, so the result shares nothing mutable with the original. Immutable atoms (numbers, strings, <code>None</code>) are reused, since that&rsquo;s safe. A tuple is rebuilt only if something inside it needed copying.</p>
+<p>Deep copies are what you want for a <strong>snapshot</strong>: an undo history, a &ldquo;before&rdquo; state in a test, a transaction to roll back, a default configuration that each user modifies. Hand-written, the idea is a few lines of recursion, though as you&rsquo;ll see next, this simple version gets two things wrong:</p>
+<div class="pc pc-example" data-kind="example" data-id="w062d4-e3"><textarea class="pc-src pc-code" hidden>def naive_deep_copy(obj):
+    if isinstance(obj, list):
+        return [naive_deep_copy(x) for x in obj]
+    if isinstance(obj, dict):
+        return {k: naive_deep_copy(v) for k, v in obj.items()}
+    if isinstance(obj, set):
+        return set(obj)                    # set items are hashable, so usually immutable
+    if isinstance(obj, tuple):
+        return tuple(naive_deep_copy(x) for x in obj)
+    return obj
+
+settings = {&quot;theme&quot;: {&quot;colour&quot;: &quot;light&quot;}, &quot;recent&quot;: [&quot;a.txt&quot;]}
+mine = naive_deep_copy(settings)
+mine[&quot;theme&quot;][&quot;colour&quot;] = &quot;dark&quot;
+print(settings[&quot;theme&quot;][&quot;colour&quot;], mine[&quot;theme&quot;][&quot;colour&quot;])
+
+row = [0]
+twin = naive_deep_copy([row, row])
+print(twin[0] is twin[1])                  # sharing lost: two separate rows</textarea></div>
+<h2 id="the-memo">The memo</h2>
+<p>The naive version has two problems: it turns <strong>one shared</strong> object into <strong>several copies</strong>, and on a <strong>cycle</strong> (a list that contains itself) it recurses forever. <code>deepcopy</code> solves both with a <strong>memo</strong>: a dict from <code>id(original)</code> to its copy.</p>
+<ol>
+<li>Before copying an object, look up its id in the memo. If it&rsquo;s there, return the <strong>existing copy</strong>: sharing is preserved.</li>
+<li>Otherwise, make the <strong>empty</strong> new container, put it in the memo <strong>at once</strong>, and only then copy the contents into it. If a cycle leads back to this object, step 1 finds the half-built copy and returns it, closing the cycle in the copy.</li>
+</ol>
+<p>(<code>deepcopy</code> also keeps the originals alive in the memo during the copy, so that ids can&rsquo;t be reused halfway through.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w062d4-e4"><textarea class="pc-src pc-code" hidden>def deep_copy(obj, memo=None):
+    if memo is None:
+        memo = {}
+    if id(obj) in memo:
+        return memo[id(obj)]
+    if isinstance(obj, list):
+        new = []
+        memo[id(obj)] = new                # register before copying the contents
+        new.extend(deep_copy(x, memo) for x in obj)
+        return new
+    if isinstance(obj, dict):
+        new = {}
+        memo[id(obj)] = new
+        for k, v in obj.items():
+            new[deep_copy(k, memo)] = deep_copy(v, memo)
+        return new
+    return obj
+
+row = [0]
+twin = deep_copy([row, row])
+print(twin[0] is twin[1], twin[0] is row)
+
+loop = [1]
+loop.append(loop)
+copied = deep_copy(loop)
+print(copied[1] is copied, copied is not loop)</textarea></div>
+<h2 id="copying-your-own-classes">Copying your own classes</h2>
+<p>By default, <code>copy.copy</code> and <code>copy.deepcopy</code> copy an instance&rsquo;s <code>__dict__</code> (shallowly or deeply). When that&rsquo;s wrong, a class can take control:</p>
+<ul>
+<li><code>__copy__(self)</code>: return the shallow copy. Useful when &ldquo;shallow&rdquo; should still give the copy its own list, say.</li>
+<li><code>__deepcopy__(self, memo)</code>: return the deep copy. Pass <code>memo</code> on to <code>copy.deepcopy</code> for the parts you do copy, and put <code>memo[id(self)] = new</code> in before copying parts that might refer back.</li>
+</ul>
+<p>Common reasons: some attributes must <strong>not</strong> be copied (a lock, an open file, a database connection, a reference to a shared registry or the owning user), some should be <strong>reset</strong> (a cache, a fresh id number), or copying is cheaper done by hand. (Week 31&rsquo;s <code>__slots__</code> classes and frozen dataclasses work with <code>copy</code> too; Python 3.13 also added <code>copy.replace</code> for &ldquo;a copy with these fields changed&rdquo;.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w062d4-e5"><textarea class="pc-src pc-code" hidden>import copy
+import itertools
+
+_ids = itertools.count(1)
+
+class Draft:
+    def __init__(self, title, lines, owner):
+        self.id = next(_ids)
+        self.title, self.lines, self.owner = title, lines, owner
+        self._cache = {}
+
+    def __copy__(self):
+        new = Draft(self.title, list(self.lines), self.owner)   # its own list of lines
+        return new
+
+    def __deepcopy__(self, memo):
+        new = Draft.__new__(Draft)
+        memo[id(self)] = new
+        new.id = next(_ids)                                     # a fresh id
+        new.title = self.title
+        new.lines = copy.deepcopy(self.lines, memo)
+        new.owner = self.owner                                  # shared, never copied
+        new._cache = {}                                         # reset
+        return new
+
+owner = {&quot;name&quot;: &quot;Ada&quot;}
+d = Draft(&quot;Notes&quot;, [[&quot;intro&quot;]], owner)
+d._cache[&quot;words&quot;] = 1
+s, dd = copy.copy(d), copy.deepcopy(d)
+print(s.id, dd.id, s.lines is d.lines, s.lines[0] is d.lines[0])
+print(dd.lines[0] is d.lines[0], dd.owner is owner, dd._cache)</textarea></div>
+<h2 id="when-not-to-copy">When not to copy</h2>
+<p>Copying is a blunt tool:</p>
+<ul>
+<li><strong>It costs time and memory</strong> in proportion to the size of the structure. Deep-copying a large state on every change can dominate a program.</li>
+<li><strong>Some things can&rsquo;t or mustn&rsquo;t be copied</strong>: files, sockets, locks, generators (<code>deepcopy</code> of a generator raises <code>TypeError</code>), and objects whose identity matters (a user, a registry).</li>
+<li><strong>It hides design questions</strong>: if you&rsquo;re copying &ldquo;just in case&rdquo;, decide who owns the data.</li>
+</ul>
+<p>Alternatives:</p>
+<ul>
+<li><strong>Immutable data</strong> (yesterday): nothing to protect, so share freely; &ldquo;changes&rdquo; build new objects that can <strong>share unchanged parts</strong> with the old ones (a new tuple of mostly the same items).</li>
+<li><strong>Copy on the boundary</strong>: copy once when data comes into an object (<code>self.items = list(items)</code>) and when it goes out, not everywhere.</li>
+<li><strong>Copy-on-write</strong>: share until someone wants to change it, and copy only then (Friday&rsquo;s challenge style, and how many databases and the <code>fork</code> system call work).</li>
+</ul>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A shallow copy (items[:], list(), .copy(), dict(), copy.copy) is a new container holding the same items: changes to the container are separate, changes to mutable items show through both; copying a tuple or string gives the same object. copy.deepcopy copies recursively, reusing immutable atoms, and its memo (id of original to copy, filled in before the contents) preserves sharing and handles cycles. Classes control copying with <strong>copy</strong> and <strong>deepcopy</strong>(memo), to share, skip or reset attributes. Copying costs time, can&rsquo;t handle files, locks or generators, and is often better replaced by immutable data, copying at boundaries or copy-on-write.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d4-shared" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">What does the copy share?</div><div class="pc-prompt"><p>Write <code>shared_parts(original, copied, path="obj")</code>: walk the two structures side by side (lists, tuples and dict values, matching by index or key) and return a list of paths, depth-first, where the copy holds <strong>the very same mutable object</strong> (list, dict or set) as the original. Don&rsquo;t descend into a shared object (everything inside it is shared too). If the two structures differ in shape at some point, stop there.</p></div><textarea class="pc-src pc-code" hidden>def shared_parts(original, copied, path=&quot;obj&quot;):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_shared():
+    &quot;shallow versus deep&quot;
+    import copy
+    data = [[1], {&quot;a&quot;: [2]}, (3, [4]), 5]
+    assert shared_parts(data, list(data)) == [&quot;obj[0]&quot;, &quot;obj[1]&quot;, &quot;obj[2][1]&quot;]
+    assert shared_parts(data, data) == [&quot;obj&quot;]
+    assert shared_parts(data, copy.deepcopy(data)) == []
+    half = [list(data[0]), data[1], data[2], 5]
+    assert shared_parts(data, half) == [&quot;obj[1]&quot;, &quot;obj[2][1]&quot;]
+    d = {&quot;x&quot;: {&quot;y&quot;: [1]}}
+    assert shared_parts(d, {&quot;x&quot;: dict(d[&quot;x&quot;])}) == [&quot;obj[&#x27;x&#x27;][&#x27;y&#x27;]&quot;]
+    assert shared_parts([1, 2], [1]) == []</textarea><textarea class="pc-src pc-solution" hidden>MUTABLE = (list, dict, set)
+
+def shared_parts(original, copied, path=&quot;obj&quot;):
+    if isinstance(original, MUTABLE) and original is copied:
+        return [path]
+    found = []
+    if isinstance(original, (list, tuple)) and isinstance(copied, (list, tuple)):
+        if len(original) == len(copied):
+            for i, (a, b) in enumerate(zip(original, copied)):
+                found += shared_parts(a, b, f&quot;{path}[{i}]&quot;)
+    elif isinstance(original, dict) and isinstance(copied, dict):
+        if original.keys() == copied.keys():
+            for key in original:
+                found += shared_parts(original[key], copied[key], f&quot;{path}[{key!r}]&quot;)
+    return found</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d4-handmade" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Copies by hand</div><div class="pc-prompt"><p>Without the <code>copy</code> module, write <code>shallow_copy(obj)</code>: a new list, dict or set with the same items (any other object is returned unchanged), and <code>deep_copy(obj)</code>: copies lists, dicts and sets recursively and rebuilds tuples, returning <strong>the same tuple</strong> when nothing inside it needed copying. Don&rsquo;t worry about sharing or cycles yet.</p></div><textarea class="pc-src pc-code" hidden>def shallow_copy(obj):
+    ___
+
+def deep_copy(obj):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_handmade():
+    &quot;shallow and deep by hand&quot;
+    data = {&quot;a&quot;: [1, [2]], &quot;b&quot;: (3, [4]), &quot;c&quot;: (5, 6), &quot;d&quot;: {7}}
+    s = shallow_copy(data)
+    assert s == data and s is not data and s[&quot;a&quot;] is data[&quot;a&quot;]
+    d = deep_copy(data)
+    assert d == data and d[&quot;a&quot;] is not data[&quot;a&quot;] and d[&quot;a&quot;][1] is not data[&quot;a&quot;][1]
+    assert d[&quot;b&quot;] is not data[&quot;b&quot;] and d[&quot;b&quot;][1] is not data[&quot;b&quot;][1]
+    assert d[&quot;c&quot;] is data[&quot;c&quot;] and d[&quot;d&quot;] is not data[&quot;d&quot;] and d[&quot;d&quot;] == {7}
+    assert shallow_copy(&quot;text&quot;) == &quot;text&quot; and deep_copy(5) == 5
+    assert not uses(source, &quot;copy.deepcopy&quot;) and not uses(source, &quot;deepcopy&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def shallow_copy(obj):
+    if isinstance(obj, (list, dict, set)):
+        return obj.copy()
+    return obj
+
+def deep_copy(obj):
+    if isinstance(obj, list):
+        return [deep_copy(x) for x in obj]
+    if isinstance(obj, dict):
+        return {k: deep_copy(v) for k, v in obj.items()}
+    if isinstance(obj, set):
+        return set(obj)
+    if isinstance(obj, tuple):
+        items = tuple(deep_copy(x) for x in obj)
+        if all(a is b for a, b in zip(items, obj)):
+            return obj
+        return items
+    return obj</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d4-memo" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Keeping the shape</div><div class="pc-prompt"><p>Write <code>clone(obj, memo=None)</code>, a deep copy of lists and dicts (keys reused, values copied) that <strong>preserves sharing</strong> (an object that appears twice in the original appears as one copy, twice) and <strong>copes with cycles</strong>, using a memo dict from <code>id</code> to copy. Other objects are returned unchanged. Then <code>same_shape(a, b)</code>: True if two list structures have the same sharing pattern: walk them side by side and check that whenever one has seen an inner list before, the other has seen the corresponding list at the same moment (use a pair of id-to-position dicts).</p></div><textarea class="pc-src pc-code" hidden>def clone(obj, memo=None):
+    ___
+
+def same_shape(a, b):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_memo():
+    &quot;the memo&quot;
+    row = [0]
+    grid = [row, row, [0]]
+    c = clone(grid)
+    assert c == grid and c[0] is c[1] and c[0] is not row and c[2] is not c[0]
+    loop = {&quot;name&quot;: &quot;me&quot;}
+    loop[&quot;self&quot;] = loop
+    lc = clone(loop)
+    assert lc[&quot;self&quot;] is lc and lc is not loop
+    a = [1]
+    a.append(a)
+    b = clone(a)
+    assert b[1] is b and b[0] == 1
+    assert same_shape(grid, c) and not same_shape(grid, [[0], [0], [0]])
+    assert same_shape(a, b) and not same_shape([row, row], [[0], [0]])
+    assert same_shape([[1], [2]], [[1], [2]])</textarea><textarea class="pc-src pc-solution" hidden>def clone(obj, memo=None):
+    if memo is None:
+        memo = {}
+    if id(obj) in memo:
+        return memo[id(obj)]
+    if isinstance(obj, list):
+        new = []
+        memo[id(obj)] = new
+        for item in obj:
+            new.append(clone(item, memo))
+        return new
+    if isinstance(obj, dict):
+        new = {}
+        memo[id(obj)] = new
+        for key, value in obj.items():
+            new[key] = clone(value, memo)
+        return new
+    return obj
+
+def same_shape(a, b):
+    seen_a, seen_b = {}, {}
+    counter = [0]
+
+    def walk(x, y):
+        if isinstance(x, list) != isinstance(y, list):
+            return False
+        if not isinstance(x, list):
+            return True
+        if (id(x) in seen_a) != (id(y) in seen_b):
+            return False
+        if id(x) in seen_a:
+            return seen_a[id(x)] == seen_b[id(y)]
+        seen_a[id(x)] = seen_b[id(y)] = counter[0]
+        counter[0] += 1
+        if len(x) != len(y):
+            return False
+        return all(walk(p, q) for p, q in zip(x, y))
+
+    return walk(a, b)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d4-dunder" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Choosing what gets copied</div><div class="pc-prompt"><p>Write a class <code>Account(owner, history)</code>: <code>owner</code> is shared with every copy (it&rsquo;s a person, not data), <code>history</code> is a list of transaction lists like <code>["in", 50]</code>, and <code>cache</code> starts as an empty dict. Define <code>__copy__</code> so a shallow copy gets its <strong>own</strong> outer history list (sharing the transaction lists) and the same cache dict, and <code>__deepcopy__(memo)</code> so a deep copy deep-copies the history (passing the memo on), shares the owner and gets a <strong>fresh empty</strong> cache. Each account gets a number from a class-level counter starting at 1, and copies get new numbers too.</p></div><textarea class="pc-src pc-code" hidden>import copy
+import itertools
+
+class Account:
+    _numbers = itertools.count(1)
+
+    def __init__(self, owner, history):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_dunder():
+    &quot;__copy__ and __deepcopy__&quot;
+    import copy
+    ada = {&quot;name&quot;: &quot;Ada&quot;}
+    acc = Account(ada, [[&quot;in&quot;, 50], [&quot;out&quot;, 20]])
+    acc.cache[&quot;balance&quot;] = 30
+    s = copy.copy(acc)
+    assert s.owner is ada and s.history is not acc.history and s.history[0] is acc.history[0]
+    assert s.cache is acc.cache and s.number != acc.number
+    d = copy.deepcopy(acc)
+    assert d.owner is ada and d.history == acc.history and d.history[0] is not acc.history[0]
+    assert d.cache == {} and d.number not in (acc.number, s.number)
+    pair = copy.deepcopy([acc, acc])
+    assert pair[0] is pair[1] and pair[0] is not acc
+    assert Account(ada, []).number &gt; d.number</textarea><textarea class="pc-src pc-solution" hidden>import copy
+import itertools
+
+class Account:
+    _numbers = itertools.count(1)
+
+    def __init__(self, owner, history):
+        self.number = next(Account._numbers)
+        self.owner = owner
+        self.history = history
+        self.cache = {}
+
+    def __copy__(self):
+        new = Account(self.owner, list(self.history))
+        new.cache = self.cache
+        return new
+
+    def __deepcopy__(self, memo):
+        new = Account.__new__(Account)
+        memo[id(self)] = new
+        new.number = next(Account._numbers)
+        new.owner = self.owner
+        new.history = copy.deepcopy(self.history, memo)
+        new.cache = {}
+        return new</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d4-undo" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Snapshots for undo</div><div class="pc-prompt"><p>Write <code>History(state)</code> for undo. <code>current()</code> returns a <strong>deep copy</strong> of the current state (so callers can&rsquo;t change history by mutating it); <code>change(func)</code> deep-copies the current state, calls <code>func(copy)</code> (which mutates it), and stores the result as the new current state; <code>undo()</code> goes back one step (raising <code>IndexError</code> if there&rsquo;s nothing to undo); <code>steps()</code> is how many changes can be undone. The starting state is copied too.</p></div><textarea class="pc-src pc-code" hidden>import copy
+
+class History:
+    def __init__(self, state):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_undo():
+    &quot;deep snapshots&quot;
+    start = {&quot;items&quot;: [&quot;tea&quot;], &quot;total&quot;: 1}
+    h = History(start)
+    start[&quot;items&quot;].append(&quot;hack&quot;)
+    assert h.current() == {&quot;items&quot;: [&quot;tea&quot;], &quot;total&quot;: 1}
+    def add_jam(s):
+        s[&quot;items&quot;].append(&quot;jam&quot;)
+        s[&quot;total&quot;] += 1
+    h.change(add_jam)
+    h.change(add_jam)
+    assert h.current()[&quot;items&quot;] == [&quot;tea&quot;, &quot;jam&quot;, &quot;jam&quot;] and h.steps() == 2
+    view = h.current()
+    view[&quot;items&quot;].clear()
+    assert h.current()[&quot;total&quot;] == 3
+    h.undo()
+    assert h.current() == {&quot;items&quot;: [&quot;tea&quot;, &quot;jam&quot;], &quot;total&quot;: 2}
+    h.undo()
+    assert h.current()[&quot;items&quot;] == [&quot;tea&quot;] and h.steps() == 0
+    try:
+        h.undo()
+        assert False
+    except IndexError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import copy
+
+class History:
+    def __init__(self, state):
+        self._states = [copy.deepcopy(state)]
+
+    def current(self):
+        return copy.deepcopy(self._states[-1])
+
+    def change(self, func):
+        new = copy.deepcopy(self._states[-1])
+        func(new)
+        self._states.append(new)
+
+    def undo(self):
+        if len(self._states) == 1:
+            raise IndexError(&quot;nothing to undo&quot;)
+        self._states.pop()
+
+    def steps(self):
+        return len(self._states) - 1</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w062d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A copy that changed the original</div><div class="pc-prompt"><p>Each user starts from a copy of the default settings, but <code>dict(...)</code> copies only the outer dict, so changing the user&rsquo;s theme also changes the defaults: this prints <code>dark dark</code>. Make the copy deep so it prints <code>light dark</code>.</p></div><textarea class="pc-src pc-code" hidden>import copy
+
+DEFAULTS = {&quot;theme&quot;: {&quot;mode&quot;: &quot;light&quot;}, &quot;font&quot;: 12}
+user = dict(DEFAULTS)
+user[&quot;theme&quot;][&quot;mode&quot;] = &quot;dark&quot;
+print(DEFAULTS[&quot;theme&quot;][&quot;mode&quot;], user[&quot;theme&quot;][&quot;mode&quot;])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;deep copy&quot;
+    expect_output(&quot;light dark&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import copy
+
+DEFAULTS = {&quot;theme&quot;: {&quot;mode&quot;: &quot;light&quot;}, &quot;font&quot;: 12}
+user = copy.deepcopy(DEFAULTS)
+user[&quot;theme&quot;][&quot;mode&quot;] = &quot;dark&quot;
+print(DEFAULTS[&quot;theme&quot;][&quot;mode&quot;], user[&quot;theme&quot;][&quot;mode&quot;])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w062d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">One list for every key</div><div class="pc-prompt"><p><code>dict.fromkeys(names, [])</code> makes <strong>one</strong> empty list and uses it as the value for every key, so adding to Ada&rsquo;s list adds to Ben&rsquo;s too: this prints <code>{'ada': ['tea'], 'ben': ['tea']}</code>. Give each key its own list so it prints <code>{'ada': ['tea'], 'ben': []}</code>.</p></div><textarea class="pc-src pc-code" hidden>names = [&quot;ada&quot;, &quot;ben&quot;]
+orders = dict.fromkeys(names, [])
+orders[&quot;ada&quot;].append(&quot;tea&quot;)
+print(orders)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;separate lists&quot;
+    expect_output(&quot;{&#x27;ada&#x27;: [&#x27;tea&#x27;], &#x27;ben&#x27;: []}&quot;)</textarea><textarea class="pc-src pc-solution" hidden>names = [&quot;ada&quot;, &quot;ben&quot;]
+orders = {name: [] for name in names}
+orders[&quot;ada&quot;].append(&quot;tea&quot;)
+print(orders)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w062d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A shallow copy of an object</div><div class="pc-prompt"><p><code>copy.copy</code> of a <code>Tally</code> makes a new object but shares its <code>marks</code> list, so marking the copy marks the original: this prints <code>[1, 2] [1, 2]</code>. Give <code>Tally</code> a <code>__copy__</code> method that copies the list so it prints <code>[1] [1, 2]</code>.</p></div><textarea class="pc-src pc-code" hidden>import copy
+
+class Tally:
+    def __init__(self):
+        self.marks = []
+
+original = Tally()
+original.marks.append(1)
+spare = copy.copy(original)
+spare.marks.append(2)
+print(original.marks, spare.marks)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;__copy__&quot;
+    expect_output(&quot;[1] [1, 2]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import copy
+
+class Tally:
+    def __init__(self):
+        self.marks = []
+
+    def __copy__(self):
+        new = Tally()
+        new.marks = list(self.marks)
+        return new
+
+original = Tally()
+original.marks.append(1)
+spare = copy.copy(original)
+spare.marks.append(2)
+print(original.marks, spare.marks)</textarea></div>
+<div class="parsons" data-id="w062d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A <strong>deepcopy</strong> that keeps the owner</div><div class="pc-prompt"><p>Arrange the lines of a <code>__deepcopy__</code> method that copies the data but shares the owner. One line is a trap.</p></div><script type="application/json">{"lines": ["def __deepcopy__(self, memo):", "    new = type(self).__new__(type(self))", "    memo[id(self)] = new", "    new.data = copy.deepcopy(self.data, memo)", "    new.owner = self.owner", "    return new"], "distractors": ["    new.owner = copy.deepcopy(self.owner)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # a = [[1]]; b = a[:]; b[0].append(2); a
+q = ___   # a = [[1]]; b = a[:]; b.append([3]); len(a)
+r = ___   # True or False: t = (1, 2); copy.copy(t) is t
+s = ___   # r = [0]; c = copy.deepcopy([r, r]); c[0] is c[1]
+t = ___   # the exception from copy.deepcopy(x for x in [1]), as a string</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [[1, 2]] and q == 1 and r is True, &quot;p, q and r&quot;
+    assert s is True and t == &quot;TypeError&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = [[1, 2]]
+q = 1
+r = True
+s = True
+t = &quot;TypeError&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w062d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does a shallow copy share with the original?", "answer": 1, "explain": "A new container holding the same objects.", "options": ["Nothing", "Its items", "Only its length", "Everything, including the container"]}, {"type": "mc", "q": "Which is not a shallow copy of a list?", "answer": 3, "explain": "That&rsquo;s just a second name.", "options": ["items[:]", "list(items)", "items.copy()", "alias = items"]}, {"type": "mc", "q": "What does copy.copy((1, 2)) return?", "answer": 1, "explain": "Immutable objects needn&rsquo;t be copied.", "options": ["A new tuple", "The same tuple", "A list", "An error"]}, {"type": "mc", "q": "What does deepcopy reuse rather than copy?", "answer": 1, "explain": "They can&rsquo;t change, so sharing is safe.", "options": ["Lists", "Immutable atoms like numbers and strings", "Dicts", "Nothing"]}, {"type": "mc", "q": "What is deepcopy&rsquo;s memo?", "answer": 1, "explain": "It preserves sharing and handles cycles.", "options": ["A cache of hashes", "A dict from id of each original to its copy", "A list of errors", "A log"]}, {"type": "mc", "q": "Why is the new container put in the memo before its contents are copied?", "answer": 1, "explain": "The half-built copy closes the cycle.", "options": ["Speed", "So a cycle leading back to it finds the copy instead of recursing forever", "Style", "It isn&rsquo;t"]}, {"type": "mc", "q": "What should <strong>deepcopy</strong> do with memo?", "answer": 1, "explain": "Otherwise sharing and cycles break.", "options": ["Ignore it", "Register the new object in it and pass it on to deepcopy calls", "Clear it", "Return it"]}, {"type": "mc", "q": "Which of these can&rsquo;t be deep-copied?", "answer": 1, "explain": "TypeError.", "options": ["A dict", "A generator", "A tuple", "A string"]}, {"type": "mc", "q": "What is copy-on-write?", "answer": 1, "explain": "Cheap when changes are rare.", "options": ["Copying every write", "Sharing until a change is needed, then copying", "Writing files", "Deep copying"]}, {"type": "output", "q": "What does this print?", "answer": "[1, 2] [1]", "explain": "The shallow copy shares the list.", "code": "import copy\na = {\"k\": [1]}\nb = copy.copy(a)\nc = copy.deepcopy(a)\na[\"k\"].append(2)\nprint(b[\"k\"], c[\"k\"])"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: your own deepcopy</div><div class="pc-prompt"><p>Write <code>deep_copy(obj, memo=None)</code> that does most of what <code>copy.deepcopy</code> does:</p>
+<ul>
+<li>atoms (<code>int</code>, <code>float</code>, <code>complex</code>, <code>bool</code>, <code>str</code>, <code>bytes</code>, <code>None</code>), functions and classes are returned as they are;</li>
+<li>lists, dicts (keys and values) and sets are copied, preserving sharing and cycles with a memo;</li>
+<li>tuples are rebuilt only if some item changed (otherwise the same tuple is returned), and recorded in the memo;</li>
+<li>if the object&rsquo;s class defines <code>__deepcopy__</code>, call it with the memo and use the result;</li>
+<li>other objects are copied by making a new instance with <code>cls.__new__(cls)</code>, registering it in the memo, and deep-copying each attribute in <code>vars(obj)</code> onto it.</li>
+</ul>
+<p>Don&rsquo;t import <code>copy</code>.</p></div><textarea class="pc-src pc-code" hidden>def deep_copy(obj, memo=None):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_containers():
+    &quot;containers, sharing and cycles&quot;
+    row = [1]
+    data = {&quot;rows&quot;: [row, row], &quot;tags&quot;: {&quot;a&quot;}, &quot;pair&quot;: (1, &quot;x&quot;), &quot;mixed&quot;: (2, [3])}
+    c = deep_copy(data)
+    assert c == data and c[&quot;rows&quot;][0] is c[&quot;rows&quot;][1] and c[&quot;rows&quot;][0] is not row
+    assert c[&quot;pair&quot;] is data[&quot;pair&quot;] and c[&quot;mixed&quot;] is not data[&quot;mixed&quot;] and c[&quot;mixed&quot;][1] is not data[&quot;mixed&quot;][1]
+    assert c[&quot;tags&quot;] == {&quot;a&quot;} and c[&quot;tags&quot;] is not data[&quot;tags&quot;]
+    loop = []
+    loop.append(loop)
+    assert deep_copy(loop)[0] is not loop
+    lc = deep_copy(loop)
+    assert lc[0] is lc
+
+def test_objects():
+    &quot;objects and __deepcopy__&quot;
+    class Node:
+        def __init__(self, value):
+            self.value, self.next = value, None
+    a, b = Node([1]), Node([2])
+    a.next, b.next = b, a
+    ca = deep_copy(a)
+    assert isinstance(ca, Node) and ca is not a and ca.value == [1] and ca.value is not a.value
+    assert ca.next.next is ca and ca.next is not b
+    class Shared:
+        def __deepcopy__(self, memo):
+            return self
+    s = Shared()
+    out = deep_copy([s, Node(s)])
+    assert out[0] is s and out[1].value is s
+    def f():
+        pass
+    assert deep_copy([f, Node])[0] is f and deep_copy([f, Node])[1] is Node
+    assert not uses(source, &quot;copy&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import types
+
+ATOMS = (int, float, complex, bool, str, bytes, type(None), type, types.FunctionType, types.BuiltinFunctionType)
+
+def deep_copy(obj, memo=None):
+    if memo is None:
+        memo = {}
+    if id(obj) in memo:
+        return memo[id(obj)]
+    if isinstance(obj, ATOMS):
+        return obj
+    special = getattr(type(obj), &quot;__deepcopy__&quot;, None)
+    if special is not None:
+        result = special(obj, memo)
+        memo[id(obj)] = result
+        return result
+    if isinstance(obj, list):
+        new = []
+        memo[id(obj)] = new
+        for item in obj:
+            new.append(deep_copy(item, memo))
+        return new
+    if isinstance(obj, dict):
+        new = {}
+        memo[id(obj)] = new
+        for key, value in obj.items():
+            new[deep_copy(key, memo)] = deep_copy(value, memo)
+        return new
+    if isinstance(obj, set):
+        new = set()
+        memo[id(obj)] = new
+        for item in obj:
+            new.add(deep_copy(item, memo))
+        return new
+    if isinstance(obj, tuple):
+        items = tuple(deep_copy(item, memo) for item in obj)
+        if id(obj) in memo:
+            return memo[id(obj)]
+        result = obj if all(a is b for a, b in zip(items, obj)) else items
+        memo[id(obj)] = result
+        return result
+    new = type(obj).__new__(type(obj))
+    memo[id(obj)] = new
+    for key, value in vars(obj).items():
+        setattr(new, key, deep_copy(value, memo))
+    return new</textarea><template class="pc-src pc-hint">Check the memo first, then atoms. For a tuple, copy its items first and only then decide whether to build a new one (a tuple can&rsquo;t be registered before its items exist). For objects, <code>new = type(obj).__new__(type(obj))</code>, register it, then <code>for k, v in vars(obj).items(): setattr(new, k, deep_copy(v, memo))</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Find one place in your own code where you copy &ldquo;just in case&rdquo;, and decide who really owns that data. Tomorrow: weak references, which let you refer to an object without keeping it alive.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w062d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w062d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w062d4", "week": 62, "day": 4, "title": "Shallow and deep copies", "exercises": [{"id": "w062d4-shared", "title": "What does the copy share?", "points": 10}, {"id": "w062d4-handmade", "title": "Copies by hand", "points": 10}, {"id": "w062d4-memo", "title": "Keeping the shape", "points": 15}, {"id": "w062d4-dunder", "title": "Choosing what gets copied", "points": 15}, {"id": "w062d4-undo", "title": "Snapshots for undo", "points": 10}, {"id": "w062d4-bug1", "title": "A copy that changed the original", "points": 10}, {"id": "w062d4-bug2", "title": "One list for every key", "points": 10}, {"id": "w062d4-bug3", "title": "A shallow copy of an object", "points": 10}, {"id": "w062d4-trace", "title": "Predict them", "points": 10}, {"id": "w062d4-challenge", "title": "Challenge: your own deepcopy", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

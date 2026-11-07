@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 62 Day 5: Weak references | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Every reference so far has kept its object alive. Sometimes that’s exactly wrong: a cache shouldn’t keep images in memory that nobody is using, a list of...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w062d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 62 Day 5: Weak references">
+<meta property="og:description" content="Every reference so far has kept its object alive. Sometimes that’s exactly wrong: a cache shouldn’t keep images in memory that nobody is using, a list of...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w062d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-62">Week 62: The memory model</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#weakref-ref" data-sec="weakref-ref">weakref.ref</a></li><li><a href="#what-can-be-weakly-referenced" data-sec="what-can-be-weakly-referenced">What can be weakly referenced</a></li><li><a href="#weak-containers" data-sec="weak-containers">Weak containers</a></li><li><a href="#bound-methods-and-weakmethod" data-sec="bound-methods-and-weakmethod">Bound methods and WeakMethod</a></li><li><a href="#weakref-finalize" data-sec="weakref-finalize">weakref.finalize</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w062d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-62">Week 62: The memory model</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 62, Day 5</span></p>
+      <h1>Weak references</h1>
+      <div class="day-intro"><p>Every reference so far has kept its object alive. Sometimes that&rsquo;s exactly wrong: a cache shouldn&rsquo;t keep images in memory that nobody is using, a list of observers shouldn&rsquo;t stop a window from closing, and a table of extra data about objects shouldn&rsquo;t make those objects immortal. A <strong>weak reference</strong> refers to an object <strong>without</strong> counting towards keeping it alive. Today covers <code>weakref.ref</code> and its callbacks, the weak containers, the special case of bound methods, and <code>weakref.finalize</code>, the safety net Week 61 promised.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Create weak references, dereference them safely and use callbacks</li><li>Say which objects can be weakly referenced, and how <strong>slots</strong> classes allow it</li><li>Build caches and side tables with WeakValueDictionary and WeakKeyDictionary</li><li>Hold observers weakly with WeakSet and WeakMethod</li><li>Register cleanup with weakref.finalize and explain why it beats <strong>del</strong></li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="weakref.ref: 20 min"></span><span class="plan-seg s0" style="flex:15" title="What can be weakly referenced: 15 min"></span><span class="plan-seg s1" style="flex:25" title="Weak containers: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Bound methods and WeakMethod: 20 min"></span><span class="plan-seg s1" style="flex:20" title="weakref.finalize: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">weakref.ref</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">What can be weakly referenced</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:45</span><span class="plan-what">Weak containers</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Bound methods and WeakMethod</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">weakref.finalize</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:40</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w062d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w062d5.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w062d5-p1"><textarea class="pc-src pc-code" hidden>import weakref
+
+class Photo:
+    def __init__(self, name):
+        self.name = name
+
+p = Photo(&quot;beach&quot;)
+r = weakref.ref(p)
+print(r() is p, r().name)
+del p
+print(r())
+
+cache = weakref.WeakValueDictionary()
+keep = Photo(&quot;hills&quot;)
+cache[&quot;hills&quot;] = keep
+cache[&quot;sea&quot;] = Photo(&quot;sea&quot;)
+print(sorted(cache.keys()))</textarea></div>
+<p>A weak reference gives the object back while it&rsquo;s alive and <code>None</code> once it&rsquo;s gone. The cache entry for <code>"sea"</code> vanished at once, because nothing <strong>strong</strong> referred to that photo.</p>
+<h2 id="weakref-ref">weakref.ref</h2>
+<p><code>r = weakref.ref(obj)</code> makes a weak reference. <strong>Calling</strong> it, <code>r()</code>, returns the object if it&rsquo;s still alive and <code>None</code> if it has been freed. Since the object can disappear between two lines, always call once and keep the result in a name while you use it:</p>
+<pre><code>target = r()
+if target is not None:
+    target.refresh()
+</code></pre>
+<p><code>weakref.ref(obj, callback)</code> also registers a <strong>callback</strong>, called with the weak reference itself just after the object dies: the place to remove a dead entry from your own data structure. Weak references to the same object without callbacks are often the same reference object, and they&rsquo;re hashable if the object is, so they can be dict keys.</p>
+<p>Remember yesterday&rsquo;s mechanics: in CPython an object without cycles dies the moment its last strong reference goes, so the callback runs at once; an object in a cycle dies only when the cycle collector runs.</p>
+<div class="pc pc-example" data-kind="example" data-id="w062d5-e2"><textarea class="pc-src pc-code" hidden>import weakref
+
+class Session:
+    def __init__(self, user):
+        self.user = user
+
+events = []
+s = Session(&quot;ada&quot;)
+r = weakref.ref(s, lambda ref: events.append(&quot;ada&#x27;s session ended&quot;))
+
+target = r()
+if target is not None:
+    print(&quot;still here:&quot;, target.user)
+del target                                  # our temporary strong reference
+
+print(weakref.getweakrefcount(s), r() is s)
+del s
+print(r(), events)</textarea></div>
+<h2 id="what-can-be-weakly-referenced">What can be weakly referenced</h2>
+<p>An object can be weakly referenced only if its type makes room for a list of weak references. That includes instances of your own classes, functions, methods&rsquo; functions, sets, frozensets, classes and modules. It <strong>excludes</strong> several built-ins: <code>int</code>, <code>str</code>, <code>bytes</code>, <code>tuple</code>, <code>list</code> and <code>dict</code> (a subclass of <code>list</code> or <code>dict</code> works, though).</p>
+<p>A class with <code>__slots__</code> (Week 31) has no room unless you add it: include <code>"__weakref__"</code> in the slots.</p>
+<p>Weak references make sense for <strong>large, identity-carrying</strong> objects (windows, documents, connections, cache entries), not for small values: a weak reference to a number would make no sense, since equal numbers are interchangeable.</p>
+<div class="pc pc-example" data-kind="example" data-id="w062d5-e3"><textarea class="pc-src pc-code" hidden>import weakref
+
+def try_ref(obj):
+    try:
+        weakref.ref(obj)
+        return &quot;yes&quot;
+    except TypeError:
+        return &quot;no&quot;
+
+class Plain:
+    pass
+
+class Slotted:
+    __slots__ = (&quot;x&quot;,)
+
+class SlottedWeak:
+    __slots__ = (&quot;x&quot;, &quot;__weakref__&quot;)
+
+class MyList(list):
+    pass
+
+for thing in (Plain(), Slotted(), SlottedWeak(), MyList(), [], {}, 42, &quot;s&quot;, (1,), {1}, try_ref):
+    print(type(thing).__name__, try_ref(thing))</textarea></div>
+<h2 id="weak-containers">Weak containers</h2>
+<p>The <code>weakref</code> module has ready-made containers that clean themselves up:</p>
+<ul>
+<li><strong><code>WeakValueDictionary</code></strong>: values are held weakly; an entry disappears when its value dies. Ideal for <strong>caches</strong> and <strong>registries</strong> (&ldquo;give me the live object with this id, if there is one&rdquo;) and for interning: never two live objects for the same key.</li>
+<li><strong><code>WeakKeyDictionary</code></strong>: keys are held weakly; an entry disappears when its key dies. Ideal for <strong>side tables</strong>: attaching extra data to objects you don&rsquo;t own (and can&rsquo;t add attributes to) without keeping them alive.</li>
+<li><strong><code>WeakSet</code></strong>: a set of weakly held members, ideal for &ldquo;everything currently registered&rdquo; (open windows, live connections).</li>
+</ul>
+<p>Two cautions: iterating over a weak container while objects are dying can change it, so take a <code>list(...)</code> of it first if you&rsquo;ll do anything that frees objects; and the number of entries is only meaningful once dead objects have actually been freed (in CPython, at once without cycles).</p>
+<div class="pc pc-example" data-kind="example" data-id="w062d5-e4"><textarea class="pc-src pc-code" hidden>import weakref
+
+class Texture:
+    loads = 0
+    def __init__(self, name):
+        Texture.loads += 1
+        self.name = name
+
+cache = weakref.WeakValueDictionary()
+
+def get_texture(name):
+    tex = cache.get(name)
+    if tex is None:
+        tex = Texture(name)
+        cache[name] = tex
+    return tex
+
+grass = get_texture(&quot;grass&quot;)
+again = get_texture(&quot;grass&quot;)
+print(grass is again, Texture.loads)
+del grass, again
+get_texture(&quot;grass&quot;)                        # not kept, so loaded again (and dropped again)
+print(Texture.loads, len(cache))
+
+notes = weakref.WeakKeyDictionary()
+class Window:
+    pass
+w = Window()
+notes[w] = &quot;main window&quot;
+print(len(notes))
+del w
+print(len(notes))</textarea></div>
+<h2 id="bound-methods-and-weakmethod">Bound methods and WeakMethod</h2>
+<p>There&rsquo;s a trap with observers. <code>obj.method</code> creates a <strong>new bound method object</strong> every time you write it, and that object is what you&rsquo;d be referring to. So <code>weakref.ref(obj.method)</code> dies <strong>immediately</strong>, even though <code>obj</code> is alive: the temporary bound method had no other references. And holding the bound method <strong>strongly</strong> keeps <code>obj</code> alive (yesterday&rsquo;s observer leak).</p>
+<p><code>weakref.WeakMethod(obj.method)</code> solves this: it holds the <strong>object</strong> and the <strong>function</strong> weakly and rebuilds the bound method when you call it, returning <code>None</code> once the object has gone. Use it whenever you store callbacks that are methods of objects that should be free to die. (Plain functions are usually module-level and live forever, so holding them strongly is fine.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w062d5-e5"><textarea class="pc-src pc-code" hidden>import weakref
+
+class Panel:
+    def __init__(self, name):
+        self.name = name
+    def refresh(self, data):
+        return f&quot;{self.name} shows {data}&quot;
+
+panel = Panel(&quot;sales&quot;)
+plain = weakref.ref(panel.refresh)
+print(plain())                              # the temporary bound method is already gone
+
+method = weakref.WeakMethod(panel.refresh)
+handler = method()
+print(handler(&quot;42&quot;))
+del handler, panel
+print(method())</textarea></div>
+<h2 id="weakref-finalize">weakref.finalize</h2>
+<p><code>weakref.finalize(obj, func, *args, **kwargs)</code> registers <code>func(*args, **kwargs)</code> to run <strong>when <code>obj</code> is garbage collected</strong>, or when the program exits, whichever comes first. It returns a finaliser object you can also <strong>call</strong> yourself to run the cleanup early; either way it runs <strong>at most once</strong>, and <code>finaliser.alive</code> tells you whether it&rsquo;s still pending.</p>
+<p>It&rsquo;s a better safety net than <code>__del__</code> (Week 61):</p>
+<ul>
+<li>it&rsquo;s guaranteed to run at most once, and at exit if not before;</li>
+<li>it doesn&rsquo;t let the object &ldquo;resurrect&rdquo; itself, and cycles containing the object can be collected normally;</li>
+<li>the cleanup is separate from the object, so a <code>close()</code> method and the safety net share one code path.</li>
+</ul>
+<p>The one rule: <code>func</code> and <code>args</code> <strong>must not refer to the object itself</strong> (no <code>self.close</code>, no <code>self</code>), or the finaliser keeps the object alive forever. Pass the pieces the cleanup needs, such as a file handle or a path, instead.</p>
+<div class="pc pc-example" data-kind="example" data-id="w062d5-e6"><textarea class="pc-src pc-code" hidden>import weakref
+
+log = []
+
+class TempDir:
+    def __init__(self, path):
+        self.path = path
+        self._finalizer = weakref.finalize(self, log.append, f&quot;removed {path}&quot;)
+
+    def close(self):
+        self._finalizer()                    # run now; never again
+
+    @property
+    def closed(self):
+        return not self._finalizer.alive
+
+a = TempDir(&quot;/tmp/a&quot;)
+a.close()
+a.close()
+print(a.closed, log)
+
+b = TempDir(&quot;/tmp/b&quot;)
+del b                                        # forgot to close: the safety net runs
+print(log)</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>weakref.ref(obj) refers to obj without keeping it alive: call it to get the object or None, keep the result in a name while using it, and pass a callback to hear when the object dies. Instances of your classes, functions, sets and classes can be weakly referenced; int, str, tuple, list and dict can&rsquo;t, and <strong>slots</strong> classes need &ldquo;<strong>weakref</strong>&rdquo;. WeakValueDictionary makes caches and registries that forget dead objects, WeakKeyDictionary attaches data to objects without keeping them alive, and WeakSet tracks live members. Bound methods are temporary objects, so store observers with WeakMethod. weakref.finalize(obj, func, *args) runs cleanup once, at collection or exit, and can be called early; its function and arguments must not refer to obj.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d5-refs" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Live or dead</div><div class="pc-prompt"><p>Write <code>can_weakref(obj)</code>: True if a weak reference to <code>obj</code> can be made. Then <code>live_targets(refs)</code>: given a list of weak references, the list of objects still alive (in order), and <code>track(objs, log)</code>: return a list of weak references to the objects, each with a callback that appends the <strong>position</strong> of that object in <code>objs</code> to <code>log</code> when it dies.</p></div><textarea class="pc-src pc-code" hidden>import weakref
+
+def can_weakref(obj):
+    ___
+
+def live_targets(refs):
+    ___
+
+def track(objs, log):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_refs():
+    &quot;weakref.ref&quot;
+    class Item:
+        pass
+    assert can_weakref(Item()) and can_weakref({1}) and can_weakref(can_weakref)
+    assert not can_weakref([]) and not can_weakref(5) and not can_weakref(&quot;x&quot;)
+    items = [Item(), Item(), Item()]
+    log = []
+    refs = track(items, log)
+    assert live_targets(refs) == items
+    middle = items.pop(1)
+    assert log == []
+    del middle
+    assert log == [1] and live_targets(refs) == items
+    items.clear()
+    assert sorted(log) == [0, 1, 2] and live_targets(refs) == []</textarea><textarea class="pc-src pc-solution" hidden>import weakref
+
+def can_weakref(obj):
+    try:
+        weakref.ref(obj)
+    except TypeError:
+        return False
+    return True
+
+def live_targets(refs):
+    out = []
+    for r in refs:
+        target = r()
+        if target is not None:
+            out.append(target)
+    return out
+
+def track(objs, log):
+    refs = []
+    for i, obj in enumerate(objs):
+        refs.append(weakref.ref(obj, lambda ref, i=i: log.append(i)))
+    return refs</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d5-cache" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A cache that lets go</div><div class="pc-prompt"><p>Write <code>ModelCache(loader)</code>: <code>get(name)</code> returns the live object for that name if there is one, otherwise calls <code>loader(name)</code>, remembers the result <strong>weakly</strong> and returns it. <code>loads</code> counts how many times <code>loader</code> was called, <code>cached()</code> is the sorted list of names whose objects are still alive, and <code>forget(name)</code> drops an entry (no error if it&rsquo;s absent). Use <code>weakref.WeakValueDictionary</code>.</p></div><textarea class="pc-src pc-code" hidden>import weakref
+
+class ModelCache:
+    def __init__(self, loader):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cache():
+    &quot;WeakValueDictionary&quot;
+    class Model:
+        def __init__(self, name):
+            self.name = name
+    c = ModelCache(Model)
+    a = c.get(&quot;tree&quot;)
+    assert c.get(&quot;tree&quot;) is a and c.loads == 1 and c.cached() == [&quot;tree&quot;]
+    b = c.get(&quot;rock&quot;)
+    assert c.cached() == [&quot;rock&quot;, &quot;tree&quot;]
+    del a
+    assert c.cached() == [&quot;rock&quot;]
+    a2 = c.get(&quot;tree&quot;)
+    assert c.loads == 3 and a2.name == &quot;tree&quot;
+    c.forget(&quot;rock&quot;)
+    c.forget(&quot;nothing&quot;)
+    assert c.get(&quot;rock&quot;) is not b and c.loads == 4</textarea><textarea class="pc-src pc-solution" hidden>import weakref
+
+class ModelCache:
+    def __init__(self, loader):
+        self._loader = loader
+        self._live = weakref.WeakValueDictionary()
+        self.loads = 0
+
+    def get(self, name):
+        obj = self._live.get(name)
+        if obj is None:
+            obj = self._loader(name)
+            self.loads += 1
+            self._live[name] = obj
+        return obj
+
+    def cached(self):
+        return sorted(self._live.keys())
+
+    def forget(self, name):
+        self._live.pop(name, None)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d5-side" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Notes on other people&rsquo;s objects</div><div class="pc-prompt"><p>Write <code>Labels</code>, a side table that attaches a set of labels to objects without keeping them alive: <code>add(obj, label)</code>, <code>labels(obj)</code> (a sorted list; empty if none), <code>remove(obj, label)</code> (no error if absent), <code>objects_with(label)</code> (a list of the live objects carrying that label, in no particular order), and <code>len(labels)</code> (how many live objects have any labels). Use <code>weakref.WeakKeyDictionary</code>.</p></div><textarea class="pc-src pc-code" hidden>import weakref
+
+class Labels:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_side():
+    &quot;WeakKeyDictionary&quot;
+    class Doc:
+        pass
+    t = Labels()
+    a, b = Doc(), Doc()
+    t.add(a, &quot;draft&quot;)
+    t.add(a, &quot;urgent&quot;)
+    t.add(b, &quot;draft&quot;)
+    assert t.labels(a) == [&quot;draft&quot;, &quot;urgent&quot;] and len(t) == 2
+    assert set(map(id, t.objects_with(&quot;draft&quot;))) == {id(a), id(b)}
+    t.remove(a, &quot;urgent&quot;)
+    t.remove(a, &quot;none&quot;)
+    assert t.labels(a) == [&quot;draft&quot;] and t.labels(Doc()) == []
+    del b
+    assert len(t) == 1 and t.objects_with(&quot;draft&quot;) == [a]</textarea><textarea class="pc-src pc-solution" hidden>import weakref
+
+class Labels:
+    def __init__(self):
+        self._table = weakref.WeakKeyDictionary()
+
+    def add(self, obj, label):
+        self._table.setdefault(obj, set()).add(label)
+
+    def labels(self, obj):
+        return sorted(self._table.get(obj, ()))
+
+    def remove(self, obj, label):
+        if obj in self._table:
+            self._table[obj].discard(label)
+
+    def objects_with(self, label):
+        return [obj for obj, labels in list(self._table.items()) if label in labels]
+
+    def __len__(self):
+        return len(self._table)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d5-signal" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Observers that can leave</div><div class="pc-prompt"><p>Write <code>Signal()</code>: <code>connect(method)</code> stores a <strong>bound method</strong> weakly using <code>weakref.WeakMethod</code>; <code>emit(*args)</code> calls every live handler in the order they were connected and returns a list of their results; dead handlers are dropped. <code>count()</code> is the number of handlers whose objects are still alive. Connecting the same bound method twice keeps only one (compare the methods they produce).</p></div><textarea class="pc-src pc-code" hidden>import weakref
+
+class Signal:
+    def __init__(self):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_signal():
+    &quot;WeakMethod&quot;
+    class Screen:
+        def __init__(self, name):
+            self.name = name
+        def show(self, value):
+            return f&quot;{self.name}:{value}&quot;
+    sig = Signal()
+    a, b = Screen(&quot;a&quot;), Screen(&quot;b&quot;)
+    sig.connect(a.show)
+    sig.connect(b.show)
+    sig.connect(a.show)
+    assert sig.count() == 2 and sig.emit(1) == [&quot;a:1&quot;, &quot;b:1&quot;]
+    del a
+    assert sig.count() == 1 and sig.emit(2) == [&quot;b:2&quot;]
+    del b
+    assert sig.emit(3) == [] and sig.count() == 0</textarea><textarea class="pc-src pc-solution" hidden>import weakref
+
+class Signal:
+    def __init__(self):
+        self._handlers = []
+
+    def connect(self, method):
+        for ref in self._handlers:
+            if ref() == method:
+                return
+        self._handlers.append(weakref.WeakMethod(method))
+
+    def _live(self):
+        self._handlers = [ref for ref in self._handlers if ref() is not None]
+        return self._handlers
+
+    def emit(self, *args):
+        results = []
+        for ref in list(self._live()):
+            handler = ref()
+            if handler is not None:
+                results.append(handler(*args))
+        return results
+
+    def count(self):
+        return len(self._live())</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d5-finalize" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A safety net that runs once</div><div class="pc-prompt"><p>Write <code>Lease(name, log)</code>: on creation it appends <code>"open " + name</code> to the list <code>log</code> and registers a <code>weakref.finalize</code> that appends <code>"release " + name</code>. <code>release()</code> runs the cleanup early (only the first call does anything), <code>active</code> is True until the cleanup has run, and an unreleased lease that is garbage collected is released automatically. The finaliser must not refer to the lease itself.</p></div><textarea class="pc-src pc-code" hidden>import weakref
+
+class Lease:
+    def __init__(self, name, log):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_finalize():
+    &quot;weakref.finalize&quot;
+    log = []
+    a = Lease(&quot;a&quot;, log)
+    assert a.active and log == [&quot;open a&quot;]
+    a.release()
+    a.release()
+    assert not a.active and log == [&quot;open a&quot;, &quot;release a&quot;]
+    b = Lease(&quot;b&quot;, log)
+    del b
+    assert log[-1] == &quot;release b&quot;
+    c = Lease(&quot;c&quot;, log)
+    import gc
+    c.me = c                               # a cycle: freed by the collector
+    del c
+    gc.collect()
+    assert log[-1] == &quot;release c&quot; and log.count(&quot;release c&quot;) == 1</textarea><textarea class="pc-src pc-solution" hidden>import weakref
+
+class Lease:
+    def __init__(self, name, log):
+        log.append(&quot;open &quot; + name)
+        self._finalizer = weakref.finalize(self, log.append, &quot;release &quot; + name)
+
+    def release(self):
+        self._finalizer()
+
+    @property
+    def active(self):
+        return self._finalizer.alive</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w062d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Cached and gone</div><div class="pc-prompt"><p>The thumbnail is put straight into a <code>WeakValueDictionary</code>, and nothing else refers to it, so it dies at once and this prints <code>missing</code>. Keep a strong reference to it in a name while it&rsquo;s in use so it prints <code>found</code>.</p></div><textarea class="pc-src pc-code" hidden>import weakref
+
+class Thumb:
+    pass
+
+cache = weakref.WeakValueDictionary()
+cache[&quot;home&quot;] = Thumb()
+print(&quot;found&quot; if &quot;home&quot; in cache else &quot;missing&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a strong reference&quot;
+    expect_output(&quot;found&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import weakref
+
+class Thumb:
+    pass
+
+cache = weakref.WeakValueDictionary()
+thumb = Thumb()
+cache[&quot;home&quot;] = thumb
+print(&quot;found&quot; if &quot;home&quot; in cache else &quot;missing&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w062d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A method that dies at once</div><div class="pc-prompt"><p><code>weakref.ref(chart.redraw)</code> refers to a temporary bound method that dies straight away, even though <code>chart</code> is alive, so this prints <code>dead</code>. Use <code>weakref.WeakMethod</code> so it prints <code>alive</code>.</p></div><textarea class="pc-src pc-code" hidden>import weakref
+
+class Chart:
+    def redraw(self):
+        return &quot;drawn&quot;
+
+chart = Chart()
+handler = weakref.ref(chart.redraw)
+print(&quot;alive&quot; if handler() is not None else &quot;dead&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;WeakMethod&quot;
+    expect_output(&quot;alive&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import weakref
+
+class Chart:
+    def redraw(self):
+        return &quot;drawn&quot;
+
+chart = Chart()
+handler = weakref.WeakMethod(chart.redraw)
+print(&quot;alive&quot; if handler() is not None else &quot;dead&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w062d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A finaliser that keeps its object alive</div><div class="pc-prompt"><p>The finaliser is given <code>self.cleanup</code>, a bound method, which refers to the object, so the object can never die and the cleanup never runs: this prints <code>[]</code>. Register a function that doesn&rsquo;t refer to the object, passing it the name, so it prints <code>['r1']</code>.</p></div><textarea class="pc-src pc-code" hidden>import weakref
+
+log = []
+
+class Resource:
+    def __init__(self, name):
+        self.name = name
+        weakref.finalize(self, self.cleanup)
+
+    def cleanup(self):
+        log.append(self.name)
+
+r = Resource(&quot;r1&quot;)
+del r
+print(log)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;no reference to self&quot;
+    expect_output(&quot;[&#x27;r1&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import weakref
+
+log = []
+
+class Resource:
+    def __init__(self, name):
+        self.name = name
+        weakref.finalize(self, log.append, name)
+
+r = Resource(&quot;r1&quot;)
+del r
+print(log)</textarea></div>
+<div class="parsons" data-id="w062d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A weak cache lookup</div><div class="pc-prompt"><p>Arrange the lines of a function that returns a cached object if it&rsquo;s alive, loading it otherwise. One line is a trap.</p></div><script type="application/json">{"lines": ["def fetch(cache, key, load):", "    obj = cache.get(key)", "    if obj is None:", "        obj = load(key)", "        cache[key] = obj", "    return obj"], "distractors": ["    return cache[key]"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # what r() returns after the object it refers to has died
+q = ___   # True or False: weakref.ref([1, 2]) works
+r = ___   # True or False: a WeakKeyDictionary keeps its keys alive
+s = ___   # True or False: weakref.ref(obj.method)() is None straight away, while obj is alive
+t = ___   # how many times a weakref.finalize cleanup can run at most</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p is None and q is False and r is False, &quot;p, q and r&quot;
+    assert s is True and t == 1, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = None
+q = False
+r = False
+s = True
+t = 1</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w062d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does a weak reference not do?", "answer": 1, "explain": "It doesn&rsquo;t count towards the object&rsquo;s life.", "options": ["Refer to an object", "Keep the object alive", "Return the object", "Work with classes"]}, {"type": "mc", "q": "What does calling a dead weak reference return?", "answer": 1, "explain": "Check for None.", "options": ["The object", "None", "It raises", "A copy"]}, {"type": "mc", "q": "When is a weakref callback called?", "answer": 1, "explain": "It receives the weak reference.", "options": ["When the reference is made", "Just after the object dies", "At exit only", "Never"]}, {"type": "mc", "q": "Which of these can be weakly referenced?", "answer": 2, "explain": "Built-in list, dict, int, str and tuple can&rsquo;t.", "options": ["An int", "A list", "An instance of your own class", "A tuple"]}, {"type": "mc", "q": "What must a <strong>slots</strong> class include to allow weak references?", "answer": 1, "explain": "Room for the weak-reference list.", "options": ["<strong>dict</strong>", "&ldquo;<strong>weakref</strong>&ldquo;", "<strong>slots</strong> can&rsquo;t", "<strong>del</strong>"]}, {"type": "mc", "q": "Which container suits a cache that shouldn&rsquo;t keep objects alive?", "answer": 1, "explain": "Values are held weakly.", "options": ["dict", "WeakValueDictionary", "WeakKeyDictionary", "list"]}, {"type": "mc", "q": "Which container attaches data to objects without keeping them alive?", "answer": 0, "explain": "A side table keyed by the object.", "options": ["WeakKeyDictionary", "WeakValueDictionary", "set", "dict"]}, {"type": "mc", "q": "Why does weakref.ref(obj.method)() return None at once?", "answer": 1, "explain": "Use WeakMethod.", "options": ["obj died", "obj.method is a temporary bound method with no other references", "Methods are immortal", "A bug"]}, {"type": "mc", "q": "What must weakref.finalize&rsquo;s function and arguments not refer to?", "answer": 1, "explain": "Otherwise the object can never die.", "options": ["Modules", "The object being watched", "Lists", "Strings"]}, {"type": "output", "q": "What does this print?", "answer": "1\n0", "explain": "The member died when its last name was rebound.", "code": "import weakref\nclass A:\n    pass\na = A()\ns = weakref.WeakSet([a])\nprint(len(s))\na = None\nprint(len(s))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w062d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a weak event bus</div><div class="pc-prompt"><p>Write <code>EventBus()</code>, which holds subscribers without keeping them alive:</p>
+<ul>
+<li><code>subscribe(event, handler)</code>: a handler is either a <strong>bound method</strong> (store it with <code>WeakMethod</code>, with a callback that removes the subscription the moment its object dies) or a plain <strong>function</strong> (held strongly). Subscribing the same handler to the same event twice does nothing. Returns a function that unsubscribes it when called.</li>
+<li><code>publish(event, *args)</code>: call the live handlers for that event in subscription order and return the number called. A handler may unsubscribe itself, or subscribe new handlers, while being called: those changes take effect from the next <code>publish</code>.</li>
+<li><code>count(event)</code>: the number of subscriptions to that event. Because of the callbacks, this drops <strong>as soon as</strong> a subscriber dies, before any publish.</li>
+<li><code>events()</code>: the sorted list of events with at least one subscription.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import weakref
+
+class EventBus:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_bus():
+    &quot;a weak event bus&quot;
+    bus = EventBus()
+    seen = []
+    class Viewer:
+        def __init__(self, name):
+            self.name = name
+        def on_save(self, doc):
+            seen.append((self.name, doc))
+    def audit(doc):
+        seen.append((&quot;audit&quot;, doc))
+    a, b = Viewer(&quot;a&quot;), Viewer(&quot;b&quot;)
+    bus.subscribe(&quot;save&quot;, a.on_save)
+    bus.subscribe(&quot;save&quot;, audit)
+    stop_b = bus.subscribe(&quot;save&quot;, b.on_save)
+    bus.subscribe(&quot;save&quot;, a.on_save)
+    assert bus.count(&quot;save&quot;) == 3 and bus.publish(&quot;save&quot;, &quot;d1&quot;) == 3
+    assert seen == [(&quot;a&quot;, &quot;d1&quot;), (&quot;audit&quot;, &quot;d1&quot;), (&quot;b&quot;, &quot;d1&quot;)]
+    del a
+    assert bus.count(&quot;save&quot;) == 2
+    stop_b()
+    stop_b()
+    assert bus.publish(&quot;save&quot;, &quot;d2&quot;) == 1 and seen[-1] == (&quot;audit&quot;, &quot;d2&quot;)
+    assert bus.events() == [&quot;save&quot;] and bus.publish(&quot;nothing&quot;) == 0 and bus.count(&quot;nothing&quot;) == 0
+
+def test_changes_while_publishing():
+    &quot;changes during publish&quot;
+    bus = EventBus()
+    calls = []
+    def once(x):
+        calls.append(&quot;once&quot;)
+        unsub()
+    def adder(x):
+        calls.append(&quot;adder&quot;)
+        bus.subscribe(&quot;tick&quot;, late)
+    def late(x):
+        calls.append(&quot;late&quot;)
+    unsub = bus.subscribe(&quot;tick&quot;, once)
+    bus.subscribe(&quot;tick&quot;, adder)
+    assert bus.publish(&quot;tick&quot;, 1) == 2 and calls == [&quot;once&quot;, &quot;adder&quot;]
+    calls.clear()
+    assert bus.publish(&quot;tick&quot;, 2) == 2 and calls == [&quot;adder&quot;, &quot;late&quot;]
+    class Temp:
+        def go(self, x):
+            pass
+    t = Temp()
+    bus.subscribe(&quot;other&quot;, t.go)
+    assert bus.events() == [&quot;other&quot;, &quot;tick&quot;]
+    del t
+    assert bus.events() == [&quot;tick&quot;]</textarea><textarea class="pc-src pc-solution" hidden>import types
+import weakref
+
+class EventBus:
+    def __init__(self):
+        self._subs = {}
+
+    @staticmethod
+    def _resolve(entry):
+        return entry() if isinstance(entry, weakref.WeakMethod) else entry
+
+    def subscribe(self, event, handler):
+        entries = self._subs.setdefault(event, [])
+        for entry in entries:
+            if self._resolve(entry) == handler:
+                return lambda: None
+        if isinstance(handler, types.MethodType):
+            def drop(ref, event=event):
+                self._remove(event, ref)
+            entry = weakref.WeakMethod(handler, drop)
+        else:
+            entry = handler
+        entries.append(entry)
+        return lambda: self._remove(event, entry)
+
+    def _remove(self, event, entry):
+        entries = self._subs.get(event, [])
+        for i, e in enumerate(entries):
+            if e is entry:
+                del entries[i]
+                break
+        if not entries:
+            self._subs.pop(event, None)
+
+    def publish(self, event, *args):
+        called = 0
+        for entry in list(self._subs.get(event, [])):
+            handler = self._resolve(entry)
+            if handler is not None:
+                handler(*args)
+                called += 1
+        return called
+
+    def count(self, event):
+        return len(self._subs.get(event, []))
+
+    def events(self):
+        return sorted(e for e, entries in self._subs.items() if entries)</textarea><template class="pc-src pc-hint">Store, for each event, a list of entries; an entry is either a <code>WeakMethod</code> or the function itself. To compare handlers, resolve an entry to a callable (<code>entry()</code> for a <code>WeakMethod</code>, the entry itself otherwise) and compare with <code>==</code>. The <code>WeakMethod</code> callback gets the dead reference: remove that exact entry from the event&rsquo;s list (compare with <code>is</code>). Publish over a <strong>copy</strong> of the list.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Think of a long-running program you use (an editor, a browser): which of its parts would you expect to use weak references? Tomorrow is the Forge: a memory-aware object store that brings the whole week together.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w062d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w062d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w062d5", "week": 62, "day": 5, "title": "Weak references", "exercises": [{"id": "w062d5-refs", "title": "Live or dead", "points": 10}, {"id": "w062d5-cache", "title": "A cache that lets go", "points": 15}, {"id": "w062d5-side", "title": "Notes on other people's objects", "points": 10}, {"id": "w062d5-signal", "title": "Observers that can leave", "points": 15}, {"id": "w062d5-finalize", "title": "A safety net that runs once", "points": 10}, {"id": "w062d5-bug1", "title": "Cached and gone", "points": 10}, {"id": "w062d5-bug2", "title": "A method that dies at once", "points": 10}, {"id": "w062d5-bug3", "title": "A finaliser that keeps its object alive", "points": 10}, {"id": "w062d5-trace", "title": "Predict them", "points": 10}, {"id": "w062d5-challenge", "title": "Challenge: a weak event bus", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
