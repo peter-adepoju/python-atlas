@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 53 Day 5: Knapsack | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Last Monday greed failed the 0/1 knapsack, and on Friday branch and bound rescued it by pruning a search. Today dynamic programming solves it outright, in...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w053d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 53 Day 5: Knapsack">
+<meta property="og:description" content="Last Monday greed failed the 0/1 knapsack, and on Friday branch and bound rescued it by pruning a search. Today dynamic programming solves it outright, in...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w053d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-53">Week 53: Dynamic programming I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#the-0-1-table" data-sec="the-0-1-table">The 0/1 table</a></li><li><a href="#one-row-backwards" data-sec="one-row-backwards">One row, backwards</a></li><li><a href="#unbounded-and-bounded" data-sec="unbounded-and-bounded">Unbounded and bounded</a></li><li><a href="#knapsacks-in-disguise" data-sec="knapsacks-in-disguise">Knapsacks in disguise</a></li><li><a href="#when-the-capacity-is-huge" data-sec="when-the-capacity-is-huge">When the capacity is huge</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w053d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-53">Week 53: Dynamic programming I</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 53, Day 5</span></p>
+      <h1>Knapsack</h1>
+      <div class="day-intro"><p>Last Monday greed failed the 0/1 knapsack, and on Friday branch and bound rescued it by pruning a search. Today dynamic programming solves it outright, in time proportional to the number of items times the capacity, whatever the values. The knapsack is the most reused DP there is: the same table answers subset sums, fair partitions, counting selections, signs that hit a target, and choices with two budgets at once. You&rsquo;ll learn the 0/1 table and how to read the chosen items from it, the one-row version and why its loop must run <strong>backwards</strong>, the unbounded and bounded variants, and what to do when the capacity is too large for a table.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Fill the 0/1 knapsack table over items and capacities, and reconstruct the chosen items</li><li>Reduce it to one row, looping capacities downwards for 0/1 and upwards for unbounded</li><li>Solve subset sum, partition and counting problems as knapsacks</li><li>Handle limited copies of each item by binary splitting</li><li>Explain why knapsack DP is pseudo-polynomial and what to do when capacities are huge</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="The 0/1 table: 25 min"></span><span class="plan-seg s0" style="flex:20" title="One row, backwards: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Unbounded and bounded: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Knapsacks in disguise: 25 min"></span><span class="plan-seg s1" style="flex:15" title="When the capacity is huge: 15 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">The 0/1 table</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">One row, backwards</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Unbounded and bounded</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Knapsacks in disguise</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">When the capacity is huge</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w053d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w053d5.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w053d5-p1"><textarea class="pc-src pc-code" hidden>items = [(60, 1), (100, 2), (120, 3)]     # (value, weight)
+capacity = 5
+
+best = [0] * (capacity + 1)
+for value, weight in items:
+    for c in range(capacity, weight - 1, -1):
+        best[c] = max(best[c], best[c - weight] + value)
+print(best)
+
+again = [0] * (capacity + 1)
+for value, weight in items:
+    for c in range(weight, capacity + 1):
+        again[c] = max(again[c], again[c - weight] + value)
+print(again)</textarea></div>
+<p>The only difference is the direction of the inner loop. Backwards, each item is used at most once (the 0/1 knapsack: 220 from the second and third items). Forwards, an item can be used again and again (the unbounded knapsack: five copies of the first item make 300). Today explains why.</p>
+<h2 id="the-0-1-table">The 0/1 table</h2>
+<p>Items have values and weights; take each item <strong>at most once</strong>, total weight at most W, most value. The state is how many items you&rsquo;ve considered and how much capacity you have:</p>
+<p><strong>best(i, c) = the most value using only the first i items with capacity c</strong>.</p>
+<p>Item i − 1 is either left out or taken (if it fits):</p>
+<p>best(i, c) = max(best(i − 1, c), best(i − 1, c − wᵢ) + vᵢ),</p>
+<p>with best(0, c) = 0. Fill row by row (i upwards); each row reads only the row before. The answer is best(n, W). There are (n + 1) × (W + 1) entries, each O(1), so O(n × W) time.</p>
+<p>To find <strong>which</strong> items, walk back from (n, W): if best(i, c) equals best(i − 1, c), item i − 1 wasn&rsquo;t needed; otherwise it was taken, so subtract its weight and move up a row.</p>
+<div class="pc pc-example" data-kind="example" data-id="w053d5-e2"><textarea class="pc-src pc-code" hidden>def knapsack(items, capacity):
+    &quot;&quot;&quot;items: (value, weight). Returns the best value and the indices taken.&quot;&quot;&quot;
+    n = len(items)
+    best = [[0] * (capacity + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        value, weight = items[i - 1]
+        for c in range(capacity + 1):
+            best[i][c] = best[i - 1][c]
+            if weight &lt;= c:
+                best[i][c] = max(best[i][c], best[i - 1][c - weight] + value)
+    taken, c = [], capacity
+    for i in range(n, 0, -1):
+        if best[i][c] != best[i - 1][c]:
+            taken.append(i - 1)
+            c -= items[i - 1][1]
+    return best[n][capacity], taken[::-1]
+
+print(knapsack([(60, 10), (100, 20), (120, 30)], 50))</textarea></div>
+<h2 id="one-row-backwards">One row, backwards</h2>
+<p>Row i reads only row i − 1, so keep one list <code>best[c]</code>. The catch is the order. The update <code>best[c] = max(best[c], best[c - w] + v)</code> needs <code>best[c - w]</code> from the <strong>previous</strong> row (the item not yet used). Looping c <strong>downwards</strong>, the smaller index c − w hasn&rsquo;t been overwritten yet in this pass, so it&rsquo;s still the previous row&rsquo;s value. Looping upwards, <code>best[c - w]</code> may already include this item, and the item gets taken again.</p>
+<p>That &ldquo;bug&rdquo; is exactly the <strong>unbounded knapsack</strong>, where every item can be used any number of times: there the recurrence is best(c) = max over items of best(c − wᵢ) + vᵢ, which wants this row&rsquo;s values. So:</p>
+<ul>
+<li>0/1 knapsack (each item once): capacity loop <strong>downwards</strong>.</li>
+<li>Unbounded (unlimited copies): capacity loop <strong>upwards</strong>.</li>
+</ul>
+<p>This one-row version is O(W) memory, but loses the reconstruction (as on Tuesday). Keep the full table, or a table of booleans recording &ldquo;taken at (i, c)&rdquo;, when you need the items.</p>
+<h2 id="unbounded-and-bounded">Unbounded and bounded</h2>
+<p><strong>Unbounded</strong> problems: cutting a rod into pieces with prices for each length, fewest coins (Tuesday), making change. Loop the capacity upwards, or think of it as one-dimensional: best(c) = max over items of best(c − w) + v.</p>
+<p><strong>Bounded</strong>: item i has kᵢ copies. Treating each copy as a separate 0/1 item works but costs O(W × total copies). <strong>Binary splitting</strong> is faster: split k copies into bundles of 1, 2, 4, &hellip;, and a remainder (13 = 1 + 2 + 4 + 6). Every number of copies from 0 to k is a sum of some bundles, so treating each bundle as one 0/1 item gives the same answers with only about log k items per original item.</p>
+<div class="pc pc-example" data-kind="example" data-id="w053d5-e3"><textarea class="pc-src pc-code" hidden>def bundles(value, weight, copies):
+    &quot;&quot;&quot;Split k copies into 1, 2, 4, ... and a remainder, as 0/1 items.&quot;&quot;&quot;
+    out, size = [], 1
+    while copies &gt; 0:
+        take = min(size, copies)
+        out.append((value * take, weight * take))
+        copies -= take
+        size *= 2
+    return out
+
+print(bundles(5, 3, 13))</textarea></div>
+<h2 id="knapsacks-in-disguise">Knapsacks in disguise</h2>
+<p>Many problems are knapsacks with the values removed:</p>
+<ul>
+<li><strong>Subset sum</strong>: can some of these numbers add up to T? A table of booleans: <code>can[c]</code> is True if some subset sums to c. Update <code>can[c] = can[c] or can[c - x]</code>, looping downwards.</li>
+<li><strong>Fair partition</strong>: split numbers into two groups with sums as close as possible: find the reachable subset sum nearest to half the total.</li>
+<li><strong>Counting</strong>: how many subsets sum to T? <code>count[c] += count[c - x]</code>, downwards, with <code>count[0] = 1</code>.</li>
+<li><strong>Signs</strong>: put + or − before each number to reach a target. If P is the sum of the plus group, P − (total − P) = target, so P = (total + target) / 2: a counting knapsack.</li>
+</ul>
+<p>A neat Python trick for subset sums: an integer as a <strong>bitset</strong>, where bit c means &ldquo;c is reachable&rdquo;. Adding a number x is <code>reach |= reach &lt;&lt; x</code>, which handles every capacity at once in fast C code (bit shifts, from Week 55&rsquo;s toolkit).</p>
+<div class="pc pc-example" data-kind="example" data-id="w053d5-e4"><textarea class="pc-src pc-code" hidden>def reachable_sums(numbers):
+    reach = 1                      # bit 0: the empty subset sums to 0
+    for x in numbers:
+        reach |= reach &lt;&lt; x
+    return [c for c in range(sum(numbers) + 1) if reach &gt;&gt; c &amp; 1]
+
+print(reachable_sums([3, 5, 6]))</textarea></div>
+<h2 id="when-the-capacity-is-huge">When the capacity is huge</h2>
+<p>O(n × W) looks polynomial, but W is a <strong>number</strong> in the input, written in about log W digits. Double the number of digits and W squares. That makes the knapsack DP <strong>pseudo-polynomial</strong>: fast when capacities are modest (thousands, millions), hopeless for W = 10¹⁸. The 0/1 knapsack is NP-hard in general, so no algorithm is known to be polynomial in the input&rsquo;s size.</p>
+<p>When W is huge but <strong>values</strong> are small, swap the roles: min_weight(v) = the least weight that achieves value exactly v, a table of size n × (total value). When both are huge and n is modest, use Friday&rsquo;s branch and bound, or <strong>meet in the middle</strong>: list the subset sums of each half (2^(n/2) each), sort one, and binary-search it for each sum of the other.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>The 0/1 knapsack table best(i, c) takes or leaves item i − 1: max(best(i − 1, c), best(i − 1, c − w) + v), filled row by row in O(n × W), with the items found by walking back up. One row suffices if you loop capacities downwards; upwards gives the unbounded knapsack. Bounded copies split into bundles of 1, 2, 4, &hellip; Subset sum, partition, counting subsets and target signs are knapsacks without values. The DP is pseudo-polynomial: for huge capacities, use a table by value, branch and bound, or meet in the middle.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d5-zero_one" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Packing the van</div><div class="pc-prompt"><p>Write <code>best_load(items, capacity)</code> for 0/1 items <code>(name, value, weight)</code>: <code>(value, names)</code>, the most value within the capacity and the sorted names of one best choice, from the full table walked back. Then <code>best_value(items, capacity)</code>: the value only, with <strong>one row</strong>.</p></div><textarea class="pc-src pc-code" hidden>def best_load(items, capacity):
+    ___
+
+def best_value(items, capacity):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, random
+def brute(items, cap):
+    best = 0
+    for r in range(len(items) + 1):
+        for combo in itertools.combinations(items, r):
+            if sum(w for _, _, w in combo) &lt;= cap:
+                best = max(best, sum(v for _, v, _ in combo))
+    return best
+def test_load():
+    &quot;0/1&quot;
+    items = [(&quot;tent&quot;, 60, 10), (&quot;stove&quot;, 100, 20), (&quot;chairs&quot;, 120, 30)]
+    assert best_load(items, 50) == (220, [&quot;chairs&quot;, &quot;stove&quot;]) and best_value(items, 50) == 220
+    assert best_load([], 10) == (0, []) and best_load(items, 0) == (0, [])
+    rng = random.Random(1)
+    for _ in range(80):
+        items = [(f&quot;i{k}&quot;, rng.randint(1, 20), rng.randint(1, 10)) for k in range(rng.randint(0, 8))]
+        cap = rng.randint(0, 30)
+        value, names = best_load(items, cap)
+        lookup = {n: (v, w) for n, v, w in items}
+        assert value == brute(items, cap) == best_value(items, cap)
+        assert sum(lookup[n][0] for n in names) == value and sum(lookup[n][1] for n in names) &lt;= cap
+        assert names == sorted(set(names))
+    big = [(str(k), (k * 37) % 100 + 1, (k * 17) % 50 + 1) for k in range(200)]
+    assert best_value(big, 2000) == best_load(big, 2000)[0]</textarea><textarea class="pc-src pc-solution" hidden>def best_load(items, capacity):
+    n = len(items)
+    best = [[0] * (capacity + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        _, value, weight = items[i - 1]
+        prev, row = best[i - 1], best[i]
+        for c in range(capacity + 1):
+            row[c] = prev[c]
+            if weight &lt;= c and prev[c - weight] + value &gt; row[c]:
+                row[c] = prev[c - weight] + value
+    names, c = [], capacity
+    for i in range(n, 0, -1):
+        if best[i][c] != best[i - 1][c]:
+            names.append(items[i - 1][0])
+            c -= items[i - 1][2]
+    return best[n][capacity], sorted(names)
+
+def best_value(items, capacity):
+    best = [0] * (capacity + 1)
+    for _, value, weight in items:
+        for c in range(capacity, weight - 1, -1):
+            best[c] = max(best[c], best[c - weight] + value)
+    return best[capacity]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d5-rod" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Cutting the rod</div><div class="pc-prompt"><p>A rod of length n can be cut into whole-number pieces; <code>prices[k]</code> is the price of a piece of length k + 1. Write <code>best_cut(prices, n)</code>: <code>(money, pieces)</code>, the most money and a list of piece lengths (sorted, longest first), as an unbounded knapsack with one row and a &ldquo;last piece&rdquo; list for reconstruction.</p></div><textarea class="pc-src pc-code" hidden>def best_cut(prices, n):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>from functools import cache
+def test_rod():
+    &quot;unbounded&quot;
+    prices = [1, 5, 8, 9, 10, 17, 17, 20]
+    money, pieces = best_cut(prices, 8)
+    assert money == 22 and sum(pieces) == 8 and sum(prices[p - 1] for p in pieces) == 22
+    assert best_cut(prices, 0) == (0, []) and best_cut([3], 4) == (12, [1, 1, 1, 1])
+    @cache
+    def ref(n, prices):
+        return max([0] + [prices[k] + ref(n - k - 1, prices) for k in range(min(n, len(prices)))])
+    for n in range(0, 25):
+        for prices in ((1, 5, 8, 9, 10, 17, 17, 20), (2, 3), (1, 1, 10), (3, 5, 8, 9, 10, 17, 17, 20)):
+            money, pieces = best_cut(list(prices), n)
+            assert money == ref(n, prices) and sum(prices[p - 1] for p in pieces) == money
+            assert sum(pieces) &lt;= n and pieces == sorted(pieces, reverse=True)</textarea><textarea class="pc-src pc-solution" hidden>def best_cut(prices, n):
+    best = [0] * (n + 1)
+    last = [0] * (n + 1)              # last[c]: a piece length used for c (0 means leave it)
+    for c in range(1, n + 1):
+        for k in range(1, min(c, len(prices)) + 1):
+            if best[c - k] + prices[k - 1] &gt; best[c]:
+                best[c], last[c] = best[c - k] + prices[k - 1], k
+    pieces, c = [], n
+    while c &gt; 0:
+        if last[c] == 0:
+            c -= 1                     # this length is better left unsold
+        else:
+            pieces.append(last[c])
+            c -= last[c]
+    return best[n], sorted(pieces, reverse=True)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d5-partition" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Fair shares</div><div class="pc-prompt"><p>Two hikers share out bags of given (positive, whole-number) weights. Write <code>fairest_split(weights)</code>: the smallest possible difference between the two hikers&rsquo; totals, using an integer as a bitset of reachable sums. Then <code>can_halve(weights)</code>: True if they can carry exactly equal weights.</p></div><textarea class="pc-src pc-code" hidden>def fairest_split(weights):
+    ___
+
+def can_halve(weights):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, random
+def brute(ws):
+    total = sum(ws)
+    best = total
+    for picks in itertools.product([0, 1], repeat=len(ws)):
+        s = sum(w for w, p in zip(ws, picks) if p)
+        best = min(best, abs(total - 2 * s))
+    return best
+def test_split():
+    &quot;partition&quot;
+    assert fairest_split([1, 6, 11, 5]) == 1 and can_halve([1, 5, 11, 5]) and not can_halve([1, 2, 3, 5])
+    assert fairest_split([]) == 0 and can_halve([]) and fairest_split([7]) == 7
+    rng = random.Random(2)
+    for _ in range(150):
+        ws = [rng.randint(1, 20) for _ in range(rng.randint(0, 10))]
+        assert fairest_split(ws) == brute(ws) and can_halve(ws) == (brute(ws) == 0)
+    big = [rng.randint(1, 1000) for _ in range(300)]
+    assert fairest_split(big) &lt;= 1</textarea><textarea class="pc-src pc-solution" hidden>def fairest_split(weights):
+    total = sum(weights)
+    reach = 1
+    for w in weights:
+        reach |= reach &lt;&lt; w
+    best = total
+    for s in range(total // 2 + 1):
+        if reach &gt;&gt; s &amp; 1:
+            best = min(best, total - 2 * s)
+    return best
+
+def can_halve(weights):
+    return fairest_split(weights) == 0</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d5-signs" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Plus or minus</div><div class="pc-prompt"><p>Write <code>sign_ways(numbers, target)</code>: how many ways to put <code>+</code> or <code>-</code> before each number (whole numbers, 0 or more) so the total is the target. Turn it into a counting knapsack: the plus group must sum to (total + target) / 2, which must be a whole number between 0 and the total. Note that a 0 can take either sign.</p></div><textarea class="pc-src pc-code" hidden>def sign_ways(numbers, target):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, random
+def brute(nums, target):
+    return sum(1 for signs in itertools.product([1, -1], repeat=len(nums)) if sum(s * x for s, x in zip(signs, nums)) == target)
+def test_signs():
+    &quot;signs&quot;
+    assert sign_ways([1, 1, 1, 1, 1], 3) == 5 and sign_ways([1], 2) == 0 and sign_ways([], 0) == 1
+    assert sign_ways([0, 0, 1], 1) == 4 and sign_ways([2, 3], 0) == 0
+    rng = random.Random(3)
+    for _ in range(200):
+        nums = [rng.randint(0, 6) for _ in range(rng.randint(0, 9))]
+        t = rng.randint(-12, 12)
+        assert sign_ways(nums, t) == brute(nums, t), (nums, t)
+    assert sign_ways([1] * 60, 0) == 118264581564861424</textarea><textarea class="pc-src pc-solution" hidden>def sign_ways(numbers, target):
+    total = sum(numbers)
+    if (total + target) % 2 or abs(target) &gt; total:
+        return 0
+    goal = (total + target) // 2
+    count = [1] + [0] * goal
+    for x in numbers:
+        for c in range(goal, x - 1, -1):
+            count[c] += count[c - x]
+    return count[goal]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d5-bounded" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A shop with limited stock</div><div class="pc-prompt"><p>A shop has <code>copies</code> of each item <code>(value, weight, copies)</code>. Write <code>bundles(value, weight, copies)</code>: the binary-split bundles as <code>(value, weight)</code> 0/1 items (sizes 1, 2, 4, &hellip;, then the remainder), and <code>best_bounded(items, capacity)</code>: the most value, by running a one-row 0/1 knapsack over all the bundles.</p></div><textarea class="pc-src pc-code" hidden>def bundles(value, weight, copies):
+    ___
+
+def best_bounded(items, capacity):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, random
+def brute(items, cap):
+    best = 0
+    for counts in itertools.product(*[range(k + 1) for _, _, k in items]):
+        if sum(c * w for c, (_, w, _) in zip(counts, items)) &lt;= cap:
+            best = max(best, sum(c * v for c, (v, _, _) in zip(counts, items)))
+    return best
+def test_bounded():
+    &quot;bounded&quot;
+    assert bundles(5, 3, 13) == [(5, 3), (10, 6), (20, 12), (30, 18)]
+    assert bundles(1, 1, 0) == [] and bundles(2, 1, 1) == [(2, 1)] and len(bundles(1, 1, 1000)) == 10
+    for k in range(0, 40):
+        sizes = [w for _, w in bundles(1, 1, k)]
+        sums = {sum(c) for r in range(len(sizes) + 1) for c in itertools.combinations(sizes, r)}
+        assert sums == set(range(k + 1)), k
+    rng = random.Random(4)
+    for _ in range(60):
+        items = [(rng.randint(1, 15), rng.randint(1, 8), rng.randint(0, 4)) for _ in range(rng.randint(0, 4))]
+        cap = rng.randint(0, 30)
+        assert best_bounded(items, cap) == brute(items, cap)
+    assert best_bounded([(3, 2, 10 ** 6), (5, 3, 10 ** 6)], 10_000) == 16_666</textarea><textarea class="pc-src pc-solution" hidden>def bundles(value, weight, copies):
+    out, size = [], 1
+    while copies &gt; 0:
+        take = min(size, copies)
+        out.append((value * take, weight * take))
+        copies -= take
+        size *= 2
+    return out
+
+def best_bounded(items, capacity):
+    best = [0] * (capacity + 1)
+    for value, weight, copies in items:
+        for v, w in bundles(value, weight, copies):
+            for c in range(capacity, w - 1, -1):
+                if best[c - w] + v &gt; best[c]:
+                    best[c] = best[c - w] + v
+    return best[capacity]</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w053d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">One tent, packed twice</div><div class="pc-prompt"><p>This one-row 0/1 knapsack loops the capacity <strong>upwards</strong>, so an item already added at a smaller capacity is added again: with one item of value 10 and weight 2, and capacity 6, it prints <code>30</code>. Loop downwards so it prints <code>10</code>.</p></div><textarea class="pc-src pc-code" hidden>items = [(10, 2)]
+capacity = 6
+best = [0] * (capacity + 1)
+for value, weight in items:
+    for c in range(weight, capacity + 1):
+        best[c] = max(best[c], best[c - weight] + value)
+print(best[capacity])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;each item once&quot;
+    expect_output(&quot;10&quot;)</textarea><textarea class="pc-src pc-solution" hidden>items = [(10, 2)]
+capacity = 6
+best = [0] * (capacity + 1)
+for value, weight in items:
+    for c in range(capacity, weight - 1, -1):
+        best[c] = max(best[c], best[c - weight] + value)
+print(best[capacity])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w053d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Nothing to count</div><div class="pc-prompt"><p>This counts the subsets of <code>[1, 2, 3]</code> summing to 3 (<code>{3}</code> and <code>{1, 2}</code>), but <code>count[0]</code> starts at 0, so no subset is ever counted and it prints <code>0</code>. The empty subset sums to 0: start <code>count[0]</code> at 1 so it prints <code>2</code>.</p></div><textarea class="pc-src pc-code" hidden>numbers = [1, 2, 3]
+goal = 3
+count = [0] * (goal + 1)
+for x in numbers:
+    for c in range(goal, x - 1, -1):
+        count[c] += count[c - x]
+print(count[goal])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the empty subset&quot;
+    expect_output(&quot;2&quot;)</textarea><textarea class="pc-src pc-solution" hidden>numbers = [1, 2, 3]
+goal = 3
+count = [1] + [0] * goal
+for x in numbers:
+    for c in range(goal, x - 1, -1):
+        count[c] += count[c - x]
+print(count[goal])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w053d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Rows are not items</div><div class="pc-prompt"><p>Row i of the table is about the first i items, so a change between rows i − 1 and i means item <strong>i − 1</strong> was taken. This walk back records the row number instead, and prints <code>[2, 3]</code>, which isn&rsquo;t even a valid index for the last one. Record the item&rsquo;s index so it prints <code>[1, 2]</code>.</p></div><textarea class="pc-src pc-code" hidden>items = [(60, 10), (100, 20), (120, 30)]
+capacity = 50
+n = len(items)
+best = [[0] * (capacity + 1) for _ in range(n + 1)]
+for i in range(1, n + 1):
+    value, weight = items[i - 1]
+    for c in range(capacity + 1):
+        best[i][c] = best[i - 1][c]
+        if weight &lt;= c:
+            best[i][c] = max(best[i][c], best[i - 1][c - weight] + value)
+taken, c = [], capacity
+for i in range(n, 0, -1):
+    if best[i][c] != best[i - 1][c]:
+        taken.append(i)
+        c -= items[i - 1][1]
+print(sorted(taken))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;row above&quot;
+    expect_output(&quot;[1, 2]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>items = [(60, 10), (100, 20), (120, 30)]
+capacity = 50
+n = len(items)
+best = [[0] * (capacity + 1) for _ in range(n + 1)]
+for i in range(1, n + 1):
+    value, weight = items[i - 1]
+    for c in range(capacity + 1):
+        best[i][c] = best[i - 1][c]
+        if weight &lt;= c:
+            best[i][c] = max(best[i][c], best[i - 1][c - weight] + value)
+taken, c = [], capacity
+for i in range(n, 0, -1):
+    if best[i][c] != best[i - 1][c]:
+        taken.append(i - 1)
+        c -= items[i - 1][1]
+print(sorted(taken))</textarea></div>
+<div class="parsons" data-id="w053d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Subset sum with booleans</div><div class="pc-prompt"><p>Arrange the lines into a one-row subset-sum check. One line is a trap.</p></div><script type="application/json">{"lines": ["def has_subset(numbers, target):", "    can = [True] + [False] * target", "    for x in numbers:", "        for c in range(target, x - 1, -1):", "            can[c] = can[c] or can[c - x]", "    return can[target]"], "distractors": ["        for c in range(x, target + 1):"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the 0/1 best for items (value, weight) (6, 1), (10, 2), (12, 3) with capacity 5
+q = ___   # the capacity loop direction for the unbounded knapsack: &quot;up&quot; or &quot;down&quot;
+r = ___   # the bundle sizes for 10 copies, as a list
+s = ___   # the reachable sums of [2, 3] as a sorted list, including 0
+t = ___   # True or False: knapsack DP is polynomial in the number of digits of the capacity</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 22 and q == &quot;up&quot; and r == [1, 2, 4, 3], &quot;p, q and r&quot;
+    assert s == [0, 2, 3, 5] and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 22
+q = &quot;up&quot;
+r = [1, 2, 4, 3]
+s = [0, 2, 3, 5]
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w053d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What is the 0/1 knapsack state?", "answer": 1, "explain": "best(i, c).", "options": ["The value so far", "Items considered and capacity left", "The heaviest item", "The order of items"]}, {"type": "mc", "q": "What does the 0/1 recurrence choose between?", "answer": 1, "explain": "max(best(i \u2212 1, c), best(i \u2212 1, c \u2212 w) + v).", "options": ["Two capacities", "Leaving item i \u2212 1 or taking it if it fits", "The two heaviest items", "Sorting orders"]}, {"type": "mc", "q": "How do you recover the chosen items?", "answer": 1, "explain": "Then subtract its weight.", "options": ["You can&rsquo;t", "Walk back: if best(i, c) differs from best(i \u2212 1, c), item i \u2212 1 was taken", "Sort by value", "Use a heap"]}, {"type": "mc", "q": "Why does the one-row 0/1 loop run downwards?", "answer": 1, "explain": "Upwards reuses the item.", "options": ["Speed", "So best[c \u2212 w] still holds the previous row&rsquo;s value", "Style", "It doesn&rsquo;t matter"]}, {"type": "mc", "q": "Which knapsack does an upwards loop solve?", "answer": 1, "explain": "Unlimited copies.", "options": ["0/1", "Unbounded", "Bounded", "None"]}, {"type": "mc", "q": "Why split k copies into 1, 2, 4, &hellip; bundles?", "answer": 1, "explain": "Binary splitting.", "options": ["Memory", "Every count from 0 to k is a sum of bundles, with only about log k items", "It&rsquo;s required", "To sort them"]}, {"type": "mc", "q": "How is fair partition a knapsack?", "answer": 1, "explain": "Subset sum with booleans.", "options": ["It isn&rsquo;t", "Find the reachable subset sum closest to half the total", "Sort and alternate", "Greedy"]}, {"type": "mc", "q": "Why is knapsack DP called pseudo-polynomial?", "answer": 1, "explain": "Fine for modest capacities only.", "options": ["It&rsquo;s approximate", "Its time grows with the capacity&rsquo;s value, which is exponential in its number of digits", "It uses floats", "It&rsquo;s slow"]}, {"type": "mc", "q": "What can you do when the capacity is huge but values are small?", "answer": 1, "explain": "Swap the roles of weight and value.", "options": ["Nothing", "Tabulate the least weight for each value", "Use floats", "Sort"]}, {"type": "output", "q": "What does this print?", "answer": "0b101101", "explain": "Bits 0, 2, 3 and 5.", "code": "reach = 1\nfor x in [2, 3]:\n    reach |= reach << x\nprint(bin(reach))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: weight and space</div><div class="pc-prompt"><p>An expedition&rsquo;s pack animal can carry at most <code>max_weight</code> kilograms <strong>and</strong> <code>max_volume</code> litres. Each item <code>(name, value, weight, volume)</code> is taken at most once. Write <code>best_pack(items, max_weight, max_volume)</code>: <code>(value, names)</code>, the most value within both limits and one best choice (sorted names). The state needs both budgets: best(i, w, v). Use a full three-dimensional table so you can walk back, or a two-dimensional one per item with a record of the choices.</p>
+<p>Then <code>best_pack_value(items, max_weight, max_volume)</code>: the value only, with a single two-dimensional table updated with <strong>both</strong> loops running downwards.</p></div><textarea class="pc-src pc-code" hidden>def best_pack(items, max_weight, max_volume):
+    ___
+
+def best_pack_value(items, max_weight, max_volume):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, random
+def brute(items, W, V):
+    best = 0
+    for r in range(len(items) + 1):
+        for combo in itertools.combinations(items, r):
+            if sum(i[2] for i in combo) &lt;= W and sum(i[3] for i in combo) &lt;= V:
+                best = max(best, sum(i[1] for i in combo))
+    return best
+def test_pack():
+    &quot;two budgets&quot;
+    items = [(&quot;rope&quot;, 10, 2, 3), (&quot;food&quot;, 30, 6, 4), (&quot;water&quot;, 25, 5, 5), (&quot;tent&quot;, 40, 7, 9)]
+    value, names = best_pack(items, 13, 12)
+    assert value == brute(items, 13, 12) == best_pack_value(items, 13, 12) == 65 and names == [&quot;food&quot;, &quot;rope&quot;, &quot;water&quot;]
+    assert best_pack([], 5, 5) == (0, []) and best_pack(items, 0, 100) == (0, [])
+    rng = random.Random(5)
+    for _ in range(60):
+        items = [(f&quot;x{k}&quot;, rng.randint(1, 20), rng.randint(1, 6), rng.randint(1, 6)) for k in range(rng.randint(0, 7))]
+        W, V = rng.randint(0, 15), rng.randint(0, 15)
+        value, names = best_pack(items, W, V)
+        lookup = {i[0]: i for i in items}
+        assert value == brute(items, W, V) == best_pack_value(items, W, V)
+        assert sum(lookup[n][1] for n in names) == value
+        assert sum(lookup[n][2] for n in names) &lt;= W and sum(lookup[n][3] for n in names) &lt;= V</textarea><textarea class="pc-src pc-solution" hidden>def best_pack(items, max_weight, max_volume):
+    n = len(items)
+    table = [[[0] * (max_volume + 1) for _ in range(max_weight + 1)]]
+    for _, value, weight, volume in items:
+        prev = table[-1]
+        cur = [row[:] for row in prev]
+        for w in range(weight, max_weight + 1):
+            for v in range(volume, max_volume + 1):
+                if prev[w - weight][v - volume] + value &gt; cur[w][v]:
+                    cur[w][v] = prev[w - weight][v - volume] + value
+        table.append(cur)
+    names, w, v = [], max_weight, max_volume
+    for i in range(n, 0, -1):
+        if table[i][w][v] != table[i - 1][w][v]:
+            name, _, weight, volume = items[i - 1]
+            names.append(name)
+            w, v = w - weight, v - volume
+    return table[n][max_weight][max_volume], sorted(names)
+
+def best_pack_value(items, max_weight, max_volume):
+    best = [[0] * (max_volume + 1) for _ in range(max_weight + 1)]
+    for _, value, weight, volume in items:
+        for w in range(max_weight, weight - 1, -1):
+            for v in range(max_volume, volume - 1, -1):
+                if best[w - weight][v - volume] + value &gt; best[w][v]:
+                    best[w][v] = best[w - weight][v - volume] + value
+    return best[max_weight][max_volume]</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Name three problems from outside programming that are knapsacks in disguise (a budget, choices, and something to make as large as possible). Tomorrow is the Forge: a festival planner built from this week&rsquo;s DP patterns.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w053d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w053d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w053d5", "week": 53, "day": 5, "title": "Knapsack", "exercises": [{"id": "w053d5-zero_one", "title": "Packing the van", "points": 15}, {"id": "w053d5-rod", "title": "Cutting the rod", "points": 10}, {"id": "w053d5-partition", "title": "Fair shares", "points": 10}, {"id": "w053d5-signs", "title": "Plus or minus", "points": 10}, {"id": "w053d5-bounded", "title": "A shop with limited stock", "points": 15}, {"id": "w053d5-bug1", "title": "One tent, packed twice", "points": 10}, {"id": "w053d5-bug2", "title": "Nothing to count", "points": 10}, {"id": "w053d5-bug3", "title": "Rows are not items", "points": 10}, {"id": "w053d5-trace", "title": "Predict them", "points": 10}, {"id": "w053d5-challenge", "title": "Challenge: weight and space", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

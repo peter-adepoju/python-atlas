@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 53 Day 2: Memoisation versus tabulation | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Yesterday’s DPs recursed from the question down to the base cases and cached the answers on the way back: top-down, or memoisation. Today turns them inside...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w053d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 53 Day 2: Memoisation versus tabulation">
+<meta property="og:description" content="Yesterday’s DPs recursed from the question down to the base cases and cached the answers on the way back: top-down, or memoisation. Today turns them inside...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w053d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-53">Week 53: Dynamic programming I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#bottom-up" data-sec="bottom-up">Bottom up</a></li><li><a href="#the-fill-order" data-sec="the-fill-order">The fill order</a></li><li><a href="#which-to-choose" data-sec="which-to-choose">Which to choose</a></li><li><a href="#rolling-arrays" data-sec="rolling-arrays">Rolling arrays</a></li><li><a href="#reading-the-choices-back" data-sec="reading-the-choices-back">Reading the choices back</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w053d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-53">Week 53: Dynamic programming I</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 53, Day 2</span></p>
+      <h1>Memoisation versus tabulation</h1>
+      <div class="day-intro"><p>Yesterday&rsquo;s DPs recursed from the question down to the base cases and cached the answers on the way back: <strong>top-down</strong>, or memoisation. Today turns them inside out: start from the base cases and fill a <strong>table</strong> in a loop, in an order that guarantees every entry&rsquo;s ingredients are ready: <strong>bottom-up</strong>, or tabulation. The answers are the same; what changes is recursion depth, speed, which states get computed, and how much memory you need. You&rsquo;ll learn to choose the fill order, to shrink a table to a few rolling variables, and to read the <strong>choices</strong> back out of a finished table.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Convert a memoised recurrence into a table filled by loops</li><li>Choose a fill order so every entry&rsquo;s dependencies come first</li><li>Compare memoisation and tabulation for depth, speed and states visited</li><li>Save memory by keeping only the rows or values the recurrence still needs</li><li>Reconstruct an optimal solution by walking back through the table</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Bottom up: 20 min"></span><span class="plan-seg s0" style="flex:20" title="The fill order: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Which to choose: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Rolling arrays: 20 min"></span><span class="plan-seg s1" style="flex:25" title="Reading the choices back: 25 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Bottom up</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">The fill order</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Which to choose</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Rolling arrays</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Reading the choices back</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w053d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w053d2.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w053d2-p1"><textarea class="pc-src pc-code" hidden>from functools import cache
+
+@cache
+def f(n):
+    return 1 if n == 0 else f(n // 2) + f(n // 3)
+
+print(f(1000), f.cache_info().currsize)
+
+table = [1] + [0] * 1000
+for i in range(1, 1001):
+    table[i] = table[i // 2] + table[i // 3]
+print(table[1000], len(table))</textarea></div>
+<p>Same recurrence, same answer. The memoised version only ever computes the states the question <strong>reaches</strong>: halving and thirding from 1000 visits a few dozen numbers. The table computes all 1,001, in order, because it can&rsquo;t know in advance which ones will be needed. For recurrences that reach far down in single steps, such as <code>f(n - 1)</code>, the opposite problem appears: memoisation recurses 1000 calls deep and hits Python&rsquo;s recursion limit, while the loop doesn&rsquo;t care.</p>
+<h2 id="bottom-up">Bottom up</h2>
+<p>To <strong>tabulate</strong> a recurrence:</p>
+<ol>
+<li>Make a table with one entry per state (a list for one index, a list of lists for two).</li>
+<li>Fill in the base cases.</li>
+<li>Loop over the states in an order where every entry&rsquo;s ingredients are already filled, applying the recurrence.</li>
+<li>Read off the answer.</li>
+</ol>
+<p>The recurrence is exactly yesterday&rsquo;s; only the direction changes. Where memoisation says &ldquo;to know f(i), first ask for f(i − 1) and f(i − 2)&rdquo;, tabulation says &ldquo;f(i − 1) and f(i − 2) are already in the table, so f(i) is one line&rdquo;.</p>
+<div class="pc pc-example" data-kind="example" data-id="w053d2-e2"><textarea class="pc-src pc-code" hidden>def fewest_coins(amount, coins):
+    INF = float(&quot;inf&quot;)
+    best = [0] + [INF] * amount               # best[a]: fewest coins for amount a
+    for a in range(1, amount + 1):
+        for c in coins:
+            if c &lt;= a and best[a - c] + 1 &lt; best[a]:
+                best[a] = best[a - c] + 1
+    return best[amount] if best[amount] &lt; INF else None
+
+print(fewest_coins(6, [1, 3, 4]), fewest_coins(11, [5, 10]), fewest_coins(10_000, [1, 7, 23, 99]))</textarea></div>
+<h2 id="the-fill-order">The fill order</h2>
+<p>The order matters: every entry must come after everything it reads. Look at the recurrence&rsquo;s right-hand side:</p>
+<ul>
+<li>f(i) reads f(i − 1) and f(i − 2): fill i <strong>upwards</strong>.</li>
+<li>f(i) reads f(i + 1) (as in &ldquo;the best from position i onwards&rdquo;): fill i <strong>downwards</strong>, from the end.</li>
+<li>f(r, c) reads f(r − 1, c) and f(r, c − 1) (grids, tomorrow and Thursday): fill row by row, left to right.</li>
+<li>f(r, c) reads f(r + 1, &hellip;) (the triangle from yesterday): fill from the <strong>bottom row up</strong>.</li>
+</ul>
+<p>A wrong order is a quiet bug: the loop reads entries still holding their starting values (0 or infinity), and the answer is wrong without any error. If you can&rsquo;t find an order (the dependencies go round in a circle), the problem isn&rsquo;t a plain DP: it&rsquo;s a shortest-path problem on a graph, and Dijkstra or Bellman-Ford (Week 51) is the tool.</p>
+<div class="pc pc-example" data-kind="example" data-id="w053d2-e3"><textarea class="pc-src pc-code" hidden>def biggest_path(triangle):
+    best = list(triangle[-1])                 # the bottom row is its own best
+    for r in range(len(triangle) - 2, -1, -1):   # rows from the bottom up
+        best = [triangle[r][c] + max(best[c], best[c + 1]) for c in range(r + 1)]
+    return best[0]
+
+print(biggest_path([[3], [7, 4], [2, 4, 6], [8, 5, 9, 3]]))</textarea></div>
+<h2 id="which-to-choose">Which to choose</h2>
+<p>Both give the same answers. The differences:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Memoisation (top-down)</th>
+<th>Tabulation (bottom-up)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Writing it</td>
+<td>Straight from the recurrence</td>
+<td>Needs a fill order</td>
+</tr>
+<tr>
+<td>States computed</td>
+<td>Only those the question reaches</td>
+<td>Every state in the table</td>
+</tr>
+<tr>
+<td>Depth</td>
+<td>Limited by recursion (about 1000)</td>
+<td>No limit</td>
+</tr>
+<tr>
+<td>Speed</td>
+<td>Function calls and hashing cost extra</td>
+<td>Plain loops, usually several times faster</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>The cache holds every state</td>
+<td>Often reducible to a few rows</td>
+</tr>
+</tbody>
+</table>
+<p>Use memoisation when the recurrence is awkward to order or most states are never needed (a huge state space where the question touches a few). Use tabulation for long inputs, for speed, and when you want to save memory. A common workflow: write the memoised version first, test it, then tabulate it and check the two agree.</p>
+<div class="pc pc-example" data-kind="example" data-id="w053d2-e4"><textarea class="pc-src pc-code" hidden>from functools import cache
+import time
+
+def top_down(n):
+    @cache
+    def f(i):
+        return i if i &lt; 2 else (f(i - 1) + f(i - 2)) % 1_000_007
+    for i in range(0, n + 1, 200):          # warm the cache in steps to stay shallow
+        f(i)
+    return f(n)
+
+def bottom_up(n):
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, (a + b) % 1_000_007
+    return a
+
+for fn in (top_down, bottom_up):
+    start = time.perf_counter()
+    answer = fn(200_000)
+    print(fn.__name__, answer, f&quot;{time.perf_counter() - start:.3f}s&quot;)</textarea></div>
+<h2 id="rolling-arrays">Rolling arrays</h2>
+<p>A table entry is only needed while later entries still read it. If f(i) reads only f(i − 1) and f(i − 2), keep <strong>two variables</strong> and slide them along: O(1) memory instead of O(n). If a two-dimensional f(r, c) reads only row r − 1, keep <strong>two rows</strong> (or even one, updated carefully): O(columns) instead of O(rows × columns).</p>
+<p>The cost: once old entries are thrown away, you can no longer walk back through them to find <strong>which choices</strong> gave the answer. Keep the full table when you need the choices, and roll it when you only need the number.</p>
+<div class="pc pc-example" data-kind="example" data-id="w053d2-e5"><textarea class="pc-src pc-code" hidden>def house_robber(values):
+    &quot;&quot;&quot;Most you can take from houses in a row without taking two neighbours.&quot;&quot;&quot;
+    take, skip = 0, 0                 # best so far if the last house was taken / skipped
+    for v in values:
+        take, skip = skip + v, max(take, skip)
+    return max(take, skip)
+
+print(house_robber([2, 7, 9, 3, 1]), house_robber([5, 1, 1, 5]))</textarea></div>
+<h2 id="reading-the-choices-back">Reading the choices back</h2>
+<p>To recover <strong>how</strong> the best answer was reached, keep the full table (or a parallel table of the choice made at each state), then start at the answer&rsquo;s state and walk back: at each state, find which option produced its value, record that choice, and move to the state it came from. This is the same idea as rebuilding a path from the <code>parent</code> dict in BFS and Dijkstra.</p>
+<div class="pc pc-example" data-kind="example" data-id="w053d2-e6"><textarea class="pc-src pc-code" hidden>def fewest_coins_used(amount, coins):
+    INF = float(&quot;inf&quot;)
+    best = [0] + [INF] * amount
+    last = [None] * (amount + 1)               # last[a]: the coin used last for a
+    for a in range(1, amount + 1):
+        for c in coins:
+            if c &lt;= a and best[a - c] + 1 &lt; best[a]:
+                best[a], last[a] = best[a - c] + 1, c
+    if best[amount] == INF:
+        return None
+    used = []
+    while amount:
+        used.append(last[amount])
+        amount -= last[amount]
+    return used
+
+print(fewest_coins_used(6, [1, 3, 4]), fewest_coins_used(63, [1, 5, 10, 21, 25]))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Tabulation fills a table from the base cases up, in an order where every entry&rsquo;s ingredients come first: read the recurrence&rsquo;s right-hand side to choose it, and remember that a wrong order fails silently. Memoisation is easier to write and computes only the states it needs; tabulation has no recursion limit, runs faster and lets you save memory by keeping only the rows or values still needed. Rolling away old entries loses the ability to reconstruct the choices, so keep the full table (or a table of choices) when you need them, and walk back from the answer state.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d2-coins" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Coins, bottom up</div><div class="pc-prompt"><p>Write <code>fewest_coins(amount, coins)</code> by tabulation (no recursion): the fewest coins making the amount exactly, with unlimited coins of each value, or <code>None</code> if impossible. Then <code>count_ways(amount, coins)</code>: the number of <strong>collections</strong> of coins, by tabulation: loop over the coins on the outside and amounts on the inside, so each collection is counted once.</p></div><textarea class="pc-src pc-code" hidden>def fewest_coins(amount, coins):
+    ___
+
+def count_ways(amount, coins):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>from functools import cache
+def test_coins():
+    &quot;coins&quot;
+    assert fewest_coins(6, [1, 3, 4]) == 2 and fewest_coins(11, [5, 10]) is None and fewest_coins(0, [2]) == 0
+    assert count_ways(4, [1, 2]) == 3 and count_ways(200, [1, 2, 5, 10, 20, 50, 100, 200]) == 73682
+    assert count_ways(0, [3]) == 1 and count_ways(7, [2, 4]) == 0
+    assert fewest_coins(9_000, [1, 7, 23, 99]) == 96
+    assert count_ways(5_000, [1, 2, 5, 10, 20, 50, 100, 200]) &gt; 10 ** 12</textarea><textarea class="pc-src pc-solution" hidden>def fewest_coins(amount, coins):
+    INF = float(&quot;inf&quot;)
+    best = [0] + [INF] * amount
+    for a in range(1, amount + 1):
+        for c in coins:
+            if c &lt;= a and best[a - c] + 1 &lt; best[a]:
+                best[a] = best[a - c] + 1
+    return best[amount] if best[amount] &lt; INF else None
+
+def count_ways(amount, coins):
+    ways = [1] + [0] * amount
+    for c in coins:
+        for a in range(c, amount + 1):
+            ways[a] += ways[a - c]
+    return ways[amount]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d2-robber" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Houses in a row, and a ring</div><div class="pc-prompt"><p>Write <code>rob_row(values)</code> with two rolling variables: the most you can take from houses in a row without taking two neighbours. Then <code>rob_ring(values)</code>: the same, but the houses stand in a <strong>circle</strong>, so the first and last are neighbours too. (Hint: either the first house is left out, or the last is.)</p></div><textarea class="pc-src pc-code" hidden>def rob_row(values):
+    ___
+
+def rob_ring(values):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, random
+def brute(values, ring):
+    n = len(values)
+    best = 0
+    for picks in itertools.product([0, 1], repeat=n):
+        bad = any(picks[i] and picks[i + 1] for i in range(n - 1))
+        if ring and n &gt; 1 and picks[0] and picks[-1]:
+            bad = True
+        if not bad:
+            best = max(best, sum(v for v, p in zip(values, picks) if p))
+    return best
+def test_robber():
+    &quot;rows and rings&quot;
+    assert rob_row([2, 7, 9, 3, 1]) == 12 and rob_ring([2, 3, 2]) == 3 and rob_ring([1, 2, 3, 1]) == 4
+    assert rob_row([]) == 0 and rob_ring([]) == 0 and rob_ring([7]) == 7
+    rng = random.Random(1)
+    for _ in range(200):
+        vals = [rng.randint(0, 20) for _ in range(rng.randint(0, 10))]
+        assert rob_row(vals) == brute(vals, False) and rob_ring(vals) == brute(vals, True), vals
+    assert rob_row(list(range(100_000))) == sum(range(1, 100_000, 2))</textarea><textarea class="pc-src pc-solution" hidden>def rob_row(values):
+    take, skip = 0, 0
+    for v in values:
+        take, skip = skip + v, max(take, skip)
+    return max(take, skip)
+
+def rob_ring(values):
+    if len(values) == 1:
+        return values[0]
+    return max(rob_row(values[1:]), rob_row(values[:-1]))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d2-order" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Fill it backwards</div><div class="pc-prompt"><p>A training course runs sessions in order; session i gives <code>points[i]</code>, but taking it means <strong>missing the next</strong> <code>rest[i]</code> sessions (you need time to recover). Write <code>best_points(points, rest)</code>: the most points. Define f(i) as the best from session i onwards, and fill the table <strong>from the end</strong>. Then <code>chosen(points, rest)</code>: the indices taken in one best plan (prefer taking a session on a tie).</p></div><textarea class="pc-src pc-code" hidden>def best_points(points, rest):
+    ___
+
+def chosen(points, rest):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def brute(points, rest):
+    n = len(points)
+    best = [0]
+    def go(i, total):
+        if i &gt;= n:
+            best[0] = max(best[0], total)
+            return
+        go(i + 1, total)
+        go(i + 1 + rest[i], total + points[i])
+    go(0, 0)
+    return best[0]
+def test_backwards():
+    &quot;fill from the end&quot;
+    pts, rst = [3, 4, 4, 2], [2, 1, 1, 2]
+    assert best_points(pts, rst) == 6 and chosen(pts, rst) == [1, 3]
+    assert best_points([], []) == 0 and chosen([], []) == []
+    rng = random.Random(2)
+    for _ in range(150):
+        n = rng.randint(0, 10)
+        pts = [rng.randint(0, 9) for _ in range(n)]
+        rst = [rng.randint(0, 3) for _ in range(n)]
+        best = best_points(pts, rst)
+        assert best == brute(pts, rst)
+        picks = chosen(pts, rst)
+        assert sum(pts[i] for i in picks) == best
+        assert all(b &gt; a + rst[a] for a, b in zip(picks, picks[1:]))
+    n = 50_000
+    assert best_points([1] * n, [0] * n) == n</textarea><textarea class="pc-src pc-solution" hidden>def _table(points, rest):
+    n = len(points)
+    best = [0] * (n + 1)
+    for i in range(n - 1, -1, -1):
+        after = i + 1 + rest[i]
+        best[i] = max(best[i + 1], points[i] + (best[after] if after &lt;= n else 0))
+    return best
+
+def best_points(points, rest):
+    return _table(points, rest)[0]
+
+def chosen(points, rest):
+    n = len(points)
+    best = _table(points, rest)
+    picks, i = [], 0
+    while i &lt; n:
+        after = i + 1 + rest[i]
+        if points[i] + (best[after] if after &lt;= n else 0) &gt;= best[i + 1]:
+            picks.append(i)
+            i = after
+        else:
+            i += 1
+    return picks</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d2-agree" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Two ways, one answer</div><div class="pc-prompt"><p>The number of ways to tile a 1 × n strip with tiles of length 1, 2 and 3. Write <code>tiles_memo(n)</code> with <code>functools.cache</code> and <code>tiles_table(n)</code> with a loop and <strong>three rolling variables</strong> (no list). They must agree; the checks call <code>tiles_table(100_000) % 1000</code> too, which the memoised version can&rsquo;t reach.</p></div><textarea class="pc-src pc-code" hidden>from functools import cache
+
+def tiles_memo(n):
+    ___
+
+def tiles_table(n):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_agree():
+    &quot;two ways&quot;
+    assert [tiles_table(n) for n in range(8)] == [1, 1, 2, 4, 7, 13, 24, 44]
+    assert all(tiles_memo(n) == tiles_table(n) for n in range(300))
+    a, b, c = 0, 0, 1
+    for _ in range(100_000):
+        a, b, c = b, c, a + b + c
+    assert tiles_table(100_000) == c
+    body = source.split(&quot;def tiles_table&quot;)[1].split(&quot;\ndef &quot;)[0]
+    assert &quot;[&quot; not in body, &quot;rolling variables, not a list&quot;</textarea><textarea class="pc-src pc-solution" hidden>from functools import cache
+
+def tiles_memo(n):
+    @cache
+    def f(i):
+        if i &lt; 0:
+            return 0
+        if i == 0:
+            return 1
+        return f(i - 1) + f(i - 2) + f(i - 3)
+    return f(n)
+
+def tiles_table(n):
+    a, b, c = 0, 0, 1          # f(i - 3), f(i - 2), f(i - 1), starting with f(0) = 1
+    for _ in range(n):
+        a, b, c = b, c, a + b + c
+    return c</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d2-triangle" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">One row at a time</div><div class="pc-prompt"><p>Write <code>min_path(triangle)</code> bottom-up with a <strong>single list</strong> that is overwritten row by row: the smallest total from the top to the bottom of a number triangle (moving to c or c + 1 below). Then <code>min_route(triangle)</code>: the list of numbers on one smallest path, which needs the <strong>full</strong> table: keep every row&rsquo;s best values and walk down from the top choosing the smaller child (left on a tie).</p></div><textarea class="pc-src pc-code" hidden>def min_path(triangle):
+    ___
+
+def min_route(triangle):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def paths(tri):
+    out = []
+    def go(r, c, acc):
+        acc = acc + [tri[r][c]]
+        if r == len(tri) - 1:
+            out.append(acc)
+            return
+        go(r + 1, c, acc)
+        go(r + 1, c + 1, acc)
+    go(0, 0, [])
+    return out
+def test_min():
+    &quot;rows&quot;
+    tri = [[2], [3, 4], [6, 5, 7], [4, 1, 8, 3]]
+    assert min_path(tri) == 11 and min_route(tri) == [2, 3, 5, 1]
+    assert min_path([[-10]]) == -10 and min_route([[-10]]) == [-10]
+    rng = random.Random(3)
+    for _ in range(80):
+        tri = [[rng.randint(-5, 9) for _ in range(r + 1)] for r in range(rng.randint(1, 7))]
+        ps = paths(tri)
+        low = min(sum(p) for p in ps)
+        assert min_path(tri) == low and min_route(tri) in ps and sum(min_route(tri)) == low
+        assert min_route(tri) == min(ps, key=sum)
+    big = [[(r * 31 + c * 17) % 50 for c in range(r + 1)] for r in range(1500)]
+    assert min_path(big) == sum(min_route(big))</textarea><textarea class="pc-src pc-solution" hidden>def min_path(triangle):
+    best = list(triangle[-1])
+    for r in range(len(triangle) - 2, -1, -1):
+        for c in range(r + 1):
+            best[c] = triangle[r][c] + min(best[c], best[c + 1])
+    return best[0]
+
+def min_route(triangle):
+    n = len(triangle)
+    table = [None] * n
+    table[-1] = list(triangle[-1])
+    for r in range(n - 2, -1, -1):
+        below = table[r + 1]
+        table[r] = [triangle[r][c] + min(below[c], below[c + 1]) for c in range(r + 1)]
+    route, c = [], 0
+    for r in range(n):
+        route.append(triangle[r][c])
+        if r &lt; n - 1 and table[r + 1][c + 1] &lt; table[r + 1][c]:
+            c += 1
+    return route</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w053d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Filled in the wrong direction</div><div class="pc-prompt"><p>f(i) is the best from house i <strong>onwards</strong>, so it reads f(i + 1) and f(i + 2), but this loop fills i upwards, reading entries that are still 0, and prints <code>2</code> instead of <code>12</code>. Fill from the end.</p></div><textarea class="pc-src pc-code" hidden>values = [2, 7, 9, 3, 1]
+n = len(values)
+best = [0] * (n + 2)
+for i in range(n):
+    best[i] = max(best[i + 1], values[i] + best[i + 2])
+print(best[0])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;dependencies first&quot;
+    expect_output(&quot;12&quot;)</textarea><textarea class="pc-src pc-solution" hidden>values = [2, 7, 9, 3, 1]
+n = len(values)
+best = [0] * (n + 2)
+for i in range(n - 1, -1, -1):
+    best[i] = max(best[i + 1], values[i] + best[i + 2])
+print(best[0])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w053d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Counting orders by mistake</div><div class="pc-prompt"><p>This should count coin <strong>collections</strong> for 4 with coins 1 and 2 (1+1+1+1, 1+1+2, 2+2: three), but with amounts on the outside and coins on the inside it counts every <strong>order</strong> and prints <code>5</code>. Swap the loops so coins are on the outside.</p></div><textarea class="pc-src pc-code" hidden>coins = [1, 2]
+amount = 4
+ways = [1] + [0] * amount
+for a in range(1, amount + 1):
+    for c in coins:
+        if c &lt;= a:
+            ways[a] += ways[a - c]
+print(ways[amount])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;collections&quot;
+    expect_output(&quot;3&quot;)</textarea><textarea class="pc-src pc-solution" hidden>coins = [1, 2]
+amount = 4
+ways = [1] + [0] * amount
+for c in coins:
+    for a in range(c, amount + 1):
+        ways[a] += ways[a - c]
+print(ways[amount])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w053d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Rolling too soon</div><div class="pc-prompt"><p>The rolling update of the house-robber variables happens one line at a time, so <code>skip</code> is computed from the <strong>new</strong> <code>take</code> instead of the old one, and it prints <code>22</code>, the total of every house, neighbours and all. Update both at once, with a tuple assignment, so it prints <code>12</code>.</p></div><textarea class="pc-src pc-code" hidden>take, skip = 0, 0
+for v in [2, 7, 9, 3, 1]:
+    take = skip + v
+    skip = max(take, skip)
+print(max(take, skip))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;simultaneous update&quot;
+    expect_output(&quot;12&quot;)</textarea><textarea class="pc-src pc-solution" hidden>take, skip = 0, 0
+for v in [2, 7, 9, 3, 1]:
+    take, skip = skip + v, max(take, skip)
+print(max(take, skip))</textarea></div>
+<div class="parsons" data-id="w053d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Reconstructing the coins</div><div class="pc-prompt"><p>Arrange the lines to fill the fewest-coins table with the last coin used, then walk back. One line is a trap.</p></div><script type="application/json">{"lines": ["for a in range(1, amount + 1):", "    for c in coins:", "        if c <= a and best[a - c] + 1 < best[a]:", "            best[a], last[a] = best[a - c] + 1, c", "used = []", "while amount:", "    used.append(last[amount])", "    amount -= last[amount]"], "distractors": ["    amount -= 1"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the fill direction for f(i) = max(f(i + 1), v[i] + f(i + 2)): &quot;up&quot; or &quot;down&quot;
+q = ___   # the table after count_ways for amount 4, coins [1, 2] (coins outside), as a list
+r = ___   # how many variables a rolling Fibonacci table needs
+s = ___   # True or False: memoisation computes every state in the table
+t = ___   # rob_row([5, 1, 1, 5])</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;down&quot; and q == [1, 1, 2, 2, 3] and r == 2, &quot;p, q and r&quot;
+    assert s is False and t == 10, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;down&quot;
+q = [1, 1, 2, 2, 3]
+r = 2
+s = False
+t = 10</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w053d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does tabulation do?", "answer": 1, "explain": "Bottom-up.", "options": ["Recurses and caches", "Fills a table from the base cases up with loops", "Sorts the states", "Uses a heap"]}, {"type": "mc", "q": "How do you choose the fill order?", "answer": 1, "explain": "Read the recurrence&rsquo;s right-hand side.", "options": ["Always upwards", "So every entry is filled after the entries it reads", "Randomly", "Alphabetically"]}, {"type": "mc", "q": "What happens with a wrong fill order?", "answer": 1, "explain": "A quiet bug.", "options": ["An error", "Entries read starting values, giving wrong answers silently", "It&rsquo;s slower", "Nothing"]}, {"type": "mc", "q": "When is memoisation the better choice?", "answer": 1, "explain": "It visits only what the question reaches.", "options": ["For very long inputs", "When the order is awkward or most states are never needed", "Always", "When memory is short"]}, {"type": "mc", "q": "What limits memoisation in Python?", "answer": 1, "explain": "Tabulation has no such limit.", "options": ["Nothing", "Recursion depth, about 1000 by default", "The size of integers", "The cache size"]}, {"type": "mc", "q": "What is a rolling array?", "answer": 1, "explain": "O(1) or O(columns) memory.", "options": ["A sorted table", "Keeping only the rows or values the recurrence still needs", "A circular list", "A heap"]}, {"type": "mc", "q": "What do you lose by rolling away old entries?", "answer": 1, "explain": "Keep the full table, or a table of choices, if you need them.", "options": ["Nothing", "The ability to reconstruct the choices", "Speed", "Correctness"]}, {"type": "mc", "q": "When counting coin collections by tabulation, which loop goes outside?", "answer": 1, "explain": "Amounts outside counts orders.", "options": ["Amounts", "Coins", "Either", "Neither"]}, {"type": "mc", "q": "If a recurrence&rsquo;s dependencies form a cycle, what is it?", "answer": 1, "explain": "Dijkstra or Bellman-Ford.", "options": ["A DP", "A shortest-path problem on a graph", "A sort", "Impossible"]}, {"type": "output", "q": "What does this print?", "answer": "55", "explain": "The tenth Fibonacci number.", "code": "a, b = 0, 1\nfor _ in range(10):\n    a, b = b, a + b\nprint(a)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: the cheapest ticket plan</div><div class="pc-prompt"><p>You&rsquo;ll travel on certain days of the year (a sorted list of distinct days from 1 to 365). A 1-day pass costs <code>prices[0]</code>, a 7-day pass <code>prices[1]</code> and a 30-day pass <code>prices[2]</code>; a pass bought on day d covers d to d + 6 (or d + 29). Write:</p>
+<ul>
+<li><code>cheapest(days, prices)</code>: the least total cost, by tabulation over the days of the year (f(d) = the cheapest way to cover all travel days up to d).</li>
+<li><code>plan(days, prices)</code>: one cheapest list of <code>(start_day, length)</code> passes, sorted by start day, found by walking back through the table (prefer the shortest pass on a tie). Start each pass on the first travel day it covers.</li>
+<li><code>cheapest_fast(days, prices)</code>: the same answer with a table indexed by <strong>travel day</strong> (position in the list) instead of calendar day, using <code>bisect</code> to find how far each pass reaches, so it works for days up to 10⁹.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import bisect
+
+def cheapest(days, prices):
+    ___
+
+def plan(days, prices):
+    ___
+
+def cheapest_fast(days, prices):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def brute(days, prices):
+    best = [None]
+    lengths = (1, 7, 30)
+    def go(i, total):
+        if best[0] is not None and total &gt;= best[0]:
+            return
+        if i == len(days):
+            best[0] = total
+            return
+        for p, L in zip(prices, lengths):
+            j = i
+            while j &lt; len(days) and days[j] &lt; days[i] + L:
+                j += 1
+            go(j, total + p)
+    go(0, 0)
+    return best[0]
+def covers(days, passes):
+    return all(any(s &lt;= d &lt; s + L for s, L in passes) for d in days)
+def test_tickets():
+    &quot;tickets&quot;
+    assert cheapest([1, 4, 6, 7, 8, 20], [2, 7, 15]) == 11
+    assert cheapest([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 30, 31], [2, 7, 15]) == 17
+    assert cheapest([], [2, 7, 15]) == 0 and plan([], [2, 7, 15]) == []
+    p = plan([1, 4, 6, 7, 8, 20], [2, 7, 15])
+    assert p == [(1, 7), (8, 1), (20, 1)], p
+    rng = random.Random(4)
+    for _ in range(80):
+        days = sorted(rng.sample(range(1, 80), rng.randint(0, 12)))
+        prices = sorted(rng.randint(1, 30) for _ in range(3))
+        want = brute(days, prices)
+        assert cheapest(days, prices) == want and cheapest_fast(days, prices) == want
+        pl = plan(days, prices)
+        cost = {1: prices[0], 7: prices[1], 30: prices[2]}
+        assert covers(days, pl) and sum(cost[L] for s, L in pl) == want and pl == sorted(pl)
+        assert all(s in days for s, L in pl)
+    big = sorted(rng.sample(range(1, 10 ** 9), 20_000))
+    assert cheapest_fast(big, [2, 7, 15]) == 40_000</textarea><textarea class="pc-src pc-solution" hidden>import bisect
+
+def _table(days, prices):
+    last = days[-1] if days else 0
+    travel = set(days)
+    best = [0] * (last + 1)
+    for d in range(1, last + 1):
+        if d not in travel:
+            best[d] = best[d - 1]
+        else:
+            best[d] = min(best[max(0, d - 1)] + prices[0],
+                          best[max(0, d - 7)] + prices[1],
+                          best[max(0, d - 30)] + prices[2])
+    return best
+
+def cheapest(days, prices):
+    return _table(days, prices)[-1]
+
+def plan(days, prices):
+    best = _table(days, prices)
+    passes, d = [], len(best) - 1
+    travel = set(days)
+    while d &gt; 0:
+        if d not in travel:
+            d -= 1
+            continue
+        for price, length in zip(prices, (1, 7, 30)):
+            before = max(0, d - length)
+            if best[before] + price == best[d]:
+                start = min(x for x in days if before &lt; x &lt;= d)
+                passes.append((start, length))
+                d = before
+                break
+    return sorted(passes)
+
+def cheapest_fast(days, prices):
+    n = len(days)
+    best = [0] * (n + 1)              # best[i]: cheapest to cover days[i:]
+    for i in range(n - 1, -1, -1):
+        options = []
+        for price, length in zip(prices, (1, 7, 30)):
+            j = bisect.bisect_left(days, days[i] + length)
+            options.append(price + best[j])
+        best[i] = min(options)
+    return best[0]</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Take one recurrence from yesterday and write its tabulated version on paper: the table&rsquo;s shape, the base cases, the fill order, and how much of the table you could throw away. Tomorrow: one-dimensional DP in depth, with a catalogue of the patterns that come up again and again.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w053d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w053d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w053d2", "week": 53, "day": 2, "title": "Memoisation versus tabulation", "exercises": [{"id": "w053d2-coins", "title": "Coins, bottom up", "points": 10}, {"id": "w053d2-robber", "title": "Houses in a row, and a ring", "points": 10}, {"id": "w053d2-order", "title": "Fill it backwards", "points": 15}, {"id": "w053d2-agree", "title": "Two ways, one answer", "points": 10}, {"id": "w053d2-triangle", "title": "One row at a time", "points": 15}, {"id": "w053d2-bug1", "title": "Filled in the wrong direction", "points": 10}, {"id": "w053d2-bug2", "title": "Counting orders by mistake", "points": 10}, {"id": "w053d2-bug3", "title": "Rolling too soon", "points": 10}, {"id": "w053d2-trace", "title": "Predict them", "points": 10}, {"id": "w053d2-challenge", "title": "Challenge: the cheapest ticket plan", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

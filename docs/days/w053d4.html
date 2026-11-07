@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 53 Day 4: Grid DP | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="A grid is the friendliest place to meet two-dimensional DP: the state is a cell (r, c), the moves are usually right and down, and the table is the grid...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w053d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 53 Day 4: Grid DP">
+<meta property="og:description" content="A grid is the friendliest place to meet two-dimensional DP: the state is a cell (r, c), the moves are usually right and down, and the table is the grid...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w053d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-53">Week 53: Dynamic programming I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#counting-routes" data-sec="counting-routes">Counting routes</a></li><li><a href="#the-cheapest-route" data-sec="the-cheapest-route">The cheapest route</a></li><li><a href="#one-row-is-enough" data-sec="one-row-is-enough">One row is enough</a></li><li><a href="#filling-from-the-goal" data-sec="filling-from-the-goal">Filling from the goal</a></li><li><a href="#squares-and-shapes" data-sec="squares-and-shapes">Squares and shapes</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w053d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-53">Week 53: Dynamic programming I</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 53, Day 4</span></p>
+      <h1>Grid DP</h1>
+      <div class="day-intro"><p>A grid is the friendliest place to meet two-dimensional DP: the state is a cell <code>(r, c)</code>, the moves are usually right and down, and the table is the grid itself. Week 16 counted routes round rocks by recursion; today you&rsquo;ll fill tables in loops, with obstacles, costs and reconstructed routes, keep only one row of memory, and meet problems that need the table filled <strong>backwards</strong> from the goal. The last section adds a twist that turns up surprisingly often: two walkers moving at once, where the state has to describe both.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Fill a grid table in row-major order when moves go right and down</li><li>Count routes, find cheapest routes and reconstruct them with obstacles in the way</li><li>Keep only one row of the table when the choices aren&rsquo;t needed</li><li>Fill backwards from the goal when the answer depends on what comes later</li><li>Find the largest square of a property with a three-neighbour recurrence</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Counting routes: 20 min"></span><span class="plan-seg s0" style="flex:25" title="The cheapest route: 25 min"></span><span class="plan-seg s1" style="flex:15" title="One row is enough: 15 min"></span><span class="plan-seg s0" style="flex:20" title="Filling from the goal: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Squares and shapes: 20 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Counting routes</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">The cheapest route</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">One row is enough</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Filling from the goal</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Squares and shapes</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w053d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w053d4.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w053d4-p1"><textarea class="pc-src pc-code" hidden>rows, cols = 3, 4
+ways = [[1] * cols for _ in range(rows)]
+for r in range(1, rows):
+    for c in range(1, cols):
+        ways[r][c] = ways[r - 1][c] + ways[r][c - 1]
+for row in ways:
+    print(row)</textarea></div>
+<p>Each cell&rsquo;s count is the sum of the cell above and the cell to the left, because the last move into it came from one of them. The first row and column have only one route each: straight along the edge. The numbers are Pascal&rsquo;s triangle on its side: there are C(5, 2) = 10 routes to the far corner of a 3 × 4 grid.</p>
+<h2 id="counting-routes">Counting routes</h2>
+<p>Moving only <strong>right</strong> and <strong>down</strong> from the top-left, define</p>
+<p><strong>ways(r, c) = the number of routes from the start to cell (r, c)</strong>,</p>
+<p>with ways(0, 0) = 1. The last move came from above or from the left, so ways(r, c) = ways(r − 1, c) + ways(r, c − 1), with cells outside the grid counting 0. Both ingredients come earlier in <strong>row-major order</strong> (row by row, left to right), so that&rsquo;s the fill order.</p>
+<p><strong>Obstacles</strong> fit naturally: a blocked cell has 0 routes. Don&rsquo;t fill the first row and column with 1s blindly: a rock on the top edge cuts off every cell beyond it. Handling the edges by &ldquo;0 if outside the grid&rdquo; rather than by special cases avoids that bug.</p>
+<div class="pc pc-example" data-kind="example" data-id="w053d4-e2"><textarea class="pc-src pc-code" hidden>def count_routes(grid):
+    &quot;&quot;&quot;grid: strings, &#x27;.&#x27; open, &#x27;#&#x27; blocked. Routes moving right and down.&quot;&quot;&quot;
+    rows, cols = len(grid), len(grid[0])
+    ways = [[0] * cols for _ in range(rows)]
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == &quot;#&quot;:
+                continue
+            if r == 0 and c == 0:
+                ways[r][c] = 1
+                continue
+            above = ways[r - 1][c] if r &gt; 0 else 0
+            left = ways[r][c - 1] if c &gt; 0 else 0
+            ways[r][c] = above + left
+    return ways[-1][-1]
+
+print(count_routes([&quot;...&quot;, &quot;.#.&quot;, &quot;...&quot;]), count_routes([&quot;.#..&quot;, &quot;....&quot;, &quot;..#.&quot;]))</textarea></div>
+<h2 id="the-cheapest-route">The cheapest route</h2>
+<p>With a cost in each cell, the same shape gives the cheapest route:</p>
+<p><strong>best(r, c) = cost(r, c) + min(best(r − 1, c), best(r, c − 1))</strong>,</p>
+<p>with infinity outside the grid (so the min ignores it) and best(0, 0) = cost(0, 0). To recover the route, walk back from the corner: at each cell, step to whichever neighbour (above or left) has the smaller best, and reverse the list of moves at the end.</p>
+<p>This is a shortest-path problem, and Dijkstra (Week 51) would solve it too. DP is simpler and faster here because moves only go right and down, so there&rsquo;s a fill order with no cycles. Allow moves up or left and that order vanishes: then it&rsquo;s Dijkstra&rsquo;s job.</p>
+<div class="pc pc-example" data-kind="example" data-id="w053d4-e3"><textarea class="pc-src pc-code" hidden>def cheapest_route(cost):
+    rows, cols = len(cost), len(cost[0])
+    INF = float(&quot;inf&quot;)
+    best = [[INF] * cols for _ in range(rows)]
+    for r in range(rows):
+        for c in range(cols):
+            if r == 0 and c == 0:
+                best[r][c] = cost[0][0]
+                continue
+            above = best[r - 1][c] if r &gt; 0 else INF
+            left = best[r][c - 1] if c &gt; 0 else INF
+            best[r][c] = cost[r][c] + min(above, left)
+    moves, r, c = [], rows - 1, cols - 1
+    while (r, c) != (0, 0):
+        if c &gt; 0 and (r == 0 or best[r][c - 1] &lt;= best[r - 1][c]):
+            moves.append(&quot;R&quot;)
+            c -= 1
+        else:
+            moves.append(&quot;D&quot;)
+            r -= 1
+    return best[-1][-1], &quot;&quot;.join(reversed(moves))
+
+print(cheapest_route([[1, 3, 1], [1, 5, 1], [4, 2, 1]]))</textarea></div>
+<h2 id="one-row-is-enough">One row is enough</h2>
+<p>Each row only reads the row above and itself. So keep <strong>one list</strong> of length <code>cols</code>: before you overwrite <code>row[c]</code>, it still holds the value from the row above (<code>best(r − 1, c)</code>), and <code>row[c − 1]</code> already holds the new value from this row (<code>best(r, c − 1)</code>). Memory drops from rows × cols to cols, which matters for wide, tall grids, at the usual price: no route reconstruction.</p>
+<p>If the moves include the <strong>diagonal</strong> (down and right), the cell diagonally up-left has already been overwritten by the time you reach <code>row[c]</code>, so save it in a variable before overwriting <code>row[c − 1]</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w053d4-e4"><textarea class="pc-src pc-code" hidden>def count_routes_one_row(rows, cols):
+    row = [1] * cols
+    for _ in range(1, rows):
+        for c in range(1, cols):
+            row[c] += row[c - 1]       # old row[c] is &quot;above&quot;; row[c - 1] is &quot;left&quot;
+    return row[-1]
+
+print(count_routes_one_row(3, 4), count_routes_one_row(17, 17))</textarea></div>
+<h2 id="filling-from-the-goal">Filling from the goal</h2>
+<p>Sometimes the answer at a cell depends on what comes <strong>after</strong> it, not before. A knight walks from the top-left to the bottom-right, moving right and down; each cell adds to or takes from their health, which must stay at least 1 the whole way. What&rsquo;s the least health to start with?</p>
+<p>Filling forwards fails: the best route so far might be the one that later walks into a disaster. Instead define</p>
+<p><strong>need(r, c) = the least health needed on entering (r, c) to finish alive</strong>,</p>
+<p>which depends on the cells <strong>after</strong> it: need(r, c) = max(1, min(need(r + 1, c), need(r, c + 1)) − cell(r, c)), and at the goal max(1, 1 − cell). Fill from the bottom-right corner, backwards. (Puzzles like this one are widely shared as &ldquo;the dungeon problem&rdquo;.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w053d4-e5"><textarea class="pc-src pc-code" hidden>def least_health(grid):
+    rows, cols = len(grid), len(grid[0])
+    INF = float(&quot;inf&quot;)
+    need = [[INF] * (cols + 1) for _ in range(rows + 1)]
+    need[rows][cols - 1] = need[rows - 1][cols] = 1        # just past the goal
+    for r in range(rows - 1, -1, -1):
+        for c in range(cols - 1, -1, -1):
+            after = min(need[r + 1][c], need[r][c + 1])
+            need[r][c] = max(1, after - grid[r][c])
+    return need[0][0]
+
+print(least_health([[-2, -3, 3], [-5, -10, 1], [10, 30, -5]]))</textarea></div>
+<h2 id="squares-and-shapes">Squares and shapes</h2>
+<p>Grid DP isn&rsquo;t only about routes. To find the <strong>largest square of 1s</strong> in a grid of 0s and 1s, define</p>
+<p><strong>side(r, c) = the side of the largest all-1 square whose bottom-right corner is (r, c)</strong>.</p>
+<p>If the cell is 0, it&rsquo;s 0. Otherwise it&rsquo;s 1 + min(side(r − 1, c), side(r, c − 1), side(r − 1, c − 1)): the square can grow only as far as all three neighbouring squares allow. It&rsquo;s &ldquo;best ending here&rdquo; from yesterday, in two dimensions, and the answer is the maximum over all cells. A bonus: the sum of side(r, c) over every cell counts <strong>all</strong> the all-1 squares, because a square of side k ending at a cell means one square of each side 1 to k ends there.</p>
+<div class="pc pc-example" data-kind="example" data-id="w053d4-e6"><textarea class="pc-src pc-code" hidden>def largest_square(grid):
+    rows, cols = len(grid), len(grid[0])
+    side = [[0] * cols for _ in range(rows)]
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == &quot;1&quot;:
+                if r == 0 or c == 0:
+                    side[r][c] = 1
+                else:
+                    side[r][c] = 1 + min(side[r - 1][c], side[r][c - 1], side[r - 1][c - 1])
+    return max(max(row) for row in side), sum(sum(row) for row in side)
+
+print(largest_square([&quot;10100&quot;, &quot;10111&quot;, &quot;11111&quot;, &quot;10010&quot;]))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Grid DP uses a cell as the state. With moves right and down, fill in row-major order: routes add the counts from above and the left, cheapest routes add the cell&rsquo;s cost to the smaller of the two, and walking back from the corner rebuilds the route. Treat cells outside the grid as 0 (for counts) or infinity (for costs) instead of special-casing edges, so obstacles on the edges work. One row of memory is enough when you don&rsquo;t need the route. When the answer depends on what comes later, as with the least starting health, fill backwards from the goal. The largest square uses 1 + the minimum of three neighbours.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d4-routes" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Routes past the rocks</div><div class="pc-prompt"><p>Write <code>count_routes(grid)</code>: the number of routes from the top-left to the bottom-right moving right and down, avoiding <code>#</code> cells (0 if the start or end is blocked). Then <code>count_routes_with(grid, through)</code>: routes that pass through the cell <code>through</code>, a <code>(row, col)</code> pair. (Routes to it, times routes from it to the end, which is the same count on the grid flipped both ways.)</p></div><textarea class="pc-src pc-code" hidden>def count_routes(grid):
+    ___
+
+def count_routes_with(grid, through):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def brute(grid, through=None):
+    rows, cols = len(grid), len(grid[0])
+    count = [0]
+    def go(r, c, seen):
+        if r &gt;= rows or c &gt;= cols or grid[r][c] == &quot;#&quot;:
+            return
+        seen = seen or (r, c) == through
+        if (r, c) == (rows - 1, cols - 1):
+            count[0] += seen
+            return
+        go(r + 1, c, seen)
+        go(r, c + 1, seen)
+    go(0, 0, through is None)
+    return count[0]
+def test_routes():
+    &quot;routes&quot;
+    assert count_routes([&quot;...&quot;, &quot;.#.&quot;, &quot;...&quot;]) == 2 and count_routes([&quot;#.&quot;]) == 0 and count_routes([&quot;.&quot;]) == 1
+    assert count_routes([&quot;.#..&quot;, &quot;....&quot;]) == 1 and count_routes([&quot;.&quot; * 10] * 10) == 48620
+    assert count_routes_with([&quot;...&quot;, &quot;...&quot;, &quot;...&quot;], (1, 1)) == 4
+    rng = random.Random(1)
+    for _ in range(100):
+        rows, cols = rng.randint(1, 5), rng.randint(1, 5)
+        grid = [&quot;&quot;.join(&quot;#&quot; if rng.random() &lt; 0.25 else &quot;.&quot; for _ in range(cols)) for _ in range(rows)]
+        assert count_routes(grid) == brute(grid), grid
+        t = (rng.randrange(rows), rng.randrange(cols))
+        assert count_routes_with(grid, t) == brute(grid, t), (grid, t)</textarea><textarea class="pc-src pc-solution" hidden>def count_routes(grid):
+    rows, cols = len(grid), len(grid[0])
+    ways = [[0] * cols for _ in range(rows)]
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == &quot;#&quot;:
+                continue
+            if r == 0 and c == 0:
+                ways[r][c] = 1
+            else:
+                ways[r][c] = (ways[r - 1][c] if r else 0) + (ways[r][c - 1] if c else 0)
+    return ways[-1][-1]
+
+def count_routes_with(grid, through):
+    r, c = through
+    if grid[r][c] == &quot;#&quot;:
+        return 0
+    to_it = count_routes([row[:c + 1] for row in grid[:r + 1]])
+    flipped = [row[::-1] for row in grid[::-1]]
+    rows, cols = len(grid), len(grid[0])
+    fr, fc = rows - 1 - r, cols - 1 - c
+    from_it = count_routes([row[:fc + 1] for row in flipped[:fr + 1]])
+    return to_it * from_it</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d4-cheapest" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The cheapest walk</div><div class="pc-prompt"><p>Write <code>cheapest_route(cost)</code>: <code>(total, moves)</code>, the cheapest total of the cells visited from the top-left to the bottom-right (moving right <code>"R"</code> and down <code>"D"</code>), and the moves as a string. Any route of least cost is accepted. Then <code>cheapest_one_row(cost)</code>: the total only, keeping one row of memory.</p></div><textarea class="pc-src pc-code" hidden>def cheapest_route(cost):
+    ___
+
+def cheapest_one_row(cost):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def brute(cost):
+    rows, cols = len(cost), len(cost[0])
+    best = [float(&quot;inf&quot;)]
+    def go(r, c, total):
+        total += cost[r][c]
+        if (r, c) == (rows - 1, cols - 1):
+            best[0] = min(best[0], total)
+            return
+        if r + 1 &lt; rows:
+            go(r + 1, c, total)
+        if c + 1 &lt; cols:
+            go(r, c + 1, total)
+    go(0, 0, 0)
+    return best[0]
+def walk(cost, moves):
+    r = c = 0
+    total = cost[0][0]
+    for m in moves:
+        r, c = (r + 1, c) if m == &quot;D&quot; else (r, c + 1)
+        total += cost[r][c]
+    return total, (r, c)
+def test_cheapest():
+    &quot;costs&quot;
+    assert cheapest_route([[1, 3, 1], [1, 5, 1], [4, 2, 1]]) == (7, &quot;RRDD&quot;)
+    assert cheapest_route([[5]]) == (5, &quot;&quot;) and cheapest_one_row([[5]]) == 5
+    rng = random.Random(2)
+    for _ in range(100):
+        rows, cols = rng.randint(1, 6), rng.randint(1, 6)
+        cost = [[rng.randint(0, 9) for _ in range(cols)] for _ in range(rows)]
+        total, moves = cheapest_route(cost)
+        assert total == brute(cost) == cheapest_one_row(cost)
+        assert walk(cost, moves) == (total, (rows - 1, cols - 1))
+    big = [[(r * 7 + c * 3) % 10 for c in range(400)] for r in range(400)]
+    assert cheapest_one_row(big) == cheapest_route(big)[0]</textarea><textarea class="pc-src pc-solution" hidden>def cheapest_route(cost):
+    rows, cols = len(cost), len(cost[0])
+    INF = float(&quot;inf&quot;)
+    best = [[INF] * cols for _ in range(rows)]
+    for r in range(rows):
+        for c in range(cols):
+            if r == 0 and c == 0:
+                best[r][c] = cost[0][0]
+                continue
+            above = best[r - 1][c] if r else INF
+            left = best[r][c - 1] if c else INF
+            best[r][c] = cost[r][c] + min(above, left)
+    moves, r, c = [], rows - 1, cols - 1
+    while (r, c) != (0, 0):
+        if c &gt; 0 and (r == 0 or best[r][c - 1] &lt;= best[r - 1][c]):
+            moves.append(&quot;R&quot;)
+            c -= 1
+        else:
+            moves.append(&quot;D&quot;)
+            r -= 1
+    return best[-1][-1], &quot;&quot;.join(reversed(moves))
+
+def cheapest_one_row(cost):
+    INF = float(&quot;inf&quot;)
+    row = [INF] * len(cost[0])
+    row[0] = 0
+    for r in range(len(cost)):
+        for c in range(len(cost[0])):
+            left = row[c - 1] if c else INF
+            row[c] = cost[r][c] + min(row[c], left)
+    return row[-1]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d4-health" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The least starting health</div><div class="pc-prompt"><p>Write <code>least_health(grid)</code> by filling backwards from the goal: the least whole-number health to start with (at least 1) so that a walker going right and down from the top-left to the bottom-right, adding each cell&rsquo;s value (the start cell included), always has health of at least 1. Then <code>forwards_guess(grid)</code>: what you&rsquo;d get by taking the route with the <strong>largest total</strong> (ties: any) and computing the health it needs; the checks show it can be worse.</p></div><textarea class="pc-src pc-code" hidden>def least_health(grid):
+    ___
+
+def forwards_guess(grid):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def brute(grid):
+    rows, cols = len(grid), len(grid[0])
+    best = [float(&quot;inf&quot;)]
+    def go(r, c, total, lowest):
+        total += grid[r][c]
+        lowest = min(lowest, total)
+        if (r, c) == (rows - 1, cols - 1):
+            best[0] = min(best[0], max(1, 1 - lowest))
+            return
+        if r + 1 &lt; rows:
+            go(r + 1, c, total, lowest)
+        if c + 1 &lt; cols:
+            go(r, c + 1, total, lowest)
+    go(0, 0, 0, 0)
+    return best[0]
+def test_health():
+    &quot;backwards&quot;
+    assert least_health([[-2, -3, 3], [-5, -10, 1], [10, 30, -5]]) == 7
+    assert least_health([[0]]) == 1 and least_health([[-5]]) == 6 and least_health([[100]]) == 1
+    rng = random.Random(3)
+    worse = False
+    for _ in range(150):
+        rows, cols = rng.randint(1, 5), rng.randint(1, 5)
+        grid = [[rng.randint(-9, 9) for _ in range(cols)] for _ in range(rows)]
+        assert least_health(grid) == brute(grid), grid
+        guess = forwards_guess(grid)
+        assert guess &gt;= least_health(grid)
+        worse = worse or guess &gt; least_health(grid)
+    assert worse, &quot;the forwards guess is sometimes worse&quot;</textarea><textarea class="pc-src pc-solution" hidden>def least_health(grid):
+    rows, cols = len(grid), len(grid[0])
+    INF = float(&quot;inf&quot;)
+    need = [[INF] * (cols + 1) for _ in range(rows + 1)]
+    need[rows][cols - 1] = need[rows - 1][cols] = 1
+    for r in range(rows - 1, -1, -1):
+        for c in range(cols - 1, -1, -1):
+            need[r][c] = max(1, min(need[r + 1][c], need[r][c + 1]) - grid[r][c])
+    return need[0][0]
+
+def forwards_guess(grid):
+    rows, cols = len(grid), len(grid[0])
+    NEG = float(&quot;-inf&quot;)
+    best = [[NEG] * cols for _ in range(rows)]
+    for r in range(rows):
+        for c in range(cols):
+            prev = 0 if r == c == 0 else max(best[r - 1][c] if r else NEG, best[r][c - 1] if c else NEG)
+            best[r][c] = prev + grid[r][c]
+    route, r, c = [(rows - 1, cols - 1)], rows - 1, cols - 1
+    while (r, c) != (0, 0):
+        if c &gt; 0 and (r == 0 or best[r][c - 1] &gt;= best[r - 1][c]):
+            c -= 1
+        else:
+            r -= 1
+        route.append((r, c))
+    total, lowest = 0, 0
+    for r, c in reversed(route):
+        total += grid[r][c]
+        lowest = min(lowest, total)
+    return max(1, 1 - lowest)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d4-squares" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Squares of land</div><div class="pc-prompt"><p>A map is a list of strings of <code>"1"</code> (land) and <code>"0"</code> (water). Write <code>largest_square(grid)</code>: the side of the largest all-land square, and <code>count_squares(grid)</code>: the number of all-land squares of every size.</p></div><textarea class="pc-src pc-code" hidden>def largest_square(grid):
+    ___
+
+def count_squares(grid):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def brute(grid):
+    rows, cols = len(grid), len(grid[0])
+    sides = []
+    for r in range(rows):
+        for c in range(cols):
+            k = 1
+            while r + k &lt;= rows and c + k &lt;= cols and all(grid[i][j] == &quot;1&quot; for i in range(r, r + k) for j in range(c, c + k)):
+                sides.append(k)
+                k += 1
+    return max(sides, default=0), len(sides)
+def test_squares():
+    &quot;squares&quot;
+    g = [&quot;10100&quot;, &quot;10111&quot;, &quot;11111&quot;, &quot;10010&quot;]
+    assert largest_square(g) == 2 and count_squares(g) == 15
+    assert largest_square([&quot;0&quot;]) == 0 and count_squares([&quot;111&quot;, &quot;111&quot;, &quot;111&quot;]) == 14
+    rng = random.Random(4)
+    for _ in range(100):
+        rows, cols = rng.randint(1, 6), rng.randint(1, 6)
+        grid = [&quot;&quot;.join(&quot;1&quot; if rng.random() &lt; 0.7 else &quot;0&quot; for _ in range(cols)) for _ in range(rows)]
+        assert (largest_square(grid), count_squares(grid)) == brute(grid), grid</textarea><textarea class="pc-src pc-solution" hidden>def _sides(grid):
+    rows, cols = len(grid), len(grid[0])
+    side = [[0] * cols for _ in range(rows)]
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == &quot;1&quot;:
+                if r == 0 or c == 0:
+                    side[r][c] = 1
+                else:
+                    side[r][c] = 1 + min(side[r - 1][c], side[r][c - 1], side[r - 1][c - 1])
+    return side
+
+def largest_square(grid):
+    return max(max(row) for row in _sides(grid))
+
+def count_squares(grid):
+    return sum(sum(row) for row in _sides(grid))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d4-diagonal" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Kings&rsquo; routes</div><div class="pc-prompt"><p>A king moves right, down, or diagonally down-right. Write <code>king_routes(rows, cols)</code>: the number of routes from the top-left to the bottom-right of an empty grid, using <strong>one list</strong> of length <code>cols</code> and a saved variable for the diagonal value. (These are the Delannoy numbers, named after Henri Delannoy, who studied them in the 1890s.)</p></div><textarea class="pc-src pc-code" hidden>def king_routes(rows, cols):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>from functools import cache
+def test_kings():
+    &quot;one row and a diagonal&quot;
+    assert king_routes(1, 1) == 1 and king_routes(2, 2) == 3 and king_routes(3, 3) == 13 and king_routes(4, 4) == 63
+    @cache
+    def d(r, c):
+        if r == 0 or c == 0:
+            return 1
+        return d(r - 1, c) + d(r, c - 1) + d(r - 1, c - 1)
+    for r in range(1, 12):
+        for c in range(1, 12):
+            assert king_routes(r, c) == d(r - 1, c - 1)
+    assert king_routes(1, 500) == 1 and king_routes(300, 300) &gt; 10 ** 200</textarea><textarea class="pc-src pc-solution" hidden>def king_routes(rows, cols):
+    row = [1] * cols
+    for _ in range(1, rows):
+        diagonal = row[0]                # the old row[c - 1], before it&#x27;s overwritten
+        for c in range(1, cols):
+            above = row[c]
+            row[c] = above + row[c - 1] + diagonal
+            diagonal = above
+    return row[-1]</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w053d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Ones along the edge</div><div class="pc-prompt"><p>This fills the first row and column with 1s before applying the recurrence, but the rock on the top edge means the cells to its right can&rsquo;t be reached along the top at all. It prints <code>10</code> instead of <code>4</code>. Treat every cell the same way, with cells outside the grid counting 0 and rocks counting 0.</p></div><textarea class="pc-src pc-code" hidden>grid = [&quot;.#..&quot;, &quot;....&quot;, &quot;....&quot;]
+rows, cols = len(grid), len(grid[0])
+ways = [[1] * cols if r == 0 else [1] + [0] * (cols - 1) for r in range(rows)]
+for r in range(1, rows):
+    for c in range(1, cols):
+        ways[r][c] = 0 if grid[r][c] == &quot;#&quot; else ways[r - 1][c] + ways[r][c - 1]
+print(ways[-1][-1])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;edges&quot;
+    expect_output(&quot;4&quot;)</textarea><textarea class="pc-src pc-solution" hidden>grid = [&quot;.#..&quot;, &quot;....&quot;, &quot;....&quot;]
+rows, cols = len(grid), len(grid[0])
+ways = [[0] * cols for _ in range(rows)]
+for r in range(rows):
+    for c in range(cols):
+        if grid[r][c] == &quot;#&quot;:
+            continue
+        if r == 0 and c == 0:
+            ways[r][c] = 1
+        else:
+            ways[r][c] = (ways[r - 1][c] if r else 0) + (ways[r][c - 1] if c else 0)
+print(ways[-1][-1])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w053d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The wrong neighbour</div><div class="pc-prompt"><p>In the one-row version, the left neighbour must already hold <strong>this</strong> row&rsquo;s value. This loop runs right to left, so <code>row[c - 1]</code> still holds the row above, and it prints <code>4</code> instead of <code>10</code> routes for a 3 × 4 grid. Run left to right.</p></div><textarea class="pc-src pc-code" hidden>rows, cols = 3, 4
+row = [1] * cols
+for _ in range(1, rows):
+    for c in range(cols - 1, 0, -1):
+        row[c] += row[c - 1]
+print(row[-1])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;left to right&quot;
+    expect_output(&quot;10&quot;)</textarea><textarea class="pc-src pc-solution" hidden>rows, cols = 3, 4
+row = [1] * cols
+for _ in range(1, rows):
+    for c in range(1, cols):
+        row[c] += row[c - 1]
+print(row[-1])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w053d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Health that goes to zero</div><div class="pc-prompt"><p>This backwards fill forgets that health must stay <strong>at least 1</strong>: where a cell gives lots of health, the need drops to 0 or below, and it prints <code>-27</code> instead of <code>7</code>. Clamp each need with <code>max(1, ...)</code>.</p></div><textarea class="pc-src pc-code" hidden>grid = [[-2, -3, 3], [-5, -10, 1], [10, 30, -5]]
+rows, cols = 3, 3
+INF = float(&quot;inf&quot;)
+need = [[INF] * (cols + 1) for _ in range(rows + 1)]
+need[rows][cols - 1] = need[rows - 1][cols] = 1
+for r in range(rows - 1, -1, -1):
+    for c in range(cols - 1, -1, -1):
+        need[r][c] = min(need[r + 1][c], need[r][c + 1]) - grid[r][c]
+print(need[0][0])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;at least one&quot;
+    expect_output(&quot;7&quot;)</textarea><textarea class="pc-src pc-solution" hidden>grid = [[-2, -3, 3], [-5, -10, 1], [10, 30, -5]]
+rows, cols = 3, 3
+INF = float(&quot;inf&quot;)
+need = [[INF] * (cols + 1) for _ in range(rows + 1)]
+need[rows][cols - 1] = need[rows - 1][cols] = 1
+for r in range(rows - 1, -1, -1):
+    for c in range(cols - 1, -1, -1):
+        need[r][c] = max(1, min(need[r + 1][c], need[r][c + 1]) - grid[r][c])
+print(need[0][0])</textarea></div>
+<div class="parsons" data-id="w053d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Largest square</div><div class="pc-prompt"><p>Arrange the lines of the inner loop of the largest-square DP. One line is a trap.</p></div><script type="application/json">{"lines": ["for r in range(rows):", "    for c in range(cols):", "        if grid[r][c] == \"1\":", "            if r == 0 or c == 0:", "                side[r][c] = 1", "            else:", "                side[r][c] = 1 + min(side[r - 1][c], side[r][c - 1], side[r - 1][c - 1])"], "distractors": ["                side[r][c] = 1 + max(side[r - 1][c], side[r][c - 1], side[r - 1][c - 1])"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # routes across an empty 2 × 3 grid moving right and down
+q = ___   # the fill order for least starting health: &quot;forwards&quot; or &quot;backwards&quot;
+r = ___   # the value outside the grid for a cheapest-route DP (use float(&quot;inf&quot;) or 0)
+s = ___   # the number of all-1 squares in [&quot;11&quot;, &quot;11&quot;]
+t = ___   # True or False: allowing moves up and left keeps the row-major fill order valid</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 3 and q == &quot;backwards&quot; and r == float(&quot;inf&quot;), &quot;p, q and r&quot;
+    assert s == 5 and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 3
+q = &quot;backwards&quot;
+r = float(&quot;inf&quot;)
+s = 5
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w053d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why does row-major order work for moves right and down?", "answer": 1, "explain": "Every ingredient comes earlier.", "options": ["It&rsquo;s the default", "The cells above and to the left are filled first", "It&rsquo;s fastest", "It isn&rsquo;t"]}, {"type": "mc", "q": "How many routes reach a blocked cell?", "answer": 1, "explain": "And everything beyond depends on that.", "options": ["1", "0", "The sum of its neighbours", "Infinity"]}, {"type": "mc", "q": "Why not fill the first row with 1s?", "answer": 1, "explain": "Treat outside cells as 0 instead.", "options": ["It&rsquo;s slower", "A rock on the edge cuts off the cells beyond it", "It&rsquo;s wrong for squares", "Python lists"]}, {"type": "mc", "q": "For cheapest routes, what is outside the grid?", "answer": 1, "explain": "So min ignores it.", "options": ["0", "Infinity", "\u22121", "The cost"]}, {"type": "mc", "q": "When does a grid route problem need Dijkstra instead?", "answer": 1, "explain": "Cycles break DP order.", "options": ["Never", "When moves can go up or left, so there&rsquo;s no fill order", "When costs are big", "Always"]}, {"type": "mc", "q": "In the one-row version, what does row[c] hold just before it&rsquo;s overwritten?", "answer": 1, "explain": "row[c \u2212 1] holds this row&rsquo;s.", "options": ["This row&rsquo;s value", "The value from the row above", "Zero", "The diagonal"]}, {"type": "mc", "q": "Why fill the least-health table backwards?", "answer": 1, "explain": "The best route so far may walk into danger later.", "options": ["Speed", "The need at a cell depends on what comes after it", "Memory", "Style"]}, {"type": "mc", "q": "What is the largest-square recurrence?", "answer": 1, "explain": "Limited by the smallest neighbouring square.", "options": ["Sum of three neighbours", "1 + the minimum of the three neighbours above, left and diagonal", "1 + maximum", "The cell value"]}, {"type": "mc", "q": "What does the sum of all side values count?", "answer": 1, "explain": "A side of k means k squares end there.", "options": ["Area", "Every all-1 square of every size", "Rows", "Nothing useful"]}, {"type": "output", "q": "What does this print?", "answer": "[1, 3, 6]", "explain": "Routes across a 3 \u00d7 3 grid: 6.", "code": "row = [1, 1, 1]\nfor _ in range(2):\n    for c in range(1, 3):\n        row[c] += row[c - 1]\nprint(row)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w053d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: two collectors</div><div class="pc-prompt"><p>A grid holds coins: each cell has a whole number of coins (0 or more), or is a rock <code>-1</code>. Two collectors both start at the top-left and walk to the bottom-right, each moving right or down, at the same time. Each cell&rsquo;s coins can be collected only once, even if both walk through it. Write <code>most_coins(grid)</code>: the most coins they can collect together, or <code>0</code> if the end can&rsquo;t be reached.</p>
+<p>Running the one-walker DP twice (best route, remove its coins, best route again) is <strong>not</strong> optimal; the checks include a grid where it fails. Instead, move both walkers one step at a time: after k steps each is on the diagonal r + c = k, so the state is <code>(k, r1, r2)</code>, and each step has four combinations of moves. Fill k upwards, keeping only the previous diagonal&rsquo;s table. Then <code>twice_greedy(grid)</code>: the two-pass approach, for comparison.</p></div><textarea class="pc-src pc-code" hidden>def most_coins(grid):
+    ___
+
+def twice_greedy(grid):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, random
+def routes(rows, cols):
+    for moves in set(itertools.permutations(&quot;R&quot; * (cols - 1) + &quot;D&quot; * (rows - 1))):
+        r = c = 0
+        cells = [(0, 0)]
+        for m in moves:
+            r, c = (r + 1, c) if m == &quot;D&quot; else (r, c + 1)
+            cells.append((r, c))
+        yield cells
+def brute(grid):
+    rows, cols = len(grid), len(grid[0])
+    ok = [p for p in routes(rows, cols) if all(grid[r][c] != -1 for r, c in p)]
+    best = 0
+    for a in ok:
+        for b in ok:
+            best = max(best, sum(grid[r][c] for r, c in set(a) | set(b)))
+    return best
+def test_two():
+    &quot;two walkers&quot;
+    assert most_coins([[0, 1, -1], [1, 0, -1], [1, 1, 1]]) == 5
+    assert most_coins([[1, 1, -1], [1, -1, 1], [-1, 1, 1]]) == 0
+    assert most_coins([[7]]) == 7
+    trap = [[1, 1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0], [0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 1, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1, 1]]
+    assert most_coins(trap) == 15 and twice_greedy(trap) &lt; 15
+    rng = random.Random(5)
+    for _ in range(40):
+        rows, cols = rng.randint(1, 4), rng.randint(1, 4)
+        grid = [[-1 if rng.random() &lt; 0.15 else rng.randint(0, 5) for _ in range(cols)] for _ in range(rows)]
+        grid[0][0], grid[-1][-1] = rng.randint(0, 5), rng.randint(0, 5)
+        assert most_coins(grid) == brute(grid), grid
+        assert twice_greedy(grid) &lt;= most_coins(grid)
+    big = [[(r * 5 + c * 3) % 7 for c in range(40)] for r in range(40)]
+    assert most_coins(big) &gt;= twice_greedy(big)</textarea><textarea class="pc-src pc-solution" hidden>def most_coins(grid):
+    rows, cols = len(grid), len(grid[0])
+    NEG = float(&quot;-inf&quot;)
+    if grid[0][0] == -1:
+        return 0
+    prev = [[NEG] * rows for _ in range(rows)]
+    prev[0][0] = grid[0][0]
+    for k in range(1, rows + cols - 1):
+        cur = [[NEG] * rows for _ in range(rows)]
+        for r1 in range(max(0, k - cols + 1), min(rows, k + 1)):
+            c1 = k - r1
+            if grid[r1][c1] == -1:
+                continue
+            for r2 in range(max(0, k - cols + 1), min(rows, k + 1)):
+                c2 = k - r2
+                if grid[r2][c2] == -1:
+                    continue
+                best = NEG
+                for a in (r1, r1 - 1):
+                    for b in (r2, r2 - 1):
+                        if 0 &lt;= a &lt; rows and 0 &lt;= b &lt; rows:
+                            best = max(best, prev[a][b])
+                if best == NEG:
+                    continue
+                gain = grid[r1][c1] + (grid[r2][c2] if r1 != r2 else 0)
+                cur[r1][r2] = best + gain
+        prev = cur
+    answer = prev[rows - 1][rows - 1]
+    return 0 if answer == NEG else answer
+
+def _best_route(grid):
+    rows, cols = len(grid), len(grid[0])
+    NEG = float(&quot;-inf&quot;)
+    best = [[NEG] * cols for _ in range(rows)]
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == -1:
+                continue
+            if r == c == 0:
+                best[r][c] = grid[r][c]
+                continue
+            prev = max(best[r - 1][c] if r else NEG, best[r][c - 1] if c else NEG)
+            if prev &gt; NEG:
+                best[r][c] = prev + grid[r][c]
+    if best[-1][-1] == NEG:
+        return None
+    route, r, c = [(rows - 1, cols - 1)], rows - 1, cols - 1
+    while (r, c) != (0, 0):
+        if c &gt; 0 and (r == 0 or best[r][c - 1] &gt;= best[r - 1][c]):
+            c -= 1
+        else:
+            r -= 1
+        route.append((r, c))
+    return best[-1][-1], route
+
+def twice_greedy(grid):
+    first = _best_route(grid)
+    if first is None:
+        return 0
+    total, route = first
+    copy = [row[:] for row in grid]
+    for r, c in route:
+        copy[r][c] = 0
+    second = _best_route(copy)
+    return total + (second[0] if second else 0)</textarea><template class="pc-src pc-hint">Keep <code>prev[r1][r2]</code>, the best total after k − 1 steps with the walkers in rows r1 and r2 (columns are k − 1 − r1 and k − 1 − r2); use minus infinity for impossible states. For each new (r1, r2) with both cells inside the grid and not rocks, take the best of <code>prev</code> at (r1, r2), (r1 − 1, r2), (r1, r2 − 1) and (r1 − 1, r2 − 1), then add the coins of both cells, counting a shared cell once.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Sketch a 4 × 4 grid with two rocks and fill in the route counts by hand, then check with your <code>count_routes</code>. Tomorrow: the knapsack family, the most useful DP of all.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w053d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w053d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w053d4", "week": 53, "day": 4, "title": "Grid DP", "exercises": [{"id": "w053d4-routes", "title": "Routes past the rocks", "points": 10}, {"id": "w053d4-cheapest", "title": "The cheapest walk", "points": 15}, {"id": "w053d4-health", "title": "The least starting health", "points": 15}, {"id": "w053d4-squares", "title": "Squares of land", "points": 10}, {"id": "w053d4-diagonal", "title": "Kings' routes", "points": 10}, {"id": "w053d4-bug1", "title": "Ones along the edge", "points": 10}, {"id": "w053d4-bug2", "title": "The wrong neighbour", "points": 10}, {"id": "w053d4-bug3", "title": "Health that goes to zero", "points": 10}, {"id": "w053d4-trace", "title": "Predict them", "points": 10}, {"id": "w053d4-challenge", "title": "Challenge: two collectors", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
