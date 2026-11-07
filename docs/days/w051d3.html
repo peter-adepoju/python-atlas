@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 51 Day 3: Union–find | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Last Thursday introduced union-find: trees of parent links, union by size, path compression, and counting components as edges arrive. Today goes further,...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w051d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 51 Day 3: Union–find">
+<meta property="og:description" content="Last Thursday introduced union-find: trees of parent links, union by size, path compression, and counting components as edges arrive. Today goes further,...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w051d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-51">Week 51: Graphs II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#last-week-in-one-example" data-sec="last-week-in-one-example">Last week, in one example</a></li><li><a href="#links-that-carry-numbers" data-sec="links-that-carry-numbers">Links that carry numbers</a></li><li><a href="#same-side-or-opposite" data-sec="same-side-or-opposite">Same side or opposite</a></li><li><a href="#running-time-backwards" data-sec="running-time-backwards">Running time backwards</a></li><li><a href="#percolation" data-sec="percolation">Percolation</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w051d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-51">Week 51: Graphs II</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 51, Day 3</span></p>
+      <h1>Union–find</h1>
+      <div class="day-intro"><p>Last Thursday introduced union-find: trees of parent links, union by size, path compression, and counting components as edges arrive. Today goes further, because the structure can carry much more than &lsquo;same group or not&rsquo;. Store a number on each link and it tracks <strong>relationships</strong> inside a group: how much heavier, how many times bigger, whether two people are on the same team or opposite ones, and it notices the moment new information contradicts old. You&rsquo;ll also handle edges that <strong>disappear</strong>, by running time backwards, and model <strong>percolation</strong>, the question of when water first finds a way through a porous rock. All of this prepares tomorrow&rsquo;s minimum spanning trees.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Keep weighted union-find, where each link stores an offset, to answer questions about differences and ratios</li><li>Detect contradictory information as it arrives</li><li>Track two-sided relationships (same or opposite) with parity</li><li>Answer connectivity questions under deletions by processing them in reverse</li><li>Model percolation with virtual top and bottom sites</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="Last week, in one example: 15 min"></span><span class="plan-seg s0" style="flex:30" title="Links that carry numbers: 30 min"></span><span class="plan-seg s1" style="flex:20" title="Same side or opposite: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Running time backwards: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Percolation: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Last week, in one example</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">Links that carry numbers</span><span class="plan-min">30 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Same side or opposite</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Running time backwards</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Percolation</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w051d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w051d3.ipynb" download>download it</a>. Exercises today are worth 135 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w051d3-p1"><textarea class="pc-src pc-code" hidden>parent = {x: x for x in &quot;abcdef&quot;}
+size = {x: 1 for x in &quot;abcdef&quot;}
+
+def find(x):
+    while parent[x] != x:
+        parent[x] = parent[parent[x]]        # halve the path as we go
+        x = parent[x]
+    return x
+
+def union(a, b):
+    ra, rb = find(a), find(b)
+    if ra == rb:
+        return False
+    if size[ra] &lt; size[rb]:
+        ra, rb = rb, ra
+    parent[rb], size[ra] = ra, size[ra] + size[rb]
+    return True
+
+print([union(a, b) for a, b in [&quot;ab&quot;, &quot;cd&quot;, &quot;bd&quot;, &quot;ac&quot;, &quot;ef&quot;]])
+print(len({find(x) for x in &quot;abcdef&quot;}), size[find(&quot;a&quot;)])</textarea></div>
+<p>This version compresses paths a little differently: <code>parent[x] = parent[parent[x]]</code> makes every vertex on the path skip to its grandparent (<strong>path halving</strong>). It needs no second loop and gives the same guarantee as full compression.</p>
+<h2 id="last-week-in-one-example">Last week, in one example</h2>
+<p>The essentials from Week 50 Day 4: each group is a tree, <code>find</code> follows parents to the root, <code>union</code> links one root under the other. With union by size (or by <strong>rank</strong>, an upper bound on height) and path compression or halving, any sequence of m operations on n items costs O(m α(n)), where α is the inverse of the fast-growing Ackermann function. α(n) is at most 4 for any n you could write down in this universe, so each operation is effectively constant.</p>
+<p>Why does union by size alone give O(log n) height? A vertex&rsquo;s depth increases only when its tree is hung under a tree at least as big, so each time its depth grows by one, the size of its tree at least <strong>doubles</strong>. A tree of n items can double at most log₂ n times.</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d3-e2"><textarea class="pc-src pc-code" hidden>import random
+
+parent, size, depth_seen = {}, {}, 0
+def find(x):
+    d = 0
+    while parent[x] != x:
+        x, d = parent[x], d + 1
+    return x, d
+
+n = 4096
+for i in range(n):
+    parent[i], size[i] = i, 1
+rng = random.Random(1)
+for _ in range(20_000):
+    (ra, _), (rb, _) = find(rng.randrange(n)), find(rng.randrange(n))
+    if ra != rb:
+        if size[ra] &lt; size[rb]:
+            ra, rb = rb, ra
+        parent[rb], size[ra] = ra, size[ra] + size[rb]
+print(&quot;deepest:&quot;, max(find(i)[1] for i in range(n)), &quot;and log2(n) =&quot;, n.bit_length() - 1)</textarea></div>
+<p>That&rsquo;s union by size alone, without compression: the deepest vertex is far below the log₂ n bound.</p>
+<h2 id="links-that-carry-numbers">Links that carry numbers</h2>
+<p>Suppose you learn facts like &ldquo;the parcel weighs 3 kg more than the box&rdquo; one at a time, and want to answer &ldquo;how much heavier is the parcel than the crate?&rdquo; as soon as enough is known. Store, on each link, the <strong>offset</strong> from a vertex to its parent: <code>diff[x]</code> means value(x) − value(parent[x]). Then:</p>
+<ul>
+<li><code>find(x)</code> returns the root and the offset from x to the root, the sum of the links along the way. Path compression must <strong>add up</strong> the offsets as it re-points vertices at the root.</li>
+<li><code>union(a, b, k)</code> records value(a) − value(b) = k. With roots ra and rb and offsets da = value(a) − value(ra) and db = value(b) − value(rb), linking rb under ra needs value(rb) − value(ra) = da − db − k.</li>
+<li>If a and b already share a root, the fact is either <strong>consistent</strong> (da − db == k) or a <strong>contradiction</strong>, and you can say so immediately.</li>
+</ul>
+<p>This is <strong>weighted</strong> (or &ldquo;potential&rdquo;) union-find. With multiplication instead of addition, it answers ratio questions (&ldquo;a is 2.5 times b&rdquo;) in the same way.</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d3-e3"><textarea class="pc-src pc-code" hidden>class Weighted:
+    def __init__(self):
+        self.parent, self.diff = {}, {}
+
+    def find(self, x):
+        if x not in self.parent:
+            self.parent[x], self.diff[x] = x, 0
+        path = []
+        while self.parent[x] != x:
+            path.append(x)
+            x = self.parent[x]
+        root, total = x, 0
+        for v in reversed(path):              # from nearest the root outwards
+            total += self.diff[v]
+            self.parent[v], self.diff[v] = root, total
+        return root
+
+    def offset(self, x):
+        self.find(x)
+        return self.diff[x]
+
+    def relate(self, a, b, k):
+        &quot;&quot;&quot;Record value(a) - value(b) = k. Returns False if it contradicts earlier facts.&quot;&quot;&quot;
+        ra, rb = self.find(a), self.find(b)
+        da, db = self.diff[a], self.diff[b]
+        if ra == rb:
+            return da - db == k
+        self.parent[rb], self.diff[rb] = ra, da - db - k
+        return True
+
+    def difference(self, a, b):
+        if self.find(a) != self.find(b):
+            return None
+        return self.offset(a) - self.offset(b)
+
+w = Weighted()
+print(w.relate(&quot;parcel&quot;, &quot;box&quot;, 3), w.relate(&quot;box&quot;, &quot;crate&quot;, -1), w.difference(&quot;parcel&quot;, &quot;crate&quot;))
+print(w.relate(&quot;crate&quot;, &quot;parcel&quot;, -2), w.relate(&quot;crate&quot;, &quot;parcel&quot;, 5), w.difference(&quot;parcel&quot;, &quot;lamp&quot;))</textarea></div>
+<h2 id="same-side-or-opposite">Same side or opposite</h2>
+<p>A special case with only two values: each item is on one of two <strong>sides</strong>, and facts say &ldquo;a and b are on the same side&rdquo; or &ldquo;on opposite sides&rdquo; (team members, wiring with polarity, charges). Store a <strong>parity</strong> bit on each link, 0 for same and 1 for opposite, and combine with XOR (<code>^</code>) instead of addition. A contradiction is an odd cycle, exactly the reason a graph isn&rsquo;t bipartite (Week 50 Day 2), but detected <strong>online</strong>, the moment the bad fact arrives.</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d3-e4"><textarea class="pc-src pc-code" hidden>parent, parity = {}, {}
+
+def find(x):
+    if x not in parent:
+        parent[x], parity[x] = x, 0
+    path = []
+    while parent[x] != x:
+        path.append(x)
+        x = parent[x]
+    total = 0
+    for v in reversed(path):
+        total ^= parity[v]
+        parent[v], parity[v] = x, total
+    return x
+
+def tell(a, b, opposite):
+    ra, rb = find(a), find(b)
+    want = 1 if opposite else 0
+    if ra == rb:
+        return (parity[a] ^ parity[b]) == want
+    parent[rb], parity[rb] = ra, parity[a] ^ parity[b] ^ want
+    return True
+
+facts = [(&quot;ana&quot;, &quot;ben&quot;, True), (&quot;ben&quot;, &quot;cy&quot;, True), (&quot;ana&quot;, &quot;cy&quot;, False), (&quot;cy&quot;, &quot;ana&quot;, True)]
+print([tell(*f) for f in facts])</textarea></div>
+<p>The last fact says Cy and Ana are on opposite sides, but the first two together put them on the same side: union-find spots it at once.</p>
+<h2 id="running-time-backwards">Running time backwards</h2>
+<p>Union-find can join groups but not split them. When the problem <strong>removes</strong> edges (&ldquo;roads close one by one; after each closure, how many towns are cut off?&rdquo;), there&rsquo;s a neat trick if you know all the removals in advance (an <strong>offline</strong> problem):</p>
+<ol>
+<li>Start from the graph as it is <strong>after</strong> every removal.</li>
+<li>Process the removals in <strong>reverse</strong>: each one becomes an <strong>addition</strong>, a <code>union</code>.</li>
+<li>Record the answers as you go, then reverse the list of answers.</li>
+</ol>
+<p>The answer after the last removal comes first, from the starting state; each later union rewinds one removal.</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d3-e5"><textarea class="pc-src pc-code" hidden>def pieces_after_closures(towns, roads, closures):
+    parent = {t: t for t in towns}
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    count = [len(towns)]                           # a one-item list the inner function can change
+    def union(a, b):
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+            count[0] -= 1
+    closed = set(closures)
+    for a, b in roads:
+        if (a, b) not in closed:
+            union(a, b)
+    answers = [count[0]]                           # after every closure
+    for a, b in reversed(closures[1:]):            # undo closures, last first
+        union(a, b)
+        answers.append(count[0])
+    return answers[::-1]                           # after closure 1, 2, ...
+
+towns = &quot;ABCDE&quot;
+roads = [(&quot;A&quot;, &quot;B&quot;), (&quot;B&quot;, &quot;C&quot;), (&quot;C&quot;, &quot;D&quot;), (&quot;D&quot;, &quot;E&quot;), (&quot;A&quot;, &quot;C&quot;)]
+print(pieces_after_closures(towns, roads, [(&quot;B&quot;, &quot;C&quot;), (&quot;A&quot;, &quot;C&quot;), (&quot;D&quot;, &quot;E&quot;)]))</textarea></div>
+<p>(<code>count</code> is a one-item list so the inner function can change it; Phase 5 explains the <code>nonlocal</code> keyword that does this directly.)</p>
+<h2 id="percolation">Percolation</h2>
+<p>Take an n × n grid of sites, each <strong>open</strong> or <strong>blocked</strong>. The grid <strong>percolates</strong> if water poured on top can reach the bottom through open sites joined up, down, left and right. Open sites one at a time at random: at what fraction of open sites does it first percolate?</p>
+<p>Union-find makes each step cheap. The trick is two <strong>virtual</strong> sites: a &ldquo;top&rdquo; joined to every open site in the first row, and a &ldquo;bottom&rdquo; joined to every open site in the last row. Then &ldquo;does it percolate?&rdquo; is just &ldquo;are top and bottom connected?&rdquo;, one <code>find</code> each, instead of a search across the whole grid. For large grids, the answer to the question settles near 0.593, a constant found by simulation (no exact formula is known). The exercise is a classic from Robert Sedgewick and Kevin Wayne&rsquo;s algorithms course.</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d3-e6"><textarea class="pc-src pc-code" hidden>import random
+
+def percolation_point(n, seed):
+    parent = list(range(n * n + 2))
+    top, bottom = n * n, n * n + 1
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    def union(a, b):
+        parent[find(a)] = find(b)
+    open_ = [False] * (n * n)
+    order = list(range(n * n))
+    random.Random(seed).shuffle(order)
+    for count, site in enumerate(order, start=1):
+        open_[site] = True
+        r, c = divmod(site, n)
+        if r == 0:
+            union(site, top)
+        if r == n - 1:
+            union(site, bottom)
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nr &lt; n and 0 &lt;= nc &lt; n and open_[nr * n + nc]:
+                union(site, nr * n + nc)
+        if find(top) == find(bottom):
+            return count / (n * n)
+
+trials = [percolation_point(40, seed) for seed in range(20)]
+print(round(sum(trials) / len(trials), 3))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Union by size keeps trees O(log n) deep (a vertex&rsquo;s tree doubles each time it gets deeper); with path compression or halving, each operation costs O(α(n)), effectively constant. Weighted union-find stores an offset on each link, sums offsets during find (fixing them as it compresses), links roots with the offset that makes a new fact true, and reports a contradiction when two items already in one group disagree; ratios work the same way with multiplication. Parity union-find uses XOR for same-or-opposite facts and detects odd cycles online. Deletions known in advance are handled by processing them backwards as unions. Percolation joins open sites with virtual top and bottom sites, so &ldquo;does it percolate?&rdquo; is one comparison of roots.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d3-growth" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Groups as they grow</div><div class="pc-prompt"><p>Write <code>UnionFind(items)</code> with <code>find</code> (using path halving, no recursion), <code>union</code>, <code>size_of(x)</code> and <code>largest</code> (an attribute: the size of the largest group, kept up to date in O(1) per union). Then <code>largest_after_each(items, pairs)</code>: the largest group size after each union.</p></div><textarea class="pc-src pc-code" hidden>class UnionFind:
+    def __init__(self, items):
+        ___
+
+def largest_after_each(items, pairs):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_growth():
+    &quot;growth&quot;
+    assert largest_after_each(&quot;abcdef&quot;, [&quot;ab&quot;, &quot;cd&quot;, &quot;bd&quot;, &quot;ac&quot;, &quot;ef&quot;]) == [2, 2, 4, 4, 4]
+    uf = UnionFind(range(5))
+    assert uf.largest == 1 and uf.union(0, 1) and not uf.union(1, 0) and uf.size_of(1) == 2
+    rng = random.Random(1)
+    items = list(range(40))
+    pairs = [tuple(rng.sample(items, 2)) for _ in range(60)]
+    got = largest_after_each(items, pairs)
+    groups = {i: {i} for i in items}
+    for (a, b), g in zip(pairs, got):
+        if groups[a] is not groups[b]:
+            merged = groups[a] | groups[b]
+            for x in merged:
+                groups[x] = merged
+        assert g == max(len(s) for s in groups.values())</textarea><textarea class="pc-src pc-solution" hidden>class UnionFind:
+    def __init__(self, items):
+        self.parent = {x: x for x in items}
+        self.size = {x: 1 for x in items}
+        self.largest = 1 if self.parent else 0
+
+    def find(self, x):
+        while self.parent[x] != x:
+            self.parent[x] = self.parent[self.parent[x]]
+            x = self.parent[x]
+        return x
+
+    def union(self, a, b):
+        ra, rb = self.find(a), self.find(b)
+        if ra == rb:
+            return False
+        if self.size[ra] &lt; self.size[rb]:
+            ra, rb = rb, ra
+        self.parent[rb] = ra
+        self.size[ra] += self.size[rb]
+        self.largest = max(self.largest, self.size[ra])
+        return True
+
+    def size_of(self, x):
+        return self.size[self.find(x)]
+
+def largest_after_each(items, pairs):
+    uf = UnionFind(items)
+    out = []
+    for a, b in pairs:
+        uf.union(a, b)
+        out.append(uf.largest)
+    return out</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d3-ratios" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Ratios</div><div class="pc-prompt"><p>Facts arrive as <code>(a, b, k)</code> meaning a = k × b (k &gt; 0). Write <code>Ratios</code> with <code>tell(a, b, k)</code> (returning <code>False</code>, and changing nothing, if the fact contradicts what&rsquo;s known, comparing with a relative tolerance of 1e-9) and <code>ask(a, b)</code>: the ratio a / b, or <code>None</code> if it can&rsquo;t be known. Store a multiplicative factor on each link (value(x) / value(parent)), and keep <code>find</code> free of recursion.</p></div><textarea class="pc-src pc-code" hidden>class Ratios:
+    def __init__(self):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>import math, random
+def test_ratios():
+    &quot;ratios&quot;
+    r = Ratios()
+    assert r.tell(&quot;km&quot;, &quot;m&quot;, 1000) and r.tell(&quot;m&quot;, &quot;cm&quot;, 100) and math.isclose(r.ask(&quot;km&quot;, &quot;cm&quot;), 100000)
+    assert math.isclose(r.ask(&quot;cm&quot;, &quot;km&quot;), 1e-5) and r.ask(&quot;km&quot;, &quot;kg&quot;) is None and r.ask(&quot;m&quot;, &quot;m&quot;) == 1
+    assert not r.tell(&quot;cm&quot;, &quot;km&quot;, 2) and math.isclose(r.ask(&quot;cm&quot;, &quot;km&quot;), 1e-5)
+    assert r.tell(&quot;mile&quot;, &quot;km&quot;, 1.609344) and math.isclose(r.ask(&quot;mile&quot;, &quot;cm&quot;), 160934.4)
+    rng = random.Random(2)
+    vals = {f&quot;x{i}&quot;: rng.uniform(0.5, 4) for i in range(30)}
+    r = Ratios()
+    names = list(vals)
+    for _ in range(60):
+        a, b = rng.sample(names, 2)
+        assert r.tell(a, b, vals[a] / vals[b])
+    for _ in range(100):
+        a, b = rng.sample(names, 2)
+        q = r.ask(a, b)
+        assert q is None or math.isclose(q, vals[a] / vals[b], rel_tol=1e-9)
+    chain = Ratios()
+    for i in range(5000):
+        chain.tell(i, i + 1, 1.0)
+    assert chain.ask(0, 5000) == 1.0</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+class Ratios:
+    def __init__(self):
+        self.parent, self.factor = {}, {}
+
+    def _find(self, x):
+        if x not in self.parent:
+            self.parent[x], self.factor[x] = x, 1.0
+        path = []
+        while self.parent[x] != x:
+            path.append(x)
+            x = self.parent[x]
+        product = 1.0
+        for v in reversed(path):
+            product *= self.factor[v]
+            self.parent[v], self.factor[v] = x, product
+        return x
+
+    def tell(self, a, b, k):
+        ra, rb = self._find(a), self._find(b)
+        fa, fb = self.factor[a], self.factor[b]          # a = fa * ra, b = fb * rb
+        if ra == rb:
+            return math.isclose(fa / fb, k, rel_tol=1e-9)
+        # a = k * b  =&gt;  fa * ra = k * fb * rb  =&gt;  rb = ra * fa / (k * fb)
+        self.parent[rb], self.factor[rb] = ra, fa / (k * fb)
+        return True
+
+    def ask(self, a, b):
+        if a not in self.parent or b not in self.parent:
+            return 1.0 if a == b else None
+        if self._find(a) != self._find(b):
+            return None
+        return self.factor[a] / self.factor[b]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d3-teams" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Same team, other team</div><div class="pc-prompt"><p>Facts arrive as lines <code>ana same ben</code> or <code>ana opposite cy</code>. Write <code>check(facts)</code>: process them in order with parity union-find, returning the 1-based number of the first fact that contradicts the earlier ones, or <code>None</code>. Then <code>teams(facts)</code> (only for consistent facts): a list of pairs of sorted lists <code>(side_a, side_b)</code>, one pair per connected group, where <code>side_a</code> holds the group&rsquo;s alphabetically first person; the list sorted by that person.</p></div><textarea class="pc-src pc-code" hidden>def check(facts):
+    ___
+
+def teams(facts):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_teams():
+    &quot;teams&quot;
+    facts = [&quot;ana opposite ben&quot;, &quot;ben opposite cy&quot;, &quot;ana same cy&quot;, &quot;cy opposite ana&quot;]
+    assert check(facts) == 4 and check(facts[:3]) is None
+    assert teams(facts[:3]) == [([&quot;ana&quot;, &quot;cy&quot;], [&quot;ben&quot;])]
+    assert teams([&quot;a same b&quot;, &quot;c opposite d&quot;, &quot;e same e&quot;]) == [([&quot;a&quot;, &quot;b&quot;], []), ([&quot;c&quot;], [&quot;d&quot;]), ([&quot;e&quot;], [])]
+    rng = random.Random(3)
+    for _ in range(100):
+        names = list(&quot;abcdef&quot;)
+        side = {n: rng.randint(0, 1) for n in names}
+        fs = []
+        for _ in range(8):
+            a, b = rng.sample(names, 2)
+            fs.append(f&quot;{a} {&#x27;same&#x27; if side[a] == side[b] else &#x27;opposite&#x27;} {b}&quot;)
+        assert check(fs) is None
+        a, b = rng.sample(names, 2)
+        wrong = f&quot;{a} {&#x27;opposite&#x27; if side[a] == side[b] else &#x27;same&#x27;} {b}&quot;
+        res = check(fs + [wrong])
+        assert res in (None, len(fs) + 1)</textarea><textarea class="pc-src pc-solution" hidden>def _process(facts):
+    parent, parity = {}, {}
+    def find(x):
+        if x not in parent:
+            parent[x], parity[x] = x, 0
+        path = []
+        while parent[x] != x:
+            path.append(x)
+            x = parent[x]
+        total = 0
+        for v in reversed(path):
+            total ^= parity[v]
+            parent[v], parity[v] = x, total
+        return x
+    for i, fact in enumerate(facts, start=1):
+        a, kind, b = fact.split()
+        want = 1 if kind == &quot;opposite&quot; else 0
+        ra, rb = find(a), find(b)
+        if ra == rb:
+            if parity[a] ^ parity[b] != want:
+                return i, None
+        else:
+            parent[rb], parity[rb] = ra, parity[a] ^ parity[b] ^ want
+    groups = {}
+    for x in parent:
+        groups.setdefault(find(x), []).append(x)
+    out = []
+    for members in groups.values():
+        first = min(members)
+        p0 = parity[first]
+        same = sorted(m for m in members if parity[m] == p0)
+        other = sorted(m for m in members if parity[m] != p0)
+        out.append((same, other))
+    return None, sorted(out, key=lambda pair: pair[0][0])
+
+def check(facts):
+    return _process(facts)[0]
+
+def teams(facts):
+    return _process(facts)[1]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d3-closures" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Roads closing</div><div class="pc-prompt"><p>Towns are joined by roads; then roads close, one at a time, in a known order. Write <code>pieces_after_each(towns, roads, closures)</code>: the number of separate pieces after each closure, by starting from the final state and adding the closed roads back in reverse. Then <code>first_split(towns, roads, closures)</code>: the 1-based number of the first closure after which some two towns that were connected at the start no longer are, or <code>None</code>. Every closure is one of the roads; roads are undirected, and a closure <code>(b, a)</code> closes road <code>(a, b)</code>.</p></div><textarea class="pc-src pc-code" hidden>def pieces_after_each(towns, roads, closures):
+    ___
+
+def first_split(towns, roads, closures):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def pieces(towns, roads):
+    parent = {t: t for t in towns}
+    def find(x):
+        while parent[x] != x:
+            x = parent[x]
+        return x
+    for a, b in roads:
+        parent[find(a)] = find(b)
+    return len({find(t) for t in towns})
+def test_closures():
+    &quot;closures&quot;
+    towns = &quot;ABCDE&quot;
+    roads = [(&quot;A&quot;, &quot;B&quot;), (&quot;B&quot;, &quot;C&quot;), (&quot;C&quot;, &quot;D&quot;), (&quot;D&quot;, &quot;E&quot;), (&quot;A&quot;, &quot;C&quot;)]
+    cl = [(&quot;B&quot;, &quot;C&quot;), (&quot;C&quot;, &quot;A&quot;), (&quot;D&quot;, &quot;E&quot;)]
+    assert pieces_after_each(towns, roads, cl) == [1, 2, 3] and first_split(towns, roads, cl) == 2
+    assert first_split(towns, roads, [(&quot;A&quot;, &quot;B&quot;)]) is None and pieces_after_each(&quot;AB&quot;, [], []) == []
+    rng = random.Random(4)
+    for _ in range(50):
+        ts = list(range(8))
+        rs = list({tuple(sorted(rng.sample(ts, 2))) for _ in range(12)})
+        cl = rng.sample(rs, rng.randint(0, len(rs)))
+        want, left = [], list(rs)
+        for c in cl:
+            left.remove(c)
+            want.append(pieces(ts, left))
+        assert pieces_after_each(ts, rs, cl) == want</textarea><textarea class="pc-src pc-solution" hidden>def pieces_after_each(towns, roads, closures):
+    if not closures:
+        return []
+    key = lambda r: tuple(sorted(r, key=str))
+    closed = {key(c) for c in closures}
+    parent = {t: t for t in towns}
+    count = [len(parent)]
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    def union(a, b):
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+            count[0] -= 1
+    for a, b in roads:
+        if key((a, b)) not in closed:
+            union(a, b)
+    answers = [count[0]]
+    for a, b in reversed(closures[1:]):
+        union(a, b)
+        answers.append(count[0])
+    return answers[::-1]
+
+def first_split(towns, roads, closures):
+    parent = {t: t for t in towns}
+    def find(x):
+        while parent[x] != x:
+            x = parent[x]
+        return x
+    for a, b in roads:
+        parent[find(a)] = find(b)
+    start = len({find(t) for t in towns})
+    for i, n in enumerate(pieces_after_each(towns, roads, closures), start=1):
+        if n &gt; start:
+            return i
+    return None</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d3-percolate" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Does it percolate?</div><div class="pc-prompt"><p>A grid is a list of strings, <code>.</code> open and <code>#</code> blocked. Write <code>percolates(grid)</code> with union-find and virtual top and bottom sites (joined up, down, left and right). Then <code>opening_order(n, order)</code>: given an n × n grid that starts fully blocked and a list of sites <code>(row, col)</code> opened one at a time, the 1-based number of the opening after which the grid first percolates, or <code>None</code>.</p></div><textarea class="pc-src pc-code" hidden>def percolates(grid):
+    ___
+
+def opening_order(n, order):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+from collections import deque
+def bfs_perc(grid):
+    n, m = len(grid), len(grid[0])
+    q = deque((0, c) for c in range(m) if grid[0][c] == &quot;.&quot;)
+    seen = set(q)
+    while q:
+        r, c = q.popleft()
+        if r == n - 1:
+            return True
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nr &lt; n and 0 &lt;= nc &lt; m and grid[nr][nc] == &quot;.&quot; and (nr, nc) not in seen:
+                seen.add((nr, nc))
+                q.append((nr, nc))
+    return False
+def test_percolates():
+    &quot;percolation&quot;
+    assert percolates([&quot;.#.&quot;, &quot;..#&quot;, &quot;#..&quot;]) and not percolates([&quot;.#.&quot;, &quot;#.#&quot;, &quot;#..&quot;])
+    assert percolates([&quot;.&quot;]) and not percolates([&quot;#&quot;])
+    rng = random.Random(5)
+    for _ in range(200):
+        n, m = rng.randint(1, 6), rng.randint(1, 6)
+        g = [&quot;&quot;.join(rng.choice(&quot;..#&quot;) for _ in range(m)) for _ in range(n)]
+        assert percolates(g) == bfs_perc(g)
+    order = [(0, 0), (2, 2), (1, 0), (1, 1), (2, 1)]
+    assert opening_order(3, order) == 5 and opening_order(3, order[:4]) is None and opening_order(1, [(0, 0)]) == 1</textarea><textarea class="pc-src pc-solution" hidden>def _make(n_sites):
+    parent = list(range(n_sites))
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    def union(a, b):
+        parent[find(a)] = find(b)
+    return find, union
+
+def percolates(grid):
+    rows, cols = len(grid), len(grid[0])
+    top, bottom = rows * cols, rows * cols + 1
+    find, union = _make(rows * cols + 2)
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] != &quot;.&quot;:
+                continue
+            site = r * cols + c
+            if r == 0:
+                union(site, top)
+            if r == rows - 1:
+                union(site, bottom)
+            for nr, nc in ((r + 1, c), (r, c + 1)):
+                if nr &lt; rows and nc &lt; cols and grid[nr][nc] == &quot;.&quot;:
+                    union(site, nr * cols + nc)
+    return find(top) == find(bottom)
+
+def opening_order(n, order):
+    top, bottom = n * n, n * n + 1
+    find, union = _make(n * n + 2)
+    is_open = [False] * (n * n)
+    for count, (r, c) in enumerate(order, start=1):
+        site = r * n + c
+        is_open[site] = True
+        if r == 0:
+            union(site, top)
+        if r == n - 1:
+            union(site, bottom)
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nr &lt; n and 0 &lt;= nc &lt; n and is_open[nr * n + nc]:
+                union(site, nr * n + nc)
+        if find(top) == find(bottom):
+            return count
+    return None</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w051d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Forgetting the offsets</div><div class="pc-prompt"><p>This weighted union-find compresses paths but doesn&rsquo;t add up the offsets as it re-points vertices at the root, so a vertex re-pointed past its old parent keeps its offset to that old parent: this prints <code>-3</code> for box minus crate, which should be <code>-2</code>. Sum the offsets along the path before re-pointing, so it prints <code>-2</code>.</p></div><textarea class="pc-src pc-code" hidden>parent, diff = {}, {}
+
+def find(x):
+    if x not in parent:
+        parent[x], diff[x] = x, 0
+    path = []
+    while parent[x] != x:
+        path.append(x)
+        x = parent[x]
+    for v in path:
+        parent[v] = x
+    return x
+
+def relate(a, b, k):
+    ra, rb = find(a), find(b)
+    if ra != rb:
+        parent[rb], diff[rb] = ra, diff[a] - diff[b] - k
+
+relate(&quot;parcel&quot;, &quot;box&quot;, 3)      # parcel is 3 more than box
+relate(&quot;crate&quot;, &quot;parcel&quot;, -1)   # crate is 1 less than parcel
+find(&quot;box&quot;)
+find(&quot;crate&quot;)
+print(diff[&quot;box&quot;] - diff[&quot;crate&quot;])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;add up the offsets&quot;
+    expect_output(&quot;-2&quot;)</textarea><textarea class="pc-src pc-solution" hidden>parent, diff = {}, {}
+
+def find(x):
+    if x not in parent:
+        parent[x], diff[x] = x, 0
+    path = []
+    while parent[x] != x:
+        path.append(x)
+        x = parent[x]
+    total = 0
+    for v in reversed(path):
+        total += diff[v]
+        parent[v], diff[v] = x, total
+    return x
+
+def relate(a, b, k):
+    ra, rb = find(a), find(b)
+    if ra != rb:
+        parent[rb], diff[rb] = ra, diff[a] - diff[b] - k
+
+relate(&quot;parcel&quot;, &quot;box&quot;, 3)      # parcel is 3 more than box
+relate(&quot;crate&quot;, &quot;parcel&quot;, -1)   # crate is 1 less than parcel
+find(&quot;box&quot;)
+find(&quot;crate&quot;)
+print(diff[&quot;box&quot;] - diff[&quot;crate&quot;])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w051d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The size of a non-root</div><div class="pc-prompt"><p>This union compares the sizes of <code>a</code> and <code>b</code> themselves rather than of their <strong>roots</strong>, so a big group can end up hung under a single item, and the recorded sizes go wrong: this prints <code>2</code>. Compare (and update) the roots&rsquo; sizes so it prints <code>4</code>.</p></div><textarea class="pc-src pc-code" hidden>parent = {x: x for x in &quot;abcd&quot;}
+size = {x: 1 for x in &quot;abcd&quot;}
+
+def find(x):
+    while parent[x] != x:
+        x = parent[x]
+    return x
+
+def union(a, b):
+    ra, rb = find(a), find(b)
+    if ra == rb:
+        return
+    if size[a] &lt; size[b]:
+        a, b = b, a
+        ra, rb = rb, ra
+    parent[rb] = ra
+    size[a] += size[b]
+
+union(&quot;a&quot;, &quot;b&quot;)
+union(&quot;c&quot;, &quot;a&quot;)
+union(&quot;d&quot;, &quot;b&quot;)
+print(size[find(&quot;a&quot;)])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;roots&quot;
+    expect_output(&quot;4&quot;)</textarea><textarea class="pc-src pc-solution" hidden>parent = {x: x for x in &quot;abcd&quot;}
+size = {x: 1 for x in &quot;abcd&quot;}
+
+def find(x):
+    while parent[x] != x:
+        x = parent[x]
+    return x
+
+def union(a, b):
+    ra, rb = find(a), find(b)
+    if ra == rb:
+        return
+    if size[ra] &lt; size[rb]:
+        ra, rb = rb, ra
+    parent[rb] = ra
+    size[ra] += size[rb]
+
+union(&quot;a&quot;, &quot;b&quot;)
+union(&quot;c&quot;, &quot;a&quot;)
+union(&quot;d&quot;, &quot;b&quot;)
+print(size[find(&quot;a&quot;)])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w051d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Joining blocked sites</div><div class="pc-prompt"><p>This percolation check joins each open site to all its neighbours, open or <strong>blocked</strong>, so water seems to flow through rock: this prints <code>True</code>. Join only open neighbours so it prints <code>False</code>.</p></div><textarea class="pc-src pc-code" hidden>grid = [&quot;.#&quot;, &quot;#.&quot;]
+n = 2
+parent = list(range(n * n + 2))
+top, bottom = n * n, n * n + 1
+
+def find(x):
+    while parent[x] != x:
+        x = parent[x]
+    return x
+
+def union(a, b):
+    parent[find(a)] = find(b)
+
+for r in range(n):
+    for c in range(n):
+        if grid[r][c] != &quot;.&quot;:
+            continue
+        site = r * n + c
+        if r == 0:
+            union(site, top)
+        if r == n - 1:
+            union(site, bottom)
+        for nr, nc in ((r + 1, c), (r, c + 1), (r - 1, c), (r, c - 1)):
+            if 0 &lt;= nr &lt; n and 0 &lt;= nc &lt; n:
+                union(site, nr * n + nc)
+print(find(top) == find(bottom))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;open neighbours only&quot;
+    expect_output(&quot;False&quot;)</textarea><textarea class="pc-src pc-solution" hidden>grid = [&quot;.#&quot;, &quot;#.&quot;]
+n = 2
+parent = list(range(n * n + 2))
+top, bottom = n * n, n * n + 1
+
+def find(x):
+    while parent[x] != x:
+        x = parent[x]
+    return x
+
+def union(a, b):
+    parent[find(a)] = find(b)
+
+for r in range(n):
+    for c in range(n):
+        if grid[r][c] != &quot;.&quot;:
+            continue
+        site = r * n + c
+        if r == 0:
+            union(site, top)
+        if r == n - 1:
+            union(site, bottom)
+        for nr, nc in ((r + 1, c), (r, c + 1), (r - 1, c), (r, c - 1)):
+            if 0 &lt;= nr &lt; n and 0 &lt;= nc &lt; n and grid[nr][nc] == &quot;.&quot;:
+                union(site, nr * n + nc)
+print(find(top) == find(bottom))</textarea></div>
+<div class="parsons" data-id="w051d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Find with offsets</div><div class="pc-prompt"><p>Arrange the lines into a weighted find that compresses paths and keeps offsets right. One line is a trap.</p></div><script type="application/json">{"lines": ["def find(x):", "    path = []", "    while parent[x] != x:", "        path.append(x)", "        x = parent[x]", "    total = 0", "    for v in reversed(path):", "        total += diff[v]", "        parent[v], diff[v] = x, total", "    return x"], "distractors": ["        parent[v], diff[v] = x, 0"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden># Weighted union-find recording value(a) - value(b) = k.
+# Facts: relate(&quot;a&quot;, &quot;b&quot;, 4), relate(&quot;b&quot;, &quot;c&quot;, 1), relate(&quot;d&quot;, &quot;c&quot;, -2).
+
+p = ___   # value(&quot;a&quot;) - value(&quot;c&quot;)
+q = ___   # value(&quot;a&quot;) - value(&quot;d&quot;)
+r = ___   # True or False: relate(&quot;c&quot;, &quot;a&quot;, -5) is consistent
+s = ___   # True or False: in parity union-find, &quot;x opposite y&quot;, &quot;y opposite z&quot;, &quot;z opposite x&quot; can all be true
+t = ___   # roughly, the fraction of open sites at which a large random grid first percolates (to 3 places)</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 5 and q == 7 and r is True, &quot;p, q and r&quot;
+    assert s is False and abs(t - 0.593) &lt; 0.001, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden># Weighted union-find recording value(a) - value(b) = k.
+# Facts: relate(&quot;a&quot;, &quot;b&quot;, 4), relate(&quot;b&quot;, &quot;c&quot;, 1), relate(&quot;d&quot;, &quot;c&quot;, -2).
+
+p = 5
+q = 7
+r = True
+s = False
+t = 0.593</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w051d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why does union by size keep trees O(log n) deep?", "answer": 1, "explain": "A tree of n can double only log2 n times.", "options": ["It sorts", "Each time a vertex gets deeper, its tree at least doubles in size", "It compresses", "It doesn&rsquo;t"]}, {"type": "mc", "q": "What does path halving do?", "answer": 1, "explain": "One loop, same guarantee as full compression.", "options": ["Halves the tree", "Points each vertex on the path at its grandparent", "Removes half the vertices", "Splits groups"]}, {"type": "mc", "q": "In weighted union-find, what does each link store?", "answer": 1, "explain": "Offsets add up along the path to the root.", "options": ["A size", "The offset from a vertex to its parent", "A name", "A rank"]}, {"type": "mc", "q": "What must path compression do in weighted union-find?", "answer": 1, "explain": "Otherwise information is lost.", "options": ["Nothing extra", "Add up the offsets so each re-pointed vertex keeps its offset to the root", "Reset offsets to 0", "Skip compression"]}, {"type": "mc", "q": "When is a new fact a contradiction?", "answer": 1, "explain": "Check da - db against k.", "options": ["Never", "When both items are already in one group and the stored offsets disagree with it", "When the items are new", "When k is negative"]}, {"type": "mc", "q": "Which operation combines parities along a path?", "answer": 1, "explain": "Same is 0, opposite is 1.", "options": ["Addition", "XOR", "Multiplication", "max"]}, {"type": "mc", "q": "What does a contradiction in parity union-find correspond to?", "answer": 1, "explain": "Exactly why a graph isn&rsquo;t bipartite.", "options": ["A tree", "An odd cycle", "An even cycle", "A self-loop"]}, {"type": "mc", "q": "How can union-find handle edges being removed?", "answer": 1, "explain": "An offline trick.", "options": ["It can&rsquo;t at all", "If removals are known in advance, process them backwards as unions", "Delete the parent link", "Rebuild after each"]}, {"type": "mc", "q": "Why add virtual top and bottom sites for percolation?", "answer": 1, "explain": "No need to search the whole grid.", "options": ["Decoration", "So &lsquo;does it percolate?&rsquo; is one root comparison", "To make it bigger", "To block water"]}, {"type": "output", "q": "What does this print?", "answer": "0 1 0 1", "explain": "XOR: equal bits give 0, different give 1.", "code": "print(1 ^ 1, 1 ^ 0, 0 ^ 0, 1 ^ 1 ^ 1)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: estimating the threshold</div><div class="pc-prompt"><p>Estimate the percolation threshold by experiment. Write <code>threshold_trial(n, rng)</code>: open the sites of an n × n grid in a random order (shuffle all n² sites with <code>rng.shuffle</code>), using union-find with virtual top and bottom sites, and return the fraction of sites open when the grid first percolates. Then <code>estimate(n, trials, seed)</code>: <code>(mean, standard_deviation)</code> over <code>trials</code> runs, all drawing from one <code>random.Random(seed)</code> (use <code>statistics.mean</code> and <code>statistics.stdev</code>), and <code>confidence(n, trials, seed)</code>: the 95% confidence interval mean ± 1.96 × stdev / √trials, as a pair rounded to 3 places. Each trial must be fast: about O(n² α(n²)), so 60 × 60 grids are fine. The checks expect the mean for n = 50 over 30 trials to be within 0.02 of 0.5927.</p></div><textarea class="pc-src pc-code" hidden>import math, random, statistics
+
+def threshold_trial(n, rng):
+    ___
+
+def estimate(n, trials, seed):
+    ___
+
+def confidence(n, trials, seed):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random, time
+def test_trial():
+    &quot;one trial&quot;
+    rng = random.Random(1)
+    t = threshold_trial(10, rng)
+    assert 0 &lt; t &lt;= 1 and t * 100 == int(round(t * 100))
+    assert threshold_trial(1, random.Random(2)) == 1.0
+def test_estimate():
+    &quot;the threshold&quot;
+    t0 = time.perf_counter()
+    mean, sd = estimate(50, 30, seed=3)
+    assert abs(mean - 0.5927) &lt; 0.02 and 0 &lt; sd &lt; 0.1 and time.perf_counter() - t0 &lt; 10
+    lo, hi = confidence(50, 30, seed=3)
+    assert lo &lt; mean &lt; hi and abs((hi - lo) - 2 * 1.96 * sd / 30 ** 0.5) &lt; 0.002
+    assert estimate(20, 5, seed=9) == estimate(20, 5, seed=9)</textarea><textarea class="pc-src pc-solution" hidden>import math, random, statistics
+
+def threshold_trial(n, rng):
+    parent = list(range(n * n + 2))
+    top, bottom = n * n, n * n + 1
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    def union(a, b):
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+    is_open = [False] * (n * n)
+    order = list(range(n * n))
+    rng.shuffle(order)
+    for count, site in enumerate(order, start=1):
+        is_open[site] = True
+        r, c = divmod(site, n)
+        if r == 0:
+            union(site, top)
+        if r == n - 1:
+            union(site, bottom)
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nr &lt; n and 0 &lt;= nc &lt; n and is_open[nr * n + nc]:
+                union(site, nr * n + nc)
+        if find(top) == find(bottom):
+            return count / (n * n)
+    return 1.0
+
+def estimate(n, trials, seed):
+    rng = random.Random(seed)
+    results = [threshold_trial(n, rng) for _ in range(trials)]
+    return statistics.mean(results), statistics.stdev(results)
+
+def confidence(n, trials, seed):
+    mean, sd = estimate(n, trials, seed)
+    half = 1.96 * sd / math.sqrt(trials)
+    return round(mean - half, 3), round(mean + half, 3)</textarea><template class="pc-src pc-hint">Number the sites <code>r * n + c</code> and use <code>n * n</code> and <code>n * n + 1</code> for the virtual top and bottom. After opening each site, join it to the top (row 0), the bottom (row n − 1) and any open neighbour, then compare the roots of top and bottom.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Think of facts you know of the form &ldquo;X is k more than Y&rdquo; (ages of people you know, heights of buildings) and work out a difference you were never told directly. Tomorrow: minimum spanning trees, the cheapest way to connect everything, with union-find doing the heavy lifting in Kruskal&rsquo;s algorithm.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w051d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w051d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w051d3", "week": 51, "day": 3, "title": "Union\u2013find", "exercises": [{"id": "w051d3-growth", "title": "Groups as they grow", "points": 10}, {"id": "w051d3-ratios", "title": "Ratios", "points": 15}, {"id": "w051d3-teams", "title": "Same team, other team", "points": 15}, {"id": "w051d3-closures", "title": "Roads closing", "points": 15}, {"id": "w051d3-percolate", "title": "Does it percolate?", "points": 15}, {"id": "w051d3-bug1", "title": "Forgetting the offsets", "points": 10}, {"id": "w051d3-bug2", "title": "The size of a non-root", "points": 10}, {"id": "w051d3-bug3", "title": "Joining blocked sites", "points": 10}, {"id": "w051d3-trace", "title": "Predict them", "points": 10}, {"id": "w051d3-challenge", "title": "Challenge: estimating the threshold", "points": 25}], "points": 135}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
