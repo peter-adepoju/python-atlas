@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 59 Day 4: yield from and pipelines | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Two ideas finish the generator story. yield from lets one generator hand over to another, passing on every value it produces: it makes recursive generators...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w059d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 59 Day 4: yield from and pipelines">
+<meta property="og:description" content="Two ideas finish the generator story. yield from lets one generator hand over to another, passing on every value it produces: it makes recursive generators...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w059d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-59">Week 59: The iteration protocol</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#handing-over" data-sec="handing-over">Handing over</a></li><li><a href="#recursive-generators" data-sec="recursive-generators">Recursive generators</a></li><li><a href="#return-values" data-sec="return-values">Return values</a></li><li><a href="#pipelines-of-stages" data-sec="pipelines-of-stages">Pipelines of stages</a></li><li><a href="#designing-stages" data-sec="designing-stages">Designing stages</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w059d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-59">Week 59: The iteration protocol</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 59, Day 4</span></p>
+      <h1>yield from and pipelines</h1>
+      <div class="day-intro"><p>Two ideas finish the generator story. <code>yield from</code> lets one generator hand over to another, passing on every value it produces: it makes recursive generators (walking trees, flattening nested lists, listing permutations) as short as their definitions, and it collects the value a sub-generator returns. And <strong>pipelines</strong> of generator functions, each stage taking an iterable and yielding a transformed stream, turn big data-processing jobs into small, testable pieces that use constant memory. Today you&rsquo;ll build both, ending with a log analyser made of stages.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Delegate to another iterable with yield from</li><li>Write recursive generators for nested structures and combinatorial sequences</li><li>Collect a sub-generator&rsquo;s return value with yield from</li><li>Design pipelines of small generator stages that each take and yield a stream</li><li>Test pipeline stages on their own and in combination</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Handing over: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Recursive generators: 25 min"></span><span class="plan-seg s1" style="flex:15" title="Return values: 15 min"></span><span class="plan-seg s0" style="flex:25" title="Pipelines of stages: 25 min"></span><span class="plan-seg s1" style="flex:15" title="Designing stages: 15 min"></span><span class="plan-seg s0" style="flex:45" title="Practice: 45 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Handing over</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Recursive generators</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Return values</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Pipelines of stages</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Designing stages</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">45 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w059d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w059d4.ipynb" download>download it</a>. Exercises today are worth 130 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w059d4-p1"><textarea class="pc-src pc-code" hidden>def inner():
+    yield 1
+    yield 2
+
+def outer_loop():
+    for x in inner():
+        yield x
+    yield 3
+
+def outer_from():
+    yield from inner()
+    yield 3
+
+def outer_wrong():
+    yield inner()
+    yield 3
+
+print(list(outer_loop()), list(outer_from()))
+print([type(x).__name__ for x in outer_wrong()])</textarea></div>
+<p><code>yield from inner()</code> does what the loop does: passes on every value. Plain <code>yield inner()</code> hands out the generator object itself, a common slip.</p>
+<h2 id="handing-over">Handing over</h2>
+<p><code>yield from iterable</code> yields every item of the iterable, in order, then carries on with the next line. It works with any iterable (a list, a string, a range, another generator), so <code>yield from "abc"</code> yields three characters.</p>
+<p>For plain iteration it&rsquo;s shorthand for <code>for x in iterable: yield x</code>, but it does more under the hood: if the consumer calls <code>close()</code> or uses the advanced <code>send()</code> and <code>throw()</code> methods, they pass straight through to the inner generator, and the inner generator&rsquo;s <strong>return value</strong> becomes the value of the <code>yield from</code> expression (below). PEP 380 (Gregory Ewing, 2009) added it in Python 3.3.</p>
+<div class="pc pc-example" data-kind="example" data-id="w059d4-e2"><textarea class="pc-src pc-code" hidden>def chain_all(*iterables):
+    for it in iterables:
+        yield from it
+
+def with_header(title, rows):
+    yield f&quot;== {title} ==&quot;
+    yield from rows
+    yield &quot;== end ==&quot;
+
+print(list(chain_all(&quot;ab&quot;, [1, 2], range(3))))
+print(&quot;\n&quot;.join(with_header(&quot;stock&quot;, [&quot;tea 4&quot;, &quot;jam 0&quot;])))</textarea></div>
+<h2 id="recursive-generators">Recursive generators</h2>
+<p><code>yield from</code> makes recursion and generators fit together. A generator that walks a structure calls <strong>itself</strong> on the parts and passes on what they yield:</p>
+<ul>
+<li><strong>Flattening</strong> a nested list: for each item, if it&rsquo;s a list, <code>yield from flatten(item)</code>; otherwise <code>yield item</code>.</li>
+<li><strong>Walking a tree</strong>: yield the node, then <code>yield from</code> each child&rsquo;s walk.</li>
+<li><strong>Combinatorial sequences</strong>: permutations of a list are each first item followed by each permutation of the rest.</li>
+</ul>
+<p>Each item travels up through one <code>yield from</code> per level, so very deep structures are slower than an explicit stack (and still hit the recursion limit near 1000 levels), but for ordinary nesting this is the clearest code there is.</p>
+<div class="pc pc-example" data-kind="example" data-id="w059d4-e3"><textarea class="pc-src pc-code" hidden>def flatten(items):
+    for item in items:
+        if isinstance(item, list):
+            yield from flatten(item)
+        else:
+            yield item
+
+def permutations(items):
+    if len(items) &lt;= 1:
+        yield list(items)
+        return
+    for i, first in enumerate(items):
+        for rest in permutations(items[:i] + items[i + 1:]):
+            yield [first] + rest
+
+print(list(flatten([1, [2, [3, [4]], 5], [], [[6]]])))
+print([&quot;&quot;.join(p) for p in permutations(&quot;abc&quot;)])</textarea></div>
+<h2 id="return-values">Return values</h2>
+<p>A generator may <code>return value</code> at the end. A normal loop ignores it, but <code>result = yield from sub()</code> passes on everything <code>sub()</code> yields <strong>and</strong> then receives its return value. That lets a sub-generator report a summary (how many items it produced, a total, a final state) to the generator that delegated to it.</p>
+<div class="pc pc-example" data-kind="example" data-id="w059d4-e4"><textarea class="pc-src pc-code" hidden>def section(name, lines):
+    count = 0
+    for line in lines:
+        yield f&quot;{name}: {line}&quot;
+        count += 1
+    return count
+
+def document(parts):
+    total = 0
+    for name, lines in parts:
+        total += yield from section(name, lines)
+    yield f&quot;({total} lines)&quot;
+
+for line in document([(&quot;intro&quot;, [&quot;hello&quot;, &quot;welcome&quot;]), (&quot;end&quot;, [&quot;bye&quot;])]):
+    print(line)</textarea></div>
+<h2 id="pipelines-of-stages">Pipelines of stages</h2>
+<p>A <strong>pipeline</strong> is a chain of generator functions, each taking an iterable and yielding a new stream:</p>
+<pre><code>lines → strip_comments → parse → only_errors → count_by_host
+</code></pre>
+<p>Each stage is a few lines and does one thing, so it can be tested alone with a short list. Connected, they process an enormous file or an endless stream in constant memory, because each record flows through all the stages before the next is read. Wednesday&rsquo;s generator expressions are one-line stages; generator functions take over when a stage needs <code>try</code>, state, or several statements. This is the Unix pipe idea (<code>grep | sort | uniq</code>, Douglas McIlroy, 1973) inside a Python program.</p>
+<div class="pc pc-example" data-kind="example" data-id="w059d4-e5"><textarea class="pc-src pc-code" hidden>def strip_comments(lines):
+    for line in lines:
+        line = line.split(&quot;#&quot;)[0].strip()
+        if line:
+            yield line
+
+def parse(lines):
+    for line in lines:
+        host, status, path = line.split()
+        yield {&quot;host&quot;: host, &quot;status&quot;: int(status), &quot;path&quot;: path}
+
+def only_errors(records):
+    return (r for r in records if r[&quot;status&quot;] &gt;= 400)
+
+log = [&quot;# web log&quot;, &quot;10.0.0.1 200 /&quot;, &quot;10.0.0.2 404 /missing  # oops&quot;, &quot;10.0.0.1 500 /api&quot;, &quot;&quot;, &quot;10.0.0.3 200 /about&quot;]
+for record in only_errors(parse(strip_comments(log))):
+    print(record)</textarea></div>
+<h2 id="designing-stages">Designing stages</h2>
+<p>Good stages have a few properties in common:</p>
+<ul>
+<li><strong>Take an iterable, yield items.</strong> Then any stage can follow any other with matching items, and lists work in tests.</li>
+<li><strong>Do one job.</strong> &ldquo;Parse and filter and count&rdquo; is three stages.</li>
+<li><strong>Don&rsquo;t consume more than you need.</strong> A stage that calls <code>list(source)</code> breaks the laziness of the whole pipeline.</li>
+<li><strong>Put state in the stage that needs it</strong>: a stage that removes duplicates keeps a set of what it has seen; a stage that numbers items keeps a counter.</li>
+<li><strong>End with a sink</strong>: something that pulls values through: <code>for</code>, <code>sum</code>, a <code>Counter</code>, <code>next</code>, writing to a file. Until then, nothing runs.</li>
+</ul>
+<p>Stages that need the <strong>previous</strong> item (differences, change detection) keep it in a local variable; stages that group neighbouring items keep the current group and yield it when it ends (tomorrow&rsquo;s <code>itertools.groupby</code> does exactly that).</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>yield from iterable yields every item of the iterable, then continues; it passes close() and friends through, and its value is the sub-generator&rsquo;s return value. It makes recursive generators natural: flatten nested lists, walk trees, list permutations, by yielding from the generator called on each part. A pipeline chains generator functions that each take an iterable and yield items, so every stage is small and testable and the whole runs in constant memory. Stages should do one job, never consume more than they need, keep their own state, and end in a sink that pulls values through.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d4-nested" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Flattening anything</div><div class="pc-prompt"><p>Write <code>flatten(items, depth=None)</code>: a recursive generator using <code>yield from</code> that yields the non-list items of a nested list in order; with <code>depth</code>, only that many levels are opened (deeper lists are yielded whole). Tuples and strings are <strong>not</strong> opened.</p></div><textarea class="pc-src pc-code" hidden>def flatten(items, depth=None):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import types
+def test_flatten():
+    &quot;yield from&quot;
+    assert list(flatten([1, [2, [3, [4]], 5], [], [[6]]])) == [1, 2, 3, 4, 5, 6]
+    assert list(flatten([1, [2, [3, [4]]]], depth=1)) == [1, 2, [3, [4]]] and list(flatten([[1]], depth=0)) == [[1]]
+    assert list(flatten([&quot;ab&quot;, (&quot;c&quot;, [1]), [[&quot;d&quot;]]])) == [&quot;ab&quot;, (&quot;c&quot;, [1]), &quot;d&quot;]
+    assert isinstance(flatten([]), types.GeneratorType) and &quot;yield from&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>def flatten(items, depth=None):
+    for item in items:
+        if isinstance(item, list) and (depth is None or depth &gt; 0):
+            yield from flatten(item, None if depth is None else depth - 1)
+        else:
+            yield item</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d4-tree" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Walking a family tree</div><div class="pc-prompt"><p>A family tree is a dict <code>{"name": ..., "children": [...]}</code> with the same shape for each child. Write recursive generators with <code>yield from</code>: <code>names(person)</code>: everyone in pre-order (a person, then each child&rsquo;s family in order); <code>with_depth(person)</code>: <code>(name, depth)</code> pairs, the root at 0; and <code>lines(person)</code>: the tree drawn as lines, each name indented by two spaces per level.</p></div><textarea class="pc-src pc-code" hidden>def names(person):
+    ___
+
+def with_depth(person, depth=0):
+    ___
+
+def lines(person):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_tree():
+    &quot;recursive generators&quot;
+    fam = {&quot;name&quot;: &quot;Ada&quot;, &quot;children&quot;: [{&quot;name&quot;: &quot;Ben&quot;, &quot;children&quot;: [{&quot;name&quot;: &quot;Cy&quot;, &quot;children&quot;: []}]}, {&quot;name&quot;: &quot;Di&quot;, &quot;children&quot;: []}]}
+    assert list(names(fam)) == [&quot;Ada&quot;, &quot;Ben&quot;, &quot;Cy&quot;, &quot;Di&quot;]
+    assert list(with_depth(fam)) == [(&quot;Ada&quot;, 0), (&quot;Ben&quot;, 1), (&quot;Cy&quot;, 2), (&quot;Di&quot;, 1)]
+    assert list(lines(fam)) == [&quot;Ada&quot;, &quot;  Ben&quot;, &quot;    Cy&quot;, &quot;  Di&quot;] and list(names({&quot;name&quot;: &quot;Solo&quot;, &quot;children&quot;: []})) == [&quot;Solo&quot;]
+    assert source.count(&quot;yield from&quot;) &gt;= 2</textarea><textarea class="pc-src pc-solution" hidden>def names(person):
+    yield person[&quot;name&quot;]
+    for child in person[&quot;children&quot;]:
+        yield from names(child)
+
+def with_depth(person, depth=0):
+    yield person[&quot;name&quot;], depth
+    for child in person[&quot;children&quot;]:
+        yield from with_depth(child, depth + 1)
+
+def lines(person):
+    for name, depth in with_depth(person):
+        yield &quot;  &quot; * depth + name</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d4-combos" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Every arrangement, lazily</div><div class="pc-prompt"><p>Write recursive generators: <code>permutations(items)</code> (lists, in the order of choosing each item first in turn), <code>subsets(items)</code> (lists: all the subsets of the items after the first, then all of those again with the first item added at the front), and <code>compositions(n)</code>: every way to write n as an ordered sum of positive whole numbers, as lists (<code>3</code>: <code>[1, 1, 1]</code>, <code>[1, 2]</code>, <code>[2, 1]</code>, <code>[3]</code>, first part smallest first).</p></div><textarea class="pc-src pc-code" hidden>def permutations(items):
+    ___
+
+def subsets(items):
+    ___
+
+def compositions(n):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools
+def test_combos():
+    &quot;recursion and yield from&quot;
+    assert [list(p) for p in itertools.permutations(&quot;abc&quot;)] == [list(p) for p in permutations(list(&quot;abc&quot;))]
+    assert list(subsets([1, 2])) == [[], [2], [1], [1, 2]] and list(subsets([])) == [[]]
+    assert sorted(map(sorted, subsets([1, 2, 3]))) == sorted(sorted(c) for r in range(4) for c in itertools.combinations([1, 2, 3], r))
+    assert list(compositions(3)) == [[1, 1, 1], [1, 2], [2, 1], [3]] and len(list(compositions(10))) == 512
+    assert next(permutations(list(range(50)))) == list(range(50))</textarea><textarea class="pc-src pc-solution" hidden>def permutations(items):
+    if len(items) &lt;= 1:
+        yield list(items)
+        return
+    for i, first in enumerate(items):
+        for rest in permutations(items[:i] + items[i + 1:]):
+            yield [first] + rest
+
+def subsets(items):
+    if not items:
+        yield []
+        return
+    rest = list(subsets(items[1:]))
+    yield from rest
+    for s in rest:
+        yield [items[0]] + s
+
+def compositions(n):
+    if n == 0:
+        yield []
+        return
+    for first in range(1, n + 1):
+        for rest in compositions(n - first):
+            yield [first] + rest</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d4-returns" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Reporting back</div><div class="pc-prompt"><p>Write <code>numbered(lines, start)</code>: a generator yielding <code>"{n}. {line}"</code> for each line, numbering from <code>start</code>, and <strong>returning</strong> the next number to use. Then <code>chapters(book)</code>: for a list of <code>(title, lines)</code>, yield each title in capitals, then its numbered lines, with the numbering <strong>continuing</strong> across chapters (collect each <code>numbered</code> call&rsquo;s return value with <code>yield from</code>).</p></div><textarea class="pc-src pc-code" hidden>def numbered(lines, start):
+    ___
+
+def chapters(book):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_returns():
+    &quot;yield from&#x27;s value&quot;
+    g = numbered([&quot;a&quot;, &quot;b&quot;], 5)
+    assert next(g) == &quot;5. a&quot; and next(g) == &quot;6. b&quot;
+    try:
+        next(g)
+        assert False
+    except StopIteration as stop:
+        assert stop.value == 7
+    book = [(&quot;one&quot;, [&quot;x&quot;, &quot;y&quot;]), (&quot;two&quot;, []), (&quot;three&quot;, [&quot;z&quot;])]
+    assert list(chapters(book)) == [&quot;ONE&quot;, &quot;1. x&quot;, &quot;2. y&quot;, &quot;TWO&quot;, &quot;THREE&quot;, &quot;3. z&quot;]
+    assert &quot;yield from&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>def numbered(lines, start):
+    n = start
+    for line in lines:
+        yield f&quot;{n}. {line}&quot;
+        n += 1
+    return n
+
+def chapters(book):
+    n = 1
+    for title, lines in book:
+        yield title.upper()
+        n = yield from numbered(lines, n)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d4-stages" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Stages of a pipeline</div><div class="pc-prompt"><p>Write three stage generators, each taking an iterable and yielding: <code>dedupe(items, key=None)</code> (each item whose key hasn&rsquo;t been seen before; <code>key</code> defaults to the item itself), <code>changes(items)</code> (each item that differs from the one before it, the first always included), and <code>numbered(items, start=1)</code> (<code>(n, item)</code> pairs). Then <code>pipeline(items)</code>: <code>numbered(dedupe(changes(items), key=str.lower))</code>, returned as a generator. All lazy.</p></div><textarea class="pc-src pc-code" hidden>def dedupe(items, key=None):
+    ___
+
+def changes(items):
+    ___
+
+def numbered(items, start=1):
+    ___
+
+def pipeline(items):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, types
+def test_stages():
+    &quot;small stages&quot;
+    assert list(dedupe([3, 1, 3, 2, 1])) == [3, 1, 2] and list(dedupe([&quot;A&quot;, &quot;a&quot;, &quot;b&quot;], key=str.lower)) == [&quot;A&quot;, &quot;b&quot;]
+    assert list(changes([1, 1, 2, 2, 2, 1, 3, 3])) == [1, 2, 1, 3] and list(changes([])) == []
+    assert list(numbered(&quot;ab&quot;, 5)) == [(5, &quot;a&quot;), (6, &quot;b&quot;)]
+    words = [&quot;Tea&quot;, &quot;tea&quot;, &quot;TEA&quot;, &quot;milk&quot;, &quot;Milk&quot;, &quot;tea&quot;, &quot;jam&quot;]
+    assert list(pipeline(words)) == [(1, &quot;Tea&quot;), (2, &quot;milk&quot;), (3, &quot;jam&quot;)] and isinstance(pipeline([]), types.GeneratorType)
+    assert list(itertools.islice(dedupe(itertools.cycle([1, 2, 3, 4])), 4)) == [1, 2, 3, 4]
+    assert list(itertools.islice(changes(itertools.count()), 3)) == [0, 1, 2]</textarea><textarea class="pc-src pc-solution" hidden>def dedupe(items, key=None):
+    seen = set()
+    for item in items:
+        k = item if key is None else key(item)
+        if k not in seen:
+            seen.add(k)
+            yield item
+
+def changes(items):
+    first, previous = True, None
+    for item in items:
+        if first or item != previous:
+            yield item
+        first, previous = False, item
+
+def numbered(items, start=1):
+    n = start
+    for item in items:
+        yield n, item
+        n += 1
+
+def pipeline(items):
+    return numbered(dedupe(changes(items), key=str.lower))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w059d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Yielding the generator</div><div class="pc-prompt"><p><code>yield (...)</code> hands out each generator object instead of its values, so this prints <code>['generator', 'generator']</code>. Use <code>yield from</code> so it prints <code>[2, 4, 1, 3]</code>.</p></div><textarea class="pc-src pc-code" hidden>def evens_then_odds(nums):
+    yield (n for n in nums if n % 2 == 0)
+    yield (n for n in nums if n % 2)
+
+print([x if isinstance(x, int) else type(x).__name__ for x in evens_then_odds([1, 2, 3, 4])])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;yield from&quot;
+    expect_output(&quot;[2, 4, 1, 3]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def evens_then_odds(nums):
+    yield from (n for n in nums if n % 2 == 0)
+    yield from (n for n in nums if n % 2)
+
+print([x if isinstance(x, int) else type(x).__name__ for x in evens_then_odds([1, 2, 3, 4])])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w059d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The recursive call that does nothing</div><div class="pc-prompt"><p>Calling <code>flatten(item)</code> on a nested list makes a generator and throws it away, so the nested items vanish and this prints <code>[1, 5]</code>. Use <code>yield from</code> on the recursive call so it prints <code>[1, 2, 3, 4, 5]</code>.</p></div><textarea class="pc-src pc-code" hidden>def flatten(items):
+    for item in items:
+        if isinstance(item, list):
+            flatten(item)
+        else:
+            yield item
+
+print(list(flatten([1, [2, [3, 4]], 5])))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;delegate&quot;
+    expect_output(&quot;[1, 2, 3, 4, 5]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def flatten(items):
+    for item in items:
+        if isinstance(item, list):
+            yield from flatten(item)
+        else:
+            yield item
+
+print(list(flatten([1, [2, [3, 4]], 5])))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w059d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A stage that eats everything</div><div class="pc-prompt"><p>This stage calls <code>list(source)</code>, which reads the <strong>whole</strong> endless stream before yielding anything, so the pipeline never produces its first value. (It&rsquo;s cut off here by a limit, and prints <code>stuck</code>.) Loop over the source directly so it prints <code>[0, 2, 4]</code>.</p></div><textarea class="pc-src pc-code" hidden>import itertools
+
+def doubled(source):
+    items = list(itertools.islice(source, 10 ** 5))
+    if len(items) == 10 ** 5:
+        yield &quot;stuck&quot;
+        return
+    for x in items:
+        yield x * 2
+
+result = list(itertools.islice(doubled(itertools.count()), 3))
+print(&quot;stuck&quot; if &quot;stuck&quot; in result else result)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;stay lazy&quot;
+    expect_output(&quot;[0, 2, 4]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import itertools
+
+def doubled(source):
+    for x in source:
+        yield x * 2
+
+result = list(itertools.islice(doubled(itertools.count()), 3))
+print(&quot;stuck&quot; if &quot;stuck&quot; in result else result)</textarea></div>
+<div class="parsons" data-id="w059d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A recursive flatten</div><div class="pc-prompt"><p>Arrange the lines of a recursive generator that flattens nested lists. One line is a trap.</p></div><script type="application/json">{"lines": ["def flatten(items):", "    for item in items:", "        if isinstance(item, list):", "            yield from flatten(item)", "        else:", "            yield item"], "distractors": ["            yield flatten(item)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # def g(): yield from &quot;hi&quot;; yield &quot;!&quot;   -- then list(g())
+q = ___   # how many permutations permutations(&quot;abcd&quot;) yields
+r = ___   # def s(): yield 1; return &quot;done&quot;   -- the value of StopIteration after one next() too many
+s = ___   # list(changes(&quot;aabbba&quot;))
+t = ___   # True or False: yield from works only with other generators</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [&quot;h&quot;, &quot;i&quot;, &quot;!&quot;] and q == 24 and r == &quot;done&quot;, &quot;p, q and r&quot;
+    assert s == [&quot;a&quot;, &quot;b&quot;, &quot;a&quot;] and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = [&quot;h&quot;, &quot;i&quot;, &quot;!&quot;]
+q = 24
+r = &quot;done&quot;
+s = [&quot;a&quot;, &quot;b&quot;, &quot;a&quot;]
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w059d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does yield from iterable do?", "answer": 1, "explain": "Delegation.", "options": ["Yields the iterable itself", "Yields every item of the iterable, then continues", "Returns the iterable", "Copies it"]}, {"type": "mc", "q": "Does yield from work with a list?", "answer": 1, "explain": "yield from &ldquo;abc&rdquo; yields three characters.", "options": ["No, only generators", "Yes, any iterable", "Only with tuples", "Only in recursion"]}, {"type": "mc", "q": "What is the value of result = yield from sub()?", "answer": 1, "explain": "PEP 380.", "options": ["None always", "sub()&rsquo;s return value", "The last item", "The count of items"]}, {"type": "mc", "q": "Why are recursive generators natural with yield from?", "answer": 1, "explain": "The code mirrors the structure.", "options": ["They&rsquo;re faster", "Each part&rsquo;s walk is passed on with one line", "They avoid recursion", "They&rsquo;re required"]}, {"type": "mc", "q": "What&rsquo;s a cost of deep recursive generators?", "answer": 1, "explain": "Use an explicit stack for very deep data.", "options": ["None", "Each item passes up through every level, and the recursion limit still applies", "They use lists", "They&rsquo;re eager"]}, {"type": "mc", "q": "What should a pipeline stage take and produce?", "answer": 1, "explain": "So any stage can follow any other.", "options": ["A list in, a list out", "An iterable in, items yielded out", "A file", "A dict"]}, {"type": "mc", "q": "What breaks a pipeline&rsquo;s laziness?", "answer": 1, "explain": "It reads everything before yielding.", "options": ["yield", "A stage calling list(source)", "for loops", "Generator expressions"]}, {"type": "mc", "q": "When does a pipeline actually run?", "answer": 1, "explain": "for, sum, Counter, next.", "options": ["When it&rsquo;s built", "When a sink pulls values through", "At import", "Never"]}, {"type": "mc", "q": "Where does a de-duplicating stage keep its state?", "answer": 1, "explain": "State belongs in the stage that needs it.", "options": ["A global", "A set local to the stage", "The input list", "Nowhere"]}, {"type": "output", "q": "What does this print?", "answer": "10", "explain": "1 + 2 + 3 + 4.", "code": "def g():\n    yield 1\n    yield from [2, 3]\n    yield 4\nprint(sum(g()))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a log analyser in stages</div><div class="pc-prompt"><p>A web server log has lines <code>host status path bytes</code>, for example <code>10.0.0.1 200 /index.html 512</code>, with <code>#</code> comments and occasional broken lines. Build a pipeline of generator stages and some sinks:</p>
+<ul>
+<li>Stages: <code>parse(lines)</code> yields dicts with keys <code>host</code>, <code>status</code> (int), <code>path</code>, <code>bytes</code> (int), skipping comments, blank and broken lines; <code>where(records, **conditions)</code> yields records matching every given field exactly (<code>where(r, status=404)</code>); <code>bursts(records, size)</code> yields lists of <code>size</code> consecutive <strong>error</strong> records (status 500 or more) that occur together, with no non-error record between them (a run of 5 errors with size 2 gives two bursts: the first two and the next two).</li>
+<li>Sinks: <code>status_counts(lines)</code> (a dict from status to count, via the stages), <code>top_paths(lines, n)</code> (the n paths with most bytes served in total, most first, ties alphabetical, as <code>(path, bytes)</code>), and <code>first_burst(lines, size)</code> (the first burst, or <code>None</code>, reading no further than needed; the checks give it an endless log).</li>
+</ul></div><textarea class="pc-src pc-code" hidden>from collections import Counter
+
+def parse(lines):
+    ___
+
+def where(records, **conditions):
+    ___
+
+def bursts(records, size):
+    ___
+
+def status_counts(lines):
+    ___
+
+def top_paths(lines, n):
+    ___
+
+def first_burst(lines, size):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, types
+LOG = [&quot;# log&quot;, &quot;10.0.0.1 200 /index.html 512&quot;, &quot;10.0.0.2 404 /missing 0&quot;, &quot;bad line&quot;, &quot;10.0.0.1 500 /api 20&quot;,
+       &quot;10.0.0.3 503 /api 10&quot;, &quot;&quot;, &quot;10.0.0.1 200 /index.html 512&quot;, &quot;10.0.0.4 500 /api 5&quot;, &quot;10.0.0.4 200 /about x&quot;]
+def test_stages():
+    &quot;stages&quot;
+    recs = list(parse(LOG))
+    assert len(recs) == 6 and recs[0] == {&quot;host&quot;: &quot;10.0.0.1&quot;, &quot;status&quot;: 200, &quot;path&quot;: &quot;/index.html&quot;, &quot;bytes&quot;: 512}
+    assert isinstance(parse(LOG), types.GeneratorType)
+    assert [r[&quot;path&quot;] for r in where(parse(LOG), status=200)] == [&quot;/index.html&quot;, &quot;/index.html&quot;]
+    assert [r[&quot;status&quot;] for r in where(parse(LOG), host=&quot;10.0.0.1&quot;, status=500)] == [500]
+    assert [[r[&quot;status&quot;] for r in b] for b in bursts(parse(LOG), 2)] == [[500, 503]]
+    assert len(list(bursts(parse(LOG), 1))) == 3
+def test_sinks():
+    &quot;sinks&quot;
+    assert status_counts(iter(LOG)) == {200: 2, 404: 1, 500: 2, 503: 1}
+    assert top_paths(LOG, 2) == [(&quot;/index.html&quot;, 1024), (&quot;/api&quot;, 35)] and top_paths([], 3) == []
+    def endless():
+        yield &quot;1.1.1.1 200 / 1&quot;
+        yield &quot;1.1.1.1 500 /x 1&quot;
+        yield &quot;1.1.1.1 200 / 1&quot;
+        yield &quot;2.2.2.2 502 /y 1&quot;
+        yield &quot;3.3.3.3 504 /z 1&quot;
+        while True:
+            yield &quot;4.4.4.4 200 / 1&quot;
+    b = first_burst(endless(), 2)
+    assert [r[&quot;host&quot;] for r in b] == [&quot;2.2.2.2&quot;, &quot;3.3.3.3&quot;] and first_burst(LOG, 3) is None</textarea><textarea class="pc-src pc-solution" hidden>from collections import Counter
+
+def parse(lines):
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith(&quot;#&quot;):
+            continue
+        parts = line.split()
+        if len(parts) != 4:
+            continue
+        host, status, path, size = parts
+        try:
+            yield {&quot;host&quot;: host, &quot;status&quot;: int(status), &quot;path&quot;: path, &quot;bytes&quot;: int(size)}
+        except ValueError:
+            continue
+
+def where(records, **conditions):
+    for r in records:
+        if all(r.get(k) == v for k, v in conditions.items()):
+            yield r
+
+def bursts(records, size):
+    run = []
+    for r in records:
+        if r[&quot;status&quot;] &gt;= 500:
+            run.append(r)
+            if len(run) == size:
+                yield run
+                run = []
+        else:
+            run = []
+
+def status_counts(lines):
+    return dict(Counter(r[&quot;status&quot;] for r in parse(lines)))
+
+def top_paths(lines, n):
+    totals = Counter()
+    for r in parse(lines):
+        totals[r[&quot;path&quot;]] += r[&quot;bytes&quot;]
+    return sorted(totals.items(), key=lambda kv: (-kv[1], kv[0]))[:n]
+
+def first_burst(lines, size):
+    return next(bursts(parse(lines), size), None)</textarea><template class="pc-src pc-hint"><code>bursts</code> keeps the current run of errors in a list: add each error record; when the list reaches <code>size</code>, yield it and start a new one; a non-error record empties the list. The sinks build <code>Counter</code>s or dicts from the stages; <code>first_burst</code> is <code>next(bursts(parse(lines), size), None)</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Draw a pipeline you could use on data you care about (bank statements, a playlist, a reading log): the source, each stage, and the sink. Tomorrow: <code>itertools</code>, the standard library&rsquo;s box of ready-made stages.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w059d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w059d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w059d4", "week": 59, "day": 4, "title": "yield from and pipelines", "exercises": [{"id": "w059d4-nested", "title": "Flattening anything", "points": 10}, {"id": "w059d4-tree", "title": "Walking a family tree", "points": 15}, {"id": "w059d4-combos", "title": "Every arrangement, lazily", "points": 15}, {"id": "w059d4-returns", "title": "Reporting back", "points": 10}, {"id": "w059d4-stages", "title": "Stages of a pipeline", "points": 15}, {"id": "w059d4-bug1", "title": "Yielding the generator", "points": 10}, {"id": "w059d4-bug2", "title": "The recursive call that does nothing", "points": 10}, {"id": "w059d4-bug3", "title": "A stage that eats everything", "points": 10}, {"id": "w059d4-trace", "title": "Predict them", "points": 10}, {"id": "w059d4-challenge", "title": "Challenge: a log analyser in stages", "points": 25}], "points": 130}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

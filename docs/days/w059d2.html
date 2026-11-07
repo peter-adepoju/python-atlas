@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 59 Day 2: Generators | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Since Phase 2, lessons have promised a better way to write iterators. Here it is: yield. A function containing yield becomes a generator function: calling...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w059d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 59 Day 2: Generators">
+<meta property="og:description" content="Since Phase 2, lessons have promised a better way to write iterators. Here it is: yield. A function containing yield becomes a generator function: calling...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w059d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-59">Week 59: The iteration protocol</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#yield" data-sec="yield">yield</a></li><li><a href="#classes-become-functions" data-sec="classes-become-functions">Classes become functions</a></li><li><a href="#lazy-and-endless" data-sec="lazy-and-endless">Lazy and endless</a></li><li><a href="#finishing-and-cleaning-up" data-sec="finishing-and-cleaning-up">Finishing and cleaning up</a></li><li><a href="#walking-structures" data-sec="walking-structures">Walking structures</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w059d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-59">Week 59: The iteration protocol</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 59, Day 2</span></p>
+      <h1>Generators</h1>
+      <div class="day-intro"><p>Since Phase 2, lessons have promised a better way to write iterators. Here it is: <code>yield</code>. A function containing <code>yield</code> becomes a <strong>generator function</strong>: calling it doesn&rsquo;t run its body, it returns a generator, an iterator that runs the body only as far as the next <code>yield</code>, pauses there with all its local variables intact, and carries on from that exact point when asked for the next item. Every iterator class from yesterday becomes a short function, with the bookkeeping done by Python. Today covers how generators run, why they save memory, infinite generators, cleaning up, and walking structures lazily.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Write generator functions with yield and explain how they pause and resume</li><li>Rewrite iterator classes as generators</li><li>Use generators for infinite and very large sequences without storing them</li><li>Clean up resources in generators with try and finally</li><li>Walk trees and other structures lazily with generators</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="yield: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Classes become functions: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Lazy and endless: 20 min"></span><span class="plan-seg s0" style="flex:15" title="Finishing and cleaning up: 15 min"></span><span class="plan-seg s1" style="flex:20" title="Walking structures: 20 min"></span><span class="plan-seg s0" style="flex:45" title="Practice: 45 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">yield</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Classes become functions</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Lazy and endless</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Finishing and cleaning up</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Walking structures</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">45 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w059d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w059d2.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w059d2-p1"><textarea class="pc-src pc-code" hidden>def countdown(n):
+    print(&quot;starting&quot;)
+    while n &gt; 0:
+        yield n
+        n -= 1
+    print(&quot;finished&quot;)
+
+c = countdown(3)
+print(&quot;made it&quot;)
+print(next(c))
+print(next(c))
+print(list(c))</textarea></div>
+<p>Calling <code>countdown(3)</code> printed nothing: the body didn&rsquo;t start. The first <code>next</code> ran it up to the first <code>yield</code>; the second resumed just after that <code>yield</code>; <code>list</code> ran it to the end, which printed &ldquo;finished&rdquo; and raised <code>StopIteration</code>.</p>
+<h2 id="yield">yield</h2>
+<p>A function with <code>yield</code> anywhere in its body is a <strong>generator function</strong>. Calling it returns a <strong>generator object</strong> without running any of the body. The generator is an <strong>iterator</strong> (it has <code>__iter__</code> returning itself and <code>__next__</code>):</p>
+<ol>
+<li><code>next(gen)</code> runs the body until the next <code>yield value</code>, then <strong>pauses</strong> and returns the value. Local variables, the position in loops, everything is kept.</li>
+<li>The next <code>next(gen)</code> resumes just after that <code>yield</code>.</li>
+<li>When the body finishes (falls off the end or runs <code>return</code>), the generator raises <code>StopIteration</code>, and it stays finished.</li>
+</ol>
+<p>Because generators are iterators, everything that loops works with them: <code>for</code>, <code>list</code>, <code>sum</code>, <code>zip</code>, unpacking. And like every iterator, a generator is <strong>one-shot</strong>: to loop again, call the function again for a fresh generator.</p>
+<div class="pc pc-example" data-kind="example" data-id="w059d2-e2"><textarea class="pc-src pc-code" hidden>def evens(limit):
+    n = 0
+    while n &lt;= limit:
+        yield n
+        n += 2
+
+g = evens(8)
+print(type(g).__name__, iter(g) is g)
+print(list(g), list(g), list(evens(4)), sum(evens(100)))</textarea></div>
+<h2 id="classes-become-functions">Classes become functions</h2>
+<p>Yesterday&rsquo;s <code>Chunks</code> class needed <code>__init__</code>, <code>__iter__</code>, <code>__next__</code>, and careful handling of <code>StopIteration</code>. As a generator, the state lives in ordinary local variables and the loop does the work:</p>
+<div class="pc pc-example" data-kind="example" data-id="w059d2-e3"><textarea class="pc-src pc-code" hidden>def chunks(iterable, n):
+    group = []
+    for item in iterable:
+        group.append(item)
+        if len(group) == n:
+            yield tuple(group)
+            group = []
+    if group:
+        yield tuple(group)
+
+def window(iterable, n):
+    from collections import deque
+    recent = deque(maxlen=n)
+    for item in iterable:
+        recent.append(item)
+        if len(recent) == n:
+            yield tuple(recent)
+
+print(list(chunks(&quot;abcdefg&quot;, 3)), list(window([1, 2, 3, 4], 2)))</textarea></div>
+<p>The same works for an <strong>iterable</strong> class: make <code>__iter__</code> a generator method, and every loop over the object gets a fresh generator, so the object can be looped over again and again.</p>
+<div class="pc pc-example" data-kind="example" data-id="w059d2-e4"><textarea class="pc-src pc-code" hidden>class Playlist:
+    def __init__(self, songs):
+        self._songs = list(songs)
+
+    def __iter__(self):
+        for song in self._songs:
+            yield song.title()
+
+p = Playlist([&quot;intro&quot;, &quot;the long walk&quot;, &quot;outro&quot;])
+print(list(p), list(p))</textarea></div>
+<h2 id="lazy-and-endless">Lazy and endless</h2>
+<p>A generator works out each value only when it&rsquo;s asked for, so:</p>
+<ul>
+<li>It can represent an <strong>endless</strong> sequence (<code>while True: yield ...</code>); the consumer decides how much to take, with <code>break</code>, <code>itertools.islice</code> or <code>zip</code> against something finite.</li>
+<li>It needs only the memory for its current state, however many values it produces: a generator over a billion numbers is a few hundred bytes, where the list would be gigabytes.</li>
+<li>Work is <strong>spread out</strong>: the first value arrives immediately rather than after the whole list is built, which matters for streams and slow sources.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w059d2-e5"><textarea class="pc-src pc-code" hidden>import sys
+from itertools import islice
+
+def naturals():
+    n = 1
+    while True:
+        yield n
+        n += 1
+
+def squares_of(numbers):
+    for n in numbers:
+        yield n * n
+
+print(list(islice(squares_of(naturals()), 5)))
+print(sys.getsizeof(squares_of(range(10 ** 9))), sys.getsizeof(list(range(10 ** 5))))</textarea></div>
+<h2 id="finishing-and-cleaning-up">Finishing and cleaning up</h2>
+<p><code>return</code> inside a generator <strong>ends</strong> it (the value given to <code>return</code>, if any, becomes the <code>StopIteration</code>&rsquo;s <code>value</code>, which Thursday&rsquo;s <code>yield from</code> uses). A generator that holds a resource (an open file, a connection) should release it even if the consumer stops early. Put the cleanup in <code>try</code> and <code>finally</code>: if a generator is abandoned, Python calls its <code>close()</code> method, which raises <code>GeneratorExit</code> at the paused <code>yield</code>, so the <code>finally</code> block runs. (<code>with</code> inside a generator works the same way, for the same reason; Week 61 covers context managers.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w059d2-e6"><textarea class="pc-src pc-code" hidden>def numbered(lines):
+    print(&quot;open&quot;)
+    try:
+        for i, line in enumerate(lines, 1):
+            yield f&quot;{i}: {line}&quot;
+    finally:
+        print(&quot;closed&quot;)
+
+g = numbered([&quot;alpha&quot;, &quot;beta&quot;, &quot;gamma&quot;])
+print(next(g))
+g.close()                      # stop early: the finally block still runs
+print(list(numbered([&quot;x&quot;])))</textarea></div>
+<h2 id="walking-structures">Walking structures</h2>
+<p>Generators make walking trees and graphs read like the definition. An in-order walk of a binary tree, with an explicit stack so tall trees don&rsquo;t hit the recursion limit:</p>
+<div class="pc pc-example" data-kind="example" data-id="w059d2-e7"><textarea class="pc-src pc-code" hidden>def in_order(tree):
+    &quot;&quot;&quot;tree: [key, left, right] lists, None for empty.&quot;&quot;&quot;
+    stack, node = [], tree
+    while stack or node:
+        while node:
+            stack.append(node)
+            node = node[1]
+        node = stack.pop()
+        yield node[0]
+        node = node[2]
+
+tree = [5, [3, [1, None, None], [4, None, None]], [8, None, [9, None, None]]]
+walk = in_order(tree)
+print(next(walk), next(walk), list(walk))
+print(next(x for x in in_order(tree) if x &gt; 4))      # stops as soon as it finds one</textarea></div>
+<p>The last line shows the real power: the search <strong>stops</strong> the walk as soon as it has its answer; nothing after 5 is visited.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A function containing yield is a generator function: calling it returns a generator without running the body. Each next() runs to the following yield and pauses there, keeping every local variable; finishing or return raises StopIteration. Generators are one-shot iterators, so call the function again to loop again, or make <strong>iter</strong> a generator method for a reusable iterable. They&rsquo;re lazy: endless sequences, tiny memory, values as soon as they&rsquo;re ready. Put cleanup in try and finally, which runs even when the consumer stops early. Walking structures with a generator lets the consumer stop the walk the moment it has what it needs.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d2-basics" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">First generators</div><div class="pc-prompt"><p>Write generator functions <code>fib()</code> (0, 1, 1, 2, 3, 5, &hellip; for ever), <code>collatz(n)</code> (n, then n/2 if even or 3n + 1 if odd, &hellip;, ending with 1; whole numbers), and <code>repeat_each(iterable, k)</code> (each item k times in a row). Each must use <code>yield</code>.</p></div><textarea class="pc-src pc-code" hidden>def fib():
+    ___
+
+def collatz(n):
+    ___
+
+def repeat_each(iterable, k):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, types
+def test_basics():
+    &quot;yield&quot;
+    assert list(itertools.islice(fib(), 10)) == [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+    assert list(collatz(6)) == [6, 3, 10, 5, 16, 8, 4, 2, 1] and list(collatz(1)) == [1]
+    assert list(repeat_each(&quot;ab&quot;, 3)) == [&quot;a&quot;, &quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;b&quot;, &quot;b&quot;] and list(repeat_each([], 2)) == []
+    assert isinstance(fib(), types.GeneratorType) and isinstance(collatz(3), types.GeneratorType)
+    assert isinstance(repeat_each(&quot;x&quot;, 1), types.GeneratorType)
+    assert list(itertools.islice(repeat_each(itertools.count(), 2), 5)) == [0, 0, 1, 1, 2]</textarea><textarea class="pc-src pc-solution" hidden>def fib():
+    a, b = 0, 1
+    while True:
+        yield a
+        a, b = b, a + b
+
+def collatz(n):
+    while n != 1:
+        yield n
+        n = n // 2 if n % 2 == 0 else 3 * n + 1
+    yield 1
+
+def repeat_each(iterable, k):
+    for item in iterable:
+        for _ in range(k):
+            yield item</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d2-records" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Reading records lazily</div><div class="pc-prompt"><p>A settings file has lines like <code>name = value</code>; blank lines and lines starting with <code>#</code> are ignored. Write <code>settings(lines)</code>: a generator of <code>(name, value)</code> pairs with surrounding spaces stripped, raising <code>ValueError(f"line {n}: no '='")</code> (n counting from 1) at a bad line <strong>only when it&rsquo;s reached</strong>. Then <code>first_setting(lines, name)</code>: the value of the first matching name, stopping as soon as it&rsquo;s found (so later bad lines don&rsquo;t matter), or <code>None</code>.</p></div><textarea class="pc-src pc-code" hidden>def settings(lines):
+    ___
+
+def first_setting(lines, name):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import types
+def test_records():
+    &quot;lazy parsing&quot;
+    lines = [&quot;# comment&quot;, &quot;&quot;, &quot;colour = blue&quot;, &quot;  size=10 &quot;, &quot;colour = red&quot;]
+    assert list(settings(lines)) == [(&quot;colour&quot;, &quot;blue&quot;), (&quot;size&quot;, &quot;10&quot;), (&quot;colour&quot;, &quot;red&quot;)]
+    assert isinstance(settings([]), types.GeneratorType)
+    bad = [&quot;a = 1&quot;, &quot;oops&quot;, &quot;b = 2&quot;]
+    g = settings(bad)
+    assert next(g) == (&quot;a&quot;, &quot;1&quot;)
+    try:
+        next(g)
+        assert False
+    except ValueError as e:
+        assert str(e) == &quot;line 2: no &#x27;=&#x27;&quot;
+    assert first_setting(bad, &quot;a&quot;) == &quot;1&quot; and first_setting(lines, &quot;size&quot;) == &quot;10&quot; and first_setting(lines, &quot;font&quot;) is None
+    def endless():
+        yield &quot;x = 1&quot;
+        while True:
+            yield &quot;junk&quot;
+    assert first_setting(endless(), &quot;x&quot;) == &quot;1&quot;</textarea><textarea class="pc-src pc-solution" hidden>def settings(lines):
+    for n, line in enumerate(lines, 1):
+        text = line.strip()
+        if not text or text.startswith(&quot;#&quot;):
+            continue
+        if &quot;=&quot; not in text:
+            raise ValueError(f&quot;line {n}: no &#x27;=&#x27;&quot;)
+        name, value = text.split(&quot;=&quot;, 1)
+        yield name.strip(), value.strip()
+
+def first_setting(lines, name):
+    for key, value in settings(lines):
+        if key == name:
+            return value
+    return None</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d2-rewrite" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Classes into generators</div><div class="pc-prompt"><p>Rewrite yesterday&rsquo;s classes as generators: <code>peek_pairs(iterable)</code>: each item with the one after it, as <code>(item, next_item)</code>, with <code>None</code> after the last; and <code>interleave(*iterables)</code>: one item from each in turn, skipping exhausted ones (a deque of iterators, as yesterday, but with <code>yield</code>). Both lazy, both working on endless inputs.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def peek_pairs(iterable):
+    ___
+
+def interleave(*iterables):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools
+def test_rewrite():
+    &quot;generators&quot;
+    assert list(peek_pairs(&quot;abc&quot;)) == [(&quot;a&quot;, &quot;b&quot;), (&quot;b&quot;, &quot;c&quot;), (&quot;c&quot;, None)] and list(peek_pairs([])) == []
+    assert list(interleave(&quot;abc&quot;, &quot;1&quot;, &quot;xy&quot;)) == [&quot;a&quot;, &quot;1&quot;, &quot;x&quot;, &quot;b&quot;, &quot;y&quot;, &quot;c&quot;] and list(interleave()) == []
+    assert list(itertools.islice(peek_pairs(itertools.count()), 3)) == [(0, 1), (1, 2), (2, 3)]
+    assert list(itertools.islice(interleave(itertools.count(), &quot;ab&quot;), 6)) == [0, &quot;a&quot;, 1, &quot;b&quot;, 2, 3]
+    assert &quot;class &quot; not in source and &quot;yield&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+def peek_pairs(iterable):
+    it = iter(iterable)
+    try:
+        current = next(it)
+    except StopIteration:
+        return
+    for following in it:
+        yield current, following
+        current = following
+    yield current, None
+
+def interleave(*iterables):
+    its = deque(iter(x) for x in iterables)
+    while its:
+        it = its.popleft()
+        try:
+            item = next(it)
+        except StopIteration:
+            continue
+        yield item
+        its.append(it)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d2-primes" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Primes for ever</div><div class="pc-prompt"><p>Write <code>primes()</code>: an endless generator of primes using an <strong>incremental sieve</strong>: a dict maps each upcoming composite number to the primes that will reach it. For each n: if n isn&rsquo;t in the dict it&rsquo;s prime, so yield it and record n² as reached by n; otherwise move each prime p recorded at n on to n + p. (This version is described in Melissa O&rsquo;Neill&rsquo;s 2009 paper &ldquo;The Genuine Sieve of Eratosthenes&rdquo;.) Then <code>nth_prime(k)</code> (k from 1) using it.</p></div><textarea class="pc-src pc-code" hidden>def primes():
+    ___
+
+def nth_prime(k):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools
+def test_primes():
+    &quot;an incremental sieve&quot;
+    assert list(itertools.islice(primes(), 10)) == [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+    assert nth_prime(1) == 2 and nth_prime(100) == 541 and nth_prime(5000) == 48611
+    small = set(itertools.takewhile(lambda p: p &lt; 2000, primes()))
+    assert small == {n for n in range(2, 2000) if all(n % d for d in range(2, int(n ** 0.5) + 1))}</textarea><textarea class="pc-src pc-solution" hidden>import itertools
+
+def primes():
+    reached = {}
+    n = 2
+    while True:
+        if n not in reached:
+            yield n
+            reached[n * n] = [n]
+        else:
+            for p in reached.pop(n):
+                reached.setdefault(n + p, []).append(p)
+        n += 1
+
+def nth_prime(k):
+    return next(itertools.islice(primes(), k - 1, None))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d2-walk" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Walking a folder tree</div><div class="pc-prompt"><p>Folders are dicts: a key mapping to a dict is a folder, to a number is a file of that size. Write <code>files(tree, prefix="")</code>: a generator of <code>(path, size)</code> for every file, paths like <code>"docs/notes.txt"</code>, visiting everything at each level in sorted name order, depth first (a folder&rsquo;s contents come straight after it, before its later siblings). Use an explicit stack (no recursion). Then <code>largest_over(tree, limit)</code>: the first file (in that order) bigger than limit, as <code>(path, size)</code>, or <code>None</code>, stopping the walk as soon as it&rsquo;s found.</p></div><textarea class="pc-src pc-code" hidden>def files(tree, prefix=&quot;&quot;):
+    ___
+
+def largest_over(tree, limit):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_walk():
+    &quot;a lazy tree walk&quot;
+    tree = {&quot;docs&quot;: {&quot;b.txt&quot;: 5, &quot;a.txt&quot;: 3, &quot;old&quot;: {&quot;x.txt&quot;: 50}}, &quot;photo.jpg&quot;: 900, &quot;z&quot;: {}}
+    assert list(files(tree)) == [(&quot;docs/a.txt&quot;, 3), (&quot;docs/b.txt&quot;, 5), (&quot;docs/old/x.txt&quot;, 50), (&quot;photo.jpg&quot;, 900)]
+    assert largest_over(tree, 10) == (&quot;docs/old/x.txt&quot;, 50) and largest_over(tree, 1000) is None
+    assert list(files({})) == []
+    deep = {}
+    node = deep
+    for i in range(3000):
+        node[&quot;d&quot;] = {}
+        node = node[&quot;d&quot;]
+    node[&quot;f&quot;] = 1
+    assert next(files(deep))[1] == 1</textarea><textarea class="pc-src pc-solution" hidden>def files(tree, prefix=&quot;&quot;):
+    stack = [(prefix, tree)]
+    while stack:
+        path, folder = stack.pop()
+        for name in sorted(folder, reverse=True):
+            item = folder[name]
+            full = f&quot;{path}/{name}&quot; if path else name
+            stack.append((full, item))
+        while stack and not isinstance(stack[-1][1], dict):
+            yield stack.pop()
+
+def largest_over(tree, limit):
+    return next(((p, s) for p, s in files(tree) if s &gt; limit), None)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w059d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">return, not yield</div><div class="pc-prompt"><p><code>return</code> ends the function at the first value, so this &ldquo;generator&rdquo; returns a single number and <code>list</code> of it fails. Use <code>yield</code> so it prints <code>[1, 4, 9]</code>.</p></div><textarea class="pc-src pc-code" hidden>def squares(n):
+    for i in range(1, n + 1):
+        return i * i
+
+try:
+    print(list(squares(3)))
+except TypeError as e:
+    print(&quot;TypeError&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;yield&quot;
+    expect_output(&quot;[1, 4, 9]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def squares(n):
+    for i in range(1, n + 1):
+        yield i * i
+
+try:
+    print(list(squares(3)))
+except TypeError as e:
+    print(&quot;TypeError&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w059d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The generator object itself</div><div class="pc-prompt"><p>Calling a generator function only makes a generator: this prints something like <code>&lt;generator object evens at 0x...&gt;</code> instead of the numbers. Turn it into a list (or loop over it) so it prints <code>[0, 2, 4]</code>.</p></div><textarea class="pc-src pc-code" hidden>def evens(n):
+    for i in range(0, n, 2):
+        yield i
+
+print(evens(6))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;consume it&quot;
+    expect_output(&quot;[0, 2, 4]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def evens(n):
+    for i in range(0, n, 2):
+        yield i
+
+print(list(evens(6)))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w059d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Used up already</div><div class="pc-prompt"><p>A generator is one-shot: the <code>sum</code> uses it up, so the <code>max</code> afterwards raises <code>ValueError</code> (an empty sequence). Call the function again for a fresh generator so it prints <code>14 9</code>.</p></div><textarea class="pc-src pc-code" hidden>def readings():
+    for x in (3, 9, 2):
+        yield x
+
+data = readings()
+total = sum(data)
+try:
+    print(total, max(data))
+except ValueError:
+    print(total, &quot;nothing left&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a fresh generator&quot;
+    expect_output(&quot;14 9&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def readings():
+    for x in (3, 9, 2):
+        yield x
+
+total = sum(readings())
+try:
+    print(total, max(readings()))
+except ValueError:
+    print(total, &quot;nothing left&quot;)</textarea></div>
+<div class="parsons" data-id="w059d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Chunks as a generator</div><div class="pc-prompt"><p>Arrange the lines of a generator yielding tuples of n items (the last may be shorter). One line is a trap.</p></div><script type="application/json">{"lines": ["def chunks(iterable, n):", "    group = []", "    for item in iterable:", "        group.append(item)", "        if len(group) == n:", "            yield tuple(group)", "            group = []", "    if group:", "        yield tuple(group)"], "distractors": ["            return tuple(group)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>def gen():
+    yield 1
+    yield 2
+    return 3
+
+p = ___   # list(gen())
+q = ___   # g = gen(); next(g); next(g); next(g, &quot;end&quot;)
+r = ___   # True or False: calling gen() runs its body up to the first yield
+s = ___   # sum(x for x in gen())
+t = ___   # g = gen(); list(g) + list(g)</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [1, 2] and q == &quot;end&quot; and r is False, &quot;p, q and r&quot;
+    assert s == 3 and t == [1, 2], &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>def gen():
+    yield 1
+    yield 2
+    return 3
+
+p = [1, 2]
+q = &quot;end&quot;
+r = False
+s = 3
+t = [1, 2]</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w059d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does calling a generator function do?", "answer": 1, "explain": "The body starts on the first next().", "options": ["Runs the whole body", "Returns a generator without running the body", "Runs up to the first yield", "Returns a list"]}, {"type": "mc", "q": "What happens at a yield?", "answer": 1, "explain": "It resumes there on the next next().", "options": ["The function ends", "The generator pauses, keeping its local variables, and hands out the value", "The value is printed", "A list grows"]}, {"type": "mc", "q": "How does a generator signal that it has finished?", "answer": 1, "explain": "Like any iterator.", "options": ["Returns None", "Raises StopIteration", "Yields None", "Raises GeneratorExit"]}, {"type": "mc", "q": "How do you loop over a generator&rsquo;s values twice?", "answer": 1, "explain": "Generators are one-shot.", "options": ["You can&rsquo;t", "Call the generator function again", "Reset it", "Use copy()"]}, {"type": "mc", "q": "How do you make a class you can loop over again and again with yield?", "answer": 1, "explain": "Each loop gets a fresh generator.", "options": ["Make <strong>next</strong> a generator", "Make <strong>iter</strong> a generator method", "Use a list", "You can&rsquo;t"]}, {"type": "mc", "q": "Why does a generator over range(10\u2079) use so little memory?", "answer": 1, "explain": "Laziness.", "options": ["Compression", "It produces one value at a time and keeps only its state", "It&rsquo;s cached", "It&rsquo;s a C array"]}, {"type": "mc", "q": "How do you take the first 5 values of an endless generator?", "answer": 1, "explain": "list(g) would never finish.", "options": ["list(g)[:5]", "itertools.islice(g, 5)", "g[:5]", "len(g)"]}, {"type": "mc", "q": "When does a generator&rsquo;s finally block run if the consumer stops early?", "answer": 1, "explain": "close() raises GeneratorExit at the paused yield.", "options": ["Never", "When the generator is closed or garbage collected", "Immediately at the yield", "At program end only"]}, {"type": "mc", "q": "What does return inside a generator do?", "answer": 1, "explain": "yield from can collect that value.", "options": ["Yields its value", "Ends the generator; the value goes on StopIteration", "Nothing", "Restarts it"]}, {"type": "output", "q": "What does this print?", "answer": "making 0\nmaking 1\n1", "explain": "Nothing after 1 is made.", "code": "def g():\n    for i in range(3):\n        print(\"making\", i)\n        yield i\nprint(next(x for x in g() if x >= 1))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w059d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: following pages lazily</div><div class="pc-prompt"><p>A web service returns results a page at a time: <code>fetch(token)</code> returns <code>(items, next_token)</code>, where <code>next_token</code> is <code>None</code> after the last page, and the first page uses the token <code>None</code>. Fetching is slow, so a program should fetch only the pages it actually needs. Write generators:</p>
+<ul>
+<li><code>all_items(fetch)</code>: every item from every page, in order, fetching each page only when the previous one&rsquo;s items have all been taken.</li>
+<li><code>take(n, iterable)</code>: the first n items as a list (it must not take an (n + 1)-th item from the source).</li>
+<li><code>pages_needed(fetch, n)</code>: how many fetches <code>take(n, all_items(fetch))</code> makes, by wrapping <code>fetch</code> in a function that counts calls.</li>
+<li><code>search(fetch, pred)</code>: the first item for which <code>pred</code> is True, fetching no more pages than needed; <code>None</code> if none.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>def all_items(fetch):
+    ___
+
+def take(n, iterable):
+    ___
+
+def pages_needed(fetch, n):
+    ___
+
+def search(fetch, pred):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import types
+def make(pages):
+    calls = []
+    def fetch(token):
+        calls.append(token)
+        i = 0 if token is None else token
+        nxt = i + 1 if i + 1 &lt; len(pages) else None
+        return pages[i], nxt
+    return fetch, calls
+def test_pages():
+    &quot;lazy paging&quot;
+    pages = [[1, 2, 3], [4, 5], [], [6, 7, 8], [9]]
+    fetch, calls = make(pages)
+    assert isinstance(all_items(fetch), types.GeneratorType) and calls == []
+    assert list(all_items(fetch)) == [1, 2, 3, 4, 5, 6, 7, 8, 9] and len(calls) == 5
+    fetch, calls = make(pages)
+    assert take(4, all_items(fetch)) == [1, 2, 3, 4] and calls == [None, 1]
+    assert take(0, all_items(make(pages)[0])) == [] and take(99, all_items(make(pages)[0])) == list(range(1, 10))
+    assert pages_needed(make(pages)[0], 3) == 1 and pages_needed(make(pages)[0], 6) == 4 and pages_needed(make(pages)[0], 0) == 0
+    fetch, calls = make(pages)
+    assert search(fetch, lambda x: x &gt; 4) == 5 and len(calls) == 2
+    assert search(make(pages)[0], lambda x: x &gt; 100) is None
+    def endless(token):
+        i = token or 0
+        return [i * 10 + k for k in range(10)], i + 1
+    assert take(25, all_items(endless))[-1] == 24 and search(endless, lambda x: x % 97 == 96) == 96</textarea><textarea class="pc-src pc-solution" hidden>def all_items(fetch):
+    token = None
+    while True:
+        items, token = fetch(token)
+        for item in items:
+            yield item
+        if token is None:
+            return
+
+def take(n, iterable):
+    out = []
+    if n &lt;= 0:
+        return out
+    for item in iterable:
+        out.append(item)
+        if len(out) == n:
+            break
+    return out
+
+def pages_needed(fetch, n):
+    count = [0]
+    def counting(token):
+        count[0] += 1
+        return fetch(token)
+    take(n, all_items(counting))
+    return count[0]
+
+def search(fetch, pred):
+    for item in all_items(fetch):
+        if pred(item):
+            return item
+    return None</textarea><template class="pc-src pc-hint"><code>all_items</code>: a loop with <code>token = None</code>, then <code>items, token = fetch(token)</code>, <code>yield</code> each item, and stop when the token is <code>None</code> after yielding a page. For <code>take</code>, loop with <code>enumerate</code> and <code>break</code> when you have n, checking <strong>before</strong> asking for another item. For <code>pages_needed</code>, wrap <code>fetch</code> in a function that increments a counter in a one-item list and then calls it.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Take one iterator class you wrote in an earlier week (Week 36 or Phase 4) and rewrite it as a generator; count the lines saved. Tomorrow: <strong>generator expressions</strong>, generators in a single line.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w059d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w059d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w059d2", "week": 59, "day": 2, "title": "Generators", "exercises": [{"id": "w059d2-basics", "title": "First generators", "points": 10}, {"id": "w059d2-records", "title": "Reading records lazily", "points": 15}, {"id": "w059d2-rewrite", "title": "Classes into generators", "points": 10}, {"id": "w059d2-primes", "title": "Primes for ever", "points": 15}, {"id": "w059d2-walk", "title": "Walking a folder tree", "points": 10}, {"id": "w059d2-bug1", "title": "return, not yield", "points": 10}, {"id": "w059d2-bug2", "title": "The generator object itself", "points": 10}, {"id": "w059d2-bug3", "title": "Used up already", "points": 10}, {"id": "w059d2-trace", "title": "Predict them", "points": 10}, {"id": "w059d2-challenge", "title": "Challenge: following pages lazily", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
