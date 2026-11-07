@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 51 Day 2: Bellman–Ford | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Dijkstra’s algorithm is fast, but it trusts that once a vertex is settled, nothing can improve it, and a single negative edge breaks that trust. The...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w051d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 51 Day 2: Bellman–Ford">
+<meta property="og:description" content="Dijkstra’s algorithm is fast, but it trusts that once a vertex is settled, nothing can improve it, and a single negative edge breaks that trust. The...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w051d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-51">Week 51: Graphs II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#relax-everything-repeatedly" data-sec="relax-everything-repeatedly">Relax everything, repeatedly</a></li><li><a href="#negative-cycles" data-sec="negative-cycles">Negative cycles</a></li><li><a href="#at-most-k-edges" data-sec="at-most-k-edges">At most k edges</a></li><li><a href="#rates-and-logarithms" data-sec="rates-and-logarithms">Rates and logarithms</a></li><li><a href="#difference-constraints" data-sec="difference-constraints">Difference constraints</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w051d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-51">Week 51: Graphs II</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 51, Day 2</span></p>
+      <h1>Bellman–Ford</h1>
+      <div class="day-intro"><p>Dijkstra&rsquo;s algorithm is fast, but it trusts that once a vertex is settled, nothing can improve it, and a single negative edge breaks that trust. The Bellman-Ford algorithm trusts nothing: it simply relaxes <strong>every</strong> edge, over and over, V − 1 times. That&rsquo;s slower, O(V × E), but it handles negative weights, and it can tell when a <strong>negative cycle</strong> makes &lsquo;shortest&rsquo; meaningless. Today you&rsquo;ll write it, find negative cycles and everything they poison, limit paths to at most k edges, spot currency arbitrage, solve systems of &lsquo;this must be at most that much later than that&rsquo; constraints, and, in the challenge, combine it with Dijkstra&rsquo;s algorithm for all pairs at once.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Implement Bellman-Ford, and explain why V − 1 rounds of relaxation are enough</li><li>Detect a negative cycle, recover it, and find the vertices it makes unbounded</li><li>Find cheapest paths using at most k edges</li><li>Turn problems with multiplied rates into sums with logarithms, and find arbitrage</li><li>Solve systems of difference constraints as shortest paths</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 55 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Relax everything, repeatedly: 25 min"></span><span class="plan-seg s0" style="flex:25" title="Negative cycles: 25 min"></span><span class="plan-seg s1" style="flex:15" title="At most k edges: 15 min"></span><span class="plan-seg s0" style="flex:20" title="Rates and logarithms: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Difference constraints: 15 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Relax everything, repeatedly</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Negative cycles</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:00</span><span class="plan-what">At most k edges</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Rates and logarithms</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Difference constraints</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:40</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w051d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w051d2.ipynb" download>download it</a>. Exercises today are worth 130 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w051d2-p1"><textarea class="pc-src pc-code" hidden>edges = [(&quot;A&quot;, &quot;B&quot;, 2), (&quot;A&quot;, &quot;C&quot;, 3), (&quot;C&quot;, &quot;B&quot;, -2), (&quot;B&quot;, &quot;D&quot;, 1)]
+dist = {&quot;A&quot;: 0, &quot;B&quot;: float(&quot;inf&quot;), &quot;C&quot;: float(&quot;inf&quot;), &quot;D&quot;: float(&quot;inf&quot;)}
+
+for round_number in range(1, 4):
+    for u, v, w in edges:
+        if dist[u] + w &lt; dist[v]:
+            dist[v] = dist[u] + w
+    print(round_number, dist)</textarea></div>
+<p>Yesterday&rsquo;s graph that fooled Dijkstra&rsquo;s algorithm: B ends at 1 and D at 2, the true distances. Each round relaxes every edge; by the second round nothing changes any more.</p>
+<h2 id="relax-everything-repeatedly">Relax everything, repeatedly</h2>
+<p>Bellman-Ford keeps the same tentative distances as Dijkstra&rsquo;s algorithm (0 at the start, infinity elsewhere), but instead of choosing which vertex to process next, it does V − 1 <strong>rounds</strong>, and each round relaxes <strong>every edge</strong>.</p>
+<p>Why V − 1? A shortest path (with no negative cycle around) never repeats a vertex, so it has at most V − 1 edges. After round 1, every shortest path of <strong>one</strong> edge has been found; after round k, every shortest path of at most k edges, because its last edge gets relaxed in round k with the correct distance already at its start. So after V − 1 rounds, all shortest distances are right, whatever the order of the edges and whatever their signs.</p>
+<p>Each round costs O(E), so the algorithm is <strong>O(V × E)</strong>: slower than Dijkstra&rsquo;s O((V + E) log V), but simpler, and correct with negative weights. Two practical touches:</p>
+<ul>
+<li><strong>Stop early</strong> if a whole round changes nothing: nothing will ever change again. On many graphs this finishes long before V − 1 rounds.</li>
+<li>An <strong>edge list</strong> suits it best, since every round walks every edge.</li>
+</ul>
+<p>The algorithm is named after Richard Bellman (1958) and Lester Ford Jr. (1956); Edward Moore published it too (1959).</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d2-e2"><textarea class="pc-src pc-code" hidden>def bellman_ford(vertices, edges, start):
+    dist = {v: float(&quot;inf&quot;) for v in vertices}
+    dist[start] = 0
+    for _ in range(len(vertices) - 1):
+        changed = False
+        for u, v, w in edges:
+            if dist[u] + w &lt; dist[v]:
+                dist[v] = dist[u] + w
+                changed = True
+        if not changed:
+            break
+    return dist
+
+edges = [(&quot;S&quot;, &quot;A&quot;, 4), (&quot;S&quot;, &quot;B&quot;, 5), (&quot;A&quot;, &quot;C&quot;, -3), (&quot;B&quot;, &quot;A&quot;, -2), (&quot;C&quot;, &quot;D&quot;, 2), (&quot;B&quot;, &quot;D&quot;, 6)]
+print(bellman_ford(&quot;SABCD&quot;, edges, &quot;S&quot;))</textarea></div>
+<p><code>float("inf")</code> makes unreachable vertices easy: infinity plus any finite weight is still infinity, so it never &ldquo;improves&rdquo; anything.</p>
+<h2 id="negative-cycles">Negative cycles</h2>
+<p>If a cycle&rsquo;s weights add up to less than zero, going round it once more always makes a path shorter, so vertices reachable from it have no shortest distance (it&rsquo;s minus infinity). Bellman-Ford detects this with one extra round: after V − 1 rounds all true distances are final, so <strong>if any edge can still be relaxed in round V, there&rsquo;s a negative cycle</strong> reachable from the start.</p>
+<p>To <strong>find</strong> the cycle: record parents as you relax. Take a vertex v relaxed in round V and follow parents back V times; that lands you on the cycle (a path of V parent steps must repeat a vertex). Then follow parents from there until you come back round.</p>
+<p>To find every vertex whose distance is minus infinity: everything <strong>reachable</strong> from a vertex relaxed in round V. A BFS from those vertices marks them all.</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d2-e3"><textarea class="pc-src pc-code" hidden>def find_negative_cycle(vertices, edges, start):
+    dist = {v: float(&quot;inf&quot;) for v in vertices}
+    parent = {v: None for v in vertices}
+    dist[start] = 0
+    last = None
+    for _ in range(len(vertices)):              # V rounds: the last one only to detect
+        last = None
+        for u, v, w in edges:
+            if dist[u] + w &lt; dist[v]:
+                dist[v], parent[v] = dist[u] + w, u
+                last = v
+    if last is None:
+        return None
+    for _ in range(len(vertices)):              # step back onto the cycle
+        last = parent[last]
+    cycle, v = [last], parent[last]
+    while v != last:
+        cycle.append(v)
+        v = parent[v]
+    return cycle[::-1]
+
+edges = [(&quot;S&quot;, &quot;A&quot;, 1), (&quot;A&quot;, &quot;B&quot;, 1), (&quot;B&quot;, &quot;C&quot;, -3), (&quot;C&quot;, &quot;A&quot;, 1), (&quot;C&quot;, &quot;D&quot;, 2)]
+print(find_negative_cycle(&quot;SABCD&quot;, edges, &quot;S&quot;))
+print(find_negative_cycle(&quot;SABCD&quot;, [(&quot;S&quot;, &quot;A&quot;, 1), (&quot;A&quot;, &quot;B&quot;, 1), (&quot;B&quot;, &quot;C&quot;, -1), (&quot;C&quot;, &quot;A&quot;, 1)], &quot;S&quot;))</textarea></div>
+<p>The cycle A → B → C → A weighs 1 + (−3) + 1 = −1. Change −3 to −1 and the cycle weighs +1, which is harmless.</p>
+<h2 id="at-most-k-edges">At most k edges</h2>
+<p>&ldquo;The cheapest flight with at most k stops&rdquo; limits the <strong>number of edges</strong>. Bellman-Ford&rsquo;s rounds are exactly that: after round i, distances are the best using at most i edges, <strong>provided each round only builds on the previous round&rsquo;s values</strong>. In-place updates (as above) can chain several edges in one round, which is fine for ordinary shortest paths but wrong here. So copy the distances at the start of each round, and relax from the copy. k stops means k + 1 flights, so k + 1 rounds.</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d2-e4"><textarea class="pc-src pc-code" hidden>def cheapest_within(flights, start, goal, max_flights):
+    best = {start: 0}
+    for _ in range(max_flights):
+        before = dict(best)                     # this round builds on the last one only
+        for u, v, price in flights:
+            if u in before and before[u] + price &lt; best.get(v, float(&quot;inf&quot;)):
+                best[v] = before[u] + price
+    return best.get(goal)
+
+flights = [(&quot;LOS&quot;, &quot;ACC&quot;, 120), (&quot;ACC&quot;, &quot;NBO&quot;, 300), (&quot;LOS&quot;, &quot;ADD&quot;, 250), (&quot;ADD&quot;, &quot;NBO&quot;, 100), (&quot;LOS&quot;, &quot;NBO&quot;, 600)]
+for k in (1, 2):
+    print(k, &quot;flight(s):&quot;, cheapest_within(flights, &quot;LOS&quot;, &quot;NBO&quot;, k))</textarea></div>
+<h2 id="rates-and-logarithms">Rates and logarithms</h2>
+<p>Some problems multiply along a path instead of adding: exchange rates, probabilities, growth factors. Logarithms turn products into sums (log(ab) = log a + log b), so a product along a path becomes a sum of logs, and shortest-path algorithms apply.</p>
+<p><strong>Currency arbitrage</strong> is the classic case: if converting round a loop of currencies multiplies your money by more than 1, there&rsquo;s free money. With edge weights −log(rate), &ldquo;product greater than 1&rdquo; becomes &ldquo;sum less than 0&rdquo;: a <strong>negative cycle</strong>. Floating-point rounding can make a product of exactly 1 look slightly bigger, so compare with a small tolerance.</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d2-e5"><textarea class="pc-src pc-code" hidden>import math
+
+rates = {(&quot;NGN&quot;, &quot;USD&quot;): 0.00065, (&quot;USD&quot;, &quot;EUR&quot;): 0.92, (&quot;EUR&quot;, &quot;NGN&quot;): 1700.0,
+         (&quot;USD&quot;, &quot;NGN&quot;): 1530.0, (&quot;EUR&quot;, &quot;USD&quot;): 1.08}
+loop = [(&quot;NGN&quot;, &quot;USD&quot;), (&quot;USD&quot;, &quot;EUR&quot;), (&quot;EUR&quot;, &quot;NGN&quot;)]
+product = math.prod(rates[e] for e in loop)
+log_sum = sum(-math.log(rates[e]) for e in loop)
+print(round(product, 4), round(log_sum, 4), &quot;arbitrage!&quot; if log_sum &lt; -1e-9 else &quot;no gain&quot;)</textarea></div>
+<h2 id="difference-constraints">Difference constraints</h2>
+<p>A system of constraints like &ldquo;the plumber must start at least 2 days after the builder&rdquo; or &ldquo;the review is at most 5 days after the draft&rdquo; can be written as <strong>x_v − x_u ≤ c</strong>. Each one is an edge u → v of weight c: in a shortest-path solution, dist[v] ≤ dist[u] + c is exactly the constraint. Add a start vertex with a 0-weight edge to every variable, run Bellman-Ford, and the distances <strong>satisfy every constraint</strong>; if there&rsquo;s a negative cycle, the constraints contradict each other and no solution exists. (Weights here are often negative, which is why Bellman-Ford, not Dijkstra, is the tool.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d2-e6"><textarea class="pc-src pc-code" hidden>def solve(variables, constraints):
+    &quot;&quot;&quot;constraints: (u, v, c) meaning x[v] - x[u] &lt;= c.&quot;&quot;&quot;
+    edges = [(&quot;*&quot;, v, 0) for v in variables] + list(constraints)
+    dist = {v: 0 for v in variables}
+    dist[&quot;*&quot;] = 0
+    for _ in range(len(variables)):
+        for u, v, c in edges:
+            if dist[u] + c &lt; dist[v]:
+                dist[v] = dist[u] + c
+    if any(dist[u] + c &lt; dist[v] for u, v, c in edges):
+        return None
+    shift = -min(dist[v] for v in variables)           # make the earliest day 0
+    return {v: dist[v] + shift for v in variables}
+
+# builder starts first; plumber at least 2 days after builder; painter at least 3 after plumber,
+# and the painter at most 4 days after the builder
+cons = [(&quot;plumber&quot;, &quot;builder&quot;, -2), (&quot;painter&quot;, &quot;plumber&quot;, -3), (&quot;builder&quot;, &quot;painter&quot;, 4)]
+print(solve([&quot;builder&quot;, &quot;plumber&quot;, &quot;painter&quot;], cons))
+print(solve([&quot;builder&quot;, &quot;plumber&quot;, &quot;painter&quot;], [(&quot;plumber&quot;, &quot;builder&quot;, -2), (&quot;painter&quot;, &quot;plumber&quot;, -3), (&quot;builder&quot;, &quot;painter&quot;, 4), (&quot;builder&quot;, &quot;painter&quot;, 1)]))</textarea></div>
+<p>&ldquo;At least 2 days after&rdquo; is x_plumber − x_builder ≥ 2, which is x_builder − x_plumber ≤ −2: an edge plumber → builder of weight −2.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Bellman-Ford relaxes every edge in rounds; after round k, all shortest paths of at most k edges are found, so V − 1 rounds suffice: O(V × E), correct with negative weights, and it can stop early when a round changes nothing. If round V still relaxes an edge, a negative cycle is reachable; parent links followed V times lead onto it, and everything reachable from it has distance minus infinity. Copying distances each round limits paths to k edges. Logarithms turn products into sums, so arbitrage is a negative cycle in −log(rate). Difference constraints x_v − x_u ≤ c are edges u → v of weight c; shortest distances satisfy them, and a negative cycle means they contradict each other.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d2-bf" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Bellman-Ford</div><div class="pc-prompt"><p>Write <code>bellman_ford(vertices, edges, start)</code>: a dict of shortest distances (infinity for unreachable vertices), stopping early when a round changes nothing; raise <code>ValueError</code> if a negative cycle is reachable from <code>start</code>. Then <code>rounds_needed(vertices, edges, start)</code>: how many rounds actually changed something.</p></div><textarea class="pc-src pc-code" hidden>def bellman_ford(vertices, edges, start):
+    ___
+
+def rounds_needed(vertices, edges, start):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random, itertools
+def slow(vertices, edges, s):
+    best = {v: float(&quot;inf&quot;) for v in vertices}
+    best[s] = 0
+    adj = {}
+    for u, v, w in edges:
+        adj.setdefault(u, []).append((v, w))
+    def walk(v, d, seen):
+        if d &lt; best[v]:
+            best[v] = d
+        for x, w in adj.get(v, []):
+            if x not in seen:
+                walk(x, d + w, seen | {x})
+    walk(s, 0, {s})
+    return best
+def test_bf():
+    &quot;distances&quot;
+    edges = [(&quot;S&quot;, &quot;A&quot;, 4), (&quot;S&quot;, &quot;B&quot;, 5), (&quot;A&quot;, &quot;C&quot;, -3), (&quot;B&quot;, &quot;A&quot;, -2), (&quot;C&quot;, &quot;D&quot;, 2), (&quot;B&quot;, &quot;D&quot;, 6)]
+    assert bellman_ford(&quot;SABCD&quot;, edges, &quot;S&quot;) == {&quot;S&quot;: 0, &quot;A&quot;: 3, &quot;B&quot;: 5, &quot;C&quot;: 0, &quot;D&quot;: 2}
+    assert bellman_ford(&quot;AB&quot;, [], &quot;A&quot;) == {&quot;A&quot;: 0, &quot;B&quot;: float(&quot;inf&quot;)}
+    try:
+        bellman_ford(&quot;SAB&quot;, [(&quot;S&quot;, &quot;A&quot;, 1), (&quot;A&quot;, &quot;B&quot;, -2), (&quot;B&quot;, &quot;A&quot;, 1)], &quot;S&quot;)
+        assert False
+    except ValueError:
+        pass
+    assert bellman_ford(&quot;SAB&quot;, [(&quot;A&quot;, &quot;B&quot;, -2), (&quot;B&quot;, &quot;A&quot;, 1)], &quot;S&quot;)[&quot;A&quot;] == float(&quot;inf&quot;), &quot;unreachable cycles don&#x27;t matter&quot;
+    rng = random.Random(1)
+    for _ in range(100):
+        vs = list(range(rng.randint(1, 6)))
+        perm = rng.sample(vs, len(vs))
+        edges = [(perm[i], perm[j], rng.randint(-5, 9)) for i in range(len(vs)) for j in range(i + 1, len(vs)) if rng.random() &lt; 0.5]
+        assert bellman_ford(vs, edges, perm[0]) == slow(vs, edges, perm[0])
+    backwards = [(&quot;C&quot;, &quot;D&quot;, 1), (&quot;B&quot;, &quot;C&quot;, 1), (&quot;A&quot;, &quot;B&quot;, 1), (&quot;S&quot;, &quot;A&quot;, 1)]
+    assert rounds_needed(&quot;SABCD&quot;, backwards, &quot;S&quot;) == 4 and rounds_needed(&quot;SABCD&quot;, backwards[::-1], &quot;S&quot;) == 1</textarea><textarea class="pc-src pc-solution" hidden>def _run(vertices, edges, start):
+    dist = {v: float(&quot;inf&quot;) for v in vertices}
+    dist[start] = 0
+    rounds = 0
+    for _ in range(len(dist) - 1):
+        changed = False
+        for u, v, w in edges:
+            if dist[u] + w &lt; dist[v]:
+                dist[v] = dist[u] + w
+                changed = True
+        if not changed:
+            break
+        rounds += 1
+    for u, v, w in edges:
+        if dist[u] + w &lt; dist[v]:
+            raise ValueError(&quot;a negative cycle is reachable&quot;)
+    return dist, rounds
+
+def bellman_ford(vertices, edges, start):
+    return _run(vertices, edges, start)[0]
+
+def rounds_needed(vertices, edges, start):
+    return _run(vertices, edges, start)[1]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d2-cycle" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Finding the cycle</div><div class="pc-prompt"><p>Write <code>negative_cycle(vertices, edges)</code>: one negative cycle <strong>anywhere</strong> in the graph (not only reachable from some start) as a list <code>[v1, ..., vk]</code> with an edge from each to the next and from vk to v1, or <code>None</code>. Start every distance at 0, which is the same as adding a start vertex with a 0-weight edge to every vertex. Then <code>unbounded(vertices, edges, start)</code>: the sorted list of vertices whose distance from <code>start</code> is minus infinity.</p></div><textarea class="pc-src pc-code" hidden>def negative_cycle(vertices, edges):
+    ___
+
+def unbounded(vertices, edges, start):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def weight(edges, c):
+    best = {}
+    for u, v, w in edges:
+        best[(u, v)] = min(w, best.get((u, v), float(&quot;inf&quot;)))
+    return sum(best[(c[i], c[(i + 1) % len(c)])] for i in range(len(c)))
+def test_cycle():
+    &quot;negative cycles&quot;
+    edges = [(&quot;S&quot;, &quot;A&quot;, 1), (&quot;A&quot;, &quot;B&quot;, 1), (&quot;B&quot;, &quot;C&quot;, -3), (&quot;C&quot;, &quot;A&quot;, 1), (&quot;C&quot;, &quot;D&quot;, 2), (&quot;E&quot;, &quot;S&quot;, 1)]
+    c = negative_cycle(&quot;SABCDE&quot;, edges)
+    assert sorted(c) == [&quot;A&quot;, &quot;B&quot;, &quot;C&quot;] and weight(edges, c) &lt; 0
+    assert unbounded(&quot;SABCDE&quot;, edges, &quot;S&quot;) == [&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;] and unbounded(&quot;SABCDE&quot;, edges, &quot;D&quot;) == []
+    assert negative_cycle(&quot;AB&quot;, [(&quot;A&quot;, &quot;B&quot;, 1), (&quot;B&quot;, &quot;A&quot;, -1)]) is None
+    assert negative_cycle(&quot;X&quot;, [(&quot;X&quot;, &quot;X&quot;, -1)]) == [&quot;X&quot;]
+    rng = random.Random(2)
+    for _ in range(200):
+        vs = list(range(rng.randint(1, 5)))
+        edges = [(rng.choice(vs), rng.choice(vs), rng.randint(-4, 6)) for _ in range(rng.randint(0, 8))]
+        edges = [e for e in edges if e[0] != e[1] or rng.random() &lt; 0.3]
+        c = negative_cycle(vs, edges)
+        if c is not None:
+            assert len(set(c)) == len(c) and weight(edges, c) &lt; 0</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+def negative_cycle(vertices, edges):
+    vertices = list(vertices)
+    dist = {v: 0 for v in vertices}
+    parent = {v: None for v in vertices}
+    last = None
+    for _ in range(len(vertices)):
+        last = None
+        for u, v, w in edges:
+            if dist[u] + w &lt; dist[v]:
+                dist[v], parent[v] = dist[u] + w, u
+                last = v
+    if last is None:
+        return None
+    for _ in range(len(vertices)):
+        last = parent[last]
+    cycle, v = [last], parent[last]
+    while v != last:
+        cycle.append(v)
+        v = parent[v]
+    return cycle[::-1]
+
+def unbounded(vertices, edges, start):
+    vertices = list(vertices)
+    dist = {v: float(&quot;inf&quot;) for v in vertices}
+    dist[start] = 0
+    for _ in range(len(vertices) - 1):
+        for u, v, w in edges:
+            if dist[u] + w &lt; dist[v]:
+                dist[v] = dist[u] + w
+    seeds = {v for u, v, w in edges if dist[u] + w &lt; dist[v]}
+    adj = {}
+    for u, v, w in edges:
+        adj.setdefault(u, []).append(v)
+    seen, queue = set(seeds), deque(seeds)
+    while queue:
+        x = queue.popleft()
+        for y in adj.get(x, []):
+            if y not in seen:
+                seen.add(y)
+                queue.append(y)
+    return sorted(seen)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d2-stops" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">With at most k stops</div><div class="pc-prompt"><p>Write <code>cheapest_flight(flights, start, goal, max_stops)</code>: the cheapest price from start to goal using at most <code>max_stops</code> intermediate airports (so at most <code>max_stops + 1</code> flights), or <code>None</code>. Copy the prices each round. Then <code>price_by_stops(flights, start, goal, max_stops)</code>: a list of the cheapest price allowing 0, 1, &hellip;, max_stops stops (<code>None</code> where impossible).</p></div><textarea class="pc-src pc-code" hidden>def cheapest_flight(flights, start, goal, max_stops):
+    ___
+
+def price_by_stops(flights, start, goal, max_stops):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random, itertools
+def test_flights():
+    &quot;flights&quot;
+    flights = [(&quot;LOS&quot;, &quot;ACC&quot;, 120), (&quot;ACC&quot;, &quot;NBO&quot;, 300), (&quot;LOS&quot;, &quot;ADD&quot;, 250), (&quot;ADD&quot;, &quot;NBO&quot;, 100), (&quot;LOS&quot;, &quot;NBO&quot;, 600)]
+    assert cheapest_flight(flights, &quot;LOS&quot;, &quot;NBO&quot;, 0) == 600 and cheapest_flight(flights, &quot;LOS&quot;, &quot;NBO&quot;, 1) == 350
+    assert cheapest_flight(flights, &quot;NBO&quot;, &quot;LOS&quot;, 3) is None and price_by_stops(flights, &quot;LOS&quot;, &quot;NBO&quot;, 2) == [600, 350, 350]
+    chain = [(&quot;A&quot;, &quot;B&quot;, 1), (&quot;B&quot;, &quot;C&quot;, 1), (&quot;C&quot;, &quot;D&quot;, 1), (&quot;A&quot;, &quot;D&quot;, 10)]
+    assert price_by_stops(chain, &quot;A&quot;, &quot;D&quot;, 2) == [10, 10, 3]
+    rng = random.Random(3)
+    for _ in range(100):
+        names = &quot;abcde&quot;
+        fl = [(a, b, rng.randint(1, 20)) for a in names for b in names if a != b and rng.random() &lt; 0.4]
+        k = rng.randint(0, 3)
+        best = None
+        for L in range(0, k + 1):
+            for mid in itertools.permutations(&quot;bcd&quot;, L):
+                route = (&quot;a&quot;,) + mid + (&quot;e&quot;,)
+                price = 0
+                for x, y in zip(route, route[1:]):
+                    ps = [p for u, v, p in fl if u == x and v == y]
+                    if not ps:
+                        price = None
+                        break
+                    price += min(ps)
+                if price is not None:
+                    best = price if best is None else min(best, price)
+        assert cheapest_flight(fl, &quot;a&quot;, &quot;e&quot;, k) == best</textarea><textarea class="pc-src pc-solution" hidden>def cheapest_flight(flights, start, goal, max_stops):
+    best = {start: 0}
+    for _ in range(max_stops + 1):
+        before = dict(best)
+        for u, v, price in flights:
+            if u in before and before[u] + price &lt; best.get(v, float(&quot;inf&quot;)):
+                best[v] = before[u] + price
+    return best.get(goal)
+
+def price_by_stops(flights, start, goal, max_stops):
+    return [cheapest_flight(flights, start, goal, k) for k in range(max_stops + 1)]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d2-arbitrage" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Free money?</div><div class="pc-prompt"><p><code>rates</code> maps <code>(from, to)</code> currency pairs to exchange rates. Write <code>arbitrage(rates)</code>: a loop of currencies <code>[c1, c2, ..., ck]</code> whose rates multiply to more than 1 (by at least one part in a billion), found as a negative cycle with weights −log(rate), or <code>None</code>. Then <code>gain(rates, loop)</code>: the product of the rates round the loop (including back to the start).</p></div><textarea class="pc-src pc-code" hidden>import math
+
+def arbitrage(rates):
+    ___
+
+def gain(rates, loop):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import math
+def test_arbitrage():
+    &quot;arbitrage&quot;
+    rates = {(&quot;NGN&quot;, &quot;USD&quot;): 0.00065, (&quot;USD&quot;, &quot;EUR&quot;): 0.92, (&quot;EUR&quot;, &quot;NGN&quot;): 1700.0, (&quot;USD&quot;, &quot;NGN&quot;): 1530.0, (&quot;EUR&quot;, &quot;USD&quot;): 1.08}
+    loop = arbitrage(rates)
+    assert loop is not None and gain(rates, loop) &gt; 1
+    fair = {(&quot;A&quot;, &quot;B&quot;): 2.0, (&quot;B&quot;, &quot;A&quot;): 0.5, (&quot;B&quot;, &quot;C&quot;): 3.0, (&quot;C&quot;, &quot;B&quot;): 1 / 3, (&quot;A&quot;, &quot;C&quot;): 6.0, (&quot;C&quot;, &quot;A&quot;): 1 / 6}
+    assert arbitrage(fair) is None and abs(gain(fair, [&quot;A&quot;, &quot;B&quot;, &quot;C&quot;]) - 1) &lt; 1e-12
+    assert gain({(&quot;x&quot;, &quot;y&quot;): 2.0, (&quot;y&quot;, &quot;x&quot;): 0.75}, [&quot;x&quot;, &quot;y&quot;]) == 1.5</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+def arbitrage(rates):
+    names = sorted({c for pair in rates for c in pair})
+    edges = [(a, b, -math.log(r)) for (a, b), r in rates.items()]
+    dist = {c: 0.0 for c in names}
+    parent = {c: None for c in names}
+    last = None
+    for _ in range(len(names)):
+        last = None
+        for u, v, w in edges:
+            if dist[u] + w &lt; dist[v] - 1e-9:
+                dist[v], parent[v] = dist[u] + w, u
+                last = v
+    if last is None:
+        return None
+    for _ in range(len(names)):
+        last = parent[last]
+    cycle, v = [last], parent[last]
+    while v != last:
+        cycle.append(v)
+        v = parent[v]
+    return cycle[::-1]
+
+def gain(rates, loop):
+    return math.prod(rates[(loop[i], loop[(i + 1) % len(loop)])] for i in range(len(loop)))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d2-constraints" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Scheduling with constraints</div><div class="pc-prompt"><p>Constraints arrive as text lines, <code>A after B by at least 3</code> (x_A − x_B ≥ 3) or <code>A after B by at most 5</code> (x_A − x_B ≤ 5). Write <code>schedule(lines)</code>: the day each task starts, with the earliest task on day 0, satisfying every line, or <code>None</code> if they contradict each other. Turn each line into a difference constraint and use Bellman-Ford.</p></div><textarea class="pc-src pc-code" hidden>def schedule(lines):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def ok(days, lines):
+    for line in lines:
+        a, _, b, _, _, kind, n = line.split()
+        diff = days[a] - days[b]
+        if kind == &quot;least&quot; and diff &lt; int(n) or kind == &quot;most&quot; and diff &gt; int(n):
+            return False
+    return True
+def test_schedule():
+    &quot;schedules&quot;
+    lines = [&quot;plumber after builder by at least 2&quot;, &quot;painter after plumber by at least 3&quot;, &quot;painter after builder by at most 6&quot;]
+    days = schedule(lines)
+    assert ok(days, lines) and min(days.values()) == 0 and days[&quot;builder&quot;] == 0
+    assert schedule(lines + [&quot;painter after builder by at most 4&quot;]) is None
+    assert schedule([]) == {}
+    lines = [&quot;b after a by at least 1&quot;, &quot;c after b by at least 1&quot;, &quot;a after c by at least -5&quot;, &quot;d after a by at most 0&quot;, &quot;a after d by at most 0&quot;]
+    days = schedule(lines)
+    assert ok(days, lines) and days[&quot;a&quot;] == days[&quot;d&quot;]</textarea><textarea class="pc-src pc-solution" hidden>def schedule(lines):
+    edges, tasks = [], set()
+    for line in lines:
+        a, _, b, _, _, kind, n = line.split()
+        n = int(n)
+        tasks |= {a, b}
+        if kind == &quot;least&quot;:
+            edges.append((a, b, -n))         # x_b - x_a &lt;= -n
+        else:
+            edges.append((b, a, n))          # x_a - x_b &lt;= n
+    if not tasks:
+        return {}
+    dist = {t: 0 for t in tasks}
+    for _ in range(len(tasks)):
+        for u, v, c in edges:
+            if dist[u] + c &lt; dist[v]:
+                dist[v] = dist[u] + c
+    if any(dist[u] + c &lt; dist[v] for u, v, c in edges):
+        return None
+    low = min(dist.values())
+    return {t: dist[t] - low for t in sorted(tasks)}</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w051d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">One round isn&rsquo;t enough</div><div class="pc-prompt"><p>This relaxes every edge only <strong>once</strong>, which finds shortest paths only when edges happen to be listed in a helpful order. Here the edges are listed backwards, so after one round D is still unreached: this prints <code>inf</code>. Do V − 1 rounds so it prints <code>3</code>.</p></div><textarea class="pc-src pc-code" hidden>vertices = &quot;ABCD&quot;
+edges = [(&quot;C&quot;, &quot;D&quot;, 1), (&quot;B&quot;, &quot;C&quot;, 1), (&quot;A&quot;, &quot;B&quot;, 1)]
+dist = {v: float(&quot;inf&quot;) for v in vertices}
+dist[&quot;A&quot;] = 0
+for u, v, w in edges:
+    if dist[u] + w &lt; dist[v]:
+        dist[v] = dist[u] + w
+print(dist[&quot;D&quot;])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;enough rounds&quot;
+    expect_output(&quot;3&quot;)</textarea><textarea class="pc-src pc-solution" hidden>vertices = &quot;ABCD&quot;
+edges = [(&quot;C&quot;, &quot;D&quot;, 1), (&quot;B&quot;, &quot;C&quot;, 1), (&quot;A&quot;, &quot;B&quot;, 1)]
+dist = {v: float(&quot;inf&quot;) for v in vertices}
+dist[&quot;A&quot;] = 0
+for _ in range(len(vertices) - 1):
+    for u, v, w in edges:
+        if dist[u] + w &lt; dist[v]:
+            dist[v] = dist[u] + w
+print(dist[&quot;D&quot;])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w051d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Too many flights in one round</div><div class="pc-prompt"><p>This &ldquo;at most one flight&rdquo; search updates prices in place, so within the same round a price just found for ACC is used to reach NBO: it chains two flights and prints <code>420</code>. Copy the prices at the start of each round, so it prints <code>600</code>.</p></div><textarea class="pc-src pc-code" hidden>flights = [(&quot;LOS&quot;, &quot;ACC&quot;, 120), (&quot;ACC&quot;, &quot;NBO&quot;, 300), (&quot;LOS&quot;, &quot;NBO&quot;, 600)]
+best = {&quot;LOS&quot;: 0}
+for _ in range(1):
+    for u, v, price in flights:
+        if u in best and best[u] + price &lt; best.get(v, float(&quot;inf&quot;)):
+            best[v] = best[u] + price
+print(best[&quot;NBO&quot;])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;one round, one flight&quot;
+    expect_output(&quot;600&quot;)</textarea><textarea class="pc-src pc-solution" hidden>flights = [(&quot;LOS&quot;, &quot;ACC&quot;, 120), (&quot;ACC&quot;, &quot;NBO&quot;, 300), (&quot;LOS&quot;, &quot;NBO&quot;, 600)]
+best = {&quot;LOS&quot;: 0}
+for _ in range(1):
+    before = dict(best)
+    for u, v, price in flights:
+        if u in before and before[u] + price &lt; best.get(v, float(&quot;inf&quot;)):
+            best[v] = before[u] + price
+print(best[&quot;NBO&quot;])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w051d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Unreachable isn&rsquo;t zero</div><div class="pc-prompt"><p>This uses <code>dist.get(u, 0)</code>, treating vertices it hasn&rsquo;t reached as distance 0, so an edge out of an unreachable vertex looks like a short cut: X can&rsquo;t be reached from A, yet this prints <code>-5</code> for B. Treat unreached vertices as infinitely far so it prints <code>2</code>.</p></div><textarea class="pc-src pc-code" hidden>edges = [(&quot;A&quot;, &quot;B&quot;, 2), (&quot;X&quot;, &quot;B&quot;, -5)]
+dist = {&quot;A&quot;: 0}
+for _ in range(2):
+    for u, v, w in edges:
+        if dist.get(u, 0) + w &lt; dist.get(v, float(&quot;inf&quot;)):
+            dist[v] = dist.get(u, 0) + w
+print(dist[&quot;B&quot;])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;infinity for unreached&quot;
+    expect_output(&quot;2&quot;)</textarea><textarea class="pc-src pc-solution" hidden>edges = [(&quot;A&quot;, &quot;B&quot;, 2), (&quot;X&quot;, &quot;B&quot;, -5)]
+dist = {&quot;A&quot;: 0}
+for _ in range(2):
+    for u, v, w in edges:
+        if dist.get(u, float(&quot;inf&quot;)) + w &lt; dist.get(v, float(&quot;inf&quot;)):
+            dist[v] = dist[u] + w
+print(dist[&quot;B&quot;])</textarea></div>
+<div class="parsons" data-id="w051d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Bellman-Ford</div><div class="pc-prompt"><p>Arrange the lines into Bellman-Ford with early stopping. One line is a trap.</p></div><script type="application/json">{"lines": ["def bellman_ford(vertices, edges, start):", "    dist = {v: float(\"inf\") for v in vertices}", "    dist[start] = 0", "    for _ in range(len(vertices) - 1):", "        changed = False", "        for u, v, w in edges:", "            if dist[u] + w < dist[v]:", "                dist[v] = dist[u] + w", "                changed = True", "        if not changed:", "            break", "    return dist"], "distractors": ["    for _ in range(len(edges) - 1):"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden># Edges in this order: B-&gt;C 2, A-&gt;B 5, A-&gt;C 9, C-&gt;D -4, S-&gt;A 1. Start at S.
+
+p = ___   # dist after round 1, as a dict (use float(&quot;inf&quot;) for unreached)
+q = ___   # the final distance to D
+r = ___   # the most rounds Bellman-Ford needs on 5 vertices without early stopping
+s = ___   # True or False: a cycle of weights 2, -1, -1 is a negative cycle
+t = ___   # the weight to use for an exchange rate r when looking for arbitrage, as a string like &quot;-log(r)&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    inf = float(&quot;inf&quot;)
+    assert p == {&quot;S&quot;: 0, &quot;A&quot;: 1, &quot;B&quot;: inf, &quot;C&quot;: inf, &quot;D&quot;: inf} and q == 4 and r == 4, &quot;p, q and r&quot;
+    assert s is False and t.replace(&quot; &quot;, &quot;&quot;) == &quot;-log(r)&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden># Edges in this order: B-&gt;C 2, A-&gt;B 5, A-&gt;C 9, C-&gt;D -4, S-&gt;A 1. Start at S.
+
+p = {&quot;S&quot;: 0, &quot;A&quot;: 1, &quot;B&quot;: float(&quot;inf&quot;), &quot;C&quot;: float(&quot;inf&quot;), &quot;D&quot;: float(&quot;inf&quot;)}
+q = 4
+r = 4
+s = False
+t = &quot;-log(r)&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w051d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does each round of Bellman-Ford do?", "answer": 1, "explain": "Every edge, every round.", "options": ["Settles one vertex", "Relaxes every edge", "Removes a cycle", "Sorts the edges"]}, {"type": "mc", "q": "Why are V \u2212 1 rounds enough?", "answer": 1, "explain": "With no negative cycle, paths needn&rsquo;t repeat vertices.", "options": ["Luck", "A shortest path has at most V \u2212 1 edges, and round k finds every shortest path of k edges", "Heaps", "There are V \u2212 1 edges"]}, {"type": "mc", "q": "What is Bellman-Ford&rsquo;s running time?", "answer": 1, "explain": "V \u2212 1 rounds of E relaxations.", "options": ["O(V + E)", "O(V \u00d7 E)", "O(E log V)", "O(V squared)"]}, {"type": "mc", "q": "How does Bellman-Ford detect a negative cycle?", "answer": 1, "explain": "One extra round tells.", "options": ["It can&rsquo;t", "An edge can still be relaxed after V \u2212 1 rounds", "A distance becomes zero", "It runs forever"]}, {"type": "mc", "q": "How do you get onto the cycle from a vertex relaxed in round V?", "answer": 1, "explain": "V steps must repeat a vertex.", "options": ["Follow edges forwards", "Follow parent links back V times", "Sort", "BFS"]}, {"type": "mc", "q": "Why copy the distances each round when limiting paths to k edges?", "answer": 1, "explain": "Each round adds at most one edge.", "options": ["Speed", "So a round can&rsquo;t chain several new edges together", "To save memory", "It isn&rsquo;t needed"]}, {"type": "mc", "q": "What weight turns arbitrage into a negative cycle?", "answer": 1, "explain": "Product greater than 1 means sum of \u2212logs below 0.", "options": ["rate", "\u2212log(rate)", "1 / rate", "rate \u2212 1"]}, {"type": "mc", "q": "How is x_v \u2212 x_u \u2264 c written as an edge?", "answer": 1, "explain": "dist[v] \u2264 dist[u] + c is the constraint.", "options": ["v -&gt; u, weight c", "u -&gt; v, weight c", "u -&gt; v, weight \u2212c", "Not possible"]}, {"type": "mc", "q": "When are difference constraints impossible to satisfy?", "answer": 1, "explain": "The constraints contradict each other.", "options": ["Never", "When their graph has a negative cycle", "When weights are negative", "When there are more than V"]}, {"type": "output", "q": "What does this print?", "answer": "True 3", "explain": "Infinity stays infinite, so unreached vertices never improve anything.", "code": "inf = float(\"inf\")\nprint(inf + (-1000) == inf, min(3, inf))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: all pairs with Johnson&rsquo;s reweighting</div><div class="pc-prompt"><p>To get shortest distances between <strong>every</strong> pair of vertices in a sparse graph with some negative edges (but no negative cycle), running Bellman-Ford from every vertex costs O(V² × E). Donald Johnson&rsquo;s 1977 algorithm does better: run Bellman-Ford <strong>once</strong>, then Dijkstra from every vertex, O(V × E log V).</p>
+<ol>
+<li>Add a new vertex q with a 0-weight edge to every vertex, and run Bellman-Ford from q to get h(v) for every v (raise <code>ValueError</code> if there&rsquo;s a negative cycle).</li>
+<li><strong>Reweight</strong> each edge: w&rsquo;(u, v) = w(u, v) + h(u) − h(v). Because h(v) ≤ h(u) + w(u, v), every new weight is <strong>non-negative</strong>. And along any path from s to t the h terms cancel in pairs, so every path&rsquo;s new length is its old length plus h(s) − h(t): the same paths are shortest.</li>
+<li>Run Dijkstra from each vertex with the new weights, and convert back: d(s, t) = d&rsquo;(s, t) − h(s) + h(t).</li>
+</ol>
+<p>Write <code>johnson(vertices, edges)</code>: a dict of dicts, <code>result[s][t]</code> the shortest distance (only for t reachable from s, including s itself at 0). Also <code>reweighted(vertices, edges)</code>: the list of <code>(u, v, new_weight)</code> triples, all non-negative. The checks compare with Bellman-Ford from every vertex.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+
+def reweighted(vertices, edges):
+    ___
+
+def johnson(vertices, edges):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def bf(vertices, edges, s):
+    dist = {v: float(&quot;inf&quot;) for v in vertices}
+    dist[s] = 0
+    for _ in range(len(vertices)):
+        for u, v, w in edges:
+            if dist[u] + w &lt; dist[v]:
+                dist[v] = dist[u] + w
+    return {v: d for v, d in dist.items() if d &lt; float(&quot;inf&quot;)}
+def test_johnson():
+    &quot;all pairs&quot;
+    edges = [(&quot;S&quot;, &quot;A&quot;, 4), (&quot;S&quot;, &quot;B&quot;, 5), (&quot;A&quot;, &quot;C&quot;, -3), (&quot;B&quot;, &quot;A&quot;, -2), (&quot;C&quot;, &quot;D&quot;, 2), (&quot;B&quot;, &quot;D&quot;, 6)]
+    r = johnson(&quot;SABCD&quot;, edges)
+    assert r[&quot;S&quot;] == {&quot;S&quot;: 0, &quot;A&quot;: 3, &quot;B&quot;: 5, &quot;C&quot;: 0, &quot;D&quot;: 2} and r[&quot;D&quot;] == {&quot;D&quot;: 0} and r[&quot;B&quot;][&quot;C&quot;] == -5
+    assert all(w &gt;= 0 for _, _, w in reweighted(&quot;SABCD&quot;, edges))
+    try:
+        johnson(&quot;AB&quot;, [(&quot;A&quot;, &quot;B&quot;, 1), (&quot;B&quot;, &quot;A&quot;, -2)])
+        assert False
+    except ValueError:
+        pass
+    rng = random.Random(4)
+    for _ in range(80):
+        vs = list(range(rng.randint(1, 7)))
+        perm = rng.sample(vs, len(vs))
+        edges = [(perm[i], perm[j], rng.randint(-5, 9)) for i in range(len(vs)) for j in range(len(vs)) if i &lt; j and rng.random() &lt; 0.4]
+        edges += [(perm[j], perm[i], rng.randint(6, 12)) for i in range(len(vs)) for j in range(len(vs)) if i &lt; j and rng.random() &lt; 0.2]
+        try:
+            want = {s: bf(vs, edges, s) for s in vs}
+            neg = any(dist[u] + w &lt; dist[v] for s in vs for dist in [want[s]] for u, v, w in edges if u in dist and v in dist)
+        except Exception:
+            neg = True
+        if neg:
+            continue
+        assert johnson(vs, edges) == want
+        assert all(w &gt;= 0 for _, _, w in reweighted(vs, edges))</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+
+def _potentials(vertices, edges):
+    vertices = list(vertices)
+    h = {v: 0 for v in vertices}
+    for _ in range(len(vertices)):
+        changed = False
+        for u, v, w in edges:
+            if h[u] + w &lt; h[v]:
+                h[v] = h[u] + w
+                changed = True
+        if not changed:
+            break
+    if any(h[u] + w &lt; h[v] for u, v, w in edges):
+        raise ValueError(&quot;a negative cycle&quot;)
+    return h
+
+def reweighted(vertices, edges):
+    h = _potentials(vertices, edges)
+    return [(u, v, w + h[u] - h[v]) for u, v, w in edges]
+
+def johnson(vertices, edges):
+    vertices = list(vertices)
+    h = _potentials(vertices, edges)
+    graph = {v: {} for v in vertices}
+    for u, v, w in edges:
+        nw = w + h[u] - h[v]
+        graph[u][v] = min(nw, graph[u].get(v, float(&quot;inf&quot;)))
+    result = {}
+    for s in vertices:
+        dist, heap, done = {s: 0}, [(0, s)], set()
+        while heap:
+            d, u = heapq.heappop(heap)
+            if u in done:
+                continue
+            done.add(u)
+            for v, w in graph[u].items():
+                if d + w &lt; dist.get(v, float(&quot;inf&quot;)):
+                    dist[v] = d + w
+                    heapq.heappush(heap, (d + w, v))
+        result[s] = {t: d - h[s] + h[t] for t, d in dist.items()}
+    return result</textarea><template class="pc-src pc-hint">For step 1 you don&rsquo;t need a real vertex q: start every h at 0 (which is what the 0-weight edges from q would give after one round) and do the usual rounds. Keep the new weights in a dict-of-dicts graph for Dijkstra; if two edges join the same pair, keep the smaller.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Find three real exchange rates between currencies and check whether converting round the loop gains or loses (it will lose a little, which is the fee). Tomorrow: more union-find, going further than last week, as preparation for minimum spanning trees.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w051d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w051d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w051d2", "week": 51, "day": 2, "title": "Bellman\u2013Ford", "exercises": [{"id": "w051d2-bf", "title": "Bellman-Ford", "points": 15}, {"id": "w051d2-cycle", "title": "Finding the cycle", "points": 15}, {"id": "w051d2-stops", "title": "With at most k stops", "points": 10}, {"id": "w051d2-arbitrage", "title": "Free money?", "points": 15}, {"id": "w051d2-constraints", "title": "Scheduling with constraints", "points": 10}, {"id": "w051d2-bug1", "title": "One round isn't enough", "points": 10}, {"id": "w051d2-bug2", "title": "Too many flights in one round", "points": 10}, {"id": "w051d2-bug3", "title": "Unreachable isn't zero", "points": 10}, {"id": "w051d2-trace", "title": "Predict them", "points": 10}, {"id": "w051d2-challenge", "title": "Challenge: all pairs with Johnson's reweighting", "points": 25}], "points": 130}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

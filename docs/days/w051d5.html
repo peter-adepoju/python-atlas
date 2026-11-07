@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 51 Day 5: Grids as graphs | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Grids are the graphs you meet most: maps, mazes, game boards, floor plans, images. Last week searched them with BFS (fewest steps), multi-source BFS...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w051d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 51 Day 5: Grids as graphs">
+<meta property="og:description" content="Grids are the graphs you meet most: maps, mazes, game boards, floor plans, images. Last week searched them with BFS (fewest steps), multi-source BFS...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w051d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-51">Week 51: Graphs II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#terrain" data-sec="terrain">Terrain</a></li><li><a href="#a-search" data-sec="a-search">A* search</a></li><li><a href="#from-both-ends" data-sec="from-both-ends">From both ends</a></li><li><a href="#cells-plus-state" data-sec="cells-plus-state">Cells plus state</a></li><li><a href="#which-search" data-sec="which-search">Which search?</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w051d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-51">Week 51: Graphs II</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 51, Day 5</span></p>
+      <h1>Grids as graphs</h1>
+      <div class="day-intro"><p>Grids are the graphs you meet most: maps, mazes, game boards, floor plans, images. Last week searched them with BFS (fewest steps), multi-source BFS (nearest of many) and 0-1 BFS (doors that cost). Today adds the tools for harder grid problems: Dijkstra&rsquo;s algorithm over terrain with different costs, <strong>A* search</strong>, which uses a sense of direction to find the same shortest path while exploring far less, <strong>bidirectional search</strong> from both ends at once, and searches whose vertices carry extra state: which keys you hold, which way you&rsquo;re facing. The challenge solves the sliding-tile puzzle with A*.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Find cheapest routes over terrain with Dijkstra&rsquo;s algorithm, including diagonal moves</li><li>Implement A* search with an admissible heuristic, and explain why it stays correct</li><li>Run bidirectional BFS and compare how much it explores</li><li>Search over states that combine a cell with keys held or direction faced</li><li>Choose the right grid search for a problem</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Terrain: 20 min"></span><span class="plan-seg s0" style="flex:30" title="A* search: 30 min"></span><span class="plan-seg s1" style="flex:15" title="From both ends: 15 min"></span><span class="plan-seg s0" style="flex:25" title="Cells plus state: 25 min"></span><span class="plan-seg s1" style="flex:10" title="Which search?: 10 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Terrain</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">A* search</span><span class="plan-min">30 min</span></li><li><span class="plan-at">1:00</span><span class="plan-what">From both ends</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Cells plus state</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">Which search?</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w051d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w051d5.ipynb" download>download it</a>. Exercises today are worth 130 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w051d5-p1"><textarea class="pc-src pc-code" hidden>import heapq
+
+terrain = [&quot;119&quot;,
+           &quot;191&quot;,
+           &quot;111&quot;]
+
+def cheapest(grid):
+    rows, cols = len(grid), len(grid[0])
+    dist = {(0, 0): 0}
+    heap = [(0, 0, 0)]
+    while heap:
+        d, r, c = heapq.heappop(heap)
+        if (r, c) == (rows - 1, cols - 1):
+            return d
+        if d &gt; dist[(r, c)]:
+            continue
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols:
+                nd = d + int(grid[nr][nc])
+                if nd &lt; dist.get((nr, nc), float(&quot;inf&quot;)):
+                    dist[(nr, nc)] = nd
+                    heapq.heappush(heap, (nd, nr, nc))
+
+print(cheapest(terrain))</textarea></div>
+<p>Each digit is the cost of stepping <strong>onto</strong> that cell. The cheap route goes down the left side and along the bottom (1 + 1 + 1 + 1 = 4), avoiding the 9s, though a route through the middle would be just as short in steps. Here <code>if d &gt; dist[...]: continue</code> plays the part of the <code>done</code> set: an entry whose distance is bigger than the best known is out of date.</p>
+<h2 id="terrain">Terrain</h2>
+<p>A grid with different costs (marsh, road, hill) is a weighted implicit graph: each cell is a vertex, each move an edge whose weight depends on the cell entered (or both cells, or the direction). Dijkstra&rsquo;s algorithm (Monday) works unchanged with a <code>neighbours</code> function.</p>
+<p>Allowing <strong>diagonal</strong> moves changes the geometry: a diagonal step covers √2 ≈ 1.414 times the distance of a straight one, so it should cost more. Counting it as 1 makes paths zig-zag oddly; using √2 (or 14 against 10 for straight moves, to stay with whole numbers) gives natural routes. Many games also forbid <strong>cutting corners</strong>: a diagonal move is only allowed if both cells beside it are open.</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d5-e2"><textarea class="pc-src pc-code" hidden>import heapq, math
+
+def route_cost(grid, diagonal):
+    rows, cols = len(grid), len(grid[0])
+    steps = [(-1, 0, 1), (1, 0, 1), (0, -1, 1), (0, 1, 1)]
+    if diagonal:
+        steps += [(dr, dc, math.sqrt(2)) for dr in (-1, 1) for dc in (-1, 1)]
+    dist, heap = {(0, 0): 0}, [(0, 0, 0)]
+    while heap:
+        d, r, c = heapq.heappop(heap)
+        if (r, c) == (rows - 1, cols - 1):
+            return round(d, 3)
+        if d &gt; dist[(r, c)]:
+            continue
+        for dr, dc, step in steps:
+            nr, nc = r + dr, c + dc
+            if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols and grid[nr][nc] != &quot;#&quot;:
+                if dr and dc and (grid[r][nc] == &quot;#&quot; or grid[nr][c] == &quot;#&quot;):
+                    continue                          # no cutting corners
+                nd = d + step
+                if nd &lt; dist.get((nr, nc), float(&quot;inf&quot;)):
+                    dist[(nr, nc)] = nd
+                    heapq.heappush(heap, (nd, nr, nc))
+
+field = [&quot;....&quot;,
+         &quot;.#..&quot;,
+         &quot;....&quot;,
+         &quot;....&quot;]
+print(route_cost(field, diagonal=False), route_cost(field, diagonal=True))</textarea></div>
+<h2 id="a-search">A* search</h2>
+<p>Dijkstra&rsquo;s algorithm spreads out in all directions like a ripple, exploring cells far behind the start just as eagerly as cells towards the goal. <strong>A* search</strong> (Peter Hart, Nils Nilsson and Bertram Raphael, 1968, for a robot called Shakey) steers it: it orders the heap by</p>
+<p>f(v) = g(v) + h(v)</p>
+<p>where g(v) is the cost from the start (Dijkstra&rsquo;s distance) and h(v) is a <strong>heuristic</strong>: an estimate of the cost still to go from v to the goal. Cells that look closer to the goal are explored first.</p>
+<p>The estimate must never <strong>overestimate</strong> the true remaining cost; such a heuristic is called <strong>admissible</strong>, and with it A* still finds a shortest path. For grids:</p>
+<ul>
+<li>moving in 4 directions with cost 1: the <strong>Manhattan distance</strong> |r − gr| + |c − gc|;</li>
+<li>moving in 8 directions with costs 1 and √2: the <strong>octile distance</strong> max(dr, dc) + (√2 − 1) × min(dr, dc).</li>
+</ul>
+<p>Two extremes show the trade-off. With h = 0, A* is exactly Dijkstra&rsquo;s algorithm. With a perfect h, it walks straight down the shortest path and explores nothing else. A good heuristic sits in between: correct, and far less work. (If h is also <strong>consistent</strong>, h(u) ≤ cost(u, v) + h(v) for every move, which Manhattan distance is, each cell is settled once, just as in Dijkstra&rsquo;s algorithm.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d5-e3"><textarea class="pc-src pc-code" hidden>import heapq
+
+def search(grid, start, goal, use_heuristic):
+    rows, cols = len(grid), len(grid[0])
+    def h(cell):
+        return abs(cell[0] - goal[0]) + abs(cell[1] - goal[1]) if use_heuristic else 0
+    g = {start: 0}
+    heap = [(h(start), 0, start)]
+    expanded = 0
+    while heap:
+        f, neg_d, cell = heapq.heappop(heap)
+        d = -neg_d
+        if d &gt; g[cell]:
+            continue
+        expanded += 1
+        if cell == goal:
+            return d, expanded
+        r, c = cell
+        for nxt in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nxt[0] &lt; rows and 0 &lt;= nxt[1] &lt; cols and grid[nxt[0]][nxt[1]] != &quot;#&quot;:
+                if d + 1 &lt; g.get(nxt, float(&quot;inf&quot;)):
+                    g[nxt] = d + 1
+                    heapq.heappush(heap, (d + 1 + h(nxt), -(d + 1), nxt))   # ties: further along first
+    return None, expanded
+
+grid = [&quot;.&quot; * 40 for _ in range(40)]
+grid[20] = &quot;#&quot; * 30 + &quot;.&quot; * 10
+print(&quot;Dijkstra:&quot;, search(grid, (0, 0), (39, 0), False))
+print(&quot;A*:      &quot;, search(grid, (0, 0), (39, 0), True))</textarea></div>
+<p>Both find the same length; A* expands a fraction of the cells. Notice the <strong>tie-break</strong>: on an open grid, every cell inside the rectangle between start and goal has the same f, so the second item in each heap entry decides. Pushing <code>-(d + 1)</code> prefers the <strong>largest</strong> g among equal f, the cell furthest along, and A* heads straight for the goal; preferring the smallest g would make it expand the whole rectangle.</p>
+<h2 id="from-both-ends">From both ends</h2>
+<p>On an unweighted graph, a BFS that reaches distance d explores roughly b^d vertices if each has about b neighbours. Searching from <strong>both</strong> ends at once and stopping when the two searches meet needs only about 2 × b^(d/2), which for large d is dramatically less. <strong>Bidirectional BFS</strong> expands one level at a time from whichever side has the smaller frontier, and stops as soon as a newly reached vertex has been seen by the other side. (It needs to be able to step backwards from the goal, which is easy for undirected graphs and puzzles with reversible moves.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d5-e4"><textarea class="pc-src pc-code" hidden>def bidirectional(neighbours, start, goal):
+    if start == goal:
+        return 0
+    front, back = {start}, {goal}
+    seen_f, seen_b = {start: 0}, {goal: 0}
+    while front and back:
+        if len(front) &gt; len(back):                   # grow the smaller side
+            front, back, seen_f, seen_b = back, front, seen_b, seen_f
+        nxt = set()
+        for v in front:
+            for w in neighbours(v):
+                if w in seen_b:
+                    return seen_f[v] + 1 + seen_b[w]
+                if w not in seen_f:
+                    seen_f[w] = seen_f[v] + 1
+                    nxt.add(w)
+        front = nxt
+    return None
+
+def moves(n):          # an implicit graph: from n you can go to n + 1, n - 1 or 2n
+    return [n + 1, n - 1, 2 * n]
+
+print(bidirectional(moves, 3, 100), bidirectional(moves, 5, 5))</textarea></div>
+<h2 id="cells-plus-state">Cells plus state</h2>
+<p>Some grid problems can&rsquo;t be solved by searching cells alone, because what you can do next depends on more than where you are:</p>
+<ul>
+<li><strong>Keys and doors</strong>: a door <code>A</code> opens only if you&rsquo;ve picked up key <code>a</code>. The state is <code>(cell, keys held)</code>. With up to a dozen keys, store the keys as a <strong>bitmask</strong>, an integer whose bit i is 1 if key i is held: <code>keys | (1 &lt;&lt; i)</code> adds key i, <code>keys &amp; (1 &lt;&lt; i)</code> tests it.</li>
+<li><strong>Direction</strong>: if turning costs time (a robot, a car), the state is <code>(cell, facing)</code>, and moving straight on is cheap while turning costs more.</li>
+<li><strong>Limited resources</strong>: walls you may break through (at most k), fuel, a time of day: add the remaining amount to the state.</li>
+</ul>
+<p>The state space is larger (cells × key sets, cells × 4 directions), but each state is still visited once, so BFS or Dijkstra&rsquo;s algorithm remains efficient. Week 50&rsquo;s lesson again: choose vertices so that the next move depends only on the vertex.</p>
+<div class="pc pc-example" data-kind="example" data-id="w051d5-e5"><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def with_keys(grid):
+    rows, cols = len(grid), len(grid[0])
+    start = next((r, c) for r in range(rows) for c in range(cols) if grid[r][c] == &quot;S&quot;)
+    state = (start, 0)
+    dist = {state: 0}
+    queue = deque([state])
+    while queue:
+        (r, c), keys = queue.popleft()
+        if grid[r][c] == &quot;E&quot;:
+            return dist[((r, c), keys)]
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if not (0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols):
+                continue
+            ch, new_keys = grid[nr][nc], keys
+            if ch == &quot;#&quot;:
+                continue
+            if ch.isupper() and ch not in &quot;SE&quot; and not keys &amp; (1 &lt;&lt; (ord(ch) - ord(&quot;A&quot;))):
+                continue                              # a locked door
+            if ch.islower():
+                new_keys = keys | (1 &lt;&lt; (ord(ch) - ord(&quot;a&quot;)))
+            nxt = ((nr, nc), new_keys)
+            if nxt not in dist:
+                dist[nxt] = dist[((r, c), keys)] + 1
+                queue.append(nxt)
+    return None
+
+castle = [&quot;S.A.E&quot;,
+          &quot;.####&quot;,
+          &quot;....a&quot;]
+print(with_keys(castle))</textarea></div>
+<p>The direct way is barred by door A; the search goes down and along to fetch key a (6 steps), comes back to the start (6 more), then through the door to the exit (4): 16 steps.</p>
+<h2 id="which-search">Which search?</h2>
+<table>
+<thead>
+<tr>
+<th>the grid</th>
+<th>use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>every step costs the same</td>
+<td>BFS</td>
+</tr>
+<tr>
+<td>a few costs of 0 and 1</td>
+<td>0-1 BFS (Week 50 Day 2)</td>
+</tr>
+<tr>
+<td>varied non-negative costs</td>
+<td>Dijkstra&rsquo;s algorithm</td>
+</tr>
+<tr>
+<td>varied costs, one known goal, a good estimate of distance</td>
+<td>A*</td>
+</tr>
+<tr>
+<td>unweighted, huge, reversible moves</td>
+<td>bidirectional BFS</td>
+</tr>
+<tr>
+<td>moves depend on keys, direction, resources</td>
+<td>any of the above on (cell, state)</td>
+</tr>
+<tr>
+<td>nearest of many sources</td>
+<td>multi-source BFS or Dijkstra</td>
+</tr>
+</tbody>
+</table>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A grid is an implicit graph; terrain costs make it weighted, so use Dijkstra&rsquo;s algorithm with a neighbours function, and cost diagonal moves √2 (forbidding cut corners if needed). A* orders the heap by g + h, where h estimates the remaining cost; if h never overestimates (Manhattan distance for 4-way moves, octile for 8-way) it still finds a shortest path while exploring far less, h = 0 being Dijkstra&rsquo;s algorithm. Bidirectional BFS grows the smaller frontier from each end until they meet, exploring about 2 × b^(d/2) instead of b^d. When the next move depends on more than the cell, search states like (cell, keys as a bitmask) or (cell, facing).</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d5-terrain" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Terrain</div><div class="pc-prompt"><p>A grid&rsquo;s digits are the cost of stepping <strong>onto</strong> each cell (the start&rsquo;s own cost isn&rsquo;t paid); <code>#</code> is impassable. Write <code>cheapest(grid, start, goal)</code>: the least cost from start to goal moving in 4 directions, or <code>None</code>. Then <code>cost_map(grid, start)</code>: a list of lists of the least cost to every cell (<code>None</code> for walls and unreachable cells).</p></div><textarea class="pc-src pc-code" hidden>import heapq
+
+def cheapest(grid, start, goal):
+    ___
+
+def cost_map(grid, start):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def test_terrain():
+    &quot;terrain&quot;
+    t = [&quot;119&quot;, &quot;191&quot;, &quot;111&quot;]
+    assert cheapest(t, (0, 0), (2, 2)) == 4 and cheapest(t, (0, 0), (0, 0)) == 0
+    assert cheapest([&quot;1#1&quot;], (0, 0), (0, 2)) is None
+    assert cost_map([&quot;12&quot;, &quot;#3&quot;], (0, 0)) == [[0, 2], [None, 5]]
+    rng = random.Random(1)
+    for _ in range(30):
+        g = [&quot;&quot;.join(rng.choice(&quot;1239#&quot;) for _ in range(5)) for _ in range(5)]
+        g[0] = &quot;1&quot; + g[0][1:]
+        m = cost_map(g, (0, 0))
+        for r in range(5):
+            for c in range(5):
+                if m[r][c] is not None and (r, c) != (0, 0):
+                    best = min(m[nr][nc] for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1))
+                               if 0 &lt;= nr &lt; 5 and 0 &lt;= nc &lt; 5 and m[nr][nc] is not None)
+                    assert m[r][c] == best + int(g[r][c])</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+
+def cost_map(grid, start):
+    rows, cols = len(grid), len(grid[0])
+    dist, heap = {start: 0}, [(0, start)]
+    while heap:
+        d, (r, c) = heapq.heappop(heap)
+        if d &gt; dist[(r, c)]:
+            continue
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols and grid[nr][nc] != &quot;#&quot;:
+                nd = d + int(grid[nr][nc])
+                if nd &lt; dist.get((nr, nc), float(&quot;inf&quot;)):
+                    dist[(nr, nc)] = nd
+                    heapq.heappush(heap, (nd, (nr, nc)))
+    return [[dist.get((r, c)) if grid[r][c] != &quot;#&quot; else None for c in range(cols)] for r in range(rows)]
+
+def cheapest(grid, start, goal):
+    return cost_map(grid, start)[goal[0]][goal[1]]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d5-astar" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A* search</div><div class="pc-prompt"><p>Write <code>astar(grid, start, goal)</code> for a grid of <code>.</code> and <code>#</code> with 4-way moves of cost 1: a pair <code>(length, expanded)</code>, the shortest path length (or <code>None</code>) and the number of cells <strong>expanded</strong> (popped and not out of date), using the Manhattan heuristic and breaking ties in f towards the <strong>larger</strong> cost so far. Then <code>dijkstra_expanded(grid, start, goal)</code>: the same count with h = 0. On open grids A* must expand far fewer.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+
+def astar(grid, start, goal):
+    ___
+
+def dijkstra_expanded(grid, start, goal):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+from collections import deque
+def bfs(grid, s, t):
+    rows, cols = len(grid), len(grid[0])
+    d = {s: 0}
+    q = deque([s])
+    while q:
+        r, c = q.popleft()
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols and grid[nr][nc] != &quot;#&quot; and (nr, nc) not in d:
+                d[(nr, nc)] = d[(r, c)] + 1
+                q.append((nr, nc))
+    return d.get(t)
+def test_astar():
+    &quot;A*&quot;
+    open_grid = [&quot;.&quot; * 30 for _ in range(30)]
+    length, exp = astar(open_grid, (0, 0), (29, 29))
+    assert length == 58 and exp &lt; dijkstra_expanded(open_grid, (0, 0), (29, 29)) // 5
+    assert astar([&quot;.#.&quot;], (0, 0), (0, 2))[0] is None
+    rng = random.Random(2)
+    for _ in range(100):
+        g = [&quot;&quot;.join(rng.choice(&quot;...#&quot;) for _ in range(8)) for _ in range(8)]
+        g[0] = &quot;.&quot; + g[0][1:]
+        g[7] = g[7][:7] + &quot;.&quot;
+        assert astar(g, (0, 0), (7, 7))[0] == bfs(g, (0, 0), (7, 7))</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+
+def _search(grid, start, goal, weight):
+    rows, cols = len(grid), len(grid[0])
+    def h(cell):
+        return weight * (abs(cell[0] - goal[0]) + abs(cell[1] - goal[1]))
+    g = {start: 0}
+    heap = [(h(start), 0, start)]
+    expanded = 0
+    while heap:
+        f, neg_d, cell = heapq.heappop(heap)
+        d = -neg_d
+        if d &gt; g[cell]:
+            continue
+        expanded += 1
+        if cell == goal:
+            return d, expanded
+        r, c = cell
+        for nxt in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nxt[0] &lt; rows and 0 &lt;= nxt[1] &lt; cols and grid[nxt[0]][nxt[1]] != &quot;#&quot;:
+                if d + 1 &lt; g.get(nxt, float(&quot;inf&quot;)):
+                    g[nxt] = d + 1
+                    heapq.heappush(heap, (d + 1 + h(nxt), -(d + 1), nxt))   # ties: further along first
+    return None, expanded
+
+def astar(grid, start, goal):
+    return _search(grid, start, goal, 1)
+
+def dijkstra_expanded(grid, start, goal):
+    return _search(grid, start, goal, 0)[1]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d5-bidir" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">From both ends</div><div class="pc-prompt"><p>Write <code>bidirectional(neighbours, start, goal)</code>: the shortest distance in an undirected implicit graph (where <code>neighbours(v)</code> returns a list, and moves are reversible), or <code>None</code>, growing the smaller frontier one level at a time. Then <code>count_expanded(neighbours, start, goal)</code>: how many vertices it <strong>adds</strong> to either side before meeting, so it can be compared with plain BFS.</p></div><textarea class="pc-src pc-code" hidden>def bidirectional(neighbours, start, goal):
+    ___
+
+def count_expanded(neighbours, start, goal):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>from collections import deque
+def bfs(neighbours, s, t, limit=10**6):
+    d = {s: 0}
+    q = deque([s])
+    while q:
+        v = q.popleft()
+        if v == t:
+            return d[v], len(d)
+        for w in neighbours(v):
+            if w not in d:
+                d[w] = d[v] + 1
+                q.append(w)
+    return None, len(d)
+def grid_n(cell):
+    r, c = cell
+    return [(r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)]
+def test_bidir():
+    &quot;both ends&quot;
+    assert bidirectional(grid_n, (0, 0), (0, 0)) == 0 and bidirectional(grid_n, (0, 0), (3, 4)) == 7
+    for t in [(5, 5), (10, -3), (0, 12)]:
+        d, size = bfs(grid_n, (0, 0), t)
+        assert bidirectional(grid_n, (0, 0), t) == d and count_expanded(grid_n, (0, 0), t) &lt; size
+    line = lambda n: [x for x in (n - 1, n + 1) if 0 &lt;= x &lt;= 10]
+    assert bidirectional(line, 0, 10) == 10 and bidirectional(lambda n: [], 1, 2) is None</textarea><textarea class="pc-src pc-solution" hidden>def _run(neighbours, start, goal):
+    if start == goal:
+        return 0, 0
+    front, back = {start}, {goal}
+    seen_f, seen_b = {start: 0}, {goal: 0}
+    added = 0
+    while front and back:
+        if len(front) &gt; len(back):
+            front, back, seen_f, seen_b = back, front, seen_b, seen_f
+        nxt = set()
+        for v in front:
+            for w in neighbours(v):
+                if w in seen_b:
+                    return seen_f[v] + 1 + seen_b[w], added
+                if w not in seen_f:
+                    seen_f[w] = seen_f[v] + 1
+                    nxt.add(w)
+                    added += 1
+        front = nxt
+    return None, added
+
+def bidirectional(neighbours, start, goal):
+    return _run(neighbours, start, goal)[0]
+
+def count_expanded(neighbours, start, goal):
+    return _run(neighbours, start, goal)[1]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d5-keys" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Keys and doors</div><div class="pc-prompt"><p>A grid has <code>S</code> (start), <code>E</code> (exit), <code>#</code> walls, <code>.</code> floor, lower-case keys <code>a</code> to <code>d</code> and matching upper-case doors <code>A</code> to <code>D</code>. Write <code>fewest_steps(grid)</code>: the fewest moves from S to E, where a door can be passed only while holding its key (picked up by stepping on it; keys aren&rsquo;t used up), or <code>None</code>. BFS over <code>(cell, keys bitmask)</code>. Then <code>keys_needed(grid)</code>: the sorted list of key letters held on arriving at E along one shortest route.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def fewest_steps(grid):
+    ___
+
+def keys_needed(grid):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_keys():
+    &quot;keys&quot;
+    castle = [&quot;S.A.E&quot;,
+              &quot;.####&quot;,
+              &quot;....a&quot;]
+    assert fewest_steps(castle) == 16 and keys_needed(castle) == [&quot;a&quot;]
+    assert fewest_steps([&quot;S.E&quot;]) == 2 and keys_needed([&quot;S.E&quot;]) == []
+    assert fewest_steps([&quot;SAE&quot;, &quot;##a&quot;]) is None
+    two = [&quot;S.b.A..E&quot;,
+           &quot;.######.&quot;,
+           &quot;a......B&quot;]
+    assert fewest_steps(two) is not None and keys_needed(two) == [&quot;a&quot;, &quot;b&quot;]</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+def _search(grid):
+    rows, cols = len(grid), len(grid[0])
+    start = next((r, c) for r in range(rows) for c in range(cols) if grid[r][c] == &quot;S&quot;)
+    first = (start, 0)
+    dist = {first: 0}
+    queue = deque([first])
+    while queue:
+        (r, c), keys = queue.popleft()
+        if grid[r][c] == &quot;E&quot;:
+            return dist[((r, c), keys)], keys
+        for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if not (0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols):
+                continue
+            ch, new_keys = grid[nr][nc], keys
+            if ch == &quot;#&quot;:
+                continue
+            if &quot;A&quot; &lt;= ch &lt;= &quot;D&quot; and not keys &amp; (1 &lt;&lt; (ord(ch) - ord(&quot;A&quot;))):
+                continue
+            if &quot;a&quot; &lt;= ch &lt;= &quot;d&quot;:
+                new_keys = keys | (1 &lt;&lt; (ord(ch) - ord(&quot;a&quot;)))
+            nxt = ((nr, nc), new_keys)
+            if nxt not in dist:
+                dist[nxt] = dist[((r, c), keys)] + 1
+                queue.append(nxt)
+    return None, 0
+
+def fewest_steps(grid):
+    return _search(grid)[0]
+
+def keys_needed(grid):
+    steps, keys = _search(grid)
+    return [chr(ord(&quot;a&quot;) + i) for i in range(4) if keys &amp; (1 &lt;&lt; i)]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d5-turns" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Fewest turns</div><div class="pc-prompt"><p>A robot in a grid of <code>.</code> and <code>#</code> moves one cell forward at a time and can turn left or right on the spot (each turn is a quarter turn). It starts at <code>start</code> facing a given direction (<code>"N"</code>, <code>"E"</code>, <code>"S"</code> or <code>"W"</code>), and any final direction is fine. Write <code>fewest_turns(grid, start, facing, goal)</code>: the fewest quarter-turns needed to reach the goal (moving forward is free), or <code>None</code>, with 0-1 BFS over <code>(cell, direction)</code> states. Then <code>cheapest_drive(grid, start, facing, goal, move_cost, turn_cost)</code>: the least total cost with Dijkstra&rsquo;s algorithm over the same states.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+from collections import deque
+
+def fewest_turns(grid, start, facing, goal):
+    ___
+
+def cheapest_drive(grid, start, facing, goal, move_cost, turn_cost):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_turns():
+    &quot;turns&quot;
+    g = [&quot;....&quot;,
+         &quot;.##.&quot;,
+         &quot;....&quot;]
+    assert fewest_turns(g, (0, 0), &quot;E&quot;, (2, 3)) == 1
+    assert fewest_turns(g, (0, 0), &quot;W&quot;, (0, 3)) == 2 and fewest_turns(g, (0, 0), &quot;N&quot;, (0, 0)) == 0
+    assert fewest_turns([&quot;.#.&quot;], (0, 0), &quot;E&quot;, (0, 2)) is None
+    assert cheapest_drive(g, (0, 0), &quot;E&quot;, (2, 3), 1, 0) == 5 and cheapest_drive(g, (0, 0), &quot;E&quot;, (2, 3), 1, 10) == 15
+    assert cheapest_drive(g, (0, 0), &quot;S&quot;, (2, 3), 1, 10) == 15</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+from collections import deque
+
+DIRS = {&quot;N&quot;: (-1, 0), &quot;E&quot;: (0, 1), &quot;S&quot;: (1, 0), &quot;W&quot;: (0, -1)}
+ORDER = &quot;NESW&quot;
+
+def _moves(grid, state, move_cost, turn_cost):
+    (r, c), d = state
+    dr, dc = DIRS[d]
+    nr, nc = r + dr, c + dc
+    out = []
+    if 0 &lt;= nr &lt; len(grid) and 0 &lt;= nc &lt; len(grid[0]) and grid[nr][nc] != &quot;#&quot;:
+        out.append((((nr, nc), d), move_cost))
+    i = ORDER.index(d)
+    for nd in (ORDER[(i + 1) % 4], ORDER[(i - 1) % 4]):
+        out.append((((r, c), nd), turn_cost))
+    return out
+
+def fewest_turns(grid, start, facing, goal):
+    first = (start, facing)
+    dist = {first: 0}
+    dq = deque([first])
+    while dq:
+        state = dq.popleft()
+        if state[0] == goal:
+            return dist[state]
+        for nxt, cost in _moves(grid, state, 0, 1):
+            nd = dist[state] + cost
+            if nd &lt; dist.get(nxt, float(&quot;inf&quot;)):
+                dist[nxt] = nd
+                if cost:
+                    dq.append(nxt)
+                else:
+                    dq.appendleft(nxt)
+    return None
+
+def cheapest_drive(grid, start, facing, goal, move_cost, turn_cost):
+    first = (start, facing)
+    dist, heap, count = {first: 0}, [(0, 0, first)], 1
+    while heap:
+        d, _, state = heapq.heappop(heap)
+        if d &gt; dist[state]:
+            continue
+        if state[0] == goal:
+            return d
+        for nxt, cost in _moves(grid, state, move_cost, turn_cost):
+            if d + cost &lt; dist.get(nxt, float(&quot;inf&quot;)):
+                dist[nxt] = d + cost
+                heapq.heappush(heap, (d + cost, count, nxt))
+                count += 1
+    return None</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w051d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">An overconfident estimate</div><div class="pc-prompt"><p>This A* multiplies the Manhattan distance by 3, so the heuristic <strong>overestimates</strong> and the search rushes towards the goal, settling for a longer route: this prints <code>14</code>. Use the plain Manhattan distance so it finds the true shortest, <code>10</code>.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+
+grid = [&quot;...#..#&quot;,
+        &quot;.#....#&quot;,
+        &quot;.#.#.#.&quot;,
+        &quot;.#..#..&quot;,
+        &quot;.......&quot;]
+
+def astar(start, goal):
+    rows, cols = len(grid), len(grid[0])
+    h = lambda cell: 3 * (abs(cell[0] - goal[0]) + abs(cell[1] - goal[1]))
+    g, heap = {start: 0}, [(h(start), 0, start)]
+    while heap:
+        f, d, cell = heapq.heappop(heap)
+        if cell == goal:
+            return d
+        if d &gt; g[cell]:
+            continue
+        r, c = cell
+        for nxt in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nxt[0] &lt; rows and 0 &lt;= nxt[1] &lt; cols and grid[nxt[0]][nxt[1]] != &quot;#&quot;:
+                if d + 1 &lt; g.get(nxt, float(&quot;inf&quot;)):
+                    g[nxt] = d + 1
+                    heapq.heappush(heap, (d + 1 + h(nxt), d + 1, nxt))
+
+print(astar((2, 0), (2, 6)))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;never overestimate&quot;
+    expect_output(&quot;10&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+
+grid = [&quot;...#..#&quot;,
+        &quot;.#....#&quot;,
+        &quot;.#.#.#.&quot;,
+        &quot;.#..#..&quot;,
+        &quot;.......&quot;]
+
+def astar(start, goal):
+    rows, cols = len(grid), len(grid[0])
+    h = lambda cell: abs(cell[0] - goal[0]) + abs(cell[1] - goal[1])
+    g, heap = {start: 0}, [(h(start), 0, start)]
+    while heap:
+        f, d, cell = heapq.heappop(heap)
+        if cell == goal:
+            return d
+        if d &gt; g[cell]:
+            continue
+        r, c = cell
+        for nxt in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+            if 0 &lt;= nxt[0] &lt; rows and 0 &lt;= nxt[1] &lt; cols and grid[nxt[0]][nxt[1]] != &quot;#&quot;:
+                if d + 1 &lt; g.get(nxt, float(&quot;inf&quot;)):
+                    g[nxt] = d + 1
+                    heapq.heappush(heap, (d + 1 + h(nxt), d + 1, nxt))
+
+print(astar((2, 0), (2, 6)))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w051d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Forgetting the keys</div><div class="pc-prompt"><p>This search records only the <strong>cell</strong> as seen, not the keys held, so after walking past the start without the key it can never come back with it: this prints <code>None</code>. Make the state <code>(cell, keys)</code> so it prints <code>16</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections import deque
+
+castle = [&quot;S.A.E&quot;,
+          &quot;.####&quot;,
+          &quot;....a&quot;]
+start = (0, 0)
+seen = {start}
+queue = deque([(start, False, 0)])
+answer = None
+while queue:
+    (r, c), has_key, steps = queue.popleft()
+    if castle[r][c] == &quot;E&quot;:
+        answer = steps
+        break
+    for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+        if 0 &lt;= nr &lt; 3 and 0 &lt;= nc &lt; 5 and castle[nr][nc] != &quot;#&quot;:
+            if castle[nr][nc] == &quot;A&quot; and not has_key:
+                continue
+            key = has_key or castle[nr][nc] == &quot;a&quot;
+            if (nr, nc) not in seen:
+                seen.add((nr, nc))
+                queue.append(((nr, nc), key, steps + 1))
+print(answer)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;keys are part of the state&quot;
+    expect_output(&quot;16&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from collections import deque
+
+castle = [&quot;S.A.E&quot;,
+          &quot;.####&quot;,
+          &quot;....a&quot;]
+start = (0, 0)
+seen = {(start, False)}
+queue = deque([(start, False, 0)])
+answer = None
+while queue:
+    (r, c), has_key, steps = queue.popleft()
+    if castle[r][c] == &quot;E&quot;:
+        answer = steps
+        break
+    for nr, nc in ((r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)):
+        if 0 &lt;= nr &lt; 3 and 0 &lt;= nc &lt; 5 and castle[nr][nc] != &quot;#&quot;:
+            if castle[nr][nc] == &quot;A&quot; and not has_key:
+                continue
+            key = has_key or castle[nr][nc] == &quot;a&quot;
+            if ((nr, nc), key) not in seen:
+                seen.add(((nr, nc), key))
+                queue.append(((nr, nc), key, steps + 1))
+print(answer)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w051d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Diagonals for free</div><div class="pc-prompt"><p>This route planner lets diagonal steps cost 1, the same as straight ones, so it reports a 4 × 4 field crossed corner to corner in 3 moves&rsquo; worth of distance: this prints <code>3</code>. Charge <code>math.sqrt(2)</code> for a diagonal step so it prints <code>4.243</code>.</p></div><textarea class="pc-src pc-code" hidden>import heapq, math
+
+n = 4
+steps = [(dr, dc, 1) for dr in (-1, 0, 1) for dc in (-1, 0, 1) if (dr, dc) != (0, 0)]
+dist, heap = {(0, 0): 0}, [(0, (0, 0))]
+while heap:
+    d, (r, c) = heapq.heappop(heap)
+    if d &gt; dist[(r, c)]:
+        continue
+    for dr, dc, step in steps:
+        nr, nc = r + dr, c + dc
+        if 0 &lt;= nr &lt; n and 0 &lt;= nc &lt; n and d + step &lt; dist.get((nr, nc), float(&quot;inf&quot;)):
+            dist[(nr, nc)] = d + step
+            heapq.heappush(heap, (d + step, (nr, nc)))
+print(round(dist[(n - 1, n - 1)], 3))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;root two&quot;
+    expect_output(&quot;4.243&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import heapq, math
+
+n = 4
+steps = [(dr, dc, math.sqrt(2) if dr and dc else 1) for dr in (-1, 0, 1) for dc in (-1, 0, 1) if (dr, dc) != (0, 0)]
+dist, heap = {(0, 0): 0}, [(0, (0, 0))]
+while heap:
+    d, (r, c) = heapq.heappop(heap)
+    if d &gt; dist[(r, c)]:
+        continue
+    for dr, dc, step in steps:
+        nr, nc = r + dr, c + dc
+        if 0 &lt;= nr &lt; n and 0 &lt;= nc &lt; n and d + step &lt; dist.get((nr, nc), float(&quot;inf&quot;)):
+            dist[(nr, nc)] = d + step
+            heapq.heappush(heap, (d + step, (nr, nc)))
+print(round(dist[(n - 1, n - 1)], 3))</textarea></div>
+<div class="parsons" data-id="w051d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">An A* step</div><div class="pc-prompt"><p>Arrange the lines into the heart of A* search. One line is a trap.</p></div><script type="application/json">{"lines": ["    while heap:", "        f, d, cell = heapq.heappop(heap)", "        if cell == goal:", "            return d", "        if d > g[cell]:", "            continue", "        for nxt in neighbours(cell):", "            if d + 1 < g.get(nxt, float(\"inf\")):", "                g[nxt] = d + 1", "                heapq.heappush(heap, (d + 1 + h(nxt), d + 1, nxt))"], "distractors": ["                heapq.heappush(heap, (h(nxt), d + 1, nxt))"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the Manhattan distance from (1, 2) to (4, 0)
+q = ___   # the octile distance from (0, 0) to (3, 1), rounded to 3 places
+r = ___   # A* with h = 0 is the same as which algorithm? (a string)
+s = ___   # the bitmask for holding keys a and c (a is bit 0)
+t = ___   # how many (cell, facing) states a 5 x 4 grid with no walls has</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 5 and q == 3.414 and r.lower().startswith(&quot;dijkstra&quot;), &quot;p, q and r&quot;
+    assert s == 5 and t == 80, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 5
+q = 3.414
+r = &quot;Dijkstra&#x27;s algorithm&quot;
+s = 5
+t = 80</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w051d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Which search suits a grid where cells have different entry costs?", "answer": 1, "explain": "Costs make it a weighted graph.", "options": ["BFS", "Dijkstra&rsquo;s algorithm", "DFS", "Union-find"]}, {"type": "mc", "q": "What should a diagonal grid step cost, compared with a straight one of cost 1?", "answer": 1, "explain": "Otherwise routes zig-zag.", "options": ["1", "About 1.414 (the square root of 2)", "2", "0.5"]}, {"type": "mc", "q": "How does A* order its heap?", "answer": 1, "explain": "f = g + h.", "options": ["By g, the cost so far", "By g + h, cost so far plus the estimate still to go", "By h only", "Randomly"]}, {"type": "mc", "q": "What makes a heuristic admissible?", "answer": 1, "explain": "Then A* still finds a shortest path.", "options": ["It&rsquo;s fast", "It never overestimates the true remaining cost", "It&rsquo;s always 0", "It&rsquo;s exact"]}, {"type": "mc", "q": "Which heuristic suits a 4-way grid with step cost 1?", "answer": 1, "explain": "It never overestimates there.", "options": ["Straight-line distance squared", "Manhattan distance", "Number of walls", "Zero only"]}, {"type": "mc", "q": "What happens if the heuristic overestimates?", "answer": 1, "explain": "It trusts the bad estimate.", "options": ["Nothing", "A* may return a path that isn&rsquo;t shortest", "It crashes", "It becomes BFS"]}, {"type": "mc", "q": "Why can bidirectional BFS explore much less?", "answer": 1, "explain": "Exponential growth is cut in half in the exponent.", "options": ["It&rsquo;s parallel", "Two searches to depth d/2 cover about 2 \u00d7 b^(d/2), far less than b^d", "It skips vertices", "It uses heuristics"]}, {"type": "mc", "q": "How should held keys be stored in the search state?", "answer": 1, "explain": "Hashable, small and fast.", "options": ["A list", "A bitmask integer", "A string sorted each time", "Not at all"]}, {"type": "mc", "q": "What is the state when turning costs time?", "answer": 1, "explain": "The next move depends on where you face.", "options": ["The cell", "(cell, facing)", "The facing only", "The number of turns"]}, {"type": "output", "q": "What does this print?", "answer": "5 False True", "explain": "Bits 0 and 2 are set: 1 + 4.", "code": "keys = 0\nkeys |= 1 << 2\nkeys |= 1 << 0\nprint(keys, bool(keys & (1 << 1)), bool(keys & (1 << 2)))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w051d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: the sliding-tile puzzle</div><div class="pc-prompt"><p>The 8-puzzle has tiles 1 to 8 and a gap (0) on a 3 × 3 board; a move slides a tile next to the gap into it. Solve it with A*: each state is a tuple of 9 numbers (row by row), each move costs 1, and the heuristic is the sum of the <strong>Manhattan distances</strong> of each tile (not the gap) from its place in the goal <code>(1, 2, 3, 4, 5, 6, 7, 8, 0)</code>. That heuristic never overestimates, since each move shifts one tile one square.</p>
+<p>Half of all arrangements can&rsquo;t be solved. A state is solvable exactly when the number of <strong>inversions</strong> (pairs of tiles, ignoring the gap, where a larger number comes before a smaller one in the row-by-row order) is even. Write <code>solvable(state)</code>, <code>solve(state)</code> (the fewest moves, or <code>None</code> if unsolvable, without searching), and <code>solution(state)</code>: the list of states from the start to the goal along a shortest solution. The checks include positions needing over 20 moves; plain BFS would have to look at up to 181,440 states, but A* looks at far fewer.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+
+GOAL = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+
+def solvable(state):
+    ___
+
+def solve(state):
+    ___
+
+def solution(state):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random, time
+from collections import deque
+GOAL = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+def neighbours(s):
+    i = s.index(0)
+    r, c = divmod(i, 3)
+    out = []
+    for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+        nr, nc = r + dr, c + dc
+        if 0 &lt;= nr &lt; 3 and 0 &lt;= nc &lt; 3:
+            j = nr * 3 + nc
+            t = list(s)
+            t[i], t[j] = t[j], t[i]
+            out.append(tuple(t))
+    return out
+def test_small():
+    &quot;small cases&quot;
+    assert solve(GOAL) == 0 and solution(GOAL) == [GOAL]
+    s = (1, 2, 3, 4, 5, 6, 7, 0, 8)
+    assert solve(s) == 1 and solution(s) == [s, GOAL]
+    assert not solvable((2, 1, 3, 4, 5, 6, 7, 8, 0)) and solve((2, 1, 3, 4, 5, 6, 7, 8, 0)) is None
+def test_random():
+    &quot;against BFS&quot;
+    rng = random.Random(6)
+    for _ in range(6):
+        s = GOAL
+        for _ in range(rng.randint(5, 30)):
+            s = rng.choice(neighbours(s))
+        d = {s: 0}
+        q = deque([s])
+        while q:
+            v = q.popleft()
+            if v == GOAL:
+                break
+            for w in neighbours(v):
+                if w not in d:
+                    d[w] = d[v] + 1
+                    q.append(w)
+        assert solve(s) == d[GOAL]
+        path = solution(s)
+        assert path[0] == s and path[-1] == GOAL and len(path) == d[GOAL] + 1 and all(b in neighbours(a) for a, b in zip(path, path[1:]))
+def test_hard():
+    &quot;a hard one, quickly&quot;
+    t0 = time.perf_counter()
+    assert solve((8, 6, 7, 2, 5, 4, 3, 0, 1)) == 31
+    assert time.perf_counter() - t0 &lt; 20</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+
+GOAL = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+HOME = {tile: divmod(i, 3) for i, tile in enumerate(GOAL)}
+
+def _h(state):
+    total = 0
+    for i, tile in enumerate(state):
+        if tile:
+            r, c = divmod(i, 3)
+            hr, hc = HOME[tile]
+            total += abs(r - hr) + abs(c - hc)
+    return total
+
+def _neighbours(state):
+    i = state.index(0)
+    r, c = divmod(i, 3)
+    out = []
+    for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+        nr, nc = r + dr, c + dc
+        if 0 &lt;= nr &lt; 3 and 0 &lt;= nc &lt; 3:
+            j = nr * 3 + nc
+            t = list(state)
+            t[i], t[j] = t[j], t[i]
+            out.append(tuple(t))
+    return out
+
+def solvable(state):
+    tiles = [t for t in state if t]
+    inversions = sum(1 for i in range(len(tiles)) for j in range(i + 1, len(tiles)) if tiles[i] &gt; tiles[j])
+    return inversions % 2 == 0
+
+def _astar(state):
+    best, parent = {state: 0}, {state: None}
+    heap = [(_h(state), 0, state)]
+    while heap:
+        f, g, s = heapq.heappop(heap)
+        if s == GOAL:
+            return g, parent
+        if g &gt; best[s]:
+            continue
+        for t in _neighbours(s):
+            if g + 1 &lt; best.get(t, float(&quot;inf&quot;)):
+                best[t], parent[t] = g + 1, s
+                heapq.heappush(heap, (g + 1 + _h(t), g + 1, t))
+    return None, parent
+
+def solve(state):
+    if not solvable(state):
+        return None
+    return _astar(tuple(state))[0]
+
+def solution(state):
+    state = tuple(state)
+    if not solvable(state):
+        return None
+    moves, parent = _astar(state)
+    path, s = [], GOAL
+    while s is not None:
+        path.append(s)
+        s = parent[s]
+    return path[::-1]</textarea><template class="pc-src pc-hint">Precompute where each tile belongs: <code>home = {tile: divmod(i, 3) for i, tile in enumerate(GOAL)}</code>. The heuristic sums <code>abs(r - hr) + abs(c - hc)</code> over tiles 1 to 8. Push <code>(g + h, g, state)</code> and keep <code>best_g</code> and <code>parent</code> dicts, exactly as in A* on a grid.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Draw a small maze on squared paper with a key and a locked door, and solve it by hand thinking in states: &ldquo;where am I, and which keys do I hold?&rdquo; Tomorrow is the Forge: a delivery planner that brings together this week&rsquo;s weighted graph algorithms.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w051d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w051d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w051d5", "week": 51, "day": 5, "title": "Grids as graphs", "exercises": [{"id": "w051d5-terrain", "title": "Terrain", "points": 10}, {"id": "w051d5-astar", "title": "A* search", "points": 15}, {"id": "w051d5-bidir", "title": "From both ends", "points": 10}, {"id": "w051d5-keys", "title": "Keys and doors", "points": 15}, {"id": "w051d5-turns", "title": "Fewest turns", "points": 15}, {"id": "w051d5-bug1", "title": "An overconfident estimate", "points": 10}, {"id": "w051d5-bug2", "title": "Forgetting the keys", "points": 10}, {"id": "w051d5-bug3", "title": "Diagonals for free", "points": 10}, {"id": "w051d5-trace", "title": "Predict them", "points": 10}, {"id": "w051d5-challenge", "title": "Challenge: the sliding-tile puzzle", "points": 25}], "points": 130}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
