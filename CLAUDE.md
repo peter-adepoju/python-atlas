@@ -8,7 +8,7 @@ Repo: https://github.com/peter-adepoju/python-atlas
 
 Write the course week by week, to the standard of Week 1 and the recent weeks (look at `course/content/w028` and `w029` as models). After each week: validate, build, commit, push, and send Peter a short progress message. "Continue" means carry on with the next day.
 
-**Status (7 November 2026):** Weeks 1 to 26, 28 to 39 and 41 to 52 are done (Weeks 27 and 40 are rest weeks, with no content). **Next: Week 53, "Dynamic programming I"**: Spotting DP problems, Memoisation versus tabulation, One-dimensional DP, Grid DP, Knapsack, Forge. The full plan is in `course/curriculum.py`. Rest weeks have no folder.
+**Status (7 November 2026):** Weeks 1 to 26, 28 to 39 and 41 to 53 are done (Weeks 27 and 40 are rest weeks, with no content). **Next: Week 54, "Dynamic programming II"**: LCS and edit distance, Longest increasing subsequence, DP on trees and graphs, Bitmask DP, DP practice, Forge. The full plan is in `course/curriculum.py`. Rest weeks have no folder.
 
 Week numbers in cross-references: Phase 2 runs Week 14 (method) to 26 (exam): 15 to 16 recursion, 17 Big-O, 18 to 19 searching and sorting, 20 modules and stdlib, 21 shell, argparse and Git, 22 setting up, 23 text and data formats, 24 testing, 25 project (the `spend` expense tracker), 26 review and exam. Phase 3 starts at Week 28. Phase 4 (data structures and algorithms) starts at Week 41; Phase 5 (Advanced Python: generators, decorators, closures and `nonlocal`, context managers) comes after it, so lessons defer those topics to Phase 5. Check a day's title (`sed -n 2p course/content/wNNN/dD.md`) before writing "Week N" in a lesson.
 
