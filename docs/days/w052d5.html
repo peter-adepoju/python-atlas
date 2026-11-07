@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 52 Day 5: Pruning | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Backtracking is only as fast as the part of the tree it doesn’t visit. Pruning is the art of proving, early, that a branch can’t contain what you’re looking...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w052d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 52 Day 5: Pruning">
+<meta property="og:description" content="Backtracking is only as fast as the part of the tree it doesn’t visit. Pruning is the art of proving, early, that a branch can’t contain what you’re looking...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w052d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-52">Week 52: Greedy and backtracking</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#can-it-still-succeed" data-sec="can-it-still-succeed">Can it still succeed?</a></li><li><a href="#branch-and-bound" data-sec="branch-and-bound">Branch and bound</a></li><li><a href="#good-choices-first" data-sec="good-choices-first">Good choices first</a></li><li><a href="#symmetry-and-dead-ends" data-sec="symmetry-and-dead-ends">Symmetry and dead ends</a></li><li><a href="#iterative-deepening" data-sec="iterative-deepening">Iterative deepening</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w052d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-4">Phase 4: Data structures and algorithms</a></li><li><a href="../map.html#week-52">Week 52: Greedy and backtracking</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 52, Day 5</span></p>
+      <h1>Pruning</h1>
+      <div class="day-intro"><p>Backtracking is only as fast as the part of the tree it doesn&rsquo;t visit. <strong>Pruning</strong> is the art of proving, early, that a branch can&rsquo;t contain what you&rsquo;re looking for, and skipping it whole. This week you&rsquo;ve pruned by constraints (no invalid brackets, no attacked squares). Today adds the stronger tools: <strong>bounds</strong> that show a branch can&rsquo;t beat the best answer found so far (branch and bound), trying the most promising choices first, breaking <strong>symmetry</strong>, remembering <strong>dead ends</strong>, and <strong>iterative deepening</strong>. You&rsquo;ll measure each by counting the nodes the search visits, because a pruning idea is only as good as the work it saves.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Prune with feasibility bounds, such as the sum of the remaining items</li><li>Use branch and bound with an optimistic estimate to find optimal answers</li><li>Order choices so good answers are found early and bounds bite sooner</li><li>Break symmetry and remember dead ends to avoid repeated work</li><li>Use iterative deepening to find the shallowest solution with little memory</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Can it still succeed?: 20 min"></span><span class="plan-seg s0" style="flex:30" title="Branch and bound: 30 min"></span><span class="plan-seg s1" style="flex:15" title="Good choices first: 15 min"></span><span class="plan-seg s0" style="flex:20" title="Symmetry and dead ends: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Iterative deepening: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Can it still succeed?</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Branch and bound</span><span class="plan-min">30 min</span></li><li><span class="plan-at">1:00</span><span class="plan-what">Good choices first</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Symmetry and dead ends</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Iterative deepening</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w052d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w052d5.ipynb" download>download it</a>. Exercises today are worth 130 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w052d5-p1"><textarea class="pc-src pc-code" hidden>def count_nodes(numbers, target, prune):
+    numbers = sorted(numbers, reverse=True)
+    suffix = [0] * (len(numbers) + 1)
+    for i in range(len(numbers) - 1, -1, -1):
+        suffix[i] = suffix[i + 1] + numbers[i]
+    visited = [0]
+    def search(i, total):
+        visited[0] += 1
+        if total == target:
+            return True
+        if i == len(numbers) or total &gt; target:
+            return False
+        if prune and total + suffix[i] &lt; target:
+            return False                       # even taking everything left falls short
+        return search(i + 1, total + numbers[i]) or search(i + 1, total)
+    found = search(0, 0)
+    return found, visited[0]
+
+nums = [41, 34, 33, 29, 27, 21, 19, 13, 9, 7, 5, 3]
+print(count_nodes(nums, 240, prune=False))
+print(count_nodes(nums, 240, prune=True))</textarea></div>
+<p>Same answer, very different work. The pruned search notices, at every step, when the numbers still available can&rsquo;t possibly reach the target, and abandons the branch.</p>
+<h2 id="can-it-still-succeed">Can it still succeed?</h2>
+<p>The simplest pruning asks: <strong>is success still possible from here?</strong> It needs a quick test that never says &ldquo;no&rdquo; wrongly (it may say &ldquo;maybe&rdquo; when the answer is really no; that only costs time). For sums:</p>
+<ul>
+<li>if the running total already exceeds the target (with positive numbers), stop;</li>
+<li>if the total plus <strong>all</strong> the remaining numbers can&rsquo;t reach the target, stop. Precompute <strong>suffix sums</strong> so this test is O(1).</li>
+</ul>
+<p>The test must be <strong>safe</strong>: a prune that sometimes throws away a real solution makes the search wrong, not just slow. Write each pruning rule as &ldquo;if this holds, no solution exists in this branch&rdquo;, and convince yourself it&rsquo;s true.</p>
+<div class="pc pc-example" data-kind="example" data-id="w052d5-e2"><textarea class="pc-src pc-code" hidden>def subsets_summing(numbers, target):
+    numbers = sorted(numbers)
+    suffix = [0] * (len(numbers) + 1)
+    for i in range(len(numbers) - 1, -1, -1):
+        suffix[i] = suffix[i + 1] + numbers[i]
+    out, current = [], []
+    def search(i, total):
+        if total == target:
+            out.append(list(current))
+            return
+        if i == len(numbers) or total + numbers[i] &gt; target or total + suffix[i] &lt; target:
+            return                     # sorted: if the smallest left overshoots, all do
+        current.append(numbers[i])
+        search(i + 1, total + numbers[i])
+        current.pop()
+        search(i + 1, total)
+    search(0, 0)
+    return out
+
+print(subsets_summing([3, 34, 4, 12, 5, 2], 9))</textarea></div>
+<h2 id="branch-and-bound">Branch and bound</h2>
+<p>For <strong>optimisation</strong> (&ldquo;the best&rdquo;, not &ldquo;any&rdquo;), keep the <strong>best answer found so far</strong>, and give each branch an <strong>optimistic bound</strong>: a value at least as good as anything in that branch. If the bound can&rsquo;t beat the best so far, prune. Better bounds prune more; a bound that&rsquo;s too optimistic still works but prunes less, and one that&rsquo;s too pessimistic is <strong>wrong</strong>.</p>
+<p>The 0/1 knapsack (Monday&rsquo;s failure of greed) is the classic. Optimistic bound for a branch: the value taken so far plus the <strong>fractional</strong> knapsack of the remaining items into the remaining capacity (Monday&rsquo;s greedy, which can only do better than whole items). Sort items by value per weight once, so the bound is a quick scan.</p>
+<p>This is <strong>branch and bound</strong>, introduced by Ailsa Land and Alison Doig in 1960 for integer programming, and still the core of the solvers used for scheduling and routing.</p>
+<div class="pc pc-example" data-kind="example" data-id="w052d5-e3"><textarea class="pc-src pc-code" hidden>def knapsack_bb(items, capacity):
+    &quot;&quot;&quot;items: (value, weight). Branch and bound with the fractional bound.&quot;&quot;&quot;
+    items = sorted(items, key=lambda it: it[0] / it[1], reverse=True)
+    best, visited = [0], [0]
+
+    def bound(i, value, room):
+        for v, w in items[i:]:
+            if w &lt;= room:
+                value, room = value + v, room - w
+            else:
+                return value + v * room / w          # a fraction of the next item
+        return value
+
+    def search(i, value, room):
+        visited[0] += 1
+        best[0] = max(best[0], value)
+        if i == len(items) or bound(i, value, room) &lt;= best[0]:
+            return                                    # can&#x27;t beat what we have
+        v, w = items[i]
+        if w &lt;= room:
+            search(i + 1, value + v, room - w)        # take it first: good answers early
+        search(i + 1, value, room)
+
+    search(0, 0, capacity)
+    return best[0], visited[0]
+
+import random
+rng = random.Random(1)
+things = [(rng.randint(10, 100), rng.randint(5, 50)) for _ in range(30)]
+print(knapsack_bb(things, 200), &quot;out of a possible&quot;, 2 ** 31 - 1, &quot;nodes&quot;)</textarea></div>
+<h2 id="good-choices-first">Good choices first</h2>
+<p>The order in which choices are tried matters twice over. For <strong>finding one</strong> solution, trying likely choices first finds it sooner. For <strong>branch and bound</strong>, a good answer found early makes the bound prune everything weaker from then on. So:</p>
+<ul>
+<li>try the choice the greedy rule would make first (the knapsack above takes each item before skipping it, in value-per-weight order);</li>
+<li>for sudoku, fill the most constrained cell first (yesterday) and try its candidates in a sensible order;</li>
+<li>start with a decent answer from a quick heuristic (a greedy solution), so pruning starts strong from the first node.</li>
+</ul>
+<h2 id="symmetry-and-dead-ends">Symmetry and dead ends</h2>
+<p><strong>Symmetry</strong>: if the problem looks the same after a reflection or rotation, solutions come in families, and searching every member is wasted work. N-queens is mirror-symmetric left to right, so count solutions whose first queen is in the <strong>left half</strong> and double them (taking care with the middle column on odd boards). Equal-share partitioning (Wednesday) skipped groups with the same current sum for the same reason: the groups are interchangeable.</p>
+<p><strong>Dead ends</strong>: if the same partial state can be reached by different routes, and it failed once, it will fail again. <strong>Remember the states that failed</strong> in a set and skip them. For example, &ldquo;can this string be split into dictionary words?&rdquo;: once you know the suffix from position i can&rsquo;t be split, every route that reaches position i again can stop at once. This is memoisation (Week 16), applied to failures, and it&rsquo;s the bridge to next week&rsquo;s dynamic programming.</p>
+<div class="pc pc-example" data-kind="example" data-id="w052d5-e4"><textarea class="pc-src pc-code" hidden>def can_split(text, words):
+    words = set(words)
+    failed, visited = set(), [0]
+    def search(i):
+        visited[0] += 1
+        if i == len(text):
+            return True
+        if i in failed:
+            return False
+        for j in range(i + 1, len(text) + 1):
+            if text[i:j] in words and search(j):
+                return True
+        failed.add(i)
+        return False
+    return search(0), visited[0]
+
+print(can_split(&quot;a&quot; * 25 + &quot;b&quot;, [&quot;a&quot;, &quot;aa&quot;, &quot;aaa&quot;, &quot;aaaa&quot;]))</textarea></div>
+<p>Without the <code>failed</code> set, that search would try every way to split 25 a&rsquo;s (about 7.5 million) before giving up.</p>
+<h2 id="iterative-deepening">Iterative deepening</h2>
+<p>Depth-first search uses little memory but may wander deep down a long path when a short solution exists; breadth-first finds the shallowest solution but stores a whole level of states, which can be enormous. <strong>Iterative deepening</strong> combines them: run a depth-first search limited to depth 1, then 2, then 3, &hellip;, until a solution appears. The first one found is the shallowest, and memory is only one path. Repeating the shallow levels costs surprisingly little, because most of the work is always in the deepest level. Richard Korf analysed it in 1985 and combined it with A* bounds as IDA*.</p>
+<div class="pc pc-example" data-kind="example" data-id="w052d5-e5"><textarea class="pc-src pc-code" hidden>def fewest_steps(start, goal, max_depth=20):
+    &quot;&quot;&quot;Reach goal from start using steps x + 1, x * 2 or x * 3.&quot;&quot;&quot;
+    def search(x, depth, path):
+        if x == goal:
+            return list(path)
+        if depth == 0 or x &gt; goal:
+            return None
+        for nxt in (x * 3, x * 2, x + 1):
+            path.append(nxt)
+            found = search(nxt, depth - 1, path)
+            if found:
+                return found
+            path.pop()
+        return None
+    for limit in range(max_depth + 1):
+        found = search(start, limit, [start])
+        if found:
+            return found
+    return None
+
+print(fewest_steps(1, 100))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Pruning skips branches that provably can&rsquo;t contain what you want. Feasibility pruning asks whether success is still possible (suffix sums make it O(1)); every rule must be safe, never discarding a real solution. Branch and bound keeps the best answer so far and prunes any branch whose optimistic bound can&rsquo;t beat it; for 0/1 knapsack, the fractional knapsack of what&rsquo;s left is that bound. Try promising choices first so good answers appear early, break symmetry so equivalent solutions aren&rsquo;t all searched, and remember failed states (the whole state, not part of it) to avoid repeating dead ends. Iterative deepening finds the shallowest solution with depth-first memory. Measure each idea by counting visited nodes.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w052d5-subset" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Pruned subset sums</div><div class="pc-prompt"><p>Write <code>count_subsets(numbers, target)</code>: the number of subsets of positive whole numbers summing exactly to target, with two prunings (sort ascending; stop when the smallest remaining number overshoots, and when the total plus all remaining numbers falls short, using suffix sums). Return <code>(count, nodes_visited)</code>. The checks compare with brute force and require far fewer nodes than the 2ⁿ⁺¹ − 1 of an unpruned search on a large example.</p></div><textarea class="pc-src pc-code" hidden>def count_subsets(numbers, target):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, random
+def test_subsets():
+    &quot;pruned subsets&quot;
+    assert count_subsets([3, 34, 4, 12, 5, 2], 9)[0] == 2 and count_subsets([], 0)[0] == 1 and count_subsets([5], 3)[0] == 0
+    rng = random.Random(1)
+    for _ in range(100):
+        nums = [rng.randint(1, 10) for _ in range(rng.randint(0, 9))]
+        t = rng.randint(0, 25)
+        want = sum(1 for r in range(len(nums) + 1) for c in itertools.combinations(nums, r) if sum(c) == t)
+        assert count_subsets(nums, t)[0] == want
+    big = [rng.randint(10, 60) for _ in range(24)]
+    count, nodes = count_subsets(big, 150)
+    assert nodes &lt; 2 ** 25 // 50, nodes</textarea><textarea class="pc-src pc-solution" hidden>def count_subsets(numbers, target):
+    numbers = sorted(numbers)
+    suffix = [0] * (len(numbers) + 1)
+    for i in range(len(numbers) - 1, -1, -1):
+        suffix[i] = suffix[i + 1] + numbers[i]
+    nodes = [0]
+    def search(i, total):
+        nodes[0] += 1
+        if i == len(numbers):
+            return 1 if total == target else 0
+        if total + numbers[i] &gt; target:
+            return 1 if total == target else 0
+        if total + suffix[i] &lt; target:
+            return 0
+        return search(i + 1, total + numbers[i]) + search(i + 1, total)
+    return search(0, 0), nodes[0]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w052d5-knapsack" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Branch and bound</div><div class="pc-prompt"><p>Write <code>knapsack(items, capacity)</code> for whole items <code>(value, weight)</code> with positive weights: <code>(best_value, nodes_visited)</code> by branch and bound with the fractional bound, items in value-per-weight order, taking each item before skipping it. Then <code>chosen(items, capacity)</code>: the indices (in the original list) of one best choice, sorted. The checks compare with a dynamic-programming answer and require far fewer nodes than 2ⁿ on 40 items.</p></div><textarea class="pc-src pc-code" hidden>def knapsack(items, capacity):
+    ___
+
+def chosen(items, capacity):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+def dp(items, cap):
+    best = [0] * (cap + 1)
+    for v, w in items:
+        for c in range(cap, w - 1, -1):
+            best[c] = max(best[c], best[c - w] + v)
+    return best[cap]
+def test_knapsack():
+    &quot;knapsack&quot;
+    assert knapsack([(6, 6), (5, 5), (5, 5)], 10)[0] == 10 and knapsack([], 5)[0] == 0
+    rng = random.Random(2)
+    for _ in range(60):
+        items = [(rng.randint(1, 30), rng.randint(1, 15)) for _ in range(rng.randint(0, 12))]
+        cap = rng.randint(0, 40)
+        assert knapsack(items, cap)[0] == dp(items, cap)
+        idx = chosen(items, cap)
+        assert sum(items[i][1] for i in idx) &lt;= cap and sum(items[i][0] for i in idx) == dp(items, cap)
+    big = [(rng.randint(10, 100), rng.randint(5, 50)) for _ in range(40)]
+    value, nodes = knapsack(big, 300)
+    assert value == dp(big, 300) and nodes &lt; 200_000, nodes</textarea><textarea class="pc-src pc-solution" hidden>def _search(items, capacity):
+    order = sorted(range(len(items)), key=lambda i: items[i][0] / items[i][1], reverse=True)
+    its = [items[i] for i in order]
+    best, best_set, nodes, current = [0], [[]], [0], []
+
+    def bound(i, value, room):
+        for v, w in its[i:]:
+            if w &lt;= room:
+                value, room = value + v, room - w
+            else:
+                return value + v * room / w
+        return value
+
+    def search(i, value, room):
+        nodes[0] += 1
+        if value &gt; best[0]:
+            best[0], best_set[0] = value, list(current)
+        if i == len(its) or bound(i, value, room) &lt;= best[0]:
+            return
+        v, w = its[i]
+        if w &lt;= room:
+            current.append(order[i])
+            search(i + 1, value + v, room - w)
+            current.pop()
+        search(i + 1, value, room)
+
+    search(0, 0, capacity)
+    return best[0], nodes[0], sorted(best_set[0])
+
+def knapsack(items, capacity):
+    value, nodes, _ = _search(items, capacity)
+    return value, nodes
+
+def chosen(items, capacity):
+    return _search(items, capacity)[2]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w052d5-tsp" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The shortest tour</div><div class="pc-prompt"><p>A delivery round must visit every town once and return to the start (town 0); <code>dist[i][j]</code> is the distance. Write <code>shortest_tour(dist)</code>: <code>(length, tour)</code> with the tour as a list starting and ending at 0, by branch and bound: extend partial tours, and prune when the length so far plus the <strong>cheapest edge out of every unvisited town</strong> (plus the cheapest way back to 0) can&rsquo;t beat the best tour found. Seed the best with the greedy nearest-neighbour tour, and try nearer towns first. Then <code>tour_length(dist, tour)</code>.</p></div><textarea class="pc-src pc-code" hidden>def shortest_tour(dist):
+    ___
+
+def tour_length(dist, tour):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, random, time
+def brute(d):
+    n = len(d)
+    best = None
+    for p in itertools.permutations(range(1, n)):
+        t = (0,) + p + (0,)
+        L = sum(d[a][b] for a, b in zip(t, t[1:]))
+        best = L if best is None else min(best, L)
+    return best if n &gt; 1 else 0
+def test_tsp():
+    &quot;tours&quot;
+    d = [[0, 2, 9, 10], [1, 0, 6, 4], [15, 7, 0, 8], [6, 3, 12, 0]]
+    length, tour = shortest_tour(d)
+    assert length == 21 and tour[0] == tour[-1] == 0 and tour_length(d, tour) == 21 and sorted(tour[:-1]) == [0, 1, 2, 3]
+    assert shortest_tour([[0]]) == (0, [0, 0])
+    rng = random.Random(3)
+    for _ in range(20):
+        n = rng.randint(2, 7)
+        d = [[0 if i == j else rng.randint(1, 30) for j in range(n)] for i in range(n)]
+        length, tour = shortest_tour(d)
+        assert length == brute(d) and tour_length(d, tour) == length
+    pts = [(rng.randint(0, 100), rng.randint(0, 100)) for _ in range(11)]
+    d = [[abs(a[0] - b[0]) + abs(a[1] - b[1]) for b in pts] for a in pts]
+    t0 = time.perf_counter()
+    shortest_tour(d)
+    assert time.perf_counter() - t0 &lt; 8</textarea><textarea class="pc-src pc-solution" hidden>def tour_length(dist, tour):
+    return sum(dist[a][b] for a, b in zip(tour, tour[1:]))
+
+def shortest_tour(dist):
+    n = len(dist)
+    if n == 1:
+        return 0, [0, 0]
+    cheapest_out = [min(dist[i][j] for j in range(n) if j != i) for i in range(n)]
+    # a first answer from nearest neighbour
+    tour, seen = [0], {0}
+    while len(tour) &lt; n:
+        here = tour[-1]
+        nxt = min((j for j in range(n) if j not in seen), key=lambda j: dist[here][j])
+        tour.append(nxt)
+        seen.add(nxt)
+    tour.append(0)
+    best = [tour_length(dist, tour), tour]
+    path, used = [0], [False] * n
+    used[0] = True
+
+    def search(length):
+        here = path[-1]
+        if len(path) == n:
+            total = length + dist[here][0]
+            if total &lt; best[0]:
+                best[0], best[1] = total, path + [0]
+            return
+        estimate = length + cheapest_out[here] + sum(cheapest_out[j] for j in range(n) if not used[j])
+        if estimate &gt;= best[0]:
+            return
+        for j in sorted((j for j in range(n) if not used[j]), key=lambda j: dist[here][j]):
+            used[j] = True
+            path.append(j)
+            search(length + dist[here][j])
+            path.pop()
+            used[j] = False
+
+    search(0)
+    return best[0], best[1]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w052d5-mirror" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Half the board</div><div class="pc-prompt"><p>Write <code>count_queens_symmetric(n)</code>: the number of N-queens solutions, computed by searching only boards whose first-row queen is in the <strong>left half</strong> of the board, doubling that, and (for odd n) adding the solutions with the first queen in the middle column. Use any correct queen search for the pieces. Then <code>nodes_saved(n)</code>: the fraction of first-row choices the symmetric search avoids, <code>(n // 2) / n</code> rounded to 3 places.</p></div><textarea class="pc-src pc-code" hidden>def count_queens_symmetric(n):
+    ___
+
+def nodes_saved(n):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_mirror():
+    &quot;symmetry&quot;
+    assert [count_queens_symmetric(n) for n in range(1, 10)] == [1, 0, 0, 2, 10, 4, 40, 92, 352]
+    assert nodes_saved(8) == 0.5 and nodes_saved(5) == 0.4</textarea><textarea class="pc-src pc-solution" hidden>def _count_from(n, first_col):
+    cols, down, up = {first_col}, {0 - first_col}, {0 + first_col}
+    def place(r):
+        if r == n:
+            return 1
+        total = 0
+        for c in range(n):
+            if c in cols or r - c in down or r + c in up:
+                continue
+            cols.add(c)
+            down.add(r - c)
+            up.add(r + c)
+            total += place(r + 1)
+            cols.discard(c)
+            down.discard(r - c)
+            up.discard(r + c)
+        return total
+    return place(1)
+
+def count_queens_symmetric(n):
+    half = sum(_count_from(n, c) for c in range(n // 2))
+    total = 2 * half
+    if n % 2:
+        total += _count_from(n, n // 2)
+    return total
+
+def nodes_saved(n):
+    return round((n // 2) / n, 3)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w052d5-deepen" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Iterative deepening</div><div class="pc-prompt"><p>Starting from a number, the allowed steps are <code>x + 1</code>, <code>x * 2</code> and <code>x * 3</code>. Write <code>fewest_steps(start, goal)</code>: the shortest list of numbers from start to goal (inclusive), by iterative deepening with a depth-first search that tries <code>x * 3</code>, then <code>x * 2</code>, then <code>x + 1</code>, and prunes when x exceeds the goal. Then <code>depth_needed(start, goal)</code>: the length of that list minus one.</p></div><textarea class="pc-src pc-code" hidden>def fewest_steps(start, goal):
+    ___
+
+def depth_needed(start, goal):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>from collections import deque
+def bfs(s, g):
+    d = {s: 0}
+    q = deque([s])
+    while q:
+        x = q.popleft()
+        if x == g:
+            return d[x]
+        for y in (x + 1, x * 2, x * 3):
+            if y &lt;= g and y not in d:
+                d[y] = d[x] + 1
+                q.append(y)
+def test_deepen():
+    &quot;deepening&quot;
+    path = fewest_steps(1, 100)
+    assert path[0] == 1 and path[-1] == 100 and len(path) - 1 == bfs(1, 100)
+    assert all(b in (a + 1, a * 2, a * 3) for a, b in zip(path, path[1:]))
+    assert fewest_steps(7, 7) == [7] and depth_needed(1, 100) == bfs(1, 100)
+    for g in (17, 55, 81, 127):
+        assert depth_needed(2, g) == bfs(2, g)</textarea><textarea class="pc-src pc-solution" hidden>def fewest_steps(start, goal):
+    def search(x, depth, path):
+        if x == goal:
+            return list(path)
+        if depth == 0 or x &gt; goal:
+            return None
+        for nxt in (x * 3, x * 2, x + 1):
+            if nxt &lt;= goal:
+                path.append(nxt)
+                found = search(nxt, depth - 1, path)
+                if found:
+                    return found
+                path.pop()
+        return None
+    limit = 0
+    while True:
+        found = search(start, limit, [start])
+        if found:
+            return found
+        limit += 1
+
+def depth_needed(start, goal):
+    return len(fewest_steps(start, goal)) - 1</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w052d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A prune that&rsquo;s too eager</div><div class="pc-prompt"><p>This subset-sum search prunes when the total plus everything remaining is <strong>at most</strong> the target, but &ldquo;exactly equal&rdquo; is a success, not a dead end: it throws away the solution that needs every remaining number and prints <code>False</code>. Prune only when it&rsquo;s strictly less, so it prints <code>True</code>.</p></div><textarea class="pc-src pc-code" hidden>numbers = [5, 4, 3]
+target = 12
+suffix = [12, 7, 3, 0]
+
+def search(i, total):
+    if total == target:
+        return True
+    if i == len(numbers) or total + suffix[i] &lt;= target:
+        return False
+    return search(i + 1, total + numbers[i]) or search(i + 1, total)
+
+print(search(0, 0))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;safe pruning&quot;
+    expect_output(&quot;True&quot;)</textarea><textarea class="pc-src pc-solution" hidden>numbers = [5, 4, 3]
+target = 12
+suffix = [12, 7, 3, 0]
+
+def search(i, total):
+    if total == target:
+        return True
+    if i == len(numbers) or total + suffix[i] &lt; target:
+        return False
+    return search(i + 1, total + numbers[i]) or search(i + 1, total)
+
+print(search(0, 0))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w052d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A pessimistic bound</div><div class="pc-prompt"><p>This knapsack&rsquo;s &ldquo;bound&rdquo; is just the value taken so far, which is <strong>not</strong> optimistic: it says no branch can improve on the best, so the search stops almost at once with a poor answer, printing <code>6</code>. Use the fractional bound over the remaining items so it prints <code>10</code>.</p></div><textarea class="pc-src pc-code" hidden>items = sorted([(6, 6), (5, 5), (5, 5)], key=lambda it: it[0] / it[1], reverse=True)
+best = [0]
+
+def search(i, value, room):
+    best[0] = max(best[0], value)
+    if i == len(items) or value &lt;= best[0] and i &gt; 0:
+        return
+    v, w = items[i]
+    if w &lt;= room:
+        search(i + 1, value + v, room - w)
+    search(i + 1, value, room)
+
+search(0, 0, 10)
+print(best[0])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;an optimistic bound&quot;
+    expect_output(&quot;10&quot;)</textarea><textarea class="pc-src pc-solution" hidden>items = sorted([(6, 6), (5, 5), (5, 5)], key=lambda it: it[0] / it[1], reverse=True)
+best = [0]
+
+def bound(i, value, room):
+    for v, w in items[i:]:
+        if w &lt;= room:
+            value, room = value + v, room - w
+        else:
+            return value + v * room / w
+    return value
+
+def search(i, value, room):
+    best[0] = max(best[0], value)
+    if i == len(items) or bound(i, value, room) &lt;= best[0]:
+        return
+    v, w = items[i]
+    if w &lt;= room:
+        search(i + 1, value + v, room - w)
+    search(i + 1, value, room)
+
+search(0, 0, 10)
+print(best[0])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w052d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Remembering too little</div><div class="pc-prompt"><p>This search asks whether the text splits into dictionary words using <strong>at most</strong> <code>k</code> words, and remembers failures. But it remembers only the position, and the state is really the position <strong>and</strong> the words still allowed: reaching position 2 with one word left fails (<code>"b"</code> leaves a <code>"b"</code> over), and that failure wrongly blocks reaching position 2 later with two words to spare. It prints <code>False</code>. Remember <code>(i, left)</code> pairs so it prints <code>True</code>.</p></div><textarea class="pc-src pc-code" hidden>words = {&quot;a&quot;, &quot;aa&quot;, &quot;b&quot;}
+text = &quot;aabb&quot;
+failed = set()
+
+def search(i, left):
+    if i == len(text):
+        return True
+    if left == 0 or i in failed:
+        return False
+    for j in range(i + 1, len(text) + 1):
+        if text[i:j] in words and search(j, left - 1):
+            return True
+    failed.add(i)
+    return False
+
+print(search(0, 3))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the whole state&quot;
+    expect_output(&quot;True&quot;)</textarea><textarea class="pc-src pc-solution" hidden>words = {&quot;a&quot;, &quot;aa&quot;, &quot;b&quot;}
+text = &quot;aabb&quot;
+failed = set()
+
+def search(i, left):
+    if i == len(text):
+        return True
+    if left == 0 or (i, left) in failed:
+        return False
+    for j in range(i + 1, len(text) + 1):
+        if text[i:j] in words and search(j, left - 1):
+            return True
+    failed.add((i, left))
+    return False
+
+print(search(0, 3))</textarea></div>
+<div class="parsons" data-id="w052d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Branch and bound</div><div class="pc-prompt"><p>Arrange the lines into the branch-and-bound search (a <code>bound</code> function is given). One line is a trap.</p></div><script type="application/json">{"lines": ["    def search(i, value, room):", "        best[0] = max(best[0], value)", "        if i == len(items) or bound(i, value, room) <= best[0]:", "            return", "        v, w = items[i]", "        if w <= room:", "            search(i + 1, value + v, room - w)", "        search(i + 1, value, room)"], "distractors": ["        if i == len(items) or bound(i, value, room) >= best[0]:"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w052d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the suffix sums of [5, 3, 2], from index 0 to 3, as a list
+q = ___   # the fractional-knapsack bound for items (10, 5), (6, 6) with room 8 (best ratio first)
+r = ___   # True or False: an optimistic bound may overestimate what a branch can achieve
+s = ___   # how many depth limits iterative deepening tries before finding a solution 3 steps away
+t = ___   # True or False: a prune that sometimes discards a real solution only makes the search slower</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [10, 5, 2, 0] and q == 13.0 and r is True, &quot;p, q and r&quot;
+    assert s == 4 and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = [10, 5, 2, 0]
+q = 13.0
+r = True
+s = 4
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w052d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does a feasibility prune ask?", "answer": 1, "explain": "If not, skip it whole.", "options": ["Is this branch the best?", "Can this branch still lead to any solution?", "Is the input sorted?", "How deep are we?"]}, {"type": "mc", "q": "Why must a pruning rule be safe?", "answer": 1, "explain": "Slower is acceptable; wrong is not.", "options": ["For speed", "An unsafe prune can discard a real solution, making the answer wrong", "It must be fast", "It mustn&rsquo;t"]}, {"type": "mc", "q": "What do suffix sums make cheap?", "answer": 1, "explain": "An O(1) feasibility test.", "options": ["Sorting", "Checking whether all remaining numbers could still reach the target", "Copying", "Recursion"]}, {"type": "mc", "q": "What does branch and bound compare?", "answer": 1, "explain": "Prune if the bound can&rsquo;t beat the best.", "options": ["Two branches", "A branch&rsquo;s optimistic bound with the best answer found so far", "Depth with width", "Time with memory"]}, {"type": "mc", "q": "For 0/1 knapsack, what&rsquo;s a good optimistic bound?", "answer": 1, "explain": "Fractions can only do better than whole items.", "options": ["The value so far", "Value so far plus the fractional knapsack of the remaining items", "Zero", "The total of all values"]}, {"type": "mc", "q": "Why try promising choices first in branch and bound?", "answer": 1, "explain": "The bar rises sooner.", "options": ["Style", "A good answer found early lets the bound prune more", "It&rsquo;s required", "To use less memory"]}, {"type": "mc", "q": "How does symmetry help N-queens?", "answer": 1, "explain": "Take care with the middle column on odd boards.", "options": ["It doesn&rsquo;t", "Mirror images are solutions too, so search half the first row and double", "It sorts queens", "It removes diagonals"]}, {"type": "mc", "q": "Why remember failed states?", "answer": 1, "explain": "Memoising failures, a step towards dynamic programming.", "options": ["For debugging", "The same state reached another way will fail again, so skip it", "To count solutions", "To sort"]}, {"type": "mc", "q": "What does iterative deepening combine?", "answer": 1, "explain": "Repeat DFS with depth limits 0, 1, 2, &hellip;", "options": ["Heaps and stacks", "Depth-first memory use with breadth-first&rsquo;s shallowest-first answer", "Greedy and DP", "Sorting and searching"]}, {"type": "output", "q": "What does this print?", "answer": "[8, 4, 3, 0]", "explain": "Each entry sums from i to the end.", "code": "nums = [4, 1, 3]\nsuffix = [0] * 4\nfor i in range(2, -1, -1):\n    suffix[i] = suffix[i + 1] + nums[i]\nprint(suffix)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w052d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: packing bins</div><div class="pc-prompt"><p>Items of given sizes must be packed into the <strong>fewest</strong> bins of a fixed capacity (lorries, disks, shelves). Write <code>fewest_bins(sizes, capacity)</code> by branch and bound:</p>
+<ul>
+<li>Start the best answer from the <strong>first-fit decreasing</strong> heuristic: sort sizes largest first and put each in the first bin it fits (a new bin if none). Write it as <code>first_fit_decreasing(sizes, capacity)</code>, returning the number of bins.</li>
+<li>Search: place items largest first, each into an existing bin it fits or one new bin. Prune when the bins in use are already at least the best; use the <strong>lower bound</strong> ⌈total size ÷ capacity⌉ to stop as soon as an answer reaches it; and, as in Wednesday&rsquo;s equal shares, skip a bin whose current load equals one already tried for this item.</li>
+</ul>
+<p>Raise <code>ValueError</code> if any item is bigger than the capacity. Return the number of bins. The checks compare with brute force and include cases where first-fit decreasing isn&rsquo;t optimal.</p></div><textarea class="pc-src pc-code" hidden>import math
+
+def first_fit_decreasing(sizes, capacity):
+    ___
+
+def fewest_bins(sizes, capacity):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import itertools, random, time
+def brute(sizes, cap):
+    n = len(sizes)
+    for k in range(1, n + 1):
+        for labels in itertools.product(range(k), repeat=n):
+            loads = [0] * k
+            for s, l in zip(sizes, labels):
+                loads[l] += s
+            if max(loads) &lt;= cap:
+                return k
+    return 0
+def test_bins():
+    &quot;bins&quot;
+    assert fewest_bins([4, 8, 1, 4, 2, 1], 10) == 2 and fewest_bins([], 10) == 0
+    tricky = [6, 6, 5, 5, 4, 4, 3, 3, 2, 2]
+    assert first_fit_decreasing(tricky, 13) &gt;= fewest_bins(tricky, 13)
+    try:
+        fewest_bins([11], 10)
+        assert False
+    except ValueError:
+        pass
+    rng = random.Random(4)
+    for _ in range(40):
+        sizes = [rng.randint(1, 9) for _ in range(rng.randint(1, 7))]
+        assert fewest_bins(sizes, 10) == brute(sizes, 10)
+    found = False
+    for _ in range(300):
+        sizes = [rng.randint(2, 8) for _ in range(8)]
+        if first_fit_decreasing(sizes, 10) &gt; fewest_bins(sizes, 10):
+            found = True
+            break
+    assert found, &quot;first-fit decreasing isn&#x27;t always optimal&quot;
+def test_speed():
+    &quot;pruning&quot;
+    rng = random.Random(5)
+    sizes = [rng.randint(10, 60) for _ in range(22)]
+    t0 = time.perf_counter()
+    fewest_bins(sizes, 100)
+    assert time.perf_counter() - t0 &lt; 8</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+def first_fit_decreasing(sizes, capacity):
+    loads = []
+    for s in sorted(sizes, reverse=True):
+        for j, load in enumerate(loads):
+            if load + s &lt;= capacity:
+                loads[j] += s
+                break
+        else:
+            loads.append(s)
+    return len(loads)
+
+def fewest_bins(sizes, capacity):
+    if any(s &gt; capacity for s in sizes):
+        raise ValueError(&quot;an item is bigger than a bin&quot;)
+    if not sizes:
+        return 0
+    items = sorted(sizes, reverse=True)
+    lower = math.ceil(sum(items) / capacity)
+    best = [first_fit_decreasing(items, capacity)]
+    loads = []
+
+    def place(i):
+        if best[0] == lower:
+            return
+        if i == len(items):
+            best[0] = min(best[0], len(loads))
+            return
+        if len(loads) &gt;= best[0]:
+            return
+        tried = set()
+        for j in range(len(loads)):
+            if loads[j] + items[i] &lt;= capacity and loads[j] not in tried:
+                tried.add(loads[j])
+                loads[j] += items[i]
+                place(i + 1)
+                loads[j] -= items[i]
+        if len(loads) + 1 &lt; best[0]:
+            loads.append(items[i])
+            place(i + 1)
+            loads.pop()
+
+    place(0)
+    return best[0]</textarea><template class="pc-src pc-hint">Keep <code>loads</code>, a list of bin loads. <code>place(i)</code>: if every item is placed, record <code>len(loads)</code> if it&rsquo;s better. Otherwise, if <code>len(loads) &gt;= best</code>, return. Try each existing bin j with room (skipping loads already tried for this item), then a new bin if <code>len(loads) + 1 &lt; best</code>. Stop everything early once the best equals the lower bound.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Pick a puzzle you enjoy (a crossword, a jigsaw, a card game) and name one pruning rule you use without thinking: a reason you never even try certain moves. Tomorrow is the Forge: an exam timetable built with greedy choices and backtracking.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w052d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w052d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w052d5", "week": 52, "day": 5, "title": "Pruning", "exercises": [{"id": "w052d5-subset", "title": "Pruned subset sums", "points": 15}, {"id": "w052d5-knapsack", "title": "Branch and bound", "points": 15}, {"id": "w052d5-tsp", "title": "The shortest tour", "points": 15}, {"id": "w052d5-mirror", "title": "Half the board", "points": 10}, {"id": "w052d5-deepen", "title": "Iterative deepening", "points": 10}, {"id": "w052d5-bug1", "title": "A prune that's too eager", "points": 10}, {"id": "w052d5-bug2", "title": "A pessimistic bound", "points": 10}, {"id": "w052d5-bug3", "title": "Remembering too little", "points": 10}, {"id": "w052d5-trace", "title": "Predict them", "points": 10}, {"id": "w052d5-challenge", "title": "Challenge: packing bins", "points": 25}], "points": 130}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
