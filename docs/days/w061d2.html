@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 61 Day 2: Context manager classes | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Yesterday you saw the protocol; today you write context managers of your own, as classes. The pattern covers far more than files: timing a block, changing a...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w061d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 61 Day 2: Context manager classes">
+<meta property="og:description" content="Yesterday you saw the protocol; today you write context managers of your own, as classes. The pattern covers far more than files: timing a block, changing a...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w061d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-61">Week 61: Context managers</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#timing-a-block" data-sec="timing-a-block">Timing a block</a></li><li><a href="#temporary-changes" data-sec="temporary-changes">Temporary changes</a></li><li><a href="#reacting-to-errors" data-sec="reacting-to-errors">Reacting to errors</a></li><li><a href="#all-or-nothing" data-sec="all-or-nothing">All or nothing</a></li><li><a href="#reuse-and-nesting" data-sec="reuse-and-nesting">Reuse and nesting</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w061d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-61">Week 61: Context managers</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 61, Day 2</span></p>
+      <h1>Context manager classes</h1>
+      <div class="day-intro"><p>Yesterday you saw the protocol; today you write context managers of your own, as classes. The pattern covers far more than files: timing a block, changing a setting just for a while, catching one kind of error deliberately, making a group of changes all-or-nothing like a database transaction, and keeping track of nesting. You&rsquo;ll also decide what <code>__enter__</code> should hand out, how to use the error information <code>__exit__</code> receives, and whether a manager can be reused or entered twice.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Write context manager classes with <strong>enter</strong> and <strong>exit</strong></li><li>Choose what <strong>enter</strong> returns (the manager, a helper, or a resource)</li><li>Restore temporary changes reliably, including when an error happens</li><li>Use <strong>exit</strong>&rsquo;s arguments to react differently to success and failure</li><li>Make managers reusable and reentrant where it makes sense</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Timing a block: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Temporary changes: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Reacting to errors: 20 min"></span><span class="plan-seg s0" style="flex:20" title="All or nothing: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Reuse and nesting: 15 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Timing a block</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Temporary changes</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Reacting to errors</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">All or nothing</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Reuse and nesting</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:45</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w061d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w061d2.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w061d2-p1"><textarea class="pc-src pc-code" hidden>class Temporarily:
+    def __init__(self, settings, key, value):
+        self.settings, self.key, self.value = settings, key, value
+
+    def __enter__(self):
+        self.old = self.settings[self.key]
+        self.settings[self.key] = self.value
+        return self.settings
+
+    def __exit__(self, exc_type, exc, tb):
+        self.settings[self.key] = self.old
+
+settings = {&quot;colour&quot;: &quot;blue&quot;, &quot;size&quot;: 10}
+with Temporarily(settings, &quot;colour&quot;, &quot;red&quot;) as s:
+    print(s[&quot;colour&quot;])
+print(settings[&quot;colour&quot;])</textarea></div>
+<h2 id="timing-a-block">Timing a block</h2>
+<p>A timer is the classic first context manager: note the time in <code>__enter__</code>, compute the difference in <code>__exit__</code>, and keep it on the object so the code after the block can read it. Returning <code>self</code> from <code>__enter__</code> makes that easy: <code>with Timer() as t: ...</code> then <code>t.elapsed</code>.</p>
+<p>Two design points. First, take the <strong>clock</strong> as a parameter with a sensible default (<code>time.perf_counter</code>): tests can pass a fake clock and get exact numbers, as in Week 60&rsquo;s time-aware decorators. Second, record the time even when the body fails: <code>__exit__</code> runs either way, so the measurement is always there.</p>
+<div class="pc pc-example" data-kind="example" data-id="w061d2-e2"><textarea class="pc-src pc-code" hidden>import time
+
+class Timer:
+    def __init__(self, clock=time.perf_counter):
+        self.clock = clock
+        self.elapsed = None
+
+    def __enter__(self):
+        self.start = self.clock()
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        self.elapsed = self.clock() - self.start
+
+with Timer() as t:
+    sum(range(100_000))
+print(t.elapsed &lt; 1)
+
+ticks = iter([10.0, 12.5])
+with Timer(clock=lambda: next(ticks)) as fake:
+    pass
+print(fake.elapsed)</textarea></div>
+<h2 id="temporary-changes">Temporary changes</h2>
+<p>Many managers change something for the duration of the block and put it back afterwards: a setting, an attribute, an environment variable, the current folder, the random seed. The rules:</p>
+<ul>
+<li><strong>Save in <code>__enter__</code>, restore in <code>__exit__</code>.</strong> Save inside <code>__enter__</code>, not <code>__init__</code>: the manager might be created long before it&rsquo;s used.</li>
+<li><strong>Restore unconditionally.</strong> <code>__exit__</code> doesn&rsquo;t need to look at the error: it restores either way.</li>
+<li><strong>Handle &ldquo;there was nothing there&rdquo;.</strong> If the attribute or key didn&rsquo;t exist before, restoring means <strong>deleting</strong> it, not setting it to <code>None</code>. A private sentinel object (Week 59) records &ldquo;missing&rdquo;.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w061d2-e3"><textarea class="pc-src pc-code" hidden>_MISSING = object()
+
+class Patched:
+    &quot;&quot;&quot;Set obj.name = value for the block, then put things back exactly.&quot;&quot;&quot;
+    def __init__(self, obj, name, value):
+        self.obj, self.name, self.value = obj, name, value
+
+    def __enter__(self):
+        self.old = getattr(self.obj, self.name, _MISSING)
+        setattr(self.obj, self.name, self.value)
+        return self.obj
+
+    def __exit__(self, *exc):
+        if self.old is _MISSING:
+            delattr(self.obj, self.name)
+        else:
+            setattr(self.obj, self.name, self.old)
+
+class Config:
+    debug = False
+
+with Patched(Config, &quot;debug&quot;, True):
+    print(Config.debug)
+with Patched(Config, &quot;verbose&quot;, 3):
+    print(Config.verbose)
+print(Config.debug, hasattr(Config, &quot;verbose&quot;))</textarea></div>
+<h2 id="reacting-to-errors">Reacting to errors</h2>
+<p><code>__exit__</code>&rsquo;s arguments let a manager behave differently on success and failure: log the error, count failures, roll back changes, or <strong>suppress</strong> particular errors. Suppress only what you mean: return true for the specific exception types you expect (<code>issubclass(exc_type, self.types)</code>), and <code>False</code> for everything else so real bugs still surface. Keep the caught exception on the manager if the code afterwards may want it.</p>
+<p>If <code>__exit__</code> itself raises, that new exception replaces the original one (whose details survive as the new one&rsquo;s <code>__context__</code>), so keep <code>__exit__</code> simple and safe.</p>
+<div class="pc pc-example" data-kind="example" data-id="w061d2-e4"><textarea class="pc-src pc-code" hidden>class Ignoring:
+    def __init__(self, *types):
+        self.types = types
+        self.caught = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        if exc_type is not None and issubclass(exc_type, self.types):
+            self.caught = exc
+            return True                    # suppress just these
+        return False
+
+with Ignoring(KeyError) as ig:
+    {}[&quot;missing&quot;]
+print(&quot;carried on; caught:&quot;, repr(ig.caught))
+
+try:
+    with Ignoring(KeyError):
+        1 / 0
+except ZeroDivisionError:
+    print(&quot;other errors still escape&quot;)</textarea></div>
+<h2 id="all-or-nothing">All or nothing</h2>
+<p>A <strong>transaction</strong> applies a group of changes completely or not at all. Databases do this with commit and rollback (Phase 6). The same idea fits any data: in <code>__enter__</code>, take a <strong>snapshot</strong>; if the body succeeds, keep the changes; if it raises, restore the snapshot and let the error carry on. The code inside reads naturally, and partial updates can&rsquo;t be left behind.</p>
+<p>For simple data a copy is a fine snapshot. (Copies have subtleties for nested data, <code>copy.deepcopy</code> versus a shallow copy: Week 62 covers them.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w061d2-e5"><textarea class="pc-src pc-code" hidden>import copy
+
+class Transaction:
+    def __init__(self, data):
+        self.data = data
+
+    def __enter__(self):
+        self.snapshot = copy.deepcopy(self.data)
+        return self.data
+
+    def __exit__(self, exc_type, exc, tb):
+        if exc_type is not None:
+            self.data.clear()
+            self.data.update(self.snapshot)      # roll back, in place
+        return False
+
+accounts = {&quot;ada&quot;: 100, &quot;ben&quot;: 20}
+try:
+    with Transaction(accounts) as acc:
+        acc[&quot;ada&quot;] -= 50
+        acc[&quot;ben&quot;] += 50
+        raise RuntimeError(&quot;the bank&#x27;s computer crashed&quot;)
+except RuntimeError:
+    pass
+print(accounts)</textarea></div>
+<h2 id="reuse-and-nesting">Reuse and nesting</h2>
+<p>Three kinds of manager:</p>
+<ul>
+<li><strong>One-shot</strong>: can be used in only one <code>with</code>. File objects are like this (once closed, they stay closed), and so are tomorrow&rsquo;s generator-based managers.</li>
+<li><strong>Reusable</strong>: can be used in several <code>with</code> statements one after another, because <code>__enter__</code> sets up fresh state each time. Today&rsquo;s <code>Timer</code> is reusable.</li>
+<li><strong>Reentrant</strong>: can be entered again while already inside itself. That needs a <strong>depth</strong> counter: set up only when entering at depth 0, clean up only when leaving back to depth 0. <code>threading.RLock</code> (Week 66) is reentrant; an indentation helper is a friendly example.</li>
+</ul>
+<p>Decrement the depth in <code>__exit__</code> <strong>whatever happened</strong>, or an error will leave the manager thinking it&rsquo;s still inside.</p>
+<div class="pc pc-example" data-kind="example" data-id="w061d2-e6"><textarea class="pc-src pc-code" hidden>class Indented:
+    def __init__(self):
+        self.depth = 0
+        self.lines = []
+
+    def __enter__(self):
+        self.depth += 1
+        return self
+
+    def __exit__(self, *exc):
+        self.depth -= 1
+
+    def say(self, text):
+        self.lines.append(&quot;  &quot; * self.depth + text)
+
+out = Indented()
+out.say(&quot;start&quot;)
+with out:
+    out.say(&quot;level one&quot;)
+    with out:
+        out.say(&quot;level two&quot;)
+    out.say(&quot;back to one&quot;)
+out.say(&quot;end&quot;)
+print(&quot;\n&quot;.join(out.lines))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Write a context manager class with <strong>enter</strong> (set up, and return what the body should use: often self, sometimes a resource) and <strong>exit</strong> (clean up, whatever happened). Take clocks and similar dependencies as parameters so tests are exact. For temporary changes, save in <strong>enter</strong> and restore in <strong>exit</strong> unconditionally, deleting what didn&rsquo;t exist before. Use <strong>exit</strong>&rsquo;s arguments to roll back on failure or to suppress only the exception types you expect; return False otherwise, and keep <strong>exit</strong> simple because an error there replaces the original. Managers can be one-shot, reusable (fresh state on each enter) or reentrant (a depth counter, always decremented).</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d2-timer" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A timer with laps</div><div class="pc-prompt"><p>Write <code>Stopwatch(clock=time.perf_counter)</code>: a reusable context manager. <code>__enter__</code> returns the stopwatch; after each <code>with</code> block, <code>last</code> is that block&rsquo;s duration and <code>laps</code> is the list of all durations so far; <code>total()</code> is their sum. Record the duration even if the block raises (and let the error carry on).</p></div><textarea class="pc-src pc-code" hidden>import time
+
+class Stopwatch:
+    def __init__(self, clock=time.perf_counter):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_timer():
+    &quot;a reusable manager&quot;
+    ticks = iter([0.0, 1.5, 10.0, 10.25, 20.0, 23.0])
+    sw = Stopwatch(clock=lambda: next(ticks))
+    with sw as s:
+        assert s is sw
+    with sw:
+        pass
+    assert sw.last == 0.25 and sw.laps == [1.5, 0.25]
+    try:
+        with sw:
+            raise ValueError
+    except ValueError:
+        pass
+    assert sw.laps == [1.5, 0.25, 3.0] and sw.total() == 4.75
+    real = Stopwatch()
+    with real:
+        sum(range(1000))
+    assert 0 &lt;= real.last &lt; 1</textarea><textarea class="pc-src pc-solution" hidden>import time
+
+class Stopwatch:
+    def __init__(self, clock=time.perf_counter):
+        self.clock = clock
+        self.laps = []
+        self.last = None
+
+    def __enter__(self):
+        self._start = self.clock()
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        self.last = self.clock() - self._start
+        self.laps.append(self.last)
+        return False
+
+    def total(self):
+        return sum(self.laps)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d2-patched" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Changing things for a while</div><div class="pc-prompt"><p>Write a class <code>Patched(mapping, **changes)</code>: for the block, set each key of the dict to its new value, then restore <strong>exactly</strong>: keys that existed get their old values back, keys that didn&rsquo;t exist are removed. <code>__enter__</code> returns the mapping. Restore even if the body raises. It must be reusable.</p></div><textarea class="pc-src pc-code" hidden>_MISSING = object()
+
+class Patched:
+    def __init__(self, mapping, **changes):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_patched():
+    &quot;temporary changes&quot;
+    env = {&quot;HOME&quot;: &quot;/home/ada&quot;, &quot;LANG&quot;: &quot;en&quot;}
+    with Patched(env, LANG=&quot;fr&quot;, DEBUG=&quot;1&quot;) as e:
+        assert e is env and env == {&quot;HOME&quot;: &quot;/home/ada&quot;, &quot;LANG&quot;: &quot;fr&quot;, &quot;DEBUG&quot;: &quot;1&quot;}
+    assert env == {&quot;HOME&quot;: &quot;/home/ada&quot;, &quot;LANG&quot;: &quot;en&quot;}
+    p = Patched(env, HOME=&quot;/tmp&quot;)
+    try:
+        with p:
+            raise RuntimeError
+    except RuntimeError:
+        pass
+    assert env[&quot;HOME&quot;] == &quot;/home/ada&quot;
+    env[&quot;HOME&quot;] = &quot;/changed&quot;
+    with p:
+        assert env[&quot;HOME&quot;] == &quot;/tmp&quot;
+    assert env[&quot;HOME&quot;] == &quot;/changed&quot;, &quot;the old value is saved at enter time&quot;
+    with Patched(env, LANG=None):
+        assert env[&quot;LANG&quot;] is None
+    assert env[&quot;LANG&quot;] == &quot;en&quot;</textarea><textarea class="pc-src pc-solution" hidden>_MISSING = object()
+
+class Patched:
+    def __init__(self, mapping, **changes):
+        self.mapping, self.changes = mapping, changes
+
+    def __enter__(self):
+        self.saved = {k: self.mapping.get(k, _MISSING) for k in self.changes}
+        self.mapping.update(self.changes)
+        return self.mapping
+
+    def __exit__(self, exc_type, exc, tb):
+        for key, old in self.saved.items():
+            if old is _MISSING:
+                self.mapping.pop(key, None)
+            else:
+                self.mapping[key] = old
+        return False</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d2-suppress" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Catching only what you expect</div><div class="pc-prompt"><p>Write <code>Ignoring(*types)</code>: a context manager that suppresses exceptions of the given types (and their subclasses) and nothing else, storing the suppressed exception in <code>caught</code> (<code>None</code> if nothing was caught) and how many times it has suppressed one in <code>count</code>, across reuses.</p></div><textarea class="pc-src pc-code" hidden>class Ignoring:
+    def __init__(self, *types):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_ignoring():
+    &quot;deliberate suppression&quot;
+    ig = Ignoring(KeyError, IndexError)
+    with ig:
+        [][3]
+    assert isinstance(ig.caught, IndexError) and ig.count == 1
+    with ig:
+        pass
+    assert ig.caught is None and ig.count == 1
+    try:
+        with ig:
+            1 / 0
+        assert False
+    except ZeroDivisionError:
+        pass
+    class Mine(KeyError):
+        pass
+    with ig:
+        raise Mine(&quot;sub&quot;)
+    assert ig.count == 2 and type(ig.caught) is Mine</textarea><textarea class="pc-src pc-solution" hidden>class Ignoring:
+    def __init__(self, *types):
+        self.types = types
+        self.caught = None
+        self.count = 0
+
+    def __enter__(self):
+        self.caught = None
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        if exc_type is not None and issubclass(exc_type, self.types):
+            self.caught = exc
+            self.count += 1
+            return True
+        return False</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d2-transaction" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">All or nothing</div><div class="pc-prompt"><p>Write <code>Transaction(data)</code> for a dict whose values may be lists or dicts: on entry take a deep copy; on success keep the changes and record <code>committed = True</code>; on an error restore the dict <strong>in place</strong> (the same object, its old contents), set <code>committed = False</code>, and let the error carry on. <code>__enter__</code> returns the data. Then <code>transfer(accounts, source, target, amount)</code>: move money inside a <code>Transaction</code>, raising <code>ValueError("insufficient funds")</code> <strong>after</strong> taking the money if the source would go below zero, so the rollback is what saves the data.</p></div><textarea class="pc-src pc-code" hidden>import copy
+
+class Transaction:
+    def __init__(self, data):
+        ___
+
+def transfer(accounts, source, target, amount):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_transaction():
+    &quot;rollback&quot;
+    accounts = {&quot;ada&quot;: 100, &quot;ben&quot;: 20}
+    ref = accounts
+    transfer(accounts, &quot;ada&quot;, &quot;ben&quot;, 30)
+    assert accounts == {&quot;ada&quot;: 70, &quot;ben&quot;: 50}
+    try:
+        transfer(accounts, &quot;ben&quot;, &quot;ada&quot;, 999)
+        assert False
+    except ValueError as e:
+        assert str(e) == &quot;insufficient funds&quot;
+    assert accounts == {&quot;ada&quot;: 70, &quot;ben&quot;: 50} and accounts is ref
+    data = {&quot;items&quot;: [1, 2], &quot;meta&quot;: {&quot;n&quot;: 2}}
+    t = Transaction(data)
+    try:
+        with t as d:
+            d[&quot;items&quot;].append(3)
+            d[&quot;meta&quot;][&quot;n&quot;] = 3
+            d[&quot;new&quot;] = True
+            raise KeyError
+    except KeyError:
+        pass
+    assert data == {&quot;items&quot;: [1, 2], &quot;meta&quot;: {&quot;n&quot;: 2}} and t.committed is False
+    with t as d:
+        d[&quot;items&quot;].append(9)
+    assert data[&quot;items&quot;] == [1, 2, 9] and t.committed is True</textarea><textarea class="pc-src pc-solution" hidden>import copy
+
+class Transaction:
+    def __init__(self, data):
+        self.data = data
+        self.committed = None
+
+    def __enter__(self):
+        self.snapshot = copy.deepcopy(self.data)
+        return self.data
+
+    def __exit__(self, exc_type, exc, tb):
+        if exc_type is None:
+            self.committed = True
+        else:
+            self.data.clear()
+            self.data.update(self.snapshot)
+            self.committed = False
+        return False
+
+def transfer(accounts, source, target, amount):
+    with Transaction(accounts) as acc:
+        acc[source] -= amount
+        acc[target] += amount
+        if acc[source] &lt; 0:
+            raise ValueError(&quot;insufficient funds&quot;)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d2-reentrant" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Nesting depth</div><div class="pc-prompt"><p>Write <code>Section(log)</code>: a reentrant context manager for nested headings. Each <code>with</code> increases the depth; <code>section.heading(text)</code> appends <code>"#" * depth + " " + text</code> to the log list (at depth 0, just the text); <code>__exit__</code> always decreases the depth, even after an error. <code>depth</code> is readable.</p></div><textarea class="pc-src pc-code" hidden>class Section:
+    def __init__(self, log):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_section():
+    &quot;a depth counter&quot;
+    log = []
+    s = Section(log)
+    s.heading(&quot;Title&quot;)
+    with s:
+        s.heading(&quot;Part&quot;)
+        with s:
+            s.heading(&quot;Detail&quot;)
+        s.heading(&quot;Part two&quot;)
+    assert log == [&quot;Title&quot;, &quot;# Part&quot;, &quot;## Detail&quot;, &quot;# Part two&quot;] and s.depth == 0
+    try:
+        with s:
+            with s:
+                raise ValueError
+    except ValueError:
+        pass
+    assert s.depth == 0</textarea><textarea class="pc-src pc-solution" hidden>class Section:
+    def __init__(self, log):
+        self.log = log
+        self.depth = 0
+
+    def __enter__(self):
+        self.depth += 1
+        return self
+
+    def __exit__(self, *exc):
+        self.depth -= 1
+        return False
+
+    def heading(self, text):
+        self.log.append((&quot;#&quot; * self.depth + &quot; &quot; + text) if self.depth else text)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w061d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Restoring the new value</div><div class="pc-prompt"><p>This manager saves the old value <strong>after</strong> changing it, so it &ldquo;restores&rdquo; the new one and the setting stays changed: it prints <code>quiet quiet</code>. Save before changing so it prints <code>quiet loud</code>.</p></div><textarea class="pc-src pc-code" hidden>settings = {&quot;mode&quot;: &quot;loud&quot;}
+
+class Quietly:
+    def __enter__(self):
+        settings[&quot;mode&quot;] = &quot;quiet&quot;
+        self.old = settings[&quot;mode&quot;]
+    def __exit__(self, *exc):
+        settings[&quot;mode&quot;] = self.old
+
+with Quietly():
+    inside = settings[&quot;mode&quot;]
+print(inside, settings[&quot;mode&quot;])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;save first&quot;
+    expect_output(&quot;quiet loud&quot;)</textarea><textarea class="pc-src pc-solution" hidden>settings = {&quot;mode&quot;: &quot;loud&quot;}
+
+class Quietly:
+    def __enter__(self):
+        self.old = settings[&quot;mode&quot;]
+        settings[&quot;mode&quot;] = &quot;quiet&quot;
+    def __exit__(self, *exc):
+        settings[&quot;mode&quot;] = self.old
+
+with Quietly():
+    inside = settings[&quot;mode&quot;]
+print(inside, settings[&quot;mode&quot;])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w061d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title"><strong>exit</strong> takes four arguments</div><div class="pc-prompt"><p><code>__exit__</code> is always called with three extra arguments (type, value, traceback). This one accepts none, so leaving the block raises <code>TypeError</code> and it prints <code>TypeError</code>. Accept them (<code>*exc</code> is fine) so it prints <code>done</code>.</p></div><textarea class="pc-src pc-code" hidden>class Gate:
+    def __enter__(self):
+        return self
+    def __exit__(self):
+        print(&quot;closing&quot;)
+
+try:
+    with Gate():
+        pass
+    print(&quot;done&quot;)
+except TypeError:
+    print(&quot;TypeError&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the signature&quot;
+    expect_output(&quot;closing\ndone&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Gate:
+    def __enter__(self):
+        return self
+    def __exit__(self, *exc):
+        print(&quot;closing&quot;)
+
+try:
+    with Gate():
+        pass
+    print(&quot;done&quot;)
+except TypeError:
+    print(&quot;TypeError&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w061d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A depth that never comes back</div><div class="pc-prompt"><p>This only decreases the depth when the block <strong>succeeds</strong>, so after an error the manager thinks it&rsquo;s still one level in, and the final depth printed is <code>1</code>. Decrease it whatever happened so it prints <code>0</code>.</p></div><textarea class="pc-src pc-code" hidden>class Level:
+    def __init__(self):
+        self.depth = 0
+    def __enter__(self):
+        self.depth += 1
+        return self
+    def __exit__(self, exc_type, exc, tb):
+        if exc_type is None:
+            self.depth -= 1
+
+lv = Level()
+try:
+    with lv:
+        raise KeyError
+except KeyError:
+    pass
+print(lv.depth)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;always decrement&quot;
+    expect_output(&quot;0&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Level:
+    def __init__(self):
+        self.depth = 0
+    def __enter__(self):
+        self.depth += 1
+        return self
+    def __exit__(self, exc_type, exc, tb):
+        self.depth -= 1
+
+lv = Level()
+try:
+    with lv:
+        raise KeyError
+except KeyError:
+    pass
+print(lv.depth)</textarea></div>
+<div class="parsons" data-id="w061d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A temporary attribute</div><div class="pc-prompt"><p>Arrange the lines of a manager that sets an attribute for the block and restores it. One line is a trap.</p></div><script type="application/json">{"lines": ["class Setting:", "    def __init__(self, obj, name, value):", "        self.obj, self.name, self.value = obj, name, value", "    def __enter__(self):", "        self.old = getattr(self.obj, self.name)", "        setattr(self.obj, self.name, self.value)", "        return self.obj", "    def __exit__(self, *exc):", "        setattr(self.obj, self.name, self.old)"], "distractors": ["        setattr(self.obj, self.name, self.value)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the kind of manager that can be entered again while already inside: &quot;one-shot&quot;, &quot;reusable&quot; or &quot;reentrant&quot;
+q = ___   # True or False: a manager should save the old value in __init__
+r = ___   # what replaces the original exception if __exit__ raises: &quot;the new exception&quot; or &quot;the original&quot;
+s = ___   # issubclass(KeyError, LookupError)
+t = ___   # True or False: a Transaction should restore its snapshot when the body succeeds</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;reentrant&quot; and q is False and r == &quot;the new exception&quot;, &quot;p, q and r&quot;
+    assert s is True and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;reentrant&quot;
+q = False
+r = &quot;the new exception&quot;
+s = True
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w061d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why take the clock as a parameter of a timer?", "answer": 1, "explain": "Dependency injection, again.", "options": ["Speed", "So tests can pass a fake clock and check exact numbers", "Style", "It&rsquo;s required"]}, {"type": "mc", "q": "Where should a temporary change save the old value?", "answer": 1, "explain": "The manager may be made long before it&rsquo;s used.", "options": ["In <strong>init</strong>", "In <strong>enter</strong>", "In <strong>exit</strong>", "Globally"]}, {"type": "mc", "q": "How should a manager restore a key that didn&rsquo;t exist before?", "answer": 1, "explain": "A sentinel records &lsquo;missing&rsquo;.", "options": ["Set it to None", "Delete it", "Leave it", "Set it to the new value"]}, {"type": "mc", "q": "When should <strong>exit</strong> return True?", "answer": 1, "explain": "Otherwise real bugs vanish.", "options": ["Always", "Only for the specific exception types it means to suppress", "Never", "On success"]}, {"type": "mc", "q": "What happens if <strong>exit</strong> raises?", "answer": 1, "explain": "The original survives as <strong>context</strong>.", "options": ["Nothing", "Its exception replaces the original one", "Both are shown equally", "The body runs again"]}, {"type": "mc", "q": "How does a transaction manager roll back?", "answer": 1, "explain": "All or nothing.", "options": ["It can&rsquo;t", "It restores a snapshot taken in <strong>enter</strong> when the body raises", "It deletes everything", "It retries"]}, {"type": "mc", "q": "What&rsquo;s a reusable manager?", "answer": 1, "explain": "Fresh state on each enter.", "options": ["One that can be nested", "One usable in several with statements one after another", "A file", "One that never exits"]}, {"type": "mc", "q": "What does a reentrant manager need?", "answer": 1, "explain": "Set up at depth 0 only, clean up back at depth 0.", "options": ["A lock", "A depth counter", "A copy", "Nothing"]}, {"type": "mc", "q": "Why decrement the depth unconditionally?", "answer": 1, "explain": "<strong>exit</strong> runs either way.", "options": ["Speed", "Otherwise an error leaves it thinking it&rsquo;s still inside", "Style", "It doesn&rsquo;t matter"]}, {"type": "output", "q": "What does this print?", "answer": "after", "explain": "The KeyError is suppressed.", "code": "class M:\n    def __enter__(self):\n        return \"in\"\n    def __exit__(self, t, e, tb):\n        return t is KeyError\nwith M():\n    raise KeyError\nprint(\"after\")"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: nested savepoints</div><div class="pc-prompt"><p>A <code>Ledger</code> keeps account balances and supports <strong>nested</strong> transactions, like a database&rsquo;s savepoints: an inner transaction that fails rolls back only its own changes, while the outer one carries on; when the outer one fails, everything since it began is undone, including inner transactions that had succeeded.</p>
+<ul>
+<li><code>Ledger(balances)</code> holds a dict; <code>ledger.balance(name)</code>; <code>ledger.move(source, target, amount)</code> changes balances, raising <code>ValueError("insufficient funds")</code> if the source would go negative (without changing anything).</li>
+<li><code>ledger.transaction()</code> returns a context manager: entering pushes a snapshot of the balances onto a stack; leaving pops it, and on an error restores that snapshot and lets the error carry on. <code>__enter__</code> returns the ledger.</li>
+<li><code>ledger.depth()</code>: how many transactions are open.</li>
+<li><code>ledger.audit</code>: a list of <code>("commit", depth)</code> and <code>("rollback", depth)</code> entries, recording each transaction as it ends, with the depth it had while open (outermost 1).</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import copy
+
+class Ledger:
+    def __init__(self, balances):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_ledger():
+    &quot;nested savepoints&quot;
+    led = Ledger({&quot;ada&quot;: 100, &quot;ben&quot;: 0, &quot;cy&quot;: 0})
+    with led.transaction():
+        led.move(&quot;ada&quot;, &quot;ben&quot;, 30)
+        try:
+            with led.transaction():
+                led.move(&quot;ben&quot;, &quot;cy&quot;, 10)
+                led.move(&quot;ada&quot;, &quot;cy&quot;, 500)
+        except ValueError:
+            pass
+        assert led.balance(&quot;cy&quot;) == 0 and led.balance(&quot;ben&quot;) == 30 and led.depth() == 1
+        with led.transaction():
+            led.move(&quot;ben&quot;, &quot;cy&quot;, 5)
+    assert (led.balance(&quot;ada&quot;), led.balance(&quot;ben&quot;), led.balance(&quot;cy&quot;)) == (70, 25, 5) and led.depth() == 0
+    assert led.audit == [(&quot;rollback&quot;, 2), (&quot;commit&quot;, 2), (&quot;commit&quot;, 1)]
+    try:
+        with led.transaction() as l:
+            assert l is led
+            with led.transaction():
+                led.move(&quot;ada&quot;, &quot;cy&quot;, 70)
+            raise RuntimeError(&quot;power cut&quot;)
+    except RuntimeError:
+        pass
+    assert led.balance(&quot;ada&quot;) == 70 and led.balance(&quot;cy&quot;) == 5 and led.audit[-2:] == [(&quot;commit&quot;, 2), (&quot;rollback&quot;, 1)]
+    try:
+        led.move(&quot;cy&quot;, &quot;ada&quot;, 6)
+        assert False
+    except ValueError:
+        pass
+    assert led.balance(&quot;cy&quot;) == 5</textarea><textarea class="pc-src pc-solution" hidden>import copy
+
+class _Savepoint:
+    def __init__(self, ledger):
+        self.ledger = ledger
+
+    def __enter__(self):
+        self.ledger._snapshots.append(copy.deepcopy(self.ledger._balances))
+        return self.ledger
+
+    def __exit__(self, exc_type, exc, tb):
+        depth = len(self.ledger._snapshots)
+        snapshot = self.ledger._snapshots.pop()
+        if exc_type is None:
+            self.ledger.audit.append((&quot;commit&quot;, depth))
+        else:
+            self.ledger._balances.clear()
+            self.ledger._balances.update(snapshot)
+            self.ledger.audit.append((&quot;rollback&quot;, depth))
+        return False
+
+class Ledger:
+    def __init__(self, balances):
+        self._balances = dict(balances)
+        self._snapshots = []
+        self.audit = []
+
+    def balance(self, name):
+        return self._balances[name]
+
+    def move(self, source, target, amount):
+        if self._balances[source] &lt; amount:
+            raise ValueError(&quot;insufficient funds&quot;)
+        self._balances[source] -= amount
+        self._balances[target] += amount
+
+    def transaction(self):
+        return _Savepoint(self)
+
+    def depth(self):
+        return len(self._snapshots)</textarea><template class="pc-src pc-hint">Keep <code>self._snapshots</code>, a list used as a stack. <code>transaction()</code> can return an instance of a small inner class (or a separate class) holding a reference to the ledger: its <code>__enter__</code> appends <code>copy.deepcopy(ledger._balances)</code> and returns the ledger; its <code>__exit__</code> records the depth (the stack&rsquo;s length) before popping, restores the popped snapshot on error, and appends to the audit.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Think of one thing in a program you&rsquo;ve written that could be a context manager class (a temporary setting, a log section, a timer around slow code) and sketch its <code>__enter__</code> and <code>__exit__</code>. Tomorrow: <code>contextlib</code>, which turns a generator into a context manager in a few lines.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w061d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w061d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w061d2", "week": 61, "day": 2, "title": "Context manager classes", "exercises": [{"id": "w061d2-timer", "title": "A timer with laps", "points": 10}, {"id": "w061d2-patched", "title": "Changing things for a while", "points": 15}, {"id": "w061d2-suppress", "title": "Catching only what you expect", "points": 10}, {"id": "w061d2-transaction", "title": "All or nothing", "points": 15}, {"id": "w061d2-reentrant", "title": "Nesting depth", "points": 10}, {"id": "w061d2-bug1", "title": "Restoring the new value", "points": 10}, {"id": "w061d2-bug2", "title": "__exit__ takes four arguments", "points": 10}, {"id": "w061d2-bug3", "title": "A depth that never comes back", "points": 10}, {"id": "w061d2-trace", "title": "Predict them", "points": 10}, {"id": "w061d2-challenge", "title": "Challenge: nested savepoints", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

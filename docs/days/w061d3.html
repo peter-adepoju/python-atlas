@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 61 Day 3: contextlib | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Writing a class with __enter__ and __exit__ for every small context manager is a lot of ceremony. The contextlib module offers a shortcut that joins this...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w061d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 61 Day 3: contextlib">
+<meta property="og:description" content="Writing a class with __enter__ and __exit__ for every small context manager is a lot of ceremony. The contextlib module offers a shortcut that joins this...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w061d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-61">Week 61: Context managers</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#a-generator-as-a-manager" data-sec="a-generator-as-a-manager">A generator as a manager</a></li><li><a href="#the-finally-rule" data-sec="the-finally-rule">The finally rule</a></li><li><a href="#errors-inside" data-sec="errors-inside">Errors inside</a></li><li><a href="#ready-made-helpers" data-sec="ready-made-helpers">Ready-made helpers</a></li><li><a href="#managers-as-decorators" data-sec="managers-as-decorators">Managers as decorators</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w061d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-61">Week 61: Context managers</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 61, Day 3</span></p>
+      <h1>contextlib</h1>
+      <div class="day-intro"><p>Writing a class with <code>__enter__</code> and <code>__exit__</code> for every small context manager is a lot of ceremony. The <code>contextlib</code> module offers a shortcut that joins this week to the last two: the <code>@contextmanager</code> decorator turns a <strong>generator</strong> into a context manager, where the code before <code>yield</code> is the setup, the yielded value is what <code>as</code> receives, and the code after is the cleanup. Today you&rsquo;ll write managers that way (and learn the one mistake it invites), then meet <code>contextlib</code>&rsquo;s ready-made helpers: <code>suppress</code>, <code>redirect_stdout</code>, <code>chdir</code>, <code>closing</code> and <code>nullcontext</code>, and <code>ContextDecorator</code>, which lets one object work both as a <code>with</code> and as a decorator.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Write context managers as generators with @contextmanager</li><li>Clean up reliably with try and finally around the yield</li><li>Handle and suppress errors inside a generator-based manager</li><li>Use suppress, redirect_stdout, chdir, closing and nullcontext</li><li>Make a manager that also works as a decorator with ContextDecorator</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="A generator as a manager: 25 min"></span><span class="plan-seg s0" style="flex:15" title="The finally rule: 15 min"></span><span class="plan-seg s1" style="flex:15" title="Errors inside: 15 min"></span><span class="plan-seg s0" style="flex:25" title="Ready-made helpers: 25 min"></span><span class="plan-seg s1" style="flex:15" title="Managers as decorators: 15 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">A generator as a manager</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">The finally rule</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Errors inside</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:05</span><span class="plan-what">Ready-made helpers</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Managers as decorators</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:45</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w061d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w061d3.ipynb" download>download it</a>. Exercises today are worth 120 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w061d3-p1"><textarea class="pc-src pc-code" hidden>from contextlib import contextmanager
+
+@contextmanager
+def announced(name):
+    print(&quot;before&quot;, name)
+    try:
+        yield name.upper()
+    finally:
+        print(&quot;after&quot;, name)
+
+with announced(&quot;tea&quot;) as shout:
+    print(&quot;inside with&quot;, shout)
+
+try:
+    with announced(&quot;jam&quot;):
+        raise ValueError(&quot;spilt&quot;)
+except ValueError as e:
+    print(&quot;caught&quot;, e)</textarea></div>
+<h2 id="a-generator-as-a-manager">A generator as a manager</h2>
+<p><code>@contextmanager</code> (from <code>contextlib</code>, by Nick Coghlan and others, with the <code>with</code> statement in Python 2.5) wraps a generator function so that calling it gives a context manager:</p>
+<ul>
+<li><code>__enter__</code> runs the generator up to its <strong>single</strong> <code>yield</code>, and returns the yielded value (bound by <code>as</code>).</li>
+<li><code>__exit__</code> resumes the generator after the <code>yield</code>. On success it&rsquo;s resumed normally; on an error, the exception is <strong>raised at the <code>yield</code></strong> inside the generator, as if the <code>yield</code> line itself had failed.</li>
+</ul>
+<p>So the setup, the value and the cleanup sit together in one short function, in the order they happen: it&rsquo;s yesterday&rsquo;s classes with the boilerplate removed. Under the hood it uses Week 59&rsquo;s generator machinery (<code>next</code> to start, <code>throw</code> to deliver an exception) and Week 60&rsquo;s decorators.</p>
+<div class="pc pc-example" data-kind="example" data-id="w061d3-e2"><textarea class="pc-src pc-code" hidden>from contextlib import contextmanager
+import time
+
+@contextmanager
+def timer(results):
+    start = time.perf_counter()
+    try:
+        yield
+    finally:
+        results.append(time.perf_counter() - start)
+
+times = []
+with timer(times):
+    sum(range(50_000))
+with timer(times):
+    pass
+print(len(times), all(t &gt;= 0 for t in times))</textarea></div>
+<h2 id="the-finally-rule">The finally rule</h2>
+<p>Because an error in the body is raised <strong>at the <code>yield</code></strong>, any cleanup written after the <code>yield</code> without protection is <strong>skipped</strong> when the body fails, the very case context managers exist for. Always put the <code>yield</code> inside <code>try</code> and the cleanup in <code>finally</code> (or use <code>except</code>/<code>else</code> when cleanup should differ between success and failure).</p>
+<p>Two other rules: the generator must yield <strong>exactly once</strong> (yielding nothing gives <code>RuntimeError: generator didn't yield</code>; yielding twice gives <code>RuntimeError: generator didn't stop</code>), and a manager made this way is <strong>one-shot</strong> per call: call the function again for each <code>with</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w061d3-e3"><textarea class="pc-src pc-code" hidden>from contextlib import contextmanager
+
+state = {&quot;mode&quot;: &quot;normal&quot;}
+
+@contextmanager
+def careless():
+    state[&quot;mode&quot;] = &quot;special&quot;
+    yield
+    state[&quot;mode&quot;] = &quot;normal&quot;                 # skipped if the body fails
+
+@contextmanager
+def careful():
+    state[&quot;mode&quot;] = &quot;special&quot;
+    try:
+        yield
+    finally:
+        state[&quot;mode&quot;] = &quot;normal&quot;
+
+for manager in (careless, careful):
+    try:
+        with manager():
+            raise RuntimeError
+    except RuntimeError:
+        pass
+    print(manager.__name__, state[&quot;mode&quot;])
+    state[&quot;mode&quot;] = &quot;normal&quot;</textarea></div>
+<h2 id="errors-inside">Errors inside</h2>
+<p>To react to an error, catch it around the <code>yield</code>:</p>
+<ul>
+<li><strong>Log and re-raise</strong>: <code>except Exception: log(...); raise</code>.</li>
+<li><strong>Roll back</strong>: undo the changes in <code>except</code>, then <code>raise</code>.</li>
+<li><strong>Suppress</strong>: catch it and <strong>don&rsquo;t</strong> re-raise; the <code>with</code> block then counts as having finished normally. As before, suppress only specific exception types.</li>
+</ul>
+<p><code>try</code>/<code>except</code>/<code>else</code>/<code>finally</code> all work as usual: <code>else</code> for &ldquo;the body succeeded&rdquo;, <code>finally</code> for &ldquo;always&rdquo;.</p>
+<div class="pc pc-example" data-kind="example" data-id="w061d3-e4"><textarea class="pc-src pc-code" hidden>from contextlib import contextmanager
+
+@contextmanager
+def all_or_nothing(items):
+    backup = list(items)
+    try:
+        yield items
+    except Exception:
+        items[:] = backup                  # roll back, then let the error carry on
+        raise
+    else:
+        print(&quot;committed&quot;, items)
+
+basket = [&quot;tea&quot;]
+with all_or_nothing(basket) as b:
+    b.append(&quot;jam&quot;)
+try:
+    with all_or_nothing(basket) as b:
+        b.append(&quot;cake&quot;)
+        raise ValueError(&quot;out of money&quot;)
+except ValueError:
+    pass
+print(basket)</textarea></div>
+<h2 id="ready-made-helpers">Ready-made helpers</h2>
+<p><code>contextlib</code> already has the common ones:</p>
+<table>
+<thead>
+<tr>
+<th>Helper</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>suppress(*types)</code></td>
+<td>ignores those exception types inside the block (Tuesday&rsquo;s <code>Ignoring</code>)</td>
+</tr>
+<tr>
+<td><code>redirect_stdout(stream)</code> / <code>redirect_stderr(stream)</code></td>
+<td>sends <code>print</code> output to another stream, such as an <code>io.StringIO</code>, for the block</td>
+</tr>
+<tr>
+<td><code>chdir(path)</code></td>
+<td>changes the current folder for the block (Python 3.11)</td>
+</tr>
+<tr>
+<td><code>closing(thing)</code></td>
+<td>calls <code>thing.close()</code> at the end, for objects with <code>close()</code> but no <code>with</code> support</td>
+</tr>
+<tr>
+<td><code>nullcontext(value)</code></td>
+<td>does nothing, giving <code>value</code> to <code>as</code>: for &ldquo;use a manager only sometimes&rdquo;</td>
+</tr>
+</tbody>
+</table>
+<p><code>nullcontext</code> is handy when code takes <strong>either</strong> a path (which it must open and close) or an open file (which belongs to the caller and must be left open): <code>manager = open(path) if isinstance(x, str) else nullcontext(x)</code>, then one <code>with</code> either way.</p>
+<div class="pc pc-example" data-kind="example" data-id="w061d3-e5"><textarea class="pc-src pc-code" hidden>from contextlib import suppress, redirect_stdout, nullcontext, closing
+import io, os
+
+with suppress(FileNotFoundError):
+    os.remove(&quot;no-such-file.txt&quot;)
+print(&quot;no error&quot;)
+
+buffer = io.StringIO()
+with redirect_stdout(buffer):
+    print(&quot;hidden from the screen&quot;)
+print(&quot;captured:&quot;, repr(buffer.getvalue()))
+
+class Connection:
+    def close(self):
+        print(&quot;connection closed&quot;)
+
+with closing(Connection()):
+    pass
+
+def first_line(source):
+    manager = open(source) if isinstance(source, str) else nullcontext(source)
+    with manager as f:
+        return f.readline().strip()
+
+with open(&quot;demo.txt&quot;, &quot;w&quot;) as f:
+    f.write(&quot;hello\nworld\n&quot;)
+stream = io.StringIO(&quot;from a stream\n&quot;)
+print(first_line(&quot;demo.txt&quot;), &quot;|&quot;, first_line(stream), &quot;|&quot;, stream.closed)</textarea></div>
+<h2 id="managers-as-decorators">Managers as decorators</h2>
+<p>Often you want &ldquo;run this whole function inside the manager&rdquo;. <code>contextlib.ContextDecorator</code> is a base class: a manager class that inherits from it can be used as a decorator too, wrapping each call in <code>with self:</code>. Managers made with <code>@contextmanager</code> already support this. It suits managers that don&rsquo;t need to hand anything to the body (timers, logging sections, temporary settings), because a decorated function can&rsquo;t receive the <code>as</code> value.</p>
+<div class="pc pc-example" data-kind="example" data-id="w061d3-e6"><textarea class="pc-src pc-code" hidden>from contextlib import ContextDecorator
+
+class section(ContextDecorator):
+    def __init__(self, name, log):
+        self.name, self.log = name, log
+    def __enter__(self):
+        self.log.append(f&quot;start {self.name}&quot;)
+        return self
+    def __exit__(self, *exc):
+        self.log.append(f&quot;end {self.name}&quot;)
+        return False
+
+log = []
+
+@section(&quot;report&quot;, log)
+def make_report():
+    log.append(&quot;writing&quot;)
+
+make_report()
+with section(&quot;manual&quot;, log):
+    log.append(&quot;by hand&quot;)
+print(log)</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>@contextmanager turns a generator into a context manager: code before the single yield is the setup, the yielded value goes to as, and code after is the cleanup. An error in the body is raised at the yield, so put the yield in try and the cleanup in finally, or the cleanup is skipped on failure. Catch around the yield to log, roll back or (rarely, specifically) suppress. Such managers are one-shot per call and must yield exactly once. contextlib also gives suppress, redirect_stdout, chdir, closing and nullcontext, and ContextDecorator (like @contextmanager managers) lets a manager decorate whole functions.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d3-gen" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Generator managers</div><div class="pc-prompt"><p>Write with <code>@contextmanager</code>: <code>tag(log, name)</code> appends <code>"&lt;name&gt;"</code> to the list on entry and <code>"&lt;/name&gt;"</code> on exit (even on error), yielding nothing; and <code>counting(counter, key)</code>: adds 1 to <code>counter[key]</code> (a dict, starting from 0 if missing) on entry, yields the new count, and subtracts 1 on exit, whatever happened.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import contextmanager
+
+@contextmanager
+def tag(log, name):
+    ___
+
+@contextmanager
+def counting(counter, key):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_gen():
+    &quot;contextmanager&quot;
+    log = []
+    with tag(log, &quot;html&quot;):
+        with tag(log, &quot;body&quot;):
+            log.append(&quot;text&quot;)
+    assert log == [&quot;&lt;html&gt;&quot;, &quot;&lt;body&gt;&quot;, &quot;text&quot;, &quot;&lt;/body&gt;&quot;, &quot;&lt;/html&gt;&quot;]
+    log = []
+    try:
+        with tag(log, &quot;p&quot;):
+            raise ValueError
+    except ValueError:
+        pass
+    assert log == [&quot;&lt;p&gt;&quot;, &quot;&lt;/p&gt;&quot;]
+    c = {}
+    with counting(c, &quot;users&quot;) as n:
+        assert n == 1
+        with counting(c, &quot;users&quot;) as m:
+            assert m == 2
+    assert c == {&quot;users&quot;: 0}
+    try:
+        with counting(c, &quot;x&quot;):
+            raise KeyError
+    except KeyError:
+        pass
+    assert c[&quot;x&quot;] == 0</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import contextmanager
+
+@contextmanager
+def tag(log, name):
+    log.append(f&quot;&lt;{name}&gt;&quot;)
+    try:
+        yield
+    finally:
+        log.append(f&quot;&lt;/{name}&gt;&quot;)
+
+@contextmanager
+def counting(counter, key):
+    counter[key] = counter.get(key, 0) + 1
+    try:
+        yield counter[key]
+    finally:
+        counter[key] -= 1</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d3-folder" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Working in another folder</div><div class="pc-prompt"><p>Write <code>inside(path)</code> with <code>@contextmanager</code>: create the folder (and any missing parents) if needed, change into it, yield the absolute path of that folder, and change back to the previous folder afterwards, even on an error. Use <code>os.makedirs</code> with <code>exist_ok=True</code>, <code>os.getcwd</code> and <code>os.chdir</code>.</p></div><textarea class="pc-src pc-code" hidden>import os
+from contextlib import contextmanager
+
+@contextmanager
+def inside(path):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import os
+def test_folder():
+    &quot;changing folder&quot;
+    start = os.getcwd()
+    with inside(&quot;work/reports&quot;) as where:
+        assert os.getcwd() == where and where.endswith(os.path.join(&quot;work&quot;, &quot;reports&quot;))
+        with open(&quot;r.txt&quot;, &quot;w&quot;) as f:
+            f.write(&quot;x&quot;)
+    assert os.getcwd() == start and os.path.exists(os.path.join(&quot;work&quot;, &quot;reports&quot;, &quot;r.txt&quot;))
+    try:
+        with inside(&quot;work&quot;):
+            raise RuntimeError
+    except RuntimeError:
+        pass
+    assert os.getcwd() == start</textarea><textarea class="pc-src pc-solution" hidden>import os
+from contextlib import contextmanager
+
+@contextmanager
+def inside(path):
+    os.makedirs(path, exist_ok=True)
+    previous = os.getcwd()
+    os.chdir(path)
+    try:
+        yield os.getcwd()
+    finally:
+        os.chdir(previous)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d3-capture" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Capturing printed output</div><div class="pc-prompt"><p>Write <code>printed(func, *args)</code>: call the function with <code>redirect_stdout</code> into an <code>io.StringIO</code> and return a pair <code>(result, text_printed)</code>. Then <code>quiet(func, *args)</code>: call it with its printed output thrown away (redirect to a fresh <code>StringIO</code>) and return only the result.</p></div><textarea class="pc-src pc-code" hidden>import io
+from contextlib import redirect_stdout
+
+def printed(func, *args):
+    ___
+
+def quiet(func, *args):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_capture():
+    &quot;redirect_stdout&quot;
+    def noisy(a, b):
+        print(&quot;adding&quot;, a, b)
+        return a + b
+    assert printed(noisy, 2, 3) == (5, &quot;adding 2 3\n&quot;) and quiet(noisy, 1, 1) == 2
+    assert printed(lambda: None) == (None, &quot;&quot;)
+    import contextlib
+    assert &quot;redirect_stdout(&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>import io
+from contextlib import redirect_stdout
+
+def printed(func, *args):
+    buffer = io.StringIO()
+    with redirect_stdout(buffer):
+        result = func(*args)
+    return result, buffer.getvalue()
+
+def quiet(func, *args):
+    with redirect_stdout(io.StringIO()):
+        return func(*args)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d3-either" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A path or an open file</div><div class="pc-prompt"><p>Write <code>count_lines(source)</code>: the number of lines in <code>source</code>, which is either a path (open it, and close it afterwards) or an already open file-like object (use it, and leave it <strong>open</strong>: it belongs to the caller). Use <code>nullcontext</code> so there&rsquo;s only one <code>with</code> statement. Then <code>remove_quietly(path)</code>: delete a file if it exists, with <code>contextlib.suppress</code>, returning True if a file was removed.</p></div><textarea class="pc-src pc-code" hidden>import os
+from contextlib import nullcontext, suppress
+
+def count_lines(source):
+    ___
+
+def remove_quietly(path):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import io, os
+def test_either():
+    &quot;nullcontext and suppress&quot;
+    with open(&quot;three.txt&quot;, &quot;w&quot;) as f:
+        f.write(&quot;a\nb\nc\n&quot;)
+    s = io.StringIO(&quot;x\ny\n&quot;)
+    assert count_lines(&quot;three.txt&quot;) == 3 and count_lines(s) == 2 and not s.closed
+    assert remove_quietly(&quot;three.txt&quot;) is True and not os.path.exists(&quot;three.txt&quot;) and remove_quietly(&quot;three.txt&quot;) is False
+    assert source.count(&quot;with &quot;) == 2 and &quot;nullcontext(&quot; in source and &quot;suppress(&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>import os
+from contextlib import nullcontext, suppress
+
+def count_lines(source):
+    manager = open(source) if isinstance(source, str) else nullcontext(source)
+    with manager as f:
+        return sum(1 for _ in f)
+
+def remove_quietly(path):
+    with suppress(FileNotFoundError):
+        os.remove(path)
+        return True
+    return False</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d3-deco" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">With or as a decorator</div><div class="pc-prompt"><p>Write a class <code>recorded(ContextDecorator)</code> taking a name and a list: entering appends <code>("start", name)</code>, exiting appends <code>("ok", name)</code> or <code>("failed", name, error_type_name)</code> and lets errors carry on. It must work as a <code>with</code> and as a decorator (on any function). Then a <code>@contextmanager</code> function <code>limited(seconds, clock)</code> that, on exit, raises <code>TimeoutError(f"took {elapsed:.1f}s")</code> if the block took longer than <code>seconds</code> by the given clock (it must work as a <code>with</code> and, being made by <code>@contextmanager</code>, as a decorator).</p></div><textarea class="pc-src pc-code" hidden>from contextlib import ContextDecorator, contextmanager
+
+class recorded(ContextDecorator):
+    def __init__(self, name, log):
+        ___
+
+@contextmanager
+def limited(seconds, clock):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_deco():
+    &quot;ContextDecorator&quot;
+    log = []
+    @recorded(&quot;job&quot;, log)
+    def job(x):
+        return x * 2
+    assert job(4) == 8 and job.__name__ == &quot;job&quot;
+    try:
+        with recorded(&quot;manual&quot;, log):
+            raise KeyError
+    except KeyError:
+        pass
+    assert log == [(&quot;start&quot;, &quot;job&quot;), (&quot;ok&quot;, &quot;job&quot;), (&quot;start&quot;, &quot;manual&quot;), (&quot;failed&quot;, &quot;manual&quot;, &quot;KeyError&quot;)]
+    ticks = iter([0.0, 0.5, 10.0, 13.0])
+    clock = lambda: next(ticks)
+    with limited(1, clock):
+        pass
+    @limited(2, clock)
+    def slow():
+        return &quot;done&quot;
+    try:
+        slow()
+        assert False
+    except TimeoutError as e:
+        assert str(e) == &quot;took 3.0s&quot;</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import ContextDecorator, contextmanager
+
+class recorded(ContextDecorator):
+    def __init__(self, name, log):
+        self.name, self.log = name, log
+
+    def __enter__(self):
+        self.log.append((&quot;start&quot;, self.name))
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        if exc_type is None:
+            self.log.append((&quot;ok&quot;, self.name))
+        else:
+            self.log.append((&quot;failed&quot;, self.name, exc_type.__name__))
+        return False
+
+@contextmanager
+def limited(seconds, clock):
+    start = clock()
+    yield
+    elapsed = clock() - start
+    if elapsed &gt; seconds:
+        raise TimeoutError(f&quot;took {elapsed:.1f}s&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w061d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Cleanup skipped on error</div><div class="pc-prompt"><p>The cleanup comes after a plain <code>yield</code>, so when the body raises, the exception arrives <strong>at</strong> the yield and the cleanup never runs: the lock stays held and this prints <code>True</code>. Wrap the yield in <code>try</code> and <code>finally</code> so it prints <code>False</code>.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import contextmanager
+
+state = {&quot;locked&quot;: False}
+
+@contextmanager
+def locked():
+    state[&quot;locked&quot;] = True
+    yield
+    state[&quot;locked&quot;] = False
+
+try:
+    with locked():
+        raise RuntimeError
+except RuntimeError:
+    pass
+print(state[&quot;locked&quot;])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;try and finally&quot;
+    expect_output(&quot;False&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import contextmanager
+
+state = {&quot;locked&quot;: False}
+
+@contextmanager
+def locked():
+    state[&quot;locked&quot;] = True
+    try:
+        yield
+    finally:
+        state[&quot;locked&quot;] = False
+
+try:
+    with locked():
+        raise RuntimeError
+except RuntimeError:
+    pass
+print(state[&quot;locked&quot;])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w061d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Yielding twice</div><div class="pc-prompt"><p>A generator-based manager must yield <strong>exactly once</strong>. This one yields in a loop, so leaving the block raises <code>RuntimeError: generator didn't stop</code>, and it prints <code>using 1</code> and then <code>RuntimeError</code>. Yield once so it prints only <code>using 1</code>.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import contextmanager
+
+@contextmanager
+def numbered():
+    for n in (1, 2):
+        yield n
+
+try:
+    with numbered() as n:
+        print(&quot;using&quot;, n)
+except RuntimeError:
+    print(&quot;RuntimeError&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;one yield&quot;
+    expect_output(&quot;using 1&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import contextmanager
+
+@contextmanager
+def numbered():
+    yield 1
+
+try:
+    with numbered() as n:
+        print(&quot;using&quot;, n)
+except RuntimeError:
+    print(&quot;RuntimeError&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w061d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Reusing a one-shot manager</div><div class="pc-prompt"><p>A <code>@contextmanager</code> object can be used only once: its generator is finished after the first <code>with</code>, so the second <code>with</code> fails (the exact exception differs between Python versions) and this prints <code>ok</code> then <code>failed</code>. Call the function again for each <code>with</code> so it prints <code>ok</code> twice.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import contextmanager
+
+@contextmanager
+def step():
+    yield &quot;ok&quot;
+
+manager = step()
+try:
+    for _ in range(2):
+        with manager as m:
+            print(m)
+except Exception:
+    print(&quot;failed&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a fresh manager each time&quot;
+    expect_output(&quot;ok\nok&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import contextmanager
+
+@contextmanager
+def step():
+    yield &quot;ok&quot;
+
+try:
+    for _ in range(2):
+        with step() as m:
+            print(m)
+except Exception:
+    print(&quot;failed&quot;)</textarea></div>
+<div class="parsons" data-id="w061d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A generator-based manager</div><div class="pc-prompt"><p>Arrange the lines of a <code>@contextmanager</code> function that sets a flag, yields, and always clears it. One line is a trap.</p></div><script type="application/json">{"lines": ["@contextmanager", "def busy(state):", "    state[\"busy\"] = True", "    try:", "        yield state", "    finally:", "        state[\"busy\"] = False"], "distractors": ["    return state"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # where an exception from the with body appears inside a @contextmanager generator: &quot;at the yield&quot; or &quot;at the start&quot;
+q = ___   # the error from a @contextmanager generator that yields twice, as a string
+r = ___   # True or False: nullcontext(5).__enter__() returns 5
+s = ___   # True or False: contextlib.suppress(KeyError) also hides a ValueError
+t = ___   # the Python version that added contextlib.chdir, as &quot;3.11&quot;, &quot;3.9&quot; or &quot;3.6&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    from contextlib import nullcontext
+    assert p == &quot;at the yield&quot; and q == &quot;RuntimeError&quot; and r is True, &quot;p, q and r&quot;
+    assert s is False and t == &quot;3.11&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;at the yield&quot;
+q = &quot;RuntimeError&quot;
+r = True
+s = False
+t = &quot;3.11&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w061d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "In a @contextmanager generator, what is the code before yield?", "answer": 1, "explain": "The yielded value goes to as.", "options": ["The cleanup", "The setup, run by <strong>enter</strong>", "The body", "Nothing"]}, {"type": "mc", "q": "Where is an exception from the with body raised inside the generator?", "answer": 1, "explain": "So the cleanup needs finally.", "options": ["At the start", "At the yield", "At the end", "It isn&rsquo;t"]}, {"type": "mc", "q": "Why put the yield inside try/finally?", "answer": 1, "explain": "The case context managers exist for.", "options": ["Style", "Otherwise the cleanup is skipped when the body fails", "Speed", "It&rsquo;s required"]}, {"type": "mc", "q": "How does a @contextmanager generator suppress an error?", "answer": 1, "explain": "Suppress only specific types.", "options": ["Return True", "Catch it around the yield and don&rsquo;t re-raise", "Yield again", "It can&rsquo;t"]}, {"type": "mc", "q": "How many times must it yield?", "answer": 1, "explain": "Otherwise RuntimeError.", "options": ["Any", "Exactly once", "At least once", "Twice"]}, {"type": "mc", "q": "What does redirect_stdout do?", "answer": 1, "explain": "Handy for capturing output.", "options": ["Prints twice", "Sends print output to another stream for the block", "Closes stdout", "Logs to a file always"]}, {"type": "mc", "q": "When is nullcontext useful?", "answer": 1, "explain": "One with statement either way.", "options": ["Never", "When a manager is needed only sometimes, such as a caller&rsquo;s own open file", "To suppress errors", "To time code"]}, {"type": "mc", "q": "What does closing(thing) do?", "answer": 1, "explain": "For objects with close() but no with support.", "options": ["Opens it", "Calls thing.close() at the end of the block", "Deletes it", "Copies it"]}, {"type": "mc", "q": "What does ContextDecorator add?", "answer": 1, "explain": "@contextmanager managers already have it.", "options": ["Speed", "Lets a manager class also be used as a decorator", "Thread safety", "Reentrancy"]}, {"type": "output", "q": "What does this print?", "answer": "a\nc", "explain": "The block stops at the error, which is then ignored.", "code": "from contextlib import suppress\nwith suppress(ZeroDivisionError):\n    print(\"a\")\n    1 / 0\n    print(\"b\")\nprint(\"c\")"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w061d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: writing files atomically</div><div class="pc-prompt"><p>A program that crashes half-way through writing a file can leave it corrupted, with neither the old contents nor the new. The safe pattern: write to a <strong>temporary</strong> file in the same folder, and only when everything has been written, <strong>replace</strong> the real file with it in one step (<code>os.replace</code> does this atomically on the same disk). If anything fails, delete the temporary file and leave the original untouched.</p>
+<ul>
+<li><code>atomic_write(path)</code>: a <code>@contextmanager</code> that yields an open file to write to (the temporary file, named <code>path + ".tmp"</code>), and on success closes it and replaces <code>path</code> with it; on an error closes and removes the temporary file and lets the error carry on.</li>
+<li><code>update_lines(path, func)</code>: read the file&rsquo;s lines (if it exists; otherwise start with none), write <code>func(lines)</code> back atomically, one line each, and return the number of lines written.</li>
+<li><code>backup_then_write(path, text)</code>: if the file exists, keep a copy as <code>path + ".bak"</code> (atomically too), then write the text atomically.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import os
+from contextlib import contextmanager
+
+@contextmanager
+def atomic_write(path):
+    ___
+
+def update_lines(path, func):
+    ___
+
+def backup_then_write(path, text):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import os
+def test_atomic():
+    &quot;temp file and replace&quot;
+    with atomic_write(&quot;data.txt&quot;) as f:
+        f.write(&quot;version 1\n&quot;)
+    with open(&quot;data.txt&quot;) as f:
+        assert f.read() == &quot;version 1\n&quot;
+    try:
+        with atomic_write(&quot;data.txt&quot;) as f:
+            f.write(&quot;half of version 2&quot;)
+            raise RuntimeError(&quot;crash&quot;)
+    except RuntimeError:
+        pass
+    with open(&quot;data.txt&quot;) as f:
+        assert f.read() == &quot;version 1\n&quot;
+    assert not os.path.exists(&quot;data.txt.tmp&quot;)
+    assert update_lines(&quot;list.txt&quot;, lambda lines: lines + [&quot;first&quot;]) == 1
+    assert update_lines(&quot;list.txt&quot;, lambda lines: [l.upper() for l in lines] + [&quot;second&quot;]) == 2
+    with open(&quot;list.txt&quot;) as f:
+        assert f.read() == &quot;FIRST\nsecond\n&quot;
+    try:
+        update_lines(&quot;list.txt&quot;, lambda lines: 1 / 0)
+    except ZeroDivisionError:
+        pass
+    with open(&quot;list.txt&quot;) as f:
+        assert f.read() == &quot;FIRST\nsecond\n&quot;
+    backup_then_write(&quot;list.txt&quot;, &quot;new\n&quot;)
+    with open(&quot;list.txt&quot;) as f, open(&quot;list.txt.bak&quot;) as g:
+        assert f.read() == &quot;new\n&quot; and g.read() == &quot;FIRST\nsecond\n&quot;</textarea><textarea class="pc-src pc-solution" hidden>import os
+from contextlib import contextmanager
+
+@contextmanager
+def atomic_write(path):
+    tmp = path + &quot;.tmp&quot;
+    f = open(tmp, &quot;w&quot;)
+    try:
+        yield f
+    except BaseException:
+        f.close()
+        os.remove(tmp)
+        raise
+    else:
+        f.close()
+        os.replace(tmp, path)
+
+def update_lines(path, func):
+    lines = []
+    if os.path.exists(path):
+        with open(path) as f:
+            lines = [line.rstrip(&quot;\n&quot;) for line in f]
+    with atomic_write(path) as out:
+        new = func(lines)
+        for line in new:
+            out.write(line + &quot;\n&quot;)
+    return len(new)
+
+def backup_then_write(path, text):
+    if os.path.exists(path):
+        with open(path) as src, atomic_write(path + &quot;.bak&quot;) as dst:
+            dst.write(src.read())
+    with atomic_write(path) as out:
+        out.write(text)</textarea><template class="pc-src pc-hint">In <code>atomic_write</code>, open <code>tmp = path + ".tmp"</code> for writing, then <code>try: yield f</code> / <code>except BaseException: f.close(); os.remove(tmp); raise</code> / <code>else: f.close(); os.replace(tmp, path)</code>. For <code>update_lines</code>, call <code>func</code> <strong>before</strong> opening the atomic writer, or inside it: either way an error must leave the file untouched.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Rewrite yesterday&rsquo;s <code>Patched</code> or <code>Transaction</code> class as a <code>@contextmanager</code> function, and compare the two for length and clarity. Tomorrow: <code>ExitStack</code>, for when you don&rsquo;t know in advance how many managers you&rsquo;ll need.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w061d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w061d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w061d3", "week": 61, "day": 3, "title": "contextlib", "exercises": [{"id": "w061d3-gen", "title": "Generator managers", "points": 10}, {"id": "w061d3-folder", "title": "Working in another folder", "points": 10}, {"id": "w061d3-capture", "title": "Capturing printed output", "points": 10}, {"id": "w061d3-either", "title": "A path or an open file", "points": 10}, {"id": "w061d3-deco", "title": "With or as a decorator", "points": 15}, {"id": "w061d3-bug1", "title": "Cleanup skipped on error", "points": 10}, {"id": "w061d3-bug2", "title": "Yielding twice", "points": 10}, {"id": "w061d3-bug3", "title": "Reusing a one-shot manager", "points": 10}, {"id": "w061d3-trace", "title": "Predict them", "points": 10}, {"id": "w061d3-challenge", "title": "Challenge: writing files atomically", "points": 25}], "points": 120}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
