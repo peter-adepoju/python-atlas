@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 65 Day 4: Caching | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Tuesday’s rule was to avoid repeated work. Caching is the general way to do it: remember the result of an expensive computation the first time, and hand...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w065d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 65 Day 4: Caching">
+<meta property="og:description" content="Tuesday’s rule was to avoid repeated work. Caching is the general way to do it: remember the result of an expensive computation the first time, and hand...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w065d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-65">Week 65: Performance</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#when-caching-is-safe" data-sec="when-caching-is-safe">When caching is safe</a></li><li><a href="#memoising-and-its-statistics" data-sec="memoising-and-its-statistics">Memoising and its statistics</a></li><li><a href="#bounded-caches-lru-and-ttl" data-sec="bounded-caches-lru-and-ttl">Bounded caches: LRU and TTL</a></li><li><a href="#cache-keys" data-sec="cache-keys">Cache keys</a></li><li><a href="#invalidation" data-sec="invalidation">Invalidation</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w065d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-65">Week 65: Performance</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 65, Day 4</span></p>
+      <h1>Caching</h1>
+      <div class="day-intro"><p>Tuesday&rsquo;s rule was to avoid repeated work. <strong>Caching</strong> is the general way to do it: remember the result of an expensive computation the first time, and hand back the remembered result whenever the same question is asked again. Week 60 met <code>functools.cache</code> and <code>lru_cache</code>; today is about using caches well: when caching is safe, how to build keys, how to bound a cache&rsquo;s size, how to make entries expire, how to keep a cache across runs on disk, and the hardest part of all, knowing when a cached answer has become wrong.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Decide when a result is safe to cache, and recognise when it isn&rsquo;t</li><li>Write memoising decorators with statistics, and caches bounded by size (LRU) or time (TTL)</li><li>Build cache keys for arguments that aren&rsquo;t hashable</li><li>Keep a cache on disk so it survives between runs</li><li>Invalidate cached results when the data they depend on changes</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="When caching is safe: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Memoising and its statistics: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Bounded caches: LRU and TTL: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Cache keys: 20 min"></span><span class="plan-seg s1" style="flex:25" title="Invalidation: 25 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">When caching is safe</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Memoising and its statistics</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Bounded caches: LRU and TTL</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Cache keys</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Invalidation</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w065d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w065d4.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w065d4-p1"><textarea class="pc-src pc-code" hidden>from functools import lru_cache
+
+calls = []
+
+@lru_cache(maxsize=2)
+def price(item):
+    calls.append(item)
+    return len(item) * 10
+
+for item in [&quot;tea&quot;, &quot;jam&quot;, &quot;tea&quot;, &quot;milk&quot;, &quot;jam&quot;, &quot;tea&quot;]:
+    price(item)
+print(calls)
+print(price.cache_info().hits, price.cache_info().misses)</textarea></div>
+<p>The second <code>"tea"</code> was a hit. But with room for only two entries, adding <code>"milk"</code> evicted the least recently used entry, <code>"jam"</code>, so asking for <code>"jam"</code> again meant computing it again. A cache is a trade: memory for time, and how much memory you allow changes how much time you save.</p>
+<h2 id="when-caching-is-safe">When caching is safe</h2>
+<p>Caching a function returns the <strong>old answer</strong> instead of running the function. That&rsquo;s only correct when the function is <strong>pure</strong> enough:</p>
+<ul>
+<li>the result depends <strong>only on the arguments</strong> (not on the time, a file, a database, global variables or random numbers), or you accept a slightly stale result;</li>
+<li>calling it has <strong>no side effects</strong> that you need to happen every time (printing, writing, sending, counting);</li>
+<li>the result isn&rsquo;t <strong>mutated</strong> by callers: everyone who asks gets the <strong>same object</strong>, so if one caller appends to a cached list, every later caller sees the change (Week 62). Return immutable results, or copies.</li>
+</ul>
+<p>Caching pays when the function is <strong>expensive</strong> relative to a lookup, and the <strong>same arguments come back</strong> often (a high <strong>hit rate</strong>). Typical wins: parsing, recursive computations with overlapping subproblems (Week 52&rsquo;s dynamic programming), conversions, lookups over a slow network or disk, and results of database queries that change rarely.</p>
+<div class="pc pc-example" data-kind="example" data-id="w065d4-e2"><textarea class="pc-src pc-code" hidden>from functools import cache
+
+@cache
+def tags_for(user):
+    return [&quot;new&quot;]                 # a mutable result: shared by every caller
+
+first = tags_for(&quot;ada&quot;)
+first.append(&quot;admin&quot;)              # one caller changes &quot;its&quot; list...
+print(tags_for(&quot;ada&quot;))             # ...and the cached result is changed for everyone
+
+@cache
+def tags_for_safe(user):
+    return (&quot;new&quot;,)                # immutable: safe to share
+print(tags_for_safe(&quot;ada&quot;) + (&quot;admin&quot;,), tags_for_safe(&quot;ada&quot;))</textarea></div>
+<h2 id="memoising-and-its-statistics">Memoising and its statistics</h2>
+<p>A memoising decorator is a dict from arguments to results wrapped around a function. Making it useful in practice means a few additions, which <code>functools.lru_cache</code> has and your own should too:</p>
+<ul>
+<li><strong>statistics</strong>: hits, misses and the current size, so you can check the cache is actually working (a hit rate near zero means the cache only costs memory);</li>
+<li><strong><code>cache_clear()</code></strong>, to empty it (for tests, and when data changes);</li>
+<li><strong><code>functools.wraps</code></strong>, so the wrapped function keeps its name and docstring;</li>
+<li>handling <strong>keyword arguments</strong>: <code>f(1, b=2)</code> and <code>f(1, 2)</code> are separate keys in <code>lru_cache</code>, which is safe but can waste entries.</li>
+</ul>
+<p><code>@functools.cache</code> (unbounded) and <code>@functools.lru_cache(maxsize=128)</code> are implemented in C and are the right choice when your arguments are hashable; write your own when you need different keys, expiry, or storage.</p>
+<div class="pc pc-example" data-kind="example" data-id="w065d4-e3"><textarea class="pc-src pc-code" hidden>import functools
+
+def memoize(func):
+    store, stats = {}, {&quot;hits&quot;: 0, &quot;misses&quot;: 0}
+
+    @functools.wraps(func)
+    def wrapper(*args):
+        if args in store:
+            stats[&quot;hits&quot;] += 1
+            return store[args]
+        stats[&quot;misses&quot;] += 1
+        result = store[args] = func(*args)
+        return result
+
+    wrapper.stats = lambda: dict(stats, size=len(store))
+    wrapper.cache_clear = lambda: (store.clear(), stats.update(hits=0, misses=0))
+    return wrapper
+
+@memoize
+def ways(n):
+    &quot;Ways to climb n stairs taking 1 or 2 steps at a time.&quot;
+    return 1 if n &lt; 2 else ways(n - 1) + ways(n - 2)
+
+print(ways(60), ways.stats(), ways.__doc__[:4])</textarea></div>
+<h2 id="bounded-caches-lru-and-ttl">Bounded caches: LRU and TTL</h2>
+<p>An unbounded cache is a memory leak waiting to happen (Week 62): every new argument adds an entry for ever. Two common bounds:</p>
+<ul>
+<li><strong>LRU (least recently used)</strong>: keep at most <code>n</code> entries; when full, evict the entry that was used longest ago. Recently used items tend to be used again, so this keeps the useful ones. <code>collections.OrderedDict</code> makes it simple: <code>move_to_end(key)</code> on each use and <code>popitem(last=False)</code> to evict the oldest. (Week 44 built one from a hash map and a linked list.)</li>
+<li><strong>TTL (time to live)</strong>: each entry is valid for a fixed time after it was stored, then treated as missing. That bounds <strong>staleness</strong> for data that changes, such as exchange rates or a list of online users. Store <code>(expiry_time, value)</code> and compare with the clock on each lookup; pass the clock in, so tests can control time.</li>
+</ul>
+<p>Real caches often combine both: at most <code>n</code> entries, each for at most <code>t</code> seconds.</p>
+<div class="pc pc-example" data-kind="example" data-id="w065d4-e4"><textarea class="pc-src pc-code" hidden>from collections import OrderedDict
+
+class LRU:
+    def __init__(self, capacity):
+        self.capacity, self.data, self.evicted = capacity, OrderedDict(), []
+    def get(self, key, default=None):
+        if key not in self.data:
+            return default
+        self.data.move_to_end(key)                 # now the most recent
+        return self.data[key]
+    def put(self, key, value):
+        self.data[key] = value
+        self.data.move_to_end(key)
+        if len(self.data) &gt; self.capacity:
+            self.evicted.append(self.data.popitem(last=False)[0])
+
+c = LRU(2)
+c.put(&quot;a&quot;, 1); c.put(&quot;b&quot;, 2); c.get(&quot;a&quot;); c.put(&quot;c&quot;, 3)
+print(list(c.data), c.evicted)
+
+now = [0]
+store = {}
+def ttl_get(key, compute, ttl=10):
+    if key in store and store[key][0] &gt; now[0]:
+        return store[key][1]
+    value = compute()
+    store[key] = (now[0] + ttl, value)
+    return value
+
+print(ttl_get(&quot;rate&quot;, lambda: 1.17), ttl_get(&quot;rate&quot;, lambda: 9.99))
+now[0] = 11
+print(ttl_get(&quot;rate&quot;, lambda: 1.18))</textarea></div>
+<h2 id="cache-keys">Cache keys</h2>
+<p>The key must identify the question <strong>exactly</strong>: two calls get the same key if and only if they must have the same answer.</p>
+<ul>
+<li>Arguments must be <strong>hashable</strong> to be dict keys: <code>lru_cache</code> raises <code>TypeError: unhashable type: 'list'</code> for list arguments. Either pass tuples, or build a key by <strong>freezing</strong> values: lists to tuples, dicts to sorted tuples of items, sets to frozensets (Week 62&rsquo;s <code>freeze</code>).</li>
+<li><strong>Keyword order</strong> shouldn&rsquo;t matter: sort keyword arguments into the key.</li>
+<li>Include <strong>everything the result depends on</strong>, such as a version number of the data or the user&rsquo;s language, or two different questions will share an answer.</li>
+<li>Don&rsquo;t include things that <strong>don&rsquo;t</strong> matter (a request id, a timestamp), or the hit rate drops to zero.</li>
+<li>For a cache stored on disk or shared between processes, the key must be a <strong>string</strong> or bytes: <code>json.dumps(key, sort_keys=True)</code>, or a hash of it (<code>hashlib.sha256(text.encode()).hexdigest()</code>).</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w065d4-e5"><textarea class="pc-src pc-code" hidden>import functools, hashlib, json
+
+def freeze(value):
+    if isinstance(value, (list, tuple)):
+        return tuple(freeze(v) for v in value)
+    if isinstance(value, dict):
+        return tuple(sorted((k, freeze(v)) for k, v in value.items()))
+    if isinstance(value, set):
+        return frozenset(value)
+    return value
+
+def make_key(args, kwargs):
+    return (freeze(args), freeze(kwargs))
+
+print(make_key(([1, 2], {&quot;b&quot;: 1, &quot;a&quot;: 2}), {}) == make_key(((1, 2), {&quot;a&quot;: 2, &quot;b&quot;: 1}), {}))
+try:
+    functools.lru_cache()(len)([1, 2])
+except TypeError as e:
+    print(&quot;TypeError:&quot;, e)
+
+text_key = json.dumps({&quot;query&quot;: &quot;tea&quot;, &quot;page&quot;: 2}, sort_keys=True)
+print(text_key, hashlib.sha256(text_key.encode()).hexdigest()[:12])</textarea></div>
+<h2 id="invalidation">Invalidation</h2>
+<p>&ldquo;There are only two hard things in Computer Science: cache invalidation and naming things&rdquo; (a saying credited to Phil Karlton). A cached result becomes <strong>wrong</strong> when the data it was computed from changes. Ways to cope, simplest first:</p>
+<ul>
+<li><strong>Don&rsquo;t cache</strong> data that changes, or cache it only within one request or one run.</li>
+<li><strong>Expire</strong> entries after a time (TTL) and accept bounded staleness.</li>
+<li><strong>Clear</strong> the whole cache when anything changes (<code>cache_clear()</code>): simple, and fine if changes are rare.</li>
+<li><strong>Version the data</strong>: include a version number in every key, and bump it on change; old entries are simply never asked for again (and an LRU bound removes them eventually).</li>
+<li><strong>Track dependencies</strong>: record which pieces of data each cached result read, and remove only the entries that depend on what changed (today&rsquo;s challenge). Spreadsheets, build tools and user-interface frameworks work this way.</li>
+</ul>
+<p>One more trap: caching <strong>methods</strong> with <code>@lru_cache</code> puts <code>self</code> in every key, so the cache keeps every instance alive for ever. Use <code>functools.cached_property</code> (stored on the instance, Week 63) or a per-instance dict instead.</p>
+<div class="pc pc-example" data-kind="example" data-id="w065d4-e6"><textarea class="pc-src pc-code" hidden>import functools, gc
+
+class Report:
+    made = 0
+    def __init__(self, rows):
+        self.rows = rows
+        Report.made += 1
+    @functools.lru_cache(maxsize=None)
+    def total(self):                    # self becomes part of a global cache key
+        return sum(self.rows)
+    @functools.cached_property
+    def average(self):                  # stored on the instance, freed with it
+        return sum(self.rows) / len(self.rows)
+
+for i in range(3):
+    r = Report([i, i + 1])
+    r.total(), r.average
+del r
+gc.collect()
+alive = sum(isinstance(o, Report) for o in gc.get_objects())
+print(alive, Report.total.cache_info().currsize)
+Report.total.cache_clear()
+gc.collect()
+print(sum(isinstance(o, Report) for o in gc.get_objects()))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Cache only results that depend just on their arguments, have no needed side effects, and won&rsquo;t be mutated by callers (return immutable values or copies); caching pays when calls are expensive and repeat often, so check the hit rate. Give caches statistics, cache_clear and functools.wraps; use functools.cache or lru_cache for hashable arguments. Bound caches by size (LRU: OrderedDict with move_to_end and popitem(last=False)) or by time (TTL, with an injectable clock). Keys must identify the question exactly: freeze unhashable arguments, sort keywords, include versions, and use strings for disk caches. Invalidate by not caching, expiring, clearing, versioning or tracking dependencies; avoid lru_cache on methods, which keeps instances alive.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d4-memo" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A memoiser with statistics</div><div class="pc-prompt"><p>Write a decorator <code>memoize(func)</code> that caches results by positional arguments <strong>and</strong> keyword arguments (with keyword order not mattering), and gives the wrapper <code>info()</code>, returning a dict with <code>hits</code>, <code>misses</code> and <code>size</code>, and <code>clear()</code>, which empties the cache and resets the counts. Keep the function&rsquo;s name and docstring.</p></div><textarea class="pc-src pc-code" hidden>import functools
+
+def memoize(func):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_memo():
+    &quot;memoising&quot;
+    calls = []
+    @memoize
+    def area(w, h=1, *, unit=&quot;cm&quot;):
+        &quot;Area of a rectangle.&quot;
+        calls.append((w, h, unit))
+        return f&quot;{w * h}{unit}2&quot;
+    assert area(2, 3) == &quot;6cm2&quot; and area(2, 3) == &quot;6cm2&quot; and area(2, h=3, unit=&quot;cm&quot;) == &quot;6cm2&quot;
+    assert area(2, unit=&quot;m&quot;, h=3) == &quot;6m2&quot; and area(2, h=3, unit=&quot;m&quot;) == &quot;6m2&quot;
+    assert area.info() == {&quot;hits&quot;: 2, &quot;misses&quot;: 3, &quot;size&quot;: 3} and len(calls) == 3
+    assert area.__name__ == &quot;area&quot; and area.__doc__ == &quot;Area of a rectangle.&quot;
+    area.clear()
+    assert area.info() == {&quot;hits&quot;: 0, &quot;misses&quot;: 0, &quot;size&quot;: 0}
+    area(2, 3)
+    assert len(calls) == 4</textarea><textarea class="pc-src pc-solution" hidden>import functools
+
+def memoize(func):
+    store = {}
+    stats = {&quot;hits&quot;: 0, &quot;misses&quot;: 0}
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        key = (args, tuple(sorted(kwargs.items())))
+        if key in store:
+            stats[&quot;hits&quot;] += 1
+            return store[key]
+        stats[&quot;misses&quot;] += 1
+        store[key] = func(*args, **kwargs)
+        return store[key]
+
+    def info():
+        return {&quot;hits&quot;: stats[&quot;hits&quot;], &quot;misses&quot;: stats[&quot;misses&quot;], &quot;size&quot;: len(store)}
+
+    def clear():
+        store.clear()
+        stats.update(hits=0, misses=0)
+
+    wrapper.info, wrapper.clear = info, clear
+    return wrapper</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d4-lru" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">An LRU cache</div><div class="pc-prompt"><p>Write <code>LRUCache(capacity)</code> using <code>collections.OrderedDict</code>: <code>get(key, default=None)</code> (a hit makes the key the most recently used), <code>put(key, value)</code> (adding or updating, also making it most recent, and evicting the <strong>least</strong> recently used key when there are more than <code>capacity</code> entries), <code>len()</code>, <code>keys()</code> (a list from least to most recently used), and counters <code>hits</code>, <code>misses</code> (counted by <code>get</code>) and <code>evictions</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_lru():
+    &quot;least recently used&quot;
+    c = LRUCache(2)
+    c.put(&quot;a&quot;, 1)
+    c.put(&quot;b&quot;, 2)
+    assert c.get(&quot;a&quot;) == 1 and c.keys() == [&quot;b&quot;, &quot;a&quot;]
+    c.put(&quot;c&quot;, 3)
+    assert c.keys() == [&quot;a&quot;, &quot;c&quot;] and c.get(&quot;b&quot;) is None and c.get(&quot;b&quot;, 0) == 0
+    c.put(&quot;a&quot;, 10)
+    c.put(&quot;d&quot;, 4)
+    assert c.keys() == [&quot;a&quot;, &quot;d&quot;] and c.get(&quot;a&quot;) == 10 and len(c) == 2
+    assert (c.hits, c.misses, c.evictions) == (2, 2, 2)</textarea><textarea class="pc-src pc-solution" hidden>from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self._data = OrderedDict()
+        self.hits = self.misses = self.evictions = 0
+
+    def get(self, key, default=None):
+        if key not in self._data:
+            self.misses += 1
+            return default
+        self.hits += 1
+        self._data.move_to_end(key)
+        return self._data[key]
+
+    def put(self, key, value):
+        self._data[key] = value
+        self._data.move_to_end(key)
+        if len(self._data) &gt; self.capacity:
+            self._data.popitem(last=False)
+            self.evictions += 1
+
+    def __len__(self):
+        return len(self._data)
+
+    def keys(self):
+        return list(self._data)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d4-ttl" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Results that expire</div><div class="pc-prompt"><p>Write a decorator factory <code>ttl_cache(seconds, clock=time.monotonic)</code> for functions of hashable positional arguments: a cached result is returned while <code>clock()</code> is <strong>less than</strong> the time it was stored plus <code>seconds</code>; after that the function is called again and the new result stored. The wrapper has <code>purge()</code>, which removes expired entries and returns how many it removed, and <code>size()</code>.</p></div><textarea class="pc-src pc-code" hidden>import functools
+import time
+
+def ttl_cache(seconds, clock=time.monotonic):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_ttl():
+    &quot;time to live&quot;
+    now = [100.0]
+    calls = []
+    @ttl_cache(10, clock=lambda: now[0])
+    def rate(currency):
+        calls.append(currency)
+        return {&quot;EUR&quot;: 1.17, &quot;USD&quot;: 1.27}[currency] + len(calls) / 100
+    first = rate(&quot;EUR&quot;)
+    now[0] = 109.9
+    assert rate(&quot;EUR&quot;) == first and calls == [&quot;EUR&quot;]
+    now[0] = 110.0
+    assert rate(&quot;EUR&quot;) != first and calls == [&quot;EUR&quot;, &quot;EUR&quot;]
+    rate(&quot;USD&quot;)
+    now[0] = 121.0
+    assert rate.size() == 2 and rate.purge() == 2 and rate.size() == 0
+    import time
+    @ttl_cache(60)
+    def real(x):
+        return x * 2
+    assert real(2) == 4 and real(2) == 4</textarea><textarea class="pc-src pc-solution" hidden>import functools
+import time
+
+def ttl_cache(seconds, clock=time.monotonic):
+    def decorate(func):
+        store = {}
+
+        @functools.wraps(func)
+        def wrapper(*args):
+            now = clock()
+            if args in store and now &lt; store[args][0]:
+                return store[args][1]
+            value = func(*args)
+            store[args] = (now + seconds, value)
+            return value
+
+        def purge():
+            now = clock()
+            expired = [k for k, (expiry, _) in store.items() if now &gt;= expiry]
+            for k in expired:
+                del store[k]
+            return len(expired)
+
+        wrapper.purge = purge
+        wrapper.size = lambda: len(store)
+        return wrapper
+    return decorate</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d4-keys" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Keys for any arguments</div><div class="pc-prompt"><p>Write <code>freeze(value)</code>: a hashable version of nested data (lists and tuples to tuples, dicts to tuples of <code>(key, frozen value)</code> pairs sorted by key, sets to frozensets, other values unchanged), and a decorator <code>memo_any(func)</code> that caches calls even when the arguments are lists, dicts or sets, using frozen arguments (and sorted keyword arguments) as the key. Like <code>lru_cache</code>, it gives the wrapper a <code>calls</code> counter of how many times the real function ran.</p></div><textarea class="pc-src pc-code" hidden>import functools
+
+def freeze(value):
+    ___
+
+def memo_any(func):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_keys():
+    &quot;cache keys&quot;
+    assert freeze({&quot;b&quot;: [1, 2], &quot;a&quot;: {3}}) == ((&quot;a&quot;, frozenset({3})), (&quot;b&quot;, (1, 2)))
+    assert hash(freeze([{&quot;x&quot;: [1]}, (2, [3])])) == hash((((&quot;x&quot;, (1,)),), (2, (3,))))
+    @memo_any
+    def total(items, weights=None):
+        return sum(i * (weights or {}).get(i, 1) for i in items)
+    assert total([1, 2, 3]) == 6 and total([1, 2, 3]) == 6 and total.calls == 1
+    assert total([1, 2], weights={2: 10}) == 21 and total([1, 2], weights={2: 10}) == 21 and total.calls == 2
+    assert total([2, 1]) == 3 and total.calls == 3</textarea><textarea class="pc-src pc-solution" hidden>import functools
+
+def freeze(value):
+    if isinstance(value, (list, tuple)):
+        return tuple(freeze(v) for v in value)
+    if isinstance(value, dict):
+        return tuple(sorted((k, freeze(v)) for k, v in value.items()))
+    if isinstance(value, (set, frozenset)):
+        return frozenset(value)
+    return value
+
+def memo_any(func):
+    store = {}
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        key = (freeze(args), freeze(kwargs))
+        if key not in store:
+            wrapper.calls += 1
+            store[key] = func(*args, **kwargs)
+        return store[key]
+
+    wrapper.calls = 0
+    return wrapper</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d4-disk" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A cache that survives</div><div class="pc-prompt"><p>Write a decorator factory <code>disk_cache(path)</code> for functions whose arguments and results can be stored as JSON. The key is <code>json.dumps([args, kwargs], sort_keys=True)</code>. On each miss, the result is stored in a dict which is written to the JSON file at <code>path</code>; when the decorator is applied, any existing file is loaded first, so a <strong>new</strong> decorated function (as in a new run of the program) reuses earlier results. The wrapper has <code>misses</code>, counting real calls in this run.</p></div><textarea class="pc-src pc-code" hidden>import functools
+import json
+import os
+
+def disk_cache(path):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_disk():
+    &quot;persistent caching&quot;
+    import os
+    if os.path.exists(&quot;cache.json&quot;):
+        os.remove(&quot;cache.json&quot;)
+    def slow_square(n, label=&quot;sq&quot;):
+        return {&quot;label&quot;: label, &quot;value&quot;: n * n}
+    first = disk_cache(&quot;cache.json&quot;)(slow_square)
+    assert first(4) == {&quot;label&quot;: &quot;sq&quot;, &quot;value&quot;: 16} and first(4)[&quot;value&quot;] == 16 and first.misses == 1
+    first(5, label=&quot;x&quot;)
+    second = disk_cache(&quot;cache.json&quot;)(slow_square)
+    assert second(4)[&quot;value&quot;] == 16 and second(5, label=&quot;x&quot;)[&quot;label&quot;] == &quot;x&quot; and second.misses == 0
+    second(6)
+    assert second.misses == 1
+    with open(&quot;cache.json&quot;) as f:
+        assert len(json.load(f)) == 3
+    os.remove(&quot;cache.json&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import functools
+import json
+import os
+
+def disk_cache(path):
+    def decorate(func):
+        store = {}
+        if os.path.exists(path):
+            with open(path) as f:
+                store.update(json.load(f))
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            key = json.dumps([args, kwargs], sort_keys=True)
+            if key not in store:
+                wrapper.misses += 1
+                store[key] = func(*args, **kwargs)
+                with open(path, &quot;w&quot;) as f:
+                    json.dump(store, f)
+            return store[key]
+
+        wrapper.misses = 0
+        return wrapper
+    return decorate</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w065d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A list as a cache key</div><div class="pc-prompt"><p><code>lru_cache</code> needs hashable arguments, so calling the cached function with a list crashes with <code>TypeError: unhashable type: 'list'</code>. Pass the items as a tuple so this prints <code>6 6 1</code>.</p></div><textarea class="pc-src pc-code" hidden>from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def total(items):
+    return sum(items)
+
+basket = [1, 2, 3]
+print(total(basket), total(basket), total.cache_info().hits)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;hashable keys&quot;
+    expect_output(&quot;6 6 1&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def total(items):
+    return sum(items)
+
+basket = (1, 2, 3)
+print(total(basket), total(basket), total.cache_info().hits)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w065d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A stale answer</div><div class="pc-prompt"><p>The cached function reads a global price list, which changes, but the cache keeps returning the old total: this prints <code>5 5</code>. Clear the cache when the prices change (with <code>cache_clear()</code>), so it prints <code>5 7</code>.</p></div><textarea class="pc-src pc-code" hidden>from functools import cache
+
+PRICES = {&quot;tea&quot;: 2, &quot;jam&quot;: 3}
+
+@cache
+def basket_total(*items):
+    return sum(PRICES[i] for i in items)
+
+before = basket_total(&quot;tea&quot;, &quot;jam&quot;)
+PRICES[&quot;tea&quot;] = 4
+after = basket_total(&quot;tea&quot;, &quot;jam&quot;)
+print(before, after)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;invalidation&quot;
+    expect_output(&quot;5 7&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from functools import cache
+
+PRICES = {&quot;tea&quot;: 2, &quot;jam&quot;: 3}
+
+@cache
+def basket_total(*items):
+    return sum(PRICES[i] for i in items)
+
+before = basket_total(&quot;tea&quot;, &quot;jam&quot;)
+PRICES[&quot;tea&quot;] = 4
+basket_total.cache_clear()
+after = basket_total(&quot;tea&quot;, &quot;jam&quot;)
+print(before, after)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w065d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A cached list that someone changed</div><div class="pc-prompt"><p>The cache hands every caller the <strong>same</strong> list, and one caller appends to it, so the next caller gets a changed result: this prints <code>['tea', 'jam', 'extra']</code>. Make the cached function return a tuple (and the caller build its own list from it), so the cached value can&rsquo;t be changed and this prints <code>('tea', 'jam')</code>.</p></div><textarea class="pc-src pc-code" hidden>from functools import cache
+
+@cache
+def default_basket():
+    return [&quot;tea&quot;, &quot;jam&quot;]
+
+mine = default_basket()
+mine.append(&quot;extra&quot;)
+print(default_basket())</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;immutable results&quot;
+    expect_output(&quot;(&#x27;tea&#x27;, &#x27;jam&#x27;)&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from functools import cache
+
+@cache
+def default_basket():
+    return (&quot;tea&quot;, &quot;jam&quot;)
+
+mine = list(default_basket())
+mine.append(&quot;extra&quot;)
+print(default_basket())</textarea></div>
+<div class="parsons" data-id="w065d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Evicting the least recently used</div><div class="pc-prompt"><p>Arrange the lines of an LRU <code>put</code> method using an <code>OrderedDict</code>. One line is a trap.</p></div><script type="application/json">{"lines": ["def put(self, key, value):", "    self.data[key] = value", "    self.data.move_to_end(key)", "    if len(self.data) > self.capacity:", "        self.data.popitem(last=False)"], "distractors": ["        self.data.popitem(last=True)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # True or False: it&#x27;s safe to cache a function that returns the current time
+q = ___   # the error lru_cache raises for a list argument, as a string
+r = ___   # which entry an LRU cache evicts: &quot;oldest added&quot;, &quot;least recently used&quot; or &quot;largest&quot;
+s = ___   # hits after calling a cached f(1), f(2), f(1), f(1)
+t = ___   # True or False: lru_cache on a method can keep instances alive</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p is False and q == &quot;TypeError&quot; and r == &quot;least recently used&quot;, &quot;p, q and r&quot;
+    assert s == 2 and t is True, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = False
+q = &quot;TypeError&quot;
+r = &quot;least recently used&quot;
+s = 2
+t = True</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w065d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "When is a function safe to cache?", "answer": 1, "explain": "Otherwise cached answers are wrong.", "options": ["Always", "When its result depends only on its arguments and it has no needed side effects", "When it&rsquo;s slow", "When it prints"]}, {"type": "mc", "q": "Why return immutable results from a cached function?", "answer": 1, "explain": "Or return copies.", "options": ["Speed", "Every caller shares the same object, so one caller&rsquo;s change would affect the rest", "Style", "lru_cache requires it"]}, {"type": "mc", "q": "What does a low hit rate tell you?", "answer": 1, "explain": "Check cache_info().", "options": ["The cache works well", "The cache costs memory but saves little time", "Nothing", "The function is pure"]}, {"type": "mc", "q": "Why bound a cache&rsquo;s size?", "answer": 1, "explain": "LRU or a size limit.", "options": ["Speed", "An unbounded cache grows for ever, a memory leak", "Python requires it", "It&rsquo;s more accurate"]}, {"type": "mc", "q": "What does an LRU cache evict when it&rsquo;s full?", "answer": 1, "explain": "Recent entries tend to be used again.", "options": ["The newest entry", "The entry used longest ago", "A random entry", "The largest entry"]}, {"type": "mc", "q": "What is a TTL cache good for?", "answer": 1, "explain": "Entries expire after a time.", "options": ["Unchanging data", "Data that changes, where results may be a little stale", "Secrets", "Sorting"]}, {"type": "mc", "q": "How do you cache a function called with lists?", "answer": 1, "explain": "Keys must be hashable and exact.", "options": ["You can&rsquo;t", "Freeze the arguments into tuples (and dicts into sorted tuples) for the key", "Use str()", "Use id()"]}, {"type": "mc", "q": "What should a cache key leave out?", "answer": 1, "explain": "Or the hit rate drops to zero.", "options": ["The arguments", "Things that don&rsquo;t affect the result, like a request id", "Versions", "Keywords"]}, {"type": "mc", "q": "Why is lru_cache on a method a problem?", "answer": 1, "explain": "Use cached_property or a per-instance dict.", "options": ["It&rsquo;s slow", "self is in every key, so the cache keeps instances alive", "It can&rsquo;t be done", "It breaks super()"]}, {"type": "output", "q": "What does this print?", "answer": "3", "explain": "Room for one entry: each call evicted the other.", "code": "from functools import lru_cache\n@lru_cache(maxsize=1)\ndef f(x):\n    return x * 2\nf(1); f(2); f(1)\nprint(f.cache_info().misses)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: caching with dependencies</div><div class="pc-prompt"><p>Build a small reactive store whose cached computations are invalidated <strong>only</strong> when data they actually read changes, like cells in a spreadsheet.</p>
+<ul>
+<li><code>Store(**values)</code>: <code>get(name)</code> and <code>set(name, value)</code> for plain values.</li>
+<li><code>@store.computed</code> turns a function of no arguments into a <strong>computed value</strong>, registered under the function&rsquo;s name and readable with <code>store.get(name)</code> too. The first read runs the function and caches the result; while it runs, the store records every name it reads with <code>get</code> (plain values <strong>and</strong> other computed values) as its dependencies.</li>
+<li><code>set(name, value)</code> invalidates every computed value that depends on <code>name</code>, <strong>directly or through other computed values</strong>, and nothing else. Setting a value to one equal to the current value invalidates nothing.</li>
+<li><code>runs(name)</code>: how many times that computed value&rsquo;s function has run. <code>dependencies(name)</code>: the sorted names it read on its last run.</li>
+</ul>
+<p>Computed values that read different names on different runs (because of an <code>if</code>) must have their dependencies replaced on each run.</p></div><textarea class="pc-src pc-code" hidden>class Store:
+    def __init__(self, **values):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_reactive():
+    &quot;dependency tracking&quot;
+    s = Store(price=10, qty=2, tax=0.2, unused=0)
+    @s.computed
+    def subtotal():
+        return s.get(&quot;price&quot;) * s.get(&quot;qty&quot;)
+    @s.computed
+    def total():
+        return round(s.get(&quot;subtotal&quot;) * (1 + s.get(&quot;tax&quot;)), 2)
+    assert s.get(&quot;total&quot;) == 24.0 and s.get(&quot;total&quot;) == 24.0 and s.runs(&quot;total&quot;) == 1 and s.runs(&quot;subtotal&quot;) == 1
+    assert s.dependencies(&quot;total&quot;) == [&quot;subtotal&quot;, &quot;tax&quot;] and s.dependencies(&quot;subtotal&quot;) == [&quot;price&quot;, &quot;qty&quot;]
+    s.set(&quot;unused&quot;, 5)
+    s.get(&quot;total&quot;)
+    assert s.runs(&quot;total&quot;) == 1
+    s.set(&quot;tax&quot;, 0.5)
+    assert s.get(&quot;total&quot;) == 30.0 and s.runs(&quot;total&quot;) == 2 and s.runs(&quot;subtotal&quot;) == 1
+    s.set(&quot;qty&quot;, 3)
+    assert s.get(&quot;total&quot;) == 45.0 and s.runs(&quot;subtotal&quot;) == 2 and s.runs(&quot;total&quot;) == 3
+    s.set(&quot;qty&quot;, 3)
+    s.get(&quot;total&quot;)
+    assert s.runs(&quot;total&quot;) == 3
+
+def test_changing_dependencies():
+    &quot;dependencies follow the last run&quot;
+    s = Store(use_discount=False, price=100, discount=10)
+    @s.computed
+    def final():
+        if s.get(&quot;use_discount&quot;):
+            return s.get(&quot;price&quot;) - s.get(&quot;discount&quot;)
+        return s.get(&quot;price&quot;)
+    assert s.get(&quot;final&quot;) == 100 and s.dependencies(&quot;final&quot;) == [&quot;price&quot;, &quot;use_discount&quot;]
+    s.set(&quot;discount&quot;, 50)
+    s.get(&quot;final&quot;)
+    assert s.runs(&quot;final&quot;) == 1
+    s.set(&quot;use_discount&quot;, True)
+    assert s.get(&quot;final&quot;) == 50 and s.dependencies(&quot;final&quot;) == [&quot;discount&quot;, &quot;price&quot;, &quot;use_discount&quot;]
+    s.set(&quot;discount&quot;, 20)
+    assert s.get(&quot;final&quot;) == 80 and s.runs(&quot;final&quot;) == 3</textarea><textarea class="pc-src pc-solution" hidden>class Store:
+    def __init__(self, **values):
+        self._values = dict(values)
+        self._functions = {}
+        self._cache = {}
+        self._deps = {}
+        self._runs = {}
+        self._running = []
+
+    def computed(self, func):
+        name = func.__name__
+        self._functions[name] = func
+        self._runs[name] = 0
+        return func
+
+    def get(self, name):
+        if self._running:
+            self._deps[self._running[-1]].add(name)
+        if name in self._functions:
+            if name not in self._cache:
+                self._deps[name] = set()
+                self._running.append(name)
+                try:
+                    self._cache[name] = self._functions[name]()
+                finally:
+                    self._running.pop()
+                self._runs[name] += 1
+            return self._cache[name]
+        return self._values[name]
+
+    def set(self, name, value):
+        if name in self._values and self._values[name] == value:
+            return
+        self._values[name] = value
+        changed = {name}
+        grew = True
+        while grew:
+            grew = False
+            for comp, deps in self._deps.items():
+                if comp not in changed and deps &amp; changed:
+                    changed.add(comp)
+                    self._cache.pop(comp, None)
+                    grew = True
+
+    def runs(self, name):
+        return self._runs[name]
+
+    def dependencies(self, name):
+        return sorted(self._deps.get(name, ()))</textarea><template class="pc-src pc-hint">Keep <code>values</code>, <code>functions</code>, <code>cache</code>, <code>deps</code> (name to the set it read) and a stack of computations currently running. In <code>get</code>, if the stack isn&rsquo;t empty, add the name to the dependencies of the computation on top. To invalidate after <code>set(name)</code>, repeatedly find computed values whose dependencies include any invalidated name, remove them from the cache, and add them to the invalidated names, until nothing changes.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Find a function in your own code that&rsquo;s called repeatedly with the same arguments. Is it pure? Would <code>@functools.cache</code> be safe, and what would its hit rate be? Tomorrow: vectorisation with NumPy, which moves whole loops into fast compiled code.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w065d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w065d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w065d4", "week": 65, "day": 4, "title": "Caching", "exercises": [{"id": "w065d4-memo", "title": "A memoiser with statistics", "points": 10}, {"id": "w065d4-lru", "title": "An LRU cache", "points": 10}, {"id": "w065d4-ttl", "title": "Results that expire", "points": 15}, {"id": "w065d4-keys", "title": "Keys for any arguments", "points": 10}, {"id": "w065d4-disk", "title": "A cache that survives", "points": 15}, {"id": "w065d4-bug1", "title": "A list as a cache key", "points": 10}, {"id": "w065d4-bug2", "title": "A stale answer", "points": 10}, {"id": "w065d4-bug3", "title": "A cached list that someone changed", "points": 10}, {"id": "w065d4-trace", "title": "Predict them", "points": 10}, {"id": "w065d4-challenge", "title": "Challenge: caching with dependencies", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

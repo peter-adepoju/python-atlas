@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 65 Day 5: Vectorisation with NumPy | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Tuesday showed that Python’s built-ins win by running their loops in C. NumPy takes that idea all the way: it stores numbers in compact, typed arrays and...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w065d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 65 Day 5: Vectorisation with NumPy">
+<meta property="og:description" content="Tuesday showed that Python’s built-ins win by running their loops in C. NumPy takes that idea all the way: it stores numbers in compact, typed arrays and...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w065d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-65">Week 65: Performance</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#why-vectorise" data-sec="why-vectorise">Why vectorise?</a></li><li><a href="#arrays" data-sec="arrays">Arrays</a></li><li><a href="#element-wise-operations" data-sec="element-wise-operations">Element-wise operations</a></li><li><a href="#broadcasting-masks-and-axes" data-sec="broadcasting-masks-and-axes">Broadcasting, masks and axes</a></li><li><a href="#pitfalls" data-sec="pitfalls">Pitfalls</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w065d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-65">Week 65: Performance</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 65, Day 5</span></p>
+      <h1>Vectorisation with NumPy</h1>
+      <div class="day-intro"><p>Tuesday showed that Python&rsquo;s built-ins win by running their loops in C. <strong>NumPy</strong> takes that idea all the way: it stores numbers in compact, typed arrays and provides operations on whole arrays at once, each running a tight compiled loop over raw memory. Writing code as operations on arrays instead of loops over elements is called <strong>vectorisation</strong>, and for numerical work it&rsquo;s routinely 10 to 100 times faster than plain Python. NumPy is a free, open-source library rather than part of the standard library; this page loads it automatically the first time you import it (which takes a few seconds), and on your own computer you install it with <code>pip install numpy</code> (Week 22).</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain why vectorised NumPy code is faster than Python loops</li><li>Create arrays and use dtype, shape, reshape and indexing</li><li>Replace loops with element-wise operations, ufuncs and np.where</li><li>Use broadcasting, boolean masks and aggregations along an axis</li><li>Avoid NumPy&rsquo;s pitfalls: views versus copies, fixed-size integer overflow and float comparisons</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Why vectorise?: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Arrays: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Element-wise operations: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Broadcasting, masks and axes: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Pitfalls: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Why vectorise?</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Arrays</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Element-wise operations</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Broadcasting, masks and axes</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Pitfalls</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w065d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w065d5.ipynb" download>download it</a>. Exercises today are worth 120 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w065d5-p1"><textarea class="pc-src pc-code" hidden>import numpy as np
+
+prices = np.array([2.5, 4.0, 10.0, 7.5])
+qty = np.array([4, 1, 2, 10])
+print((prices * qty).tolist())
+print(float((prices * qty).sum()))
+print(prices[qty &gt;= 2].tolist())
+print(np.where(qty &gt;= 10, prices * 0.9, prices).tolist())</textarea></div>
+<p>No loops: <code>prices * qty</code> multiplies matching elements, <code>qty &gt;= 2</code> makes an array of <code>True</code>/<code>False</code> that selects elements, and <code>np.where</code> chooses between two arrays element by element. Each line runs as one compiled loop inside NumPy.</p>
+<h2 id="why-vectorise">Why vectorise?</h2>
+<p>A Python list of a million floats is a million pointers to a million separate float objects, and a loop over it runs bytecode for every element: fetch the object, check its type, look up the operation, make a new object for the result (Week 64). A NumPy <strong>array</strong> stores the million numbers as raw 8-byte values side by side in one block of memory, all of one type (its <strong>dtype</strong>). An operation such as <code>a * 2</code> runs <strong>one</strong> C loop over that block:</p>
+<ul>
+<li>no per-element type checks or object creation;</li>
+<li>memory read in order, which the processor&rsquo;s caches handle well;</li>
+<li>often <strong>SIMD</strong> instructions that process several numbers at once.</li>
+</ul>
+<p>The style that results is <strong>vectorisation</strong>: express the computation as operations on whole arrays. The speed-up is large, typically 10 to 100 times, but only for code that stays inside NumPy: a Python <code>for</code> loop over a NumPy array is <strong>slower</strong> than over a list, because each element has to be turned into a Python object.</p>
+<div class="pc pc-example" data-kind="example" data-id="w065d5-e2"><textarea class="pc-src pc-code" hidden>import time
+import numpy as np
+
+n = 200_000
+values = list(range(n))
+array = np.arange(n)
+
+start = time.perf_counter()
+looped = [v * 2 + 1 for v in values]
+loop_time = time.perf_counter() - start
+
+start = time.perf_counter()
+vectorised = array * 2 + 1
+vector_time = time.perf_counter() - start
+
+print(looped[-1], int(vectorised[-1]), looped == vectorised.tolist())
+print(&quot;vectorised was faster:&quot;, vector_time &lt; loop_time)</textarea></div>
+<h2 id="arrays">Arrays</h2>
+<ul>
+<li><strong>Creating</strong>: <code>np.array([1, 2, 3])</code> from a list; <code>np.arange(start, stop, step)</code> like <code>range</code>; <code>np.zeros(n)</code>, <code>np.ones((rows, cols))</code>, <code>np.full(shape, value)</code>; <code>np.linspace(0, 1, 5)</code> for evenly spaced values.</li>
+<li><strong>dtype</strong>: the element type, chosen from the data (<code>int64</code>, <code>float64</code>, <code>bool</code>) or given (<code>dtype=np.float32</code>); <code>a.astype(float)</code> converts (making a copy).</li>
+<li><strong>shape and dimensions</strong>: <code>a.shape</code> is a tuple (<code>(3,)</code> for a vector, <code>(2, 3)</code> for 2 rows and 3 columns), <code>a.ndim</code> the number of dimensions, <code>a.size</code> the number of elements; <code>a.reshape(2, 3)</code> views the same data with a new shape (<code>-1</code> means &ldquo;work it out&rdquo;).</li>
+<li><strong>Indexing</strong>: <code>a[0]</code>, <code>a[-1]</code>, slices <code>a[1:4]</code>, and for 2D arrays <code>m[row, col]</code>, <code>m[0]</code> (a row), <code>m[:, 1]</code> (a column), <code>m[1:, :2]</code>.</li>
+<li><strong>Back to Python</strong>: <code>a.tolist()</code> gives nested lists of Python numbers, and <code>float(x)</code> or <code>int(x)</code> converts a single NumPy number. (Printing NumPy numbers inside a list shows things like <code>np.float64(2.5)</code>, so convert first.)</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w065d5-e3"><textarea class="pc-src pc-code" hidden>import numpy as np
+
+a = np.arange(6)
+print(a.tolist(), a.dtype.kind, a.shape)
+m = a.reshape(2, 3)
+print(m.tolist(), m.shape, m.ndim, m.size)
+print(int(m[1, 2]), m[0].tolist(), m[:, 1].tolist())
+print(np.linspace(0, 1, 5).tolist(), np.zeros((2, 2)).tolist())
+print(np.array([1, 2, 3]).astype(float).tolist(), np.array([1.5, 2]).dtype.kind)</textarea></div>
+<h2 id="element-wise-operations">Element-wise operations</h2>
+<p>Arithmetic and comparisons between arrays of the same shape work <strong>element by element</strong>, and so do NumPy&rsquo;s <strong>ufuncs</strong> (universal functions): <code>np.sqrt</code>, <code>np.exp</code>, <code>np.log</code>, <code>np.abs</code>, <code>np.round</code>, <code>np.maximum(a, b)</code>, <code>np.minimum</code>, <code>np.clip(a, lo, hi)</code>. Comparisons give <strong>boolean arrays</strong>; combine them with <code>&amp;</code> (and), <code>|</code> (or) and <code>~</code> (not), in brackets, since Python&rsquo;s <code>and</code>/<code>or</code> don&rsquo;t work on arrays.</p>
+<p><strong><code>np.where(condition, x, y)</code></strong> is the vectorised <code>x if condition else y</code>. Together these replace most loops with <code>if</code> statements inside.</p>
+<p><strong>Aggregations</strong> reduce an array to a number: <code>a.sum()</code>, <code>a.mean()</code>, <code>a.std()</code>, <code>a.min()</code>, <code>a.max()</code>, <code>a.argmin()</code>/<code>a.argmax()</code> (the <strong>position</strong> of the smallest/largest), <code>np.cumsum(a)</code> (running totals), <code>np.diff(a)</code> (differences between neighbours), <code>np.sort(a)</code>, <code>np.argsort(a)</code> (the order that would sort it), <code>np.unique(a)</code>, and counting with <code>np.count_nonzero(mask)</code> or <code>mask.sum()</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w065d5-e4"><textarea class="pc-src pc-code" hidden>import numpy as np
+
+temps_c = np.array([12.0, 18.5, 25.0, 31.0, 7.5])
+print((temps_c * 9 / 5 + 32).tolist())
+hot = temps_c &gt; 20
+print(hot.tolist(), int(hot.sum()), temps_c[hot].tolist())
+mild = (temps_c &gt; 10) &amp; (temps_c &lt; 26)
+print(np.where(mild, &quot;mild&quot;, &quot;extreme&quot;).tolist())
+print(np.clip(temps_c, 10, 30).tolist(), int(temps_c.argmax()))
+print(np.cumsum([1, 2, 3, 4]).tolist(), np.diff([1, 4, 9, 16]).tolist())
+print(np.round(np.sqrt([2, 9]), 3).tolist(), np.argsort([30, 10, 20]).tolist())</textarea></div>
+<h2 id="broadcasting-masks-and-axes">Broadcasting, masks and axes</h2>
+<p><strong>Broadcasting</strong> lets arrays of <strong>different shapes</strong> combine. NumPy compares shapes from the <strong>last</strong> dimension backwards; two sizes are compatible if they&rsquo;re equal or one of them is 1, and a size-1 dimension (or a missing one) is stretched to match, without copying data:</p>
+<ul>
+<li><code>array * 2</code>: the number is broadcast to every element;</li>
+<li>a <code>(3, 4)</code> matrix minus a <code>(4,)</code> vector: the vector is subtracted from <strong>every row</strong>;</li>
+<li>a <code>(3, 1)</code> column plus a <code>(1, 4)</code> row gives a <code>(3, 4)</code> table of all sums. <code>a[:, None]</code> (or <code>a.reshape(-1, 1)</code>) turns a vector into a column.</li>
+</ul>
+<p><strong>Axes</strong>: aggregations on a 2D array can work along one axis. <code>m.sum(axis=0)</code> collapses the rows, giving one total <strong>per column</strong>; <code>m.sum(axis=1)</code> collapses the columns, giving one total <strong>per row</strong>. The same goes for <code>mean</code>, <code>max</code>, <code>argmax</code> and so on.</p>
+<p><strong>Boolean masks</strong> select or change elements: <code>m[m &lt; 0] = 0</code> sets every negative element to zero in place.</p>
+<div class="pc pc-example" data-kind="example" data-id="w065d5-e5"><textarea class="pc-src pc-code" hidden>import numpy as np
+
+sales = np.array([[5, 0, 3],      # rows: days; columns: products
+                  [2, 8, 1],
+                  [7, 1, 4]])
+print(sales.sum(axis=0).tolist(), sales.sum(axis=1).tolist(), sales.argmax(axis=0).tolist())
+prices = np.array([2.0, 1.5, 4.0])
+print((sales * prices).sum(axis=1).tolist())        # each day&#x27;s takings: (3, 3) * (3,)
+
+col = np.arange(3)[:, None]                          # shape (3, 1)
+row = np.arange(4)                                   # shape (4,)
+print((col * 10 + row).tolist())
+
+points = np.array([[0, 0], [3, 4], [6, 8]])
+diff = points[:, None, :] - points[None, :, :]       # (3, 1, 2) - (1, 3, 2) gives (3, 3, 2)
+print(np.sqrt((diff ** 2).sum(axis=2)).tolist())
+
+readings = np.array([3, -1, 4, -5])
+readings[readings &lt; 0] = 0
+print(readings.tolist())</textarea></div>
+<h2 id="pitfalls">Pitfalls</h2>
+<ul>
+<li><strong>Slices are views, not copies.</strong> <code>b = a[1:3]</code> shares memory with <code>a</code>: changing <code>b</code> changes <code>a</code>. That&rsquo;s what makes slicing fast. Call <code>.copy()</code> when you need independent data. (Boolean and list indexing, <code>a[mask]</code> and <code>a[[0, 2]]</code>, do make copies.)</li>
+<li><strong>Fixed-size integers overflow silently.</strong> A <code>uint8</code> holds 0 to 255 and an <code>int8</code> holds -128 to 127; arithmetic beyond that <strong>wraps around</strong>, with no error. Python ints never overflow; NumPy ints do. Use a wide enough dtype (<code>int64</code> is the usual default) or convert first with <code>astype</code>.</li>
+<li><strong>Floats aren&rsquo;t exact.</strong> <code>0.1 + 0.2 == 0.3</code> is false in NumPy too. Compare with <code>np.isclose(a, b)</code> element-wise or <code>np.allclose(a, b)</code> for the whole array.</li>
+<li><strong><code>==</code> on arrays gives an array</strong>, so <code>if a == b:</code> raises &ldquo;the truth value of an array is ambiguous&rdquo;. Use <code>np.array_equal(a, b)</code>, or <code>.all()</code> / <code>.any()</code>.</li>
+<li><strong>Don&rsquo;t loop</strong> over arrays element by element in Python; if you must loop, a plain list is faster.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w065d5-e6"><textarea class="pc-src pc-code" hidden>import numpy as np
+
+a = np.arange(5)
+view = a[1:3]
+view[0] = 99
+print(a.tolist())                      # the original changed
+safe = a[1:3].copy()
+safe[0] = -1
+print(a.tolist())
+
+small = np.array([100, 120], dtype=np.int8)
+print((small + small).tolist(), (small.astype(np.int64) + small).tolist())
+
+x = np.array([0.1 + 0.2, 1.0])
+print((x == np.array([0.3, 1.0])).tolist(), np.isclose(x, [0.3, 1.0]).tolist())
+try:
+    if np.array([1, 2]) == np.array([1, 2]):
+        pass
+except ValueError as e:
+    print(&quot;ValueError:&quot;, str(e)[:40])
+print(np.array_equal([1, 2], np.array([1, 2])))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>NumPy arrays store numbers of one dtype in one block of memory, and operations on whole arrays run as compiled loops: vectorised code is 10 to 100 times faster than Python loops, but Python loops over arrays are slower than over lists. Create arrays with np.array, arange, zeros, linspace; check shape, dtype and ndim; reshape views data in a new shape; convert back with tolist(), int() and float(). Arithmetic, comparisons and ufuncs work element-wise; combine conditions with &amp;, | and ~; np.where replaces if/else; aggregations take axis=0 (per column) or axis=1 (per row). Broadcasting stretches size-1 or missing dimensions, matching from the last dimension. Slices are views (copy() when needed), small integer dtypes wrap silently, floats need np.isclose, and array == array gives an array (use array_equal).</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d5-summary" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Summary statistics</div><div class="pc-prompt"><p>Using NumPy (no Python loops), write <code>summary(values)</code>: a dict with <code>"mean"</code>, <code>"std"</code> (the population standard deviation, NumPy&rsquo;s default), <code>"min"</code>, <code>"max"</code> and <code>"range"</code>, each a Python <code>float</code> rounded to 2 decimal places, and <code>standardise(values)</code>: each value&rsquo;s <strong>z-score</strong>, <code>(x - mean) / std</code>, as a list of floats rounded to 2 places (all zeros if <code>std</code> is 0).</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def summary(values):
+    ___
+
+def standardise(values):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_summary():
+    &quot;aggregations&quot;
+    s = summary([2, 4, 4, 4, 5, 5, 7, 9])
+    assert s == {&quot;mean&quot;: 5.0, &quot;std&quot;: 2.0, &quot;min&quot;: 2.0, &quot;max&quot;: 9.0, &quot;range&quot;: 7.0}
+    assert all(type(v) is float for v in s.values())
+    assert standardise([2, 4, 4, 4, 5, 5, 7, 9]) == [-1.5, -0.5, -0.5, -0.5, 0.0, 0.0, 1.0, 2.0]
+    assert standardise([3, 3]) == [0.0, 0.0]
+    import re
+    assert not re.search(r&quot;^\s*for &quot;, source, re.M)</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def summary(values):
+    a = np.asarray(values, dtype=float)
+    stats = {&quot;mean&quot;: a.mean(), &quot;std&quot;: a.std(), &quot;min&quot;: a.min(), &quot;max&quot;: a.max(), &quot;range&quot;: a.max() - a.min()}
+    return {k: round(float(v), 2) for k, v in stats.items()}
+
+def standardise(values):
+    a = np.asarray(values, dtype=float)
+    std = a.std()
+    if std == 0:
+        return [0.0] * len(a)
+    return np.round((a - a.mean()) / std, 2).tolist()</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d5-where" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Loops into array operations</div><div class="pc-prompt"><p>Rewrite these loops as vectorised NumPy code, without <code>for</code>: <code>bills(prices, qty)</code> returns each line&rsquo;s cost, <code>price * qty</code>, with 10% off lines of 10 or more items, rounded to 2 places, as a list; <code>grade_bands(scores)</code> returns a list of <code>"fail"</code> (below 40), <code>"pass"</code> (40 to 69) or <code>"merit"</code> (70 and above) using nested <code>np.where</code>; and <code>capped_total(values, cap)</code> is the sum of the values after limiting each to the range 0 to <code>cap</code>, as a Python float.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def bills(prices, qty):
+    ___
+
+def grade_bands(scores):
+    ___
+
+def capped_total(values, cap):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_where():
+    &quot;vectorising if/else&quot;
+    assert bills([2.5, 1.0, 3.0], [4, 10, 12]) == [10.0, 9.0, 32.4]
+    assert grade_bands([12, 40, 69, 70, 99]) == [&quot;fail&quot;, &quot;pass&quot;, &quot;pass&quot;, &quot;merit&quot;, &quot;merit&quot;]
+    assert capped_total([-5, 3, 12, 7], 10) == 20.0 and type(capped_total([1], 2)) is float
+    import re
+    assert not re.search(r&quot;^\s*for &quot;, source, re.M) and &quot;where&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def bills(prices, qty):
+    prices, qty = np.asarray(prices, dtype=float), np.asarray(qty)
+    cost = prices * qty
+    return np.round(np.where(qty &gt;= 10, cost * 0.9, cost), 2).tolist()
+
+def grade_bands(scores):
+    s = np.asarray(scores)
+    return np.where(s &gt;= 70, &quot;merit&quot;, np.where(s &gt;= 40, &quot;pass&quot;, &quot;fail&quot;)).tolist()
+
+def capped_total(values, cap):
+    return float(np.clip(np.asarray(values, dtype=float), 0, cap).sum())</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d5-broadcast" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Distances by broadcasting</div><div class="pc-prompt"><p>Points are rows of an <code>(n, 2)</code> array of x and y. Using broadcasting (no Python loops), write <code>distances(points)</code>: the <code>(n, n)</code> matrix of Euclidean distances, as nested lists rounded to 3 places, and <code>nearest(points)</code>: for each point, the index of the <strong>closest other</strong> point (set the diagonal to infinity with <code>np.fill_diagonal</code> first; ties go to the lower index, which <code>argmin</code> gives).</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def distances(points):
+    ___
+
+def nearest(points):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_broadcast():
+    &quot;broadcasting&quot;
+    pts = [[0, 0], [3, 4], [6, 8], [0, 1]]
+    d = distances(pts)
+    assert d[0] == [0.0, 5.0, 10.0, 1.0] and d[1][2] == 5.0 and d[3][1] == 4.243
+    assert nearest(pts) == [3, 3, 1, 0]
+    assert nearest([[0, 0], [1, 0], [2, 0]]) == [1, 0, 1]
+    import re
+    assert not re.search(r&quot;^\s*for &quot;, source, re.M)</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def _matrix(points):
+    p = np.asarray(points, dtype=float)
+    diff = p[:, None, :] - p[None, :, :]
+    return np.sqrt((diff ** 2).sum(axis=2))
+
+def distances(points):
+    return np.round(_matrix(points), 3).tolist()
+
+def nearest(points):
+    d = _matrix(points)
+    np.fill_diagonal(d, np.inf)
+    return d.argmin(axis=1).tolist()</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d5-axes" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Working along an axis</div><div class="pc-prompt"><p>A shop&rsquo;s sales are a 2D array: one row per day, one column per product. Without loops, write <code>product_totals(sales)</code> (a list of column totals), <code>best_day(sales)</code> (for each product, the index of the day it sold most), <code>busy_days(sales, threshold)</code> (the indices of days whose total is <strong>above</strong> the threshold, a list), and <code>shares(sales)</code> (each day&rsquo;s sales as a fraction of that day&rsquo;s total, rounded to 2 places, as nested lists; days with no sales give zeros).</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def product_totals(sales):
+    ___
+
+def best_day(sales):
+    ___
+
+def busy_days(sales, threshold):
+    ___
+
+def shares(sales):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_axes():
+    &quot;axis=0 and axis=1&quot;
+    s = [[5, 0, 3], [2, 8, 1], [7, 1, 4], [0, 0, 0]]
+    assert product_totals(s) == [14, 9, 8] and best_day(s) == [2, 1, 2]
+    assert busy_days(s, 9) == [1, 2] and busy_days(s, 100) == []
+    assert shares(s) == [[0.62, 0.0, 0.38], [0.18, 0.73, 0.09], [0.58, 0.08, 0.33], [0.0, 0.0, 0.0]]
+    import re
+    assert not re.search(r&quot;^\s*for &quot;, source, re.M)</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def product_totals(sales):
+    return np.asarray(sales).sum(axis=0).tolist()
+
+def best_day(sales):
+    return np.asarray(sales).argmax(axis=0).tolist()
+
+def busy_days(sales, threshold):
+    totals = np.asarray(sales).sum(axis=1)
+    return np.nonzero(totals &gt; threshold)[0].tolist()
+
+def shares(sales):
+    s = np.asarray(sales, dtype=float)
+    totals = s.sum(axis=1, keepdims=True)
+    safe = np.where(totals == 0, 1, totals)
+    return np.round(s / safe, 2).tolist()</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d5-pitfalls" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Avoiding the traps</div><div class="pc-prompt"><p>Write <code>brightened(pixels, amount)</code>: the <code>uint8</code> image values (0 to 255) with <code>amount</code> added, <strong>without wrapping</strong>: values above 255 become 255 (convert to a wider type, clip, convert back to <code>uint8</code>), returned as a <code>uint8</code> array. Then <code>first_half(a)</code>: an independent <strong>copy</strong> of the first half of an array (changing it mustn&rsquo;t change <code>a</code>), and <code>same(a, b)</code>: True if two float arrays are equal within NumPy&rsquo;s default tolerance.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def brightened(pixels, amount):
+    ___
+
+def first_half(a):
+    ___
+
+def same(a, b):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_pitfalls():
+    &quot;overflow, views and floats&quot;
+    import numpy as np
+    px = np.array([10, 200, 250], dtype=np.uint8)
+    out = brightened(px, 50)
+    assert out.dtype == np.uint8 and out.tolist() == [60, 250, 255] and px.tolist() == [10, 200, 250]
+    a = np.arange(6)
+    h = first_half(a)
+    h[0] = 100
+    assert h.tolist() == [100, 1, 2] and a.tolist() == [0, 1, 2, 3, 4, 5]
+    assert same(np.array([0.1 + 0.2, 1.0]), np.array([0.3, 1.0])) and not same(np.array([1.0]), np.array([1.1]))</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def brightened(pixels, amount):
+    wide = np.asarray(pixels).astype(np.int64) + amount
+    return np.clip(wide, 0, 255).astype(np.uint8)
+
+def first_half(a):
+    return a[: len(a) // 2].copy()
+
+def same(a, b):
+    return bool(np.allclose(a, b))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w065d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A slice that changed the original</div><div class="pc-prompt"><p>The &ldquo;backup&rdquo; is a slice, which in NumPy is a <strong>view</strong> of the same memory, so resetting the working copy also changes the backup: this prints <code>[0, 0, 0]</code>. Make the backup a real copy so it prints <code>[4, 5, 6]</code>.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+data = np.array([4, 5, 6, 7])
+backup = data[:3]
+data[:3] = 0
+print(backup.tolist())</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;copy()&quot;
+    expect_output(&quot;[4, 5, 6]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+data = np.array([4, 5, 6, 7])
+backup = data[:3].copy()
+data[:3] = 0
+print(backup.tolist())</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w065d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Scores that wrapped round</div><div class="pc-prompt"><p>The scores are stored as <code>int8</code>, which holds only -128 to 127, so adding bonus points wraps around silently and this prints <code>[-116, -126]</code>. Convert to <code>int64</code> before adding so it prints <code>[140, 130]</code>.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+scores = np.array([120, 110], dtype=np.int8)
+bonus = np.array([20, 20], dtype=np.int8)
+print((scores + bonus).tolist())</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a wide enough type&quot;
+    expect_output(&quot;[140, 130]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+scores = np.array([120, 110], dtype=np.int8)
+bonus = np.array([20, 20], dtype=np.int8)
+print((scores.astype(np.int64) + bonus).tolist())</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w065d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Floats that weren&rsquo;t equal</div><div class="pc-prompt"><p>Testing floats with <code>==</code> misses values that differ only by rounding error: <code>0.1 + 0.2</code> isn&rsquo;t exactly <code>0.3</code>, so the check finds only one match and this prints <code>1</code>. Use <code>np.isclose</code> so the two values that are really 0.3 are counted, and this prints <code>2</code>.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+totals = np.array([0.1 + 0.2, 0.15 + 0.15, 0.4])
+print(int(np.count_nonzero(totals == 0.3)))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;np.isclose&quot;
+    expect_output(&quot;2&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+totals = np.array([0.1 + 0.2, 0.15 + 0.15, 0.4])
+print(int(np.count_nonzero(np.isclose(totals, 0.3))))</textarea></div>
+<div class="parsons" data-id="w065d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Per-row shares</div><div class="pc-prompt"><p>Arrange the lines of a function that turns each row of a 2D array into fractions of that row&rsquo;s total. One line is a trap.</p></div><script type="application/json">{"lines": ["def row_shares(m):", "    m = np.asarray(m, dtype=float)", "    totals = m.sum(axis=1, keepdims=True)", "    return m / totals"], "distractors": ["    totals = m.sum(axis=0)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # np.arange(6).reshape(2, 3).shape
+q = ___   # np.array([[1, 2], [3, 4]]).sum(axis=0).tolist()
+r = ___   # (np.arange(3)[:, None] + np.arange(2)).shape
+s = ___   # True or False: b = a[1:3] makes an independent copy of part of a
+t = ___   # np.array([200], dtype=np.uint8) + 100, as a list</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == (2, 3) and q == [4, 6] and r == (3, 2), &quot;p, q and r&quot;
+    assert s is False and t == [44], &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = (2, 3)
+q = [4, 6]
+r = (3, 2)
+s = False
+t = [44]</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w065d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why is vectorised NumPy code fast?", "answer": 1, "explain": "No per-element Python objects.", "options": ["It uses threads", "Operations run as compiled loops over compact, typed memory", "It skips elements", "It caches results"]}, {"type": "mc", "q": "What happens if you loop over a NumPy array in Python?", "answer": 1, "explain": "Stay inside NumPy.", "options": ["It&rsquo;s faster than a list", "It&rsquo;s slower than a list, since each element becomes a Python object", "It&rsquo;s vectorised", "An error"]}, {"type": "mc", "q": "What is an array&rsquo;s dtype?", "answer": 1, "explain": "int64, float64, bool, uint8&hellip;", "options": ["Its shape", "The single type of all its elements", "Its name", "Its size in bytes"]}, {"type": "mc", "q": "How do you combine two conditions on arrays?", "answer": 1, "explain": "Brackets matter: &amp; binds tighter than &gt;.", "options": ["and", "(a &gt; 1) &amp; (a &lt; 5)", "a &gt; 1 and &lt; 5", "or"]}, {"type": "mc", "q": "What does np.where(cond, x, y) do?", "answer": 1, "explain": "The vectorised if/else.", "options": ["Finds positions only", "Picks x where cond is true and y elsewhere, element by element", "Filters", "Sorts"]}, {"type": "mc", "q": "What does m.sum(axis=0) give for a 2D array?", "answer": 1, "explain": "axis=0 collapses the rows.", "options": ["One total per row", "One total per column", "A single number", "The diagonal"]}, {"type": "mc", "q": "When can two shapes broadcast?", "answer": 1, "explain": "Size-1 dimensions stretch.", "options": ["Only when equal", "When, from the last dimension back, each pair of sizes is equal or one of them is 1", "Never", "When they have the same number of elements"]}, {"type": "mc", "q": "What is a slice of a NumPy array?", "answer": 1, "explain": "Use .copy() for independent data.", "options": ["A copy", "A view sharing the original&rsquo;s memory", "A list", "Read-only"]}, {"type": "mc", "q": "What happens when a uint8 value goes above 255?", "answer": 1, "explain": "Use a wider dtype or clip.", "options": ["An error", "It wraps around silently", "It becomes a float", "It stays 255"]}, {"type": "output", "q": "What does this print?", "answer": "[1, 2, 0] [1, 2, 3]", "explain": "argsort gives the positions in sorted order.", "code": "import numpy as np\na = np.array([3, 1, 2])\nprint(np.argsort(a).tolist(), a[np.argsort(a)].tolist())"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w065d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: the Game of Life, vectorised</div><div class="pc-prompt"><p>In John Conway&rsquo;s Game of Life, a grid of cells, each alive (1) or dead (0), changes in steps: a live cell with 2 or 3 live neighbours (of its 8) stays alive, a dead cell with exactly 3 becomes alive, and every other cell is dead in the next step. Using NumPy and <strong>no Python loops over cells</strong>, write:</p>
+<ul>
+<li><code>neighbours(grid)</code>: an array of each cell&rsquo;s live-neighbour count, where the grid <strong>wraps around</strong> at the edges (use <code>np.roll</code> along both axes, adding the eight shifted copies);</li>
+<li><code>life_step(grid)</code>: the next grid as an array of 0s and 1s;</li>
+<li><code>evolve(grid, steps)</code>: the grid after <code>steps</code> steps (a loop over steps is fine);</li>
+<li><code>population(grid)</code>: the number of live cells, as a Python <code>int</code>.</li>
+</ul>
+<p>Results must match a plain Python version on random grids (the tests include one).</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def neighbours(grid):
+    ___
+
+def life_step(grid):
+    ___
+
+def evolve(grid, steps):
+    ___
+
+def population(grid):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_life():
+    &quot;a vectorised simulation&quot;
+    import numpy as np, random
+    def slow_step(g):
+        rows, cols = len(g), len(g[0])
+        new = [[0] * cols for _ in range(rows)]
+        for r in range(rows):
+            for c in range(cols):
+                n = sum(g[(r + dr) % rows][(c + dc) % cols] for dr in (-1, 0, 1) for dc in (-1, 0, 1) if dr or dc)
+                new[r][c] = 1 if n == 3 or (g[r][c] and n == 2) else 0
+        return new
+    blinker = np.zeros((5, 5), dtype=int)
+    blinker[2, 1:4] = 1
+    assert neighbours(blinker)[1].tolist() == [1, 2, 3, 2, 1] and neighbours(blinker)[2, 2] == 2
+    assert np.asarray(life_step(blinker))[1:4, 2].tolist() == [1, 1, 1] and population(blinker) == 3
+    assert np.array_equal(evolve(blinker, 2), blinker)
+    random.seed(5)
+    g = [[random.randint(0, 1) for _ in range(12)] for _ in range(9)]
+    expected = g
+    for _ in range(4):
+        expected = slow_step(expected)
+    assert np.asarray(evolve(np.array(g), 4)).tolist() == expected
+    assert type(population(np.array(g))) is int
+    glider = np.zeros((8, 8), dtype=int)
+    for r, c in [(0, 1), (1, 2), (2, 0), (2, 1), (2, 2)]:
+        glider[r, c] = 1
+    assert population(evolve(glider, 32)) == 5</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+OFFSETS = [(dr, dc) for dr in (-1, 0, 1) for dc in (-1, 0, 1) if dr or dc]
+
+def neighbours(grid):
+    g = np.asarray(grid)
+    return sum(np.roll(np.roll(g, dr, axis=0), dc, axis=1) for dr, dc in OFFSETS)
+
+def life_step(grid):
+    g = np.asarray(grid)
+    n = neighbours(g)
+    return ((n == 3) | ((g == 1) &amp; (n == 2))).astype(int)
+
+def evolve(grid, steps):
+    g = np.asarray(grid)
+    for _ in range(steps):
+        g = life_step(g)
+    return g
+
+def population(grid):
+    return int(np.asarray(grid).sum())</textarea><template class="pc-src pc-hint"><code>np.roll(grid, shift, axis)</code> moves the whole grid, wrapping at the edges. Sum <code>np.roll(np.roll(grid, dr, axis=0), dc, axis=1)</code> for the eight <code>(dr, dc)</code> pairs other than <code>(0, 0)</code> (a loop over those eight offsets is fine: it&rsquo;s not a loop over cells). The rule is then one expression: <code>(n == 3) | ((grid == 1) &amp; (n == 2))</code>, converted with <code>.astype(int)</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, install NumPy with <code>pip install numpy</code> in a virtual environment (Week 22) and time a vectorised calculation against the same loop in plain Python on a million numbers. Tomorrow is the Forge: speeding up a slow program, step by step, with everything from this week.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w065d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w065d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w065d5", "week": 65, "day": 5, "title": "Vectorisation with NumPy", "exercises": [{"id": "w065d5-summary", "title": "Summary statistics", "points": 10}, {"id": "w065d5-where", "title": "Loops into array operations", "points": 10}, {"id": "w065d5-broadcast", "title": "Distances by broadcasting", "points": 15}, {"id": "w065d5-axes", "title": "Working along an axis", "points": 10}, {"id": "w065d5-pitfalls", "title": "Avoiding the traps", "points": 10}, {"id": "w065d5-bug1", "title": "A slice that changed the original", "points": 10}, {"id": "w065d5-bug2", "title": "Scores that wrapped round", "points": 10}, {"id": "w065d5-bug3", "title": "Floats that weren't equal", "points": 10}, {"id": "w065d5-trace", "title": "Predict them", "points": 10}, {"id": "w065d5-challenge", "title": "Challenge: the Game of Life, vectorised", "points": 25}], "points": 120}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
