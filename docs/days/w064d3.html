@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 64 Day 3: Frames and the evaluation loop | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="A code object is a recipe; a frame is a recipe being cooked. Every time a function is called, CPython makes a frame holding that call’s local variables, its...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w064d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 64 Day 3: Frames and the evaluation loop">
+<meta property="og:description" content="A code object is a recipe; a frame is a recipe being cooked. Every time a function is called, CPython makes a frame holding that call’s local variables, its...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w064d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-64">Week 64: Inside CPython</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#what-a-frame-holds" data-sec="what-a-frame-holds">What a frame holds</a></li><li><a href="#looking-at-the-stack" data-sec="looking-at-the-stack">Looking at the stack</a></li><li><a href="#tracebacks-are-frames" data-sec="tracebacks-are-frames">Tracebacks are frames</a></li><li><a href="#tracing-with-sys-settrace" data-sec="tracing-with-sys-settrace">Tracing with sys.settrace</a></li><li><a href="#the-evaluation-loop" data-sec="the-evaluation-loop">The evaluation loop</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w064d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-64">Week 64: Inside CPython</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 64, Day 3</span></p>
+      <h1>Frames and the evaluation loop</h1>
+      <div class="day-intro"><p>A code object is a recipe; a <strong>frame</strong> is a recipe being cooked. Every time a function is called, CPython makes a frame holding that call&rsquo;s local variables, its value stack, and where it has got to, links it to the frame that called it, and hands it to the <strong>evaluation loop</strong>, the C function that reads bytecode instructions one by one and carries them out. Today you&rsquo;ll look at live frames with <code>sys._getframe</code> and <code>inspect</code>, walk tracebacks, watch code run line by line with <code>sys.settrace</code> (how debuggers and coverage tools work), and build a machine with real call frames of its own.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain what a frame holds and how frames form the call stack</li><li>Inspect frames with sys._getframe, inspect and frame attributes</li><li>Walk a traceback&rsquo;s frames after an exception</li><li>Trace calls and lines with sys.settrace, always restoring the previous tracer</li><li>Describe the evaluation loop and simulate frames, calls and returns</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="What a frame holds: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Looking at the stack: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Tracebacks are frames: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Tracing with sys.settrace: 25 min"></span><span class="plan-seg s1" style="flex:20" title="The evaluation loop: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">What a frame holds</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Looking at the stack</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Tracebacks are frames</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Tracing with sys.settrace</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">The evaluation loop</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w064d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w064d3.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w064d3-p1"><textarea class="pc-src pc-code" hidden>import sys
+
+def inner():
+    frame = sys._getframe()
+    names = []
+    while frame is not None and frame.f_code.co_name != &quot;&lt;module&gt;&quot;:
+        names.append(frame.f_code.co_name)
+        frame = frame.f_back
+    return names
+
+def middle():
+    return inner()
+
+def outer():
+    return middle()
+
+print(outer())</textarea></div>
+<p>Each call made a frame, and each frame points back to its caller&rsquo;s frame with <code>f_back</code>. Following those links from the innermost call gives the call stack, the same list a traceback shows you after an error.</p>
+<h2 id="what-a-frame-holds">What a frame holds</h2>
+<p>When a function is called, CPython creates a <strong>frame</strong> for that call. It holds:</p>
+<ul>
+<li><code>f_code</code>: the code object being run (the same one for every call to that function);</li>
+<li><code>f_locals</code>: the call&rsquo;s local variables (parameters included);</li>
+<li><code>f_globals</code> and <code>f_builtins</code>: the namespaces used for global and built-in names;</li>
+<li><code>f_back</code>: the frame of the <strong>caller</strong>;</li>
+<li><code>f_lineno</code>: the line currently running, and <code>f_lasti</code>, the offset of the current instruction;</li>
+<li>internally, the <strong>value stack</strong> that bytecode instructions push to and pop from (yesterday), and the stack of active <code>try</code> blocks.</li>
+</ul>
+<p>Frames are linked into the <strong>call stack</strong>: the newest frame at the top, <code>f_back</code> leading down to the module-level frame. When a function returns, its frame is popped and (unless something still refers to it) freed. A recursive function has one frame per active call, which is why deep recursion costs memory and why Python limits it (<code>sys.getrecursionlimit()</code>, normally 1000).</p>
+<p>Generators are the exception: a generator <strong>keeps its frame</strong> between <code>next()</code> calls (<code>gen.gi_frame</code>), which is exactly how it remembers its local variables and where it paused (Week 59).</p>
+<div class="pc pc-example" data-kind="example" data-id="w064d3-e2"><textarea class="pc-src pc-code" hidden>import inspect, sys
+
+def show(label):
+    frame = sys._getframe()
+    caller = frame.f_back
+    print(label, &quot;| this:&quot;, frame.f_code.co_name, &quot;| locals:&quot;, sorted(frame.f_locals),
+          &quot;| called from:&quot;, caller.f_code.co_name)
+
+def area(w, h):
+    result = w * h
+    show(&quot;in area&quot;)
+    return result
+
+area(3, 4)
+
+def counter():
+    n = 0
+    while True:
+        n += 1
+        yield n
+
+gen = counter()
+next(gen)
+next(gen)
+print(inspect.getgeneratorstate(gen), gen.gi_frame.f_locals[&quot;n&quot;])
+gen.close()
+print(inspect.getgeneratorstate(gen), gen.gi_frame)</textarea></div>
+<h2 id="looking-at-the-stack">Looking at the stack</h2>
+<p><code>sys._getframe(depth=0)</code> returns the current frame, or the one <code>depth</code> levels up (1 is the caller). The leading underscore marks it as CPython-specific; the portable equivalents are in <code>inspect</code>:</p>
+<ul>
+<li><code>inspect.currentframe()</code> (may return <code>None</code> on other Pythons);</li>
+<li><code>inspect.stack()</code>: a list of <code>FrameInfo</code> records for the whole stack, newest first, each with <code>function</code>, <code>lineno</code>, <code>filename</code> and <code>frame</code>;</li>
+<li><code>inspect.getframeinfo(frame)</code>.</li>
+</ul>
+<p>Uses: logging that records the calling function, debugging helpers, and frameworks that look up the caller&rsquo;s variables. Two cautions:</p>
+<ul>
+<li><strong>Don&rsquo;t keep frames around.</strong> A frame refers to all its locals, and the locals may refer back to the frame, making a cycle (Week 62). Use what you need and drop the reference (or <code>del frame</code>).</li>
+<li><strong>Don&rsquo;t change locals through a frame.</strong> Since Python 3.13, <code>frame.f_locals</code> for a function is a live view that does write through to the variables (PEP 667), but older versions behaved differently, and code that relies on either is fragile.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w064d3-e3"><textarea class="pc-src pc-code" hidden>import inspect
+
+def log(message):
+    caller = inspect.stack()[1]
+    return f&quot;[{caller.function}] {message}&quot;
+
+def checkout(basket):
+    return log(f&quot;{len(basket)} items&quot;)
+
+print(checkout([&quot;tea&quot;, &quot;jam&quot;]))
+
+def depth():
+    return len(inspect.stack())
+
+def deeper():
+    return depth()
+
+print(deeper() - depth())</textarea></div>
+<h2 id="tracebacks-are-frames">Tracebacks are frames</h2>
+<p>When an exception escapes a function, Python builds a <strong>traceback</strong>: a linked list of traceback objects, one for each frame the exception passed through. <code>exc.__traceback__</code> is the first (the outermost frame); each has:</p>
+<ul>
+<li><code>tb_frame</code>: the frame;</li>
+<li><code>tb_lineno</code>: the line in that frame where the exception passed;</li>
+<li><code>tb_next</code>: the next traceback object, one call deeper, or <code>None</code> at the frame where the exception was raised.</li>
+</ul>
+<p>The <code>traceback</code> module formats these (<code>traceback.format_exception(exc)</code>, <code>traceback.extract_tb(tb)</code>), and <code>traceback.walk_tb(tb)</code> yields <code>(frame, lineno)</code> pairs. Because a traceback holds frames, and frames hold all their locals, keeping an exception object alive keeps all of those alive too (Week 62).</p>
+<div class="pc pc-example" data-kind="example" data-id="w064d3-e4"><textarea class="pc-src pc-code" hidden>import traceback
+
+def parse(text):
+    return int(text)
+
+def load(rows):
+    return [parse(r) for r in rows]
+
+def main():
+    return load([&quot;1&quot;, &quot;two&quot;])
+
+try:
+    main()
+except ValueError as e:
+    tb = e.__traceback__
+    chain = []
+    while tb is not None:
+        chain.append(tb.tb_frame.f_code.co_name)
+        tb = tb.tb_next
+    print(chain)
+    print([summary.name for summary in traceback.extract_tb(e.__traceback__)])
+    print(traceback.format_exception_only(e)[-1].strip())</textarea></div>
+<h2 id="tracing-with-sys-settrace">Tracing with sys.settrace</h2>
+<p><code>sys.settrace(tracer)</code> installs a <strong>trace function</strong> that the evaluation loop calls as code runs. It&rsquo;s how <code>pdb</code> (the debugger), coverage tools and some profilers work.</p>
+<ul>
+<li>The <strong>global</strong> tracer is called with <code>(frame, "call", None)</code> whenever a new frame starts. What it <strong>returns</strong> becomes the <strong>local</strong> tracer for that frame (return <code>None</code> to ignore the frame).</li>
+<li>The local tracer is then called with events for that frame: <code>"line"</code> (a new line is about to run), <code>"return"</code> (with the return value as <code>arg</code>), and <code>"exception"</code> (with the exception details). It must return itself (or another function) to keep receiving events.</li>
+<li>Tracing only affects the current thread, slows everything down a lot, and must be <strong>removed</strong> afterwards: save <code>sys.gettrace()</code> first and restore it in a <code>finally</code>, so you don&rsquo;t break a debugger or coverage tool that was already running.</li>
+</ul>
+<p>(Python 3.12 added <code>sys.monitoring</code>, a faster, lower-level API for tools; <code>settrace</code> remains the simple, portable choice.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w064d3-e5"><textarea class="pc-src pc-code" hidden>import sys
+
+def fib(n):
+    if n &lt; 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+def traced(func, *args):
+    calls, returns = [], []
+    def tracer(frame, event, arg):
+        if event == &quot;call&quot; and frame.f_code is func.__code__:
+            calls.append(frame.f_locals[&quot;n&quot;])
+            return tracer                      # follow this frame
+        if event == &quot;return&quot;:
+            returns.append(arg)
+        return tracer if event != &quot;call&quot; else None
+    previous = sys.gettrace()
+    sys.settrace(tracer)
+    try:
+        result = func(*args)
+    finally:
+        sys.settrace(previous)
+    return result, calls, returns
+
+print(traced(fib, 4))</textarea></div>
+<h2 id="the-evaluation-loop">The evaluation loop</h2>
+<p>At the heart of CPython is one large C function, <code>_PyEval_EvalFrameDefault</code> in <code>Python/ceval.c</code>. Stripped to its essentials, it&rsquo;s yesterday&rsquo;s stack machine:</p>
+<pre><code>for (;;) {
+    instruction = *next_instr++;
+    switch (opcode(instruction)) {
+        case LOAD_FAST:   push(frame-&gt;locals[oparg]); break;
+        case BINARY_OP:   right = pop(); left = pop(); push(binary_op(left, right, oparg)); break;
+        case CALL:        ... push a new frame and continue the loop in it ...
+        case RETURN_VALUE: ... pop the frame, push the result onto the caller's stack ...
+        ...
+    }
+}
+</code></pre>
+<p>Some details matter for understanding Python&rsquo;s behaviour:</p>
+<ul>
+<li><strong>Calls between Python functions don&rsquo;t use the C stack</strong> (since 3.11): a call pushes a new frame and the same loop continues with it, which made calls faster and deep recursion cheaper.</li>
+<li><strong>The loop checks for interruptions</strong> regularly: signals such as Ctrl+C (raising <code>KeyboardInterrupt</code>), and, in builds with the global interpreter lock, requests from other threads to take a turn (Week 66).</li>
+<li><strong>Exceptions</strong> make the loop look up the current instruction in the code object&rsquo;s <strong>exception table</strong> to find the handler; if there is none, the frame is popped and the exception continues in the caller, adding a traceback entry.</li>
+<li>In Python 3.13 and later, an experimental <strong>JIT compiler</strong> can turn hot sequences of instructions into machine code, but the loop remains the reference behaviour.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w064d3-e6"><textarea class="pc-src pc-code" hidden>def run_frames(functions, entry, args):
+    &quot;A tiny machine with call frames: each function is a list of instructions.&quot;
+    frames = [{&quot;func&quot;: entry, &quot;pc&quot;: 0, &quot;locals&quot;: dict(args), &quot;stack&quot;: []}]
+    max_depth = 1
+    while True:
+        frame = frames[-1]
+        op, *arg = functions[frame[&quot;func&quot;]][&quot;code&quot;][frame[&quot;pc&quot;]]
+        frame[&quot;pc&quot;] += 1
+        if op == &quot;LOAD&quot;:
+            frame[&quot;stack&quot;].append(frame[&quot;locals&quot;][arg[0]])
+        elif op == &quot;PUSH&quot;:
+            frame[&quot;stack&quot;].append(arg[0])
+        elif op == &quot;MUL&quot;:
+            b, a = frame[&quot;stack&quot;].pop(), frame[&quot;stack&quot;].pop()
+            frame[&quot;stack&quot;].append(a * b)
+        elif op == &quot;CALL&quot;:
+            name = arg[0]
+            params = functions[name][&quot;params&quot;]
+            values = [frame[&quot;stack&quot;].pop() for _ in params][::-1]
+            frames.append({&quot;func&quot;: name, &quot;pc&quot;: 0, &quot;locals&quot;: dict(zip(params, values)), &quot;stack&quot;: []})
+            max_depth = max(max_depth, len(frames))
+        elif op == &quot;RETURN&quot;:
+            value = frame[&quot;stack&quot;].pop()
+            frames.pop()
+            if not frames:
+                return value, max_depth
+            frames[-1][&quot;stack&quot;].append(value)
+
+functions = {
+    &quot;square&quot;: {&quot;params&quot;: [&quot;x&quot;], &quot;code&quot;: [(&quot;LOAD&quot;, &quot;x&quot;), (&quot;LOAD&quot;, &quot;x&quot;), (&quot;MUL&quot;,), (&quot;RETURN&quot;,)]},
+    &quot;main&quot;: {&quot;params&quot;: [&quot;n&quot;], &quot;code&quot;: [(&quot;LOAD&quot;, &quot;n&quot;), (&quot;CALL&quot;, &quot;square&quot;), (&quot;PUSH&quot;, 2), (&quot;MUL&quot;,), (&quot;RETURN&quot;,)]},
+}
+print(run_frames(functions, &quot;main&quot;, {&quot;n&quot;: 5}))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A frame holds one call&rsquo;s state: its code object, locals, globals, value stack, current line and a link to its caller (f_back); linked frames form the call stack, and generators keep theirs between steps. sys._getframe and inspect.stack show live frames: use them briefly and don&rsquo;t store them or write to their locals. An exception&rsquo;s <strong>traceback</strong> is a chain of tb_frame / tb_lineno / tb_next records, outermost first. sys.settrace installs a tracer: the &ldquo;call&rdquo; event&rsquo;s return value becomes the frame&rsquo;s local tracer, which gets &ldquo;line&rdquo;, &ldquo;return&rdquo; and &ldquo;exception&rdquo; events; always restore sys.gettrace() in a finally. The evaluation loop reads instructions and dispatches on them; Python-to-Python calls push frames without using the C stack, and the loop also handles signals, thread switches and exceptions.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d3-caller" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Who called me?</div><div class="pc-prompt"><p>Write <code>caller_name()</code>: the name of the function that called the function that called <code>caller_name</code> (use <code>sys._getframe</code> with the right depth), and <code>call_chain(stop="&lt;module&gt;")</code>: the list of function names from the caller of <code>call_chain</code> downwards, stopping <strong>before</strong> the first frame whose function is named <code>stop</code> (or at the bottom of the stack).</p></div><textarea class="pc-src pc-code" hidden>import sys
+
+def caller_name():
+    ___
+
+def call_chain(stop=&quot;&lt;module&gt;&quot;):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_caller():
+    &quot;walking frames&quot;
+    def helper():
+        return caller_name()
+    def report():
+        return helper()
+    assert report() == &quot;report&quot;
+    def c():
+        return call_chain(stop=&quot;test_caller&quot;)
+    def b():
+        return c()
+    def a():
+        return b()
+    assert a() == [&quot;c&quot;, &quot;b&quot;, &quot;a&quot;]
+    chain = call_chain()
+    assert chain[0] == &quot;test_caller&quot;</textarea><textarea class="pc-src pc-solution" hidden>import sys
+
+def caller_name():
+    return sys._getframe(2).f_code.co_name
+
+def call_chain(stop=&quot;&lt;module&gt;&quot;):
+    names = []
+    frame = sys._getframe(1)
+    while frame is not None and frame.f_code.co_name != stop:
+        names.append(frame.f_code.co_name)
+        frame = frame.f_back
+    return names</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d3-locals" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A peek at the caller&rsquo;s variables</div><div class="pc-prompt"><p>Write <code>caller_locals(*names)</code>: a <strong>copy</strong> of the caller&rsquo;s local variables as a dict, limited to the given names if any are given (missing names are left out). Then <code>debug(*names)</code>: a string like <code>"x=1, total=5"</code> showing the named variables of the caller, in the order given, with <code>repr</code> of each value, and <code>"?"</code> for names the caller doesn&rsquo;t have. Delete your frame references before returning.</p></div><textarea class="pc-src pc-code" hidden>import sys
+
+def caller_locals(*names):
+    ___
+
+def debug(*names):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_locals():
+    &quot;reading frame locals&quot;
+    def work():
+        x, total, label = 1, 5, &quot;a&quot;
+        return caller_locals(), caller_locals(&quot;x&quot;, &quot;nope&quot;), debug(&quot;x&quot;, &quot;label&quot;, &quot;missing&quot;)
+    everything, some, text = work()
+    assert everything == {&quot;x&quot;: 1, &quot;total&quot;: 5, &quot;label&quot;: &quot;a&quot;} and some == {&quot;x&quot;: 1}
+    assert text == &quot;x=1, label=&#x27;a&#x27;, missing=?&quot;
+    def change():
+        y = 1
+        copy = caller_locals()
+        copy[&quot;y&quot;] = 99
+        return y
+    assert change() == 1</textarea><textarea class="pc-src pc-solution" hidden>import sys
+
+def caller_locals(*names):
+    frame = sys._getframe(1)
+    try:
+        values = dict(frame.f_locals)
+    finally:
+        del frame
+    if names:
+        return {n: values[n] for n in names if n in values}
+    return values
+
+def debug(*names):
+    frame = sys._getframe(1)
+    try:
+        values = dict(frame.f_locals)
+    finally:
+        del frame
+    return &quot;, &quot;.join(f&quot;{n}={values[n]!r}&quot; if n in values else f&quot;{n}=?&quot; for n in names)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d3-tb" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Inside a traceback</div><div class="pc-prompt"><p>Write <code>traceback_chain(exc)</code>: a list of <code>(function name, line offset)</code> pairs for every frame in the exception&rsquo;s traceback, outermost first, where the offset is the traceback&rsquo;s line number minus the function&rsquo;s <code>co_firstlineno</code> (so it doesn&rsquo;t depend on where the code sits in a file). Then <code>raised_in(exc)</code>: the name of the function where the exception was actually raised (the innermost frame).</p></div><textarea class="pc-src pc-code" hidden>def traceback_chain(exc):
+    ___
+
+def raised_in(exc):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_tb():
+    &quot;walking tracebacks&quot;
+    def parse(text):
+        value = int(text)
+        return value
+    def total(rows):
+        s = 0
+        for r in rows:
+            s += parse(r)
+        return s
+    try:
+        total([&quot;1&quot;, &quot;x&quot;])
+        assert False
+    except ValueError as e:
+        chain = traceback_chain(e)
+        assert [name for name, _ in chain][-2:] == [&quot;total&quot;, &quot;parse&quot;]
+        assert chain[-1][1] == 1 and chain[-2][1] == 3
+        assert raised_in(e) == &quot;parse&quot;
+    try:
+        {}[&quot;k&quot;]
+    except KeyError as e:
+        assert raised_in(e) == &quot;test_tb&quot;</textarea><textarea class="pc-src pc-solution" hidden>def traceback_chain(exc):
+    out = []
+    tb = exc.__traceback__
+    while tb is not None:
+        code = tb.tb_frame.f_code
+        out.append((code.co_name, tb.tb_lineno - code.co_firstlineno))
+        tb = tb.tb_next
+    return out
+
+def raised_in(exc):
+    tb = exc.__traceback__
+    while tb.tb_next is not None:
+        tb = tb.tb_next
+    return tb.tb_frame.f_code.co_name</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d3-lines" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Which lines ran?</div><div class="pc-prompt"><p>Write <code>trace_lines(func, *args)</code>: call <code>func(*args)</code> with a tracer installed and return <code>(result, lines)</code>, where <code>lines</code> lists, in order, the line offsets (the frame&rsquo;s <code>f_lineno</code> minus the function&rsquo;s <code>co_firstlineno</code>) of every <code>"line"</code> event <strong>in that function&rsquo;s own frames</strong> (not in functions it calls). Restore the previous tracer even if <code>func</code> raises. Then <code>coverage(func, *calls)</code>: run <code>func</code> once per argument tuple in <code>calls</code> and return the sorted list of distinct line offsets that ran.</p></div><textarea class="pc-src pc-code" hidden>import sys
+
+def trace_lines(func, *args):
+    ___
+
+def coverage(func, *calls):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_lines():
+    &quot;sys.settrace&quot;
+    def grade(score):
+        if score &gt;= 50:
+            return &quot;pass&quot;
+        return &quot;fail&quot;
+    def helper(n):
+        return n + 1
+    def total(n):
+        t = 0
+        for i in range(n):
+            t += helper(i)
+        return t
+    assert trace_lines(grade, 70) == (&quot;pass&quot;, [1, 2]) and trace_lines(grade, 10) == (&quot;fail&quot;, [1, 3])
+    assert trace_lines(total, 2) == (3, [1, 2, 3, 2, 3, 2, 4])
+    assert coverage(grade, (70,)) == [1, 2] and coverage(grade, (70,), (5,)) == [1, 2, 3]
+    before = sys.gettrace()
+    def boom():
+        raise ValueError
+    try:
+        trace_lines(boom)
+        assert False
+    except ValueError:
+        pass
+    assert sys.gettrace() is before</textarea><textarea class="pc-src pc-solution" hidden>import sys
+
+def trace_lines(func, *args):
+    code = func.__code__
+    lines = []
+
+    def local(frame, event, arg):
+        if event == &quot;line&quot;:
+            lines.append(frame.f_lineno - code.co_firstlineno)
+        return local
+
+    def tracer(frame, event, arg):
+        if event == &quot;call&quot; and frame.f_code is code:
+            return local
+        return None
+
+    previous = sys.gettrace()
+    sys.settrace(tracer)
+    try:
+        result = func(*args)
+    finally:
+        sys.settrace(previous)
+    return result, lines
+
+def coverage(func, *calls):
+    seen = set()
+    for args in calls:
+        seen.update(trace_lines(func, *args)[1])
+    return sorted(seen)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d3-calls" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Counting calls and depth</div><div class="pc-prompt"><p>Write <code>call_stats(func, *args)</code>: run <code>func(*args)</code> with a tracer and return <code>(result, stats)</code>, where <code>stats</code> is a dict from function name to the number of calls made to functions with that name <strong>while <code>func</code> ran</strong> (including <code>func</code> itself), counting only Python functions whose code object&rsquo;s <code>co_filename</code> is the same as <code>func</code>&rsquo;s, plus the key <code>"max_depth"</code>: the deepest nesting of those calls (1 for <code>func</code> alone). Use <code>"call"</code> and <code>"return"</code> events to track the depth, and restore the previous tracer.</p></div><textarea class="pc-src pc-code" hidden>import sys
+
+def call_stats(func, *args):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_calls():
+    &quot;tracing calls&quot;
+    def fact(n):
+        return 1 if n &lt;= 1 else n * fact(n - 1)
+    def twice(x):
+        return fact(x) + fact(x - 1)
+    result, stats = call_stats(fact, 5)
+    assert result == 120 and stats == {&quot;fact&quot;: 5, &quot;max_depth&quot;: 5}
+    result, stats = call_stats(twice, 3)
+    assert result == 8 and stats == {&quot;twice&quot;: 1, &quot;fact&quot;: 5, &quot;max_depth&quot;: 4}
+    result, stats = call_stats(lambda: len([1, 2]))
+    assert result == 2 and stats == {&quot;&lt;lambda&gt;&quot;: 1, &quot;max_depth&quot;: 1}</textarea><textarea class="pc-src pc-solution" hidden>import sys
+
+def call_stats(func, *args):
+    filename = func.__code__.co_filename
+    stats = {}
+    depth = [0, 0]
+
+    def tracer(frame, event, arg):
+        if event == &quot;call&quot; and frame.f_code.co_filename == filename:
+            name = frame.f_code.co_name
+            stats[name] = stats.get(name, 0) + 1
+            depth[0] += 1
+            depth[1] = max(depth[1], depth[0])
+            return local
+        return None
+
+    def local(frame, event, arg):
+        if event == &quot;return&quot;:
+            depth[0] -= 1
+        return local
+
+    previous = sys.gettrace()
+    sys.settrace(tracer)
+    try:
+        result = func(*args)
+    finally:
+        sys.settrace(previous)
+    stats[&quot;max_depth&quot;] = depth[1]
+    return result, stats</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w064d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">One frame too close</div><div class="pc-prompt"><p><code>whoami</code> wants the name of the function that called it, but <code>sys._getframe(0)</code> is <code>whoami</code>&rsquo;s own frame, so this prints <code>whoami</code>. Look one frame up so it prints <code>checkout</code>.</p></div><textarea class="pc-src pc-code" hidden>import sys
+
+def whoami():
+    return sys._getframe(0).f_code.co_name
+
+def checkout():
+    return whoami()
+
+print(checkout())</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the caller&#x27;s frame&quot;
+    expect_output(&quot;checkout&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import sys
+
+def whoami():
+    return sys._getframe(1).f_code.co_name
+
+def checkout():
+    return whoami()
+
+print(checkout())</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w064d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A tracer that stops listening</div><div class="pc-prompt"><p>The tracer handles the <code>"call"</code> event but returns <code>None</code>, which tells Python not to trace inside that frame, so no <code>"line"</code> events arrive and this prints <code>0</code>. Return a local tracer that counts lines (and returns itself), so this prints <code>3</code>.</p></div><textarea class="pc-src pc-code" hidden>import sys
+
+count = 0
+
+def tracer(frame, event, arg):
+    global count
+    if event == &quot;line&quot;:
+        count += 1
+    return None
+
+def work():
+    a = 1
+    b = 2
+    return a + b
+
+sys.settrace(tracer)
+work()
+sys.settrace(None)
+print(count)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;return the tracer&quot;
+    expect_output(&quot;3&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import sys
+
+count = 0
+
+def tracer(frame, event, arg):
+    global count
+    if event == &quot;line&quot;:
+        count += 1
+    return tracer
+
+def work():
+    a = 1
+    b = 2
+    return a + b
+
+sys.settrace(tracer)
+work()
+sys.settrace(None)
+print(count)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w064d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A tracer left running</div><div class="pc-prompt"><p>The tracer is never removed after the first call, so it keeps counting lines in the second call too, and this prints <code>[2, 4]</code>. Remove it after the measured call (restoring the previous tracer) so the second count stays the same, and this prints <code>[2, 2]</code>.</p></div><textarea class="pc-src pc-code" hidden>import sys
+
+lines = 0
+
+def tracer(frame, event, arg):
+    global lines
+    if event == &quot;line&quot;:
+        lines += 1
+    return tracer
+
+def step():
+    x = 1
+    return x
+
+previous = sys.gettrace()
+sys.settrace(tracer)
+step()
+counts = [lines]
+step()
+counts.append(lines)
+sys.settrace(previous)
+print(counts)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;restore the tracer&quot;
+    expect_output(&quot;[2, 2]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import sys
+
+lines = 0
+
+def tracer(frame, event, arg):
+    global lines
+    if event == &quot;line&quot;:
+        lines += 1
+    return tracer
+
+def step():
+    x = 1
+    return x
+
+previous = sys.gettrace()
+sys.settrace(tracer)
+step()
+sys.settrace(previous)
+counts = [lines]
+step()
+counts.append(lines)
+print(counts)</textarea></div>
+<div class="parsons" data-id="w064d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Tracing safely</div><div class="pc-prompt"><p>Arrange the lines of a helper that runs a function under a tracer and always restores the previous one. One line is a trap.</p></div><script type="application/json">{"lines": ["def run_traced(func, tracer):", "    previous = sys.gettrace()", "    sys.settrace(tracer)", "    try:", "        return func()", "    finally:", "        sys.settrace(previous)"], "distractors": ["        sys.settrace(tracer)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the frame attribute linking to the caller&#x27;s frame
+q = ___   # True or False: every call to the same function shares one frame
+r = ___   # which comes first in exc.__traceback__: &quot;outermost&quot; or &quot;innermost&quot;
+s = ___   # what a &quot;call&quot; tracer should return to ignore a frame
+t = ___   # True or False: a finished generator still has its frame (gi_frame)</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;f_back&quot; and q is False and r == &quot;outermost&quot;, &quot;p, q and r&quot;
+    assert s is None and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;f_back&quot;
+q = False
+r = &quot;outermost&quot;
+s = None
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w064d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What&rsquo;s the difference between a code object and a frame?", "answer": 1, "explain": "One code object, many frames.", "options": ["None", "A code object is the compiled recipe; a frame is one running call of it", "Frames are compiled", "Code objects hold locals"]}, {"type": "mc", "q": "What does f_back refer to?", "answer": 1, "explain": "Following it walks the call stack.", "options": ["The previous line", "The caller&rsquo;s frame", "The module", "The traceback"]}, {"type": "mc", "q": "Why does a generator remember its local variables?", "answer": 1, "explain": "gi_frame.", "options": ["It copies them", "It keeps its frame between next() calls", "They&rsquo;re global", "It doesn&rsquo;t"]}, {"type": "mc", "q": "Why shouldn&rsquo;t you store frame objects?", "answer": 1, "explain": "Use and drop them.", "options": ["They&rsquo;re read-only", "They keep all their locals alive and can form reference cycles", "They&rsquo;re slow to make", "They change type"]}, {"type": "mc", "q": "What is tb_next?", "answer": 1, "explain": "None at the innermost frame.", "options": ["The caller&rsquo;s traceback", "The traceback entry one call deeper, towards where the exception was raised", "The next exception", "A line number"]}, {"type": "mc", "q": "What does a global trace function&rsquo;s return value on a &ldquo;call&rdquo; event do?", "answer": 1, "explain": "That&rsquo;s how tracing is limited to some frames.", "options": ["Nothing", "Becomes the local tracer for that frame (None means don&rsquo;t trace it)", "Is the function&rsquo;s result", "Stops tracing"]}, {"type": "mc", "q": "Why restore sys.gettrace() after tracing?", "answer": 1, "explain": "Always in a finally.", "options": ["Style", "A debugger or coverage tool may already be using it", "It&rsquo;s faster", "It frees memory"]}, {"type": "mc", "q": "What does the evaluation loop do?", "answer": 1, "explain": "In Python/ceval.c.", "options": ["Parses source", "Reads bytecode instructions one at a time and carries them out", "Imports modules", "Collects garbage only"]}, {"type": "mc", "q": "Since 3.11, what happens when a Python function calls another Python function?", "answer": 1, "explain": "Faster calls, cheaper recursion.", "options": ["A new C function call", "A new frame is pushed and the same loop continues in it", "A thread starts", "The bytecode is copied"]}, {"type": "output", "q": "What does this print?", "answer": "g", "explain": "f&rsquo;s caller is g.", "code": "import sys\ndef f():\n    return sys._getframe().f_back.f_code.co_name\ndef g():\n    return f()\nprint(g())"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a machine with real frames</div><div class="pc-prompt"><p>Build a stack machine with functions and call frames. A program is a dict from function name to <code>{"params": [...], "code": [...]}</code>. Write <code>call(program, name, *args, max_depth=100)</code> that runs function <code>name</code> and returns its result. Each <strong>frame</strong> has its own locals, value stack and program counter. Instructions:</p>
+<ul>
+<li><code>("PUSH", v)</code>, <code>("LOAD", name)</code>, <code>("STORE", name)</code>, <code>("ADD",)</code>, <code>("SUB",)</code>, <code>("MUL",)</code>, <code>("LT",)</code>, <code>("EQ",)</code>;</li>
+<li><code>("JUMP", target)</code> and <code>("JUMP_IF_FALSE", target)</code> within the current function&rsquo;s code;</li>
+<li><code>("CALL", fname)</code>: pop as many values as <code>fname</code> has parameters (the last pushed is the last argument), push a new frame, and continue there;</li>
+<li><code>("RETURN",)</code>: pop the return value, pop the frame and push the value onto the caller&rsquo;s stack (or finish, if it was the first frame).</li>
+</ul>
+<p>Errors: calling an unknown function raises <code>NameError</code>; having more than <code>max_depth</code> frames at once raises <code>RecursionError</code>; reading an unset local raises <code>NameError</code>. Write the machine as <code>call_with_stats(program, name, *args, max_depth=100)</code>, which returns <code>(result, calls, deepest)</code>: the total number of frames created and the maximum depth reached. Do it <strong>without</strong> Python recursion, so deep (but allowed) recursion in the machine can&rsquo;t hit Python&rsquo;s own limit.</p></div><textarea class="pc-src pc-code" hidden>def call_with_stats(program, name, *args, max_depth=100):
+    ___
+
+def call(program, name, *args, max_depth=100):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_frames():
+    &quot;frames and calls&quot;
+    fact = {&quot;fact&quot;: {&quot;params&quot;: [&quot;n&quot;], &quot;code&quot;: [
+        (&quot;LOAD&quot;, &quot;n&quot;), (&quot;PUSH&quot;, 2), (&quot;LT&quot;,), (&quot;JUMP_IF_FALSE&quot;, 6),
+        (&quot;PUSH&quot;, 1), (&quot;RETURN&quot;,),
+        (&quot;LOAD&quot;, &quot;n&quot;), (&quot;LOAD&quot;, &quot;n&quot;), (&quot;PUSH&quot;, 1), (&quot;SUB&quot;,), (&quot;CALL&quot;, &quot;fact&quot;), (&quot;MUL&quot;,), (&quot;RETURN&quot;,)]}}
+    assert call(fact, &quot;fact&quot;, 5) == 120 and call_with_stats(fact, &quot;fact&quot;, 5) == (120, 5, 5)
+    assert call(fact, &quot;fact&quot;, 900, max_depth=1000) &gt; 0
+    try:
+        call(fact, &quot;fact&quot;, 50, max_depth=10)
+        assert False
+    except RecursionError:
+        pass
+    fib = {&quot;fib&quot;: {&quot;params&quot;: [&quot;n&quot;], &quot;code&quot;: [
+        (&quot;LOAD&quot;, &quot;n&quot;), (&quot;PUSH&quot;, 2), (&quot;LT&quot;,), (&quot;JUMP_IF_FALSE&quot;, 6), (&quot;LOAD&quot;, &quot;n&quot;), (&quot;RETURN&quot;,),
+        (&quot;LOAD&quot;, &quot;n&quot;), (&quot;PUSH&quot;, 1), (&quot;SUB&quot;,), (&quot;CALL&quot;, &quot;fib&quot;),
+        (&quot;LOAD&quot;, &quot;n&quot;), (&quot;PUSH&quot;, 2), (&quot;SUB&quot;,), (&quot;CALL&quot;, &quot;fib&quot;), (&quot;ADD&quot;,), (&quot;RETURN&quot;,)]}}
+    assert call_with_stats(fib, &quot;fib&quot;, 6) == (8, 25, 6)
+
+def test_args_and_errors():
+    &quot;arguments and errors&quot;
+    prog = {
+        &quot;minus&quot;: {&quot;params&quot;: [&quot;a&quot;, &quot;b&quot;], &quot;code&quot;: [(&quot;LOAD&quot;, &quot;a&quot;), (&quot;LOAD&quot;, &quot;b&quot;), (&quot;SUB&quot;,), (&quot;RETURN&quot;,)]},
+        &quot;main&quot;: {&quot;params&quot;: [], &quot;code&quot;: [(&quot;PUSH&quot;, 10), (&quot;PUSH&quot;, 3), (&quot;CALL&quot;, &quot;minus&quot;), (&quot;STORE&quot;, &quot;r&quot;),
+                                         (&quot;LOAD&quot;, &quot;r&quot;), (&quot;LOAD&quot;, &quot;r&quot;), (&quot;MUL&quot;,), (&quot;RETURN&quot;,)]},
+        &quot;bad&quot;: {&quot;params&quot;: [], &quot;code&quot;: [(&quot;CALL&quot;, &quot;nothing&quot;), (&quot;RETURN&quot;,)]},
+        &quot;unset&quot;: {&quot;params&quot;: [], &quot;code&quot;: [(&quot;LOAD&quot;, &quot;x&quot;), (&quot;RETURN&quot;,)]},
+    }
+    assert call(prog, &quot;main&quot;) == 49 and call(prog, &quot;minus&quot;, 1, 5) == -4
+    for name in (&quot;bad&quot;, &quot;unset&quot;, &quot;missing&quot;):
+        try:
+            call(prog, name)
+            assert False
+        except NameError:
+            pass</textarea><textarea class="pc-src pc-solution" hidden>def call_with_stats(program, name, *args, max_depth=100):
+    def new_frame(fname, values):
+        if fname not in program:
+            raise NameError(fname)
+        params = program[fname][&quot;params&quot;]
+        return {&quot;code&quot;: program[fname][&quot;code&quot;], &quot;pc&quot;: 0,
+                &quot;locals&quot;: dict(zip(params, values)), &quot;stack&quot;: []}
+
+    frames = [new_frame(name, args)]
+    calls = deepest = 1
+    binary = {&quot;ADD&quot;: lambda a, b: a + b, &quot;SUB&quot;: lambda a, b: a - b, &quot;MUL&quot;: lambda a, b: a * b,
+              &quot;LT&quot;: lambda a, b: a &lt; b, &quot;EQ&quot;: lambda a, b: a == b}
+    while True:
+        frame = frames[-1]
+        op, *arg = frame[&quot;code&quot;][frame[&quot;pc&quot;]]
+        frame[&quot;pc&quot;] += 1
+        stack = frame[&quot;stack&quot;]
+        if op == &quot;PUSH&quot;:
+            stack.append(arg[0])
+        elif op == &quot;LOAD&quot;:
+            if arg[0] not in frame[&quot;locals&quot;]:
+                raise NameError(arg[0])
+            stack.append(frame[&quot;locals&quot;][arg[0]])
+        elif op == &quot;STORE&quot;:
+            frame[&quot;locals&quot;][arg[0]] = stack.pop()
+        elif op in binary:
+            right, left = stack.pop(), stack.pop()
+            stack.append(binary[op](left, right))
+        elif op == &quot;JUMP&quot;:
+            frame[&quot;pc&quot;] = arg[0]
+        elif op == &quot;JUMP_IF_FALSE&quot;:
+            if not stack.pop():
+                frame[&quot;pc&quot;] = arg[0]
+        elif op == &quot;CALL&quot;:
+            fname = arg[0]
+            if fname not in program:
+                raise NameError(fname)
+            count = len(program[fname][&quot;params&quot;])
+            values = stack[len(stack) - count:]
+            del stack[len(stack) - count:]
+            if len(frames) &gt;= max_depth:
+                raise RecursionError(&quot;maximum depth exceeded&quot;)
+            frames.append(new_frame(fname, values))
+            calls += 1
+            deepest = max(deepest, len(frames))
+        elif op == &quot;RETURN&quot;:
+            value = stack.pop()
+            frames.pop()
+            if not frames:
+                return value, calls, deepest
+            frames[-1][&quot;stack&quot;].append(value)
+        else:
+            raise ValueError(op)
+
+def call(program, name, *args, max_depth=100):
+    return call_with_stats(program, name, *args, max_depth=max_depth)[0]</textarea><template class="pc-src pc-hint">Keep a list of frame dicts (<code>{"code": ..., "pc": 0, "locals": {...}, "stack": []}</code>) and loop forever, always running the top frame&rsquo;s next instruction. <code>CALL</code> appends a frame (after checking the depth); <code>RETURN</code> pops one and either pushes the value onto the new top frame&rsquo;s stack or returns it.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, put <code>breakpoint()</code> inside a function, run it, and type <code>where</code> (or <code>w</code>) at the <code>(Pdb)</code> prompt to see the stack of frames, then <code>up</code> and <code>down</code> to move between them. Tomorrow: what objects look like inside CPython, in C.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w064d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w064d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w064d3", "week": 64, "day": 3, "title": "Frames and the evaluation loop", "exercises": [{"id": "w064d3-caller", "title": "Who called me?", "points": 10}, {"id": "w064d3-locals", "title": "A peek at the caller's variables", "points": 10}, {"id": "w064d3-tb", "title": "Inside a traceback", "points": 10}, {"id": "w064d3-lines", "title": "Which lines ran?", "points": 15}, {"id": "w064d3-calls", "title": "Counting calls and depth", "points": 15}, {"id": "w064d3-bug1", "title": "One frame too close", "points": 10}, {"id": "w064d3-bug2", "title": "A tracer that stops listening", "points": 10}, {"id": "w064d3-bug3", "title": "A tracer left running", "points": 10}, {"id": "w064d3-trace", "title": "Predict them", "points": 10}, {"id": "w064d3-challenge", "title": "Challenge: a machine with real frames", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
