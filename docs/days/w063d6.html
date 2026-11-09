@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 63 Day 6: Forge | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="This week took attribute access apart: descriptors and the lookup order, properties built from them, the getattr family of hooks, metaclasses and class...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w063d6.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 63 Day 6: Forge">
+<meta property="og:description" content="This week took attribute access apart: descriptors and the lookup order, properties built from them, the getattr family of hooks, metaclasses and class...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w063d6.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-63">Week 63: Attribute magic</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#mixed-review" data-sec="mixed-review">Mixed review</a></li><li><a href="#forge-an-object-mapper" data-sec="forge-an-object-mapper">Forge: an object mapper</a></li><li><a href="#forge-bonus-observable-models" data-sec="forge-bonus-observable-models">Forge bonus: observable models</a></li><li><a href="#weekly-quiz" data-sec="weekly-quiz">Weekly quiz</a></li><li><a href="#week-63-review" data-sec="week-63-review">Week 63 review</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w063d6.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-63">Week 63: Attribute magic</a></li><li aria-current="page">Day 6 of 6</li></ol>
+      <p class="day-where"><span>Week 63, Day 6</span><span class="forge-tag">Forge day</span></p>
+      <h1>Forge</h1>
+      <div class="day-intro"><p>This week took attribute access apart: descriptors and the lookup order, properties built from them, the <strong>getattr</strong> family of hooks, metaclasses and class decorators. Today&rsquo;s Forge puts four of those tools to work in a small <strong>object mapper</strong>, the kind of library that turns classes into database tables: columns are descriptors, models register themselves with <code>__init_subclass__</code>, a class decorator adds constraints, and the database offers <code>db.readers.find_by_city(...)</code> through <code>__getattr__</code>. The bonus is an observable model whose descriptors notify listeners, with batched updates. The weekly quiz and review finish the week.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Build typed, change-tracking columns as data descriptors</li><li>Register models and collect their columns with <strong>init_subclass</strong></li><li>Add constraints with a class decorator and dynamic finders with <strong>getattr</strong></li><li>Build observable attributes with batched notifications</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:15" title="Warm-up: predict: 15 min"></span><span class="plan-seg s1" style="flex:30" title="Mixed review practice: 30 min"></span><span class="plan-seg s0" style="flex:60" title="Forge: an object mapper: 60 min"></span><span class="plan-seg s1" style="flex:40" title="Forge bonus: observable models: 40 min"></span><span class="plan-seg s0" style="flex:25" title="Weekly quiz: 25 min"></span><span class="plan-seg s1" style="flex:10" title="Week 63 review: 10 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up: predict</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:15</span><span class="plan-what">Mixed review practice</span><span class="plan-min">30 min</span></li><li><span class="plan-at">0:45</span><span class="plan-what">Forge: an object mapper</span><span class="plan-min">60 min</span></li><li><span class="plan-at">1:45</span><span class="plan-what">Forge bonus: observable models</span><span class="plan-min">40 min</span></li><li><span class="plan-at">2:25</span><span class="plan-what">Weekly quiz</span><span class="plan-min">25 min</span></li><li><span class="plan-at">2:50</span><span class="plan-what">Week 63 review</span><span class="plan-min">10 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w063d6.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w063d6.ipynb" download>download it</a>. Exercises today are worth 100 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w063d6-p1"><textarea class="pc-src pc-code" hidden>class D:
+    def __get__(self, obj, objtype=None):
+        return &quot;D&quot;
+
+class P:
+    @property
+    def x(self):
+        return &quot;property&quot;
+
+class A(P):
+    y = D()
+
+a = A()
+a.__dict__.update(x=&quot;instance&quot;, y=&quot;instance&quot;)
+print(a.x, a.y)</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w063d6-p2"><textarea class="pc-src pc-code" hidden>class Meta(type):
+    def __call__(cls, *args):
+        print(&quot;making&quot;, cls.__name__)
+        return super().__call__(*args)
+
+class Thing(metaclass=Meta):
+    def __init__(self, n):
+        print(&quot;init&quot;, n)
+
+t = Thing(3)
+print(type(Thing).__name__, type(t).__name__)</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w063d6-p3"><textarea class="pc-src pc-code" hidden>class Fallback:
+    known = 1
+    def __getattr__(self, name):
+        return name * 2
+
+f = Fallback()
+print(f.known, f.ab, getattr(f, &quot;zz&quot;, &quot;default&quot;))</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w063d6-p4"><textarea class="pc-src pc-code" hidden>def deco(cls):
+    print(&quot;deco&quot;, cls.__name__)
+    return cls
+
+class Base:
+    def __init_subclass__(cls, **kwargs):
+        print(&quot;init_subclass&quot;, cls.__name__)
+
+@deco
+class Child(Base):
+    print(&quot;body&quot;)</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w063d6-p5"><textarea class="pc-src pc-code" hidden>class Counter:
+    total = 0
+c = Counter()
+c.total += 1
+print(c.total, Counter.total)
+del c.total
+print(c.total)</textarea></div>
+<p>If any surprised you, revisit <a href="w063d1.html">descriptors</a>, <a href="w063d2.html">how properties work</a>, <a href="w063d3.html"><strong>getattr</strong></a>, <a href="w063d4.html">metaclasses</a> or <a href="w063d5.html">class decorators</a>.</p>
+<h2 id="mixed-review">Mixed review</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d6-mix_track" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Counting live instances</div><div class="pc-prompt"><p>Write a class decorator <code>track_instances(cls)</code> that wraps the class&rsquo;s <code>__init__</code> so every new instance is added to a <code>weakref.WeakSet</code> (Week 62), and adds a class method <code>live_count()</code> returning how many live instances of <strong>that</strong> class (subclasses included) there are. Instances that are deleted stop counting at once.</p></div><textarea class="pc-src pc-code" hidden>import weakref
+
+def track_instances(cls):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_track():
+    &quot;a class decorator with weak references&quot;
+    @track_instances
+    class Window:
+        def __init__(self, title):
+            self.title = title
+    a, b = Window(&quot;a&quot;), Window(&quot;b&quot;)
+    assert a.title == &quot;a&quot; and Window.live_count() == 2
+    del a
+    assert Window.live_count() == 1
+    class Dialog(Window):
+        pass
+    d = Dialog(&quot;d&quot;)
+    assert Window.live_count() == 2 and Dialog.live_count() == 1
+    del b, d
+    assert Window.live_count() == 0</textarea><textarea class="pc-src pc-solution" hidden>import weakref
+
+def track_instances(cls):
+    live = weakref.WeakSet()
+    original_init = cls.__init__
+
+    def __init__(self, *args, **kwargs):
+        original_init(self, *args, **kwargs)
+        live.add(self)
+
+    cls.__init__ = __init__
+    cls.live_count = classmethod(lambda c: sum(1 for obj in live if isinstance(obj, c)))
+    return cls</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d6-mix_override" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Overriding attributes for a block</div><div class="pc-prompt"><p>Write a context manager <code>overridden(obj, **values)</code> (Week 61) that sets the given attributes on <code>obj</code> for the duration of a <code>with</code> block and yields <code>obj</code>. Afterwards, even after an error, each attribute goes back to what the instance had before; if the instance had <strong>no</strong> value of its own (the name came from the class, or didn&rsquo;t exist), the instance attribute is deleted, so the class&rsquo;s value shows through again.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import contextmanager
+
+@contextmanager
+def overridden(obj, **values):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_overridden():
+    &quot;a context manager over attributes&quot;
+    class Config:
+        mode = &quot;slow&quot;
+        def __init__(self):
+            self.level = 1
+    c = Config()
+    with overridden(c, level=5, mode=&quot;fast&quot;) as same:
+        assert same is c and c.level == 5 and c.mode == &quot;fast&quot; and Config.mode == &quot;slow&quot;
+    assert c.level == 1 and c.mode == &quot;slow&quot; and &quot;mode&quot; not in vars(c)
+    try:
+        with overridden(c, level=9, extra=True):
+            raise KeyError
+    except KeyError:
+        pass
+    assert c.level == 1 and not hasattr(c, &quot;extra&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import contextmanager
+
+_ABSENT = object()
+
+@contextmanager
+def overridden(obj, **values):
+    saved = {name: obj.__dict__.get(name, _ABSENT) for name in values}
+    for name, value in values.items():
+        setattr(obj, name, value)
+    try:
+        yield obj
+    finally:
+        for name, old in saved.items():
+            if old is _ABSENT:
+                if name in obj.__dict__:
+                    delattr(obj, name)
+            else:
+                setattr(obj, name, old)</textarea></div>
+<h2 id="forge-an-object-mapper">Forge: an object mapper</h2>
+<p>An <strong>object mapper</strong> lets you describe stored records as classes and work with them as objects. Write the four parts:</p>
+<ul>
+<li><strong><code>Column(kind, *, default=REQUIRED, primary=False)</code></strong>, a data descriptor storing values in the instance&rsquo;s <code>__dict__</code>: setting a value that isn&rsquo;t a <code>kind</code> raises <code>TypeError</code>; changing a primary key that&rsquo;s already set to a <strong>different</strong> value raises <code>AttributeError</code>; and every set adds the column&rsquo;s name to the instance&rsquo;s set of changed columns, <code>obj.__dict__["_dirty"]</code>.</li>
+<li><strong><code>Model</code></strong>, a base class using <code>__init_subclass__(cls, table=None, abstract=False)</code>: it collects every <code>Column</code> name (base classes first, in definition order) into <code>cls._columns</code>, a tuple. Unless the class is <code>abstract</code>, it must have <strong>exactly one</strong> primary column (<code>TypeError</code> otherwise), stored as <code>cls._primary</code>; its table name is <code>table</code> or the lower-cased class name plus <code>"s"</code>, stored as <code>cls._table</code>, and the class is registered in the dict <code>Model.tables</code>. <code>__init__(**values)</code> sets every column from the keywords or its default (<code>TypeError</code> for a missing required column or an unknown keyword). <code>dirty()</code> returns the sorted changed columns, <code>to_dict()</code> the column values and <code>repr</code> looks like <code>Reader(id=1, name='Ada', city='Lagos')</code>.</li>
+<li><strong><code>unique(*names)</code></strong>, a class decorator storing the names in <code>cls._unique</code> (a <code>TypeError</code> for a name that isn&rsquo;t a column).</li>
+<li><strong><code>Database()</code></strong>: <code>save(obj)</code> stores <code>obj.to_dict()</code> under its table and primary key, refusing (<code>ValueError</code>) a value in a unique column that another row (with a different key) already has; it clears the object&rsquo;s changed columns and returns the key. <code>get(cls, pk)</code> returns the <strong>same object</strong> for the same key while it stays remembered (an identity map), building a new instance from the stored row otherwise (with no changed columns), and raises <code>KeyError</code> for unknown keys; <code>forget()</code> clears the remembered objects. <strong><code>db.&lt;table&gt;</code></strong> (through <code>__getattr__</code>) returns a view of a registered table with <code>all()</code> (objects sorted by key), <code>count()</code> and <code>find_by_&lt;column&gt;(value)</code> (also through <code>__getattr__</code>), with <code>AttributeError</code> for unknown tables and columns.</li>
+</ul>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d6-forge" data-points="50"><div class="pc-label"><span>Exercise</span><span class="pc-pts">50 points</span></div><div class="pc-title">Forge: an object mapper</div><div class="pc-prompt"><p>Write <code>Column</code>, <code>Model</code>, <code>unique</code> and <code>Database</code> to the specification above.</p></div><textarea class="pc-src pc-code" hidden>REQUIRED = object()
+
+class Column:
+    def __init__(self, kind, *, default=REQUIRED, primary=False):
+        ___
+
+class Model:
+    tables = {}
+    ___
+
+def unique(*names):
+    ___
+
+class Database:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_models():
+    &quot;columns and models&quot;
+    class Named(Model, abstract=True):
+        name = Column(str)
+    class Author(Named):
+        id = Column(int, primary=True)
+        born = Column(int, default=0)
+    assert Author._columns == (&quot;name&quot;, &quot;id&quot;, &quot;born&quot;) and Model.tables[&quot;authors&quot;] is Author
+    a = Author(id=1, name=&quot;Chinua&quot;)
+    assert a.born == 0 and repr(a) == &quot;Author(name=&#x27;Chinua&#x27;, id=1, born=0)&quot;
+    assert a.dirty() == [&quot;born&quot;, &quot;id&quot;, &quot;name&quot;] and isinstance(Author.name, Column)
+    for kwargs, err in (({&quot;id&quot;: 2}, TypeError), ({&quot;id&quot;: &quot;3&quot;, &quot;name&quot;: &quot;x&quot;}, TypeError), ({&quot;id&quot;: 4, &quot;name&quot;: &quot;x&quot;, &quot;x&quot;: 1}, TypeError)):
+        try:
+            Author(**kwargs)
+            assert False
+        except err:
+            pass
+    try:
+        a.id = 5
+        assert False
+    except AttributeError:
+        pass
+    a.id = 1
+    try:
+        class NoKey(Model):
+            title = Column(str)
+        assert False
+    except TypeError:
+        pass
+    class Book(Model, table=&quot;library&quot;):
+        isbn = Column(str, primary=True)
+    assert Model.tables[&quot;library&quot;] is Book and &quot;nameds&quot; not in Model.tables
+
+def test_database():
+    &quot;saving, loading and finding&quot;
+    class Reader(Model):
+        id = Column(int, primary=True)
+        name = Column(str)
+        city = Column(str, default=&quot;Lagos&quot;)
+    db = Database()
+    r1, r2 = Reader(id=2, name=&quot;Ada&quot;), Reader(id=1, name=&quot;Ben&quot;, city=&quot;Accra&quot;)
+    assert db.save(r1) == 2 and r1.dirty() == []
+    db.save(r2)
+    r1.city = &quot;Ibadan&quot;
+    assert r1.dirty() == [&quot;city&quot;]
+    assert db.get(Reader, 2) is r1 and db.readers.count() == 2
+    assert [r.name for r in db.readers.all()] == [&quot;Ben&quot;, &quot;Ada&quot;]
+    db.save(r1)
+    db.forget()
+    fresh = db.get(Reader, 2)
+    assert fresh is not r1 and fresh.city == &quot;Ibadan&quot; and fresh.dirty() == [] and db.get(Reader, 2) is fresh
+    assert [r.id for r in db.readers.find_by_city(&quot;Accra&quot;)] == [1] and db.readers.find_by_name(&quot;Zed&quot;) == []
+    for bad in (lambda: db.readers.find_by_shoe, lambda: db.nothing, lambda: db.readers.other):
+        try:
+            bad()
+            assert False
+        except AttributeError:
+            pass
+    try:
+        db.get(Reader, 99)
+        assert False
+    except KeyError:
+        pass
+
+def test_unique():
+    &quot;the class decorator&quot;
+    @unique(&quot;email&quot;)
+    class Member(Model):
+        id = Column(int, primary=True)
+        email = Column(str)
+    db = Database()
+    db.save(Member(id=1, email=&quot;a@x.org&quot;))
+    db.save(Member(id=1, email=&quot;a@x.org&quot;))
+    try:
+        db.save(Member(id=2, email=&quot;a@x.org&quot;))
+        assert False
+    except ValueError:
+        pass
+    assert db.members.count() == 1
+    try:
+        @unique(&quot;phone&quot;)
+        class Other(Model):
+            id = Column(int, primary=True)
+        assert False
+    except TypeError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>REQUIRED = object()
+
+class Column:
+    def __init__(self, kind, *, default=REQUIRED, primary=False):
+        self.kind, self.default, self.primary = kind, default, primary
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        try:
+            return obj.__dict__[self.name]
+        except KeyError:
+            raise AttributeError(self.name) from None
+
+    def __set__(self, obj, value):
+        if not isinstance(value, self.kind):
+            raise TypeError(f&quot;{self.name} must be {self.kind.__name__}&quot;)
+        if self.primary and self.name in obj.__dict__ and obj.__dict__[self.name] != value:
+            raise AttributeError(&quot;primary key can&#x27;t change&quot;)
+        obj.__dict__[self.name] = value
+        obj.__dict__.setdefault(&quot;_dirty&quot;, set()).add(self.name)
+
+class Model:
+    tables = {}
+
+    def __init_subclass__(cls, table=None, abstract=False, **kwargs):
+        super().__init_subclass__(**kwargs)
+        columns = []
+        for klass in reversed(cls.__mro__):
+            for name, value in vars(klass).items():
+                if isinstance(value, Column) and name not in columns:
+                    columns.append(name)
+        cls._columns = tuple(columns)
+        if abstract:
+            return
+        primaries = [c for c in columns if getattr(cls, c).primary]
+        if len(primaries) != 1:
+            raise TypeError(f&quot;{cls.__name__} needs exactly one primary key&quot;)
+        cls._primary = primaries[0]
+        cls._table = table or cls.__name__.lower() + &quot;s&quot;
+        Model.tables[cls._table] = cls
+
+    def __init__(self, **values):
+        for key in values:
+            if key not in self._columns:
+                raise TypeError(f&quot;unknown column: {key}&quot;)
+        for name in self._columns:
+            if name in values:
+                setattr(self, name, values[name])
+            else:
+                default = getattr(type(self), name).default
+                if default is REQUIRED:
+                    raise TypeError(f&quot;missing column: {name}&quot;)
+                setattr(self, name, default)
+
+    def dirty(self):
+        return sorted(self.__dict__.get(&quot;_dirty&quot;, ()))
+
+    def to_dict(self):
+        return {c: getattr(self, c) for c in self._columns}
+
+    def __repr__(self):
+        inner = &quot;, &quot;.join(f&quot;{k}={v!r}&quot; for k, v in self.to_dict().items())
+        return f&quot;{type(self).__name__}({inner})&quot;
+
+def unique(*names):
+    def decorate(cls):
+        for name in names:
+            if name not in cls._columns:
+                raise TypeError(f&quot;{cls.__name__} has no column {name!r}&quot;)
+        cls._unique = tuple(names)
+        return cls
+    return decorate
+
+class TableView:
+    def __init__(self, db, cls):
+        self._db, self._cls = db, cls
+
+    def all(self):
+        rows = self._db._data.get(self._cls._table, {})
+        return [self._db.get(self._cls, pk) for pk in sorted(rows)]
+
+    def count(self):
+        return len(self._db._data.get(self._cls._table, {}))
+
+    def __getattr__(self, name):
+        if name.startswith(&quot;find_by_&quot;):
+            column = name[len(&quot;find_by_&quot;):]
+            if column in self._cls._columns:
+                def finder(value):
+                    return [obj for obj in self.all() if getattr(obj, column) == value]
+                return finder
+        raise AttributeError(name)
+
+class Database:
+    def __init__(self):
+        self._data = {}
+        self._loaded = {}
+
+    def save(self, obj):
+        cls = type(obj)
+        rows = self._data.setdefault(cls._table, {})
+        pk = getattr(obj, cls._primary)
+        for name in getattr(cls, &quot;_unique&quot;, ()):
+            value = getattr(obj, name)
+            for other_pk, row in rows.items():
+                if other_pk != pk and row[name] == value:
+                    raise ValueError(f&quot;duplicate {name}: {value!r}&quot;)
+        rows[pk] = obj.to_dict()
+        self._loaded[(cls._table, pk)] = obj
+        obj.__dict__[&quot;_dirty&quot;] = set()
+        return pk
+
+    def get(self, cls, pk):
+        key = (cls._table, pk)
+        if key in self._loaded:
+            return self._loaded[key]
+        row = self._data.get(cls._table, {}).get(pk)
+        if row is None:
+            raise KeyError(pk)
+        obj = cls(**row)
+        obj.__dict__[&quot;_dirty&quot;] = set()
+        self._loaded[key] = obj
+        return obj
+
+    def forget(self):
+        self._loaded.clear()
+
+    def __getattr__(self, name):
+        if name.startswith(&quot;_&quot;):
+            raise AttributeError(name)
+        cls = Model.tables.get(name)
+        if cls is None:
+            raise AttributeError(f&quot;no table {name!r}&quot;)
+        return TableView(self, cls)</textarea><template class="pc-src pc-hint">A small <code>TableView(db, cls)</code> class makes <code>db.readers</code> easy: <code>Database.__getattr__</code> looks the name up in <code>Model.tables</code> and returns a view, and the view&rsquo;s own <code>__getattr__</code> turns <code>find_by_city</code> into a function that filters <code>all()</code>. Remember that <code>__getattr__</code> mustn&rsquo;t invent private names (<code>_data</code> and friends), or a missing attribute during setup becomes an endless loop.</template></div>
+<aside class="callout c-think"><div class="callout-t">Four tools, four jobs</div><p>Each tool in today&rsquo;s mapper does the job it&rsquo;s best at. Descriptors own one attribute each: type checks, the primary-key rule and change tracking live in one place and serve every model. <strong>init_subclass</strong> runs for every model automatically, because registration and column collection must never be forgotten. The class decorator is opt-in and visible, right for a constraint only some models want. And <strong>getattr</strong> handles a family of names (find_by_anything) that can&rsquo;t be listed in advance. No metaclass was needed: when the simpler tools fit, they keep the code readable and combinable with other libraries.</p></aside>
+<h2 id="forge-bonus-observable-models">Forge bonus: observable models</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d6-forge2" data-points="30"><div class="pc-label"><span>Exercise</span><span class="pc-pts">30 points</span></div><div class="pc-title">Forge bonus: observable models</div><div class="pc-prompt"><p>User interfaces and caches often need to know when an object changes. Write <code>Watched(default=None)</code>, a data descriptor (values in the instance&rsquo;s <code>__dict__</code>, reading the default when unset) that reports every <strong>real</strong> change (new value not equal to the old one) to its instance, and <code>Observable</code>, a base class with:</p>
+<ul>
+<li><code>watched</code>, a tuple of the class&rsquo;s <code>Watched</code> names (base classes first), collected by <code>__init_subclass__</code>;</li>
+<li><code>subscribe(callback, *names)</code>: <code>callback(obj, name, old, new)</code> is called for changes to the named attributes (all watched attributes when no names are given; <code>AttributeError</code> for a name that isn&rsquo;t watched). It returns a function that unsubscribes (safe to call twice). Listeners belong to each instance;</li>
+<li><code>batch()</code>: a context manager (reentrant, yielding the object) during which notifications are held back; when the <strong>outermost</strong> batch ends, even after an error, each attribute that changed gets <strong>one</strong> notification with its value before the batch and its final value, in the order the attributes first changed, and none if it ended up back where it started.</li>
+</ul>
+<p>Set up per-instance state lazily (the first time it&rsquo;s needed), since subclasses&rsquo; <code>__init__</code> methods might not call yours.</p></div><textarea class="pc-src pc-code" hidden>from contextlib import contextmanager
+
+class Watched:
+    def __init__(self, default=None):
+        ___
+
+class Observable:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_notify():
+    &quot;change notifications&quot;
+    class Shape(Observable):
+        colour = Watched(&quot;black&quot;)
+    class Box(Shape):
+        width = Watched(1)
+        label = &quot;plain&quot;
+    assert Box.watched == (&quot;colour&quot;, &quot;width&quot;)
+    b = Box()
+    seen, widths = [], []
+    stop = b.subscribe(lambda obj, n, old, new: seen.append((n, old, new)))
+    b.subscribe(lambda obj, n, old, new: widths.append(new), &quot;width&quot;)
+    b.colour = &quot;red&quot;
+    b.colour = &quot;red&quot;
+    b.width = 5
+    b.label = &quot;x&quot;
+    assert seen == [(&quot;colour&quot;, &quot;black&quot;, &quot;red&quot;), (&quot;width&quot;, 1, 5)] and widths == [5]
+    stop()
+    stop()
+    b.width = 6
+    assert len(seen) == 2 and widths == [5, 6]
+    try:
+        b.subscribe(print, &quot;label&quot;)
+        assert False
+    except AttributeError:
+        pass
+    assert Box().colour == &quot;black&quot; and Box().width == 1
+
+def test_batch():
+    &quot;batched notifications&quot;
+    class Point(Observable):
+        x = Watched(0)
+        y = Watched(0)
+    p = Point()
+    seen = []
+    p.subscribe(lambda obj, n, old, new: seen.append((n, old, new)))
+    with p.batch() as same:
+        assert same is p
+        p.y = 1
+        p.x = 5
+        p.y = 2
+        with p.batch():
+            p.x = 0
+        assert seen == []
+    assert seen == [(&quot;y&quot;, 0, 2)]
+    try:
+        with p.batch():
+            p.x = 9
+            raise ValueError
+    except ValueError:
+        pass
+    assert seen[-1] == (&quot;x&quot;, 0, 9) and p.x == 9
+    q = Point()
+    q.x = 3
+    assert len(seen) == 2</textarea><textarea class="pc-src pc-solution" hidden>from contextlib import contextmanager
+
+class Watched:
+    def __init__(self, default=None):
+        self.default = default
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return obj.__dict__.get(self.name, self.default)
+
+    def __set__(self, obj, value):
+        old = self.__get__(obj)
+        obj.__dict__[self.name] = value
+        if old != value:
+            obj._changed(self.name, old, value)
+
+class Observable:
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        names = []
+        for klass in reversed(cls.__mro__):
+            for name, value in vars(klass).items():
+                if isinstance(value, Watched) and name not in names:
+                    names.append(name)
+        cls.watched = tuple(names)
+
+    def _state(self):
+        if &quot;_listeners&quot; not in self.__dict__:
+            self.__dict__[&quot;_listeners&quot;] = []
+            self.__dict__[&quot;_batch_depth&quot;] = 0
+            self.__dict__[&quot;_pending&quot;] = {}
+        return self.__dict__
+
+    def subscribe(self, callback, *names):
+        for name in names:
+            if name not in self.watched:
+                raise AttributeError(f&quot;{name!r} is not watched&quot;)
+        entry = (callback, frozenset(names))
+        self._state()[&quot;_listeners&quot;].append(entry)
+
+        def unsubscribe():
+            listeners = self._state()[&quot;_listeners&quot;]
+            if entry in listeners:
+                listeners.remove(entry)
+        return unsubscribe
+
+    def _notify(self, name, old, new):
+        for callback, names in list(self._state()[&quot;_listeners&quot;]):
+            if not names or name in names:
+                callback(self, name, old, new)
+
+    def _changed(self, name, old, new):
+        state = self._state()
+        if state[&quot;_batch_depth&quot;]:
+            pending = state[&quot;_pending&quot;]
+            if name in pending:
+                pending[name] = (pending[name][0], new)
+            else:
+                pending[name] = (old, new)
+        else:
+            self._notify(name, old, new)
+
+    @contextmanager
+    def batch(self):
+        state = self._state()
+        state[&quot;_batch_depth&quot;] += 1
+        try:
+            yield self
+        finally:
+            state[&quot;_batch_depth&quot;] -= 1
+            if state[&quot;_batch_depth&quot;] == 0:
+                pending, state[&quot;_pending&quot;] = state[&quot;_pending&quot;], {}
+                for name, (old, new) in pending.items():
+                    if old != new:
+                        self._notify(name, old, new)</textarea><template class="pc-src pc-hint">Give <code>Observable</code> a method <code>_changed(name, old, new)</code> for the descriptor to call. Outside a batch it notifies at once; inside one it records <code>(old, new)</code> in a pending dict, keeping the <strong>first</strong> old value if the name is already there. A plain dict keeps first-insertion order for you.</template></div>
+<h2 id="weekly-quiz">Weekly quiz</h2>
+<div class="quiz" data-id="w063d6-weekly"><div class="pc-label"><span>Quiz</span><span>15 questions</span></div><script type="application/json">[{"type": "mc", "q": "What makes an object a descriptor?", "answer": 1, "explain": "And it lives on a class.", "options": ["Being callable", "Its type defines <strong>get</strong>, <strong>set</strong> or <strong>delete</strong>", "Being in <strong>slots</strong>", "Having <strong>set_name</strong>"]}, {"type": "mc", "q": "Why store a descriptor&rsquo;s values in the instance <strong>dict</strong>?", "answer": 1, "explain": "Values on the descriptor would be shared.", "options": ["Speed", "One descriptor serves every instance", "It&rsquo;s required", "For pickling"]}, {"type": "mc", "q": "Who wins between a data descriptor and an instance <strong>dict</strong> entry?", "answer": 1, "explain": "Non-data descriptors lose.", "options": ["The instance", "The data descriptor", "Whichever is newer", "Neither"]}, {"type": "mc", "q": "How does functools.cached_property avoid calling its function again?", "answer": 1, "explain": "The instance <strong>dict</strong> wins.", "options": ["A global cache", "It&rsquo;s non-data, so the stored instance value shadows it", "A lock", "It doesn&rsquo;t"]}, {"type": "mc", "q": "Why must a property&rsquo;s setter share the getter&rsquo;s name?", "answer": 1, "explain": "Otherwise the name keeps the read-only one.", "options": ["Style", "setter returns a new property, which must replace the old one under that name", "Speed", "Python checks names"]}, {"type": "mc", "q": "Where does obj.x = 1 go when the class has a property x?", "answer": 1, "explain": "Data descriptors intercept assignment.", "options": ["The instance <strong>dict</strong>", "The property&rsquo;s setter", "The class", "Nowhere"]}, {"type": "mc", "q": "What should <strong>getattr</strong> raise for a missing name?", "answer": 1, "explain": "So hasattr and getattr defaults work.", "options": ["KeyError", "AttributeError", "ValueError", "Nothing"]}, {"type": "mc", "q": "How do you read attributes inside <strong>getattribute</strong> safely?", "answer": 1, "explain": "Anything else recurses.", "options": ["self.x", "object.<strong>getattribute</strong>(self, name)", "self.<strong>dict</strong>", "getattr"]}, {"type": "mc", "q": "Why doesn&rsquo;t len(proxy) use <strong>getattr</strong>?", "answer": 1, "explain": "Define <strong>len</strong> on the proxy class.", "options": ["It does", "Special methods are looked up on the type", "len is special-cased for lists", "Proxies can&rsquo;t have lengths"]}, {"type": "mc", "q": "What is the type of an ordinary class?", "answer": 1, "explain": "type is the default metaclass.", "options": ["object", "type", "class", "None"]}, {"type": "mc", "q": "What does a metaclass&rsquo;s <strong>call</strong> control?", "answer": 1, "explain": "Singletons, caches, counting.", "options": ["Class creation", "What happens when the class is called to make an instance", "Attribute lookup", "Imports"]}, {"type": "mc", "q": "In what order do these run when a class is defined?", "answer": 1, "explain": "The decorator runs last.", "options": ["Decorator, body, <strong>init_subclass</strong>", "Body, <strong>init_subclass</strong>, decorator", "<strong>init_subclass</strong>, body, decorator", "Body, decorator, <strong>init_subclass</strong>"]}, {"type": "mc", "q": "What&rsquo;s wrong with making method wrappers directly in a loop?", "answer": 1, "explain": "Make each in its own function call.", "options": ["Nothing", "Each closure sees the loop variable&rsquo;s final value", "They&rsquo;re slow", "They lose self"]}, {"type": "mc", "q": "Which tool runs automatically for every subclass, most simply?", "answer": 1, "explain": "Metaclasses can too, at a higher cost.", "options": ["A class decorator", "<strong>init_subclass</strong>", "<strong>getattr</strong>", "A descriptor"]}, {"type": "mc", "q": "When do you really need a metaclass?", "answer": 1, "explain": "Otherwise prefer the simpler tools.", "options": ["For any registration", "To change the namespace before the class exists, control calling the class, or give classes special methods", "For properties", "For validation"]}]</script></div>
+<h2 id="week-63-review">Week 63 review</h2>
+<p>Tick off each one honestly. If one feels shaky, go back and redo two exercises from that day.</p>
+<ul>
+<li>I can write data and non-data descriptors with <strong>set_name</strong>, storing values correctly. (<a href="w063d1.html">Day 1</a>)</li>
+<li>I can write property, staticmethod and classmethod myself and state the lookup order for reading and setting. (<a href="w063d2.html">Day 2</a>)</li>
+<li>I can use <strong>getattr</strong>, <strong>getattribute</strong>, <strong>setattr</strong> and <strong>delattr</strong> without recursion, and know what they don&rsquo;t see. (<a href="w063d3.html">Day 3</a>)</li>
+<li>I can explain class creation step by step and write metaclasses that check, register and control classes. (<a href="w063d4.html">Day 4</a>)</li>
+<li>I can write class decorators that add and wrap methods and generate code from annotations. (<a href="w063d5.html">Day 5</a>)</li>
+<li>I built an object mapper and an observable model. (Today)</li>
+</ul>
+<p>Tomorrow is a <strong>rest day</strong>. Next week: <strong>Inside CPython</strong>: how Python runs your code, bytecode and <code>dis</code>, frames and the evaluation loop, objects in C, and the import system.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w063d5.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w063d6", "week": 63, "day": 6, "title": "Forge", "exercises": [{"id": "w063d6-mix_track", "title": "Counting live instances", "points": 10}, {"id": "w063d6-mix_override", "title": "Overriding attributes for a block", "points": 10}, {"id": "w063d6-forge", "title": "Forge: an object mapper", "points": 50}, {"id": "w063d6-forge2", "title": "Forge bonus: observable models", "points": 30}], "points": 100}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
