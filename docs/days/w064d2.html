@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 64 Day 2: Bytecode and dis | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Yesterday’s pipeline ended with bytecode inside a code object. Today you read it. CPython’s bytecode is the instruction set of a stack machine: instructions...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w064d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 64 Day 2: Bytecode and dis">
+<meta property="og:description" content="Yesterday’s pipeline ended with bytecode inside a code object. Today you read it. CPython’s bytecode is the instruction set of a stack machine: instructions...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w064d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-64">Week 64: Inside CPython</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#a-stack-machine" data-sec="a-stack-machine">A stack machine</a></li><li><a href="#reading-dis" data-sec="reading-dis">Reading dis</a></li><li><a href="#families-of-instructions" data-sec="families-of-instructions">Families of instructions</a></li><li><a href="#jumps-how-if-and-while-work" data-sec="jumps-how-if-and-while-work">Jumps: how if and while work</a></li><li><a href="#bytecode-changes-between-versions" data-sec="bytecode-changes-between-versions">Bytecode changes between versions</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w064d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-64">Week 64: Inside CPython</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 64, Day 2</span></p>
+      <h1>Bytecode and dis</h1>
+      <div class="day-intro"><p>Yesterday&rsquo;s pipeline ended with bytecode inside a code object. Today you read it. CPython&rsquo;s bytecode is the instruction set of a <strong>stack machine</strong>: instructions push values onto a stack, operate on the top values, and pop results off. The <code>dis</code> module disassembles any function into readable instructions, so you can see what a line of Python really asks the interpreter to do. Because the exact instructions change with every Python release, the exercises today build and run a small stack machine of your own, which teaches the same ideas without depending on any one version.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain how a stack machine evaluates expressions, and trace one by hand</li><li>Read the output of dis.dis and use dis.get_instructions</li><li>Name the families of CPython instructions (loads, stores, operations, calls, jumps)</li><li>Compile expressions and statements from an AST into instructions for a stack machine</li><li>Explain why bytecode differs between Python versions and what that means for tools</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="A stack machine: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Reading dis: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Families of instructions: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Jumps: how if and while work: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Bytecode changes between versions: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">A stack machine</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Reading dis</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Families of instructions</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Jumps: how if and while work</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Bytecode changes between versions</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w064d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w064d2.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w064d2-p1"><textarea class="pc-src pc-code" hidden>stack = []
+program = [(&quot;PUSH&quot;, 2), (&quot;PUSH&quot;, 3), (&quot;PUSH&quot;, 4), (&quot;MUL&quot;,), (&quot;ADD&quot;,)]
+for instruction in program:
+    op = instruction[0]
+    if op == &quot;PUSH&quot;:
+        stack.append(instruction[1])
+    else:
+        right, left = stack.pop(), stack.pop()
+        stack.append(left * right if op == &quot;MUL&quot; else left + right)
+    print(op, stack)</textarea></div>
+<p>Five instructions computed <code>2 + 3 * 4</code>: push the operands, and let each operation take the top two values and push its result. CPython runs your code in exactly this style, with a few hundred kinds of instruction instead of three.</p>
+<h2 id="a-stack-machine">A stack machine</h2>
+<p>A <strong>stack machine</strong> keeps its working values on a stack instead of in named registers. Every instruction either <strong>pushes</strong> something (a constant, the value of a variable), <strong>pops</strong> something (to store it in a variable, to discard it, to return it), or <strong>pops its inputs and pushes its result</strong> (arithmetic, comparisons, calls).</p>
+<p>To turn an expression into stack code, walk its syntax tree <strong>post-order</strong>: emit code for the operands first, then the operation. For <code>price * (1 + tax)</code>:</p>
+<pre><code>LOAD price
+PUSH 1
+LOAD tax
+ADD          # pops 1 and tax, pushes 1 + tax
+MUL          # pops price and (1 + tax), pushes the product
+</code></pre>
+<p>Stack code is compact (no register numbers to encode), simple to generate from a tree, and simple to interpret, which is why CPython, the Java virtual machine, WebAssembly and many others use it.</p>
+<div class="pc pc-example" data-kind="example" data-id="w064d2-e2"><textarea class="pc-src pc-code" hidden>def run_stack(program, variables):
+    stack = []
+    for op, *arg in program:
+        if op == &quot;PUSH&quot;:
+            stack.append(arg[0])
+        elif op == &quot;LOAD&quot;:
+            stack.append(variables[arg[0]])
+        elif op == &quot;STORE&quot;:
+            variables[arg[0]] = stack.pop()
+        else:
+            right, left = stack.pop(), stack.pop()
+            stack.append({&quot;ADD&quot;: left + right, &quot;SUB&quot;: left - right, &quot;MUL&quot;: left * right}[op])
+    return variables
+
+prog = [(&quot;LOAD&quot;, &quot;price&quot;), (&quot;PUSH&quot;, 1), (&quot;LOAD&quot;, &quot;tax&quot;), (&quot;ADD&quot;,), (&quot;MUL&quot;,), (&quot;STORE&quot;, &quot;total&quot;)]
+print(run_stack(prog, {&quot;price&quot;: 100, &quot;tax&quot;: 0.2}))</textarea></div>
+<h2 id="reading-dis">Reading dis</h2>
+<p><code>dis.dis(func)</code> prints the bytecode of a function (or of a string of code). Each line shows:</p>
+<ul>
+<li>the <strong>source line number</strong> (at the start of each line&rsquo;s instructions);</li>
+<li>the instruction&rsquo;s <strong>offset</strong> in bytes within <code>co_code</code> (each instruction takes two bytes, plus extra &ldquo;cache&rdquo; entries for some);</li>
+<li>the <strong>opname</strong>, such as <code>LOAD_FAST</code> or <code>BINARY_OP</code>;</li>
+<li>its <strong>argument</strong> (a number) and, in brackets, what that number means: the local variable, constant, name or operator it refers to.</li>
+</ul>
+<p><code>dis.get_instructions(func)</code> gives the same information as <code>Instruction</code> objects with <code>opname</code>, <code>arg</code>, <code>argval</code> (the decoded argument), <code>offset</code> and position fields, so tools can read bytecode without parsing text. <code>dis.show_code(func)</code> prints the code object&rsquo;s constants and names.</p>
+<p>The output below is from whichever Python is running this page; don&rsquo;t be surprised if it differs from what you see on your own computer.</p>
+<div class="pc pc-example" data-kind="example" data-id="w064d2-e3"><textarea class="pc-src pc-code" hidden>import dis
+
+def price_with_tax(price, rate):
+    tax = price * rate
+    return price + tax
+
+dis.dis(price_with_tax)
+
+names = [ins.opname for ins in dis.get_instructions(price_with_tax)]
+print(len(names), &quot;instructions; the last is&quot;, names[-1])
+print(price_with_tax.__code__.co_varnames, price_with_tax.__code__.co_consts)</textarea></div>
+<h2 id="families-of-instructions">Families of instructions</h2>
+<p>The exact names change between versions, but the families are stable:</p>
+<ul>
+<li><strong>Loads</strong> push a value: <code>LOAD_CONST</code> (from <code>co_consts</code>), <code>LOAD_FAST</code> (a local, by index into the frame&rsquo;s local slots: fast because no dict lookup is needed), <code>LOAD_GLOBAL</code> (a global or built-in, looked up by name), <code>LOAD_ATTR</code> (an attribute of the top value), <code>LOAD_DEREF</code> (a closure cell).</li>
+<li><strong>Stores</strong> pop a value into a place: <code>STORE_FAST</code>, <code>STORE_GLOBAL</code>, <code>STORE_ATTR</code>, <code>STORE_SUBSCR</code>.</li>
+<li><strong>Operations</strong>: <code>BINARY_OP</code> (with the operator as its argument, since 3.11), <code>UNARY_NEGATIVE</code>, <code>COMPARE_OP</code>, <code>CONTAINS_OP</code>, <code>IS_OP</code>.</li>
+<li><strong>Calls and returns</strong>: <code>CALL</code>, <code>RETURN_VALUE</code>, and building containers with <code>BUILD_LIST</code>, <code>BUILD_TUPLE</code>, <code>BUILD_MAP</code>.</li>
+<li><strong>Jumps</strong>: conditional and unconditional jumps change which instruction runs next (next section).</li>
+<li><strong>Iteration</strong>: <code>GET_ITER</code> and <code>FOR_ITER</code> implement <code>for</code> loops using Week 59&rsquo;s iterator protocol.</li>
+</ul>
+<p>Seeing these explains some performance folklore: a local variable is faster than a global because <code>LOAD_FAST</code> indexes an array while <code>LOAD_GLOBAL</code> searches dicts; <code>x.y.z</code> in a loop repeats two <code>LOAD_ATTR</code>s every time; and a list comprehension avoids the <code>.append</code> lookup and call that a loop does.</p>
+<div class="pc pc-example" data-kind="example" data-id="w064d2-e4"><textarea class="pc-src pc-code" hidden>import dis
+
+RATE = 0.2
+
+def with_global(prices):
+    return [p * RATE for p in prices]
+
+def kinds(func):
+    found = set()
+    for ins in dis.get_instructions(func):
+        for family in (&quot;LOAD_GLOBAL&quot;, &quot;LOAD_FAST&quot;, &quot;LOAD_ATTR&quot;, &quot;STORE&quot;, &quot;CALL&quot;, &quot;RETURN&quot;):
+            if ins.opname.startswith(family):
+                found.add(family)
+    return sorted(found)
+
+print(kinds(with_global))
+print([ins.argval for ins in dis.get_instructions(with_global) if ins.opname.startswith(&quot;LOAD_GLOBAL&quot;)])</textarea></div>
+<h2 id="jumps-how-if-and-while-work">Jumps: how if and while work</h2>
+<p>Bytecode has no <code>if</code> or <code>while</code>: they become <strong>jumps</strong>. A conditional jump pops the top of the stack and, depending on its truth, either carries on to the next instruction or jumps to another offset. An <code>if</code> jumps <strong>over</strong> its body when the test is false; a <code>while</code> loop tests, jumps out when false, and ends its body with a jump <strong>back</strong> to the test. <code>and</code> and <code>or</code> are jumps too, which is how short-circuiting works: <code>a and b</code> jumps past <code>b</code> when <code>a</code> is false, leaving <code>a</code> as the result.</p>
+<p>In the stack machine you&rsquo;ll build, instructions are numbered by position, and a jump&rsquo;s argument is the position to go to:</p>
+<pre><code>0  LOAD n
+1  PUSH 0
+2  GT                  # n &gt; 0 ?
+3  JUMP_IF_FALSE 9     # no: leave the loop
+4  LOAD n
+5  PUSH 1
+6  SUB
+7  STORE n             # n = n - 1
+8  JUMP 0              # back to the test
+9  ...
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w064d2-e5"><textarea class="pc-src pc-code" hidden>def run(program, variables):
+    stack, pc = [], 0
+    while pc &lt; len(program):
+        op, *arg = program[pc]
+        pc += 1
+        if op == &quot;PUSH&quot;:
+            stack.append(arg[0])
+        elif op == &quot;LOAD&quot;:
+            stack.append(variables[arg[0]])
+        elif op == &quot;STORE&quot;:
+            variables[arg[0]] = stack.pop()
+        elif op == &quot;JUMP&quot;:
+            pc = arg[0]
+        elif op == &quot;JUMP_IF_FALSE&quot;:
+            if not stack.pop():
+                pc = arg[0]
+        else:
+            right, left = stack.pop(), stack.pop()
+            stack.append({&quot;SUB&quot;: left - right, &quot;ADD&quot;: left + right, &quot;GT&quot;: left &gt; right}[op])
+    return variables
+
+countdown = [(&quot;LOAD&quot;, &quot;n&quot;), (&quot;PUSH&quot;, 0), (&quot;GT&quot;,), (&quot;JUMP_IF_FALSE&quot;, 13),     # 0 to 3: the test
+             (&quot;LOAD&quot;, &quot;n&quot;), (&quot;PUSH&quot;, 1), (&quot;SUB&quot;,), (&quot;STORE&quot;, &quot;n&quot;),           # 4 to 7: n = n - 1
+             (&quot;LOAD&quot;, &quot;steps&quot;), (&quot;PUSH&quot;, 1), (&quot;ADD&quot;,), (&quot;STORE&quot;, &quot;steps&quot;),   # 8 to 11: steps += 1
+             (&quot;JUMP&quot;, 0)]                                                    # 12: back to the test
+print(run(countdown, {&quot;n&quot;: 4, &quot;steps&quot;: 0}))</textarea></div>
+<h2 id="bytecode-changes-between-versions">Bytecode changes between versions</h2>
+<p>Bytecode is an <strong>implementation detail</strong> of CPython, not part of the Python language. It changes in almost every release: Python 3.11 merged the arithmetic instructions into <code>BINARY_OP</code> and added <strong>adaptive specialisation</strong> (an instruction such as <code>BINARY_OP</code> rewrites itself into a faster version like <code>BINARY_OP_ADD_INT</code> after seeing the same types a few times), 3.12 and 3.13 combined common pairs of instructions, and 3.14 changed how small integers are loaded. Other Pythons (PyPy, MicroPython) use completely different internal forms.</p>
+<p>So:</p>
+<ul>
+<li><code>.pyc</code> files are tied to one version (yesterday), and each has a <strong>magic number</strong> in its header (<code>importlib.util.MAGIC_NUMBER</code>) that changes with the bytecode;</li>
+<li>tools that work on bytecode (debuggers, coverage tools, some decompilers) must be updated for each release;</li>
+<li>your code should never depend on particular instructions. Use <code>dis</code> to <strong>understand</strong>, and measure performance with timers rather than counting instructions (Week 65).</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w064d2-e6"><textarea class="pc-src pc-code" hidden>import dis, importlib.util, sys
+
+def f(x):
+    return x + 1
+
+print(sys.version_info[:2], len(importlib.util.MAGIC_NUMBER), &quot;byte magic number&quot;)
+ops = [i.opname for i in dis.get_instructions(f)]
+print(&quot;RETURN_VALUE&quot; in ops or &quot;RETURN_CONST&quot; in ops)
+print(len(f.__code__.co_code) % 2 == 0)          # instructions are two bytes each</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>CPython&rsquo;s bytecode runs on a stack machine: loads push values, stores pop them into variables, operations pop their inputs and push results, and expressions compile to post-order stack code. dis.dis prints a function&rsquo;s instructions with line numbers, offsets, opnames and decoded arguments; dis.get_instructions gives them as objects. Instructions come in families: loads (LOAD_FAST for locals is faster than LOAD_GLOBAL), stores, operations, calls and returns, iteration, and jumps, which implement if, while, and, or. Bytecode is an implementation detail that changes every release (and specialises itself at run time since 3.11), so use dis to understand, never as something to depend on.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d2-vm" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A stack machine</div><div class="pc-prompt"><p>Write <code>execute(program, variables=None)</code> for a stack machine whose program is a list of tuples: <code>("PUSH", value)</code>, <code>("LOAD", name)</code>, <code>("STORE", name)</code>, <code>("ADD",)</code>, <code>("SUB",)</code>, <code>("MUL",)</code>, <code>("DIV",)</code> (true division), <code>("NEG",)</code> (negate the top value), <code>("DUP",)</code> (push a copy of the top value), <code>("POP",)</code> and <code>("PRINT",)</code> (pop and append the value to an output list). Return a tuple <code>(variables, output)</code>. Popping an empty stack raises <code>IndexError("stack underflow")</code>, an unknown instruction <code>ValueError</code>, and an unknown variable <code>NameError</code>. Don&rsquo;t change the <code>variables</code> dict passed in.</p></div><textarea class="pc-src pc-code" hidden>def execute(program, variables=None):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_vm():
+    &quot;a stack machine&quot;
+    prog = [(&quot;LOAD&quot;, &quot;w&quot;), (&quot;LOAD&quot;, &quot;h&quot;), (&quot;MUL&quot;,), (&quot;DUP&quot;,), (&quot;STORE&quot;, &quot;area&quot;), (&quot;PUSH&quot;, 2), (&quot;DIV&quot;,), (&quot;PRINT&quot;,)]
+    start = {&quot;w&quot;: 3, &quot;h&quot;: 4}
+    variables, out = execute(prog, start)
+    assert variables == {&quot;w&quot;: 3, &quot;h&quot;: 4, &quot;area&quot;: 12} and out == [6.0] and start == {&quot;w&quot;: 3, &quot;h&quot;: 4}
+    assert execute([(&quot;PUSH&quot;, 5), (&quot;NEG&quot;,), (&quot;PUSH&quot;, 2), (&quot;SUB&quot;,), (&quot;PRINT&quot;,)])[1] == [-7]
+    assert execute([(&quot;PUSH&quot;, 1), (&quot;POP&quot;,)]) == ({}, [])
+    for prog, err in (([(&quot;ADD&quot;,)], IndexError), ([(&quot;JUMP&quot;, 0)], ValueError), ([(&quot;LOAD&quot;, &quot;x&quot;)], NameError)):
+        try:
+            execute(prog)
+            assert False
+        except err:
+            pass</textarea><textarea class="pc-src pc-solution" hidden>def execute(program, variables=None):
+    variables = dict(variables or {})
+    stack, output = [], []
+
+    def pop():
+        if not stack:
+            raise IndexError(&quot;stack underflow&quot;)
+        return stack.pop()
+
+    binary = {&quot;ADD&quot;: lambda a, b: a + b, &quot;SUB&quot;: lambda a, b: a - b,
+              &quot;MUL&quot;: lambda a, b: a * b, &quot;DIV&quot;: lambda a, b: a / b}
+    for op, *args in program:
+        if op == &quot;PUSH&quot;:
+            stack.append(args[0])
+        elif op == &quot;LOAD&quot;:
+            if args[0] not in variables:
+                raise NameError(args[0])
+            stack.append(variables[args[0]])
+        elif op == &quot;STORE&quot;:
+            variables[args[0]] = pop()
+        elif op in binary:
+            right, left = pop(), pop()
+            stack.append(binary[op](left, right))
+        elif op == &quot;NEG&quot;:
+            stack.append(-pop())
+        elif op == &quot;DUP&quot;:
+            top = pop()
+            stack.extend([top, top])
+        elif op == &quot;POP&quot;:
+            pop()
+        elif op == &quot;PRINT&quot;:
+            output.append(pop())
+        else:
+            raise ValueError(f&quot;unknown instruction {op}&quot;)
+    return variables, output</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d2-compile_expr" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Compiling expressions</div><div class="pc-prompt"><p>Write <code>compile_expression(source)</code>: parse the expression with <code>ast.parse(source, mode="eval")</code> and return a list of instructions for the machine above that leaves its value on the stack: constants become <code>PUSH</code>, names <code>LOAD</code>, <code>+ - * /</code> become <code>ADD SUB MUL DIV</code>, and unary minus <code>NEG</code> (unary plus produces nothing). Anything else raises <code>ValueError</code>. Then <code>stack_depth(program)</code>: the largest number of values on the stack at any moment while running a program of <code>PUSH</code>, <code>LOAD</code>, binary operations and <code>NEG</code>, worked out <strong>without</strong> running it.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def compile_expression(source):
+    ___
+
+def stack_depth(program):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_compile():
+    &quot;AST to stack code&quot;
+    assert compile_expression(&quot;price * (1 + tax)&quot;) == [(&quot;LOAD&quot;, &quot;price&quot;), (&quot;PUSH&quot;, 1), (&quot;LOAD&quot;, &quot;tax&quot;), (&quot;ADD&quot;,), (&quot;MUL&quot;,)]
+    assert compile_expression(&quot;-a - +b / 2&quot;) == [(&quot;LOAD&quot;, &quot;a&quot;), (&quot;NEG&quot;,), (&quot;LOAD&quot;, &quot;b&quot;), (&quot;PUSH&quot;, 2), (&quot;DIV&quot;,), (&quot;SUB&quot;,)]
+    assert compile_expression(&quot;7&quot;) == [(&quot;PUSH&quot;, 7)]
+    for bad in (&quot;a ** 2&quot;, &quot;f(x)&quot;, &quot;a &lt; b&quot;):
+        try:
+            compile_expression(bad)
+            assert False
+        except ValueError:
+            pass
+    assert stack_depth(compile_expression(&quot;a + b + c + d&quot;)) == 2
+    assert stack_depth(compile_expression(&quot;a + (b + (c + d))&quot;)) == 4
+    assert stack_depth([]) == 0</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+OPS = {ast.Add: &quot;ADD&quot;, ast.Sub: &quot;SUB&quot;, ast.Mult: &quot;MUL&quot;, ast.Div: &quot;DIV&quot;}
+
+def compile_expression(source):
+    code = []
+
+    def emit(node):
+        if isinstance(node, ast.Constant):
+            code.append((&quot;PUSH&quot;, node.value))
+        elif isinstance(node, ast.Name):
+            code.append((&quot;LOAD&quot;, node.id))
+        elif isinstance(node, ast.BinOp) and type(node.op) in OPS:
+            emit(node.left)
+            emit(node.right)
+            code.append((OPS[type(node.op)],))
+        elif isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
+            emit(node.operand)
+            code.append((&quot;NEG&quot;,))
+        elif isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.UAdd):
+            emit(node.operand)
+        else:
+            raise ValueError(type(node).__name__)
+
+    emit(ast.parse(source, mode=&quot;eval&quot;).body)
+    return code
+
+def stack_depth(program):
+    depth = deepest = 0
+    for op, *args in program:
+        if op in (&quot;PUSH&quot;, &quot;LOAD&quot;):
+            depth += 1
+        elif op in (&quot;ADD&quot;, &quot;SUB&quot;, &quot;MUL&quot;, &quot;DIV&quot;):
+            depth -= 1
+        deepest = max(deepest, depth)
+    return deepest</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d2-jumps" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Jumps and loops</div><div class="pc-prompt"><p>Extend the machine with control flow. Write <code>execute_jumps(program, variables=None, limit=10000)</code> supporting everything in the first exercise plus comparisons <code>("LT",)</code>, <code>("GT",)</code> and <code>("EQ",)</code> (pushing <code>True</code> or <code>False</code>), <code>("JUMP", target)</code>, <code>("JUMP_IF_FALSE", target)</code> (pops the test) and <code>("JUMP_IF_TRUE", target)</code>, where targets are positions in the list. Running more than <code>limit</code> instructions raises <code>RuntimeError("too many steps")</code>. Return <code>(variables, output)</code>. Then write <code>sum_to_program()</code>: a program that, given a variable <code>n</code>, sets <code>total</code> to <code>1 + 2 + ... + n</code> using a loop.</p></div><textarea class="pc-src pc-code" hidden>def execute_jumps(program, variables=None, limit=10000):
+    ___
+
+def sum_to_program():
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_jumps():
+    &quot;jumps&quot;
+    prog = sum_to_program()
+    assert execute_jumps(prog, {&quot;n&quot;: 4})[0][&quot;total&quot;] == 10
+    assert execute_jumps(prog, {&quot;n&quot;: 0})[0][&quot;total&quot;] == 0
+    assert execute_jumps(prog, {&quot;n&quot;: 100})[0][&quot;total&quot;] == 5050
+    pick = [(&quot;LOAD&quot;, &quot;x&quot;), (&quot;PUSH&quot;, 0), (&quot;LT&quot;,), (&quot;JUMP_IF_TRUE&quot;, 7), (&quot;PUSH&quot;, &quot;positive&quot;), (&quot;PRINT&quot;,), (&quot;JUMP&quot;, 9),
+            (&quot;PUSH&quot;, &quot;negative&quot;), (&quot;PRINT&quot;,)]
+    assert execute_jumps(pick, {&quot;x&quot;: 5})[1] == [&quot;positive&quot;] and execute_jumps(pick, {&quot;x&quot;: -1})[1] == [&quot;negative&quot;]
+    assert execute_jumps([(&quot;PUSH&quot;, 2), (&quot;PUSH&quot;, 2), (&quot;EQ&quot;,), (&quot;PRINT&quot;,)])[1] == [True]
+    try:
+        execute_jumps([(&quot;JUMP&quot;, 0)])
+        assert False
+    except RuntimeError as e:
+        assert str(e) == &quot;too many steps&quot;</textarea><textarea class="pc-src pc-solution" hidden>def execute_jumps(program, variables=None, limit=10000):
+    variables = dict(variables or {})
+    stack, output, pc, steps = [], [], 0, 0
+
+    def pop():
+        if not stack:
+            raise IndexError(&quot;stack underflow&quot;)
+        return stack.pop()
+
+    binary = {&quot;ADD&quot;: lambda a, b: a + b, &quot;SUB&quot;: lambda a, b: a - b, &quot;MUL&quot;: lambda a, b: a * b,
+              &quot;DIV&quot;: lambda a, b: a / b, &quot;LT&quot;: lambda a, b: a &lt; b, &quot;GT&quot;: lambda a, b: a &gt; b,
+              &quot;EQ&quot;: lambda a, b: a == b}
+    while pc &lt; len(program):
+        steps += 1
+        if steps &gt; limit:
+            raise RuntimeError(&quot;too many steps&quot;)
+        op, *args = program[pc]
+        pc += 1
+        if op == &quot;PUSH&quot;:
+            stack.append(args[0])
+        elif op == &quot;LOAD&quot;:
+            if args[0] not in variables:
+                raise NameError(args[0])
+            stack.append(variables[args[0]])
+        elif op == &quot;STORE&quot;:
+            variables[args[0]] = pop()
+        elif op in binary:
+            right, left = pop(), pop()
+            stack.append(binary[op](left, right))
+        elif op == &quot;NEG&quot;:
+            stack.append(-pop())
+        elif op == &quot;DUP&quot;:
+            top = pop()
+            stack.extend([top, top])
+        elif op == &quot;POP&quot;:
+            pop()
+        elif op == &quot;PRINT&quot;:
+            output.append(pop())
+        elif op == &quot;JUMP&quot;:
+            pc = args[0]
+        elif op == &quot;JUMP_IF_FALSE&quot;:
+            if not pop():
+                pc = args[0]
+        elif op == &quot;JUMP_IF_TRUE&quot;:
+            if pop():
+                pc = args[0]
+        else:
+            raise ValueError(f&quot;unknown instruction {op}&quot;)
+    return variables, output
+
+def sum_to_program():
+    return [
+        (&quot;PUSH&quot;, 0), (&quot;STORE&quot;, &quot;total&quot;),
+        (&quot;PUSH&quot;, 1), (&quot;STORE&quot;, &quot;i&quot;),
+        (&quot;LOAD&quot;, &quot;n&quot;), (&quot;LOAD&quot;, &quot;i&quot;), (&quot;LT&quot;,), (&quot;JUMP_IF_TRUE&quot;, 17),   # 4: stop when n &lt; i
+        (&quot;LOAD&quot;, &quot;total&quot;), (&quot;LOAD&quot;, &quot;i&quot;), (&quot;ADD&quot;,), (&quot;STORE&quot;, &quot;total&quot;),
+        (&quot;LOAD&quot;, &quot;i&quot;), (&quot;PUSH&quot;, 1), (&quot;ADD&quot;,), (&quot;STORE&quot;, &quot;i&quot;),
+        (&quot;JUMP&quot;, 4),
+    ]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d2-dis_read" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Asking dis</div><div class="pc-prompt"><p>Using <code>dis.get_instructions</code> (and checking only opname <strong>prefixes</strong>, which are stable), write <code>globals_used(func)</code>: the sorted list of names a function loads with an instruction whose opname starts with <code>LOAD_GLOBAL</code>, and <code>has_loop(func)</code>: True if the function contains an instruction whose opname starts with <code>FOR_ITER</code> or is a backwards jump (an opname starting with <code>JUMP_BACKWARD</code>). Then <code>local_names(func)</code>: the function&rsquo;s local variable names, from the code object.</p></div><textarea class="pc-src pc-code" hidden>import dis
+
+def globals_used(func):
+    ___
+
+def has_loop(func):
+    ___
+
+def local_names(func):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_dis():
+    &quot;reading bytecode&quot;
+    def report(items):
+        total = 0
+        for item in items:
+            total += len(item)
+        return round(total / max(1, len(items)), 2)
+    def simple(a, b):
+        c = a + b
+        return c
+    def waiting(n):
+        while n &gt; 0:
+            n -= 1
+        return n
+    assert globals_used(report) == [&quot;len&quot;, &quot;max&quot;, &quot;round&quot;] and globals_used(simple) == []
+    assert has_loop(report) and has_loop(waiting) and not has_loop(simple)
+    assert local_names(report) == [&quot;items&quot;, &quot;total&quot;, &quot;item&quot;] and local_names(simple) == [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]</textarea><textarea class="pc-src pc-solution" hidden>import dis
+
+def globals_used(func):
+    return sorted({ins.argval for ins in dis.get_instructions(func) if ins.opname.startswith(&quot;LOAD_GLOBAL&quot;)})
+
+def has_loop(func):
+    return any(ins.opname.startswith((&quot;FOR_ITER&quot;, &quot;JUMP_BACKWARD&quot;)) for ins in dis.get_instructions(func))
+
+def local_names(func):
+    return list(func.__code__.co_varnames)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d2-peephole" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A peephole optimiser</div><div class="pc-prompt"><p>Compilers improve code by looking at short windows of instructions, a <strong>peephole</strong>. Write <code>optimise(program)</code> for the first exercise&rsquo;s machine, repeating until nothing changes: replace <code>PUSH a, PUSH b, &lt;op&gt;</code> with <code>PUSH result</code> for <code>ADD</code>, <code>SUB</code> and <code>MUL</code>; replace <code>PUSH a, NEG</code> with <code>PUSH -a</code>; remove <code>PUSH x, POP</code> pairs; and replace <code>STORE n, LOAD n</code> with <code>DUP, STORE n</code>. Return the new list (don&rsquo;t change the original).</p></div><textarea class="pc-src pc-code" hidden>def optimise(program):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_peephole():
+    &quot;peephole optimisation&quot;
+    prog = [(&quot;PUSH&quot;, 2), (&quot;PUSH&quot;, 3), (&quot;MUL&quot;,), (&quot;PUSH&quot;, 1), (&quot;ADD&quot;,), (&quot;STORE&quot;, &quot;x&quot;), (&quot;LOAD&quot;, &quot;x&quot;), (&quot;PRINT&quot;,)]
+    assert optimise(prog) == [(&quot;PUSH&quot;, 7), (&quot;DUP&quot;,), (&quot;STORE&quot;, &quot;x&quot;), (&quot;PRINT&quot;,)]
+    assert prog[0] == (&quot;PUSH&quot;, 2)
+    assert optimise([(&quot;PUSH&quot;, 4), (&quot;NEG&quot;,), (&quot;PUSH&quot;, 9), (&quot;POP&quot;,), (&quot;LOAD&quot;, &quot;a&quot;), (&quot;ADD&quot;,)]) == [(&quot;PUSH&quot;, -4), (&quot;LOAD&quot;, &quot;a&quot;), (&quot;ADD&quot;,)]
+    assert optimise([(&quot;LOAD&quot;, &quot;a&quot;), (&quot;PUSH&quot;, 1), (&quot;ADD&quot;,)]) == [(&quot;LOAD&quot;, &quot;a&quot;), (&quot;PUSH&quot;, 1), (&quot;ADD&quot;,)]
+    assert optimise([]) == []</textarea><textarea class="pc-src pc-solution" hidden>FOLD = {&quot;ADD&quot;: lambda a, b: a + b, &quot;SUB&quot;: lambda a, b: a - b, &quot;MUL&quot;: lambda a, b: a * b}
+
+def _once(program):
+    out, i = [], 0
+    while i &lt; len(program):
+        window = program[i:i + 3]
+        ops = [ins[0] for ins in window]
+        if ops[:2] == [&quot;PUSH&quot;, &quot;PUSH&quot;] and len(ops) == 3 and ops[2] in FOLD:
+            out.append((&quot;PUSH&quot;, FOLD[ops[2]](window[0][1], window[1][1])))
+            i += 3
+        elif ops[:2] == [&quot;PUSH&quot;, &quot;NEG&quot;]:
+            out.append((&quot;PUSH&quot;, -window[0][1]))
+            i += 2
+        elif ops[:2] == [&quot;PUSH&quot;, &quot;POP&quot;]:
+            i += 2
+        elif ops[:2] == [&quot;STORE&quot;, &quot;LOAD&quot;] and window[0][1] == window[1][1]:
+            out.extend([(&quot;DUP&quot;,), window[0]])
+            i += 2
+        else:
+            out.append(program[i])
+            i += 1
+    return out
+
+def optimise(program):
+    current = list(program)
+    while True:
+        better = _once(current)
+        if better == current:
+            return current
+        current = better</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w064d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Operands the wrong way round</div><div class="pc-prompt"><p>The machine pops the <strong>right</strong> operand first (it was pushed last), but this code calls the first value it pops <code>left</code>, so <code>10 - 4</code> comes out as <code>-6</code>. Pop in the right order so this prints <code>6</code>.</p></div><textarea class="pc-src pc-code" hidden>stack = []
+for op, *arg in [(&quot;PUSH&quot;, 10), (&quot;PUSH&quot;, 4), (&quot;SUB&quot;,)]:
+    if op == &quot;PUSH&quot;:
+        stack.append(arg[0])
+    elif op == &quot;SUB&quot;:
+        left, right = stack.pop(), stack.pop()
+        stack.append(left - right)
+print(stack[-1])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;pop order&quot;
+    expect_output(&quot;6&quot;)</textarea><textarea class="pc-src pc-solution" hidden>stack = []
+for op, *arg in [(&quot;PUSH&quot;, 10), (&quot;PUSH&quot;, 4), (&quot;SUB&quot;,)]:
+    if op == &quot;PUSH&quot;:
+        stack.append(arg[0])
+    elif op == &quot;SUB&quot;:
+        right, left = stack.pop(), stack.pop()
+        stack.append(left - right)
+print(stack[-1])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w064d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A jump that never happens</div><div class="pc-prompt"><p>After a jump, the loop still adds one to the program counter, so every jump lands one instruction too far: the jump to position 2 ends up at position 3, so <code>PUSH "kept"</code> never runs and this prints <code>[]</code>. Advance the counter <strong>before</strong> carrying out the instruction, so a jump replaces it, and this prints <code>['kept']</code>.</p></div><textarea class="pc-src pc-code" hidden>program = [(&quot;JUMP&quot;, 2), (&quot;PUSH&quot;, &quot;skipped&quot;), (&quot;PUSH&quot;, &quot;kept&quot;), (&quot;PRINT&quot;,)]
+stack, out, pc = [], [], 0
+while pc &lt; len(program):
+    op, *arg = program[pc]
+    if op == &quot;JUMP&quot;:
+        pc = arg[0]
+    elif op == &quot;PUSH&quot;:
+        stack.append(arg[0])
+    elif op == &quot;PRINT&quot;:
+        out.append(stack.pop()) if stack else None
+    pc += 1
+print(out)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the program counter&quot;
+    expect_output(&quot;[&#x27;kept&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>program = [(&quot;JUMP&quot;, 2), (&quot;PUSH&quot;, &quot;skipped&quot;), (&quot;PUSH&quot;, &quot;kept&quot;), (&quot;PRINT&quot;,)]
+stack, out, pc = [], [], 0
+while pc &lt; len(program):
+    op, *arg = program[pc]
+    pc += 1
+    if op == &quot;JUMP&quot;:
+        pc = arg[0]
+    elif op == &quot;PUSH&quot;:
+        stack.append(arg[0])
+    elif op == &quot;PRINT&quot;:
+        out.append(stack.pop()) if stack else None
+print(out)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w064d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Operations before operands</div><div class="pc-prompt"><p>The compiler emits the operation <strong>before</strong> its operands (pre-order), so the machine tries to add with nothing on the stack and crashes with <code>IndexError</code>. Emit the operands first (post-order) so this prints <code>14</code>.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def emit(node, code):
+    if isinstance(node, ast.Constant):
+        code.append((&quot;PUSH&quot;, node.value))
+    elif isinstance(node, ast.BinOp):
+        code.append((&quot;ADD&quot;,) if isinstance(node.op, ast.Add) else (&quot;MUL&quot;,))
+        emit(node.left, code)
+        emit(node.right, code)
+
+code = []
+emit(ast.parse(&quot;2 + 3 * 4&quot;, mode=&quot;eval&quot;).body, code)
+stack = []
+for op, *arg in code:
+    if op == &quot;PUSH&quot;:
+        stack.append(arg[0])
+    else:
+        b, a = stack.pop(), stack.pop()
+        stack.append(a + b if op == &quot;ADD&quot; else a * b)
+print(stack[-1])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;post-order&quot;
+    expect_output(&quot;14&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+def emit(node, code):
+    if isinstance(node, ast.Constant):
+        code.append((&quot;PUSH&quot;, node.value))
+    elif isinstance(node, ast.BinOp):
+        emit(node.left, code)
+        emit(node.right, code)
+        code.append((&quot;ADD&quot;,) if isinstance(node.op, ast.Add) else (&quot;MUL&quot;,))
+
+code = []
+emit(ast.parse(&quot;2 + 3 * 4&quot;, mode=&quot;eval&quot;).body, code)
+stack = []
+for op, *arg in code:
+    if op == &quot;PUSH&quot;:
+        stack.append(arg[0])
+    else:
+        b, a = stack.pop(), stack.pop()
+        stack.append(a + b if op == &quot;ADD&quot; else a * b)
+print(stack[-1])</textarea></div>
+<div class="parsons" data-id="w064d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Emitting stack code</div><div class="pc-prompt"><p>Arrange the lines of a function that emits stack code for additions of names. One line is a trap.</p></div><script type="application/json">{"lines": ["def emit(node, code):", "    if isinstance(node, ast.Name):", "        code.append((\"LOAD\", node.id))", "    else:", "        emit(node.left, code)", "        emit(node.right, code)", "        code.append((\"ADD\",))"], "distractors": ["        code.insert(0, (\"ADD\",))"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the stack after PUSH 1, PUSH 2, PUSH 3, ADD, as a list
+q = ___   # True or False: LOAD_FAST looks a local up by name in a dict
+r = ___   # which statement has no instruction of its own and becomes jumps: &quot;if&quot; or &quot;return&quot;
+s = ___   # True or False: the same function always has the same bytecode in every Python version
+t = ___   # the largest stack depth of stack code for a + b * c</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [1, 5] and q is False and r == &quot;if&quot;, &quot;p, q and r&quot;
+    assert s is False and t == 3, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = [1, 5]
+q = False
+r = &quot;if&quot;
+s = False
+t = 3</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w064d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "How does a stack machine evaluate a + b?", "answer": 1, "explain": "Operands first, then the operation.", "options": ["Registers", "Push a, push b, then ADD pops both and pushes the sum", "It calls a function", "It reads the source"]}, {"type": "mc", "q": "In what order must an expression tree be walked to produce stack code?", "answer": 1, "explain": "An operation needs its inputs on the stack.", "options": ["Pre-order", "Post-order: operands before their operation", "Level order", "Any order"]}, {"type": "mc", "q": "What does dis.get_instructions return?", "answer": 1, "explain": "For tools that read bytecode.", "options": ["Text", "Instruction objects with opname, argval and offset", "The source", "A code object"]}, {"type": "mc", "q": "Why is a local variable faster to read than a global?", "answer": 1, "explain": "One reason to bind globals to locals in hot loops.", "options": ["It isn&rsquo;t", "LOAD_FAST indexes an array of local slots; LOAD_GLOBAL searches dicts", "Globals are copied", "Locals are cached on disk"]}, {"type": "mc", "q": "How are if and while represented in bytecode?", "answer": 1, "explain": "while ends with a jump backwards.", "options": ["As special instructions", "With conditional and unconditional jumps", "As function calls", "They aren&rsquo;t compiled"]}, {"type": "mc", "q": "How does and short-circuit in bytecode?", "answer": 1, "explain": "The left value is the result.", "options": ["It doesn&rsquo;t", "A jump skips the right side when the left is false", "Both sides always run", "With exceptions"]}, {"type": "mc", "q": "What is adaptive specialisation (Python 3.11+)?", "answer": 1, "explain": "BINARY_OP can become BINARY_OP_ADD_INT.", "options": ["Manual optimisation", "Instructions rewriting themselves into faster type-specific versions after seeing the same types", "JIT compilation of the whole program", "Removing instructions"]}, {"type": "mc", "q": "Why shouldn&rsquo;t code depend on exact bytecode?", "answer": 1, "explain": "Use dis to understand, not to rely on.", "options": ["It&rsquo;s secret", "It changes between Python versions and implementations", "It&rsquo;s slow to read", "It&rsquo;s encrypted"]}, {"type": "mc", "q": "What does the magic number in a .pyc header identify?", "answer": 1, "explain": "It changes when the bytecode changes.", "options": ["The author", "The bytecode format version", "The file size", "The source&rsquo;s hash"]}, {"type": "output", "q": "What does this print?", "answer": "[14]", "explain": "(3 + 4) * 2 in postfix.", "code": "stack = []\nfor op in [\"3\", \"4\", \"+\", \"2\", \"*\"]:\n    if op.isdigit():\n        stack.append(int(op))\n    else:\n        b, a = stack.pop(), stack.pop()\n        stack.append(a + b if op == \"+\" else a * b)\nprint(stack)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: compiling a little language</div><div class="pc-prompt"><p>Write <code>compile_program(source)</code>, which compiles a small subset of Python into instructions for your <code>execute_jumps</code> machine, and <code>run_program(source, variables=None)</code>, which compiles and runs it, returning <code>(variables, output)</code>. Copy <code>execute_jumps</code> into your answer. Support:</p>
+<ul>
+<li>expressions: constants, names, <code>+ - *</code>, <code>/</code>, unary <code>-</code>, comparisons <code>&lt;</code>, <code>&gt;</code>, <code>==</code> (single comparisons only), and <code>and</code> / <code>or</code> with short-circuiting (the result is one of the operands, as in Python; hint: <code>DUP</code> and <code>POP</code> help);</li>
+<li>statements: assignment to one name, augmented assignment (<code>x += e</code>, <code>x -= e</code>, <code>x *= e</code>), <code>print(e)</code> with one argument (the <code>PRINT</code> instruction), <code>if</code> / <code>else</code> (including <code>elif</code>, which the AST represents as a nested <code>If</code>), and <code>while</code> loops (without <code>else</code>).</li>
+</ul>
+<p>Anything else raises <code>ValueError</code>. Jump targets must be correct positions in the final list: emit a placeholder and <strong>patch</strong> it once you know where the jump should go.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def execute_jumps(program, variables=None, limit=10000):
+    ___
+
+def compile_program(source):
+    ___
+
+def run_program(source, variables=None):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_programs():
+    &quot;a compiled language&quot;
+    src = &quot;total = 0\ni = 1\nwhile i &lt; n + 1:\n    total += i\n    i += 1\nprint(total)\n&quot;
+    assert run_program(src, {&quot;n&quot;: 10})[1] == [55]
+    fizz = (
+        &quot;i = 1\nwhile i &lt; 16:\n&quot;
+        &quot;    if i - (i / 15) * 15 == 0 and 0:\n        print(0)\n&quot;
+        &quot;    elif i == 15:\n        print(&#x27;fizzbuzz&#x27;)\n&quot;
+        &quot;    elif i == 3 or i == 6:\n        print(&#x27;fizz&#x27;)\n&quot;
+        &quot;    else:\n        x = 1\n&quot;
+        &quot;    i += 1\n&quot;
+    )
+    assert run_program(fizz)[1] == [&quot;fizz&quot;, &quot;fizz&quot;, &quot;fizzbuzz&quot;]
+    assert run_program(&quot;a = 0 or 5\nb = 3 and 0\nc = 2 and 7\nprint(a)\nprint(b)\nprint(c)&quot;)[1] == [5, 0, 7]
+    assert run_program(&quot;x = -3 * 2\nx -= 1\nx *= 2\nprint(x / 4)&quot;)[1] == [-3.5]
+    assert run_program(&quot;if 1 &gt; 2:\n    print(&#x27;no&#x27;)\nprint(&#x27;done&#x27;)&quot;)[1] == [&quot;done&quot;]
+
+def test_refused():
+    &quot;unsupported code&quot;
+    for bad in (&quot;for i in range(3):\n    pass&quot;, &quot;def f():\n    pass&quot;, &quot;x = [1]&quot;, &quot;print(1, 2)&quot;, &quot;a, b = 1, 2&quot;, &quot;x = 1 &lt; 2 &lt; 3&quot;):
+        try:
+            compile_program(bad)
+            assert False, bad
+        except ValueError:
+            pass</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+def execute_jumps(program, variables=None, limit=10000):
+    variables = dict(variables or {})
+    stack, output, pc, steps = [], [], 0, 0
+
+    def pop():
+        if not stack:
+            raise IndexError(&quot;stack underflow&quot;)
+        return stack.pop()
+
+    binary = {&quot;ADD&quot;: lambda a, b: a + b, &quot;SUB&quot;: lambda a, b: a - b, &quot;MUL&quot;: lambda a, b: a * b,
+              &quot;DIV&quot;: lambda a, b: a / b, &quot;LT&quot;: lambda a, b: a &lt; b, &quot;GT&quot;: lambda a, b: a &gt; b,
+              &quot;EQ&quot;: lambda a, b: a == b}
+    while pc &lt; len(program):
+        steps += 1
+        if steps &gt; limit:
+            raise RuntimeError(&quot;too many steps&quot;)
+        op, *args = program[pc]
+        pc += 1
+        if op == &quot;PUSH&quot;:
+            stack.append(args[0])
+        elif op == &quot;LOAD&quot;:
+            if args[0] not in variables:
+                raise NameError(args[0])
+            stack.append(variables[args[0]])
+        elif op == &quot;STORE&quot;:
+            variables[args[0]] = pop()
+        elif op in binary:
+            right, left = pop(), pop()
+            stack.append(binary[op](left, right))
+        elif op == &quot;NEG&quot;:
+            stack.append(-pop())
+        elif op == &quot;DUP&quot;:
+            top = pop()
+            stack.extend([top, top])
+        elif op == &quot;POP&quot;:
+            pop()
+        elif op == &quot;PRINT&quot;:
+            output.append(pop())
+        elif op == &quot;JUMP&quot;:
+            pc = args[0]
+        elif op == &quot;JUMP_IF_FALSE&quot;:
+            if not pop():
+                pc = args[0]
+        elif op == &quot;JUMP_IF_TRUE&quot;:
+            if pop():
+                pc = args[0]
+        else:
+            raise ValueError(f&quot;unknown instruction {op}&quot;)
+    return variables, output
+
+BIN = {ast.Add: &quot;ADD&quot;, ast.Sub: &quot;SUB&quot;, ast.Mult: &quot;MUL&quot;, ast.Div: &quot;DIV&quot;}
+CMP = {ast.Lt: &quot;LT&quot;, ast.Gt: &quot;GT&quot;, ast.Eq: &quot;EQ&quot;}
+
+def compile_program(source):
+    code = []
+
+    def jump(op):
+        code.append((op, None))
+        return len(code) - 1
+
+    def patch(index):
+        code[index] = (code[index][0], len(code))
+
+    def expr(node):
+        if isinstance(node, ast.Constant):
+            code.append((&quot;PUSH&quot;, node.value))
+        elif isinstance(node, ast.Name):
+            code.append((&quot;LOAD&quot;, node.id))
+        elif isinstance(node, ast.BinOp) and type(node.op) in BIN:
+            expr(node.left)
+            expr(node.right)
+            code.append((BIN[type(node.op)],))
+        elif isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
+            expr(node.operand)
+            code.append((&quot;NEG&quot;,))
+        elif isinstance(node, ast.Compare) and len(node.ops) == 1 and type(node.ops[0]) in CMP:
+            expr(node.left)
+            expr(node.comparators[0])
+            code.append((CMP[type(node.ops[0])],))
+        elif isinstance(node, ast.BoolOp):
+            exits = []
+            for value in node.values[:-1]:
+                expr(value)
+                code.append((&quot;DUP&quot;,))
+                exits.append(jump(&quot;JUMP_IF_FALSE&quot; if isinstance(node.op, ast.And) else &quot;JUMP_IF_TRUE&quot;))
+                code.append((&quot;POP&quot;,))
+            expr(node.values[-1])
+            for index in exits:
+                patch(index)
+        else:
+            raise ValueError(type(node).__name__)
+
+    def stmt(node):
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            expr(node.value)
+            code.append((&quot;STORE&quot;, node.targets[0].id))
+        elif isinstance(node, ast.AugAssign) and isinstance(node.target, ast.Name) and type(node.op) in BIN:
+            code.append((&quot;LOAD&quot;, node.target.id))
+            expr(node.value)
+            code.append((BIN[type(node.op)],))
+            code.append((&quot;STORE&quot;, node.target.id))
+        elif (isinstance(node, ast.Expr) and isinstance(node.value, ast.Call)
+              and isinstance(node.value.func, ast.Name) and node.value.func.id == &quot;print&quot;
+              and len(node.value.args) == 1 and not node.value.keywords):
+            expr(node.value.args[0])
+            code.append((&quot;PRINT&quot;,))
+        elif isinstance(node, ast.If):
+            expr(node.test)
+            to_else = jump(&quot;JUMP_IF_FALSE&quot;)
+            block(node.body)
+            to_end = jump(&quot;JUMP&quot;)
+            patch(to_else)
+            block(node.orelse)
+            patch(to_end)
+        elif isinstance(node, ast.While) and not node.orelse:
+            start = len(code)
+            expr(node.test)
+            to_end = jump(&quot;JUMP_IF_FALSE&quot;)
+            block(node.body)
+            code.append((&quot;JUMP&quot;, start))
+            patch(to_end)
+        else:
+            raise ValueError(type(node).__name__)
+
+    def block(statements):
+        for s in statements:
+            stmt(s)
+
+    block(ast.parse(source).body)
+    return code
+
+def run_program(source, variables=None):
+    return execute_jumps(compile_program(source), variables)</textarea><template class="pc-src pc-hint">Keep one list <code>code</code>. A helper <code>emit_jump(op)</code> appends <code>(op, None)</code> and returns its index; later <code>code[index] = (op, len(code))</code> patches it to &ldquo;here&rdquo;. For <code>if</code>: compile the test, emit <code>JUMP_IF_FALSE</code>, compile the body, emit <code>JUMP</code> (to skip the else), patch the first jump, compile <code>orelse</code>, patch the second. For <code>a and b</code>: compile <code>a</code>, <code>DUP</code>, <code>JUMP_IF_FALSE</code> to the end (leaving <code>a</code>), <code>POP</code>, compile <code>b</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, run <code>python -m dis your_file.py</code> on a short program, then on the same file with a different Python version if you have one, and compare. Tomorrow: frames, the objects that hold each running function&rsquo;s state, and the evaluation loop that drives them.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w064d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w064d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w064d2", "week": 64, "day": 2, "title": "Bytecode and dis", "exercises": [{"id": "w064d2-vm", "title": "A stack machine", "points": 10}, {"id": "w064d2-compile_expr", "title": "Compiling expressions", "points": 15}, {"id": "w064d2-jumps", "title": "Jumps and loops", "points": 15}, {"id": "w064d2-dis_read", "title": "Asking dis", "points": 10}, {"id": "w064d2-peephole", "title": "A peephole optimiser", "points": 10}, {"id": "w064d2-bug1", "title": "Operands the wrong way round", "points": 10}, {"id": "w064d2-bug2", "title": "A jump that never happens", "points": 10}, {"id": "w064d2-bug3", "title": "Operations before operands", "points": 10}, {"id": "w064d2-trace", "title": "Predict them", "points": 10}, {"id": "w064d2-challenge", "title": "Challenge: compiling a little language", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 64 Day 6: Forge | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="This week went inside the interpreter: the pipeline from source to running code, bytecode on a stack machine, frames and the evaluation loop, objects as C...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w064d6.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 64 Day 6: Forge">
+<meta property="og:description" content="This week went inside the interpreter: the pipeline from source to running code, bytecode on a stack machine, frames and the evaluation loop, objects as C...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w064d6.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-64">Week 64: Inside CPython</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#mixed-review" data-sec="mixed-review">Mixed review</a></li><li><a href="#forge-a-code-checker" data-sec="forge-a-code-checker">Forge: a code checker</a></li><li><a href="#forge-bonus-line-coverage" data-sec="forge-bonus-line-coverage">Forge bonus: line coverage</a></li><li><a href="#weekly-quiz" data-sec="weekly-quiz">Weekly quiz</a></li><li><a href="#week-64-review" data-sec="week-64-review">Week 64 review</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w064d6.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-64">Week 64: Inside CPython</a></li><li aria-current="page">Day 6 of 6</li></ol>
+      <p class="day-where"><span>Week 64, Day 6</span><span class="forge-tag">Forge day</span></p>
+      <h1>Forge</h1>
+      <div class="day-intro"><p>This week went inside the interpreter: the pipeline from source to running code, bytecode on a stack machine, frames and the evaluation loop, objects as C structs, and the import system. Today&rsquo;s Forge is a <strong>code checker</strong>, a small version of the linters you&rsquo;ll meet in real projects: it parses code with <code>ast</code>, finds unused imports and variables, mutable defaults, bare <code>except</code> clauses, shadowed built-ins and comparisons to <code>None</code>, and honours <code># noqa</code> comments found with <code>tokenize</code>. The bonus is a <strong>line coverage</strong> tool built on <code>sys.settrace</code>, the technique behind <code>coverage.py</code>. The weekly quiz and review finish the week.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Analyse code with ast to find common mistakes, with exact line numbers</li><li>Use tokenize to read comments that the syntax tree throws away</li><li>Measure line coverage with sys.settrace and statement lines from the AST</li><li>Combine this week&rsquo;s tools into programs that examine other programs</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:15" title="Warm-up: predict: 15 min"></span><span class="plan-seg s1" style="flex:30" title="Mixed review practice: 30 min"></span><span class="plan-seg s0" style="flex:60" title="Forge: a code checker: 60 min"></span><span class="plan-seg s1" style="flex:40" title="Forge bonus: line coverage: 40 min"></span><span class="plan-seg s0" style="flex:25" title="Weekly quiz: 25 min"></span><span class="plan-seg s1" style="flex:10" title="Week 64 review: 10 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up: predict</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:15</span><span class="plan-what">Mixed review practice</span><span class="plan-min">30 min</span></li><li><span class="plan-at">0:45</span><span class="plan-what">Forge: a code checker</span><span class="plan-min">60 min</span></li><li><span class="plan-at">1:45</span><span class="plan-what">Forge bonus: line coverage</span><span class="plan-min">40 min</span></li><li><span class="plan-at">2:25</span><span class="plan-what">Weekly quiz</span><span class="plan-min">25 min</span></li><li><span class="plan-at">2:50</span><span class="plan-what">Week 64 review</span><span class="plan-min">10 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w064d6.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w064d6.ipynb" download>download it</a>. Exercises today are worth 100 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w064d6-p1"><textarea class="pc-src pc-code" hidden>import ast
+tree = ast.parse(&quot;total = price * (1 + rate)&quot;)
+print(sorted(n.id for n in ast.walk(tree) if isinstance(n, ast.Name)))
+print(type(tree.body[0].value.right).__name__)</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w064d6-p2"><textarea class="pc-src pc-code" hidden>stack = []
+for op in [(&quot;PUSH&quot;, 6), (&quot;PUSH&quot;, 2), (&quot;SUB&quot;,), (&quot;PUSH&quot;, 3), (&quot;MUL&quot;,)]:
+    if op[0] == &quot;PUSH&quot;:
+        stack.append(op[1])
+    else:
+        b, a = stack.pop(), stack.pop()
+        stack.append(a - b if op[0] == &quot;SUB&quot; else a * b)
+print(stack)</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w064d6-p3"><textarea class="pc-src pc-code" hidden>import sys
+def a():
+    return b()
+def b():
+    f = sys._getframe()
+    return [f.f_code.co_name, f.f_back.f_code.co_name]
+print(a())</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w064d6-p4"><textarea class="pc-src pc-code" hidden>import sys
+s1 = &quot;abc&quot; * 10
+s2 = &quot;ab€&quot; * 10
+print(sys.getsizeof(s1 + &quot;a&quot;) - sys.getsizeof(s1), sys.getsizeof(s2 + &quot;a&quot;) - sys.getsizeof(s2))</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w064d6-p5"><textarea class="pc-src pc-code" hidden>import sys, types
+m = types.ModuleType(&quot;fake&quot;)
+m.value = 42
+sys.modules[&quot;fake&quot;] = m
+from fake import value
+print(value)
+del sys.modules[&quot;fake&quot;]</textarea></div>
+<p>If any surprised you, revisit <a href="w064d1.html">how CPython runs your code</a>, <a href="w064d2.html">bytecode and dis</a>, <a href="w064d3.html">frames and the evaluation loop</a>, <a href="w064d4.html">objects in C</a> or <a href="w064d5.html">the import system</a>.</p>
+<h2 id="mixed-review">Mixed review</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d6-mix_closure" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Inside a closure</div><div class="pc-prompt"><p>Write <code>closure_vars(func)</code>: a dict from each <strong>free variable</strong> of a function (the names in <code>func.__code__.co_freevars</code>) to its current value, read from the matching cell in <code>func.__closure__</code> (<code>cell.cell_contents</code>; use <code>None</code> for an empty cell, which raises <code>ValueError</code>). Closures and <code>nonlocal</code> were Week 60; this is what they look like inside.</p></div><textarea class="pc-src pc-code" hidden>def closure_vars(func):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_closure_vars():
+    &quot;closures and code objects&quot;
+    def make(rate):
+        count = 0
+        def bump(x):
+            nonlocal count
+            count += 1
+            return x * rate
+        return bump
+    f = make(3)
+    assert closure_vars(f) == {&quot;count&quot;: 0, &quot;rate&quot;: 3}
+    f(2)
+    f(2)
+    assert closure_vars(f)[&quot;count&quot;] == 2 and closure_vars(f)[&quot;rate&quot;] == 3
+    assert closure_vars(lambda: 1) == {}</textarea><textarea class="pc-src pc-solution" hidden>def closure_vars(func):
+    code = func.__code__
+    cells = func.__closure__ or ()
+    values = {}
+    for name, cell in zip(code.co_freevars, cells):
+        try:
+            values[name] = cell.cell_contents
+        except ValueError:
+            values[name] = None
+    return values</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d6-mix_walk" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Walking a tree with a generator</div><div class="pc-prompt"><p>Write a generator <code>walk_tree(node, depth=0)</code> (Week 59) that yields <code>(depth, node type name)</code> for every node of an AST in <strong>pre-order</strong> (a node before its children, children in the order <code>ast.iter_child_nodes</code> gives), using <code>yield from</code> for the recursion. Then <code>deepest(source)</code>: the greatest depth in the tree of the parsed source.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def walk_tree(node, depth=0):
+    ___
+
+def deepest(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_walk_tree():
+    &quot;a generator over a syntax tree&quot;
+    import ast, types
+    tree = ast.parse(&quot;x = 1 + y&quot;)
+    gen = walk_tree(tree)
+    assert isinstance(gen, types.GeneratorType)
+    assert list(walk_tree(tree)) == [(0, &quot;Module&quot;), (1, &quot;Assign&quot;), (2, &quot;Name&quot;), (3, &quot;Store&quot;), (2, &quot;BinOp&quot;),
+                                     (3, &quot;Constant&quot;), (3, &quot;Add&quot;), (3, &quot;Name&quot;), (4, &quot;Load&quot;)]
+    assert deepest(&quot;a&quot;) == 3 and deepest(&quot;f(g(h(1)))&quot;) &gt; deepest(&quot;f(1)&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+def walk_tree(node, depth=0):
+    yield depth, type(node).__name__
+    for child in ast.iter_child_nodes(node):
+        yield from walk_tree(child, depth + 1)
+
+def deepest(source):
+    return max(depth for depth, _ in walk_tree(ast.parse(source)))</textarea></div>
+<h2 id="forge-a-code-checker">Forge: a code checker</h2>
+<p>A <strong>linter</strong> reads code without running it and reports likely mistakes. Write <code>check(source)</code>, returning a sorted list of <code>(line, code, message)</code> tuples with no duplicates, and <code>report(source)</code>, the same problems as lines <code>"line: CODE message"</code> joined by newlines (an empty string if there are none). Checks:</p>
+<table>
+<thead>
+<tr>
+<th>code</th>
+<th>finds</th>
+<th>message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>F401</code></td>
+<td>an imported name that&rsquo;s never read anywhere (<code>import a.b</code> binds <code>a</code>; <code>as</code> names count; names listed in a module-level <code>__all__</code> count as used)</td>
+<td><code>'os' imported but unused</code></td>
+</tr>
+<tr>
+<td><code>F841</code></td>
+<td>inside a function, a name assigned with <code>=</code> anywhere in the function&rsquo;s body that&rsquo;s never read in that body, ignoring <code>_</code> and names declared <code>global</code> or <code>nonlocal</code>; report the line of the first assignment</td>
+<td><code>local variable 'x' is assigned to but never used</code></td>
+</tr>
+<tr>
+<td><code>B006</code></td>
+<td>a default argument that&rsquo;s a list, dict or set display, or a call to <code>list</code>, <code>dict</code> or <code>set</code> (positional and keyword-only defaults)</td>
+<td><code>mutable default argument</code></td>
+</tr>
+<tr>
+<td><code>E722</code></td>
+<td><code>except:</code> with no exception type</td>
+<td><code>do not use bare 'except'</code></td>
+</tr>
+<tr>
+<td><code>A001</code></td>
+<td>a name that&rsquo;s assigned, or a function, class or parameter name, that&rsquo;s also a built-in (<code>dir(builtins)</code>, ignoring names starting with <code>_</code>)</td>
+<td><code>'list' shadows a built-in</code></td>
+</tr>
+<tr>
+<td><code>E711</code></td>
+<td><code>== None</code> or <code>!= None</code></td>
+<td><code>comparison to None should use 'is' or 'is not'</code></td>
+</tr>
+</tbody>
+</table>
+<p>A line with a <code># noqa</code> comment hides every problem on that line; <code># noqa: E711, F401</code> hides only those codes (case-insensitive <code>noqa</code>). Find comments with <code>tokenize</code>, so <code>"# noqa"</code> inside a string doesn&rsquo;t count. Code with a syntax error gives <code>[(line, "E999", "syntax error")]</code>.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d6-forge" data-points="50"><div class="pc-label"><span>Exercise</span><span class="pc-pts">50 points</span></div><div class="pc-title">Forge: a code checker</div><div class="pc-prompt"><p>Write <code>check</code> and <code>report</code> to the specification above.</p></div><textarea class="pc-src pc-code" hidden>import ast
+import builtins
+import io
+import tokenize
+
+def check(source):
+    ___
+
+def report(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_imports_and_locals():
+    &quot;unused imports and locals&quot;
+    src = (
+        &quot;import os\n&quot;
+        &quot;import sys, json\n&quot;
+        &quot;import collections.abc\n&quot;
+        &quot;from math import pi, tau as full_turn\n&quot;
+        &quot;__all__ = [&#x27;full_turn&#x27;]\n&quot;
+        &quot;def area(r):\n&quot;
+        &quot;    unused = 2\n&quot;
+        &quot;    total = pi * r * r\n&quot;
+        &quot;    _ = 0\n&quot;
+        &quot;    return total\n&quot;
+        &quot;def counter():\n&quot;
+        &quot;    count = 0\n&quot;
+        &quot;    def step():\n&quot;
+        &quot;        return count + 1\n&quot;
+        &quot;    return step\n&quot;
+        &quot;print(sys.argv)\n&quot;
+    )
+    assert check(src) == [
+        (1, &quot;F401&quot;, &quot;&#x27;os&#x27; imported but unused&quot;),
+        (2, &quot;F401&quot;, &quot;&#x27;json&#x27; imported but unused&quot;),
+        (3, &quot;F401&quot;, &quot;&#x27;collections&#x27; imported but unused&quot;),
+        (7, &quot;F841&quot;, &quot;local variable &#x27;unused&#x27; is assigned to but never used&quot;),
+    ]
+    assert check(&quot;import a.b\nprint(a.b.c)\n&quot;) == []
+    assert check(&quot;def f():\n    global g\n    g = 1\n&quot;) == []
+
+def test_other_checks():
+    &quot;defaults, excepts, built-ins and None&quot;
+    src = (
+        &quot;def add(item, items=[], seen=set(), *, opts={}):\n&quot;
+        &quot;    if item == None:\n&quot;
+        &quot;        return items\n&quot;
+        &quot;    try:\n&quot;
+        &quot;        items.append(item)\n&quot;
+        &quot;    except:\n&quot;
+        &quot;        pass\n&quot;
+        &quot;    return items\n&quot;
+        &quot;list = [1]\n&quot;
+        &quot;def max(id):\n&quot;
+        &quot;    return id != None\n&quot;
+    )
+    assert check(src) == [
+        (1, &quot;B006&quot;, &quot;mutable default argument&quot;),
+        (2, &quot;E711&quot;, &quot;comparison to None should use &#x27;is&#x27; or &#x27;is not&#x27;&quot;),
+        (6, &quot;E722&quot;, &quot;do not use bare &#x27;except&#x27;&quot;),
+        (9, &quot;A001&quot;, &quot;&#x27;list&#x27; shadows a built-in&quot;),
+        (10, &quot;A001&quot;, &quot;&#x27;id&#x27; shadows a built-in&quot;),
+        (10, &quot;A001&quot;, &quot;&#x27;max&#x27; shadows a built-in&quot;),
+        (11, &quot;E711&quot;, &quot;comparison to None should use &#x27;is&#x27; or &#x27;is not&#x27;&quot;),
+    ]
+    assert check(&quot;def f(x=None, y=(), z=0):\n    return x is None\n&quot;) == []
+
+def test_noqa_and_report():
+    &quot;suppression, syntax errors and reports&quot;
+    src = &quot;import os  # noqa\nimport re  # noqa: E711\nx = 1 == None  # noqa: E711, F401\ndef f(a=[]):  # NOQA: B006\n    pass\n&quot;
+    assert check(src) == [(2, &quot;F401&quot;, &quot;&#x27;re&#x27; imported but unused&quot;)]
+    assert check(&quot;x = = 1&quot;) == [(1, &quot;E999&quot;, &quot;syntax error&quot;)]
+    assert report(&quot;import os\nlist = 3\n&quot;) == &quot;1: F401 &#x27;os&#x27; imported but unused\n2: A001 &#x27;list&#x27; shadows a built-in&quot;
+    assert report(&quot;x = 1\n&quot;) == &quot;&quot;
+    text = &quot;s = &#x27;# noqa&#x27;\nimport os\n&quot;
+    assert check(text) == [(2, &quot;F401&quot;, &quot;&#x27;os&#x27; imported but unused&quot;)]</textarea><textarea class="pc-src pc-solution" hidden>import ast
+import builtins
+import io
+import tokenize
+
+BUILTINS = {name for name in dir(builtins) if not name.startswith(&quot;_&quot;)}
+
+def _noqa(source):
+    rules = {}
+    try:
+        for tok in tokenize.generate_tokens(io.StringIO(source).readline):
+            if tok.type == tokenize.COMMENT:
+                text = tok.string.lstrip(&quot;#&quot;).strip()
+                if text.lower().startswith(&quot;noqa&quot;):
+                    rest = text[4:].strip()
+                    if rest.startswith(&quot;:&quot;):
+                        codes = {c.strip() for c in rest[1:].split(&quot;,&quot;) if c.strip()}
+                        rules[tok.start[0]] = codes
+                    else:
+                        rules[tok.start[0]] = None
+    except tokenize.TokenError:
+        pass
+    return rules
+
+def _loaded(node):
+    return {n.id for n in ast.walk(node) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load)}
+
+def _check_imports(tree, problems):
+    used = _loaded(tree)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id == &quot;__all__&quot; and isinstance(node.value, (ast.List, ast.Tuple)):
+                    used |= {e.value for e in node.value.elts if isinstance(e, ast.Constant)}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                name = alias.asname or alias.name.split(&quot;.&quot;)[0]
+                if name not in used:
+                    problems.append((node.lineno, &quot;F401&quot;, f&quot;&#x27;{name}&#x27; imported but unused&quot;))
+        elif isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                name = alias.asname or alias.name
+                if name != &quot;*&quot; and name not in used:
+                    problems.append((node.lineno, &quot;F401&quot;, f&quot;&#x27;{name}&#x27; imported but unused&quot;))
+
+def _check_locals(tree, problems):
+    for func in ast.walk(tree):
+        if not isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        declared = set()
+        for n in ast.walk(func):
+            if isinstance(n, (ast.Global, ast.Nonlocal)):
+                declared.update(n.names)
+        used = set()
+        for stmt in func.body:
+            used |= _loaded(stmt)
+        first = {}
+        for stmt in func.body:
+            for n in ast.walk(stmt):
+                if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+                    continue
+                if isinstance(n, ast.Assign):
+                    for target in n.targets:
+                        if isinstance(target, ast.Name):
+                            first.setdefault(target.id, n.lineno)
+        for name, line in first.items():
+            if name not in used and name not in declared and name != &quot;_&quot;:
+                problems.append((line, &quot;F841&quot;, f&quot;local variable &#x27;{name}&#x27; is assigned to but never used&quot;))
+
+def _check_defaults(tree, problems):
+    for func in ast.walk(tree):
+        if isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+            for default in func.args.defaults + [d for d in func.args.kw_defaults if d is not None]:
+                mutable = isinstance(default, (ast.List, ast.Dict, ast.Set)) or (
+                    isinstance(default, ast.Call) and isinstance(default.func, ast.Name)
+                    and default.func.id in (&quot;list&quot;, &quot;dict&quot;, &quot;set&quot;))
+                if mutable:
+                    problems.append((default.lineno, &quot;B006&quot;, &quot;mutable default argument&quot;))
+
+def _check_misc(tree, problems):
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ExceptHandler) and node.type is None:
+            problems.append((node.lineno, &quot;E722&quot;, &quot;do not use bare &#x27;except&#x27;&quot;))
+        elif isinstance(node, ast.Compare):
+            for op, right in zip(node.ops, node.comparators):
+                if isinstance(op, (ast.Eq, ast.NotEq)) and isinstance(right, ast.Constant) and right.value is None:
+                    problems.append((node.lineno, &quot;E711&quot;, &quot;comparison to None should use &#x27;is&#x27; or &#x27;is not&#x27;&quot;))
+        names = []
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            names.append(node.id)
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            names.append(node.name)
+        elif isinstance(node, ast.arg):
+            names.append(node.arg)
+        for name in names:
+            if name in BUILTINS:
+                problems.append((node.lineno, &quot;A001&quot;, f&quot;&#x27;{name}&#x27; shadows a built-in&quot;))
+
+def check(source):
+    try:
+        tree = ast.parse(source)
+    except SyntaxError as e:
+        return [(e.lineno or 1, &quot;E999&quot;, &quot;syntax error&quot;)]
+    problems = []
+    for checker in (_check_imports, _check_locals, _check_defaults, _check_misc):
+        checker(tree, problems)
+    rules = _noqa(source)
+    kept = []
+    for line, code, message in problems:
+        if line in rules and (rules[line] is None or code in rules[line]):
+            continue
+        kept.append((line, code, message))
+    return sorted(set(kept))
+
+def report(source):
+    return &quot;\n&quot;.join(f&quot;{line}: {code} {message}&quot; for line, code, message in check(source))</textarea><template class="pc-src pc-hint">Write one small function per check, each appending to a shared list of problems, then filter by the <code>noqa</code> rules (a dict from line number to <code>None</code> for &ldquo;everything&rdquo; or a set of codes). For F401, collect every <code>Name</code> with a <code>Load</code> context in the whole tree. For F841, walk each function&rsquo;s body for <code>Assign</code> targets and <code>Load</code> names separately.</template></div>
+<aside class="callout c-think"><div class="callout-t">Programs that read programs</div><p>The checker never runs the code it checks, yet it finds real bugs, because the syntax tree holds the program&rsquo;s structure precisely. That&rsquo;s the idea behind every tool in this family: linters (flake8, pylint, Ruff), formatters (Black), type checkers (mypy, Week 33), refactoring tools and IDE features such as &ldquo;find all references&rdquo;. Each starts from the same stages you met on Monday, tokens for what the tree forgets (comments, exact layout) and the AST for everything else, and adds a symbol table when it needs to know which name means what. When a tool reports a strange warning, you can now picture what it saw.</p></aside>
+<h2 id="forge-bonus-line-coverage">Forge bonus: line coverage</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d6-forge2" data-points="30"><div class="pc-label"><span>Exercise</span><span class="pc-pts">30 points</span></div><div class="pc-title">Forge bonus: line coverage</div><div class="pc-prompt"><p><strong>Coverage</strong> tools show which lines of a program ran, so you can find code your tests never reach. Write:</p>
+<ul>
+<li><code>statement_lines(source)</code>: the sorted line numbers where statements start (every <code>ast.stmt</code> node&rsquo;s <code>lineno</code>), leaving out docstrings and other string-only expression statements;</li>
+<li><code>measure(source, namespace=None)</code>: compile the source with the filename <code>"&lt;covered&gt;"</code>, run it in <code>namespace</code> (a new dict if none) with a tracer that counts <code>"line"</code> events in frames from that filename only (module level and functions), and return a dict with <code>"statements"</code>, <code>"executed"</code> (statement lines that ran, sorted), <code>"missed"</code> (those that didn&rsquo;t), <code>"percent"</code> (executed statements as a rounded whole-number percentage, 100 when there are none) and <code>"hits"</code> (for each executed statement line, how many times it ran). Restore the previous tracer even if the code raises;</li>
+<li><code>annotate(source, result)</code>: the source with a three-character margin and <code>" | "</code> before each line: the hit count (right-aligned) for executed statement lines, <code>!</code> for missed ones, and spaces for other lines.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import ast
+import sys
+
+def statement_lines(source):
+    ___
+
+def measure(source, namespace=None):
+    ___
+
+def annotate(source, result):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_measure():
+    &quot;line coverage&quot;
+    src = (
+        &quot;def grade(score):\n&quot;
+        &quot;    if score &gt;= 50:\n&quot;
+        &quot;        return &#x27;pass&#x27;\n&quot;
+        &quot;    return &#x27;fail&#x27;\n&quot;
+        &quot;results = []\n&quot;
+        &quot;for s in (70, 80):\n&quot;
+        &quot;    results.append(grade(s))\n&quot;
+    )
+    ns = {}
+    r = measure(src, ns)
+    assert ns[&quot;results&quot;] == [&quot;pass&quot;, &quot;pass&quot;]
+    assert r[&quot;statements&quot;] == [1, 2, 3, 4, 5, 6, 7] and r[&quot;missed&quot;] == [4]
+    assert r[&quot;executed&quot;] == [1, 2, 3, 5, 6, 7] and r[&quot;percent&quot;] == 86
+    assert r[&quot;hits&quot;][2] == 2 and r[&quot;hits&quot;][7] == 2 and r[&quot;hits&quot;][1] == 1
+    full = measure(&quot;x = 1\ny = x + 1\n&quot;)
+    assert full[&quot;percent&quot;] == 100 and full[&quot;missed&quot;] == []
+    assert statement_lines(&#x27;&quot;&quot;&quot;doc&quot;&quot;&quot;\nx = 1\n&#x27;) == [2]
+
+def test_annotate():
+    &quot;annotated listing&quot;
+    src = &quot;a = 1\nif a &gt; 5:\n    a = 0\nb = a\n&quot;
+    r = measure(src)
+    assert annotate(src, r).split(&quot;\n&quot;) == [&quot;  1 | a = 1&quot;, &quot;  1 | if a &gt; 5:&quot;, &quot;  ! |     a = 0&quot;, &quot;  1 | b = a&quot;, &quot;    | &quot;]
+    import sys
+    before = sys.gettrace()
+    try:
+        measure(&quot;raise ValueError(&#x27;x&#x27;)\n&quot;)
+        assert False
+    except ValueError:
+        pass
+    assert sys.gettrace() is before</textarea><textarea class="pc-src pc-solution" hidden>import ast
+import sys
+
+FILENAME = &quot;&lt;covered&gt;&quot;
+
+def statement_lines(source):
+    lines = set()
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.stmt):
+            if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
+                continue
+            lines.add(node.lineno)
+    return sorted(lines)
+
+def measure(source, namespace=None):
+    namespace = {} if namespace is None else namespace
+    hits = {}
+
+    def tracer(frame, event, arg):
+        if frame.f_code.co_filename != FILENAME:
+            return None
+        if event == &quot;line&quot;:
+            hits[frame.f_lineno] = hits.get(frame.f_lineno, 0) + 1
+        return tracer
+
+    code = compile(source, FILENAME, &quot;exec&quot;)
+    previous = sys.gettrace()
+    sys.settrace(tracer)
+    try:
+        exec(code, namespace)
+    finally:
+        sys.settrace(previous)
+    statements = statement_lines(source)
+    executed = sorted(line for line in statements if line in hits)
+    missed = sorted(line for line in statements if line not in hits)
+    percent = round(100 * len(executed) / len(statements)) if statements else 100
+    return {&quot;statements&quot;: statements, &quot;executed&quot;: executed, &quot;missed&quot;: missed,
+            &quot;percent&quot;: percent, &quot;hits&quot;: {line: hits[line] for line in executed}}
+
+def annotate(source, result):
+    out = []
+    for number, text in enumerate(source.split(&quot;\n&quot;), 1):
+        if number in result[&quot;missed&quot;]:
+            mark = &quot;!&quot;
+        elif number in result[&quot;executed&quot;]:
+            mark = str(result[&quot;hits&quot;][number])
+        else:
+            mark = &quot; &quot;
+        out.append(f&quot;{mark:&gt;3} | {text}&quot;)
+    return &quot;\n&quot;.join(out)</textarea><template class="pc-src pc-hint">The tracer must return itself both for the module-level frame and for function frames from <code>"&lt;covered&gt;"</code>, and <code>None</code> for any other file. Format each margin with <code>f"{mark:&gt;3}"</code>.</template></div>
+<h2 id="weekly-quiz">Weekly quiz</h2>
+<div class="quiz" data-id="w064d6-weekly"><div class="pc-label"><span>Quiz</span><span>15 questions</span></div><script type="application/json">[{"type": "mc", "q": "In what order does CPython turn source into running code?", "answer": 1, "explain": "Each stage has a tool.", "options": ["Compile, parse, tokenise", "Tokenise, parse into an AST, compile to bytecode, evaluate", "Evaluate, then compile", "Parse, evaluate, tokenise"]}, {"type": "mc", "q": "What does the AST lose that tokens keep?", "answer": 1, "explain": "That&rsquo;s why the checker used tokenize for noqa.", "options": ["Names", "Comments and exact layout", "Numbers", "Strings"]}, {"type": "mc", "q": "Why call generic_visit in a NodeVisitor method?", "answer": 1, "explain": "Otherwise nested nodes are skipped.", "options": ["Speed", "To carry on into the node&rsquo;s children", "To stop", "To print"]}, {"type": "mc", "q": "What does compile(&hellip;, &ldquo;eval&rdquo;) accept?", "answer": 1, "explain": "exec mode for statements.", "options": ["Any code", "A single expression", "Only numbers", "Statements"]}, {"type": "mc", "q": "How does a stack machine compute a - b?", "answer": 1, "explain": "The right operand is on top.", "options": ["Pop a then b", "Push a, push b, then SUB pops b and a and pushes a - b", "With registers", "It can&rsquo;t"]}, {"type": "mc", "q": "Why shouldn&rsquo;t programs depend on exact bytecode?", "answer": 1, "explain": "Use dis only to understand.", "options": ["It&rsquo;s secret", "It changes between Python versions", "It&rsquo;s slow", "It&rsquo;s random"]}, {"type": "mc", "q": "What links a frame to its caller?", "answer": 1, "explain": "Following f_back walks the stack.", "options": ["f_code", "f_back", "f_locals", "tb_next"]}, {"type": "mc", "q": "What must a trace function return on a &ldquo;call&rdquo; event to receive that frame&rsquo;s line events?", "answer": 1, "explain": "None means: don&rsquo;t trace this frame.", "options": ["None", "A local trace function (often itself)", "True", "The frame"]}, {"type": "mc", "q": "What are the two fields of the PyObject header?", "answer": 1, "explain": "ob_refcnt and ob_type.", "options": ["Name and value", "Reference count and type pointer", "Size and hash", "Address and id"]}, {"type": "mc", "q": "Why are special methods looked up on the type?", "answer": 1, "explain": "nb_add, sq_length, tp_hash&hellip;", "options": ["Style", "They fill C slots in the type object", "Instances can&rsquo;t have methods", "Speed only"]}, {"type": "mc", "q": "How many bytes per character does CPython use for a string whose widest character is &lsquo;\u00e9&rsquo;?", "answer": 0, "explain": "\u00e9 is below 256.", "options": ["1", "2", "4", "It varies by character"]}, {"type": "mc", "q": "What does import check first?", "answer": 1, "explain": "The module cache.", "options": ["sys.path", "sys.modules", "The current folder", "site-packages"]}, {"type": "mc", "q": "What must a meta path finder return for names it doesn&rsquo;t provide?", "answer": 1, "explain": "So other finders get a turn.", "options": ["An empty module", "None", "An exception", "False"]}, {"type": "mc", "q": "When does a circular import fail?", "answer": 1, "explain": "The module is partially initialised.", "options": ["Always", "When one module needs a name another hasn&rsquo;t defined yet, as in from a import x at the top", "Never", "Only with packages"]}, {"type": "mc", "q": "How does a coverage tool know which lines ran?", "answer": 1, "explain": "sys.settrace, or sys.monitoring in newer tools.", "options": ["It reads the source", "It records line events from a trace function", "It guesses", "From the .pyc file"]}]</script></div>
+<h2 id="week-64-review">Week 64 review</h2>
+<p>Tick off each one honestly. If one feels shaky, go back and redo two exercises from that day.</p>
+<ul>
+<li>I can follow code through tokens, the AST and code objects, and analyse and rewrite code with ast. (<a href="w064d1.html">Day 1</a>)</li>
+<li>I can read dis output and build and compile for a stack machine with jumps. (<a href="w064d2.html">Day 2</a>)</li>
+<li>I can inspect frames and tracebacks and trace calls and lines with sys.settrace safely. (<a href="w064d3.html">Day 3</a>)</li>
+<li>I can explain the object header, type slots, big integers, compact strings and list growth. (<a href="w064d4.html">Day 4</a>)</li>
+<li>I can explain each step of an import and write my own finder and loader, including packages. (<a href="w064d5.html">Day 5</a>)</li>
+<li>I built a code checker and a line coverage tool. (Today)</li>
+</ul>
+<p>Tomorrow is a <strong>rest day</strong>. Next week: <strong>Performance</strong>: profiling, algorithms versus constant factors, fast data structures, caching, and vectorisation with NumPy.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w064d5.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w064d6", "week": 64, "day": 6, "title": "Forge", "exercises": [{"id": "w064d6-mix_closure", "title": "Inside a closure", "points": 10}, {"id": "w064d6-mix_walk", "title": "Walking a tree with a generator", "points": 10}, {"id": "w064d6-forge", "title": "Forge: a code checker", "points": 50}, {"id": "w064d6-forge2", "title": "Forge bonus: line coverage", "points": 30}], "points": 100}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

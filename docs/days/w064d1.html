@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 64 Day 1: How CPython runs your code | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Last week took apart what happens when you write obj.attr. This week goes deeper, into the interpreter itself. CPython, the Python you’ve been using all...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w064d1.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 64 Day 1: How CPython runs your code">
+<meta property="og:description" content="Last week took apart what happens when you write obj.attr. This week goes deeper, into the interpreter itself. CPython, the Python you’ve been using all...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w064d1.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-64">Week 64: Inside CPython</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#the-pipeline" data-sec="the-pipeline">The pipeline</a></li><li><a href="#tokens" data-sec="tokens">Tokens</a></li><li><a href="#the-abstract-syntax-tree" data-sec="the-abstract-syntax-tree">The abstract syntax tree</a></li><li><a href="#compile-and-code-objects" data-sec="compile-and-code-objects">compile and code objects</a></li><li><a href="#caching-bytecode-pyc-files" data-sec="caching-bytecode-pyc-files">Caching bytecode: .pyc files</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w064d1.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-64">Week 64: Inside CPython</a></li><li aria-current="page">Day 1 of 6</li></ol>
+      <p class="day-where"><span>Week 64, Day 1</span></p>
+      <h1>How CPython runs your code</h1>
+      <div class="day-intro"><p>Last week took apart what happens when you write <code>obj.attr</code>. This week goes deeper, into the interpreter itself. <strong>CPython</strong>, the Python you&rsquo;ve been using all along, is a program written in C, and running a <code>.py</code> file takes it through a pipeline: the source is split into <strong>tokens</strong>, the tokens are parsed into an <strong>abstract syntax tree</strong>, the tree is compiled into <strong>bytecode</strong> inside a <strong>code object</strong>, and the bytecode is run by the <strong>evaluation loop</strong>. Today you&rsquo;ll walk through every stage with the standard library&rsquo;s own tools (<code>tokenize</code>, <code>ast</code>, <code>compile</code>), and then use the syntax tree to analyse and rewrite code.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Name the stages from source text to running code and the tool that shows each one</li><li>Read token streams with tokenize and syntax trees with ast</li><li>Use compile with its exec, eval and single modes, and inspect code objects</li><li>Analyse code with ast.NodeVisitor and rewrite it with ast.NodeTransformer</li><li>Explain what .pyc files are and when Python reuses them</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="The pipeline: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Tokens: 20 min"></span><span class="plan-seg s1" style="flex:25" title="The abstract syntax tree: 25 min"></span><span class="plan-seg s0" style="flex:20" title="compile and code objects: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Caching bytecode: .pyc files: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">The pipeline</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Tokens</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">The abstract syntax tree</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">compile and code objects</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Caching bytecode: .pyc files</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w064d1.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w064d1.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w064d1-p1"><textarea class="pc-src pc-code" hidden>import ast
+
+tree = ast.parse(&quot;total = price * 2&quot;)
+assign = tree.body[0]
+print(type(assign).__name__)
+print(assign.targets[0].id, type(assign.value).__name__)
+print(ast.unparse(assign.value))
+
+code = compile(&quot;price * 2&quot;, &quot;&lt;calc&gt;&quot;, &quot;eval&quot;)
+print(eval(code, {&quot;price&quot;: 21}))
+print(type(code).__name__, code.co_names)</textarea></div>
+<p>Python turned the text into a tree of objects you can inspect (an <code>Assign</code> whose value is a <code>BinOp</code>), then compiled an expression into a <strong>code object</strong> that <code>eval</code> ran. Every program you&rsquo;ve written has gone through these same steps.</p>
+<h2 id="the-pipeline">The pipeline</h2>
+<p>When you run <code>python shop.py</code>, CPython:</p>
+<ol>
+<li><strong>reads</strong> the file as text (UTF-8 by default);</li>
+<li><strong>tokenises</strong> it: splits the text into tokens such as names, numbers, operators and the special <code>INDENT</code> and <code>DEDENT</code> tokens that make indentation part of the grammar;</li>
+<li><strong>parses</strong> the tokens into an <strong>abstract syntax tree</strong> (AST): a tree of nodes like <code>Assign</code>, <code>Call</code> and <code>If</code>. Syntax errors are found here;</li>
+<li>builds a <strong>symbol table</strong>, deciding for every name whether it&rsquo;s local, global, or a free variable of a closure (Week 60);</li>
+<li><strong>compiles</strong> the AST into <strong>bytecode</strong>: a compact list of instructions for a virtual machine, stored with its constants and names in a <strong>code object</strong>;</li>
+<li><strong>evaluates</strong> the code object in the <strong>evaluation loop</strong>, a large C function that reads one instruction at a time and carries it out (Wednesday).</li>
+</ol>
+<p>Each stage has a tool in the standard library: <code>tokenize</code>, <code>ast</code>, <code>symtable</code>, <code>compile</code>, <code>dis</code> (tomorrow) and <code>exec</code>. The point of knowing them isn&rsquo;t to write a compiler, but to understand error messages, performance and tools: linters, formatters, test frameworks and coverage tools all work on these stages.</p>
+<div class="pc pc-example" data-kind="example" data-id="w064d1-e2"><textarea class="pc-src pc-code" hidden>import ast, io, tokenize
+
+source = &quot;if n &gt; 0:\n    n = n - 1\n&quot;
+for tok in tokenize.generate_tokens(io.StringIO(source).readline):
+    print(tokenize.tok_name[tok.type], repr(tok.string))
+
+tree = ast.parse(source)
+print(type(tree.body[0]).__name__, type(tree.body[0].test).__name__)
+
+code = compile(tree, &quot;&lt;example&gt;&quot;, &quot;exec&quot;)
+namespace = {&quot;n&quot;: 3}
+exec(code, namespace)
+print(namespace[&quot;n&quot;])</textarea></div>
+<h2 id="tokens">Tokens</h2>
+<p>The <strong>tokeniser</strong> (or lexer) turns characters into tokens, each with a type, its text and its position. <code>tokenize.generate_tokens(readline)</code> exposes it: give it a function that returns one line at a time (<code>io.StringIO(text).readline</code>). Useful types:</p>
+<ul>
+<li><code>NAME</code> (identifiers and keywords: <code>if</code> is a <code>NAME</code> token too), <code>NUMBER</code>, <code>STRING</code>, <code>OP</code> (operators and brackets);</li>
+<li><code>NEWLINE</code> (the end of a logical line), <code>NL</code> (a blank line or a line break inside brackets), <code>COMMENT</code>;</li>
+<li><code>INDENT</code> and <code>DEDENT</code>: Python&rsquo;s blocks, made by comparing each line&rsquo;s indentation with a stack of previous levels;</li>
+<li><code>ENDMARKER</code> at the end.</li>
+</ul>
+<p>Tokenising keeps comments and exact positions, which the AST throws away, so tools that must preserve your text (some formatters, syntax highlighters, <code>tokenize</code>-based refactoring tools) work at this level.</p>
+<div class="pc pc-example" data-kind="example" data-id="w064d1-e3"><textarea class="pc-src pc-code" hidden>import io, keyword, tokenize
+
+source = &quot;def area(r):  # circle\n    return 3.14 * r ** 2\n&quot;
+names, keywords, comments = [], [], []
+for tok in tokenize.generate_tokens(io.StringIO(source).readline):
+    if tok.type == tokenize.NAME:
+        (keywords if keyword.iskeyword(tok.string) else names).append(tok.string)
+    elif tok.type == tokenize.COMMENT:
+        comments.append((tok.start, tok.string))
+print(names, keywords, comments)</textarea></div>
+<h2 id="the-abstract-syntax-tree">The abstract syntax tree</h2>
+<p><code>ast.parse(source)</code> returns a <code>Module</code> node whose <code>body</code> is a list of statements. Every node is an ordinary Python object with named fields (<code>node._fields</code> lists them) and, for most nodes, a position (<code>lineno</code>, <code>col_offset</code>). Some common nodes:</p>
+<table>
+<thead>
+<tr>
+<th>code</th>
+<th>node</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>x = 1</code></td>
+<td><code>Assign(targets=[Name('x')], value=Constant(1))</code></td>
+</tr>
+<tr>
+<td><code>a + b</code></td>
+<td><code>BinOp(left=Name('a'), op=Add(), right=Name('b'))</code></td>
+</tr>
+<tr>
+<td><code>f(x)</code></td>
+<td><code>Call(func=Name('f'), args=[Name('x')])</code></td>
+</tr>
+<tr>
+<td><code>def f(): ...</code></td>
+<td><code>FunctionDef(name='f', args=..., body=[...])</code></td>
+</tr>
+<tr>
+<td><code>x</code> read / written</td>
+<td><code>Name(id='x', ctx=Load())</code> / <code>Name(id='x', ctx=Store())</code></td>
+</tr>
+</tbody>
+</table>
+<p>Tools to work with trees:</p>
+<ul>
+<li><code>ast.dump(node)</code> shows a node&rsquo;s structure; <code>ast.unparse(node)</code> turns a tree back into source code.</li>
+<li><code>ast.walk(tree)</code> yields <strong>every</strong> node, in no particular order: fine for counting.</li>
+<li><strong><code>ast.NodeVisitor</code></strong>: subclass it and define <code>visit_Name</code>, <code>visit_Call</code> and so on; call <code>visitor.visit(tree)</code>. Inside a <code>visit_X</code> method, call <code>self.generic_visit(node)</code> to carry on into the node&rsquo;s children, or they&rsquo;re skipped.</li>
+<li><strong><code>ast.NodeTransformer</code></strong>: like a visitor, but each <code>visit_X</code> returns a replacement node (or the same node, or <code>None</code> to delete it). After changing a tree, call <code>ast.fix_missing_locations(tree)</code> so new nodes get positions before compiling.</li>
+<li><code>ast.literal_eval(text)</code> safely evaluates text containing only literals (numbers, strings, lists, dicts, &hellip;): unlike <code>eval</code>, it can&rsquo;t run code.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w064d1-e4"><textarea class="pc-src pc-code" hidden>import ast
+
+source = &quot;&quot;&quot;
+def total(prices, tax):
+    subtotal = sum(prices)
+    return round(subtotal * (1 + tax), 2)
+
+def label(item):
+    return item.upper()
+&quot;&quot;&quot;
+
+class CallCounter(ast.NodeVisitor):
+    def __init__(self):
+        self.calls = []
+    def visit_FunctionDef(self, node):
+        print(&quot;function&quot;, node.name, &quot;args&quot;, [a.arg for a in node.args.args])
+        self.generic_visit(node)             # carry on into the body
+    def visit_Call(self, node):
+        self.calls.append(ast.unparse(node.func))
+        self.generic_visit(node)
+
+counter = CallCounter()
+counter.visit(ast.parse(source))
+print(counter.calls)
+print(ast.literal_eval(&quot;{&#x27;a&#x27;: [1, 2.5], &#x27;b&#x27;: (True, None)}&quot;))</textarea></div>
+<h2 id="compile-and-code-objects">compile and code objects</h2>
+<p><code>compile(source, filename, mode)</code> turns source text (or an AST) into a <strong>code object</strong>. The <code>filename</code> is only used in error messages and tracebacks (<code>"&lt;string&gt;"</code> is the convention for code without a file). The mode says what kind of code it is:</p>
+<ul>
+<li><code>"exec"</code>: any sequence of statements, run with <code>exec(code, namespace)</code>; the result is always <code>None</code>, and the statements&rsquo; effects land in <code>namespace</code>;</li>
+<li><code>"eval"</code>: a single <strong>expression</strong>, whose value <code>eval(code, namespace)</code> returns;</li>
+<li><code>"single"</code>: one interactive statement, as the REPL uses (expression values are printed).</li>
+</ul>
+<p>A code object is immutable and holds everything needed to run the code: <code>co_code</code> (the bytecode bytes), <code>co_consts</code> (constants), <code>co_names</code> (global and attribute names it uses), <code>co_varnames</code> (local variable names, arguments first), <code>co_argcount</code>, <code>co_freevars</code> (names from enclosing functions), <code>co_filename</code>, <code>co_firstlineno</code> and <code>co_name</code>. Every function holds one: <code>func.__code__</code>. Code objects for nested functions sit in the outer code object&rsquo;s <code>co_consts</code>; the <code>def</code> statement makes a <strong>function object</strong> from one each time it runs.</p>
+<div class="pc pc-example" data-kind="example" data-id="w064d1-e5"><textarea class="pc-src pc-code" hidden>def make_counter(start):
+    count = start
+    def step(by=1):
+        nonlocal count
+        count += by
+        return count
+    return step
+
+step = make_counter(10)
+code = step.__code__
+print(code.co_name, code.co_argcount, code.co_varnames, code.co_freevars)
+outer = make_counter.__code__
+inner_codes = [c for c in outer.co_consts if hasattr(c, &quot;co_name&quot;)]
+print([c.co_name for c in inner_codes], inner_codes[0] is code)
+
+try:
+    compile(&quot;x = &quot;, &quot;&lt;typed in&gt;&quot;, &quot;exec&quot;)
+except SyntaxError as e:
+    print(&quot;SyntaxError in&quot;, e.filename, &quot;line&quot;, e.lineno)
+
+namespace = {}
+exec(compile(&quot;a = 2\nb = a * 21&quot;, &quot;&lt;string&gt;&quot;, &quot;exec&quot;), namespace)
+print(namespace[&quot;b&quot;], eval(compile(&quot;a + b&quot;, &quot;&lt;string&gt;&quot;, &quot;eval&quot;), namespace))</textarea></div>
+<h2 id="caching-bytecode-pyc-files">Caching bytecode: .pyc files</h2>
+<p>Compiling takes time, so when you <strong>import</strong> a module, CPython saves the compiled code object to a <code>.pyc</code> file in a <code>__pycache__</code> folder next to the source, named after the interpreter version (<code>shop.cpython-313.pyc</code>). Next time, if the source hasn&rsquo;t changed (by default it compares the source&rsquo;s modification time and size, stored in the <code>.pyc</code> header), CPython loads the cached bytecode instead of recompiling.</p>
+<p>Some consequences:</p>
+<ul>
+<li>The script you run directly (<code>python shop.py</code>) is compiled every time; only imported modules are cached.</li>
+<li><code>.pyc</code> files are specific to a Python version, which is why the version is in the name, and why you never commit <code>__pycache__</code> to Git (Week 21&rsquo;s <code>.gitignore</code>).</li>
+<li><code>python -m compileall folder</code> compiles a whole tree ahead of time; <code>importlib.util.cache_from_source(path)</code> tells you where the cached file for a source file would go.</li>
+<li>The <code>marshal</code> module is the format the code objects are saved in.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w064d1-e6"><textarea class="pc-src pc-code" hidden>import importlib.util, marshal
+
+print(importlib.util.cache_from_source(&quot;shop.py&quot;).replace(&quot;\\&quot;, &quot;/&quot;).split(&quot;/&quot;)[0])
+
+code = compile(&quot;print(&#x27;loaded from bytes&#x27;)&quot;, &quot;&lt;cached&gt;&quot;, &quot;exec&quot;)
+data = marshal.dumps(code)          # what goes into a .pyc after its header
+again = marshal.loads(data)
+exec(again)
+print(type(data).__name__, again.co_filename)</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>CPython reads source, tokenises it (tokenize), parses tokens into an abstract syntax tree (ast), builds a symbol table, compiles the tree to bytecode in a code object (compile), and runs it in the evaluation loop. Tokens keep comments and positions; the AST keeps structure: walk it with ast.walk, analyse it with NodeVisitor (calling generic_visit to go deeper), rewrite it with NodeTransformer plus fix_missing_locations, and turn it back into text with ast.unparse. compile&rsquo;s modes are exec (statements), eval (one expression) and single (the REPL). Code objects hold bytecode, constants, names and local names; every function has one in <strong>code</strong>. Imported modules&rsquo; code objects are cached in <strong>pycache</strong> as version-specific .pyc files.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d1-tokens" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Counting tokens</div><div class="pc-prompt"><p>Write <code>token_counts(source)</code>: a dict from token type name (<code>"NAME"</code>, <code>"OP"</code>, <code>"NUMBER"</code>, <code>"STRING"</code>, &hellip;) to how many tokens of that type the source contains, <strong>leaving out</strong> the layout tokens <code>NEWLINE</code>, <code>NL</code>, <code>INDENT</code>, <code>DEDENT</code> and <code>ENDMARKER</code>. Then <code>strip_comments(source)</code>: the source with every comment removed, using the tokeniser to find them (so a <code>#</code> inside a string isn&rsquo;t touched), with any spaces left at the end of each line removed too.</p></div><textarea class="pc-src pc-code" hidden>import io
+import tokenize
+
+def token_counts(source):
+    ___
+
+def strip_comments(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_tokens():
+    &quot;the tokeniser&quot;
+    src = &quot;x = 1 + y  # add\nif x:\n    print(&#x27;# not a comment&#x27;, x)\n&quot;
+    assert token_counts(src) == {&quot;NAME&quot;: 6, &quot;OP&quot;: 6, &quot;NUMBER&quot;: 1, &quot;COMMENT&quot;: 1, &quot;STRING&quot;: 1}
+    assert token_counts(&quot;&quot;) == {}
+    assert strip_comments(src) == &quot;x = 1 + y\nif x:\n    print(&#x27;# not a comment&#x27;, x)\n&quot;
+    assert strip_comments(&quot;# only\ny = 2  # two\n&quot;) == &quot;\ny = 2\n&quot;</textarea><textarea class="pc-src pc-solution" hidden>import io
+import tokenize
+
+LAYOUT = {&quot;NEWLINE&quot;, &quot;NL&quot;, &quot;INDENT&quot;, &quot;DEDENT&quot;, &quot;ENDMARKER&quot;}
+
+def token_counts(source):
+    counts = {}
+    for tok in tokenize.generate_tokens(io.StringIO(source).readline):
+        name = tokenize.tok_name[tok.type]
+        if name not in LAYOUT:
+            counts[name] = counts.get(name, 0) + 1
+    return counts
+
+def strip_comments(source):
+    lines = source.split(&quot;\n&quot;)
+    for tok in tokenize.generate_tokens(io.StringIO(source).readline):
+        if tok.type == tokenize.COMMENT:
+            row, col = tok.start
+            lines[row - 1] = lines[row - 1][:col]
+    return &quot;\n&quot;.join(line.rstrip() for line in lines)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d1-names" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">What a program uses</div><div class="pc-prompt"><p>Using the AST, write <code>names_read(source)</code>: the sorted list of distinct names the code <strong>reads</strong> (a <code>Name</code> node with a <code>Load</code> context), and <code>definitions(source)</code>: a dict with keys <code>"functions"</code>, <code>"classes"</code> and <code>"imports"</code>, each a sorted list: names of every function (including methods and nested functions) and class defined anywhere, and every module imported (<code>import a.b</code> gives <code>"a.b"</code>, <code>from c import d</code> gives <code>"c"</code>).</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def names_read(source):
+    ___
+
+def definitions(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_names():
+    &quot;walking the tree&quot;
+    src = (
+        &quot;import os\nimport collections.abc\nfrom math import pi\n&quot;
+        &quot;class Shape:\n    def area(self):\n        def helper():\n            return pi\n        return helper() * self.r\n&quot;
+        &quot;def main():\n    s = Shape()\n    print(s.area(), os.sep)\n&quot;
+    )
+    assert names_read(src) == [&quot;Shape&quot;, &quot;helper&quot;, &quot;os&quot;, &quot;pi&quot;, &quot;print&quot;, &quot;s&quot;, &quot;self&quot;]
+    assert definitions(src) == {&quot;functions&quot;: [&quot;area&quot;, &quot;helper&quot;, &quot;main&quot;], &quot;classes&quot;: [&quot;Shape&quot;], &quot;imports&quot;: [&quot;collections.abc&quot;, &quot;math&quot;, &quot;os&quot;]}
+    assert names_read(&quot;x = 1&quot;) == [] and definitions(&quot;&quot;) == {&quot;functions&quot;: [], &quot;classes&quot;: [], &quot;imports&quot;: []}</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+def names_read(source):
+    found = {node.id for node in ast.walk(ast.parse(source))
+             if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load)}
+    return sorted(found)
+
+def definitions(source):
+    out = {&quot;functions&quot;: set(), &quot;classes&quot;: set(), &quot;imports&quot;: set()}
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            out[&quot;functions&quot;].add(node.name)
+        elif isinstance(node, ast.ClassDef):
+            out[&quot;classes&quot;].add(node.name)
+        elif isinstance(node, ast.Import):
+            out[&quot;imports&quot;].update(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            out[&quot;imports&quot;].add(node.module)
+    return {k: sorted(v) for k, v in out.items()}</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d1-modes" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">The three modes</div><div class="pc-prompt"><p>Write <code>kind_of_code(source)</code>: <code>"expression"</code> if the source compiles in <code>"eval"</code> mode, otherwise <code>"statements"</code> if it compiles in <code>"exec"</code> mode, otherwise <code>"invalid"</code>. Then <code>evaluate(source, variables)</code> that returns the value for an expression and, for statements, a dict of the <strong>new or changed</strong> names they set (compared with <code>variables</code>, which must not be modified), ignoring <code>__builtins__</code>.</p></div><textarea class="pc-src pc-code" hidden>def kind_of_code(source):
+    ___
+
+def evaluate(source, variables):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_modes():
+    &quot;compile modes&quot;
+    assert kind_of_code(&quot;1 + 2&quot;) == &quot;expression&quot; and kind_of_code(&quot;x = 1&quot;) == &quot;statements&quot;
+    assert kind_of_code(&quot;for i in range(3): pass&quot;) == &quot;statements&quot; and kind_of_code(&quot;x = &quot;) == &quot;invalid&quot;
+    assert kind_of_code(&quot;f(x)&quot;) == &quot;expression&quot;
+    start = {&quot;a&quot;: 2, &quot;b&quot;: 3}
+    assert evaluate(&quot;a * b&quot;, start) == 6
+    assert evaluate(&quot;c = a + b\na = 10\nb = 3&quot;, start) == {&quot;c&quot;: 5, &quot;a&quot;: 10}
+    assert start == {&quot;a&quot;: 2, &quot;b&quot;: 3}
+    assert evaluate(&quot;total = sum(range(4))&quot;, {}) == {&quot;total&quot;: 6}</textarea><textarea class="pc-src pc-solution" hidden>def kind_of_code(source):
+    try:
+        compile(source, &quot;&lt;string&gt;&quot;, &quot;eval&quot;)
+        return &quot;expression&quot;
+    except SyntaxError:
+        pass
+    try:
+        compile(source, &quot;&lt;string&gt;&quot;, &quot;exec&quot;)
+        return &quot;statements&quot;
+    except SyntaxError:
+        return &quot;invalid&quot;
+
+def evaluate(source, variables):
+    namespace = dict(variables)
+    if kind_of_code(source) == &quot;expression&quot;:
+        return eval(compile(source, &quot;&lt;string&gt;&quot;, &quot;eval&quot;), namespace)
+    exec(compile(source, &quot;&lt;string&gt;&quot;, &quot;exec&quot;), namespace)
+    return {k: v for k, v in namespace.items()
+            if k != &quot;__builtins__&quot; and (k not in variables or variables[k] is not v)}</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d1-codeobj" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Reading a code object</div><div class="pc-prompt"><p>Write <code>describe(func)</code>: a dict built from <code>func.__code__</code> with <code>"name"</code>, <code>"positional"</code> (the names of the ordinary positional parameters, a list), <code>"locals"</code> (local variable names that <strong>aren&rsquo;t</strong> parameters, a list in order), <code>"free"</code> (a list of the closure variables it uses), <code>"varargs"</code> and <code>"varkw"</code> (True if it has <code>*args</code> / <code>**kwargs</code>, from <code>co_flags</code> with <code>inspect.CO_VARARGS</code> and <code>inspect.CO_VARKEYWORDS</code>), and <code>"nested"</code> (names of functions defined directly inside it, found in <code>co_consts</code>). Keyword-only parameters count as parameters (<code>co_kwonlyargcount</code>).</p></div><textarea class="pc-src pc-code" hidden>import inspect
+
+def describe(func):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_codeobj():
+    &quot;code objects&quot;
+    def outer(a, b=2, *rest, key=None, **extra):
+        total = a + b
+        def inner():
+            return total
+        def other():
+            pass
+        return inner
+    d = describe(outer)
+    assert d[&quot;name&quot;] == &quot;outer&quot; and d[&quot;positional&quot;] == [&quot;a&quot;, &quot;b&quot;] and d[&quot;varargs&quot;] and d[&quot;varkw&quot;]
+    assert set(d[&quot;locals&quot;]) == {&quot;total&quot;, &quot;inner&quot;, &quot;other&quot;} and d[&quot;nested&quot;] == [&quot;inner&quot;, &quot;other&quot;]
+    inner = outer(1)
+    di = describe(inner)
+    assert di[&quot;free&quot;] == [&quot;total&quot;] and di[&quot;positional&quot;] == [] and di[&quot;locals&quot;] == [] and not di[&quot;varargs&quot;]
+    assert describe(lambda x, *, y: x)[&quot;positional&quot;] == [&quot;x&quot;] and describe(lambda x, *, y: x)[&quot;locals&quot;] == []</textarea><textarea class="pc-src pc-solution" hidden>import inspect
+
+def describe(func):
+    code = func.__code__
+    n_params = code.co_argcount + code.co_kwonlyargcount
+    varargs = bool(code.co_flags &amp; inspect.CO_VARARGS)
+    varkw = bool(code.co_flags &amp; inspect.CO_VARKEYWORDS)
+    n_params += varargs + varkw
+    return {
+        &quot;name&quot;: code.co_name,
+        &quot;positional&quot;: list(code.co_varnames[:code.co_argcount]),
+        &quot;locals&quot;: list(code.co_varnames[n_params:]) + [
+            v for v in code.co_cellvars if v not in code.co_varnames
+        ],
+        &quot;free&quot;: list(code.co_freevars),
+        &quot;varargs&quot;: varargs,
+        &quot;varkw&quot;: varkw,
+        &quot;nested&quot;: [c.co_name for c in code.co_consts if inspect.iscode(c)],
+    }</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d1-transform" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Rewriting code</div><div class="pc-prompt"><p>Write two <code>ast.NodeTransformer</code>s and functions that apply them and return the new source with <code>ast.unparse</code>: <code>fold(source)</code> replaces every <code>+</code>, <code>-</code> or <code>*</code> between two <strong>constants</strong> with the result, working from the inside out (so <code>2 * 3 + 1</code> becomes <code>7</code>), and <code>rename(source, old, new)</code> renames every variable, parameter and function called <code>old</code> to <code>new</code> (<code>Name</code> nodes, <code>arg</code> nodes and <code>FunctionDef</code> names). Check that the result still compiles.</p></div><textarea class="pc-src pc-code" hidden>import ast
+import operator
+
+def fold(source):
+    ___
+
+def rename(source, old, new):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_transform():
+    &quot;NodeTransformer&quot;
+    assert fold(&quot;x = 2 * 3 + 1&quot;) == &quot;x = 7&quot;
+    assert fold(&quot;y = a * (4 - 1) + 2 * 5&quot;) == &quot;y = a * 3 + 10&quot;
+    assert fold(&quot;z = &#x27;ab&#x27; + &#x27;c&#x27;&quot;) == &quot;z = &#x27;abc&#x27;&quot; and fold(&quot;w = a + b&quot;) == &quot;w = a + b&quot;
+    out = rename(&quot;def total(n):\n    total = n + 1\n    return total\nprint(total(2))&quot;, &quot;total&quot;, &quot;tally&quot;)
+    assert out == &quot;def tally(n):\n    tally = n + 1\n    return tally\nprint(tally(2))&quot;
+    assert rename(&quot;def f(x):\n    return x * 2&quot;, &quot;x&quot;, &quot;value&quot;) == &quot;def f(value):\n    return value * 2&quot;
+    compile(fold(&quot;q = 1 + 2&quot;), &quot;&lt;t&gt;&quot;, &quot;exec&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import ast
+import operator
+
+OPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul}
+
+class Folder(ast.NodeTransformer):
+    def visit_BinOp(self, node):
+        self.generic_visit(node)
+        op = OPS.get(type(node.op))
+        if op and isinstance(node.left, ast.Constant) and isinstance(node.right, ast.Constant):
+            return ast.copy_location(ast.Constant(op(node.left.value, node.right.value)), node)
+        return node
+
+class Renamer(ast.NodeTransformer):
+    def __init__(self, old, new):
+        self.old, self.new = old, new
+    def visit_Name(self, node):
+        if node.id == self.old:
+            node.id = self.new
+        return node
+    def visit_arg(self, node):
+        if node.arg == self.old:
+            node.arg = self.new
+        return node
+    def visit_FunctionDef(self, node):
+        if node.name == self.old:
+            node.name = self.new
+        self.generic_visit(node)
+        return node
+
+def _apply(transformer, source):
+    tree = ast.fix_missing_locations(transformer.visit(ast.parse(source)))
+    compile(tree, &quot;&lt;rewritten&gt;&quot;, &quot;exec&quot;)
+    return ast.unparse(tree)
+
+def fold(source):
+    return _apply(Folder(), source)
+
+def rename(source, old, new):
+    return _apply(Renamer(old, new), source)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w064d1-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">eval for a statement</div><div class="pc-prompt"><p><code>eval</code> only accepts a single expression, so asking it to run an assignment fails with <code>SyntaxError</code>. Run the statement with <code>exec</code> in the namespace instead, so this prints <code>30</code>.</p></div><textarea class="pc-src pc-code" hidden>namespace = {&quot;width&quot;: 5, &quot;height&quot;: 6}
+eval(&quot;area = width * height&quot;, namespace)
+print(namespace[&quot;area&quot;])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;exec for statements&quot;
+    expect_output(&quot;30&quot;)</textarea><textarea class="pc-src pc-solution" hidden>namespace = {&quot;width&quot;: 5, &quot;height&quot;: 6}
+exec(&quot;area = width * height&quot;, namespace)
+print(namespace[&quot;area&quot;])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w064d1-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A visitor that stops at the top</div><div class="pc-prompt"><p><code>visit_FunctionDef</code> doesn&rsquo;t call <code>generic_visit</code>, so the visitor never goes inside a function, never finds the nested one, and this prints <code>1</code>. Make it carry on into each function&rsquo;s body so it prints <code>2</code>.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+class Functions(ast.NodeVisitor):
+    def __init__(self):
+        self.count = 0
+    def visit_FunctionDef(self, node):
+        self.count += 1
+
+source = &quot;def outer():\n    def inner():\n        pass\n    return inner\n&quot;
+v = Functions()
+v.visit(ast.parse(source))
+print(v.count)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;generic_visit&quot;
+    expect_output(&quot;2&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+class Functions(ast.NodeVisitor):
+    def __init__(self):
+        self.count = 0
+    def visit_FunctionDef(self, node):
+        self.count += 1
+        self.generic_visit(node)
+
+source = &quot;def outer():\n    def inner():\n        pass\n    return inner\n&quot;
+v = Functions()
+v.visit(ast.parse(source))
+print(v.count)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w064d1-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">New nodes without positions</div><div class="pc-prompt"><p>The transformer replaces each number with a brand-new <code>Constant</code> node that has no line number, and compiling a tree with nodes missing their positions fails with <code>TypeError</code>. Give the new nodes positions with <code>ast.fix_missing_locations</code> before compiling, so this prints <code>20</code>.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+class Double(ast.NodeTransformer):
+    def visit_Constant(self, node):
+        return ast.Constant(node.value * 2)
+
+tree = Double().visit(ast.parse(&quot;result = 4 + 6&quot;, mode=&quot;exec&quot;))
+namespace = {}
+exec(compile(tree, &quot;&lt;doubled&gt;&quot;, &quot;exec&quot;), namespace)
+print(namespace[&quot;result&quot;])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;fix_missing_locations&quot;
+    expect_output(&quot;20&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+class Double(ast.NodeTransformer):
+    def visit_Constant(self, node):
+        return ast.Constant(node.value * 2)
+
+tree = Double().visit(ast.parse(&quot;result = 4 + 6&quot;, mode=&quot;exec&quot;))
+tree = ast.fix_missing_locations(tree)
+namespace = {}
+exec(compile(tree, &quot;&lt;doubled&gt;&quot;, &quot;exec&quot;), namespace)
+print(namespace[&quot;result&quot;])</textarea></div>
+<div class="parsons" data-id="w064d1-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Counting calls in a tree</div><div class="pc-prompt"><p>Arrange the lines of a visitor that counts function calls, including calls nested inside other calls. One line is a trap.</p></div><script type="application/json">{"lines": ["import ast", "class Calls(ast.NodeVisitor):", "    def __init__(self):", "        self.count = 0", "    def visit_Call(self, node):", "        self.count += 1", "        self.generic_visit(node)"], "distractors": ["        return self.count"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d1-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the compile mode for a single expression: &quot;exec&quot;, &quot;eval&quot; or &quot;single&quot;
+q = ___   # type(ast.parse(&quot;x + 1&quot;).body[0]).__name__
+r = ___   # True or False: the AST keeps the program&#x27;s comments
+s = ___   # what exec returns, whatever the code does
+t = ___   # True or False: python script.py caches script.py&#x27;s own bytecode in __pycache__</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;eval&quot; and q == &quot;Expr&quot; and r is False, &quot;p, q and r&quot;
+    assert s is None and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;eval&quot;
+q = &quot;Expr&quot;
+r = False
+s = None
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w064d1-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "In what order does CPython process source code?", "answer": 1, "explain": "Each stage has a standard library tool.", "options": ["Parse, tokenise, run, compile", "Tokenise, parse into an AST, compile to bytecode, evaluate", "Compile, tokenise, parse, run", "Run, then compile"]}, {"type": "mc", "q": "Which stage turns indentation into INDENT and DEDENT?", "answer": 1, "explain": "Blocks become tokens.", "options": ["The compiler", "The tokeniser", "The evaluation loop", "The importer"]}, {"type": "mc", "q": "Where are syntax errors found?", "answer": 1, "explain": "That&rsquo;s why one typo stops the whole file.", "options": ["When the line runs", "While tokenising and parsing, before anything runs", "At import of the next module", "Never"]}, {"type": "mc", "q": "What does ast.unparse do?", "answer": 1, "explain": "Comments and exact layout are lost.", "options": ["Deletes the tree", "Turns a syntax tree back into source code", "Runs the code", "Tokenises"]}, {"type": "mc", "q": "What happens if a NodeVisitor&rsquo;s visit_FunctionDef doesn&rsquo;t call generic_visit?", "answer": 1, "explain": "generic_visit carries on into the children.", "options": ["An error", "Nodes inside that function aren&rsquo;t visited", "Everything is visited twice", "Nothing"]}, {"type": "mc", "q": "Why call ast.fix_missing_locations after a transformation?", "answer": 1, "explain": "Otherwise compile raises.", "options": ["Speed", "New nodes need line numbers before the tree can be compiled", "To sort the nodes", "It removes comments"]}, {"type": "mc", "q": "Which compile mode accepts only one expression?", "answer": 1, "explain": "eval returns its value.", "options": ["exec", "eval", "single", "expr"]}, {"type": "mc", "q": "What does co_varnames hold?", "answer": 1, "explain": "co_names holds globals and attributes.", "options": ["Global names", "Local variable names, parameters first", "Constants", "Attribute names"]}, {"type": "mc", "q": "Why is <strong>pycache</strong> never committed to Git?", "answer": 1, "explain": "Each interpreter makes its own.", "options": ["It&rsquo;s secret", "The files are generated and specific to a Python version", "It&rsquo;s too small", "Git can&rsquo;t store it"]}, {"type": "output", "q": "What does this print?", "answer": "3", "explain": "a, b and c.", "code": "import ast\ntree = ast.parse(\"a = b + c * 2\")\nprint(sum(isinstance(n, ast.Name) for n in ast.walk(tree)))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d1-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a safe calculator</div><div class="pc-prompt"><p><code>eval</code> on text you didn&rsquo;t write is dangerous: <code>eval("__import__('os').remove('data.txt')")</code> would do exactly that. Write <code>safe_eval(expression, names=None)</code> that evaluates an expression by <strong>walking its AST yourself</strong> and allowing only:</p>
+<ul>
+<li>numbers (<code>int</code> and <code>float</code> constants; booleans count as numbers);</li>
+<li>names, looked up in the <code>names</code> dict (an unknown name raises <code>NameError</code>);</li>
+<li>the binary operators <code>+ - * / // % **</code>, unary <code>-</code> and <code>+</code>, and comparisons (<code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>==</code>, <code>!=</code>, including chains such as <code>0 &lt; x &lt; 10</code>);</li>
+<li><code>and</code>, <code>or</code> and <code>not</code>, with Python&rsquo;s short-circuit behaviour;</li>
+<li>conditional expressions (<code>a if test else b</code>);</li>
+<li>calls to <strong>functions in <code>names</code></strong>, with positional arguments only.</li>
+</ul>
+<p>Anything else (attribute access, strings, subscripts, lambdas, keyword arguments, calls to things not in <code>names</code>) raises <code>ValueError</code> naming the node type. To keep things bounded, <code>**</code> with an exponent above 100 raises <code>ValueError</code>. Don&rsquo;t call <code>eval</code> or <code>exec</code>.</p></div><textarea class="pc-src pc-code" hidden>import ast
+import operator
+
+def safe_eval(expression, names=None):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_arithmetic():
+    &quot;allowed expressions&quot;
+    assert safe_eval(&quot;2 + 3 * 4&quot;) == 14 and safe_eval(&quot;(2 + 3) * 4&quot;) == 20
+    assert safe_eval(&quot;7 // 2 + 7 % 2 - 2 ** 3&quot;) == -4 and safe_eval(&quot;-x + +y&quot;, {&quot;x&quot;: 2, &quot;y&quot;: 5}) == 3
+    assert safe_eval(&quot;1 / 4&quot;) == 0.25 and safe_eval(&quot;0 &lt; x &lt; 10&quot;, {&quot;x&quot;: 3}) is True
+    assert safe_eval(&quot;x == 1 or y &gt; 2&quot;, {&quot;x&quot;: 0, &quot;y&quot;: 3}) is True and safe_eval(&quot;not (1 &lt; 2)&quot;) is False
+    assert safe_eval(&quot;big if n &gt; 5 else small&quot;, {&quot;n&quot;: 9, &quot;big&quot;: 1, &quot;small&quot;: 0}) == 1
+    assert safe_eval(&quot;max(a, b) + abs(c)&quot;, {&quot;a&quot;: 1, &quot;b&quot;: 4, &quot;c&quot;: -2, &quot;max&quot;: max, &quot;abs&quot;: abs}) == 6
+    assert safe_eval(&quot;0 and boom&quot;, {}) == 0 and safe_eval(&quot;1 or boom&quot;, {}) == 1
+    assert safe_eval(&quot;True + 1&quot;) == 2
+
+def test_refused():
+    &quot;everything else&quot;
+    for bad in (&quot;__import__(&#x27;os&#x27;)&quot;, &quot;x.real&quot;, &quot;&#x27;text&#x27;&quot;, &quot;[1, 2][0]&quot;, &quot;(lambda: 1)()&quot;, &quot;max(1, key=abs)&quot;, &quot;2 ** 1000&quot;):
+        try:
+            safe_eval(bad, {&quot;x&quot;: 1, &quot;max&quot;: max, &quot;abs&quot;: abs})
+            assert False, bad
+        except ValueError:
+            pass
+    try:
+        safe_eval(&quot;y + 1&quot;, {})
+        assert False
+    except NameError:
+        pass
+    import re
+    assert not re.search(r&quot;(?&lt;![_\w])eval\(&quot;, source) and &quot;exec(&quot; not in source</textarea><textarea class="pc-src pc-solution" hidden>import ast
+import operator
+
+BIN = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.Div: operator.truediv,
+       ast.FloorDiv: operator.floordiv, ast.Mod: operator.mod, ast.Pow: operator.pow}
+UNARY = {ast.USub: operator.neg, ast.UAdd: operator.pos, ast.Not: operator.not_}
+CMP = {ast.Lt: operator.lt, ast.LtE: operator.le, ast.Gt: operator.gt, ast.GtE: operator.ge,
+       ast.Eq: operator.eq, ast.NotEq: operator.ne}
+
+def safe_eval(expression, names=None):
+    names = names or {}
+
+    def ev(node):
+        if isinstance(node, ast.Expression):
+            return ev(node.body)
+        if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+            return node.value
+        if isinstance(node, ast.Name):
+            if node.id not in names:
+                raise NameError(node.id)
+            return names[node.id]
+        if isinstance(node, ast.BinOp) and type(node.op) in BIN:
+            left, right = ev(node.left), ev(node.right)
+            if isinstance(node.op, ast.Pow) and abs(right) &gt; 100:
+                raise ValueError(&quot;exponent too large&quot;)
+            return BIN[type(node.op)](left, right)
+        if isinstance(node, ast.UnaryOp) and type(node.op) in UNARY:
+            return UNARY[type(node.op)](ev(node.operand))
+        if isinstance(node, ast.Compare):
+            left = ev(node.left)
+            for op, comparator in zip(node.ops, node.comparators):
+                if type(op) not in CMP:
+                    raise ValueError(type(op).__name__)
+                right = ev(comparator)
+                if not CMP[type(op)](left, right):
+                    return False
+                left = right
+            return True
+        if isinstance(node, ast.BoolOp):
+            result = None
+            for value in node.values:
+                result = ev(value)
+                if isinstance(node.op, ast.And) and not result:
+                    return result
+                if isinstance(node.op, ast.Or) and result:
+                    return result
+            return result
+        if isinstance(node, ast.IfExp):
+            return ev(node.body) if ev(node.test) else ev(node.orelse)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and not node.keywords:
+            if node.func.id not in names or not callable(names[node.func.id]):
+                raise ValueError(f&quot;call to {node.func.id}&quot;)
+            return names[node.func.id](*[ev(a) for a in node.args])
+        raise ValueError(type(node).__name__)
+
+    return ev(ast.parse(expression, mode=&quot;eval&quot;))</textarea><template class="pc-src pc-hint">Write one function <code>ev(node)</code> with a branch per allowed node type: <code>ast.Expression</code> (evaluate its <code>body</code>), <code>ast.Constant</code>, <code>ast.Name</code>, <code>ast.BinOp</code>, <code>ast.UnaryOp</code>, <code>ast.Compare</code> (walk <code>ops</code> and <code>comparators</code> pairwise, stopping at the first false comparison), <code>ast.BoolOp</code> (<code>node.values</code> with short-circuiting), <code>ast.IfExp</code> and <code>ast.Call</code>. Use <code>ast.parse(expression, mode="eval")</code>. The last line is <code>raise ValueError(type(node).__name__)</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Run <code>python -m ast your_file.py</code> (Python 3.9 and later) on a small file of your own to see its whole tree, and <code>python -m tokenize your_file.py</code> to see its tokens. Tomorrow: bytecode, the instructions inside a code object, and the <code>dis</code> module that shows them.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w063d6.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w064d2.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w064d1", "week": 64, "day": 1, "title": "How CPython runs your code", "exercises": [{"id": "w064d1-tokens", "title": "Counting tokens", "points": 10}, {"id": "w064d1-names", "title": "What a program uses", "points": 10}, {"id": "w064d1-modes", "title": "The three modes", "points": 10}, {"id": "w064d1-codeobj", "title": "Reading a code object", "points": 15}, {"id": "w064d1-transform", "title": "Rewriting code", "points": 15}, {"id": "w064d1-bug1", "title": "eval for a statement", "points": 10}, {"id": "w064d1-bug2", "title": "A visitor that stops at the top", "points": 10}, {"id": "w064d1-bug3", "title": "New nodes without positions", "points": 10}, {"id": "w064d1-trace", "title": "Predict them", "points": 10}, {"id": "w064d1-challenge", "title": "Challenge: a safe calculator", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

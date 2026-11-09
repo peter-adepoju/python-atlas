@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 64 Day 5: The import system | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Week 20 showed what import does from the outside: find the module, run it once, bind a name. Today is the machinery inside: the sys.modules cache, finders...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w064d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 64 Day 5: The import system">
+<meta property="og:description" content="Week 20 showed what import does from the outside: find the module, run it once, bind a name. Today is the machinery inside: the sys.modules cache, finders...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w064d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-64">Week 64: Inside CPython</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#what-import-really-does" data-sec="what-import-really-does">What import really does</a></li><li><a href="#sys-modules-the-cache" data-sec="sys-modules-the-cache">sys.modules: the cache</a></li><li><a href="#finders-loaders-and-specs" data-sec="finders-loaders-and-specs">Finders, loaders and specs</a></li><li><a href="#packages-and-relative-imports" data-sec="packages-and-relative-imports">Packages and relative imports</a></li><li><a href="#circular-imports" data-sec="circular-imports">Circular imports</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w064d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-64">Week 64: Inside CPython</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 64, Day 5</span></p>
+      <h1>The import system</h1>
+      <div class="day-intro"><p>Week 20 showed what <code>import</code> does from the outside: find the module, run it once, bind a name. Today is the machinery inside: the <code>sys.modules</code> cache, <strong>finders</strong> on <code>sys.meta_path</code> that locate modules, <strong>loaders</strong> that create and run them, <strong>module specs</strong> that connect the two, and how packages, relative imports and circular imports fit in. Since all of it is written in Python (<code>importlib</code>), you can extend it: today you&rsquo;ll write an importer that loads modules from a dictionary instead of files, which is how tools load code from zip files, databases or the network.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Describe the steps of an import, from sys.modules to executing the module</li><li>Explain finders, loaders and module specs, and inspect them</li><li>Create modules from source and import by name with importlib</li><li>Write a meta path finder and loader that serve modules from memory, including packages</li><li>Explain how circular imports fail and how to avoid them</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="What import really does: 20 min"></span><span class="plan-seg s0" style="flex:20" title="sys.modules: the cache: 20 min"></span><span class="plan-seg s1" style="flex:25" title="Finders, loaders and specs: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Packages and relative imports: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Circular imports: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">What import really does</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">sys.modules: the cache</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Finders, loaders and specs</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Packages and relative imports</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Circular imports</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w064d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w064d5.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w064d5-p1"><textarea class="pc-src pc-code" hidden>import sys, types
+
+config = types.ModuleType(&quot;config&quot;)
+exec(&quot;DEBUG = True\nLEVEL = 3\n&quot;, config.__dict__)
+print(config.DEBUG, config.LEVEL, type(config).__name__)
+
+sys.modules[&quot;config&quot;] = config
+import config as again
+print(again is config)
+del sys.modules[&quot;config&quot;]
+
+import json
+print(json.__spec__.name, &quot;json&quot; in sys.modules)</textarea></div>
+<p>A module is just an object with a namespace dict. Putting one in <code>sys.modules</code> was enough for <code>import config</code> to find it, without any file: the very first thing <code>import</code> does is look in that dict.</p>
+<h2 id="what-import-really-does">What import really does</h2>
+<p><code>import shop.cart</code> (and every other form of import) calls <code>importlib.__import__</code>, which, for each part of the dotted name in turn (<code>shop</code>, then <code>shop.cart</code>):</p>
+<ol>
+<li><strong>Checks <code>sys.modules</code>.</strong> If the name is there, that module is used, and nothing else happens. That&rsquo;s why a module&rsquo;s code runs only once per program.</li>
+<li><strong>Finds a spec.</strong> It asks each <strong>finder</strong> in <code>sys.meta_path</code>, in order, <code>find_spec(name, path)</code>. The first to return a <strong>module spec</strong> wins; if all return <code>None</code>, the result is <code>ModuleNotFoundError</code>.</li>
+<li><strong>Creates the module</strong> with the spec&rsquo;s <strong>loader</strong> (<code>loader.create_module(spec)</code>, usually returning <code>None</code> to get a plain module object), sets its attributes (<code>__name__</code>, <code>__spec__</code>, <code>__file__</code>, <code>__package__</code>, <code>__path__</code> for packages, <code>__loader__</code>) and <strong>puts it in <code>sys.modules</code> before running it</strong>.</li>
+<li><strong>Executes the module</strong>: <code>loader.exec_module(module)</code> runs the module&rsquo;s code with the module&rsquo;s <code>__dict__</code> as its globals.</li>
+<li><strong>Binds names</strong>: <code>import shop.cart</code> binds <code>shop</code> in your namespace; <code>from shop import cart</code> binds <code>cart</code>; and the submodule is also set as an attribute of its parent (<code>shop.cart</code>).</li>
+</ol>
+<p>If executing the module raises, the module is removed from <code>sys.modules</code> again, so a later import retries.</p>
+<p><code>importlib.import_module("shop.cart")</code> does steps 1 to 4 for a name held in a string and returns the module itself (whereas <code>__import__("shop.cart")</code> returns the top package, <code>shop</code>).</p>
+<div class="pc pc-example" data-kind="example" data-id="w064d5-e2"><textarea class="pc-src pc-code" hidden>import importlib, sys
+
+mod = importlib.import_module(&quot;os.path&quot;)
+top = __import__(&quot;os.path&quot;)
+print(mod.__name__ in (&quot;posixpath&quot;, &quot;ntpath&quot;), top.__name__)
+
+import importlib.util
+spec = importlib.util.find_spec(&quot;json&quot;)
+print(spec.name, spec.submodule_search_locations is not None, type(spec.loader).__name__)
+print([type(f).__name__ for f in sys.meta_path][:3])</textarea></div>
+<h2 id="sys-modules-the-cache">sys.modules: the cache</h2>
+<p><code>sys.modules</code> is a plain dict from module name to module object, and the import system trusts it completely:</p>
+<ul>
+<li>Importing an already-imported module is a dict lookup: cheap, and the module&rsquo;s code doesn&rsquo;t run again.</li>
+<li><strong>Changing a module&rsquo;s source file doesn&rsquo;t affect a running program</strong>, because the old module object stays in <code>sys.modules</code>. <code>importlib.reload(module)</code> re-runs the module&rsquo;s code <strong>in the same module object</strong> (so existing references see the new definitions), but objects created from the old code (instances of old classes, functions imported with <code>from ... import</code>) keep the old versions.</li>
+<li><strong>Removing</strong> an entry (<code>del sys.modules[name]</code>) makes the next import load the module afresh, as a <strong>new</strong> object; anything still holding the old module keeps it. Tests sometimes do this to get a fresh module.</li>
+<li>You can <strong>insert</strong> your own objects, as the warm-up did: test frameworks use this to replace a module with a fake.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w064d5-e3"><textarea class="pc-src pc-code" hidden>import importlib, sys, types
+
+source = &quot;VERSION = 1\ndef hello():\n    return &#x27;hi v1&#x27;\n&quot;
+mod = types.ModuleType(&quot;greetings&quot;)
+mod.__spec__ = None
+exec(source, mod.__dict__)
+sys.modules[&quot;greetings&quot;] = mod
+
+from greetings import hello                 # a reference to the v1 function
+exec(source.replace(&quot;1&quot;, &quot;2&quot;), mod.__dict__) # what reload does: re-run the code in the same module
+import greetings
+print(greetings.VERSION, greetings.hello(), hello())   # the old reference keeps the old function
+del sys.modules[&quot;greetings&quot;]</textarea></div>
+<h2 id="finders-loaders-and-specs">Finders, loaders and specs</h2>
+<p>The machinery is split into small, replaceable parts:</p>
+<ul>
+<li>A <strong>finder</strong> answers &ldquo;can you provide this module?&rdquo;. Finders on <strong><code>sys.meta_path</code></strong> are asked first, for every import. CPython&rsquo;s defaults are, in order: <code>BuiltinImporter</code> (modules compiled into the interpreter, such as <code>sys</code>), <code>FrozenImporter</code> (modules frozen into the executable) and <code>PathFinder</code>, which searches the folders in <strong><code>sys.path</code></strong> (and, for submodules, the package&rsquo;s <code>__path__</code>) using <strong>path entry finders</strong> for ordinary files, <code>.pyc</code> files, C extensions and zip files.</li>
+<li>A <strong>module spec</strong> (<code>importlib.machinery.ModuleSpec</code>) is what a finder returns: the module&rsquo;s <code>name</code>, its <code>loader</code>, its <code>origin</code> (often the file path), and <code>submodule_search_locations</code> (non-<code>None</code> for packages). <code>importlib.util.spec_from_loader</code> builds one.</li>
+<li>A <strong>loader</strong> creates and runs the module: <code>create_module(spec)</code> (return <code>None</code> for the default) and <code>exec_module(module)</code>, which runs the code in <code>module.__dict__</code>.</li>
+</ul>
+<p>To add a new source of modules, write a class with <code>find_spec</code> (a meta path finder) and <code>exec_module</code> (a loader), and put an instance at the front of <code>sys.meta_path</code>. A finder returns <code>None</code> for names it doesn&rsquo;t handle, so the rest of the chain still works. Always remove your finder again, and the modules it loaded, when you&rsquo;re done.</p>
+<div class="pc pc-example" data-kind="example" data-id="w064d5-e4"><textarea class="pc-src pc-code" hidden>import importlib, importlib.abc, importlib.util, sys
+
+class MemoryImporter(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    def __init__(self, sources):
+        self.sources = sources
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname not in self.sources:
+            return None                                       # not ours: let others try
+        return importlib.util.spec_from_loader(fullname, self, origin=&quot;memory&quot;)
+    def create_module(self, spec):
+        return None                                           # the default module object
+    def exec_module(self, module):
+        exec(compile(self.sources[module.__name__], &quot;&lt;memory:&quot; + module.__name__ + &quot;&gt;&quot;, &quot;exec&quot;), module.__dict__)
+
+importer = MemoryImporter({&quot;tax&quot;: &quot;RATE = 0.2\ndef add_tax(p):\n    return round(p * (1 + RATE), 2)\n&quot;})
+sys.meta_path.insert(0, importer)
+try:
+    import tax
+    print(tax.add_tax(10), tax.__spec__.origin, tax.__file__ if hasattr(tax, &quot;__file__&quot;) else &quot;no file&quot;)
+finally:
+    sys.meta_path.remove(importer)
+    sys.modules.pop(&quot;tax&quot;, None)</textarea></div>
+<h2 id="packages-and-relative-imports">Packages and relative imports</h2>
+<p>A <strong>package</strong> is a module that can contain submodules. On disk it&rsquo;s a folder with an <code>__init__.py</code> (which runs when the package is imported); in the import system, it&rsquo;s a module with a <strong><code>__path__</code></strong> attribute: a list of places to search for its submodules. When you import <code>shop.cart</code>, Python imports <code>shop</code> first, then asks the finders for <code>shop.cart</code>, passing <code>shop.__path__</code>.</p>
+<p>A folder <strong>without</strong> <code>__init__.py</code> on <code>sys.path</code> becomes a <strong>namespace package</strong> (PEP 420): it has a <code>__path__</code> that can span several folders, so separately installed parts can share one package name.</p>
+<p><strong>Relative imports</strong> (<code>from . import cart</code>, <code>from .prices import price</code>, <code>from .. import utils</code>) are resolved using the importing module&rsquo;s <strong><code>__package__</code></strong> (the package it belongs to): <code>.</code> is that package, <code>..</code> its parent. That&rsquo;s why relative imports only work inside packages, and fail with &ldquo;attempted relative import with no known parent package&rdquo; in a script run directly (whose <code>__package__</code> is empty). Running a module with <code>python -m shop.cart</code> sets its package properly.</p>
+<div class="pc pc-example" data-kind="example" data-id="w064d5-e5"><textarea class="pc-src pc-code" hidden>import importlib, sys
+
+print(importlib.util.resolve_name(&quot;.prices&quot;, &quot;shop&quot;), importlib.util.resolve_name(&quot;..utils&quot;, &quot;shop.cart&quot;))
+import json, json.decoder
+print(json.__path__ is not None, json.decoder.__package__, hasattr(json.decoder, &quot;__path__&quot;))
+import importlib.util as iu
+print(iu.find_spec(&quot;json&quot;).submodule_search_locations is not None, iu.find_spec(&quot;json.decoder&quot;).submodule_search_locations)</textarea></div>
+<h2 id="circular-imports">Circular imports</h2>
+<p>Since a module is put in <code>sys.modules</code> <strong>before</strong> its code runs, a module that&rsquo;s still running can be imported by another. That&rsquo;s what makes <strong>circular imports</strong> possible: if <code>a</code> imports <code>b</code> and <code>b</code> imports <code>a</code>, then when <code>b</code> runs <code>import a</code> it receives the <strong>partially initialised</strong> module <code>a</code>, which only has the names defined above <code>a</code>&rsquo;s <code>import b</code> line.</p>
+<ul>
+<li><code>import a</code> followed by using <code>a.thing</code> <strong>later</strong> (inside a function) usually works, because by then <code>a</code> has finished.</li>
+<li><code>from a import thing</code> at the top of <code>b</code> fails with <code>ImportError: cannot import name 'thing' from partially initialized module 'a' (most likely due to a circular import)</code>, because <code>thing</code> doesn&rsquo;t exist yet.</li>
+</ul>
+<p>Fixes, best first: <strong>restructure</strong> (move what both need into a third module that imports neither); import <strong>inside the function</strong> that needs it; or use <code>import a</code> instead of <code>from a import ...</code> and look the name up when it&rsquo;s used. Type hints that cause cycles can be guarded with <code>if typing.TYPE_CHECKING:</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w064d5-e6"><textarea class="pc-src pc-code" hidden>import importlib, importlib.abc, importlib.util, sys
+
+sources = {
+    &quot;orders&quot;: &quot;import customers\nDISCOUNT = 0.1\ndef price(p):\n    return p * (1 - DISCOUNT)\n&quot;,
+    &quot;customers&quot;: &quot;from orders import DISCOUNT\n&quot;,
+}
+
+class Mem(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    def find_spec(self, name, path=None, target=None):
+        return importlib.util.spec_from_loader(name, self) if name in sources else None
+    def create_module(self, spec):
+        return None
+    def exec_module(self, module):
+        exec(sources[module.__name__], module.__dict__)
+
+finder = Mem()
+sys.meta_path.insert(0, finder)
+try:
+    import orders
+except ImportError as e:
+    print(&quot;ImportError:&quot;, str(e).split(&quot; (&quot;)[0])
+finally:
+    sys.meta_path.remove(finder)
+    for name in sources:
+        sys.modules.pop(name, None)</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>import checks sys.modules first; otherwise it asks each finder on sys.meta_path for a module spec (name, loader, origin, submodule_search_locations), creates the module, puts it in sys.modules before running it, runs it with loader.exec_module, and binds names. importlib.import_module imports by string and returns the module itself. sys.modules is the cache: modules run once, reload re-runs code in the same object, and deleting an entry forces a fresh module. Extend imports with a class having find_spec (returning None for names it doesn&rsquo;t handle) and exec_module, inserted at the front of sys.meta_path and removed afterwards. Packages have <strong>path</strong>; relative imports resolve against <strong>package</strong>. Circular imports see partly initialised modules: restructure, import inside functions, or use import a and a.name.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d5-fromsource" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Modules from source</div><div class="pc-prompt"><p>Write <code>module_from_source(name, source)</code>: a new module object (with <code>types.ModuleType</code>) named <code>name</code>, with <code>__file__</code> set to <code>"&lt;memory&gt;"</code>, whose code has been executed in its namespace; it must <strong>not</strong> be added to <code>sys.modules</code>. Then <code>public_names(module)</code>: the sorted list of names in the module&rsquo;s namespace that don&rsquo;t start with <code>_</code>, or, if the module defines <code>__all__</code>, exactly the names in <code>__all__</code> (sorted).</p></div><textarea class="pc-src pc-code" hidden>import sys
+import types
+
+def module_from_source(name, source):
+    ___
+
+def public_names(module):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_fromsource():
+    &quot;module objects&quot;
+    import sys
+    m = module_from_source(&quot;shapes&quot;, &quot;import math\nPI2 = math.pi * 2\n_hidden = 1\ndef area(r):\n    return math.pi * r * r\n&quot;)
+    assert m.__name__ == &quot;shapes&quot; and m.__file__ == &quot;&lt;memory&gt;&quot; and round(m.area(1), 2) == 3.14
+    assert &quot;shapes&quot; not in sys.modules and public_names(m) == [&quot;PI2&quot;, &quot;area&quot;, &quot;math&quot;]
+    n = module_from_source(&quot;api&quot;, &quot;__all__ = [&#x27;b&#x27;, &#x27;a&#x27;]\na = b = c = 1\n&quot;)
+    assert public_names(n) == [&quot;a&quot;, &quot;b&quot;]
+    try:
+        module_from_source(&quot;bad&quot;, &quot;x = 1 / 0&quot;)
+        assert False
+    except ZeroDivisionError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import sys
+import types
+
+def module_from_source(name, source):
+    module = types.ModuleType(name)
+    module.__file__ = &quot;&lt;memory&gt;&quot;
+    exec(compile(source, module.__file__, &quot;exec&quot;), module.__dict__)
+    return module
+
+def public_names(module):
+    namespace = vars(module)
+    if &quot;__all__&quot; in namespace:
+        return sorted(namespace[&quot;__all__&quot;])
+    return sorted(k for k in namespace if not k.startswith(&quot;_&quot;))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d5-cache" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Working with sys.modules</div><div class="pc-prompt"><p>Write <code>loaded(prefix)</code>: the sorted names in <code>sys.modules</code> that are <code>prefix</code> itself or start with <code>prefix + "."</code>. Then <code>forget(prefix)</code>: remove all those entries and return how many were removed, and <code>fresh_import(name)</code>: forget the module and its submodules, import it again with <code>importlib.import_module</code>, and return the <strong>new</strong> module object.</p></div><textarea class="pc-src pc-code" hidden>import importlib
+import sys
+
+def loaded(prefix):
+    ___
+
+def forget(prefix):
+    ___
+
+def fresh_import(name):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cache():
+    &quot;the module cache&quot;
+    import sys, types, colorsys
+    old = colorsys
+    new = fresh_import(&quot;colorsys&quot;)
+    assert new is not old and sys.modules[&quot;colorsys&quot;] is new and new.rgb_to_hsv(1, 0, 0)[0] == 0
+    for name in (&quot;fakepkg&quot;, &quot;fakepkg.a&quot;, &quot;fakepkg.b&quot;, &quot;fakepkgextra&quot;):
+        sys.modules[name] = types.ModuleType(name)
+    try:
+        assert loaded(&quot;fakepkg&quot;) == [&quot;fakepkg&quot;, &quot;fakepkg.a&quot;, &quot;fakepkg.b&quot;]
+        assert forget(&quot;fakepkg&quot;) == 3 and loaded(&quot;fakepkg&quot;) == [] and &quot;fakepkgextra&quot; in sys.modules
+    finally:
+        for name in (&quot;fakepkg&quot;, &quot;fakepkg.a&quot;, &quot;fakepkg.b&quot;, &quot;fakepkgextra&quot;):
+            sys.modules.pop(name, None)</textarea><textarea class="pc-src pc-solution" hidden>import importlib
+import sys
+
+def loaded(prefix):
+    return sorted(n for n in sys.modules if n == prefix or n.startswith(prefix + &quot;.&quot;))
+
+def forget(prefix):
+    names = loaded(prefix)
+    for name in names:
+        del sys.modules[name]
+    return len(names)
+
+def fresh_import(name):
+    forget(name)
+    return importlib.import_module(name)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d5-memory" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">An importer from memory</div><div class="pc-prompt"><p>Write <code>MemoryImporter(sources)</code>, a meta path finder and loader for plain modules (no packages yet) whose source code is in the dict <code>sources</code> (module name to source). It records each module it <strong>executes</strong> in its list <code>executed</code>. Then write a context manager <code>using(importer)</code> that puts the importer at the <strong>front</strong> of <code>sys.meta_path</code> for the duration of the block and afterwards removes it and every module that was imported during the block from <code>sys.modules</code> (even after an error). Names the importer doesn&rsquo;t know must still import normally.</p></div><textarea class="pc-src pc-code" hidden>import importlib.abc
+import importlib.util
+import sys
+from contextlib import contextmanager
+
+class MemoryImporter(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    def __init__(self, sources):
+        ___
+
+@contextmanager
+def using(importer):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_memory():
+    &quot;a custom importer&quot;
+    import importlib, sys
+    sources = {&quot;greet&quot;: &quot;def hello(name):\n    return &#x27;hello &#x27; + name\n&quot;, &quot;maths2&quot;: &quot;import greet\nTWO = 2\n&quot;}
+    imp = MemoryImporter(sources)
+    with using(imp) as same:
+        assert same is imp
+        m = importlib.import_module(&quot;maths2&quot;)
+        assert m.TWO == 2 and m.greet.hello(&quot;ada&quot;) == &quot;hello ada&quot;
+        assert importlib.import_module(&quot;greet&quot;) is m.greet and imp.executed == [&quot;maths2&quot;, &quot;greet&quot;]
+        assert m.__spec__.loader is imp and sys.meta_path[0] is imp
+        import string
+        assert string.ascii_lowercase[0] == &quot;a&quot;
+        try:
+            importlib.import_module(&quot;nowhere_at_all&quot;)
+            assert False
+        except ModuleNotFoundError:
+            pass
+    assert imp not in sys.meta_path and &quot;maths2&quot; not in sys.modules and &quot;greet&quot; not in sys.modules
+    try:
+        with using(imp):
+            importlib.import_module(&quot;greet&quot;)
+            raise ValueError
+    except ValueError:
+        pass
+    assert &quot;greet&quot; not in sys.modules and imp.executed == [&quot;maths2&quot;, &quot;greet&quot;, &quot;greet&quot;]</textarea><textarea class="pc-src pc-solution" hidden>import importlib.abc
+import importlib.util
+import sys
+from contextlib import contextmanager
+
+class MemoryImporter(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    def __init__(self, sources):
+        self.sources = sources
+        self.executed = []
+
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname not in self.sources:
+            return None
+        return importlib.util.spec_from_loader(fullname, self, origin=&quot;memory:&quot; + fullname)
+
+    def create_module(self, spec):
+        return None
+
+    def exec_module(self, module):
+        self.executed.append(module.__name__)
+        code = compile(self.sources[module.__name__], module.__spec__.origin, &quot;exec&quot;)
+        exec(code, module.__dict__)
+
+@contextmanager
+def using(importer):
+    before = set(sys.modules)
+    sys.meta_path.insert(0, importer)
+    try:
+        yield importer
+    finally:
+        sys.meta_path.remove(importer)
+        for name in set(sys.modules) - before:
+            del sys.modules[name]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d5-watch" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Watching imports</div><div class="pc-prompt"><p>Write <code>ImportWatcher</code>, a meta path finder that never provides modules (its <code>find_spec</code> always returns <code>None</code>) but records each name it&rsquo;s asked about in <code>requested</code>, in order, without duplicates. Then <code>imports_triggered(func)</code>: run <code>func()</code> with a fresh watcher at the front of <code>sys.meta_path</code> and return its <code>requested</code> list (always removing the watcher). Names already in <code>sys.modules</code> never reach finders, so they won&rsquo;t appear.</p></div><textarea class="pc-src pc-code" hidden>import sys
+
+class ImportWatcher:
+    def __init__(self):
+        ___
+
+def imports_triggered(func):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_watch():
+    &quot;finders are asked in order&quot;
+    import sys, importlib
+    def load():
+        sys.modules.pop(&quot;colorsys&quot;, None)
+        import colorsys
+        import sys as again
+        return colorsys
+    names = imports_triggered(load)
+    assert names == [&quot;colorsys&quot;]
+    assert not any(isinstance(f, ImportWatcher) for f in sys.meta_path)
+    def nothing():
+        import sys
+    assert imports_triggered(nothing) == []
+    def fails():
+        importlib.import_module(&quot;not_a_real_module_xyz&quot;)
+    try:
+        imports_triggered(fails)
+        assert False
+    except ModuleNotFoundError:
+        pass
+    assert not any(isinstance(f, ImportWatcher) for f in sys.meta_path)</textarea><textarea class="pc-src pc-solution" hidden>import sys
+
+class ImportWatcher:
+    def __init__(self):
+        self.requested = []
+
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname not in self.requested:
+            self.requested.append(fullname)
+        return None
+
+def imports_triggered(func):
+    watcher = ImportWatcher()
+    sys.meta_path.insert(0, watcher)
+    try:
+        func()
+    finally:
+        sys.meta_path.remove(watcher)
+    return watcher.requested</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d5-cycles" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Simulating circular imports</div><div class="pc-prompt"><p>Model a program&rsquo;s imports as a dict from module name to the list of <code>(kind, target, name)</code> steps its top level runs, in order: <code>("import", "b", None)</code> for <code>import b</code>, <code>("from", "b", "x")</code> for <code>from b import x</code>, and <code>("define", None, "x")</code> for defining <code>x</code>. Write <code>simulate_import(modules, start)</code> following Python&rsquo;s rules: a module enters the cache (with no names yet) <strong>before</strong> its steps run; importing a cached module does nothing more; <code>from b import x</code> imports <code>b</code> and then fails if <code>x</code> isn&rsquo;t defined in <code>b</code> <strong>yet</strong>. Return the list of modules in the order they <strong>finished</strong> running, or raise <code>ImportError(f"cannot import name {x!r} from partially initialized module {b!r}")</code>.</p></div><textarea class="pc-src pc-code" hidden>def simulate_import(modules, start):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cycles():
+    &quot;partially initialised modules&quot;
+    ok = {&quot;app&quot;: [(&quot;import&quot;, &quot;models&quot;, None), (&quot;define&quot;, None, &quot;main&quot;)],
+          &quot;models&quot;: [(&quot;import&quot;, &quot;app&quot;, None), (&quot;define&quot;, None, &quot;User&quot;)]}
+    assert simulate_import(ok, &quot;app&quot;) == [&quot;models&quot;, &quot;app&quot;]
+    bad = {&quot;orders&quot;: [(&quot;import&quot;, &quot;customers&quot;, None), (&quot;define&quot;, None, &quot;DISCOUNT&quot;)],
+           &quot;customers&quot;: [(&quot;from&quot;, &quot;orders&quot;, &quot;DISCOUNT&quot;)]}
+    try:
+        simulate_import(bad, &quot;orders&quot;)
+        assert False
+    except ImportError as e:
+        assert str(e) == &quot;cannot import name &#x27;DISCOUNT&#x27; from partially initialized module &#x27;orders&#x27;&quot;
+    fixed = {&quot;orders&quot;: [(&quot;define&quot;, None, &quot;DISCOUNT&quot;), (&quot;import&quot;, &quot;customers&quot;, None)],
+             &quot;customers&quot;: [(&quot;from&quot;, &quot;orders&quot;, &quot;DISCOUNT&quot;)]}
+    assert simulate_import(fixed, &quot;orders&quot;) == [&quot;customers&quot;, &quot;orders&quot;]
+    diamond = {&quot;a&quot;: [(&quot;import&quot;, &quot;b&quot;, None), (&quot;import&quot;, &quot;c&quot;, None)], &quot;b&quot;: [(&quot;import&quot;, &quot;d&quot;, None)],
+               &quot;c&quot;: [(&quot;from&quot;, &quot;d&quot;, &quot;x&quot;)], &quot;d&quot;: [(&quot;define&quot;, None, &quot;x&quot;)]}
+    assert simulate_import(diamond, &quot;a&quot;) == [&quot;d&quot;, &quot;b&quot;, &quot;c&quot;, &quot;a&quot;]</textarea><textarea class="pc-src pc-solution" hidden>def simulate_import(modules, start):
+    cache, finished = {}, []
+
+    def load(name):
+        if name in cache:
+            return cache[name]
+        namespace = cache[name] = set()
+        for kind, target, attr in modules[name]:
+            if kind == &quot;define&quot;:
+                namespace.add(attr)
+            elif kind == &quot;import&quot;:
+                load(target)
+            elif kind == &quot;from&quot;:
+                other = load(target)
+                if attr not in other:
+                    raise ImportError(f&quot;cannot import name {attr!r} from partially initialized module {target!r}&quot;)
+                namespace.add(attr)
+        finished.append(name)
+        return namespace
+
+    load(start)
+    return finished</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w064d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title"><strong>import</strong> returns the top package</div><div class="pc-prompt"><p><code>__import__("os.path")</code> imports <code>os.path</code> but returns the <strong>top-level</strong> package <code>os</code>, which has no <code>join</code> of its own, so <code>mod.join</code> raises <code>AttributeError</code>. Use <code>importlib.import_module</code>, which returns the submodule itself, so this prints <code>a/b</code>.</p></div><textarea class="pc-src pc-code" hidden>import importlib
+
+mod = __import__(&quot;os.path&quot;)
+print(mod.join(&quot;a&quot;, &quot;b&quot;).replace(&quot;\\&quot;, &quot;/&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;import_module&quot;
+    expect_output(&quot;a/b&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import importlib
+
+mod = importlib.import_module(&quot;os.path&quot;)
+print(mod.join(&quot;a&quot;, &quot;b&quot;).replace(&quot;\\&quot;, &quot;/&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w064d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A loader that ran the code somewhere else</div><div class="pc-prompt"><p><code>exec_module</code> runs the source in a new, empty dict instead of the module&rsquo;s own namespace, so the module comes out empty and <code>units.METRE</code> raises <code>AttributeError</code>. Run the code in <code>module.__dict__</code> so this prints <code>1.0</code>.</p></div><textarea class="pc-src pc-code" hidden>import importlib.abc, importlib.util, sys
+
+class Loader(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    def find_spec(self, name, path=None, target=None):
+        return importlib.util.spec_from_loader(name, self) if name == &quot;units&quot; else None
+    def create_module(self, spec):
+        return None
+    def exec_module(self, module):
+        exec(&quot;METRE = 1.0&quot;, {})
+
+finder = Loader()
+sys.meta_path.insert(0, finder)
+try:
+    import units
+    print(units.METRE)
+finally:
+    sys.meta_path.remove(finder)
+    sys.modules.pop(&quot;units&quot;, None)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the module&#x27;s namespace&quot;
+    expect_output(&quot;1.0&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import importlib.abc, importlib.util, sys
+
+class Loader(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    def find_spec(self, name, path=None, target=None):
+        return importlib.util.spec_from_loader(name, self) if name == &quot;units&quot; else None
+    def create_module(self, spec):
+        return None
+    def exec_module(self, module):
+        exec(&quot;METRE = 1.0&quot;, module.__dict__)
+
+finder = Loader()
+sys.meta_path.insert(0, finder)
+try:
+    import units
+    print(units.METRE)
+finally:
+    sys.meta_path.remove(finder)
+    sys.modules.pop(&quot;units&quot;, None)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w064d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A finder that claims everything</div><div class="pc-prompt"><p>This finder returns a spec for <strong>every</strong> name it&rsquo;s asked about, so even <code>import string</code> comes from it, as an empty module, and <code>string.digits</code> raises <code>AttributeError</code>. Return <code>None</code> for names the finder doesn&rsquo;t provide, so the normal finders handle them and this prints <code>0123456789</code>.</p></div><textarea class="pc-src pc-code" hidden>import importlib.abc, importlib.util, sys
+
+class Greedy(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    provides = {&quot;extras&quot;: &quot;VALUE = 1&quot;}
+    def find_spec(self, name, path=None, target=None):
+        return importlib.util.spec_from_loader(name, self)
+    def create_module(self, spec):
+        return None
+    def exec_module(self, module):
+        exec(self.provides.get(module.__name__, &quot;&quot;), module.__dict__)
+
+finder = Greedy()
+sys.modules.pop(&quot;string&quot;, None)
+sys.meta_path.insert(0, finder)
+try:
+    import string
+    print(string.digits)
+finally:
+    sys.meta_path.remove(finder)
+    sys.modules.pop(&quot;string&quot;, None)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;return None&quot;
+    expect_output(&quot;0123456789&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import importlib.abc, importlib.util, sys
+
+class Greedy(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    provides = {&quot;extras&quot;: &quot;VALUE = 1&quot;}
+    def find_spec(self, name, path=None, target=None):
+        if name not in self.provides:
+            return None
+        return importlib.util.spec_from_loader(name, self)
+    def create_module(self, spec):
+        return None
+    def exec_module(self, module):
+        exec(self.provides.get(module.__name__, &quot;&quot;), module.__dict__)
+
+finder = Greedy()
+sys.modules.pop(&quot;string&quot;, None)
+sys.meta_path.insert(0, finder)
+try:
+    import string
+    print(string.digits)
+finally:
+    sys.meta_path.remove(finder)
+    sys.modules.pop(&quot;string&quot;, None)</textarea></div>
+<div class="parsons" data-id="w064d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A minimal finder</div><div class="pc-prompt"><p>Arrange the lines of a finder method that only provides modules it knows about. One line is a trap.</p></div><script type="application/json">{"lines": ["def find_spec(self, fullname, path=None, target=None):", "    if fullname not in self.sources:", "        return None", "    return importlib.util.spec_from_loader(fullname, self)"], "distractors": ["        raise ModuleNotFoundError(fullname)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the first place import looks: &quot;sys.path&quot;, &quot;sys.meta_path&quot; or &quot;sys.modules&quot;
+q = ___   # True or False: a module is added to sys.modules before its code runs
+r = ___   # what __import__(&quot;a.b&quot;) returns: &quot;a&quot; or &quot;a.b&quot;
+s = ___   # the attribute that makes a module a package
+t = ___   # importlib.util.resolve_name(&quot;.models&quot;, &quot;shop&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;sys.modules&quot; and q is True and r == &quot;a&quot;, &quot;p, q and r&quot;
+    assert s == &quot;__path__&quot; and t == &quot;shop.models&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;sys.modules&quot;
+q = True
+r = &quot;a&quot;
+s = &quot;__path__&quot;
+t = &quot;shop.models&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w064d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why does a module&rsquo;s code run only once per program?", "answer": 1, "explain": "The cache.", "options": ["Python remembers the file", "After the first import it&rsquo;s in sys.modules, which is checked first", "Modules are compiled", "It doesn&rsquo;t"]}, {"type": "mc", "q": "What does a finder&rsquo;s find_spec return?", "answer": 1, "explain": "None passes the name on.", "options": ["The module", "A module spec, or None if it can&rsquo;t provide the module", "Source code", "A file"]}, {"type": "mc", "q": "What does a loader&rsquo;s exec_module do?", "answer": 1, "explain": "module.<strong>dict</strong> is the globals.", "options": ["Finds the file", "Runs the module&rsquo;s code in the module&rsquo;s namespace", "Deletes the module", "Compiles only"]}, {"type": "mc", "q": "Which finder searches the folders in sys.path?", "answer": 1, "explain": "It&rsquo;s last on sys.meta_path.", "options": ["BuiltinImporter", "PathFinder", "FrozenImporter", "zipimport only"]}, {"type": "mc", "q": "What does importlib.reload do?", "answer": 1, "explain": "Old references to its functions stay old.", "options": ["Creates a new module object", "Re-runs the module&rsquo;s code in the same module object", "Restarts Python", "Clears the cache"]}, {"type": "mc", "q": "What makes a module a package?", "answer": 1, "explain": "Submodules are searched for there.", "options": ["Its name", "A <strong>path</strong> attribute", "A docstring", "Being in site-packages"]}, {"type": "mc", "q": "Why does from . import x fail in a script run directly?", "answer": 1, "explain": "Use python -m package.module.", "options": ["Scripts can&rsquo;t import", "Its <strong>package</strong> is empty, so . has nothing to refer to", "Dots are illegal", "It doesn&rsquo;t"]}, {"type": "mc", "q": "Why can circular imports see missing names?", "answer": 1, "explain": "It&rsquo;s partially initialised.", "options": ["A bug", "The module is in sys.modules before it finishes running", "Python skips lines", "Names are deleted"]}, {"type": "mc", "q": "Which is the best fix for a circular import?", "answer": 1, "explain": "Restructure first.", "options": ["Retry the import", "Move what both modules need into a third module", "Use exec", "Rename the files"]}, {"type": "output", "q": "What does this print?", "answer": "5 True", "explain": "import found it in the cache.", "code": "import sys, types\nm = types.ModuleType(\"thing\")\nm.x = 5\nsys.modules[\"thing\"] = m\nimport thing\nprint(thing.x, thing is m)\ndel sys.modules[\"thing\"]"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w064d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: packages from memory</div><div class="pc-prompt"><p>Extend the memory importer to support <strong>packages</strong>. Sources are keyed by path: <code>"shop/__init__"</code> is the package <code>shop</code>, <code>"shop/cart"</code> is the module <code>shop.cart</code>, <code>"util"</code> is the top-level module <code>util</code>. Write <code>PackageImporter(sources)</code> so that:</p>
+<ul>
+<li><code>find_spec</code> finds both packages (making a spec with <code>is_package=True</code>, so the module gets a <code>__path__</code>) and modules, and returns <code>None</code> for anything else;</li>
+<li>relative imports inside packages work (<code>from . import cart</code>, <code>from .prices import price</code>), since the import system resolves them from <code>__package__</code>;</li>
+<li>each module&rsquo;s <code>__file__</code> is <code>"memory:" + key</code> (set it in <code>exec_module</code>);</li>
+<li><code>executed</code> records each module&rsquo;s full name as it starts executing;</li>
+<li><code>tree()</code> returns a dict from each package name to the sorted list of its direct submodule names (full names), including packages with no submodules, for everything in <code>sources</code>.</li>
+</ul>
+<p>Also write <code>using(importer)</code> as in the earlier exercise.</p></div><textarea class="pc-src pc-code" hidden>import importlib.abc
+import importlib.util
+import sys
+from contextlib import contextmanager
+
+class PackageImporter(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    def __init__(self, sources):
+        ___
+
+@contextmanager
+def using(importer):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_packages():
+    &quot;packages and relative imports&quot;
+    import importlib, sys
+    src = {
+        &quot;shop/__init__&quot;: &quot;from . import cart\nNAME = &#x27;shop&#x27;\n&quot;,
+        &quot;shop/cart&quot;: &quot;from .prices import price\ndef total(items):\n    return sum(price(i) for i in items)\n&quot;,
+        &quot;shop/prices&quot;: &quot;TABLE = {&#x27;tea&#x27;: 3, &#x27;jam&#x27;: 4}\ndef price(item):\n    return TABLE[item]\n&quot;,
+        &quot;shop/admin/__init__&quot;: &quot;&quot;,
+        &quot;shop/admin/reports&quot;: &quot;from ..prices import TABLE\nCOUNT = len(TABLE)\n&quot;,
+        &quot;util&quot;: &quot;X = 1\n&quot;,
+    }
+    imp = PackageImporter(src)
+    with using(imp):
+        shop = importlib.import_module(&quot;shop&quot;)
+        assert shop.cart.total([&quot;tea&quot;, &quot;jam&quot;]) == 7 and shop.NAME == &quot;shop&quot;
+        assert hasattr(shop, &quot;__path__&quot;) and not hasattr(shop.cart, &quot;__path__&quot;)
+        assert imp.executed == [&quot;shop&quot;, &quot;shop.cart&quot;, &quot;shop.prices&quot;]
+        reports = importlib.import_module(&quot;shop.admin.reports&quot;)
+        assert reports.COUNT == 2 and reports.__package__ == &quot;shop.admin&quot;
+        assert shop.__file__ == &quot;memory:shop/__init__&quot; and reports.__file__ == &quot;memory:shop/admin/reports&quot;
+        import util
+        assert util.X == 1 and util.__file__ == &quot;memory:util&quot;
+        try:
+            importlib.import_module(&quot;shop.missing&quot;)
+            assert False
+        except ModuleNotFoundError:
+            pass
+    assert &quot;shop&quot; not in sys.modules and &quot;shop.cart&quot; not in sys.modules
+    assert imp.tree() == {&quot;shop&quot;: [&quot;shop.admin&quot;, &quot;shop.cart&quot;, &quot;shop.prices&quot;], &quot;shop.admin&quot;: [&quot;shop.admin.reports&quot;]}</textarea><textarea class="pc-src pc-solution" hidden>import importlib.abc
+import importlib.util
+import sys
+from contextlib import contextmanager
+
+class PackageImporter(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    def __init__(self, sources):
+        self.sources = sources
+        self.executed = []
+
+    def _key(self, fullname):
+        path = fullname.replace(&quot;.&quot;, &quot;/&quot;)
+        if path + &quot;/__init__&quot; in self.sources:
+            return path + &quot;/__init__&quot;, True
+        if path in self.sources:
+            return path, False
+        return None, False
+
+    def find_spec(self, fullname, path=None, target=None):
+        key, is_package = self._key(fullname)
+        if key is None:
+            return None
+        return importlib.util.spec_from_loader(fullname, self, origin=&quot;memory:&quot; + key, is_package=is_package)
+
+    def create_module(self, spec):
+        return None
+
+    def exec_module(self, module):
+        key, _ = self._key(module.__name__)
+        module.__file__ = &quot;memory:&quot; + key
+        self.executed.append(module.__name__)
+        exec(compile(self.sources[key], module.__file__, &quot;exec&quot;), module.__dict__)
+
+    def tree(self):
+        packages = {k[:-len(&quot;/__init__&quot;)].replace(&quot;/&quot;, &quot;.&quot;) for k in self.sources if k.endswith(&quot;/__init__&quot;)}
+        result = {p: [] for p in packages}
+        for key in self.sources:
+            name = key[:-len(&quot;/__init__&quot;)] if key.endswith(&quot;/__init__&quot;) else key
+            full = name.replace(&quot;/&quot;, &quot;.&quot;)
+            parent = full.rpartition(&quot;.&quot;)[0]
+            if parent in result:
+                result[parent].append(full)
+        return {p: sorted(children) for p, children in result.items()}
+
+@contextmanager
+def using(importer):
+    before = set(sys.modules)
+    sys.meta_path.insert(0, importer)
+    try:
+        yield importer
+    finally:
+        sys.meta_path.remove(importer)
+        for name in set(sys.modules) - before:
+            del sys.modules[name]</textarea><template class="pc-src pc-hint">Convert a full name to a key with <code>fullname.replace(".", "/")</code>: if <code>key + "/__init__"</code> is in the sources it&rsquo;s a package, if <code>key</code> is, a module. <code>importlib.util.spec_from_loader(name, self, origin=..., is_package=True)</code> gives packages an empty <code>submodule_search_locations</code>, which is enough for the import system to treat them as packages and to resolve relative imports.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, run <code>python -X importtime -c "import json"</code> to see every module importing <code>json</code> loads and how long each took. Tomorrow is the Forge: a code checker built from this week&rsquo;s tools.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w064d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w064d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w064d5", "week": 64, "day": 5, "title": "The import system", "exercises": [{"id": "w064d5-fromsource", "title": "Modules from source", "points": 10}, {"id": "w064d5-cache", "title": "Working with sys.modules", "points": 10}, {"id": "w064d5-memory", "title": "An importer from memory", "points": 15}, {"id": "w064d5-watch", "title": "Watching imports", "points": 10}, {"id": "w064d5-cycles", "title": "Simulating circular imports", "points": 15}, {"id": "w064d5-bug1", "title": "__import__ returns the top package", "points": 10}, {"id": "w064d5-bug2", "title": "A loader that ran the code somewhere else", "points": 10}, {"id": "w064d5-bug3", "title": "A finder that claims everything", "points": 10}, {"id": "w064d5-trace", "title": "Predict them", "points": 10}, {"id": "w064d5-challenge", "title": "Challenge: packages from memory", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
