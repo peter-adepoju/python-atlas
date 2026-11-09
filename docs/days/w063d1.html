@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 63 Day 1: Descriptors | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Since Week 29 you’ve used @property, and since Week 28 you’ve called methods, without asking how obj.attr actually finds what it returns. This week opens up...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w063d1.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 63 Day 1: Descriptors">
+<meta property="og:description" content="Since Week 29 you’ve used @property, and since Week 28 you’ve called methods, without asking how obj.attr actually finds what it returns. This week opens up...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w063d1.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-63">Week 63: Attribute magic</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#the-problem-descriptors-solve" data-sec="the-problem-descriptors-solve">The problem descriptors solve</a></li><li><a href="#the-descriptor-protocol" data-sec="the-descriptor-protocol">The descriptor protocol</a></li><li><a href="#set-name-and-where-to-store-values" data-sec="set-name-and-where-to-store-values">set_name and where to store values</a></li><li><a href="#data-and-non-data-descriptors" data-sec="data-and-non-data-descriptors">Data and non-data descriptors</a></li><li><a href="#descriptors-you-already-use" data-sec="descriptors-you-already-use">Descriptors you already use</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w063d1.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-63">Week 63: Attribute magic</a></li><li aria-current="page">Day 1 of 6</li></ol>
+      <p class="day-where"><span>Week 63, Day 1</span></p>
+      <h1>Descriptors</h1>
+      <div class="day-intro"><p>Since Week 29 you&rsquo;ve used <code>@property</code>, and since Week 28 you&rsquo;ve called methods, without asking how <code>obj.attr</code> actually finds what it returns. This week opens up attribute access. Today&rsquo;s tool is the <strong>descriptor</strong>: an object stored on a class that takes over what happens when an attribute with its name is read, set or deleted on an instance. Properties, methods, <code>staticmethod</code>, <code>classmethod</code>, <code>__slots__</code> and <code>functools.cached_property</code> are all descriptors. You&rsquo;ll write validating fields, lazy attributes and aliases, and finish with a small field framework of the kind behind dataclasses and form libraries.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain the descriptor protocol (<strong>get</strong>, <strong>set</strong>, <strong>delete</strong>) and when Python calls it</li><li>Handle access through the class (obj is None) and use <strong>set_name</strong> to learn the attribute&rsquo;s name</li><li>Store per-instance values correctly, in the instance&rsquo;s <strong>dict</strong>, never on the descriptor</li><li>Tell data descriptors from non-data descriptors and predict which wins over the instance <strong>dict</strong></li><li>Build reusable validating fields and a small model framework from descriptors</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="The problem descriptors solve: 20 min"></span><span class="plan-seg s0" style="flex:25" title="The descriptor protocol: 25 min"></span><span class="plan-seg s1" style="flex:20" title="__set_name__ and where to store values: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Data and non-data descriptors: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Descriptors you already use: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">The problem descriptors solve</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">The descriptor protocol</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what"><strong>set_name</strong> and where to store values</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Data and non-data descriptors</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Descriptors you already use</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w063d1.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w063d1.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w063d1-p1"><textarea class="pc-src pc-code" hidden>class Loud:
+    def __get__(self, obj, objtype=None):
+        print(&quot;get called, obj is&quot;, &quot;None&quot; if obj is None else type(obj).__name__)
+        return 42
+
+class Box:
+    size = Loud()
+
+b = Box()
+print(b.size)
+print(Box.size)
+b.__dict__[&quot;size&quot;] = 7
+print(b.size)</textarea></div>
+<p>Reading <code>b.size</code> didn&rsquo;t return the <code>Loud</code> object stored on the class: Python called its <code>__get__</code>, both through the instance and through the class. But once the instance had its own <code>size</code> in its <code>__dict__</code>, that value won and <code>__get__</code> wasn&rsquo;t called. The section on data and non-data descriptors explains why.</p>
+<h2 id="the-problem-descriptors-solve">The problem descriptors solve</h2>
+<p>Week 29&rsquo;s properties let a class check values as they&rsquo;re set:</p>
+<pre><code>class Product:
+    @property
+    def price(self):
+        return self._price
+    @price.setter
+    def price(self, value):
+        if value &lt;= 0:
+            raise ValueError(&quot;price must be positive&quot;)
+        self._price = value
+</code></pre>
+<p>Now suppose <code>Product</code> also has <code>weight</code> and <code>stock</code>, and <code>Order</code> has <code>quantity</code>, all of which must be positive. Each needs the same eight lines, differing only in the name. Properties are written <strong>per attribute</strong>. A <strong>descriptor</strong> is a class whose instances <strong>are</strong> the reusable behaviour: write <code>Positive</code> once, then</p>
+<pre><code>class Product:
+    price = Positive()
+    weight = Positive()
+</code></pre>
+<h2 id="the-descriptor-protocol">The descriptor protocol</h2>
+<p>A <strong>descriptor</strong> is any object whose class defines at least one of:</p>
+<ul>
+<li><code>__get__(self, obj, objtype=None)</code>: called for <code>obj.attr</code>; <code>obj</code> is the instance, or <code>None</code> when the attribute is read from the class itself (<code>Product.price</code>), and <code>objtype</code> is the class;</li>
+<li><code>__set__(self, obj, value)</code>: called for <code>obj.attr = value</code>;</li>
+<li><code>__delete__(self, obj)</code>: called for <code>del obj.attr</code>.</li>
+</ul>
+<p>It only works when the descriptor is stored as a <strong>class attribute</strong>. Python&rsquo;s attribute lookup (<code>object.__getattribute__</code>, tomorrow&rsquo;s subject) finds <code>price</code> in the class, sees that the object found has <code>__get__</code>, and calls it instead of returning it. A descriptor stored in an instance&rsquo;s <code>__dict__</code> is just an ordinary value.</p>
+<p>By convention, <code>__get__</code> with <code>obj is None</code> returns the descriptor itself, so that <code>Product.price</code> gives you the descriptor to inspect.</p>
+<div class="pc pc-example" data-kind="example" data-id="w063d1-e2"><textarea class="pc-src pc-code" hidden>class Celsius:
+    &quot;Reads and writes a temperature stored in Celsius, in Fahrenheit.&quot;
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return obj._celsius * 9 / 5 + 32
+
+    def __set__(self, obj, value):
+        obj._celsius = (value - 32) * 5 / 9
+
+class Room:
+    fahrenheit = Celsius()
+    def __init__(self, celsius):
+        self._celsius = celsius
+
+r = Room(20)
+print(r.fahrenheit)
+r.fahrenheit = 50                  # calls Celsius.__set__(descriptor, r, 50)
+print(r._celsius)
+print(type(Room.fahrenheit).__name__)</textarea></div>
+<h2 id="set-name-and-where-to-store-values"><strong>set_name</strong> and where to store values</h2>
+<p>One descriptor object is shared by <strong>every instance</strong> of the class, so it must not keep a value on <code>self</code> (the descriptor): all instances would see the same value. Store each instance&rsquo;s value <strong>on the instance</strong>, usually in <code>obj.__dict__</code>, under a key the descriptor knows.</p>
+<p>To know that key, define <code>__set_name__(self, owner, name)</code>. Python calls it once, when the class is created, for every descriptor in the class body, passing the class and the attribute name (<code>"price"</code>). Then:</p>
+<ul>
+<li>a <strong>data</strong> descriptor (one with <code>__set__</code>) can store under the <strong>same name</strong>, <code>obj.__dict__["price"]</code>, because, as you&rsquo;ll see next, a data descriptor wins over the instance <code>__dict__</code>, so the stored value never shadows it;</li>
+<li>or store under a private name such as <code>"_price"</code>.</li>
+</ul>
+<p>Never write <code>setattr(obj, self.name, value)</code> inside <code>__set__</code> with the same name: that calls <code>__set__</code> again, forever.</p>
+<div class="pc pc-example" data-kind="example" data-id="w063d1-e3"><textarea class="pc-src pc-code" hidden>class Positive:
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        try:
+            return obj.__dict__[self.name]
+        except KeyError:
+            raise AttributeError(self.name) from None
+
+    def __set__(self, obj, value):
+        if value &lt;= 0:
+            raise ValueError(f&quot;{self.name} must be positive, not {value}&quot;)
+        obj.__dict__[self.name] = value
+
+class Product:
+    price = Positive()
+    stock = Positive()
+    def __init__(self, price, stock):
+        self.price, self.stock = price, stock     # goes through Positive.__set__
+
+tea, jam = Product(3, 10), Product(5, 2)
+print(tea.price, jam.price, vars(tea))
+try:
+    tea.stock = 0
+except ValueError as e:
+    print(e)
+print(Product.price.name)</textarea></div>
+<h2 id="data-and-non-data-descriptors">Data and non-data descriptors</h2>
+<p>The difference between the two kinds decides who wins when the <strong>instance <code>__dict__</code></strong> has an entry with the same name:</p>
+<ul>
+<li>A <strong>data descriptor</strong> defines <code>__set__</code> or <code>__delete__</code>. It <strong>beats</strong> the instance <code>__dict__</code>: reading always goes through <code>__get__</code>. (Properties are data descriptors, even read-only ones: their <code>__set__</code> raises.)</li>
+<li>A <strong>non-data descriptor</strong> defines only <code>__get__</code>. The instance <code>__dict__</code> <strong>beats</strong> it: once the instance has its own value under that name, that value is returned and <code>__get__</code> isn&rsquo;t called.</li>
+</ul>
+<p>Non-data descriptors make <strong>caching</strong> easy: compute in <code>__get__</code>, store the result in <code>obj.__dict__</code> under the same name, and every later read finds the stored value directly, with no call at all. That&rsquo;s exactly how <code>functools.cached_property</code> works. It&rsquo;s also why the warm-up&rsquo;s <code>Loud</code> (non-data) lost to <code>b.__dict__["size"]</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w063d1-e4"><textarea class="pc-src pc-code" hidden>class Lazy:
+    def __init__(self, func):
+        self.func = func
+    def __set_name__(self, owner, name):
+        self.name = name
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        value = self.func(obj)
+        obj.__dict__[self.name] = value         # shadows this non-data descriptor from now on
+        return value
+
+class Report:
+    def __init__(self, rows):
+        self.rows = rows
+    @Lazy
+    def total(self):
+        print(&quot;computing...&quot;)
+        return sum(self.rows)
+
+rep = Report([1, 2, 3])
+print(rep.total)
+print(rep.total)                                # no &quot;computing...&quot; this time
+print(&quot;total&quot; in vars(rep))</textarea></div>
+<h2 id="descriptors-you-already-use">Descriptors you already use</h2>
+<ul>
+<li><strong>Functions are non-data descriptors.</strong> <code>def greet(self)</code> in a class stores a function; <code>function.__get__(obj, cls)</code> returns a <strong>bound method</strong> with <code>obj</code> filled in as <code>self</code>. That&rsquo;s the whole mechanism of methods, and why yesterday&rsquo;s <code>obj.method</code> made a new object each time.</li>
+<li><strong><code>property</code></strong> is a data descriptor class; <code>@property</code> calls it with your getter, and <code>.setter</code> returns a new property with a setter added.</li>
+<li><strong><code>staticmethod</code></strong> and <strong><code>classmethod</code></strong> are descriptors whose <code>__get__</code> returns the plain function or binds the class instead of the instance.</li>
+<li><strong><code>__slots__</code></strong> creates one descriptor per slot on the class, storing values in fixed places inside the object.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w063d1-e5"><textarea class="pc-src pc-code" hidden>class Greeter:
+    def greet(self, name):
+        return f&quot;hello, {name}&quot;
+
+g = Greeter()
+func = Greeter.__dict__[&quot;greet&quot;]               # the plain function stored on the class
+bound = func.__get__(g, Greeter)               # what g.greet does
+print(bound(&quot;Ada&quot;), bound.__self__ is g)
+print(type(Greeter.__dict__[&quot;greet&quot;]).__name__, hasattr(func, &quot;__get__&quot;), hasattr(func, &quot;__set__&quot;))
+
+class Slotted:
+    __slots__ = (&quot;x&quot;,)
+print(type(Slotted.__dict__[&quot;x&quot;]).__name__)
+print(hasattr(property, &quot;__set__&quot;), hasattr(classmethod, &quot;__set__&quot;))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A descriptor is an object stored on a class whose type defines <strong>get</strong>(self, obj, objtype), <strong>set</strong>(self, obj, value) or <strong>delete</strong>(self, obj); Python calls them for reads, writes and deletes of that attribute on instances. <strong>get</strong> gets obj None when read through the class, and should return the descriptor itself. <strong>set_name</strong>(owner, name) tells the descriptor its name when the class is created. One descriptor serves every instance, so store values on the instance (obj.<strong>dict</strong>), never on the descriptor, and never with setattr under the same name. Data descriptors (with <strong>set</strong> or <strong>delete</strong>) beat the instance <strong>dict</strong>; non-data descriptors (only <strong>get</strong>) lose to it, which is how caching works. Functions, property, staticmethod, classmethod and <strong>slots</strong> are all descriptors.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d1-positive" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A reusable check</div><div class="pc-prompt"><p>Write a data descriptor <code>InRange(low, high)</code>: setting a value outside <code>low &lt;= value &lt;= high</code> raises <code>ValueError</code>, and setting a value that isn&rsquo;t an <code>int</code> or <code>float</code> (booleans don&rsquo;t count) raises <code>TypeError</code>. Use <code>__set_name__</code> and store values in the instance&rsquo;s <code>__dict__</code> under the attribute&rsquo;s own name. Reading an attribute that hasn&rsquo;t been set raises <code>AttributeError</code>; reading through the class returns the descriptor.</p></div><textarea class="pc-src pc-code" hidden>class InRange:
+    def __init__(self, low, high):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_range():
+    &quot;validating descriptors&quot;
+    class Patient:
+        temperature = InRange(30, 45)
+        age = InRange(0, 130)
+    p, q = Patient(), Patient()
+    p.temperature, q.temperature = 37, 39.5
+    assert p.temperature == 37 and q.temperature == 39.5 and vars(p) == {&quot;temperature&quot;: 37}
+    for bad, err in ((50, ValueError), (29.9, ValueError), (&quot;37&quot;, TypeError), (True, TypeError)):
+        try:
+            p.temperature = bad
+            assert False
+        except err:
+            pass
+    assert p.temperature == 37
+    try:
+        p.age
+        assert False
+    except AttributeError:
+        pass
+    assert isinstance(Patient.age, InRange) and Patient.age.low == 0</textarea><textarea class="pc-src pc-solution" hidden>class InRange:
+    def __init__(self, low, high):
+        self.low, self.high = low, high
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        try:
+            return obj.__dict__[self.name]
+        except KeyError:
+            raise AttributeError(self.name) from None
+
+    def __set__(self, obj, value):
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise TypeError(f&quot;{self.name} must be a number&quot;)
+        if not self.low &lt;= value &lt;= self.high:
+            raise ValueError(f&quot;{self.name} must be between {self.low} and {self.high}&quot;)
+        obj.__dict__[self.name] = value</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d1-typed" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Typed with a default</div><div class="pc-prompt"><p>Write <code>Typed(kind, default=None)</code>: setting a value that isn&rsquo;t an instance of <code>kind</code> raises <code>TypeError</code> with the message <code>"&lt;name&gt; must be &lt;kind name&gt;"</code> (for example <code>"title must be str"</code>). Reading an attribute that was never set returns <code>default</code>. <code>del obj.attr</code> removes the stored value (so reads give the default again), and deleting one that isn&rsquo;t set raises <code>AttributeError</code>.</p></div><textarea class="pc-src pc-code" hidden>class Typed:
+    def __init__(self, kind, default=None):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_typed():
+    &quot;a typed field&quot;
+    class Book:
+        title = Typed(str, &quot;untitled&quot;)
+        pages = Typed(int, 0)
+    b = Book()
+    assert b.title == &quot;untitled&quot; and b.pages == 0
+    b.title = &quot;Aké&quot;
+    assert b.title == &quot;Aké&quot; and Book().title == &quot;untitled&quot;
+    try:
+        b.pages = &quot;300&quot;
+        assert False
+    except TypeError as e:
+        assert str(e) == &quot;pages must be int&quot;
+    del b.title
+    assert b.title == &quot;untitled&quot;
+    try:
+        del b.title
+        assert False
+    except AttributeError:
+        pass
+    assert isinstance(Book.pages, Typed)</textarea><textarea class="pc-src pc-solution" hidden>class Typed:
+    def __init__(self, kind, default=None):
+        self.kind, self.default = kind, default
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return obj.__dict__.get(self.name, self.default)
+
+    def __set__(self, obj, value):
+        if not isinstance(value, self.kind):
+            raise TypeError(f&quot;{self.name} must be {self.kind.__name__}&quot;)
+        obj.__dict__[self.name] = value
+
+    def __delete__(self, obj):
+        if self.name not in obj.__dict__:
+            raise AttributeError(self.name)
+        del obj.__dict__[self.name]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d1-cached" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Your own cached property</div><div class="pc-prompt"><p>Write <code>cached(func)</code>, a <strong>non-data</strong> descriptor used as a decorator: the first read on an instance calls <code>func(obj)</code> and stores the result in the instance&rsquo;s <code>__dict__</code> under the attribute&rsquo;s name, so later reads don&rsquo;t call it. Assigning to the attribute replaces the cached value (that works for free, since it&rsquo;s non-data), <code>del</code> clears it so the next read recomputes, and the descriptor keeps the function&rsquo;s <code>__doc__</code>.</p></div><textarea class="pc-src pc-code" hidden>class cached:
+    def __init__(self, func):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cached():
+    &quot;a non-data descriptor that caches&quot;
+    calls = []
+    class Data:
+        def __init__(self, xs):
+            self.xs = xs
+        @cached
+        def mean(self):
+            &quot;The average.&quot;
+            calls.append(1)
+            return sum(self.xs) / len(self.xs)
+    d = Data([1, 2, 3])
+    assert d.mean == 2 and d.mean == 2 and len(calls) == 1
+    e = Data([10])
+    assert e.mean == 10 and len(calls) == 2
+    d.xs.append(10)
+    del d.mean
+    assert d.mean == 4 and len(calls) == 3
+    d.mean = 99
+    assert d.mean == 99 and len(calls) == 3
+    assert Data.mean.__doc__ == &quot;The average.&quot; and not hasattr(cached, &quot;__set__&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class cached:
+    def __init__(self, func):
+        self.func = func
+        self.__doc__ = func.__doc__
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        value = self.func(obj)
+        obj.__dict__[self.name] = value
+        return value</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d1-alias" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Another name for an attribute</div><div class="pc-prompt"><p>Write a data descriptor <code>Alias(target)</code> so that reading, setting and deleting the aliased attribute act on the attribute named <code>target</code> instead (use <code>getattr</code>, <code>setattr</code> and <code>delattr</code> on the target name). Then <code>Counted()</code>: a data descriptor storing values in the instance&rsquo;s <code>__dict__</code> that also counts, <strong>per instance</strong>, how many times the attribute has been set; <code>Counted.sets(obj, name)</code> is a static method returning that count for the named attribute (0 if never set).</p></div><textarea class="pc-src pc-code" hidden>class Alias:
+    def __init__(self, target):
+        ___
+
+class Counted:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_alias():
+    &quot;forwarding descriptors&quot;
+    class Point:
+        x = Counted()
+        y = Counted()
+        horizontal = Alias(&quot;x&quot;)
+    p = Point()
+    p.x = 1
+    p.horizontal = 5
+    assert p.x == 5 and p.horizontal == 5
+    assert Counted.sets(p, &quot;x&quot;) == 2 and Counted.sets(p, &quot;y&quot;) == 0
+    q = Point()
+    q.x = 3
+    assert Counted.sets(q, &quot;x&quot;) == 1 and p.x == 5
+    del p.horizontal
+    try:
+        p.x
+        assert False
+    except AttributeError:
+        pass
+    assert isinstance(Point.horizontal, Alias)</textarea><textarea class="pc-src pc-solution" hidden>class Alias:
+    def __init__(self, target):
+        self.target = target
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return getattr(obj, self.target)
+
+    def __set__(self, obj, value):
+        setattr(obj, self.target, value)
+
+    def __delete__(self, obj):
+        delattr(obj, self.target)
+
+class Counted:
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        try:
+            return obj.__dict__[self.name]
+        except KeyError:
+            raise AttributeError(self.name) from None
+
+    def __set__(self, obj, value):
+        obj.__dict__[self.name] = value
+        counts = obj.__dict__.setdefault(&quot;_set_counts&quot;, {})
+        counts[self.name] = counts.get(self.name, 0) + 1
+
+    def __delete__(self, obj):
+        try:
+            del obj.__dict__[self.name]
+        except KeyError:
+            raise AttributeError(self.name) from None
+
+    @staticmethod
+    def sets(obj, name):
+        return obj.__dict__.get(&quot;_set_counts&quot;, {}).get(name, 0)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d1-binding" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Methods by hand</div><div class="pc-prompt"><p>Functions become methods because they&rsquo;re descriptors. Write <code>bind(func, obj)</code>: return what <code>obj.&lt;func&gt;</code> would be if <code>func</code> were stored on <code>obj</code>&rsquo;s class, using the function&rsquo;s <code>__get__</code> (don&rsquo;t use <code>types.MethodType</code>). Then write a descriptor <code>class_or_instance(func)</code>: reading it through an <strong>instance</strong> binds the instance as the first argument, and reading it through the <strong>class</strong> binds the class, so the same method works both ways.</p></div><textarea class="pc-src pc-code" hidden>def bind(func, obj):
+    ___
+
+class class_or_instance:
+    def __init__(self, func):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_binding():
+    &quot;functions are descriptors&quot;
+    class Dog:
+        def __init__(self, name):
+            self.name = name
+    def speak(self, word):
+        return f&quot;{self.name} says {word}&quot;
+    rex = Dog(&quot;Rex&quot;)
+    m = bind(speak, rex)
+    assert m(&quot;woof&quot;) == &quot;Rex says woof&quot; and m.__self__ is rex and m.__func__ is speak
+    class Thing:
+        label = &quot;class&quot;
+        def __init__(self):
+            self.label = &quot;instance&quot;
+        @class_or_instance
+        def describe(who):
+            return who.label
+    assert Thing.describe() == &quot;class&quot; and Thing().describe() == &quot;instance&quot;
+    assert not uses(source, &quot;MethodType&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def bind(func, obj):
+    return func.__get__(obj, type(obj))
+
+class class_or_instance:
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, obj, objtype=None):
+        target = objtype if obj is None else obj
+        return self.func.__get__(target, type(target))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w063d1-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">One value for everyone</div><div class="pc-prompt"><p><code>Score</code> stores the value on the descriptor itself, and there&rsquo;s only one descriptor for the whole class, so setting Ben&rsquo;s score changes Ada&rsquo;s too: this prints <code>20 20</code>. Store each value on its own instance so it prints <code>10 20</code>.</p></div><textarea class="pc-src pc-code" hidden>class Score:
+    def __get__(self, obj, objtype=None):
+        return self.value
+    def __set__(self, obj, value):
+        self.value = value
+
+class Player:
+    score = Score()
+
+ada, ben = Player(), Player()
+ada.score = 10
+ben.score = 20
+print(ada.score, ben.score)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;per-instance storage&quot;
+    expect_output(&quot;10 20&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Score:
+    def __get__(self, obj, objtype=None):
+        return obj.__dict__[&quot;score&quot;]
+    def __set__(self, obj, value):
+        obj.__dict__[&quot;score&quot;] = value
+
+class Player:
+    score = Score()
+
+ada, ben = Player(), Player()
+ada.score = 10
+ben.score = 20
+print(ada.score, ben.score)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w063d1-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Asked through the class</div><div class="pc-prompt"><p>Reading <code>Product.price</code> through the class calls <code>__get__</code> with <code>obj</code> set to <code>None</code>, and <code>None</code> has no <code>__dict__</code>, so this crashes with <code>AttributeError</code>. Return the descriptor itself when <code>obj</code> is <code>None</code> so it prints <code>Price</code>.</p></div><textarea class="pc-src pc-code" hidden>class Price:
+    def __set_name__(self, owner, name):
+        self.name = name
+    def __get__(self, obj, objtype=None):
+        return obj.__dict__[self.name]
+    def __set__(self, obj, value):
+        obj.__dict__[self.name] = value
+
+class Product:
+    price = Price()
+
+print(type(Product.price).__name__)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;obj is None&quot;
+    expect_output(&quot;Price&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Price:
+    def __set_name__(self, owner, name):
+        self.name = name
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return obj.__dict__[self.name]
+    def __set__(self, obj, value):
+        obj.__dict__[self.name] = value
+
+class Product:
+    price = Price()
+
+print(type(Product.price).__name__)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w063d1-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Setting itself forever</div><div class="pc-prompt"><p><code>__set__</code> stores the value with <code>setattr</code> under the attribute&rsquo;s own name, which calls <code>__set__</code> again, and again, until Python gives up with <code>RecursionError</code>. Store it directly in the instance&rsquo;s <code>__dict__</code> so this prints <code>42</code>.</p></div><textarea class="pc-src pc-code" hidden>class Stored:
+    def __set_name__(self, owner, name):
+        self.name = name
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return obj.__dict__[self.name]
+    def __set__(self, obj, value):
+        setattr(obj, self.name, value)
+
+class Answer:
+    value = Stored()
+
+a = Answer()
+a.value = 42
+print(a.value)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;no recursion&quot;
+    expect_output(&quot;42&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Stored:
+    def __set_name__(self, owner, name):
+        self.name = name
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return obj.__dict__[self.name]
+    def __set__(self, obj, value):
+        obj.__dict__[self.name] = value
+
+class Answer:
+    value = Stored()
+
+a = Answer()
+a.value = 42
+print(a.value)</textarea></div>
+<div class="parsons" data-id="w063d1-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A descriptor&rsquo;s reading half</div><div class="pc-prompt"><p>Arrange the lines of a descriptor that learns its name and reads values from the instance. One line is a trap.</p></div><script type="application/json">{"lines": ["class Field:", "    def __set_name__(self, owner, name):", "        self.name = name", "    def __get__(self, obj, objtype=None):", "        if obj is None:", "            return self", "        return obj.__dict__[self.name]"], "distractors": ["        return getattr(obj, self.name)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d1-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # True or False: a descriptor only works when stored on the class
+q = ___   # what obj is in __get__ when the attribute is read through the class
+r = ___   # &quot;data&quot; or &quot;non-data&quot;: a descriptor with only __get__
+s = ___   # True or False: a non-data descriptor beats a value in the instance __dict__
+t = ___   # when __set_name__ is called: &quot;class creation&quot; or &quot;first use&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p is True and q is None and r == &quot;non-data&quot;, &quot;p, q and r&quot;
+    assert s is False and t == &quot;class creation&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = True
+q = None
+r = &quot;non-data&quot;
+s = False
+t = &quot;class creation&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w063d1-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What makes an object a descriptor?", "answer": 1, "explain": "And it&rsquo;s stored on a class.", "options": ["Being a function", "Its type defines <strong>get</strong>, <strong>set</strong> or <strong>delete</strong>", "Having a name", "Being in <strong>dict</strong>"]}, {"type": "mc", "q": "Where must a descriptor be stored to take effect?", "answer": 1, "explain": "Lookup checks the class for descriptors.", "options": ["In the instance <strong>dict</strong>", "As a class attribute", "In a module", "Anywhere"]}, {"type": "mc", "q": "What are <strong>get</strong>&rsquo;s obj and objtype when you read Cls.attr?", "answer": 1, "explain": "Return the descriptor itself then.", "options": ["The class and None", "None and the class", "Both None", "The instance and the class"]}, {"type": "mc", "q": "What does <strong>set_name</strong> receive?", "answer": 1, "explain": "Called once when the class is created.", "options": ["The value", "The owner class and the attribute name", "The instance", "Nothing"]}, {"type": "mc", "q": "Why mustn&rsquo;t a descriptor store values on self?", "answer": 1, "explain": "Store on the instance.", "options": ["It&rsquo;s slow", "One descriptor is shared by every instance", "self is read-only", "It&rsquo;s fine"]}, {"type": "mc", "q": "What makes a descriptor a data descriptor?", "answer": 1, "explain": "It then beats the instance <strong>dict</strong>.", "options": ["Storing data", "Defining <strong>set</strong> or <strong>delete</strong>", "Defining <strong>get</strong>", "Being a property"]}, {"type": "mc", "q": "Who wins between a non-data descriptor and an instance <strong>dict</strong> entry of the same name?", "answer": 1, "explain": "That&rsquo;s how caching works.", "options": ["The descriptor", "The instance <strong>dict</strong>", "Whichever came first", "Neither"]}, {"type": "mc", "q": "Why are functions descriptors?", "answer": 1, "explain": "func.<strong>get</strong>(obj, cls).", "options": ["They aren&rsquo;t", "Their <strong>get</strong> returns a bound method, which is how methods get self", "For speed", "For decorators"]}, {"type": "mc", "q": "Is a read-only property a data descriptor?", "answer": 1, "explain": "So it can&rsquo;t be shadowed.", "options": ["No", "Yes: property defines <strong>set</strong>, which raises without a setter", "Only sometimes", "It&rsquo;s not a descriptor"]}, {"type": "output", "q": "What does this print?", "answer": "mine from D", "explain": "Non-data: the instance value wins; the class read still calls <strong>get</strong>.", "code": "class D:\n    def __get__(self, obj, objtype=None):\n        return \"from D\"\nclass C:\n    x = D()\nc = C()\nc.x = \"mine\"\nprint(c.x, C.x)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d1-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a field framework</div><div class="pc-prompt"><p>Build the core of a model library from descriptors. <code>Field(kind, *, default=REQUIRED, check=None)</code> is a data descriptor: setting checks <code>isinstance(value, kind)</code> (<code>TypeError</code>) and, if given, <code>check(value)</code> must be true (<code>ValueError</code>); values live in the instance&rsquo;s <code>__dict__</code>. <code>REQUIRED</code> is a sentinel.</p>
+<p><code>Model</code> is a base class:</p>
+<ul>
+<li><code>fields()</code> (a class method) returns the names of all <code>Field</code>s, in definition order, including those inherited from base models (base fields first; a subclass may redefine a field, which keeps its original position).</li>
+<li><code>__init__(**values)</code> sets every field from the keywords or its default; a missing required field raises <code>TypeError("missing field: name")</code>, an unknown keyword raises <code>TypeError("unknown field: name")</code>.</li>
+<li><code>repr</code> is <code>Point(x=1, y=2)</code>, <code>==</code> compares class and field values, and <code>to_dict()</code> returns a dict of field values.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>REQUIRED = object()
+
+class Field:
+    def __init__(self, kind, *, default=REQUIRED, check=None):
+        ___
+
+class Model:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_fields():
+    &quot;descriptors as fields&quot;
+    class Point(Model):
+        x = Field(int)
+        y = Field(int, default=0)
+    p = Point(x=1, y=2)
+    assert p.x == 1 and p.y == 2 and Point(x=5).y == 0
+    assert Point.fields() == [&quot;x&quot;, &quot;y&quot;] and repr(p) == &quot;Point(x=1, y=2)&quot;
+    assert p == Point(x=1, y=2) and p != Point(x=1) and p.to_dict() == {&quot;x&quot;: 1, &quot;y&quot;: 2}
+    for kwargs, message in (({}, &quot;missing field: x&quot;), ({&quot;x&quot;: 1, &quot;z&quot;: 3}, &quot;unknown field: z&quot;)):
+        try:
+            Point(**kwargs)
+            assert False
+        except TypeError as e:
+            assert str(e) == message
+    try:
+        p.x = &quot;1&quot;
+        assert False
+    except TypeError:
+        pass
+    assert isinstance(Point.x, Field)
+
+def test_inheritance_and_checks():
+    &quot;checks and inherited fields&quot;
+    class Item(Model):
+        name = Field(str)
+        price = Field(int, check=lambda v: v &gt; 0)
+    class Discounted(Item):
+        percent = Field(int, default=10, check=lambda v: 0 &lt;= v &lt;= 100)
+        price = Field(int, default=1, check=lambda v: v &gt; 0)
+    assert Discounted.fields() == [&quot;name&quot;, &quot;price&quot;, &quot;percent&quot;]
+    d = Discounted(name=&quot;tea&quot;)
+    assert d.price == 1 and d.percent == 10 and repr(d) == &quot;Discounted(name=&#x27;tea&#x27;, price=1, percent=10)&quot;
+    try:
+        Item(name=&quot;jam&quot;, price=0)
+        assert False
+    except ValueError:
+        pass
+    try:
+        d.percent = 101
+        assert False
+    except ValueError:
+        pass
+    assert Item(name=&quot;a&quot;, price=1) != Discounted(name=&quot;a&quot;, price=1)
+    assert d.to_dict() == {&quot;name&quot;: &quot;tea&quot;, &quot;price&quot;: 1, &quot;percent&quot;: 10}</textarea><textarea class="pc-src pc-solution" hidden>REQUIRED = object()
+
+class Field:
+    def __init__(self, kind, *, default=REQUIRED, check=None):
+        self.kind, self.default, self.check = kind, default, check
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        try:
+            return obj.__dict__[self.name]
+        except KeyError:
+            raise AttributeError(self.name) from None
+
+    def __set__(self, obj, value):
+        if not isinstance(value, self.kind):
+            raise TypeError(f&quot;{self.name} must be {self.kind.__name__}&quot;)
+        if self.check is not None and not self.check(value):
+            raise ValueError(f&quot;invalid {self.name}: {value!r}&quot;)
+        obj.__dict__[self.name] = value
+
+class Model:
+    @classmethod
+    def fields(cls):
+        names = []
+        for klass in reversed(cls.__mro__):
+            for name, value in vars(klass).items():
+                if isinstance(value, Field) and name not in names:
+                    names.append(name)
+        return names
+
+    def __init__(self, **values):
+        names = self.fields()
+        for key in values:
+            if key not in names:
+                raise TypeError(f&quot;unknown field: {key}&quot;)
+        for name in names:
+            if name in values:
+                setattr(self, name, values[name])
+            else:
+                default = getattr(type(self), name).default
+                if default is REQUIRED:
+                    raise TypeError(f&quot;missing field: {name}&quot;)
+                setattr(self, name, default)
+
+    def to_dict(self):
+        return {name: getattr(self, name) for name in self.fields()}
+
+    def __repr__(self):
+        inside = &quot;, &quot;.join(f&quot;{k}={v!r}&quot; for k, v in self.to_dict().items())
+        return f&quot;{type(self).__name__}({inside})&quot;
+
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return NotImplemented
+        return self.to_dict() == other.to_dict()</textarea><template class="pc-src pc-hint"><code>fields()</code> can walk <code>reversed(cls.__mro__)</code> and, for each class, its <code>__dict__</code> items, appending names whose values are <code>Field</code>s and that aren&rsquo;t already in the list. In <code>__init__</code>, compare the keywords with <code>fields()</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Open a Python shell and look at <code>type(vars(SomeClass)["some_method"])</code> for a class of yours, then call its <code>__get__</code> by hand. Tomorrow: exactly how <code>property</code> is built from the descriptor protocol, and the full attribute lookup order.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w062d6.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w063d2.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w063d1", "week": 63, "day": 1, "title": "Descriptors", "exercises": [{"id": "w063d1-positive", "title": "A reusable check", "points": 10}, {"id": "w063d1-typed", "title": "Typed with a default", "points": 10}, {"id": "w063d1-cached", "title": "Your own cached property", "points": 15}, {"id": "w063d1-alias", "title": "Another name for an attribute", "points": 10}, {"id": "w063d1-binding", "title": "Methods by hand", "points": 15}, {"id": "w063d1-bug1", "title": "One value for everyone", "points": 10}, {"id": "w063d1-bug2", "title": "Asked through the class", "points": 10}, {"id": "w063d1-bug3", "title": "Setting itself forever", "points": 10}, {"id": "w063d1-trace", "title": "Predict them", "points": 10}, {"id": "w063d1-challenge", "title": "Challenge: a field framework", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

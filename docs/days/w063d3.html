@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 63 Day 3: __getattr__ | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Week 31 used __getattr__ to forward missing attributes to a wrapped object. Today goes all the way: the four hooks a class can define to take over attribute...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w063d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 63 Day 3: __getattr__">
+<meta property="og:description" content="Week 31 used __getattr__ to forward missing attributes to a wrapped object. Today goes all the way: the four hooks a class can define to take over attribute...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w063d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-63">Week 63: Attribute magic</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#getattr-in-depth" data-sec="getattr-in-depth">getattr in depth</a></li><li><a href="#getattribute" data-sec="getattribute">getattribute</a></li><li><a href="#setattr-and-delattr" data-sec="setattr-and-delattr">setattr and delattr</a></li><li><a href="#what-the-hooks-don-t-see" data-sec="what-the-hooks-don-t-see">What the hooks don’t see</a></li><li><a href="#dir-and-module-getattr" data-sec="dir-and-module-getattr">dir and module getattr</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w063d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-63">Week 63: Attribute magic</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 63, Day 3</span></p>
+      <h1>__getattr__</h1>
+      <div class="day-intro"><p>Week 31 used <code>__getattr__</code> to forward missing attributes to a wrapped object. Today goes all the way: the four hooks a class can define to take over attribute access (<code>__getattr__</code>, <code>__getattribute__</code>, <code>__setattr__</code> and <code>__delattr__</code>), plus <code>__dir__</code> and a module&rsquo;s own <code>__getattr__</code>. They&rsquo;re how proxies, attribute-style dicts, lazy loaders, change trackers and remote objects are built. They&rsquo;re also easy to get wrong, with infinite recursion, swallowed errors and special methods that skip them entirely, so each section ends with the safe pattern.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Choose between <strong>getattr</strong> (only on failure) and <strong>getattribute</strong> (every read)</li><li>Write <strong>setattr</strong> and <strong>delattr</strong> that hand off to object safely</li><li>Raise AttributeError (never KeyError) so hasattr and getattr defaults keep working</li><li>Explain why special methods bypass these hooks, and work around it</li><li>Use <strong>dir</strong> and a module-level <strong>getattr</strong> for lazy, discoverable attributes</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="__getattr__ in depth: 20 min"></span><span class="plan-seg s0" style="flex:20" title="__getattribute__: 20 min"></span><span class="plan-seg s1" style="flex:20" title="__setattr__ and __delattr__: 20 min"></span><span class="plan-seg s0" style="flex:20" title="What the hooks don&#x27;t see: 20 min"></span><span class="plan-seg s1" style="flex:15" title="__dir__ and module __getattr__: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what"><strong>getattr</strong> in depth</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what"><strong>getattribute</strong></span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what"><strong>setattr</strong> and <strong>delattr</strong></span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">What the hooks don&rsquo;t see</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what"><strong>dir</strong> and module <strong>getattr</strong></span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:45</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:40</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w063d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w063d3.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w063d3-p1"><textarea class="pc-src pc-code" hidden>class Shadow:
+    def __init__(self):
+        self.real = &quot;found normally&quot;
+    def __getattr__(self, name):
+        return f&quot;made up: {name}&quot;
+
+s = Shadow()
+print(s.real)
+print(s.anything)
+print(hasattr(s, &quot;whatever&quot;), getattr(s, &quot;x&quot;, &quot;default&quot;))
+s.anything = &quot;now real&quot;
+print(s.anything)</textarea></div>
+<p><code>__getattr__</code> only runs when normal lookup fails, so once <code>anything</code> exists on the instance it&rsquo;s never called for that name. And because it never raises, <code>hasattr</code> says every attribute exists and <code>getattr</code>&rsquo;s default is never used.</p>
+<h2 id="getattr-in-depth"><strong>getattr</strong> in depth</h2>
+<p><code>__getattr__(self, name)</code> is the <strong>fallback</strong>: Python calls it after the whole lookup order from yesterday has failed (or a property&rsquo;s getter raised <code>AttributeError</code>). Whatever it returns is the value; to say &ldquo;no such attribute&rdquo; it must <strong>raise <code>AttributeError</code></strong>. That matters, because <code>hasattr(obj, name)</code> and <code>getattr(obj, name, default)</code> work by catching <code>AttributeError</code> and nothing else: raise a <code>KeyError</code> and they break.</p>
+<p>Three patterns:</p>
+<ul>
+<li><strong>Forwarding</strong> (Week 31): <code>return getattr(self._inner, name)</code>.</li>
+<li><strong>Computing</strong>: build the attribute from data, for example <code>record.email</code> from <code>record._fields["email"]</code>.</li>
+<li><strong>Caching</strong>: compute once, then <code>setattr(self, name, value)</code> (or write to <code>self.__dict__</code>), so the next read finds it normally and <code>__getattr__</code> isn&rsquo;t called again.</li>
+</ul>
+<p>The classic trap: <code>__getattr__</code> reads <code>self._fields</code>, but <code>_fields</code> doesn&rsquo;t exist yet. That happens before <code>__init__</code> has run, which is exactly what <code>copy.copy</code>, <code>pickle</code> and similar tools do (they make the object with <code>__new__</code> and then look for hooks such as <code>__setstate__</code>). The lookup of <code>self._fields</code> fails, calls <code>__getattr__("_fields")</code>, which reads <code>self._fields</code>&hellip; and you get <code>RecursionError</code>. Read your own state with <code>self.__dict__</code> or <code>object.__getattribute__</code>, or refuse private names first.</p>
+<div class="pc pc-example" data-kind="example" data-id="w063d3-e2"><textarea class="pc-src pc-code" hidden>import copy
+
+class Record:
+    def __init__(self, **fields):
+        self._fields = fields
+
+    def __getattr__(self, name):
+        if name.startswith(&quot;_&quot;):                  # never invent private or special names
+            raise AttributeError(name)
+        try:
+            return self._fields[name]
+        except KeyError:
+            raise AttributeError(f&quot;Record has no field {name!r}&quot;) from None
+
+r = Record(name=&quot;Ada&quot;, email=&quot;ada@example.com&quot;)
+print(r.name, hasattr(r, &quot;phone&quot;), getattr(r, &quot;phone&quot;, &quot;none&quot;))
+twin = copy.copy(r)                               # safe: _fields lookups during copying raise properly
+print(twin.email)</textarea></div>
+<h2 id="getattribute"><strong>getattribute</strong></h2>
+<p><code>__getattribute__(self, name)</code> runs for <strong>every</strong> attribute read, before anything else: it <strong>is</strong> the lookup order (that&rsquo;s <code>object.__getattribute__</code>, the machinery from yesterday). Overriding it lets you see or change every access, including <code>self.anything</code> inside your own methods.</p>
+<p>The rule: get real attributes by calling <strong><code>object.__getattribute__(self, name)</code></strong> (or <code>super().__getattribute__(name)</code>). Writing <code>self.__dict__</code> or <code>self.x</code> inside it calls <code>__getattribute__</code> again, and recurses forever. If <code>__getattribute__</code> raises <code>AttributeError</code> and the class also defines <code>__getattr__</code>, Python then calls <code>__getattr__</code>.</p>
+<p>Because it runs on every access, it slows every attribute read and is rarely the right tool. It&rsquo;s used for things like auditing, access control and transparent proxies; prefer <code>__getattr__</code> or descriptors when they&rsquo;ll do.</p>
+<div class="pc pc-example" data-kind="example" data-id="w063d3-e3"><textarea class="pc-src pc-code" hidden>class Audited:
+    def __init__(self, **values):
+        object.__setattr__(self, &quot;reads&quot;, [])
+        for k, v in values.items():
+            object.__setattr__(self, k, v)
+
+    def __getattribute__(self, name):
+        if not name.startswith(&quot;_&quot;) and name != &quot;reads&quot;:
+            object.__getattribute__(self, &quot;reads&quot;).append(name)
+        return object.__getattribute__(self, name)
+
+a = Audited(x=1, y=2)
+print(a.x + a.y + a.x)
+print(a.reads)</textarea></div>
+<h2 id="setattr-and-delattr"><strong>setattr</strong> and <strong>delattr</strong></h2>
+<p><code>__setattr__(self, name, value)</code> runs for <strong>every</strong> assignment <code>obj.name = value</code>, including the ones in <code>__init__</code>, and <code>__delattr__(self, name)</code> for every <code>del obj.name</code>. Uses: validation, read-only objects (Week 62), change tracking, redirecting attributes into a dict or a remote store.</p>
+<p>Do the real work by handing on to <strong><code>object.__setattr__(self, name, value)</code></strong> (or <code>super().__setattr__(name, value)</code>), which keeps descriptors and properties working. Writing <code>self.name = value</code> inside <code>__setattr__</code> calls it again, forever. Writing straight into <code>self.__dict__[name]</code> works but <strong>skips data descriptors</strong> such as properties and slots, which is usually a bug.</p>
+<p>A common need is setting up internal state in <code>__init__</code> without triggering your own checks: use <code>object.__setattr__</code> for those.</p>
+<div class="pc pc-example" data-kind="example" data-id="w063d3-e4"><textarea class="pc-src pc-code" hidden>class Tracked:
+    def __init__(self, **values):
+        object.__setattr__(self, &quot;changes&quot;, [])
+        for k, v in values.items():
+            setattr(self, k, v)
+
+    def __setattr__(self, name, value):
+        old = self.__dict__.get(name, &quot;&lt;unset&gt;&quot;)
+        self.changes.append((name, old, value))
+        object.__setattr__(self, name, value)
+
+    def __delattr__(self, name):
+        self.changes.append((name, self.__dict__.get(name), &quot;&lt;deleted&gt;&quot;))
+        object.__delattr__(self, name)
+
+t = Tracked(colour=&quot;red&quot;)
+t.colour = &quot;blue&quot;
+del t.colour
+print(t.changes)</textarea></div>
+<h2 id="what-the-hooks-don-t-see">What the hooks don&rsquo;t see</h2>
+<p><strong>Special methods are looked up on the type, directly</strong> (Week 31): <code>len(obj)</code>, <code>obj + 1</code>, <code>obj[0]</code>, <code>str(obj)</code>, <code>with obj:</code> and <code>for x in obj</code> find <code>__len__</code>, <code>__add__</code> and so on on <code>type(obj)</code>, without going through <code>__getattr__</code> or <code>__getattribute__</code>. So a forwarding proxy around a list supports <code>proxy.append(1)</code> but <strong>not</strong> <code>len(proxy)</code> or <code>proxy[0]</code>.</p>
+<p>The fix is to define the special methods you need explicitly on the proxy class, each forwarding by hand, or generate them in a loop after the class is created (<code>setattr(Proxy, "__len__", ...)</code> on the class, which does work). Some libraries do exactly that for every special method.</p>
+<p>The other gap: <strong><code>__getattr__</code> doesn&rsquo;t see attributes that exist</strong>. If the class or an ancestor has a <code>name</code> method, a forwarding <code>__getattr__</code> never forwards <code>name</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w063d3-e5"><textarea class="pc-src pc-code" hidden>class Proxy:
+    def __init__(self, target):
+        object.__setattr__(self, &quot;_target&quot;, target)
+    def __getattr__(self, name):
+        return getattr(self._target, name)
+
+p = Proxy([3, 1, 2])
+print(p.count(1), p.__len__())        # explicit attribute lookups are forwarded
+try:
+    len(p)                            # the special-method lookup isn&#x27;t
+except TypeError as e:
+    print(&quot;TypeError:&quot;, e)
+
+for special in (&quot;__len__&quot;, &quot;__getitem__&quot;, &quot;__iter__&quot;):
+    setattr(Proxy, special, lambda self, *a, _n=special: getattr(self._target, _n)(*a))
+print(len(p), p[0], sorted(p))</textarea></div>
+<h2 id="dir-and-module-getattr"><strong>dir</strong> and module <strong>getattr</strong></h2>
+<p>Attributes made up by <code>__getattr__</code> are invisible to <code>dir()</code>, tab completion and documentation tools. Define <strong><code>__dir__(self)</code></strong> to return the names you support (often <code>sorted(set(super().__dir__()) | your_names)</code>).</p>
+<p><strong>Modules can have <code>__getattr__</code> too</strong>: define a function <code>__getattr__(name)</code> at the top level of a module, and <code>module.missing</code> calls it (PEP 562). Uses: <strong>lazy imports</strong> (load a heavy submodule the first time it&rsquo;s touched), <strong>deprecation warnings</strong> for renamed names, and computed constants. A module-level <code>__dir__()</code> function works the same way for <code>dir(module)</code>.</p>
+<pre><code># shapes.py
+import importlib
+
+_LAZY = {&quot;plotting&quot;: &quot;shapes._plotting&quot;}
+
+def __getattr__(name):
+    if name in _LAZY:
+        module = importlib.import_module(_LAZY[name])
+        globals()[name] = module          # cache: next time it's found normally
+        return module
+    raise AttributeError(f&quot;module 'shapes' has no attribute {name!r}&quot;)
+
+def __dir__():
+    return sorted(list(globals()) + list(_LAZY))
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w063d3-e6"><textarea class="pc-src pc-code" hidden>import types
+
+lazy = types.ModuleType(&quot;lazy&quot;)
+loaded = []
+
+def module_getattr(name):
+    if name == &quot;heavy&quot;:
+        loaded.append(name)
+        value = list(range(5))
+        setattr(lazy, name, value)        # cache on the module
+        return value
+    raise AttributeError(name)
+
+lazy.__getattr__ = module_getattr
+print(loaded, lazy.heavy[-1], lazy.heavy[0], loaded)
+print(hasattr(lazy, &quot;other&quot;))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p><strong>getattr</strong> is the fallback after normal lookup fails; it must raise AttributeError (so hasattr and getattr defaults work) and mustn&rsquo;t read attributes that might not exist yet, which happens during copying and unpickling. <strong>getattribute</strong> runs for every read: use object.<strong>getattribute</strong> inside it. <strong>setattr</strong> and <strong>delattr</strong> run for every assignment and deletion: hand on to object.<strong>setattr</strong> / object.<strong>delattr</strong>, which keeps properties working. Special methods are looked up on the type and bypass all these hooks, so proxies must define them on the class. <strong>dir</strong> advertises dynamic names, and a module-level <strong>getattr</strong> gives lazy and deprecated module attributes.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d3-attrdict" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A dict with attribute access</div><div class="pc-prompt"><p>Write <code>AttrDict</code>, a subclass of <code>dict</code> where <code>d.key</code> reads <code>d["key"]</code>, <code>d.key = value</code> sets it and <code>del d.key</code> deletes it. Missing keys must raise <strong><code>AttributeError</code></strong> (so <code>hasattr</code> works), and names that start with <code>_</code> are never treated as keys. Normal dict methods (<code>d.items()</code>, <code>d.get</code>) keep working because they&rsquo;re found before <code>__getattr__</code>.</p></div><textarea class="pc-src pc-code" hidden>class AttrDict(dict):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_attrdict():
+    &quot;attribute access to keys&quot;
+    d = AttrDict(host=&quot;localhost&quot;, port=8080)
+    assert d.host == &quot;localhost&quot; and d.port == 8080
+    d.debug = True
+    assert d[&quot;debug&quot;] is True and &quot;debug&quot; not in vars(d)
+    del d.port
+    assert &quot;port&quot; not in d and not hasattr(d, &quot;port&quot;) and getattr(d, &quot;port&quot;, 1) == 1
+    try:
+        del d.missing
+        assert False
+    except AttributeError:
+        pass
+    assert sorted(d.items()) == [(&quot;debug&quot;, True), (&quot;host&quot;, &quot;localhost&quot;)]
+    d[&quot;items&quot;] = &quot;shadowed&quot;
+    assert callable(d.items)
+    assert not hasattr(d, &quot;_private&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class AttrDict(dict):
+    def __getattr__(self, name):
+        if name.startswith(&quot;_&quot;):
+            raise AttributeError(name)
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError(name) from None
+
+    def __setattr__(self, name, value):
+        if name.startswith(&quot;_&quot;):
+            object.__setattr__(self, name, value)
+        else:
+            self[name] = value
+
+    def __delattr__(self, name):
+        try:
+            del self[name]
+        except KeyError:
+            raise AttributeError(name) from None</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d3-proxy" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A counting proxy</div><div class="pc-prompt"><p>Write <code>Proxy(target)</code>: reading any attribute it doesn&rsquo;t have forwards to the target and counts the name in <code>proxy_reads</code> (a dict from name to count); setting any attribute other than the proxy&rsquo;s own (<code>_target</code> and <code>proxy_reads</code>) sets it <strong>on the target</strong>; <code>len</code>, indexing and iteration work by forwarding (define <code>__len__</code>, <code>__getitem__</code> and <code>__iter__</code>). Set the proxy&rsquo;s own attributes with <code>object.__setattr__</code>.</p></div><textarea class="pc-src pc-code" hidden>class Proxy:
+    def __init__(self, target):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_proxy():
+    &quot;forwarding reads and writes&quot;
+    class Settings:
+        def __init__(self):
+            self.volume = 3
+    s = Settings()
+    p = Proxy(s)
+    assert p.volume == 3 and p.volume == 3 and p.proxy_reads == {&quot;volume&quot;: 2}
+    p.volume = 9
+    assert s.volume == 9 and &quot;volume&quot; not in vars(p)
+    items = Proxy([4, 5, 6])
+    items.append(7)
+    assert len(items) == 4 and items[0] == 4 and list(items) == [4, 5, 6, 7]
+    assert items.proxy_reads == {&quot;append&quot;: 1}
+    try:
+        p.missing
+        assert False
+    except AttributeError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>class Proxy:
+    def __init__(self, target):
+        object.__setattr__(self, &quot;_target&quot;, target)
+        object.__setattr__(self, &quot;proxy_reads&quot;, {})
+
+    def __getattr__(self, name):
+        if name in (&quot;_target&quot;, &quot;proxy_reads&quot;):
+            raise AttributeError(name)
+        reads = self.proxy_reads
+        reads[name] = reads.get(name, 0) + 1
+        return getattr(self._target, name)
+
+    def __setattr__(self, name, value):
+        if name in (&quot;_target&quot;, &quot;proxy_reads&quot;):
+            object.__setattr__(self, name, value)
+        else:
+            setattr(self._target, name, value)
+
+    def __len__(self):
+        return len(self._target)
+
+    def __getitem__(self, index):
+        return self._target[index]
+
+    def __iter__(self):
+        return iter(self._target)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d3-history" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Remembering every change</div><div class="pc-prompt"><p>Write a base class <code>History</code> whose subclasses record every attribute change: <code>__setattr__</code> appends <code>(name, old_value, new_value)</code> to the object&rsquo;s change list (old is <code>None</code> the first time) and then sets the attribute <strong>through <code>object.__setattr__</code></strong>, so properties in subclasses still work. <code>changes()</code> returns a copy of the list and <code>undo()</code> reverts the latest change (deleting the attribute if its old value was the first-time <code>None</code>), without recording the undo itself.</p></div><textarea class="pc-src pc-code" hidden>class History:
+    def __init__(self):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_history():
+    &quot;tracking with __setattr__&quot;
+    class Doc(History):
+        def __init__(self, title):
+            super().__init__()
+            self.title = title
+        @property
+        def words(self):
+            return self._words
+        @words.setter
+        def words(self, value):
+            object.__setattr__(self, &quot;_words&quot;, max(0, value))
+        @words.deleter
+        def words(self):
+            object.__delattr__(self, &quot;_words&quot;)
+    d = Doc(&quot;Draft&quot;)
+    d.title = &quot;Final&quot;
+    d.words = -5
+    assert d.words == 0 and d.title == &quot;Final&quot;
+    assert d.changes() == [(&quot;title&quot;, None, &quot;Draft&quot;), (&quot;title&quot;, &quot;Draft&quot;, &quot;Final&quot;), (&quot;words&quot;, None, -5)]
+    d.undo()
+    assert len(d.changes()) == 2
+    d.undo()
+    assert d.title == &quot;Draft&quot; and d.changes() == [(&quot;title&quot;, None, &quot;Draft&quot;)]
+    d.undo()
+    assert not hasattr(d, &quot;title&quot;) and d.changes() == []
+    d.changes().append(&quot;x&quot;)
+    assert d.changes() == []</textarea><textarea class="pc-src pc-solution" hidden>_FIRST = None
+
+class History:
+    def __init__(self):
+        object.__setattr__(self, &quot;_changes&quot;, [])
+
+    def __setattr__(self, name, value):
+        old = getattr(self, name, None)
+        self._changes.append((name, old, value))
+        object.__setattr__(self, name, value)
+
+    def changes(self):
+        return list(self._changes)
+
+    def undo(self):
+        name, old, new = self._changes.pop()
+        if old is None and not any(c[0] == name for c in self._changes):
+            object.__delattr__(self, name)
+        else:
+            object.__setattr__(self, name, old)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d3-audit" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Watching every read</div><div class="pc-prompt"><p>Write a base class <code>Watched</code> that uses <code>__getattribute__</code> to count every read of a <strong>public</strong> attribute (one not starting with <code>_</code>), including method lookups and reads inside the object&rsquo;s own methods, in a dict available as <code>obj._reads</code>. Reads of private names aren&rsquo;t counted. <code>most_read()</code> returns the most-read name (ties: the alphabetically first), or <code>None</code>, and calling it isn&rsquo;t itself counted. Use <code>object.__getattribute__</code> to avoid recursion.</p></div><textarea class="pc-src pc-code" hidden>class Watched:
+    def __init__(self):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_audit():
+    &quot;__getattribute__&quot;
+    class Counter(Watched):
+        def __init__(self):
+            super().__init__()
+            self.value = 0
+        def bump(self):
+            self.value += 1
+    c = Counter()
+    c.bump()
+    c.bump()
+    assert c._reads == {&quot;bump&quot;: 2, &quot;value&quot;: 2} and c.value == 2
+    assert c._reads[&quot;value&quot;] == 3
+    assert c.most_read() == &quot;value&quot;
+    assert &quot;most_read&quot; not in c._reads
+    assert Counter().most_read() is None
+    c.label = &quot;x&quot;
+    c.label
+    c.label
+    c.label
+    assert c.most_read() == &quot;label&quot; and c._reads[&quot;label&quot;] == 3</textarea><textarea class="pc-src pc-solution" hidden>class Watched:
+    def __init__(self):
+        object.__setattr__(self, &quot;_reads&quot;, {})
+
+    def __getattribute__(self, name):
+        if not name.startswith(&quot;_&quot;) and name != &quot;most_read&quot;:
+            reads = object.__getattribute__(self, &quot;_reads&quot;)
+            reads[name] = reads.get(name, 0) + 1
+        return object.__getattribute__(self, name)
+
+    def most_read(self):
+        reads = object.__getattribute__(self, &quot;_reads&quot;)
+        if not reads:
+            return None
+        return min(reads, key=lambda n: (-reads[n], n))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d3-lazy" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Load on first use</div><div class="pc-prompt"><p>Write <code>LazyNamespace(**loaders)</code>: each keyword is a function of no arguments. Reading <code>ns.name</code> for the first time calls that loader and <strong>caches</strong> the result in the instance&rsquo;s <code>__dict__</code>, so <code>__getattr__</code> isn&rsquo;t involved again. <code>loaded()</code> lists names loaded so far (sorted), unknown names raise <code>AttributeError</code>, and <code>dir(ns)</code> includes every loader name (define <code>__dir__</code>).</p></div><textarea class="pc-src pc-code" hidden>class LazyNamespace:
+    def __init__(self, **loaders):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_lazy():
+    &quot;caching in __getattr__&quot;
+    calls = []
+    def big():
+        calls.append(&quot;big&quot;)
+        return list(range(1000))
+    ns = LazyNamespace(big=big, small=lambda: 1)
+    assert ns.loaded() == [] and calls == []
+    assert ns.big[-1] == 999 and ns.big[0] == 0 and calls == [&quot;big&quot;]
+    assert ns.loaded() == [&quot;big&quot;] and &quot;big&quot; in vars(ns)
+    assert &quot;small&quot; in dir(ns) and &quot;big&quot; in dir(ns) and &quot;loaded&quot; in dir(ns)
+    assert ns.small == 1 and ns.loaded() == [&quot;big&quot;, &quot;small&quot;]
+    assert not hasattr(ns, &quot;other&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class LazyNamespace:
+    def __init__(self, **loaders):
+        self._loaders = loaders
+
+    def __getattr__(self, name):
+        loaders = self.__dict__.get(&quot;_loaders&quot;, {})
+        if name not in loaders:
+            raise AttributeError(name)
+        value = loaders[name]()
+        self.__dict__[name] = value
+        return value
+
+    def loaded(self):
+        return sorted(n for n in self._loaders if n in self.__dict__)
+
+    def __dir__(self):
+        return sorted(set(super().__dir__()) | set(self._loaders))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w063d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The wrong kind of error</div><div class="pc-prompt"><p><code>__getattr__</code> lets a <code>KeyError</code> escape, and <code>getattr</code> with a default only catches <code>AttributeError</code>, so this crashes with <code>KeyError</code> instead of printing <code>default</code>. Raise <code>AttributeError</code> for missing settings so it prints <code>default</code>.</p></div><textarea class="pc-src pc-code" hidden>class Config:
+    def __init__(self, values):
+        self._values = values
+    def __getattr__(self, name):
+        return self._values[name]
+
+cfg = Config({&quot;mode&quot;: &quot;fast&quot;})
+print(getattr(cfg, &quot;colour&quot;, &quot;default&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;AttributeError&quot;
+    expect_output(&quot;default&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Config:
+    def __init__(self, values):
+        self._values = values
+    def __getattr__(self, name):
+        try:
+            return self._values[name]
+        except KeyError:
+            raise AttributeError(name) from None
+
+cfg = Config({&quot;mode&quot;: &quot;fast&quot;})
+print(getattr(cfg, &quot;colour&quot;, &quot;default&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w063d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A wrapper len can&rsquo;t see</div><div class="pc-prompt"><p>The wrapper forwards attributes with <code>__getattr__</code>, but <code>len()</code> looks for <code>__len__</code> on the class directly, so this crashes with <code>TypeError</code>. Give the class its own <code>__len__</code> that forwards to the wrapped list so it prints <code>3</code>.</p></div><textarea class="pc-src pc-code" hidden>class Wrapper:
+    def __init__(self, items):
+        self._items = items
+    def __getattr__(self, name):
+        return getattr(self._items, name)
+
+w = Wrapper([1, 2, 3])
+print(len(w))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;special methods&quot;
+    expect_output(&quot;3&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Wrapper:
+    def __init__(self, items):
+        self._items = items
+    def __getattr__(self, name):
+        return getattr(self._items, name)
+    def __len__(self):
+        return len(self._items)
+
+w = Wrapper([1, 2, 3])
+print(len(w))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w063d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A setter that calls itself</div><div class="pc-prompt"><p><code>__setattr__</code> stores the value with <code>setattr(self, name, ...)</code>, which calls <code>__setattr__</code> again, and again, until <code>RecursionError</code>. Hand the work on to <code>object.__setattr__</code> so this prints <code>ADA</code>.</p></div><textarea class="pc-src pc-code" hidden>class Shouting:
+    def __setattr__(self, name, value):
+        setattr(self, name, value.upper())
+
+s = Shouting()
+s.name = &quot;ada&quot;
+print(s.name)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;object.__setattr__&quot;
+    expect_output(&quot;ADA&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Shouting:
+    def __setattr__(self, name, value):
+        object.__setattr__(self, name, value.upper())
+
+s = Shouting()
+s.name = &quot;ada&quot;
+print(s.name)</textarea></div>
+<div class="parsons" data-id="w063d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A safe fallback</div><div class="pc-prompt"><p>Arrange the lines of a <code>__getattr__</code> that reads from a dict and raises the right error. One line is a trap.</p></div><script type="application/json">{"lines": ["def __getattr__(self, name):", "    data = self.__dict__.get(\"_data\", {})", "    if name in data:", "        return data[name]", "    raise AttributeError(name)"], "distractors": ["    raise KeyError(name)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # True or False: __getattr__ is called for attributes that exist
+q = ___   # True or False: __getattribute__ is called for attributes that exist
+r = ___   # the error __getattr__ should raise for a missing name, as a string
+s = ___   # True or False: len(obj) goes through __getattr__ when __len__ is missing from the class
+t = ___   # what to call inside __setattr__ to really store the value: &quot;object.__setattr__&quot; or &quot;setattr&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p is False and q is True and r == &quot;AttributeError&quot;, &quot;p, q and r&quot;
+    assert s is False and t == &quot;object.__setattr__&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = False
+q = True
+r = &quot;AttributeError&quot;
+s = False
+t = &quot;object.__setattr__&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w063d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "When is <strong>getattr</strong> called?", "answer": 1, "explain": "The fallback.", "options": ["For every read", "Only when normal attribute lookup fails", "On assignment", "On deletion"]}, {"type": "mc", "q": "Why must <strong>getattr</strong> raise AttributeError for missing names?", "answer": 1, "explain": "Other errors escape.", "options": ["Style", "hasattr and getattr&rsquo;s default catch only AttributeError", "It&rsquo;s faster", "KeyError is reserved"]}, {"type": "mc", "q": "Why can <strong>getattr</strong> recurse forever during copy.copy?", "answer": 1, "explain": "Read your state with self.<strong>dict</strong>.", "options": ["It can&rsquo;t", "The copy is made without <strong>init</strong>, so self._data is missing and its lookup calls <strong>getattr</strong> again", "copy is broken", "Because of <strong>slots</strong>"]}, {"type": "mc", "q": "How do you read a real attribute inside <strong>getattribute</strong>?", "answer": 1, "explain": "Anything else recurses.", "options": ["self.name", "object.<strong>getattribute</strong>(self, name)", "self.<strong>dict</strong>[name]", "getattr(self, name)"]}, {"type": "mc", "q": "When does <strong>setattr</strong> run?", "answer": 1, "explain": "Use object.<strong>setattr</strong> for internal state.", "options": ["Only outside <strong>init</strong>", "For every assignment, including in <strong>init</strong>", "Only for new attributes", "Never for properties"]}, {"type": "mc", "q": "Why prefer object.<strong>setattr</strong> over writing self.<strong>dict</strong> directly?", "answer": 1, "explain": "<strong>dict</strong> writes skip descriptors.", "options": ["Speed", "It keeps properties and other data descriptors working", "It&rsquo;s shorter", "No reason"]}, {"type": "mc", "q": "Why doesn&rsquo;t len(proxy) use the proxy&rsquo;s <strong>getattr</strong>?", "answer": 1, "explain": "Define <strong>len</strong> on the class.", "options": ["It does", "Special methods are looked up on the type directly", "len is a keyword", "Proxies can&rsquo;t have length"]}, {"type": "mc", "q": "What does <strong>dir</strong> do?", "answer": 1, "explain": "Advertise dynamic attributes.", "options": ["Lists files", "Returns the names dir() should show", "Deletes attributes", "Lists the MRO"]}, {"type": "mc", "q": "What does a module-level <strong>getattr</strong>(name) function do?", "answer": 1, "explain": "PEP 562.", "options": ["Nothing", "Runs when module.name isn&rsquo;t found, for lazy or deprecated names", "Runs on import", "Replaces import"]}, {"type": "output", "q": "What does this print?", "answer": "1 0", "explain": "x exists; y doesn&rsquo;t.", "code": "class A:\n    x = 1\n    def __getattr__(self, name):\n        return 0\na = A()\nprint(a.x, a.y)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w063d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: settings from the environment</div><div class="pc-prompt"><p>Programs often read configuration from environment variables like <code>DB_HOST</code> and <code>DB_PORT</code>. Write <code>Env(mapping, prefix="")</code> giving attribute access to them, grouped by underscores:</p>
+<ul>
+<li><code>env.db.host</code> reads the key <code>"DB_HOST"</code>: an attribute name is upper-cased and joined to the prefix with <code>_</code>. If that exact key exists, its value is returned, converted to <code>int</code> if it&rsquo;s all digits, to <code>True</code>/<code>False</code> if it&rsquo;s <code>"true"</code>/<code>"false"</code> (any case), and left as a string otherwise. If no exact key exists but some key <strong>starts with</strong> it plus <code>_</code>, a new <code>Env</code> for that prefix is returned. Otherwise <code>AttributeError</code>.</li>
+<li>Setting or deleting any attribute raises <code>AttributeError("Env is read-only")</code>.</li>
+<li><code>dir(env)</code> lists the next-level names, lower-cased and sorted (for the root: the first part of every key).</li>
+<li><code>env.as_dict()</code> returns every key under the prefix, with the prefix and its underscore removed, lower-cased, and values converted.</li>
+<li><code>repr(env)</code> is <code>Env('DB')</code> (or <code>Env('')</code> for the root), and two <code>Env</code>s are equal if they have the same mapping and prefix.</li>
+</ul>
+<p>Names starting with <code>_</code> are never looked up as keys.</p></div><textarea class="pc-src pc-code" hidden>class Env:
+    def __init__(self, mapping, prefix=&quot;&quot;):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_env():
+    &quot;attribute access to environment variables&quot;
+    m = {&quot;DB_HOST&quot;: &quot;db.local&quot;, &quot;DB_PORT&quot;: &quot;5432&quot;, &quot;DB_POOL_SIZE&quot;: &quot;10&quot;, &quot;DEBUG&quot;: &quot;True&quot;, &quot;APP_NAME&quot;: &quot;atlas&quot;, &quot;LEVEL&quot;: &quot;info&quot;}
+    env = Env(m)
+    assert env.db.host == &quot;db.local&quot; and env.db.port == 5432 and env.db.pool.size == 10
+    assert env.debug is True and env.level == &quot;info&quot; and env.app.name == &quot;atlas&quot;
+    assert isinstance(env.db, Env) and repr(env.db) == &quot;Env(&#x27;DB&#x27;)&quot; and repr(env) == &quot;Env(&#x27;&#x27;)&quot;
+    assert env.db == Env(m, &quot;DB&quot;) and env.db != env.app
+    for action in (lambda: setattr(env, &quot;debug&quot;, False), lambda: delattr(env, &quot;db&quot;)):
+        try:
+            action()
+            assert False
+        except AttributeError as e:
+            assert str(e) == &quot;Env is read-only&quot;
+    assert not hasattr(env, &quot;missing&quot;) and not hasattr(env.db, &quot;user&quot;) and not hasattr(env, &quot;_secret&quot;)
+    assert getattr(env.db, &quot;user&quot;, &quot;postgres&quot;) == &quot;postgres&quot;
+
+def test_listing():
+    &quot;dir and as_dict&quot;
+    m = {&quot;DB_HOST&quot;: &quot;h&quot;, &quot;DB_PORT&quot;: &quot;1&quot;, &quot;DB_POOL_SIZE&quot;: &quot;10&quot;, &quot;DEBUG&quot;: &quot;false&quot;, &quot;APP_NAME&quot;: &quot;atlas&quot;}
+    env = Env(m)
+    assert [n for n in dir(env) if not n.startswith(&quot;_&quot;) and n not in (&quot;as_dict&quot;,)] == [&quot;app&quot;, &quot;db&quot;, &quot;debug&quot;]
+    assert [n for n in dir(env.db) if not n.startswith(&quot;_&quot;) and n != &quot;as_dict&quot;] == [&quot;host&quot;, &quot;pool&quot;, &quot;port&quot;]
+    assert env.db.as_dict() == {&quot;host&quot;: &quot;h&quot;, &quot;port&quot;: 1, &quot;pool_size&quot;: 10}
+    assert env.as_dict()[&quot;debug&quot;] is False and len(env.as_dict()) == 5
+    assert env.db.pool.as_dict() == {&quot;size&quot;: 10}</textarea><textarea class="pc-src pc-solution" hidden>def _convert(value):
+    if value.isdigit():
+        return int(value)
+    if value.lower() in (&quot;true&quot;, &quot;false&quot;):
+        return value.lower() == &quot;true&quot;
+    return value
+
+class Env:
+    def __init__(self, mapping, prefix=&quot;&quot;):
+        object.__setattr__(self, &quot;_mapping&quot;, mapping)
+        object.__setattr__(self, &quot;_prefix&quot;, prefix)
+
+    def _full(self, name):
+        return f&quot;{self._prefix}_{name.upper()}&quot; if self._prefix else name.upper()
+
+    def _under(self):
+        start = self._prefix + &quot;_&quot; if self._prefix else &quot;&quot;
+        return {k[len(start):]: v for k, v in self._mapping.items() if k.startswith(start)}
+
+    def __getattr__(self, name):
+        if name.startswith(&quot;_&quot;):
+            raise AttributeError(name)
+        key = self._full(name)
+        if key in self._mapping:
+            return _convert(self._mapping[key])
+        if any(k.startswith(key + &quot;_&quot;) for k in self._mapping):
+            return Env(self._mapping, key)
+        raise AttributeError(name)
+
+    def __setattr__(self, name, value):
+        raise AttributeError(&quot;Env is read-only&quot;)
+
+    def __delattr__(self, name):
+        raise AttributeError(&quot;Env is read-only&quot;)
+
+    def __dir__(self):
+        names = {k.split(&quot;_&quot;)[0].lower() for k in self._under()}
+        return sorted(names | set(super().__dir__()))
+
+    def as_dict(self):
+        return {k.lower(): _convert(v) for k, v in self._under().items()}
+
+    def __repr__(self):
+        return f&quot;Env({self._prefix!r})&quot;
+
+    def __eq__(self, other):
+        if not isinstance(other, Env):
+            return NotImplemented
+        return self._mapping == other._mapping and self._prefix == other._prefix</textarea><template class="pc-src pc-hint">Store the mapping and prefix with <code>object.__setattr__</code>, since your own <code>__setattr__</code> refuses everything. In <code>__getattr__</code>, build <code>key = (prefix + "_" + name.upper()) if prefix else name.upper()</code>; then check for the exact key, then for any key starting with <code>key + "_"</code>. For <code>__dir__</code>, strip the prefix from the matching keys and take the part before the next underscore.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Run <code>dir()</code> on a module you use often and look for names you didn&rsquo;t expect; then look up PEP 562 to see the examples it gives for module <code>__getattr__</code>. Tomorrow: metaclasses, the classes that make classes.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w063d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w063d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w063d3", "week": 63, "day": 3, "title": "__getattr__", "exercises": [{"id": "w063d3-attrdict", "title": "A dict with attribute access", "points": 10}, {"id": "w063d3-proxy", "title": "A counting proxy", "points": 15}, {"id": "w063d3-history", "title": "Remembering every change", "points": 10}, {"id": "w063d3-audit", "title": "Watching every read", "points": 15}, {"id": "w063d3-lazy", "title": "Load on first use", "points": 10}, {"id": "w063d3-bug1", "title": "The wrong kind of error", "points": 10}, {"id": "w063d3-bug2", "title": "A wrapper len can't see", "points": 10}, {"id": "w063d3-bug3", "title": "A setter that calls itself", "points": 10}, {"id": "w063d3-trace", "title": "Predict them", "points": 10}, {"id": "w063d3-challenge", "title": "Challenge: settings from the environment", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
