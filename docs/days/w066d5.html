@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 66 Day 5: concurrent.futures | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Starting threads by hand, collecting their results and catching their errors is fiddly, as Tuesday showed. The concurrent.futures module wraps all of it in...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w066d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 66 Day 5: concurrent.futures">
+<meta property="og:description" content="Starting threads by hand, collecting their results and catching their errors is fiddly, as Tuesday showed. The concurrent.futures module wraps all of it in...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w066d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-66">Week 66: Concurrency I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#executors" data-sec="executors">Executors</a></li><li><a href="#futures" data-sec="futures">Futures</a></li><li><a href="#as-they-complete" data-sec="as-they-complete">As they complete</a></li><li><a href="#errors-timeouts-and-cancelling" data-sec="errors-timeouts-and-cancelling">Errors, timeouts and cancelling</a></li><li><a href="#threads-or-processes" data-sec="threads-or-processes">Threads or processes?</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w066d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-66">Week 66: Concurrency I</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 66, Day 5</span></p>
+      <h1>concurrent.futures</h1>
+      <div class="day-intro"><p>Starting threads by hand, collecting their results and catching their errors is fiddly, as Tuesday showed. The <code>concurrent.futures</code> module wraps all of it in one high-level interface: an <strong>executor</strong> runs functions for you on a pool of workers, and each call gives back a <strong>future</strong>, an object standing for a result that will exist later, with its return value or its exception. The same code runs on threads (<code>ThreadPoolExecutor</code>) or processes (<code>ProcessPoolExecutor</code>) by changing one name. In the browser the pools can&rsquo;t start workers, but futures themselves work, so today you&rsquo;ll write your own executors, including one that simulates time, and use the real <code>as_completed</code>, <code>wait</code> and callbacks with them.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Use submit, map and the with statement with ThreadPoolExecutor and ProcessPoolExecutor</li><li>Work with Future objects - results, exceptions, cancellation, timeouts and callbacks</li><li>Process results as they finish with as_completed and wait</li><li>Handle errors per task instead of losing a whole batch</li><li>Write executors of your own by subclassing Executor</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Executors: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Futures: 25 min"></span><span class="plan-seg s1" style="flex:20" title="As they complete: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Errors, timeouts and cancelling: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Threads or processes?: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Executors</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Futures</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">As they complete</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Errors, timeouts and cancelling</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Threads or processes?</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w066d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w066d5.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w066d5-p1"><textarea class="pc-src pc-code" hidden>from concurrent.futures import Future
+
+f = Future()
+print(f.done())
+f.set_result(42)
+print(f.done(), f.result())
+
+g = Future()
+g.set_exception(ValueError(&quot;bad input&quot;))
+print(g.done(), type(g.exception()).__name__)
+try:
+    g.result()
+except ValueError as e:
+    print(&quot;result() raised:&quot;, e)</textarea></div>
+<p>A future is a box for a result that may not exist yet. Once it&rsquo;s settled it holds either a value or an exception, and <code>result()</code> returns the value or <strong>re-raises</strong> the exception, in whichever thread asks. That&rsquo;s how errors travel back from workers.</p>
+<h2 id="executors">Executors</h2>
+<p>An <strong>executor</strong> owns a pool of workers and runs callables on them:</p>
+<pre><code>from concurrent.futures import ThreadPoolExecutor
+
+with ThreadPoolExecutor(max_workers=8) as pool:
+    future = pool.submit(fetch, &quot;https://example.org&quot;)   # returns at once
+    page = future.result()                               # waits for this one
+    pages = list(pool.map(fetch, urls))                  # results in input order
+</code></pre>
+<ul>
+<li><code>submit(fn, *args, **kwargs)</code> schedules <code>fn(*args, **kwargs)</code> and returns a <code>Future</code> at once.</li>
+<li><code>map(fn, *iterables, timeout=None)</code> is like the built-in <code>map</code>: it returns an iterator of results <strong>in input order</strong> (waiting for each in turn), and re-raises the first exception it meets when you reach that item.</li>
+<li>The <code>with</code> block calls <code>shutdown(wait=True)</code> at the end, waiting for all submitted work; after shutdown, <code>submit</code> raises <code>RuntimeError</code>.</li>
+<li><code>ThreadPoolExecutor</code> uses threads (good for I/O-bound work); <code>ProcessPoolExecutor</code> uses processes (CPU-bound work: arguments and results are pickled, Monday, and the call must be importable, so not a lambda). Both default to a sensible number of workers.</li>
+</ul>
+<p><code>Executor</code> is an abstract base class (Week 32): a subclass must provide <code>submit</code>, and inherits <code>map</code> and the context manager. Writing one that runs calls at once is a good way to test code that uses executors, and it works here:</p>
+<div class="pc pc-example" data-kind="example" data-id="w066d5-e2"><textarea class="pc-src pc-code" hidden>from concurrent.futures import Executor, Future
+
+class InlineExecutor(Executor):
+    &quot;Runs each call immediately, in the calling thread.&quot;
+    def submit(self, fn, /, *args, **kwargs):
+        future = Future()
+        try:
+            future.set_result(fn(*args, **kwargs))
+        except BaseException as e:
+            future.set_exception(e)
+        return future
+
+with InlineExecutor() as pool:
+    f = pool.submit(pow, 2, 10)
+    print(f.result(), list(pool.map(str.upper, [&quot;tea&quot;, &quot;jam&quot;])))
+    print([pool.submit(len, w).result() for w in (&quot;a&quot;, &quot;bb&quot;, &quot;ccc&quot;)])</textarea></div>
+<h2 id="futures">Futures</h2>
+<p>A <code>Future</code> has a small, precise interface:</p>
+<ul>
+<li><strong>State</strong>: <code>done()</code> (finished, failed or cancelled), <code>running()</code>, <code>cancelled()</code>.</li>
+<li><strong>Outcome</strong>: <code>result(timeout=None)</code> waits up to <code>timeout</code> seconds and returns the value, re-raises the task&rsquo;s exception, raises <code>CancelledError</code> if cancelled, or raises <code>TimeoutError</code> if time runs out; <code>exception(timeout=None)</code> returns the exception (or <code>None</code>) instead of raising it.</li>
+<li><strong>Callbacks</strong>: <code>add_done_callback(fn)</code> calls <code>fn(future)</code> when it finishes, or at once if it already has. Callbacks run in the thread that completed the future, so keep them short and don&rsquo;t raise from them.</li>
+<li><strong>Settling</strong> (for executors and tests, not normal user code): <code>set_result(value)</code>, <code>set_exception(exc)</code>, and <code>set_running_or_notify_cancel()</code>.</li>
+</ul>
+<p>Futures are a general idea, not just a Python one: JavaScript calls them promises, and next week&rsquo;s <code>asyncio</code> has its own futures with the same shape.</p>
+<div class="pc pc-example" data-kind="example" data-id="w066d5-e3"><textarea class="pc-src pc-code" hidden>from concurrent.futures import Future, CancelledError
+
+log = []
+f = Future()
+f.add_done_callback(lambda fut: log.append((&quot;first&quot;, fut.result())))
+f.set_result(&quot;ready&quot;)
+f.add_done_callback(lambda fut: log.append((&quot;late&quot;, fut.result())))   # runs at once
+print(log)
+
+pending = Future()
+print(pending.cancel(), pending.cancelled(), pending.done())
+try:
+    pending.result()
+except CancelledError:
+    print(&quot;CancelledError&quot;)
+
+slow = Future()
+try:
+    slow.result(timeout=0)
+except TimeoutError:
+    print(&quot;not finished yet&quot;)</textarea></div>
+<h2 id="as-they-complete">As they complete</h2>
+<p><code>map</code> gives results in <strong>input</strong> order, so one slow task holds up all the results after it. Often you&rsquo;d rather handle each result <strong>as soon as it&rsquo;s ready</strong>:</p>
+<ul>
+<li><code>as_completed(futures, timeout=None)</code> yields futures <strong>in the order they finish</strong>. Keep a dict from future to its input so you know which is which.</li>
+<li><code>wait(futures, timeout=None, return_when=ALL_COMPLETED)</code> returns two sets, <code>(done, not_done)</code>; <code>return_when</code> can be <code>FIRST_COMPLETED</code> or <code>FIRST_EXCEPTION</code>.</li>
+</ul>
+<p>The usual pattern for a batch of I/O work, on your own computer:</p>
+<pre><code>from concurrent.futures import ThreadPoolExecutor, as_completed
+
+with ThreadPoolExecutor(max_workers=8) as pool:
+    futures = {pool.submit(fetch, url): url for url in urls}
+    for future in as_completed(futures):
+        url = futures[future]
+        try:
+            page = future.result()
+        except Exception as e:
+            print(url, &quot;failed:&quot;, e)
+        else:
+            print(url, len(page), &quot;bytes&quot;)
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w066d5-e4"><textarea class="pc-src pc-code" hidden>from concurrent.futures import Future, as_completed, wait, FIRST_COMPLETED
+
+futures = {Future(): name for name in (&quot;a&quot;, &quot;b&quot;, &quot;c&quot;)}
+items = list(futures)
+items[1].set_result(&quot;b finished first&quot;)
+items[0].set_result(&quot;then a&quot;)
+items[2].set_result(&quot;then c&quot;)
+print(sorted(f.result() for f in as_completed(items)))
+
+x, y = Future(), Future()
+y.set_result(1)
+done, not_done = wait([x, y], timeout=0, return_when=FIRST_COMPLETED)
+print(len(done), len(not_done))
+x.cancel()</textarea></div>
+<h2 id="errors-timeouts-and-cancelling">Errors, timeouts and cancelling</h2>
+<ul>
+<li><strong>One failure shouldn&rsquo;t sink a batch.</strong> With <code>map</code>, the first exception stops the iteration and the remaining results are lost to you. With <code>submit</code> and <code>as_completed</code>, check each future: <code>future.exception()</code> or <code>try: future.result()</code>.</li>
+<li><strong>Timeouts</strong>: <code>future.result(timeout=5)</code> gives up waiting after five seconds, but the task <strong>keeps running</strong> in its worker: Python can&rsquo;t stop a running thread. Design tasks to time themselves out (network calls usually accept a timeout).</li>
+<li><strong>Cancelling</strong>: <code>future.cancel()</code> succeeds only if the task hasn&rsquo;t started; a running or finished task can&rsquo;t be cancelled. <code>executor.shutdown(cancel_futures=True)</code> (3.9+) cancels everything still queued.</li>
+<li><strong>Exceptions inside a process pool</strong> are pickled and re-raised in the parent; the original traceback is attached as text.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w066d5-e5"><textarea class="pc-src pc-code" hidden>from concurrent.futures import Executor, Future
+
+class InlineExecutor(Executor):
+    def submit(self, fn, /, *args, **kwargs):
+        f = Future()
+        try:
+            f.set_result(fn(*args, **kwargs))
+        except BaseException as e:
+            f.set_exception(e)
+        return f
+
+def parse(text):
+    return int(text)
+
+inputs = [&quot;1&quot;, &quot;2&quot;, &quot;three&quot;, &quot;4&quot;]
+with InlineExecutor() as pool:
+    try:
+        print(list(pool.map(parse, inputs)))
+    except ValueError:
+        print(&quot;map stopped at the first failure&quot;)
+    futures = [pool.submit(parse, t) for t in inputs]
+ok = [f.result() for f in futures if f.exception() is None]
+failed = [t for t, f in zip(inputs, futures) if f.exception() is not None]
+print(ok, failed)</textarea></div>
+<h2 id="threads-or-processes">Threads or processes?</h2>
+<p>The decision follows Monday&rsquo;s rules:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>ThreadPoolExecutor</th>
+<th>ProcessPoolExecutor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>good for</td>
+<td>I/O-bound work: network, files, databases</td>
+<td>CPU-bound pure-Python work</td>
+</tr>
+<tr>
+<td>parallel Python code?</td>
+<td>no (with the GIL)</td>
+<td>yes: one interpreter each</td>
+</tr>
+<tr>
+<td>start-up cost</td>
+<td>low</td>
+<td>higher (new processes)</td>
+</tr>
+<tr>
+<td>arguments and results</td>
+<td>shared, no copying</td>
+<td>pickled: must be picklable, copied</td>
+</tr>
+<tr>
+<td>functions</td>
+<td>anything callable</td>
+<td>must be importable (top-level functions, not lambdas)</td>
+</tr>
+<tr>
+<td>where it fails</td>
+<td>CPU-bound work gains nothing</td>
+<td>tiny tasks: overheads dominate</td>
+</tr>
+</tbody>
+</table>
+<p>Two practical notes for process pools: guard the code that creates them with <code>if __name__ == "__main__":</code>, and send work in <strong>chunks</strong> (<code>map(fn, items, chunksize=100)</code>) when tasks are small, so each round trip carries enough work.</p>
+<div class="pc pc-example" data-kind="example" data-id="w066d5-e6"><textarea class="pc-src pc-code" hidden>import pickle
+
+def picklable(fn):
+    try:
+        pickle.dumps(fn)
+        return True
+    except Exception:
+        return False
+
+def square(x):
+    return x * x
+
+print(picklable(square), picklable(lambda x: x * x))
+
+def choose(io_bound, task_ms, overhead_ms=5):
+    if io_bound:
+        return &quot;ThreadPoolExecutor&quot;
+    return &quot;ProcessPoolExecutor&quot; if task_ms &gt; 10 * overhead_ms else &quot;run it in one process&quot;
+
+print(choose(True, 1), &quot;|&quot;, choose(False, 500), &quot;|&quot;, choose(False, 2))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Executors run callables on a pool of workers: submit returns a Future at once, map returns results in input order (stopping at the first exception), and with shuts the pool down after waiting for the work; ThreadPoolExecutor suits I/O-bound work and ProcessPoolExecutor CPU-bound work (picklable, importable functions, the <strong>main</strong> guard, chunksize for small tasks). A Future holds a value or an exception: result(timeout) returns or re-raises, exception() returns it, cancel() works only before it starts, and add_done_callback runs a function on completion (at once if already done). as_completed yields futures as they finish and wait returns done and not-done sets. Handle errors per future, and remember a timeout stops waiting, not the task. Subclass Executor and provide submit to make your own.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d5-outcome" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Settling futures</div><div class="pc-prompt"><p>Write <code>settle(future, func, *args)</code>: call <code>func(*args)</code> and store its result in the future, or store the exception if it raises, and return the future. Then <code>describe(future)</code>: <code>("pending", None)</code> if not done, <code>("cancelled", None)</code> if cancelled, <code>("error", "ValueError")</code> (the exception&rsquo;s type name) if it failed, or <code>("ok", value)</code>.</p></div><textarea class="pc-src pc-code" hidden>from concurrent.futures import Future
+
+def settle(future, func, *args):
+    ___
+
+def describe(future):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_outcome():
+    &quot;futures&quot;
+    from concurrent.futures import Future
+    assert describe(Future()) == (&quot;pending&quot;, None)
+    assert describe(settle(Future(), pow, 2, 5)) == (&quot;ok&quot;, 32)
+    assert describe(settle(Future(), int, &quot;x&quot;)) == (&quot;error&quot;, &quot;ValueError&quot;)
+    f = Future()
+    f.cancel()
+    assert describe(f) == (&quot;cancelled&quot;, None)
+    g = settle(Future(), lambda: None)
+    assert describe(g) == (&quot;ok&quot;, None) and g.done()</textarea><textarea class="pc-src pc-solution" hidden>from concurrent.futures import Future
+
+def settle(future, func, *args):
+    try:
+        future.set_result(func(*args))
+    except Exception as e:
+        future.set_exception(e)
+    return future
+
+def describe(future):
+    if future.cancelled():
+        return (&quot;cancelled&quot;, None)
+    if not future.done():
+        return (&quot;pending&quot;, None)
+    error = future.exception()
+    if error is not None:
+        return (&quot;error&quot;, type(error).__name__)
+    return (&quot;ok&quot;, future.result())</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d5-inline" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Your own executor</div><div class="pc-prompt"><p>Write <code>RecordingExecutor</code>, a subclass of <code>concurrent.futures.Executor</code> that runs each submitted call <strong>immediately</strong> and returns a settled <code>Future</code> (with the result or the exception). It records each call as <code>(function name, args)</code> in <code>calls</code>. After <code>shutdown()</code> (which the <code>with</code> statement calls), <code>submit</code> raises <code>RuntimeError("cannot schedule new futures after shutdown")</code>. The inherited <code>map</code> must work with it.</p></div><textarea class="pc-src pc-code" hidden>from concurrent.futures import Executor, Future
+
+class RecordingExecutor(Executor):
+    def __init__(self):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_inline():
+    &quot;subclassing Executor&quot;
+    from concurrent.futures import as_completed
+    with RecordingExecutor() as ex:
+        f = ex.submit(pow, 3, 2)
+        assert f.done() and f.result() == 9
+        assert list(ex.map(len, [&quot;a&quot;, &quot;bb&quot;])) == [1, 2]
+        bad = ex.submit(int, &quot;x&quot;)
+        assert isinstance(bad.exception(), ValueError)
+        assert sorted(g.result() for g in as_completed([ex.submit(abs, -4), ex.submit(abs, 2)])) == [2, 4]
+    assert ex.calls[0] == (&quot;pow&quot;, (3, 2)) and ex.calls[1] == (&quot;len&quot;, (&quot;a&quot;,)) and len(ex.calls) == 6
+    try:
+        ex.submit(print, 1)
+        assert False
+    except RuntimeError as e:
+        assert str(e) == &quot;cannot schedule new futures after shutdown&quot;</textarea><textarea class="pc-src pc-solution" hidden>from concurrent.futures import Executor, Future
+
+class RecordingExecutor(Executor):
+    def __init__(self):
+        self.calls = []
+        self._shutdown = False
+
+    def submit(self, fn, /, *args, **kwargs):
+        if self._shutdown:
+            raise RuntimeError(&quot;cannot schedule new futures after shutdown&quot;)
+        self.calls.append((fn.__name__, args))
+        future = Future()
+        try:
+            future.set_result(fn(*args, **kwargs))
+        except BaseException as e:
+            future.set_exception(e)
+        return future
+
+    def shutdown(self, wait=True, *, cancel_futures=False):
+        self._shutdown = True</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d5-gather" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Results and failures</div><div class="pc-prompt"><p>Write <code>gather(executor, func, items)</code>: submit <code>func(item)</code> for every item, then return a tuple <code>(results, errors)</code>: <code>results</code> is a list in input order with <code>None</code> for failed items, and <code>errors</code> is a dict from the <strong>index</strong> of each failed item to its exception&rsquo;s type name. Use <code>submit</code> and each future&rsquo;s <code>exception()</code>, not <code>map</code>, so one failure doesn&rsquo;t hide the rest. The tests pass in an executor that runs calls at once.</p></div><textarea class="pc-src pc-code" hidden>def gather(executor, func, items):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_gather():
+    &quot;per-task errors&quot;
+    from concurrent.futures import Executor, Future
+    class Inline(Executor):
+        def submit(self, fn, /, *args, **kwargs):
+            f = Future()
+            try:
+                f.set_result(fn(*args, **kwargs))
+            except BaseException as e:
+                f.set_exception(e)
+            return f
+    results, errors = gather(Inline(), int, [&quot;1&quot;, &quot;x&quot;, &quot;3&quot;, None])
+    assert results == [1, None, 3, None] and errors == {1: &quot;ValueError&quot;, 3: &quot;TypeError&quot;}
+    assert gather(Inline(), len, []) == ([], {})
+    assert &quot;map(&quot; not in source</textarea><textarea class="pc-src pc-solution" hidden>def gather(executor, func, items):
+    futures = [executor.submit(func, item) for item in items]
+    results, errors = [], {}
+    for i, f in enumerate(futures):
+        error = f.exception()
+        if error is None:
+            results.append(f.result())
+        else:
+            results.append(None)
+            errors[i] = type(error).__name__
+    return results, errors</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d5-order" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Input order or finishing order?</div><div class="pc-prompt"><p>A pool with <code>workers</code> workers starts tasks in submission order, each on the worker free first (the lowest-numbered on ties). Given each task&rsquo;s duration, write <code>finish_times(durations, workers)</code> (a list, one per task), <code>as_completed_order(durations, workers)</code>: the task indices in the order <code>as_completed</code> would yield them (by finish time, ties by index), and <code>waiting_with_map(durations, workers)</code>: for each task, the time at which <code>map</code> would hand you its result, which is the latest finish time of that task and every task before it.</p></div><textarea class="pc-src pc-code" hidden>def finish_times(durations, workers):
+    ___
+
+def as_completed_order(durations, workers):
+    ___
+
+def waiting_with_map(durations, workers):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_order():
+    &quot;as_completed versus map&quot;
+    d = [5, 1, 3, 1]
+    assert finish_times(d, 2) == [5, 1, 4, 5] and as_completed_order(d, 2) == [1, 2, 0, 3]
+    assert waiting_with_map(d, 2) == [5, 5, 5, 5]
+    assert as_completed_order([3, 2, 1], 3) == [2, 1, 0] and waiting_with_map([3, 2, 1], 3) == [3, 3, 3]
+    assert finish_times([2, 2, 2], 1) == [2, 4, 6] and as_completed_order([], 2) == []</textarea><textarea class="pc-src pc-solution" hidden>def finish_times(durations, workers):
+    free_at = [0] * workers
+    out = []
+    for d in durations:
+        i = free_at.index(min(free_at))
+        free_at[i] += d
+        out.append(free_at[i])
+    return out
+
+def as_completed_order(durations, workers):
+    times = finish_times(durations, workers)
+    return sorted(range(len(times)), key=lambda i: (times[i], i))
+
+def waiting_with_map(durations, workers):
+    out, latest = [], 0
+    for t in finish_times(durations, workers):
+        latest = max(latest, t)
+        out.append(latest)
+    return out</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d5-chain" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Chaining futures</div><div class="pc-prompt"><p>Write <code>then(future, func)</code>: return a <strong>new</strong> future that, when <code>future</code> finishes, gets <code>func(future.result())</code>, or the same exception if <code>future</code> failed, or the exception <code>func</code> raises, or is cancelled if <code>future</code> was cancelled. Use <code>add_done_callback</code>, so it works whether <code>future</code> is already done or finishes later. Then <code>all_of(futures)</code>: a new future whose result is the list of all their results, settled when the last one finishes (with the first exception, in list order, if any failed).</p></div><textarea class="pc-src pc-code" hidden>from concurrent.futures import Future
+
+def then(future, func):
+    ___
+
+def all_of(futures):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_chain():
+    &quot;callbacks&quot;
+    from concurrent.futures import Future
+    a = Future()
+    b = then(a, lambda x: x * 10)
+    c = then(b, str)
+    assert not c.done()
+    a.set_result(4)
+    assert b.result() == 40 and c.result() == &quot;40&quot;
+    done = Future()
+    done.set_result(1)
+    assert then(done, lambda x: x + 1).result() == 2
+    bad = Future()
+    bad.set_exception(KeyError(&quot;k&quot;))
+    assert isinstance(then(bad, str).exception(), KeyError)
+    assert isinstance(then(done, lambda x: 1 / 0).exception(), ZeroDivisionError)
+    gone = Future()
+    gone.cancel()
+    assert then(gone, str).cancelled()
+    fs = [Future(), Future(), Future()]
+    total = all_of(fs)
+    fs[2].set_result(&quot;c&quot;); fs[0].set_result(&quot;a&quot;)
+    assert not total.done()
+    fs[1].set_result(&quot;b&quot;)
+    assert total.result() == [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+    gs = [Future(), Future()]
+    failing = all_of(gs)
+    gs[1].set_exception(ValueError())
+    gs[0].set_result(1)
+    assert isinstance(failing.exception(), ValueError) and all_of([]).result() == []</textarea><textarea class="pc-src pc-solution" hidden>from concurrent.futures import Future
+
+def then(future, func):
+    out = Future()
+
+    def finish(f):
+        if f.cancelled():
+            out.cancel()
+            return
+        error = f.exception()
+        if error is not None:
+            out.set_exception(error)
+            return
+        try:
+            out.set_result(func(f.result()))
+        except Exception as e:
+            out.set_exception(e)
+
+    future.add_done_callback(finish)
+    return out
+
+def all_of(futures):
+    out = Future()
+    futures = list(futures)
+    if not futures:
+        out.set_result([])
+        return out
+    remaining = [len(futures)]
+
+    def finish(_):
+        remaining[0] -= 1
+        if remaining[0]:
+            return
+        for f in futures:
+            error = f.exception()
+            if error is not None:
+                out.set_exception(error)
+                return
+        out.set_result([f.result() for f in futures])
+
+    for f in futures:
+        f.add_done_callback(finish)
+    return out</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w066d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">One failure loses the batch</div><div class="pc-prompt"><p><code>map</code> re-raises the first exception when the loop reaches it, so the results after it are never seen and this prints only <code>[1]</code> before the error is caught. Submit each item separately and keep the ones that succeed, so this prints <code>[1, 3]</code>.</p></div><textarea class="pc-src pc-code" hidden>from concurrent.futures import Executor, Future
+
+class Inline(Executor):
+    def submit(self, fn, /, *args, **kwargs):
+        f = Future()
+        try:
+            f.set_result(fn(*args, **kwargs))
+        except BaseException as e:
+            f.set_exception(e)
+        return f
+
+good = []
+with Inline() as pool:
+    try:
+        for value in pool.map(int, [&quot;1&quot;, &quot;two&quot;, &quot;3&quot;]):
+            good.append(value)
+    except ValueError:
+        pass
+print(good)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;per-future handling&quot;
+    expect_output(&quot;[1, 3]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from concurrent.futures import Executor, Future
+
+class Inline(Executor):
+    def submit(self, fn, /, *args, **kwargs):
+        f = Future()
+        try:
+            f.set_result(fn(*args, **kwargs))
+        except BaseException as e:
+            f.set_exception(e)
+        return f
+
+good = []
+with Inline() as pool:
+    futures = [pool.submit(int, text) for text in [&quot;1&quot;, &quot;two&quot;, &quot;3&quot;]]
+for f in futures:
+    if f.exception() is None:
+        good.append(f.result())
+print(good)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w066d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Futures are not results</div><div class="pc-prompt"><p><code>as_completed</code> yields <strong>futures</strong>, not their values, so adding them to a number fails with <code>TypeError</code>. Call <code>result()</code> on each future so this prints <code>6</code>.</p></div><textarea class="pc-src pc-code" hidden>from concurrent.futures import Future, as_completed
+
+futures = []
+for n in (1, 2, 3):
+    f = Future()
+    f.set_result(n)
+    futures.append(f)
+
+total = 0
+for f in as_completed(futures):
+    total += f
+print(total)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;result()&quot;
+    expect_output(&quot;6&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from concurrent.futures import Future, as_completed
+
+futures = []
+for n in (1, 2, 3):
+    f = Future()
+    f.set_result(n)
+    futures.append(f)
+
+total = 0
+for f in as_completed(futures):
+    total += f.result()
+print(total)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w066d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Called too early</div><div class="pc-prompt"><p><code>pool.submit(square(4))</code> calls <code>square</code> <strong>immediately</strong>, in the current thread, and submits its result (the number 16) as if it were a function, so the future fails with <code>TypeError: 'int' object is not callable</code>. Pass the function and its argument separately so this prints <code>16</code>.</p></div><textarea class="pc-src pc-code" hidden>from concurrent.futures import Executor, Future
+
+class Inline(Executor):
+    def submit(self, fn, /, *args, **kwargs):
+        f = Future()
+        try:
+            f.set_result(fn(*args, **kwargs))
+        except BaseException as e:
+            f.set_exception(e)
+        return f
+
+def square(x):
+    return x * x
+
+with Inline() as pool:
+    future = pool.submit(square(4))
+print(future.result())</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;submit(fn, arg)&quot;
+    expect_output(&quot;16&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from concurrent.futures import Executor, Future
+
+class Inline(Executor):
+    def submit(self, fn, /, *args, **kwargs):
+        f = Future()
+        try:
+            f.set_result(fn(*args, **kwargs))
+        except BaseException as e:
+            f.set_exception(e)
+        return f
+
+def square(x):
+    return x * x
+
+with Inline() as pool:
+    future = pool.submit(square, 4)
+print(future.result())</textarea></div>
+<div class="parsons" data-id="w066d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Handling results as they finish</div><div class="pc-prompt"><p>Arrange the lines that report each download as soon as it finishes (as you&rsquo;d write it on your own computer). One line is a trap.</p></div><script type="application/json">{"lines": ["with ThreadPoolExecutor(max_workers=4) as pool:", "    futures = {pool.submit(fetch, url): url for url in urls}", "    for future in as_completed(futures):", "        url = futures[future]", "        print(url, len(future.result()))"], "distractors": ["        print(url, len(future))"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # what executor.submit returns: &quot;the result&quot; or &quot;a Future&quot;
+q = ___   # the order map gives results in: &quot;input order&quot; or &quot;finishing order&quot;
+r = ___   # True or False: future.cancel() can stop a task that&#x27;s already running
+s = ___   # what future.result() does if the task raised: &quot;returns None&quot; or &quot;re-raises&quot;
+t = ___   # the executor for CPU-bound pure-Python work: &quot;ThreadPoolExecutor&quot; or &quot;ProcessPoolExecutor&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;a Future&quot; and q == &quot;input order&quot; and r is False, &quot;p, q and r&quot;
+    assert s == &quot;re-raises&quot; and t == &quot;ProcessPoolExecutor&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;a Future&quot;
+q = &quot;input order&quot;
+r = False
+s = &quot;re-raises&quot;
+t = &quot;ProcessPoolExecutor&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w066d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does executor.submit(fn, x) return?", "answer": 1, "explain": "It returns at once.", "options": ["fn(x)", "A Future that will hold fn(x)&rsquo;s result", "None", "A thread"]}, {"type": "mc", "q": "In what order does executor.map return results?", "answer": 1, "explain": "Use as_completed for finishing order.", "options": ["Finishing order", "Input order", "Random", "Reverse"]}, {"type": "mc", "q": "What happens to an exception raised by a submitted task?", "answer": 1, "explain": "exception() returns it without raising.", "options": ["It&rsquo;s lost", "It&rsquo;s stored in the future and re-raised by result()", "The program stops", "It&rsquo;s printed only"]}, {"type": "mc", "q": "What does the with statement do for an executor?", "answer": 1, "explain": "shutdown(wait=True).", "options": ["Nothing", "Shuts it down at the end, waiting for submitted work", "Starts it", "Cancels everything"]}, {"type": "mc", "q": "When can future.cancel() succeed?", "answer": 1, "explain": "Running tasks can&rsquo;t be stopped.", "options": ["Always", "Only before the task has started", "Only after it finishes", "Never"]}, {"type": "mc", "q": "What does result(timeout=5) do if the task takes longer?", "answer": 1, "explain": "Make tasks time themselves out.", "options": ["Kills the task", "Raises TimeoutError but the task keeps running", "Returns None", "Waits for ever"]}, {"type": "mc", "q": "What does as_completed yield?", "answer": 1, "explain": "Map futures back to inputs with a dict.", "options": ["Results", "Futures, in the order they finish", "Indices", "Exceptions"]}, {"type": "mc", "q": "Why can&rsquo;t you send a lambda to a ProcessPoolExecutor?", "answer": 1, "explain": "Use a top-level function.", "options": ["Lambdas are slow", "It must be pickled, and lambdas can&rsquo;t be", "Processes forbid functions", "You can"]}, {"type": "mc", "q": "When does a callback added with add_done_callback run if the future is already done?", "answer": 1, "explain": "Otherwise when it completes.", "options": ["Never", "Immediately", "At shutdown", "On the next submit"]}, {"type": "output", "q": "What does this print?", "answer": "1 1", "explain": "b wasn&rsquo;t finished.", "code": "from concurrent.futures import Future, wait\na, b = Future(), Future()\na.set_result(1)\ndone, not_done = wait([a, b], timeout=0)\nprint(len(done), len(not_done))\nb.cancel()"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: an executor with simulated time</div><div class="pc-prompt"><p>Write <code>SimulatedPool(workers)</code>, an <code>Executor</code> subclass whose tasks take <strong>simulated</strong> time. <code>submit(fn, *args, duration=1, **kwargs)</code> returns a pending <code>Future</code> and queues the task; nothing runs until <code>run()</code>, which processes tasks like a real pool: each starts, in submission order, on the worker that becomes free first (lowest-numbered on ties); its function is called when it <strong>starts</strong> (so <code>fn</code> sees the right <code>now</code>), but its future is settled only at its finish time. Futures are settled in finish-time order (ties: submission order), so callbacks fire in that order. Also:</p>
+<ul>
+<li><code>now</code> is the current simulated time (0 before running, the last finish time after);</li>
+<li>a future cancelled before <code>run()</code> is skipped and takes no time;</li>
+<li><code>run()</code> returns a list of <code>(finish_time, future)</code> in the order they were settled;</li>
+<li>after <code>shutdown()</code>, <code>submit</code> raises <code>RuntimeError</code>; <code>shutdown()</code> (and so the <code>with</code> statement) calls <code>run()</code> if there&rsquo;s work left.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import heapq
+from concurrent.futures import Executor, Future
+
+class SimulatedPool(Executor):
+    def __init__(self, workers):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_simulated():
+    &quot;simulated time&quot;
+    from concurrent.futures import as_completed
+    pool = SimulatedPool(2)
+    order = []
+    fa = pool.submit(lambda: &quot;a&quot;, duration=5)
+    fb = pool.submit(lambda: &quot;b&quot;, duration=1)
+    fc = pool.submit(lambda: &quot;c&quot;, duration=3)
+    for f, name in ((fa, &quot;a&quot;), (fb, &quot;b&quot;), (fc, &quot;c&quot;)):
+        f.add_done_callback(lambda fut, name=name: order.append((name, pool.now)))
+    assert not fa.done() and pool.now == 0
+    settled = pool.run()
+    assert order == [(&quot;b&quot;, 1), (&quot;c&quot;, 4), (&quot;a&quot;, 5)] and [t for t, _ in settled] == [1, 4, 5]
+    assert sorted(f.result() for f in as_completed([fa, fb, fc])) == [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;] and pool.now == 5
+
+def test_details():
+    &quot;starting times, errors, cancelling and shutdown&quot;
+    pool = SimulatedPool(1)
+    seen = []
+    def record(label):
+        seen.append((label, pool.now))
+        return label
+    f1 = pool.submit(record, &quot;first&quot;, duration=2)
+    f2 = pool.submit(record, &quot;second&quot;, duration=2)
+    f3 = pool.submit(int, &quot;x&quot;, duration=1)
+    skipped = pool.submit(record, &quot;skipped&quot;, duration=100)
+    assert skipped.cancel()
+    pool.run()
+    assert seen == [(&quot;first&quot;, 0), (&quot;second&quot;, 2)] and isinstance(f3.exception(), ValueError) and pool.now == 5
+    with SimulatedPool(3) as p:
+        g = p.submit(pow, 2, 8, duration=4)
+    assert g.result() == 256 and p.now == 4
+    try:
+        p.submit(abs, 1)
+        assert False
+    except RuntimeError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+from concurrent.futures import Executor, Future
+
+class SimulatedPool(Executor):
+    def __init__(self, workers):
+        self.workers = workers
+        self.now = 0
+        self._queue = []
+        self._closed = False
+        self._free_at = [0] * workers
+
+    def submit(self, fn, /, *args, duration=1, **kwargs):
+        if self._closed:
+            raise RuntimeError(&quot;cannot schedule new futures after shutdown&quot;)
+        future = Future()
+        self._queue.append((future, fn, args, kwargs, duration))
+        return future
+
+    def run(self):
+        heap = []
+        for seq, (future, fn, args, kwargs, duration) in enumerate(self._queue):
+            if not future.set_running_or_notify_cancel():
+                continue
+            i = self._free_at.index(min(self._free_at))
+            start = self._free_at[i]
+            finish = start + duration
+            self._free_at[i] = finish
+            self.now = start
+            try:
+                outcome = (&quot;ok&quot;, fn(*args, **kwargs))
+            except Exception as e:
+                outcome = (&quot;error&quot;, e)
+            heapq.heappush(heap, (finish, seq, future, outcome))
+        self._queue = []
+        settled = []
+        while heap:
+            finish, seq, future, (kind, value) = heapq.heappop(heap)
+            self.now = finish
+            if kind == &quot;ok&quot;:
+                future.set_result(value)
+            else:
+                future.set_exception(value)
+            settled.append((finish, future))
+        return settled
+
+    def shutdown(self, wait=True, *, cancel_futures=False):
+        if self._queue:
+            self.run()
+        self._closed = True</textarea><template class="pc-src pc-hint">In <code>run()</code>, go through the queued tasks in submission order: pick the worker free first, compute <code>start</code> and <code>finish</code>, set <code>self.now = start</code>, call the function then (catching its exception), and push <code>(finish, sequence, future, outcome)</code> onto a heap. Then pop the heap in order, set <code>self.now = finish</code>, and settle each future, so callbacks see the right time.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, rewrite Monday&rsquo;s downloader with <code>ThreadPoolExecutor</code> and <code>as_completed</code>, and make one of the fake downloads raise an exception: check that the others still report. Tomorrow is the Forge: a deterministic web-crawler simulation using everything from this week.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w066d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w066d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w066d5", "week": 66, "day": 5, "title": "concurrent.futures", "exercises": [{"id": "w066d5-outcome", "title": "Settling futures", "points": 10}, {"id": "w066d5-inline", "title": "Your own executor", "points": 15}, {"id": "w066d5-gather", "title": "Results and failures", "points": 10}, {"id": "w066d5-order", "title": "Input order or finishing order?", "points": 10}, {"id": "w066d5-chain", "title": "Chaining futures", "points": 15}, {"id": "w066d5-bug1", "title": "One failure loses the batch", "points": 10}, {"id": "w066d5-bug2", "title": "Futures are not results", "points": 10}, {"id": "w066d5-bug3", "title": "Called too early", "points": 10}, {"id": "w066d5-trace", "title": "Predict them", "points": 10}, {"id": "w066d5-challenge", "title": "Challenge: an executor with simulated time", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

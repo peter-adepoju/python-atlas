@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 66 Day 4: Race conditions and locks | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Yesterday showed that a thread can be paused between almost any two instructions, so two threads changing the same data can interleave in ways that lose...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w066d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 66 Day 4: Race conditions and locks">
+<meta property="og:description" content="Yesterday showed that a thread can be paused between almost any two instructions, so two threads changing the same data can interleave in ways that lose...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w066d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-66">Week 66: Concurrency I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#race-conditions" data-sec="race-conditions">Race conditions</a></li><li><a href="#locks" data-sec="locks">Locks</a></li><li><a href="#check-then-act-and-other-patterns" data-sec="check-then-act-and-other-patterns">Check-then-act and other patterns</a></li><li><a href="#deadlock" data-sec="deadlock">Deadlock</a></li><li><a href="#more-primitives" data-sec="more-primitives">More primitives</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w066d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-66">Week 66: Concurrency I</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 66, Day 4</span></p>
+      <h1>Race conditions and locks</h1>
+      <div class="day-intro"><p>Yesterday showed that a thread can be paused between almost any two instructions, so two threads changing the same data can interleave in ways that lose updates. That&rsquo;s a <strong>race condition</strong>: the result depends on the timing. Races are among the hardest bugs there are, because they may appear once in a million runs, on a busy machine, in production. Today you&rsquo;ll learn to see them by <strong>enumerating interleavings</strong>, prevent them with <strong>locks</strong> and the other <code>threading</code> primitives, and avoid the problems locks bring: <strong>deadlock</strong>, from taking locks in different orders, and forgotten releases. The simulations run in the browser; the real <code>Lock</code> and <code>RLock</code> objects work here too, as long as only one thread uses them.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain race conditions, atomicity and critical sections, and find races by enumerating interleavings</li><li>Protect shared data with Lock using with, and know when RLock is needed</li><li>Recognise check-then-act and read-modify-write races</li><li>Prevent deadlock with a consistent lock order, and detect it with a wait-for graph</li><li>Choose between locks, Semaphore, Condition and queues</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Race conditions: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Locks: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Check-then-act and other patterns: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Deadlock: 25 min"></span><span class="plan-seg s1" style="flex:15" title="More primitives: 15 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Race conditions</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Locks</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Check-then-act and other patterns</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Deadlock</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">More primitives</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w066d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w066d4.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w066d4-p1"><textarea class="pc-src pc-code" hidden>from itertools import combinations
+
+def interleavings(a, b):
+    n = len(a) + len(b)
+    for positions in combinations(range(n), len(a)):
+        merged, ia, ib = [], iter(a), iter(b)
+        for i in range(n):
+            merged.append(next(ia) if i in positions else next(ib))
+        yield merged
+
+def run(order):
+    x, reg = 0, {}
+    for who, op in order:
+        if op == &quot;load&quot;:
+            reg[who] = x
+        else:
+            x = reg[who] + 1
+    return x
+
+A = [(&quot;A&quot;, &quot;load&quot;), (&quot;A&quot;, &quot;store&quot;)]
+B = [(&quot;B&quot;, &quot;load&quot;), (&quot;B&quot;, &quot;store&quot;)]
+results = [run(order) for order in interleavings(A, B)]
+print(len(results), sorted(set(results)), results.count(1))</textarea></div>
+<p>Two threads each add one to <code>x</code> with a load and a store. There are six possible orders, and in four of them one update is lost, so <code>x</code> ends up 1 instead of 2. Nothing about the code is wrong line by line; the bug is in the interleaving.</p>
+<h2 id="race-conditions">Race conditions</h2>
+<p>A <strong>race condition</strong> is a bug where the outcome depends on the relative timing of threads. The classic form is <strong>read-modify-write</strong>: <code>counter += 1</code>, <code>balance -= amount</code>, <code>items[key].append(x)</code> after a lookup. Each is several steps, and another thread can run between them.</p>
+<p>Key words:</p>
+<ul>
+<li>An operation is <strong>atomic</strong> if no other thread can observe it half done.</li>
+<li>A <strong>critical section</strong> is a piece of code that must not run in two threads at once (because it reads and writes shared data).</li>
+<li><strong>Shared mutable state</strong> is the root cause. No shared state (each thread uses its own data and sends results through a queue) means no races.</li>
+</ul>
+<p>Races are hard to find by testing, because the bad interleavings may be rare. Ways to reason about them: imagine the worst moment for a switch (between every pair of steps), <strong>enumerate</strong> interleavings for small cases (two threads with <code>m</code> and <code>n</code> steps have <code>(m + n)! / (m! n!)</code> orders), and use tools: the free-threaded build and race detectors make races show up more often.</p>
+<div class="pc pc-example" data-kind="example" data-id="w066d4-e2"><textarea class="pc-src pc-code" hidden>from math import comb
+
+for m, n in [(2, 2), (3, 3), (10, 10)]:
+    print(f&quot;{m} and {n} steps: {comb(m + n, m)} interleavings&quot;)
+
+balance = 100
+
+def withdraw_steps(amount):
+    &quot;Check, then act: two steps that must not be separated.&quot;
+    return [(&quot;check&quot;, amount), (&quot;take&quot;, amount)]
+
+def run(order):
+    bal, approved = 100, {}
+    for who, (step, amount) in order:
+        if step == &quot;check&quot;:
+            approved[who] = bal &gt;= amount
+        elif approved[who]:
+            bal -= amount
+    return bal
+
+a = [(&quot;A&quot;, s) for s in withdraw_steps(80)]
+b = [(&quot;B&quot;, s) for s in withdraw_steps(80)]
+print(run(a + b), run([a[0], b[0], a[1], b[1]]))     # in turn, then interleaved: overdrawn</textarea></div>
+<h2 id="locks">Locks</h2>
+<p>A <strong>lock</strong> (<code>threading.Lock</code>, a &ldquo;mutex&rdquo;) is held by at most one thread at a time. <code>acquire()</code> takes it, waiting while another thread holds it; <code>release()</code> gives it back. Wrapping a critical section in a lock makes it effectively atomic with respect to other code that uses the <strong>same</strong> lock.</p>
+<p>Always use the <code>with</code> statement (Week 61), which releases the lock even if the block raises:</p>
+<pre><code>balance_lock = threading.Lock()
+
+def withdraw(amount):
+    with balance_lock:                   # one thread at a time in here
+        if balance &gt;= amount:
+            balance -= amount
+            return True
+        return False
+</code></pre>
+<ul>
+<li><code>acquire(blocking=False)</code> returns <code>False</code> immediately if the lock is taken; <code>acquire(timeout=1.0)</code> waits at most a second; both return <code>True</code> on success.</li>
+<li>A plain <code>Lock</code> isn&rsquo;t <strong>re-entrant</strong>: if a thread holding it calls <code>acquire()</code> again, it waits for itself for ever. <strong><code>threading.RLock</code></strong> (re-entrant lock) counts acquisitions by the owning thread and can be acquired again by it; it must be released as many times. Use it when a method holding the lock calls another method that takes the same lock.</li>
+<li>Locks protect data only if <strong>every</strong> access goes through them. One unlocked read or write, anywhere, and the race is back.</li>
+<li>Keep critical sections <strong>short</strong>: while one thread holds the lock, others that need it wait, so long sections remove the benefit of threads.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w066d4-e3"><textarea class="pc-src pc-code" hidden>import threading
+
+lock = threading.Lock()
+with lock:
+    print(&quot;held:&quot;, lock.locked(), &quot;| a second acquire succeeds:&quot;, lock.acquire(blocking=False))
+print(&quot;after with:&quot;, lock.locked())
+
+rlock = threading.RLock()
+
+class Account:
+    def __init__(self):
+        self.balance, self.lock = 100, threading.RLock()
+    def withdraw(self, amount):
+        with self.lock:
+            if self.balance &gt;= amount:
+                self.balance -= amount
+                return True
+            return False
+    def withdraw_twice(self, amount):
+        with self.lock:                       # the same thread takes the lock again inside withdraw
+            return self.withdraw(amount) and self.withdraw(amount)
+
+acc = Account()
+print(acc.withdraw_twice(30), acc.balance)</textarea></div>
+<h2 id="check-then-act-and-other-patterns">Check-then-act and other patterns</h2>
+<p>Races aren&rsquo;t only about counters. Watch for:</p>
+<ul>
+<li><strong>Check-then-act</strong>: <code>if key not in cache: cache[key] = load(key)</code> (two threads both see it missing and both load); <code>if os.path.exists(path): open(path)</code> (the file can vanish in between); <code>if balance &gt;= amount: balance -= amount</code>. Put the check <strong>and</strong> the act inside one lock, or use an operation that does both at once (<code>dict.setdefault</code>, opening a file with mode <code>"x"</code>, a database transaction).</li>
+<li><strong>Compound operations on several objects</strong>: moving an item from one list to another must hold a lock covering both.</li>
+<li><strong>Lazy initialisation</strong>: creating a shared object on first use (<code>if self._conn is None: self._conn = connect()</code>) needs a lock, or do it before starting threads.</li>
+<li><strong>Iterating while another thread modifies</strong> a list or dict: copy it under the lock first.</li>
+</ul>
+<p>And the simplest fix of all: <strong>don&rsquo;t share</strong>. Give each thread its own data, use <code>queue.Queue</code> to hand work and results between threads, or make shared data <strong>immutable</strong> (Week 62): immutable objects can be read by any number of threads safely.</p>
+<div class="pc pc-example" data-kind="example" data-id="w066d4-e4"><textarea class="pc-src pc-code" hidden>cache, loads = {}, []
+
+def load(key):
+    loads.append(key)
+    return key.upper()
+
+def get_racy(steps, key):
+    &quot;Each thread checks, then (after a possible switch) stores.&quot;
+    seen_missing = {}
+    for who in steps:
+        if who not in seen_missing:
+            seen_missing[who] = key not in cache       # check
+        elif seen_missing[who]:
+            cache[key] = load(key)                     # act
+            seen_missing[who] = False
+    return len(loads)
+
+print(get_racy([&quot;A&quot;, &quot;B&quot;, &quot;A&quot;, &quot;B&quot;], &quot;tea&quot;), &quot;loads instead of 1&quot;)
+
+cache.clear(); loads.clear()
+def get_atomic(key):
+    if key not in cache:                               # imagine this whole function inside one lock
+        cache[key] = load(key)
+    return cache[key]
+get_atomic(&quot;tea&quot;); get_atomic(&quot;tea&quot;)
+print(len(loads))</textarea></div>
+<h2 id="deadlock">Deadlock</h2>
+<p>Locks introduce a new failure: <strong>deadlock</strong>, where threads wait for each other for ever. The classic case: thread 1 holds lock A and waits for lock B, while thread 2 holds B and waits for A. Neither can proceed. Four conditions together make deadlock possible (Coffman&rsquo;s conditions): locks held exclusively, held while waiting for more, not taken away by force, and a <strong>cycle</strong> of threads each waiting for the next.</p>
+<p>Prevention, most useful first:</p>
+<ul>
+<li><strong>A global lock order</strong>: whenever a thread needs several locks, it takes them in one agreed order (by name, by id, by account number). A cycle can then never form. A bank transfer between accounts <code>x</code> and <code>y</code> locks <code>min(x, y)</code> first, whichever way the money moves.</li>
+<li><strong>Hold fewer locks</strong>: one lock for related data is often simpler than several fine-grained ones.</li>
+<li><strong>Timeouts</strong>: <code>acquire(timeout=...)</code> and give up (releasing what you hold) if it fails, then retry.</li>
+<li><strong>Never call unknown code while holding a lock</strong> (a callback could try to take another lock).</li>
+</ul>
+<p><strong>Detecting</strong> deadlock: build a <strong>wait-for graph</strong> with an edge from each waiting thread to the thread holding the lock it wants. A deadlock is a <strong>cycle</strong> in that graph (Week 50&rsquo;s cycle detection).</p>
+<div class="pc pc-example" data-kind="example" data-id="w066d4-e5"><textarea class="pc-src pc-code" hidden>def wait_for_graph(holds, wants):
+    &quot;holds: lock -&gt; thread holding it; wants: thread -&gt; lock it&#x27;s waiting for.&quot;
+    return {t: holds[lock] for t, lock in wants.items() if lock in holds}
+
+def find_cycle(graph):
+    for start in graph:
+        seen, node = [], start
+        while node in graph and node not in seen:
+            seen.append(node)
+            node = graph[node]
+        if node in seen:
+            return seen[seen.index(node):]
+    return []
+
+holds = {&quot;A&quot;: &quot;t1&quot;, &quot;B&quot;: &quot;t2&quot;}
+wants = {&quot;t1&quot;: &quot;B&quot;, &quot;t2&quot;: &quot;A&quot;}
+print(find_cycle(wait_for_graph(holds, wants)))
+
+def lock_order(a, b):
+    return tuple(sorted((a, b)))                 # the same order whichever way money moves
+print(lock_order(&quot;x&quot;, &quot;y&quot;), lock_order(&quot;y&quot;, &quot;x&quot;))</textarea></div>
+<h2 id="more-primitives">More primitives</h2>
+<p><code>threading</code> has a few more tools, all usable with <code>with</code>:</p>
+<ul>
+<li><strong><code>Semaphore(n)</code></strong>: a lock that up to <code>n</code> threads can hold at once. Use it to <strong>limit concurrency</strong>: at most 5 simultaneous downloads, at most 10 database connections. <code>BoundedSemaphore</code> also catches releasing too many times.</li>
+<li><strong><code>Condition</code></strong>: a lock plus the ability to <strong>wait for a condition</strong> to become true: <code>with cond: while not ready(): cond.wait()</code>, and another thread changes the state and calls <code>cond.notify()</code> or <code>notify_all()</code>. It&rsquo;s what <code>queue.Queue</code> is built on; prefer a queue when one fits.</li>
+<li><strong><code>Event</code></strong> (Tuesday): a one-off flag.</li>
+<li><strong><code>Barrier(n)</code></strong>: makes <code>n</code> threads wait until all of them have arrived, then releases them together.</li>
+</ul>
+<p>Rules of thumb: prefer <strong>queues</strong> for passing data, <strong>one lock</strong> around a small piece of shared state when you can&rsquo;t avoid sharing, <strong>semaphores</strong> for limits, and don&rsquo;t invent your own synchronisation from flags and <code>sleep</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w066d4-e6"><textarea class="pc-src pc-code" hidden>import threading
+
+slots = threading.Semaphore(2)
+taken = [slots.acquire(blocking=False) for _ in range(3)]
+print(taken)
+slots.release(); slots.release()
+
+bounded = threading.BoundedSemaphore(1)
+bounded.acquire()
+bounded.release()
+try:
+    bounded.release()
+except ValueError as e:
+    print(&quot;ValueError:&quot;, e)
+
+cond = threading.Condition()
+with cond:
+    print(&quot;waiting returns:&quot;, cond.wait(timeout=0))   # nobody will notify: times out at once</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A race condition is a bug whose result depends on how threads interleave; read-modify-write (+=) and check-then-act are the usual forms, and enumerating interleavings of small cases shows them. A critical section must run in one thread at a time: protect it with a Lock, always with with, around every access to the shared data, kept short; acquire(blocking=False) and timeout avoid waiting for ever; RLock allows the owning thread to re-acquire. Deadlock is a cycle of threads waiting for each other&rsquo;s locks: prevent it with one global lock order (sorted), fewer locks, timeouts and no callbacks under locks, and detect it as a cycle in the wait-for graph. Semaphore limits concurrency, Condition waits for a state, Barrier synchronises a group; queues and immutable data avoid sharing altogether.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d4-interleave" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Every possible order</div><div class="pc-prompt"><p>Write <code>interleavings(a, b)</code>: a list of every way to merge the step lists <code>a</code> and <code>b</code> that keeps each list&rsquo;s own order (as lists), in the order produced by choosing, at each point, a step from <code>a</code> before a step from <code>b</code>. Then <code>count_interleavings(m, n)</code>: how many there are, computed with <code>math.comb</code> (not by generating them).</p></div><textarea class="pc-src pc-code" hidden>import math
+
+def interleavings(a, b):
+    ___
+
+def count_interleavings(m, n):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_interleave():
+    &quot;enumerating interleavings&quot;
+    assert interleavings([1, 2], [&quot;x&quot;]) == [[1, 2, &quot;x&quot;], [1, &quot;x&quot;, 2], [&quot;x&quot;, 1, 2]]
+    assert len(interleavings([1, 2, 3], [4, 5, 6])) == 20 == count_interleavings(3, 3)
+    assert interleavings([], [1]) == [[1]] and interleavings([], []) == [[]]
+    assert count_interleavings(10, 10) == 184756
+    for merged in interleavings([&quot;a1&quot;, &quot;a2&quot;], [&quot;b1&quot;, &quot;b2&quot;]):
+        assert merged.index(&quot;a1&quot;) &lt; merged.index(&quot;a2&quot;) and merged.index(&quot;b1&quot;) &lt; merged.index(&quot;b2&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+def interleavings(a, b):
+    if not a:
+        return [list(b)]
+    if not b:
+        return [list(a)]
+    return ([[a[0]] + rest for rest in interleavings(a[1:], b)] +
+            [[b[0]] + rest for rest in interleavings(a, b[1:])])
+
+def count_interleavings(m, n):
+    return math.comb(m + n, m)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d4-outcomes" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">All possible results</div><div class="pc-prompt"><p>Model threads as lists of instructions on shared variables, each thread with its own register: <code>("load", var)</code> copies a variable into the register, <code>("add", k)</code> adds <code>k</code> to the register, and <code>("store", var)</code> writes the register to the variable. Write <code>execute(order, shared)</code>: run a list of <code>(thread, instruction)</code> pairs on a copy of the dict <code>shared</code> and return the final dict. Then <code>possible(threads, shared, var)</code>: the sorted list of distinct final values of <code>var</code> over <strong>all</strong> interleavings of the threads (a dict from thread name to instruction list; any number of threads).</p></div><textarea class="pc-src pc-code" hidden>def execute(order, shared):
+    ___
+
+def possible(threads, shared, var):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_outcomes():
+    &quot;finding races&quot;
+    inc = [(&quot;load&quot;, &quot;x&quot;), (&quot;add&quot;, 1), (&quot;store&quot;, &quot;x&quot;)]
+    assert possible({&quot;A&quot;: inc, &quot;B&quot;: inc}, {&quot;x&quot;: 0}, &quot;x&quot;) == [1, 2]
+    assert possible({&quot;A&quot;: inc, &quot;B&quot;: inc, &quot;C&quot;: inc}, {&quot;x&quot;: 0}, &quot;x&quot;) == [1, 2, 3]
+    dec = [(&quot;load&quot;, &quot;x&quot;), (&quot;add&quot;, -5), (&quot;store&quot;, &quot;x&quot;)]
+    assert possible({&quot;A&quot;: inc, &quot;B&quot;: dec}, {&quot;x&quot;: 10}, &quot;x&quot;) == [5, 6, 11]
+    assert execute([(&quot;A&quot;, (&quot;load&quot;, &quot;x&quot;)), (&quot;A&quot;, (&quot;add&quot;, 2)), (&quot;A&quot;, (&quot;store&quot;, &quot;y&quot;))], {&quot;x&quot;: 1}) == {&quot;x&quot;: 1, &quot;y&quot;: 3}
+    start = {&quot;x&quot;: 0}
+    execute([(&quot;A&quot;, (&quot;load&quot;, &quot;x&quot;)), (&quot;A&quot;, (&quot;store&quot;, &quot;x&quot;))], start)
+    assert start == {&quot;x&quot;: 0} and possible({&quot;A&quot;: inc}, {&quot;x&quot;: 7}, &quot;x&quot;) == [8]</textarea><textarea class="pc-src pc-solution" hidden>def execute(order, shared):
+    state = dict(shared)
+    registers = {}
+    for thread, (op, arg) in order:
+        if op == &quot;load&quot;:
+            registers[thread] = state[arg]
+        elif op == &quot;add&quot;:
+            registers[thread] = registers.get(thread, 0) + arg
+        elif op == &quot;store&quot;:
+            state[arg] = registers[thread]
+    return state
+
+def possible(threads, shared, var):
+    names = list(threads)
+    results = set()
+
+    def explore(positions, order):
+        progressed = False
+        for name in names:
+            i = positions[name]
+            if i &lt; len(threads[name]):
+                progressed = True
+                positions[name] += 1
+                order.append((name, threads[name][i]))
+                explore(positions, order)
+                order.pop()
+                positions[name] -= 1
+        if not progressed:
+            results.add(execute(order, shared)[var])
+
+    explore({n: 0 for n in names}, [])
+    return sorted(results)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d4-locked" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Locks in the model</div><div class="pc-prompt"><p>Extend the model with locks: <code>("acquire", name)</code> can only run when no <strong>other</strong> thread holds that lock (then this thread holds it), and <code>("release", name)</code> gives it up. Write <code>possible_locked(threads, shared, var)</code>: like <code>possible</code>, but only exploring orders the locks allow (an interleaving step is available only if it isn&rsquo;t an <code>acquire</code> of a lock held by another thread). Then <code>protect(steps, lock="L")</code>: the steps wrapped in an acquire and a release. With protection, the counter race disappears.</p></div><textarea class="pc-src pc-code" hidden>def possible_locked(threads, shared, var):
+    ___
+
+def protect(steps, lock=&quot;L&quot;):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_locked():
+    &quot;locks remove the race&quot;
+    inc = [(&quot;load&quot;, &quot;x&quot;), (&quot;add&quot;, 1), (&quot;store&quot;, &quot;x&quot;)]
+    assert possible_locked({&quot;A&quot;: inc, &quot;B&quot;: inc}, {&quot;x&quot;: 0}, &quot;x&quot;) == [1, 2]
+    assert possible_locked({&quot;A&quot;: protect(inc), &quot;B&quot;: protect(inc)}, {&quot;x&quot;: 0}, &quot;x&quot;) == [2]
+    assert possible_locked({&quot;A&quot;: protect(inc), &quot;B&quot;: protect(inc), &quot;C&quot;: protect(inc)}, {&quot;x&quot;: 0}, &quot;x&quot;) == [3]
+    assert possible_locked({&quot;A&quot;: protect(inc), &quot;B&quot;: inc}, {&quot;x&quot;: 0}, &quot;x&quot;) == [1, 2]
+    assert protect([(&quot;add&quot;, 1)], &quot;M&quot;) == [(&quot;acquire&quot;, &quot;M&quot;), (&quot;add&quot;, 1), (&quot;release&quot;, &quot;M&quot;)]</textarea><textarea class="pc-src pc-solution" hidden>def possible_locked(threads, shared, var):
+    names = list(threads)
+    results = set()
+
+    def run(order):
+        state = dict(shared)
+        reg = {}
+        for thread, (op, arg) in order:
+            if op == &quot;load&quot;:
+                reg[thread] = state[arg]
+            elif op == &quot;add&quot;:
+                reg[thread] = reg.get(thread, 0) + arg
+            elif op == &quot;store&quot;:
+                state[arg] = reg[thread]
+        return state[var]
+
+    def explore(positions, holders, order):
+        progressed = False
+        for name in names:
+            i = positions[name]
+            if i &gt;= len(threads[name]):
+                continue
+            op, arg = threads[name][i]
+            if op == &quot;acquire&quot; and holders.get(arg) not in (None, name):
+                continue
+            progressed = True
+            positions[name] += 1
+            previous = holders.get(arg)
+            if op == &quot;acquire&quot;:
+                holders[arg] = name
+            elif op == &quot;release&quot;:
+                holders.pop(arg, None)
+            order.append((name, (op, arg)))
+            explore(positions, holders, order)
+            order.pop()
+            if op in (&quot;acquire&quot;, &quot;release&quot;):
+                if previous is None:
+                    holders.pop(arg, None)
+                else:
+                    holders[arg] = previous
+            positions[name] -= 1
+        if not progressed and all(positions[n] == len(threads[n]) for n in names):
+            results.add(run(order))
+
+    explore({n: 0 for n in names}, {}, [])
+    return sorted(results)
+
+def protect(steps, lock=&quot;L&quot;):
+    return [(&quot;acquire&quot;, lock)] + list(steps) + [(&quot;release&quot;, lock)]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d4-transfer" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Locks in a consistent order</div><div class="pc-prompt"><p>Write <code>transfer(accounts, locks, src, dst, amount)</code>: move <code>amount</code> from <code>accounts[src]</code> to <code>accounts[dst]</code> while holding <strong>both</strong> accounts&rsquo; locks (from the dict <code>locks</code>), always acquiring them in <strong>sorted order of account name</strong> with <code>with</code> statements, whichever direction the money goes. Raise <code>ValueError("insufficient funds")</code> if the source can&rsquo;t cover it (leaving balances unchanged), and <code>ValueError("same account")</code> if <code>src == dst</code>. The tests pass in locks that record the order they&rsquo;re taken in.</p></div><textarea class="pc-src pc-code" hidden>def transfer(accounts, locks, src, dst, amount):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_transfer():
+    &quot;lock ordering&quot;
+    import threading
+    taken = []
+    class Recorded:
+        def __init__(self, name):
+            self.name, self.lock = name, threading.Lock()
+        def __enter__(self):
+            self.lock.acquire()
+            taken.append(self.name)
+            return self
+        def __exit__(self, *exc):
+            self.lock.release()
+            return False
+    accounts = {&quot;ada&quot;: 100, &quot;ben&quot;: 50}
+    locks = {name: Recorded(name) for name in accounts}
+    transfer(accounts, locks, &quot;ben&quot;, &quot;ada&quot;, 20)
+    transfer(accounts, locks, &quot;ada&quot;, &quot;ben&quot;, 70)
+    assert accounts == {&quot;ada&quot;: 50, &quot;ben&quot;: 100} and taken == [&quot;ada&quot;, &quot;ben&quot;, &quot;ada&quot;, &quot;ben&quot;]
+    try:
+        transfer(accounts, locks, &quot;ada&quot;, &quot;ben&quot;, 1000)
+        assert False
+    except ValueError as e:
+        assert str(e) == &quot;insufficient funds&quot;
+    assert accounts == {&quot;ada&quot;: 50, &quot;ben&quot;: 100} and not locks[&quot;ada&quot;].lock.locked()
+    try:
+        transfer(accounts, locks, &quot;ada&quot;, &quot;ada&quot;, 1)
+        assert False
+    except ValueError as e:
+        assert str(e) == &quot;same account&quot;</textarea><textarea class="pc-src pc-solution" hidden>def transfer(accounts, locks, src, dst, amount):
+    if src == dst:
+        raise ValueError(&quot;same account&quot;)
+    first, second = sorted((src, dst))
+    with locks[first], locks[second]:
+        if accounts[src] &lt; amount:
+            raise ValueError(&quot;insufficient funds&quot;)
+        accounts[src] -= amount
+        accounts[dst] += amount</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d4-deadlock" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Finding a deadlock</div><div class="pc-prompt"><p>Write <code>waits_for(holds, wants)</code>: the wait-for graph as a dict from each waiting thread to the thread holding the lock it wants (threads waiting for a free lock aren&rsquo;t waiting for anyone, so leave them out). <code>holds</code> maps lock to holding thread; <code>wants</code> maps thread to the lock it&rsquo;s waiting for. Then <code>deadlocked(holds, wants)</code>: the sorted list of threads that are part of a <strong>cycle</strong> in that graph (empty if there&rsquo;s no deadlock).</p></div><textarea class="pc-src pc-code" hidden>def waits_for(holds, wants):
+    ___
+
+def deadlocked(holds, wants):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_deadlock():
+    &quot;wait-for graphs&quot;
+    holds = {&quot;A&quot;: &quot;t1&quot;, &quot;B&quot;: &quot;t2&quot;, &quot;C&quot;: &quot;t3&quot;}
+    wants = {&quot;t1&quot;: &quot;B&quot;, &quot;t2&quot;: &quot;C&quot;, &quot;t3&quot;: &quot;A&quot;, &quot;t4&quot;: &quot;A&quot;}
+    assert waits_for(holds, wants) == {&quot;t1&quot;: &quot;t2&quot;, &quot;t2&quot;: &quot;t3&quot;, &quot;t3&quot;: &quot;t1&quot;, &quot;t4&quot;: &quot;t1&quot;}
+    assert deadlocked(holds, wants) == [&quot;t1&quot;, &quot;t2&quot;, &quot;t3&quot;]
+    assert deadlocked({&quot;A&quot;: &quot;t1&quot;}, {&quot;t2&quot;: &quot;A&quot;}) == [] and waits_for({}, {&quot;t1&quot;: &quot;Z&quot;}) == {}
+    assert deadlocked({&quot;A&quot;: &quot;t1&quot;, &quot;B&quot;: &quot;t2&quot;}, {&quot;t1&quot;: &quot;B&quot;, &quot;t2&quot;: &quot;A&quot;, &quot;t3&quot;: &quot;B&quot;}) == [&quot;t1&quot;, &quot;t2&quot;]</textarea><textarea class="pc-src pc-solution" hidden>def waits_for(holds, wants):
+    return {t: holds[lock] for t, lock in wants.items() if lock in holds and holds[lock] != t}
+
+def deadlocked(holds, wants):
+    graph = waits_for(holds, wants)
+    in_cycle = set()
+    for start in graph:
+        path, node = [], start
+        while node in graph and node not in path:
+            path.append(node)
+            node = graph[node]
+        if node in path:
+            in_cycle.update(path[path.index(node):])
+    return sorted(in_cycle)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w066d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A lock that waits for itself</div><div class="pc-prompt"><p><code>log_all</code> holds the lock and then calls <code>log</code>, which tries to take the <strong>same</strong> plain <code>Lock</code> again; a <code>Lock</code> isn&rsquo;t re-entrant, so the second acquire can never succeed (here it gives up after a short timeout) and this prints <code>stuck</code>. Use an <code>RLock</code>, which the owning thread may acquire again, so it prints <code>ok</code>.</p></div><textarea class="pc-src pc-code" hidden>import threading
+
+lock = threading.Lock()
+
+def log(lines, message):
+    if not lock.acquire(timeout=0.2):
+        return False
+    try:
+        lines.append(message)
+        return True
+    finally:
+        lock.release()
+
+def log_all(lines, messages):
+    with lock:
+        return all(log(lines, m) for m in messages)
+
+print(&quot;ok&quot; if log_all([], [&quot;a&quot;, &quot;b&quot;]) else &quot;stuck&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a re-entrant lock&quot;
+    expect_output(&quot;ok&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import threading
+
+lock = threading.RLock()
+
+def log(lines, message):
+    if not lock.acquire(timeout=0.2):
+        return False
+    try:
+        lines.append(message)
+        return True
+    finally:
+        lock.release()
+
+def log_all(lines, messages):
+    with lock:
+        return all(log(lines, m) for m in messages)
+
+print(&quot;ok&quot; if log_all([], [&quot;a&quot;, &quot;b&quot;]) else &quot;stuck&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w066d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A lock never released</div><div class="pc-prompt"><p><code>update</code> acquires the lock by hand, and when the update raises, <code>release()</code> is never reached, so the lock stays held for ever and the next update can&rsquo;t get it: this prints <code>locked out</code>. Use <code>with lock:</code> so the lock is released even when an error happens, and this prints <code>updated</code>.</p></div><textarea class="pc-src pc-code" hidden>import threading
+
+lock = threading.Lock()
+stock = {&quot;tea&quot;: 5}
+
+def update(item, change):
+    lock.acquire()
+    stock[item] += change
+    lock.release()
+
+try:
+    update(&quot;jam&quot;, 1)
+except KeyError:
+    pass
+print(&quot;updated&quot; if lock.acquire(timeout=0.2) else &quot;locked out&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;with releases&quot;
+    expect_output(&quot;updated&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import threading
+
+lock = threading.Lock()
+stock = {&quot;tea&quot;: 5}
+
+def update(item, change):
+    with lock:
+        stock[item] += change
+
+try:
+    update(&quot;jam&quot;, 1)
+except KeyError:
+    pass
+print(&quot;updated&quot; if lock.acquire(timeout=0.2) else &quot;locked out&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w066d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Two orders, one deadlock</div><div class="pc-prompt"><p>Each transfer locks the <strong>source</strong> account first, so a transfer from x to y and one from y to x take the locks in opposite orders, which can deadlock: this prints <code>deadlock possible</code>. Lock the accounts in sorted order instead, whatever the direction, so it prints <code>safe</code>.</p></div><textarea class="pc-src pc-code" hidden>def lock_order(src, dst):
+    return (src, dst)
+
+first = lock_order(&quot;x&quot;, &quot;y&quot;)
+second = lock_order(&quot;y&quot;, &quot;x&quot;)
+print(&quot;safe&quot; if first == second else &quot;deadlock possible&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a global order&quot;
+    expect_output(&quot;safe&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def lock_order(src, dst):
+    return tuple(sorted((src, dst)))
+
+first = lock_order(&quot;x&quot;, &quot;y&quot;)
+second = lock_order(&quot;y&quot;, &quot;x&quot;)
+print(&quot;safe&quot; if first == second else &quot;deadlock possible&quot;)</textarea></div>
+<div class="parsons" data-id="w066d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A safe withdrawal</div><div class="pc-prompt"><p>Arrange the lines of a method that withdraws money only if there&rsquo;s enough, with the check and the change inside one lock. One line is a trap.</p></div><script type="application/json">{"lines": ["def withdraw(self, amount):", "    with self.lock:", "        if self.balance < amount:", "            return False", "        self.balance -= amount", "        return True"], "distractors": ["    if self.balance < amount:"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # possible final x when two threads each do load x, add 1, store x, starting at 0, as a sorted list
+q = ___   # what lock.acquire(blocking=False) returns when another thread holds it
+r = ___   # the lock a thread can acquire again while holding it: &quot;Lock&quot; or &quot;RLock&quot;
+s = ___   # how many interleavings two threads of 2 steps each have
+t = ___   # what a deadlock is in the wait-for graph: &quot;a cycle&quot; or &quot;a long path&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [1, 2] and q is False and r == &quot;RLock&quot;, &quot;p, q and r&quot;
+    assert s == 6 and t == &quot;a cycle&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = [1, 2]
+q = False
+r = &quot;RLock&quot;
+s = 6
+t = &quot;a cycle&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w066d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What is a race condition?", "answer": 1, "explain": "Timing-dependent.", "options": ["A fast thread", "A bug whose result depends on how threads happen to interleave", "A deadlock", "An exception"]}, {"type": "mc", "q": "Why can counter += 1 lose updates between threads?", "answer": 1, "explain": "Read-modify-write.", "options": ["It can&rsquo;t", "It&rsquo;s a load, an add and a store, and a switch can happen between them", "Ints are immutable", "The GIL"]}, {"type": "mc", "q": "What does a Lock guarantee?", "answer": 1, "explain": "Only if every access uses it.", "options": ["Speed", "At most one thread at a time holds it, so code using it doesn&rsquo;t interleave", "No exceptions", "Ordering of threads"]}, {"type": "mc", "q": "Why use with lock: rather than acquire() and release()?", "answer": 1, "explain": "A forgotten release locks everyone out.", "options": ["Speed", "The lock is released even if the block raises", "It&rsquo;s required", "It&rsquo;s re-entrant"]}, {"type": "mc", "q": "When do you need an RLock?", "answer": 1, "explain": "A plain Lock would wait for itself.", "options": ["Always", "When the thread holding the lock may acquire it again, such as one method calling another", "For speed", "For processes"]}, {"type": "mc", "q": "What is wrong with if key not in cache: cache[key] = load(key) in threads?", "answer": 1, "explain": "Put both inside one lock.", "options": ["Nothing", "Check-then-act: two threads can both see it missing", "It&rsquo;s slow", "dicts aren&rsquo;t thread-safe at all"]}, {"type": "mc", "q": "What causes a deadlock?", "answer": 1, "explain": "Each waits for ever.", "options": ["Too many threads", "A cycle of threads, each holding a lock the next one wants", "Slow code", "Exceptions"]}, {"type": "mc", "q": "What&rsquo;s the most reliable way to prevent deadlock with several locks?", "answer": 1, "explain": "Then no cycle can form.", "options": ["Timeouts only", "Always acquire locks in one global order", "More locks", "Sleeping"]}, {"type": "mc", "q": "What is a Semaphore(5) for?", "answer": 1, "explain": "Limiting concurrency.", "options": ["Five locks", "Allowing at most five threads into a section at once", "Five queues", "Timeouts"]}, {"type": "output", "q": "What does this print?", "answer": "[True, True, False]", "explain": "Two slots.", "code": "import threading\ns = threading.Semaphore(2)\nprint([s.acquire(blocking=False) for _ in range(3)])"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w066d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a bank under a random scheduler</div><div class="pc-prompt"><p>Test concurrency code the way race detectors do: run it under many <strong>random</strong> schedules. Write:</p>
+<ul>
+<li><code>SimLock</code>, a simulated lock with a <code>holder</code> (or <code>None</code>);</li>
+<li><code>run_random(threads, seed)</code>: threads are a dict of generators that yield <code>("acquire", lock)</code>, <code>("release", lock)</code> or <code>None</code> (a plain step). At each step, pick a <strong>random</strong> runnable thread with <code>random.Random(seed)</code> (choosing from runnable names in the dict&rsquo;s order); a thread is runnable unless its pending request is an acquire of a lock another thread holds. A request takes effect when that thread is chosen. Run until all finish, or raise <code>RuntimeError("deadlock")</code> if unfinished threads exist but none is runnable;</li>
+<li><code>transfer_thread(accounts, src, dst, amount, locks=None, ordered=True)</code>: a generator thread that moves money from <code>src</code> to <code>dst</code> by reading both balances, yielding (a plain step: a moment another thread may run), and then writing both. With <code>locks</code> (a dict of <code>SimLock</code>s), it acquires both accounts&rsquo; locks first (sorted by name if <code>ordered</code>, otherwise source first) and releases them at the end.</li>
+</ul>
+<p>The tests run many seeds: without locks, schedules lose or create money; unordered locks deadlock under some schedule; ordered locks always conserve money and never deadlock.</p></div><textarea class="pc-src pc-code" hidden>import random
+
+class SimLock:
+    def __init__(self):
+        ___
+
+def run_random(threads, seed):
+    ___
+
+def transfer_thread(accounts, src, dst, amount, locks=None, ordered=True):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_bank():
+    &quot;random schedules&quot;
+    def trial(seed, locked, ordered):
+        accounts = {&quot;x&quot;: 100, &quot;y&quot;: 100, &quot;z&quot;: 100}
+        locks = {n: SimLock() for n in accounts} if locked else None
+        jobs = [(&quot;x&quot;, &quot;y&quot;, 10), (&quot;y&quot;, &quot;x&quot;, 20), (&quot;y&quot;, &quot;z&quot;, 5), (&quot;z&quot;, &quot;x&quot;, 15)]
+        threads = {f&quot;t{i}&quot;: transfer_thread(accounts, s, d, a, locks, ordered) for i, (s, d, a) in enumerate(jobs)}
+        try:
+            run_random(threads, seed)
+        except RuntimeError as e:
+            return str(e)
+        return sum(accounts.values())
+    unlocked = {trial(s, False, True) for s in range(200)}
+    assert any(v != 300 for v in unlocked)
+    unordered = {trial(s, True, False) for s in range(200)}
+    assert &quot;deadlock&quot; in unordered
+    ordered = {trial(s, True, True) for s in range(200)}
+    assert ordered == {300}
+
+def test_scheduler():
+    &quot;the scheduler itself&quot;
+    log = []
+    def worker(name, lock):
+        yield (&quot;acquire&quot;, lock)
+        log.append(name + &quot; in&quot;)
+        yield None
+        log.append(name + &quot; out&quot;)
+        yield (&quot;release&quot;, lock)
+    lock = SimLock()
+    run_random({&quot;a&quot;: worker(&quot;a&quot;, lock), &quot;b&quot;: worker(&quot;b&quot;, lock)}, seed=1)
+    assert len(log) == 4 and log[0][0] == log[1][0] and log[2][0] == log[3][0] and lock.holder is None</textarea><textarea class="pc-src pc-solution" hidden>import random
+
+class SimLock:
+    def __init__(self):
+        self.holder = None
+
+def run_random(threads, seed):
+    rng = random.Random(seed)
+    pending = {}
+    for name, gen in threads.items():
+        try:
+            pending[name] = next(gen)
+        except StopIteration:
+            pass
+    while pending:
+        runnable = []
+        for name in threads:
+            if name not in pending:
+                continue
+            request = pending[name]
+            if request and request[0] == &quot;acquire&quot; and request[1].holder not in (None, name):
+                continue
+            runnable.append(name)
+        if not runnable:
+            raise RuntimeError(&quot;deadlock&quot;)
+        name = rng.choice(runnable)
+        request = pending[name]
+        if request and request[0] == &quot;acquire&quot;:
+            request[1].holder = name
+        elif request and request[0] == &quot;release&quot;:
+            request[1].holder = None
+        try:
+            pending[name] = next(threads[name])
+        except StopIteration:
+            del pending[name]
+
+def transfer_thread(accounts, src, dst, amount, locks=None, ordered=True):
+    names = sorted((src, dst)) if ordered else [src, dst]
+    if locks:
+        for n in names:
+            yield (&quot;acquire&quot;, locks[n])
+    from_balance, to_balance = accounts[src], accounts[dst]
+    yield None
+    accounts[src] = from_balance - amount
+    accounts[dst] = to_balance + amount
+    if locks:
+        for n in reversed(names):
+            yield (&quot;release&quot;, locks[n])</textarea><template class="pc-src pc-hint">Keep, for each thread, its pending request: get the first one with <code>next(gen)</code>. A thread is runnable unless its pending request is <code>("acquire", lock)</code> with <code>lock.holder</code> set to another thread. When a thread is chosen, apply its pending request (set or clear the holder), then fetch its next request with <code>next</code>, catching <code>StopIteration</code> to mark it finished. Use <code>rng.choice(runnable)</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, run two threads that each do <code>counter += 1</code> a million times on a shared global, with and without a <code>Lock</code>, and compare the final counts. (With the GIL, you may need several runs, or a free-threaded build, to see a lost update.) Tomorrow: <code>concurrent.futures</code>, the high-level way to run work in threads and processes.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w066d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w066d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w066d4", "week": 66, "day": 4, "title": "Race conditions and locks", "exercises": [{"id": "w066d4-interleave", "title": "Every possible order", "points": 10}, {"id": "w066d4-outcomes", "title": "All possible results", "points": 15}, {"id": "w066d4-locked", "title": "Locks in the model", "points": 15}, {"id": "w066d4-transfer", "title": "Locks in a consistent order", "points": 10}, {"id": "w066d4-deadlock", "title": "Finding a deadlock", "points": 10}, {"id": "w066d4-bug1", "title": "A lock that waits for itself", "points": 10}, {"id": "w066d4-bug2", "title": "A lock never released", "points": 10}, {"id": "w066d4-bug3", "title": "Two orders, one deadlock", "points": 10}, {"id": "w066d4-trace", "title": "Predict them", "points": 10}, {"id": "w066d4-challenge", "title": "Challenge: a bank under a random scheduler", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
