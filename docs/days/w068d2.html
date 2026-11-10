@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 68 Day 2: ctypes and cffi | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Writing a C extension means writing C. Often you don’t need to: the code you want already exists in a compiled shared library (a .so, .dylib or .dll), and...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w068d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 68 Day 2: ctypes and cffi">
+<meta property="og:description" content="Writing a C extension means writing C. Often you don’t need to: the code you want already exists in a compiled shared library (a .so, .dylib or .dll), and...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w068d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-68">Week 68: Extending Python</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#loading-a-library-and-calling-it" data-sec="loading-a-library-and-calling-it">Loading a library and calling it</a></li><li><a href="#c-types-and-conversions" data-sec="c-types-and-conversions">C types and conversions</a></li><li><a href="#pointers-arrays-and-buffers" data-sec="pointers-arrays-and-buffers">Pointers, arrays and buffers</a></li><li><a href="#structs-and-their-layout" data-sec="structs-and-their-layout">Structs and their layout</a></li><li><a href="#callbacks-safety-and-cffi" data-sec="callbacks-safety-and-cffi">Callbacks, safety and cffi</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w068d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-68">Week 68: Extending Python</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 68, Day 2</span></p>
+      <h1>ctypes and cffi</h1>
+      <div class="day-intro"><p>Writing a C extension means writing C. Often you don&rsquo;t need to: the code you want already exists in a compiled <strong>shared library</strong> (a <code>.so</code>, <code>.dylib</code> or <code>.dll</code>), and you only need to call it. The standard library&rsquo;s <strong><code>ctypes</code></strong> module does exactly that, from pure Python: load a library, describe each function&rsquo;s argument and return types, and call it. You&rsquo;ll call real C functions from the C standard library today, right here in the browser (Pyodide&rsquo;s C library is built in), work with C types, pointers, arrays and structs, and even pass a Python function to C as a callback. <code>cffi</code>, a popular alternative, appears at the end for your own computer.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Load a shared library and call its functions with ctypes, declaring argtypes and restype</li><li>Use C types, pointers, byref, arrays and string buffers</li><li>Describe C structs with ctypes.Structure, and explain padding and alignment</li><li>Pass a Python function to C as a callback with CFUNCTYPE</li><li>Avoid the classic ctypes crashes, and compare ctypes with cffi</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Loading a library and calling it: 20 min"></span><span class="plan-seg s0" style="flex:20" title="C types and conversions: 20 min"></span><span class="plan-seg s1" style="flex:25" title="Pointers, arrays and buffers: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Structs and their layout: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Callbacks, safety and cffi: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Loading a library and calling it</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">C types and conversions</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Pointers, arrays and buffers</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Structs and their layout</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Callbacks, safety and cffi</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w068d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w068d2.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w068d2-p1"><textarea class="pc-src pc-code" hidden>import ctypes
+
+libc = ctypes.CDLL(None)            # the C library already loaded into this process
+print(libc.abs(-7))
+print(libc.strlen(b&quot;hello&quot;))
+libc.toupper.restype = ctypes.c_int
+print(chr(libc.toupper(ord(&quot;q&quot;))))</textarea></div>
+<p>Three functions from the C standard library, called directly from Python: no C code of ours, no compiler. <code>ctypes</code> converted the Python values to C values, called the functions, and converted the results back.</p>
+<h2 id="loading-a-library-and-calling-it">Loading a library and calling it</h2>
+<ul>
+<li><strong>Load</strong> a shared library with <code>ctypes.CDLL(path)</code>: a file path, or a name found by <code>ctypes.util.find_library("m")</code>. <code>CDLL(None)</code> gives the symbols already loaded into the running program, which on Linux and in this browser includes the C library. (On Windows, use <code>ctypes.WinDLL</code> or <code>ctypes.CDLL("msvcrt")</code>.)</li>
+<li><strong>Functions</strong> are attributes of the library object: <code>libc.strlen</code>.</li>
+<li><strong>Declare their types</strong> before calling: <code>func.argtypes = [ctypes.c_char_p]</code> and <code>func.restype = ctypes.c_size_t</code>. Without declarations, <code>ctypes</code> guesses: it assumes the result is a C <code>int</code>, and converts arguments by their Python type (int to <code>int</code>, bytes to <code>char *</code>). Guessing wrong gives garbage or a crash, so always declare.</li>
+<li><strong>Strings</strong>: C strings are bytes. Pass <code>b"text"</code> (or <code>"text".encode()</code>); a <code>c_char_p</code> result comes back as <code>bytes</code>.</li>
+</ul>
+<p>On your own computer, a library you&rsquo;ve compiled yourself loads the same way:</p>
+<pre><code>import ctypes
+lib = ctypes.CDLL(&quot;./libgeometry.so&quot;)       # or geometry.dll on Windows
+lib.area.argtypes = [ctypes.c_double, ctypes.c_double]
+lib.area.restype = ctypes.c_double
+print(lib.area(3.0, 4.0))
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w068d2-e2"><textarea class="pc-src pc-code" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+libc.strlen.argtypes = [ctypes.c_char_p]
+libc.strlen.restype = ctypes.c_size_t
+libc.atoi.argtypes = [ctypes.c_char_p]
+libc.atoi.restype = ctypes.c_int
+libc.strcmp.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+libc.strcmp.restype = ctypes.c_int
+
+print(libc.strlen(&quot;naïve&quot;.encode()), &quot;bytes in UTF-8&quot;)
+print(libc.atoi(b&quot;  42 apples&quot;), libc.atoi(b&quot;none&quot;))
+print(libc.strcmp(b&quot;apple&quot;, b&quot;banana&quot;) &lt; 0, libc.strcmp(b&quot;same&quot;, b&quot;same&quot;))
+try:
+    libc.strlen(&quot;not bytes&quot;)
+except ctypes.ArgumentError as e:
+    print(&quot;ArgumentError:&quot;, str(e)[:40])</textarea></div>
+<h2 id="c-types-and-conversions">C types and conversions</h2>
+<p><code>ctypes</code> has a class for each C type: <code>c_bool</code>, <code>c_char</code> (one byte), <code>c_int</code>, <code>c_uint</code>, <code>c_long</code>, <code>c_longlong</code>, <code>c_size_t</code>, <code>c_float</code>, <code>c_double</code>, <code>c_char_p</code> (a C string), <code>c_void_p</code> (any pointer), and fixed-width ones such as <code>c_int8</code>, <code>c_uint16</code>, <code>c_int32</code>, <code>c_int64</code>.</p>
+<ul>
+<li><code>ctypes.c_int(5)</code> creates a C value; <code>.value</code> reads or changes it.</li>
+<li><code>ctypes.sizeof(ctypes.c_int)</code> is its size in bytes. Sizes depend on the platform: <code>c_long</code> is 8 bytes on 64-bit Linux and macOS but 4 on Windows, and pointers are 4 bytes here in the browser (32-bit WebAssembly). Use the fixed-width types when the size matters.</li>
+<li>Conversions <strong>don&rsquo;t check for overflow</strong>: <code>c_uint8(300).value</code> is <code>44</code>, silently wrapped (the same pitfall as NumPy&rsquo;s small integers, Week 65).</li>
+<li><code>c_double</code> arguments accept Python ints and floats; <code>c_int</code> arguments reject floats.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w068d2-e3"><textarea class="pc-src pc-code" hidden>import ctypes
+
+n = ctypes.c_int(41)
+n.value += 1
+print(n.value, ctypes.sizeof(ctypes.c_int), ctypes.sizeof(ctypes.c_int64), ctypes.sizeof(ctypes.c_double))
+print(ctypes.c_uint8(300).value, ctypes.c_int8(200).value)
+print(ctypes.sizeof(ctypes.c_void_p) in (4, 8))
+
+libc = ctypes.CDLL(None)
+libc.labs.argtypes = [ctypes.c_long]
+libc.labs.restype = ctypes.c_long
+print(libc.labs(-123456))</textarea></div>
+<h2 id="pointers-arrays-and-buffers">Pointers, arrays and buffers</h2>
+<p>C functions often take <strong>pointers</strong>: to write a result back, or to receive an array.</p>
+<ul>
+<li><code>ctypes.byref(value)</code> passes a pointer to a C value (the cheap, common way); <code>ctypes.pointer(value)</code> makes a real pointer object, and <code>ptr.contents</code> is what it points to. Declare such parameters as <code>ctypes.POINTER(ctypes.c_int)</code> and so on.</li>
+<li><strong>Arrays</strong>: <code>(ctypes.c_int * 5)(3, 1, 4, 1, 5)</code> creates a C array of five ints; it can be indexed, iterated and passed where a pointer is expected.</li>
+<li><strong>Buffers</strong>: C functions that write text need writable memory: <code>ctypes.create_string_buffer(size)</code> or <code>create_string_buffer(b"initial", size)</code>. <code>.value</code> is the text up to the first zero byte; <code>.raw</code> is every byte.</li>
+<li>A function that reports <strong>where it stopped</strong> takes a pointer to a pointer: <code>strtol(text, &amp;end, base)</code> sets <code>end</code> to the first character it didn&rsquo;t use.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w068d2-e4"><textarea class="pc-src pc-code" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+libc.strtol.argtypes = [ctypes.c_char_p, ctypes.POINTER(ctypes.c_char_p), ctypes.c_int]
+libc.strtol.restype = ctypes.c_long
+
+end = ctypes.c_char_p()
+value = libc.strtol(b&quot;255 apples&quot;, ctypes.byref(end), 10)
+print(value, end.value)
+print(libc.strtol(b&quot;ff&quot;, None, 16), libc.strtol(b&quot;777&quot;, None, 8))
+
+numbers = (ctypes.c_int * 4)(10, 20, 30, 40)
+print(list(numbers), ctypes.sizeof(numbers), numbers[2])
+
+buffer = ctypes.create_string_buffer(10)
+libc.memset(buffer, ord(&quot;*&quot;), 3)
+libc.memmove(ctypes.byref(buffer, 3), b&quot;ok&quot;, 2)
+print(buffer.value, buffer.raw)</textarea></div>
+<h2 id="structs-and-their-layout">Structs and their layout</h2>
+<p>A C <code>struct</code> becomes a subclass of <code>ctypes.Structure</code> with a <code>_fields_</code> list of <code>(name, type)</code> pairs. Instances can be created with positional or keyword values, read and written by attribute, passed by pointer to C functions, and nested.</p>
+<p>Structs in C usually contain <strong>padding</strong>: each field is placed at an offset that&rsquo;s a multiple of its <strong>alignment</strong> (normally its size), and the whole struct is padded to a multiple of its largest alignment. So a <code>char</code>, an <code>int</code> and another <code>char</code> take 12 bytes, not 6. <code>ctypes</code> follows the platform&rsquo;s rules, so <code>ctypes.sizeof</code> and <code>Struct.field.offset</code> tell you the real layout. <code>_pack_ = 1</code> removes the padding, for formats that are packed on disk or on the wire. Getting a struct layout wrong is a common source of mysterious bugs, which is why the <code>struct</code> module (Week 23) and <code>ctypes</code> let you check sizes.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d2-e5"><textarea class="pc-src pc-code" hidden>import ctypes
+
+class Reading(ctypes.Structure):
+    _fields_ = [(&quot;flag&quot;, ctypes.c_char), (&quot;value&quot;, ctypes.c_int), (&quot;unit&quot;, ctypes.c_char)]
+
+class PackedReading(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [(&quot;flag&quot;, ctypes.c_char), (&quot;value&quot;, ctypes.c_int), (&quot;unit&quot;, ctypes.c_char)]
+
+for cls in (Reading, PackedReading):
+    print(cls.__name__, ctypes.sizeof(cls), [getattr(cls, name).offset for name, _ in cls._fields_])
+
+r = Reading(b&quot;A&quot;, 21, unit=b&quot;C&quot;)
+r.value += 1
+print(r.flag, r.value, r.unit, bytes(r)[:1])
+
+class Point(ctypes.Structure):
+    _fields_ = [(&quot;x&quot;, ctypes.c_int), (&quot;y&quot;, ctypes.c_int)]
+
+class Line(ctypes.Structure):
+    _fields_ = [(&quot;start&quot;, Point), (&quot;end&quot;, Point)]
+
+line = Line(Point(0, 0), Point(3, 4))
+print(line.end.x, line.end.y, ctypes.sizeof(Line))</textarea></div>
+<h2 id="callbacks-safety-and-cffi">Callbacks, safety and cffi</h2>
+<p><strong>Callbacks</strong>: some C functions call a function you give them, such as <code>qsort</code>, which sorts an array using your comparison function. <code>ctypes.CFUNCTYPE(restype, *argtypes)</code> makes a function-pointer type; wrapping a Python function in it gives something C can call. Keep a reference to the wrapped callback for as long as C might call it, or it may be garbage collected and the program crash.</p>
+<p><strong>Safety</strong>: <code>ctypes</code> gives you all of C&rsquo;s power, including its ways to crash: wrong argument types, a too-small buffer, a dangling pointer, or a callback that&rsquo;s been freed can corrupt memory or kill the interpreter with no Python traceback. Always declare <code>argtypes</code> and <code>restype</code>, size buffers carefully, and keep owners of memory alive. <strong>Variadic</strong> functions such as <code>printf</code> are especially fragile (and don&rsquo;t work reliably in WebAssembly at all).</p>
+<p><strong>cffi</strong> (a free third-party library, <code>pip install cffi</code>) is the main alternative. You paste the C declarations, and it works out the types:</p>
+<pre><code>from cffi import FFI
+ffi = FFI()
+ffi.cdef(&quot;size_t strlen(const char *s); int abs(int n);&quot;)
+libc = ffi.dlopen(None)
+print(libc.strlen(b&quot;hello&quot;), libc.abs(-3))
+</code></pre>
+<p>Its <strong>API mode</strong> compiles a small C wrapper with your compiler, which is faster and checks types against the real headers. <code>ctypes</code> needs nothing installed; <code>cffi</code> is more convenient for large C APIs. PyPy prefers <code>cffi</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d2-e6"><textarea class="pc-src pc-code" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+COMPARE = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
+
+calls = []
+def by_value(a, b):
+    calls.append(1)
+    return a[0] - b[0]
+
+compare = COMPARE(by_value)                     # keep a reference while C uses it
+values = (ctypes.c_int * 6)(5, 3, 9, 1, 7, 2)
+libc.qsort(values, len(values), ctypes.sizeof(ctypes.c_int), compare)
+print(list(values), &quot;after&quot;, len(calls), &quot;calls into Python&quot;)
+
+descending = COMPARE(lambda a, b: b[0] - a[0])
+libc.qsort(values, len(values), ctypes.sizeof(ctypes.c_int), descending)
+print(list(values))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>ctypes calls functions in shared libraries from pure Python: load with CDLL (CDLL(None) for symbols already loaded), always set argtypes and restype, and pass strings as bytes. C types (c_int, c_double, c_char_p, c_int64 &hellip;) wrap values in .value; sizes vary by platform (c_long, pointers), and conversions wrap silently. byref and POINTER pass pointers, (c_int * n)(&hellip;) makes arrays, create_string_buffer makes writable memory, and a pointer to a pointer reports where a parser stopped. Structure subclasses with <em>fields</em> describe structs; fields are padded to their alignment unless <em>pack</em> = 1, and sizeof and .offset show the real layout. CFUNCTYPE wraps Python functions as C callbacks (keep a reference). Mistakes crash rather than raise, and variadic functions are fragile; cffi takes C declarations directly and offers a compiled API mode.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d2-calls" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Declaring and calling</div><div class="pc-prompt"><p>Using the C library from <code>ctypes.CDLL(None)</code>, write <code>c_strlen(text)</code> (the length in <strong>bytes</strong> of a Python string encoded as UTF-8, using <code>strlen</code>), <code>c_atoi(text)</code> (using <code>atoi</code>, which reads a leading whole number and gives 0 if there isn&rsquo;t one) and <code>c_compare(a, b)</code> (using <code>strcmp</code>, returning <code>-1</code>, <code>0</code> or <code>1</code> by the sign of the result). Declare <code>argtypes</code> and <code>restype</code> for each function.</p></div><textarea class="pc-src pc-code" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+
+def c_strlen(text):
+    ___
+
+def c_atoi(text):
+    ___
+
+def c_compare(a, b):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_calls():
+    &quot;calling the C library&quot;
+    assert c_strlen(&quot;hello&quot;) == 5 and c_strlen(&quot;café&quot;) == 5 and c_strlen(&quot;&quot;) == 0
+    assert c_atoi(&quot;42 apples&quot;) == 42 and c_atoi(&quot;-7&quot;) == -7 and c_atoi(&quot;none&quot;) == 0
+    assert c_compare(&quot;apple&quot;, &quot;banana&quot;) == -1 and c_compare(&quot;pear&quot;, &quot;pear&quot;) == 0 and c_compare(&quot;b&quot;, &quot;a&quot;) == 1
+    assert &quot;argtypes&quot; in source and &quot;restype&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+libc.strlen.argtypes = [ctypes.c_char_p]
+libc.strlen.restype = ctypes.c_size_t
+libc.atoi.argtypes = [ctypes.c_char_p]
+libc.atoi.restype = ctypes.c_int
+libc.strcmp.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+libc.strcmp.restype = ctypes.c_int
+
+def c_strlen(text):
+    return libc.strlen(text.encode())
+
+def c_atoi(text):
+    return libc.atoi(text.encode())
+
+def c_compare(a, b):
+    result = libc.strcmp(a.encode(), b.encode())
+    return (result &gt; 0) - (result &lt; 0)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d2-parse" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Parsing with strtol</div><div class="pc-prompt"><p><code>strtol(text, &amp;end, base)</code> reads a whole number in a given base and sets <code>end</code> to point at the first character it didn&rsquo;t use. Write <code>parse_number(text, base=10)</code>: call it through <code>ctypes</code> and return <code>(value, rest)</code>, where <code>rest</code> is the unused part of the text as a Python <code>str</code>; raise <code>ValueError(f"no number in {text!r}")</code> if it used nothing (the rest is the whole text). Then <code>parse_all(text)</code>: read whitespace-separated whole numbers, in any of these forms: decimal, <code>0x</code> hexadecimal or <code>0</code> octal, using base <code>0</code> (which tells <code>strtol</code> to work it out), and return the list.</p></div><textarea class="pc-src pc-code" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+
+def parse_number(text, base=10):
+    ___
+
+def parse_all(text):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_parse():
+    &quot;pointers to pointers&quot;
+    assert parse_number(&quot;255 apples&quot;) == (255, &quot; apples&quot;) and parse_number(&quot;ff&quot;, 16) == (255, &quot;&quot;)
+    assert parse_number(&quot;  -12kg&quot;) == (-12, &quot;kg&quot;) and parse_number(&quot;101&quot;, 2) == (5, &quot;&quot;)
+    try:
+        parse_number(&quot;apples&quot;)
+        assert False
+    except ValueError as e:
+        assert str(e) == &quot;no number in &#x27;apples&#x27;&quot;
+    assert parse_all(&quot;10 0x1f 017 -3&quot;) == [10, 31, 15, -3] and parse_all(&quot;&quot;) == []</textarea><textarea class="pc-src pc-solution" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+libc.strtol.argtypes = [ctypes.c_char_p, ctypes.POINTER(ctypes.c_char_p), ctypes.c_int]
+libc.strtol.restype = ctypes.c_long
+
+def parse_number(text, base=10):
+    data = text.encode()
+    end = ctypes.c_char_p()
+    value = libc.strtol(data, ctypes.byref(end), base)
+    rest = end.value.decode()
+    if len(rest) == len(text):
+        raise ValueError(f&quot;no number in {text!r}&quot;)
+    return value, rest
+
+def parse_all(text):
+    out = []
+    rest = text
+    while rest.strip():
+        value, rest = parse_number(rest, 0)
+        out.append(value)
+    return out</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d2-arrays" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Arrays and buffers</div><div class="pc-prompt"><p>Write <code>to_c_array(values)</code>: a <code>ctypes</code> array of <code>c_int</code> holding the values; <code>from_c_array(array)</code>: a plain Python list; <code>repeat_char(char, n)</code>: a <code>bytes</code> object of <code>n</code> copies of a one-character string, made by filling a <code>create_string_buffer</code> with <code>memset</code> from the C library (not by Python repetition); and <code>join_bytes(parts)</code>: one <code>bytes</code> value of all the parts, copied one after another into a single buffer with <code>memmove</code> and <code>ctypes.byref(buffer, offset)</code>.</p></div><textarea class="pc-src pc-code" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+
+def to_c_array(values):
+    ___
+
+def from_c_array(array):
+    ___
+
+def repeat_char(char, n):
+    ___
+
+def join_bytes(parts):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_arrays():
+    &quot;C memory&quot;
+    import ctypes
+    arr = to_c_array([3, 1, 4])
+    assert isinstance(arr, ctypes.Array) and arr._type_ is ctypes.c_int and len(arr) == 3 and from_c_array(arr) == [3, 1, 4]
+    assert ctypes.sizeof(arr) == 3 * ctypes.sizeof(ctypes.c_int) and from_c_array(to_c_array([])) == []
+    assert repeat_char(&quot;-&quot;, 5) == b&quot;-----&quot; and repeat_char(&quot;x&quot;, 0) == b&quot;&quot;
+    assert join_bytes([b&quot;he&quot;, b&quot;ll&quot;, b&quot;o&quot;]) == b&quot;hello&quot; and join_bytes([]) == b&quot;&quot;
+    assert &quot;memset&quot; in source and &quot;memmove&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+
+def to_c_array(values):
+    return (ctypes.c_int * len(values))(*values)
+
+def from_c_array(array):
+    return list(array)
+
+def repeat_char(char, n):
+    buffer = ctypes.create_string_buffer(n + 1)
+    libc.memset(buffer, ord(char), n)
+    return buffer.raw[:n]
+
+def join_bytes(parts):
+    total = sum(len(p) for p in parts)
+    buffer = ctypes.create_string_buffer(total + 1)
+    offset = 0
+    for part in parts:
+        libc.memmove(ctypes.byref(buffer, offset), part, len(part))
+        offset += len(part)
+    return buffer.raw[:total]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d2-structs" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Struct layouts</div><div class="pc-prompt"><p>Write <code>layout(fields, packed=False)</code>: compute a C struct&rsquo;s layout yourself from a list of <code>(name, size)</code> pairs, where each field&rsquo;s alignment equals its size: each field starts at the next offset that&rsquo;s a multiple of its alignment (no padding at all if <code>packed</code>), and the total size is rounded up to a multiple of the largest alignment (not if packed). Return <code>(offsets, size)</code> with <code>offsets</code> a dict. Then <code>matches_ctypes(fields_spec)</code>: build a real <code>ctypes.Structure</code> subclass from a list of <code>(name, ctype)</code> pairs and return True if <code>layout</code> with <code>ctypes.sizeof</code> of each type gives the same offsets and size as <code>ctypes</code> does.</p></div><textarea class="pc-src pc-code" hidden>import ctypes
+
+def layout(fields, packed=False):
+    ___
+
+def matches_ctypes(fields_spec):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_structs():
+    &quot;padding and alignment&quot;
+    assert layout([(&quot;a&quot;, 1), (&quot;b&quot;, 4), (&quot;c&quot;, 1)]) == ({&quot;a&quot;: 0, &quot;b&quot;: 4, &quot;c&quot;: 8}, 12)
+    assert layout([(&quot;a&quot;, 1), (&quot;b&quot;, 4), (&quot;c&quot;, 1)], packed=True) == ({&quot;a&quot;: 0, &quot;b&quot;: 1, &quot;c&quot;: 5}, 6)
+    assert layout([(&quot;b&quot;, 4), (&quot;a&quot;, 1), (&quot;c&quot;, 1)]) == ({&quot;b&quot;: 0, &quot;a&quot;: 4, &quot;c&quot;: 5}, 8)
+    assert layout([(&quot;x&quot;, 8), (&quot;y&quot;, 2)]) == ({&quot;x&quot;: 0, &quot;y&quot;: 8}, 16) and layout([]) == ({}, 0)
+    import ctypes
+    assert matches_ctypes([(&quot;flag&quot;, ctypes.c_char), (&quot;value&quot;, ctypes.c_int), (&quot;unit&quot;, ctypes.c_char)])
+    assert matches_ctypes([(&quot;a&quot;, ctypes.c_int16), (&quot;b&quot;, ctypes.c_char), (&quot;c&quot;, ctypes.c_int32)])</textarea><textarea class="pc-src pc-solution" hidden>import ctypes
+
+def layout(fields, packed=False):
+    offsets, offset, biggest = {}, 0, 1
+    for name, size in fields:
+        if not packed and offset % size:
+            offset += size - offset % size
+        offsets[name] = offset
+        offset += size
+        biggest = max(biggest, size)
+    if not packed and fields and offset % biggest:
+        offset += biggest - offset % biggest
+    return offsets, offset
+
+def matches_ctypes(fields_spec):
+    Struct = type(&quot;Struct&quot;, (ctypes.Structure,), {&quot;_fields_&quot;: fields_spec})
+    expected = ({name: getattr(Struct, name).offset for name, _ in fields_spec}, ctypes.sizeof(Struct))
+    computed = layout([(name, ctypes.sizeof(t)) for name, t in fields_spec])
+    return computed == expected</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d2-callback" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Sorting with a Python callback</div><div class="pc-prompt"><p>Write <code>c_sort(values, reverse=False)</code>: copy a list of ints into a C array, sort it with the C library&rsquo;s <code>qsort</code> using a comparison callback made with <code>ctypes.CFUNCTYPE</code>, and return a new sorted list (descending if <code>reverse</code>). Then <code>c_sort_by(values, key)</code>: sort by <code>key(value)</code> instead; <code>qsort</code> isn&rsquo;t stable (equal items can end up in any order), so break ties by the value itself. Count how many times the callback was called in the attribute <code>c_sort.calls</code> (reset on each call).</p></div><textarea class="pc-src pc-code" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+
+def c_sort(values, reverse=False):
+    ___
+
+def c_sort_by(values, key):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_callback():
+    &quot;qsort and CFUNCTYPE&quot;
+    assert c_sort([5, 3, 9, 1]) == [1, 3, 5, 9] and c_sort([5, 3, 9, 1], reverse=True) == [9, 5, 3, 1]
+    assert c_sort.calls &gt; 0 and c_sort([]) == [] and c_sort.calls == 0
+    assert c_sort_by([12, 7, 25, 3], key=lambda v: v % 10) == [12, 3, 25, 7]
+    assert c_sort_by([-3, 2, -1], key=abs) == [-1, 2, -3]
+    assert &quot;CFUNCTYPE&quot; in source and &quot;qsort&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+COMPARE = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
+
+def _qsort(values, order):
+    c_sort.calls = 0
+    array = (ctypes.c_int * len(values))(*values)
+
+    def compare(a, b):
+        c_sort.calls += 1
+        x, y = order(a[0]), order(b[0])
+        return (x &gt; y) - (x &lt; y)
+
+    callback = COMPARE(compare)
+    if values:
+        libc.qsort(array, len(values), ctypes.sizeof(ctypes.c_int), callback)
+    return list(array)
+
+def c_sort(values, reverse=False):
+    return _qsort(values, (lambda v: -v) if reverse else (lambda v: v))
+
+def c_sort_by(values, key):
+    return _qsort(values, lambda v: (key(v), v))
+
+c_sort.calls = 0</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A str where C wanted bytes</div><div class="pc-prompt"><p><code>strlen</code> is declared to take a C string, which <code>ctypes</code> passes as <code>bytes</code>, but this code hands it a Python <code>str</code>, so the call fails with <code>ArgumentError</code>. Encode the text to UTF-8 bytes first so this prints <code>5</code>.</p></div><textarea class="pc-src pc-code" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+libc.strlen.argtypes = [ctypes.c_char_p]
+libc.strlen.restype = ctypes.c_size_t
+print(libc.strlen(&quot;hello&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;C strings are bytes&quot;
+    expect_output(&quot;5&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+libc.strlen.argtypes = [ctypes.c_char_p]
+libc.strlen.restype = ctypes.c_size_t
+print(libc.strlen(&quot;hello&quot;.encode()))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A wrapped-around value</div><div class="pc-prompt"><p>A temperature is stored in a <code>c_uint8</code>, which holds only 0 to 255, so <code>-5</code> silently wraps round to 251 and this prints <code>251</code>. Use a signed 8-bit type, <code>c_int8</code>, so it prints <code>-5</code>.</p></div><textarea class="pc-src pc-code" hidden>import ctypes
+
+reading = ctypes.c_uint8(-5)
+print(reading.value)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the right C type&quot;
+    expect_output(&quot;-5&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import ctypes
+
+reading = ctypes.c_int8(-5)
+print(reading.value)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Padding that wasn&rsquo;t expected</div><div class="pc-prompt"><p>A file format stores each record as a <code>char</code> followed by an <code>int</code> with <strong>no</strong> padding (5 bytes), but this struct uses the platform&rsquo;s normal alignment, so it&rsquo;s 8 bytes long and this prints <code>8</code>. Pack it with <code>_pack_ = 1</code> so its layout matches the file and this prints <code>5</code>.</p></div><textarea class="pc-src pc-code" hidden>import ctypes
+
+class Record(ctypes.Structure):
+    _fields_ = [(&quot;kind&quot;, ctypes.c_char), (&quot;value&quot;, ctypes.c_int32)]
+
+print(ctypes.sizeof(Record))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;_pack_&quot;
+    expect_output(&quot;5&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import ctypes
+
+class Record(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [(&quot;kind&quot;, ctypes.c_char), (&quot;value&quot;, ctypes.c_int32)]
+
+print(ctypes.sizeof(Record))</textarea></div>
+<div class="parsons" data-id="w068d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Declaring a C function</div><div class="pc-prompt"><p>Arrange the lines that load the C library and declare <code>strlen</code> properly before calling it. One line is a trap.</p></div><script type="application/json">{"lines": ["import ctypes", "libc = ctypes.CDLL(None)", "libc.strlen.argtypes = [ctypes.c_char_p]", "libc.strlen.restype = ctypes.c_size_t", "print(libc.strlen(b\"atlas\"))"], "distractors": ["print(libc.strlen(\"atlas\"))"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # ctypes.c_uint8(260).value
+q = ___   # the result type ctypes assumes when restype isn&#x27;t set: &quot;int&quot; or &quot;double&quot;
+r = ___   # ctypes.sizeof of a struct with a c_char and then a c_int32, normal alignment
+s = ___   # the same struct with _pack_ = 1
+t = ___   # True or False: a ctypes mistake always raises a Python exception</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 4 and q == &quot;int&quot; and r == 8, &quot;p, q and r&quot;
+    assert s == 5 and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 4
+q = &quot;int&quot;
+r = 8
+s = 5
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w068d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does ctypes let you do?", "answer": 1, "explain": "No compiler needed.", "options": ["Write C", "Call functions in compiled shared libraries from pure Python", "Compile Python", "Speed up loops"]}, {"type": "mc", "q": "Why set argtypes and restype?", "answer": 1, "explain": "Always declare.", "options": ["Speed only", "Without them ctypes guesses (an int result), which can give garbage or crash", "They&rsquo;re required syntax", "For documentation"]}, {"type": "mc", "q": "How are C strings passed with ctypes?", "answer": 1, "explain": "c_char_p.", "options": ["As str", "As bytes, such as b&rdquo;text&rdquo; or text.encode()", "As lists", "As ints"]}, {"type": "mc", "q": "What does ctypes.byref(x) do?", "answer": 1, "explain": "The cheap way to pass a pointer.", "options": ["Copies x", "Passes a pointer to x, so C can read or write it", "Deletes x", "Converts x to bytes"]}, {"type": "mc", "q": "Why can a char followed by an int take 8 bytes in a struct?", "answer": 1, "explain": "<em>pack</em> = 1 removes padding.", "options": ["A bug", "Padding: the int is aligned to a multiple of 4", "ints are 8 bytes", "Compression"]}, {"type": "mc", "q": "What does create_string_buffer give you?", "answer": 1, "explain": ".value and .raw read it.", "options": ["A Python string", "Writable C memory that functions can fill", "A file", "A list"]}, {"type": "mc", "q": "What is CFUNCTYPE for?", "answer": 1, "explain": "Keep a reference while C may call it.", "options": ["Calling Python from Python", "Turning a Python function into a C function pointer, for callbacks", "Compiling", "Declaring structs"]}, {"type": "mc", "q": "What happens if you pass C the wrong type of argument without argtypes?", "answer": 1, "explain": "C trusts you.", "options": ["A clear TypeError", "Possibly garbage or a crash, with no traceback", "Nothing", "An automatic conversion"]}, {"type": "mc", "q": "How does cffi differ from ctypes?", "answer": 1, "explain": "Convenient for big C APIs; needs installing.", "options": ["It&rsquo;s built in", "You give it C declarations, and its API mode compiles a checked wrapper", "It&rsquo;s slower", "It only works on Windows"]}, {"type": "output", "q": "What does this print?", "answer": "[7, 0, 9] 3", "explain": "C arrays index like lists.", "code": "import ctypes\narr = (ctypes.c_int * 3)(7, 8, 9)\narr[1] = 0\nprint(list(arr), len(arr))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a Pythonic wrapper</div><div class="pc-prompt"><p>Raw <code>ctypes</code> calls are awkward to use. Wrap part of the C library in a class that feels like Python: <code>CString(text)</code> holds a writable C buffer containing the text encoded as UTF-8, with extra capacity:</p>
+<ul>
+<li><code>CString(text, capacity=None)</code>: a buffer of <code>capacity</code> bytes (default: the encoded length plus 1); <code>ValueError("capacity too small")</code> if the text and its terminating zero don&rsquo;t fit;</li>
+<li><code>len(s)</code> uses <code>strlen</code>; <code>str(s)</code> decodes the buffer&rsquo;s value; <code>bytes(s)</code> gives the text&rsquo;s bytes;</li>
+<li><code>s.upper()</code> changes the buffer <strong>in place</strong>, byte by byte with C&rsquo;s <code>toupper</code> (only ASCII letters change), and returns <code>s</code>;</li>
+<li><code>s.append(more)</code> copies <code>more</code> onto the end with <code>memmove</code>, raising <code>ValueError("capacity too small")</code> if it wouldn&rsquo;t fit (leaving <code>s</code> unchanged);</li>
+<li><code>s.find(sub)</code>: the position of the first occurrence of <code>sub</code> (as bytes) using <code>strstr</code> (whose result is a pointer: subtract the buffer&rsquo;s <code>ctypes.addressof</code>), or <code>-1</code>;</li>
+<li><code>s == other</code> compares the texts with <code>strcmp</code>, for another <code>CString</code> or a <code>str</code>.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+
+class CString:
+    def __init__(self, text, capacity=None):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cstring():
+    &quot;wrapping C in Python&quot;
+    s = CString(&quot;hello&quot;, capacity=16)
+    assert len(s) == 5 and str(s) == &quot;hello&quot; and bytes(s) == b&quot;hello&quot;
+    assert s.upper() is s and str(s) == &quot;HELLO&quot;
+    s.append(&quot;, world&quot;)
+    assert str(s) == &quot;HELLO, world&quot; and len(s) == 12
+    try:
+        s.append(&quot;x&quot; * 10)
+        assert False
+    except ValueError as e:
+        assert str(e) == &quot;capacity too small&quot;
+    assert str(s) == &quot;HELLO, world&quot;
+    assert s.find(&quot;world&quot;) == 7 and s.find(&quot;LL&quot;) == 2 and s.find(&quot;zzz&quot;) == -1
+    assert s == &quot;HELLO, world&quot; and s == CString(&quot;HELLO, world&quot;) and not (s == &quot;hello&quot;)
+    try:
+        CString(&quot;toolong&quot;, capacity=4)
+        assert False
+    except ValueError:
+        pass
+    assert len(CString(&quot;&quot;)) == 0 and str(CString(&quot;café&quot;).upper()) == &quot;CAFé&quot;</textarea><textarea class="pc-src pc-solution" hidden>import ctypes
+
+libc = ctypes.CDLL(None)
+libc.strlen.argtypes = [ctypes.c_char_p]
+libc.strlen.restype = ctypes.c_size_t
+libc.toupper.argtypes = [ctypes.c_int]
+libc.toupper.restype = ctypes.c_int
+libc.strstr.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+libc.strstr.restype = ctypes.c_void_p
+libc.strcmp.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+libc.strcmp.restype = ctypes.c_int
+
+class CString:
+    def __init__(self, text, capacity=None):
+        data = text.encode()
+        if capacity is None:
+            capacity = len(data) + 1
+        if len(data) + 1 &gt; capacity:
+            raise ValueError(&quot;capacity too small&quot;)
+        self._buf = ctypes.create_string_buffer(data, capacity)
+        self.capacity = capacity
+
+    def __len__(self):
+        return libc.strlen(self._buf)
+
+    def __str__(self):
+        return self._buf.value.decode()
+
+    def __bytes__(self):
+        return self._buf.value
+
+    def upper(self):
+        for i in range(len(self)):
+            self._buf[i] = bytes([libc.toupper(self._buf[i][0])])
+        return self
+
+    def append(self, more):
+        data = more.encode()
+        end = len(self)
+        if end + len(data) + 1 &gt; self.capacity:
+            raise ValueError(&quot;capacity too small&quot;)
+        ctypes.memmove(ctypes.byref(self._buf, end), data, len(data))
+        self._buf[end + len(data)] = b&quot;\0&quot;
+
+    def find(self, sub):
+        address = libc.strstr(self._buf, sub.encode())
+        if address is None:
+            return -1
+        return address - ctypes.addressof(self._buf)
+
+    def __eq__(self, other):
+        other_bytes = bytes(other) if isinstance(other, CString) else str(other).encode()
+        return libc.strcmp(self._buf.value, other_bytes) == 0</textarea><template class="pc-src pc-hint">Set <code>argtypes</code> and <code>restype</code> for <code>strlen</code>, <code>toupper</code>, <code>strstr</code> (returning <code>c_void_p</code>, so you get an address or <code>None</code>) and <code>strcmp</code> once, at the top. For <code>upper</code>, loop over the buffer&rsquo;s positions: <code>buffer[i]</code> is a one-byte <code>bytes</code> value, and <code>toupper</code> takes and returns an <code>int</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, find a shared library on your system (on Linux, <code>ctypes.util.find_library("m")</code> finds the maths library) and call one of its functions with <code>ctypes</code>, declaring its types from the documentation (<code>man 3 cos</code>). Tomorrow: Cython, which compiles Python-like code to C.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w068d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w068d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w068d2", "week": 68, "day": 2, "title": "ctypes and cffi", "exercises": [{"id": "w068d2-calls", "title": "Declaring and calling", "points": 10}, {"id": "w068d2-parse", "title": "Parsing with strtol", "points": 15}, {"id": "w068d2-arrays", "title": "Arrays and buffers", "points": 10}, {"id": "w068d2-structs", "title": "Struct layouts", "points": 15}, {"id": "w068d2-callback", "title": "Sorting with a Python callback", "points": 10}, {"id": "w068d2-bug1", "title": "A str where C wanted bytes", "points": 10}, {"id": "w068d2-bug2", "title": "A wrapped-around value", "points": 10}, {"id": "w068d2-bug3", "title": "Padding that wasn't expected", "points": 10}, {"id": "w068d2-trace", "title": "Predict them", "points": 10}, {"id": "w068d2-challenge", "title": "Challenge: a Pythonic wrapper", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

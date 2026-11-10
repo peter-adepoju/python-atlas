@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 68 Day 5: When to extend and when not to | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="You can now see four ways to put compiled code under Python: the C API, ctypes and cffi, Cython, and Rust with PyO3. Each can make a hot loop dozens of...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w068d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 68 Day 5: When to extend and when not to">
+<meta property="og:description" content="You can now see four ways to put compiled code under Python: the C API, ctypes and cffi, Cython, and Rust with PyO3. Each can make a hot loop dozens of...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w068d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-68">Week 68: Extending Python</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#the-ladder" data-sec="the-ladder">The ladder</a></li><li><a href="#what-a-speed-up-is-worth" data-sec="what-a-speed-up-is-worth">What a speed-up is worth</a></li><li><a href="#crossing-the-boundary" data-sec="crossing-the-boundary">Crossing the boundary</a></li><li><a href="#shipping-compiled-code" data-sec="shipping-compiled-code">Shipping compiled code</a></li><li><a href="#choosing-a-tool" data-sec="choosing-a-tool">Choosing a tool</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w068d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-68">Week 68: Extending Python</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 68, Day 5</span></p>
+      <h1>When to extend and when not to</h1>
+      <div class="day-intro"><p>You can now see four ways to put compiled code under Python: the C API, <code>ctypes</code> and <code>cffi</code>, Cython, and Rust with PyO3. Each can make a hot loop dozens of times faster. Each also costs something that doesn&rsquo;t show up in a benchmark: a second language for everyone who maintains the code, a build step, compiled wheels for every platform, and bugs that crash instead of raising. Today is about deciding: the ladder of cheaper alternatives to try first, the arithmetic of what a speed-up is really worth, the hidden cost of crossing the boundary between Python and native code, and the packaging work that comes with it.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Work through the ladder of alternatives before writing an extension</li><li>Estimate the overall gain of speeding up one part with Amdahl&rsquo;s law</li><li>Weigh development and maintenance time against the time saved</li><li>Account for the cost of each call across the Python-native boundary, and batch to reduce it</li><li>Read wheel tags and explain what shipping compiled code involves</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="The ladder: 20 min"></span><span class="plan-seg s0" style="flex:20" title="What a speed-up is worth: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Crossing the boundary: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Shipping compiled code: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Choosing a tool: 20 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">The ladder</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">What a speed-up is worth</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Crossing the boundary</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Shipping compiled code</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Choosing a tool</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w068d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w068d5.ipynb" download>download it</a>. Exercises today are worth 120 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w068d5-p1"><textarea class="pc-src pc-code" hidden>def overall(hot_fraction, local_speedup):
+    return round(1 / ((1 - hot_fraction) + hot_fraction / local_speedup), 2)
+
+print(overall(0.5, 100))
+print(overall(0.9, 100))
+print(overall(0.9, 10))</textarea></div>
+<p>Making half the program a hundred times faster speeds the whole thing up by less than 2. If 90% of the time is in the code you speed up, a tenfold local gain gives about 5 overall and a hundredfold gives about 9. Amdahl&rsquo;s law (Week 66) is the first check on any plan to rewrite part of a program in a faster language.</p>
+<h2 id="the-ladder">The ladder</h2>
+<p>Before writing an extension, climb the cheaper rungs first. Each is less work and less risk than the one after it, and each often removes the need for the next:</p>
+<ol>
+<li><strong>Measure.</strong> Profile (Week 65) and confirm where the time goes. Decide what &ldquo;fast enough&rdquo; means.</li>
+<li><strong>Better algorithm or data structure.</strong> An O(n²) to O(n log n) change beats any language switch (Week 65 Day 2).</li>
+<li><strong>Use what&rsquo;s already fast</strong>: built-ins, the standard library, and libraries such as <strong>NumPy</strong>, pandas or Polars that already run in compiled code (Week 65 Day 5).</li>
+<li><strong>Avoid repeated work</strong>: caching (Week 65 Day 4), batching I/O, doing less.</li>
+<li><strong>Concurrency</strong> if the time is waiting rather than computing (Weeks 66 and 67).</li>
+<li><strong>A faster Python</strong>: <strong>PyPy</strong> (a different interpreter with a just-in-time compiler, often several times faster for pure-Python loops), <strong>Numba</strong> (a decorator that compiles numeric functions to machine code), or <strong>mypyc</strong> (compiles type-annotated Python modules to C extensions).</li>
+<li><strong>Write an extension</strong>: Cython for numeric loops close to Python, Rust with PyO3 for larger, safe components, <code>ctypes</code>/<code>cffi</code> to call an existing C library, the raw C API only when you need full control.</li>
+</ol>
+<p>Most performance problems are solved by step 2 or 3.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d5-e2"><textarea class="pc-src pc-code" hidden>LADDER = [
+    (&quot;measure&quot;, lambda p: not p[&quot;profiled&quot;]),
+    (&quot;better algorithm&quot;, lambda p: p[&quot;complexity&quot;] in (&quot;quadratic&quot;, &quot;cubic&quot;)),
+    (&quot;NumPy or a library&quot;, lambda p: p[&quot;numeric_arrays&quot;]),
+    (&quot;caching&quot;, lambda p: p[&quot;repeated_inputs&quot;]),
+    (&quot;concurrency&quot;, lambda p: p[&quot;mostly_waiting&quot;]),
+    (&quot;PyPy, Numba or mypyc&quot;, lambda p: p[&quot;pure_python_loops&quot;] and not p[&quot;needs_cpython_only_libraries&quot;]),
+]
+
+def next_step(problem):
+    for step, applies in LADDER:
+        if applies(problem):
+            return step
+    return &quot;write an extension&quot;
+
+base = dict(profiled=True, complexity=&quot;linear&quot;, numeric_arrays=False, repeated_inputs=False,
+            mostly_waiting=False, pure_python_loops=True, needs_cpython_only_libraries=True)
+print(next_step(dict(base, profiled=False)), &quot;|&quot;, next_step(dict(base, complexity=&quot;quadratic&quot;)), &quot;|&quot;, next_step(base))</textarea></div>
+<h2 id="what-a-speed-up-is-worth">What a speed-up is worth</h2>
+<p>Two pieces of arithmetic belong in every decision:</p>
+<ul>
+<li><strong>Amdahl&rsquo;s law</strong>: if the part you speed up takes a fraction <code>f</code> of the run time and becomes <code>s</code> times faster, the whole program becomes <code>1 / ((1 - f) + f / s)</code> times faster. The ceiling is <code>1 / (1 - f)</code>. Profile to find <code>f</code>.</li>
+<li><strong>Break-even</strong>: the time saved has to pay for the time spent. A job that runs 50 times a day and becomes 30 seconds faster saves about 150 hours a year of waiting (or of machine time, which costs money in the cloud); if the extension takes 40 hours to write and 20 hours a year to maintain, it pays for itself in about four months. A job that runs once a month saving 30 seconds never does.</li>
+</ul>
+<p>And value isn&rsquo;t only hours: a response that drops from 2 seconds to 200 milliseconds may change whether a product is usable at all, while making a nightly batch job finish at 02:10 instead of 02:40 may change nothing for anyone.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d5-e3"><textarea class="pc-src pc-code" hidden>def overall(f, s):
+    return 1 / ((1 - f) + f / s)
+
+def saved_hours_per_year(runs_per_day, seconds_before, seconds_after, days=365):
+    return runs_per_day * days * (seconds_before - seconds_after) / 3600
+
+def break_even_years(build_hours, upkeep_hours_per_year, saved_per_year):
+    net = saved_per_year - upkeep_hours_per_year
+    return None if net &lt;= 0 else round(build_hours / net, 2)
+
+before = 40.0
+after = before / overall(0.8, 20)
+saved = saved_hours_per_year(50, before, after)
+print(round(after, 1), &quot;seconds per run;&quot;, round(saved), &quot;hours a year;&quot;, break_even_years(40, 20, saved), &quot;years to pay back&quot;)
+print(break_even_years(40, 20, saved_hours_per_year(1 / 30, before, after)))</textarea></div>
+<h2 id="crossing-the-boundary">Crossing the boundary</h2>
+<p>Every call from Python into native code has a fixed <strong>overhead</strong>: converting arguments (Monday&rsquo;s <code>PyArg_ParseTuple</code>, or PyO3&rsquo;s conversions), checking types, possibly copying data (a list becomes a <code>Vec</code>), and converting the result back. That&rsquo;s typically tens to hundreds of nanoseconds, comparable to the cost of a whole Python operation. So:</p>
+<ul>
+<li><strong>Calling a fast native function once per element</strong> from a Python loop often gains little or nothing: the loop and the call overhead dominate.</li>
+<li><strong>Batch</strong>: pass a whole array, list or file to one native call and loop on the native side. That&rsquo;s why NumPy&rsquo;s whole-array operations are fast and NumPy-in-a-Python-loop isn&rsquo;t.</li>
+<li><strong>Avoid copies</strong>: the buffer protocol (Wednesday) lets native code read Python&rsquo;s memory directly instead of converting each element.</li>
+</ul>
+<p>The cost model: <code>n</code> items handled in calls of <code>b</code> items each cost about <code>(n / b) * call_overhead + n * per_item_work</code>. Larger batches cut the first term, until memory or latency limits how big a batch can be.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d5-e4"><textarea class="pc-src pc-code" hidden>def total_cost(n, batch, call_overhead=200, per_item=5):
+    calls = -(-n // batch)
+    return calls * call_overhead + n * per_item
+
+n = 1_000_000
+for batch in (1, 10, 1000, n):
+    print(f&quot;batch {batch:&gt;7}: {total_cost(n, batch) / 1e6:8.2f} ms (nanosecond units)&quot;)</textarea></div>
+<h2 id="shipping-compiled-code">Shipping compiled code</h2>
+<p>Pure-Python packages work everywhere. Compiled extensions must be <strong>built for each platform</strong>, and users without a compiler need a <strong>wheel</strong> that matches their system. A wheel&rsquo;s file name says what it&rsquo;s for: <code>name-version(-build)?-python-abi-platform.whl</code> (PEP 427):</p>
+<ul>
+<li><strong>python tag</strong>: <code>py3</code> (any Python 3), <code>cp313</code> (CPython 3.13);</li>
+<li><strong>ABI tag</strong>: <code>none</code> (pure Python), <code>cp313</code> (built against CPython 3.13&rsquo;s full ABI, only for that version), <code>abi3</code> (the stable ABI: CPython 3.x and later, from the version in the python tag);</li>
+<li><strong>platform tag</strong>: <code>any</code>, <code>win_amd64</code>, <code>macosx_11_0_arm64</code>, <code>manylinux_2_17_x86_64</code> (works on Linux with glibc 2.17 or newer), <code>musllinux_1_2_x86_64</code> (Alpine and other musl systems).</li>
+</ul>
+<p>So a project with a C or Rust extension typically publishes a dozen or more wheels per release, built automatically in continuous integration (with the free <code>cibuildwheel</code> or <code>maturin-action</code>), plus a source distribution for everything else. That&rsquo;s real, ongoing work, and part of the cost of extending.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d5-e5"><textarea class="pc-src pc-code" hidden>def parse_wheel(filename):
+    parts = filename[:-len(&quot;.whl&quot;)].split(&quot;-&quot;)
+    name, version = parts[0], parts[1]
+    python, abi, platform = parts[-3:]
+    return {&quot;name&quot;: name, &quot;version&quot;: version, &quot;python&quot;: python, &quot;abi&quot;: abi, &quot;platform&quot;: platform}
+
+for f in [&quot;requests-2.32.3-py3-none-any.whl&quot;,
+          &quot;numpy-2.1.0-cp313-cp313-manylinux_2_17_x86_64.whl&quot;,
+          &quot;fastjson-1.0-cp39-abi3-win_amd64.whl&quot;]:
+    w = parse_wheel(f)
+    kind = &quot;pure Python&quot; if w[&quot;abi&quot;] == &quot;none&quot; else &quot;stable ABI&quot; if w[&quot;abi&quot;] == &quot;abi3&quot; else &quot;one Python version&quot;
+    print(f&quot;{w[&#x27;name&#x27;]:9} {w[&#x27;python&#x27;]:5} {w[&#x27;abi&#x27;]:6} {w[&#x27;platform&#x27;]:24} {kind}&quot;)</textarea></div>
+<h2 id="choosing-a-tool">Choosing a tool</h2>
+<p>When an extension is justified, the tools compare like this:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>good for</th>
+<th>you write</th>
+<th>safety</th>
+<th>build needs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ctypes</code> / <code>cffi</code></td>
+<td>calling an existing C library</td>
+<td>Python (plus C declarations for cffi)</td>
+<td>crashes on mistakes</td>
+<td>nothing (ctypes); a compiler for cffi&rsquo;s API mode</td>
+</tr>
+<tr>
+<td>Cython</td>
+<td>numeric loops, gradual speed-ups of Python code</td>
+<td>Python with C types</td>
+<td>mostly safe; C rules for typed code</td>
+<td>a C compiler</td>
+</tr>
+<tr>
+<td>Rust + PyO3</td>
+<td>larger components, parsers, anything safety-critical</td>
+<td>Rust</td>
+<td>memory-safe, checked by the compiler</td>
+<td>Rust toolchain and maturin</td>
+</tr>
+<tr>
+<td>C API</td>
+<td>full control, CPython internals</td>
+<td>C</td>
+<td>all of C&rsquo;s risks</td>
+<td>a C compiler</td>
+</tr>
+<tr>
+<td>Numba / mypyc</td>
+<td>numeric functions / typed Python modules</td>
+<td>Python</td>
+<td>safe</td>
+<td>the tool itself</td>
+</tr>
+</tbody>
+</table>
+<p>Questions that decide in practice: Does a library already do it? Who will maintain it, and do they know the language? Must it work on PyPy or many Python versions (favour <code>cffi</code>, the stable ABI, or pure Python)? Does it need to release the GIL for parallelism (Cython&rsquo;s <code>nogil</code> or Rust&rsquo;s <code>allow_threads</code>)?</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d5-e6"><textarea class="pc-src pc-code" hidden>def suggest(existing_c_library, numeric_loop, large_component, team_knows_rust, needs_internals):
+    if existing_c_library:
+        return &quot;ctypes or cffi&quot;
+    if needs_internals:
+        return &quot;the C API&quot;
+    if large_component and team_knows_rust:
+        return &quot;Rust with PyO3&quot;
+    if numeric_loop:
+        return &quot;Cython (or Numba)&quot;
+    return &quot;Cython, or reconsider: maybe mypyc&quot;
+
+print(suggest(True, False, False, False, False), &quot;|&quot;, suggest(False, True, False, False, False), &quot;|&quot;,
+      suggest(False, False, True, True, False))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Climb the ladder before extending: measure, improve the algorithm, use fast libraries such as NumPy, cache, use concurrency for waiting, try PyPy, Numba or mypyc, and only then write an extension. Amdahl&rsquo;s law limits the overall gain to 1 / (1 - f) for a hot fraction f; check that the saved time (or latency that matters) outweighs building and maintaining the extension. Each call across the Python-native boundary has a fixed overhead, so batch whole arrays into one call and avoid copies with the buffer protocol. Compiled code ships as wheels per platform, named name-version-python-abi-platform (abi3 for the stable ABI, manylinux and musllinux for Linux), built in CI. Use ctypes or cffi for existing C libraries, Cython for numeric loops, Rust with PyO3 for larger safe components, and the raw C API only for full control.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d5-amdahl" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">What the hot spot is worth</div><div class="pc-prompt"><p>Write <code>overall_speedup(hot_fraction, local_speedup)</code>: Amdahl&rsquo;s overall speed-up, rounded to 2 places; <code>ceiling(hot_fraction)</code>: the most it could ever be, rounded to 2 places (<code>float("inf")</code> when the fraction is 1); and <code>local_needed(hot_fraction, target)</code>: the local speed-up the hot part needs for the program to reach <code>target</code> overall, rounded to 2 places, or <code>None</code> if the target is at or above the ceiling.</p></div><textarea class="pc-src pc-code" hidden>def overall_speedup(hot_fraction, local_speedup):
+    ___
+
+def ceiling(hot_fraction):
+    ___
+
+def local_needed(hot_fraction, target):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_amdahl():
+    &quot;Amdahl&#x27;s law&quot;
+    assert overall_speedup(0.5, 100) == 1.98 and overall_speedup(0.9, 10) == 5.26 and overall_speedup(1.0, 8) == 8.0
+    assert ceiling(0.9) == 10.0 and ceiling(0.5) == 2.0 and ceiling(1.0) == float(&quot;inf&quot;)
+    assert local_needed(0.9, 5) == 9.0 and local_needed(0.8, 4) == 16.0 and local_needed(0.5, 2) is None
+    assert local_needed(1.0, 50) == 50.0</textarea><textarea class="pc-src pc-solution" hidden>def overall_speedup(hot_fraction, local_speedup):
+    return round(1 / ((1 - hot_fraction) + hot_fraction / local_speedup), 2)
+
+def ceiling(hot_fraction):
+    if hot_fraction &gt;= 1:
+        return float(&quot;inf&quot;)
+    return round(1 / (1 - hot_fraction), 2)
+
+def local_needed(hot_fraction, target):
+    if hot_fraction &lt; 1 and target &gt;= 1 / (1 - hot_fraction) - 1e-12:
+        return None
+    # target = 1 / ((1 - f) + f / s)  =&gt;  f / s = 1 / target - (1 - f)
+    return round(hot_fraction / (1 / target - (1 - hot_fraction)), 2)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d5-breakeven" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Does it pay for itself?</div><div class="pc-prompt"><p>Write <code>hours_saved(runs_per_day, seconds_before, seconds_after, days=365)</code>: the hours of waiting saved per year, rounded to 1 place; <code>payback_years(build_hours, upkeep_per_year, saved_per_year)</code>: years until the saved time covers the build, rounded to 2 places, or <code>None</code> if the upkeep eats all the savings; and <code>worth_it(job, horizon_years=3)</code>: True if a job dict (with <code>runs_per_day</code>, <code>before</code>, <code>after</code>, <code>build_hours</code> and <code>upkeep</code>) pays back within the horizon.</p></div><textarea class="pc-src pc-code" hidden>def hours_saved(runs_per_day, seconds_before, seconds_after, days=365):
+    ___
+
+def payback_years(build_hours, upkeep_per_year, saved_per_year):
+    ___
+
+def worth_it(job, horizon_years=3):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_breakeven():
+    &quot;time saved versus time spent&quot;
+    assert hours_saved(50, 40, 10) == 152.1 and hours_saved(1, 3600, 0, days=10) == 10.0
+    assert payback_years(40, 20, 152.1) == 0.3 and payback_years(40, 50, 30) is None
+    nightly = {&quot;runs_per_day&quot;: 1, &quot;before&quot;: 1800, &quot;after&quot;: 1500, &quot;build_hours&quot;: 100, &quot;upkeep&quot;: 10}
+    busy = {&quot;runs_per_day&quot;: 200, &quot;before&quot;: 2.0, &quot;after&quot;: 0.2, &quot;build_hours&quot;: 80, &quot;upkeep&quot;: 5}
+    assert not worth_it(nightly) and worth_it(busy) and not worth_it(dict(busy, runs_per_day=5))</textarea><textarea class="pc-src pc-solution" hidden>def hours_saved(runs_per_day, seconds_before, seconds_after, days=365):
+    return round(runs_per_day * days * (seconds_before - seconds_after) / 3600, 1)
+
+def payback_years(build_hours, upkeep_per_year, saved_per_year):
+    net = saved_per_year - upkeep_per_year
+    if net &lt;= 0:
+        return None
+    return round(build_hours / net, 2)
+
+def worth_it(job, horizon_years=3):
+    saved = hours_saved(job[&quot;runs_per_day&quot;], job[&quot;before&quot;], job[&quot;after&quot;])
+    years = payback_years(job[&quot;build_hours&quot;], job[&quot;upkeep&quot;], saved)
+    return years is not None and years &lt;= horizon_years</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d5-boundary" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">The cost of crossing</div><div class="pc-prompt"><p>Using the model <code>calls * call_overhead + n * per_item</code> (with <code>calls</code> the number of batches, rounding up), write <code>cost(n, batch, call_overhead, per_item)</code>; <code>best_batch(n, call_overhead, per_item, max_batch)</code>: the batch size from 1 up to <code>max_batch</code> with the lowest cost (the smallest such size on ties); and <code>python_loop_gain(n, python_per_item, native_per_item, call_overhead)</code>: how many times faster calling a native function <strong>once per item</strong> is than doing the item in Python (rounded to 2 places; below 1 means it&rsquo;s slower).</p></div><textarea class="pc-src pc-code" hidden>def cost(n, batch, call_overhead, per_item):
+    ___
+
+def best_batch(n, call_overhead, per_item, max_batch):
+    ___
+
+def python_loop_gain(n, python_per_item, native_per_item, call_overhead):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_boundary():
+    &quot;batching across the boundary&quot;
+    assert cost(1000, 1, 200, 5) == 205000 and cost(1000, 1000, 200, 5) == 5200 and cost(1001, 1000, 200, 5) == 5405
+    assert best_batch(1000, 200, 5, 64) == 63
+    assert best_batch(100, 10, 1, 1000) == 100 and best_batch(5, 0, 1, 3) == 1
+    assert python_loop_gain(1000, 50, 1, 200) == 0.25 and python_loop_gain(1000, 500, 1, 100) == 4.95</textarea><textarea class="pc-src pc-solution" hidden>def cost(n, batch, call_overhead, per_item):
+    calls = -(-n // batch)
+    return calls * call_overhead + n * per_item
+
+def best_batch(n, call_overhead, per_item, max_batch):
+    return min(range(1, max_batch + 1), key=lambda b: (cost(n, b, call_overhead, per_item), b))
+
+def python_loop_gain(n, python_per_item, native_per_item, call_overhead):
+    python_time = n * python_per_item
+    native_time = n * (native_per_item + call_overhead)
+    return round(python_time / native_time, 2)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d5-wheels" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Reading wheel names</div><div class="pc-prompt"><p>Write <code>parse_wheel(filename)</code>: a dict with <code>name</code>, <code>version</code>, <code>build</code> (the optional build tag, or <code>None</code>), <code>python</code>, <code>abi</code> and <code>platform</code>, from a name like <code>fastjson-1.0-2-cp39-abi3-win_amd64.whl</code> (the build tag is present when there are six dash-separated parts). Then <code>installable(filename, python, platform, glibc=(2, 28))</code> for a system running CPython <code>python</code> (a tag like <code>"cp313"</code>) on <code>platform</code> (like <code>"linux_x86_64"</code>, <code>"win_amd64"</code>): the python tag must be <code>py3</code>, or equal to it, or, when the ABI is <code>abi3</code>, a <code>cp3X</code> tag no newer than it; the ABI must be <code>none</code>, <code>abi3</code> or equal to the python tag; the platform must be <code>any</code>, equal, or, for Linux, a <code>manylinux_A_B_arch</code> tag with the same architecture and <code>(A, B)</code> no newer than <code>glibc</code>. Compare versions as numbers, not strings.</p></div><textarea class="pc-src pc-code" hidden>def parse_wheel(filename):
+    ___
+
+def installable(filename, python, platform, glibc=(2, 28)):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_wheels():
+    &quot;wheel tags&quot;
+    assert parse_wheel(&quot;fastjson-1.0-2-cp39-abi3-win_amd64.whl&quot;) == {
+        &quot;name&quot;: &quot;fastjson&quot;, &quot;version&quot;: &quot;1.0&quot;, &quot;build&quot;: &quot;2&quot;, &quot;python&quot;: &quot;cp39&quot;, &quot;abi&quot;: &quot;abi3&quot;, &quot;platform&quot;: &quot;win_amd64&quot;}
+    assert parse_wheel(&quot;requests-2.32.3-py3-none-any.whl&quot;)[&quot;build&quot;] is None
+    assert installable(&quot;requests-2.32.3-py3-none-any.whl&quot;, &quot;cp313&quot;, &quot;win_amd64&quot;)
+    assert installable(&quot;numpy-2.1.0-cp313-cp313-manylinux_2_17_x86_64.whl&quot;, &quot;cp313&quot;, &quot;linux_x86_64&quot;)
+    assert not installable(&quot;numpy-2.1.0-cp313-cp313-manylinux_2_17_x86_64.whl&quot;, &quot;cp312&quot;, &quot;linux_x86_64&quot;)
+    assert installable(&quot;fast-1.0-cp39-abi3-manylinux_2_17_x86_64.whl&quot;, &quot;cp313&quot;, &quot;linux_x86_64&quot;)
+    assert not installable(&quot;fast-1.0-cp313-abi3-manylinux_2_17_x86_64.whl&quot;, &quot;cp39&quot;, &quot;linux_x86_64&quot;)
+    assert not installable(&quot;new-1.0-cp313-cp313-manylinux_2_34_x86_64.whl&quot;, &quot;cp313&quot;, &quot;linux_x86_64&quot;)
+    assert not installable(&quot;arm-1.0-cp313-cp313-manylinux_2_17_aarch64.whl&quot;, &quot;cp313&quot;, &quot;linux_x86_64&quot;)
+    assert not installable(&quot;win-1.0-cp313-cp313-win_amd64.whl&quot;, &quot;cp313&quot;, &quot;linux_x86_64&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def parse_wheel(filename):
+    parts = filename[:-len(&quot;.whl&quot;)].split(&quot;-&quot;)
+    build = parts[2] if len(parts) == 6 else None
+    return {&quot;name&quot;: parts[0], &quot;version&quot;: parts[1], &quot;build&quot;: build,
+            &quot;python&quot;: parts[-3], &quot;abi&quot;: parts[-2], &quot;platform&quot;: parts[-1]}
+
+def _minor(tag):
+    return int(tag[3:]) if tag.startswith(&quot;cp3&quot;) else None
+
+def installable(filename, python, platform, glibc=(2, 28)):
+    w = parse_wheel(filename)
+    py_ok = (w[&quot;python&quot;] in (&quot;py3&quot;, python) or
+             (w[&quot;abi&quot;] == &quot;abi3&quot; and _minor(w[&quot;python&quot;]) is not None and _minor(w[&quot;python&quot;]) &lt;= _minor(python)))
+    abi_ok = w[&quot;abi&quot;] in (&quot;none&quot;, &quot;abi3&quot;, python)
+    plat = w[&quot;platform&quot;]
+    if plat == &quot;any&quot; or plat == platform:
+        plat_ok = True
+    elif plat.startswith(&quot;manylinux_&quot;) and platform.startswith(&quot;linux_&quot;):
+        _, major, minor, arch = plat.split(&quot;_&quot;, 3)
+        plat_ok = arch == platform[len(&quot;linux_&quot;):] and (int(major), int(minor)) &lt;= tuple(glibc)
+    else:
+        plat_ok = False
+    return py_ok and abi_ok and plat_ok</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d5-ladder" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">The next rung</div><div class="pc-prompt"><p>Write <code>next_step(problem)</code> for a dict of facts about a slow program, returning the first rung that applies: <code>"measure"</code> if it hasn&rsquo;t been <code>profiled</code>; <code>"better algorithm"</code> if its <code>complexity</code> is <code>"quadratic"</code> or worse (<code>"cubic"</code>, <code>"exponential"</code>); <code>"use a library"</code> if it&rsquo;s <code>numeric_arrays</code> work; <code>"cache"</code> if it has <code>repeated_inputs</code>; <code>"concurrency"</code> if it&rsquo;s <code>mostly_waiting</code>; <code>"try a faster Python"</code> if it&rsquo;s <code>pure_python</code> code and doesn&rsquo;t <code>need_cpython</code>; otherwise <code>"write an extension"</code>. Then <code>steps_before_extension(problem)</code>: how many rungs were skipped as not applying before reaching the answer.</p></div><textarea class="pc-src pc-code" hidden>def next_step(problem):
+    ___
+
+def steps_before_extension(problem):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_ladder():
+    &quot;the ladder of alternatives&quot;
+    base = {&quot;profiled&quot;: True, &quot;complexity&quot;: &quot;linear&quot;, &quot;numeric_arrays&quot;: False, &quot;repeated_inputs&quot;: False,
+            &quot;mostly_waiting&quot;: False, &quot;pure_python&quot;: True, &quot;need_cpython&quot;: True}
+    assert next_step(dict(base, profiled=False)) == &quot;measure&quot;
+    assert next_step(dict(base, complexity=&quot;cubic&quot;)) == &quot;better algorithm&quot;
+    assert next_step(dict(base, numeric_arrays=True)) == &quot;use a library&quot;
+    assert next_step(dict(base, mostly_waiting=True)) == &quot;concurrency&quot;
+    assert next_step(dict(base, need_cpython=False)) == &quot;try a faster Python&quot;
+    assert next_step(base) == &quot;write an extension&quot; and steps_before_extension(base) == 6
+    assert steps_before_extension(dict(base, repeated_inputs=True)) == 3</textarea><textarea class="pc-src pc-solution" hidden>RUNGS = [
+    (&quot;measure&quot;, lambda p: not p[&quot;profiled&quot;]),
+    (&quot;better algorithm&quot;, lambda p: p[&quot;complexity&quot;] in (&quot;quadratic&quot;, &quot;cubic&quot;, &quot;exponential&quot;)),
+    (&quot;use a library&quot;, lambda p: p[&quot;numeric_arrays&quot;]),
+    (&quot;cache&quot;, lambda p: p[&quot;repeated_inputs&quot;]),
+    (&quot;concurrency&quot;, lambda p: p[&quot;mostly_waiting&quot;]),
+    (&quot;try a faster Python&quot;, lambda p: p[&quot;pure_python&quot;] and not p[&quot;need_cpython&quot;]),
+]
+
+def next_step(problem):
+    for name, applies in RUNGS:
+        if applies(problem):
+            return name
+    return &quot;write an extension&quot;
+
+def steps_before_extension(problem):
+    for i, (name, applies) in enumerate(RUNGS):
+        if applies(problem):
+            return i
+    return len(RUNGS)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Amdahl misapplied</div><div class="pc-prompt"><p>The estimate assumes the whole program gets the hot spot&rsquo;s local speed-up, so it promises <code>20</code> times faster. Only 60% of the time is in that part: apply Amdahl&rsquo;s law (rounding to 2 places) so this prints <code>2.33</code>.</p></div><textarea class="pc-src pc-code" hidden>hot_fraction = 0.6
+local_speedup = 20
+print(local_speedup)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;Amdahl&#x27;s law&quot;
+    expect_output(&quot;2.33&quot;)</textarea><textarea class="pc-src pc-solution" hidden>hot_fraction = 0.6
+local_speedup = 20
+print(round(1 / ((1 - hot_fraction) + hot_fraction / local_speedup), 2))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Versions compared as text</div><div class="pc-prompt"><p>The check compares Python version tags as <strong>strings</strong>, and <code>"cp39" &gt; "cp313"</code> because <code>"9"</code> comes after <code>"1"</code>, so it wrongly says a wheel for 3.9 and later can&rsquo;t be installed on 3.13: this prints <code>False</code>. Compare the minor version numbers as integers so it prints <code>True</code>.</p></div><textarea class="pc-src pc-code" hidden>wheel_tag, python_tag = &quot;cp39&quot;, &quot;cp313&quot;
+print(wheel_tag &lt;= python_tag)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;numbers, not strings&quot;
+    expect_output(&quot;True&quot;)</textarea><textarea class="pc-src pc-solution" hidden>wheel_tag, python_tag = &quot;cp39&quot;, &quot;cp313&quot;
+print(int(wheel_tag[3:]) &lt;= int(python_tag[3:]))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">One call per item</div><div class="pc-prompt"><p>The code calls a &ldquo;native&rdquo; function once per item, paying the fixed boundary overhead a thousand times, so the total cost is <code>205000</code> units. Pass all the items in <strong>one</strong> call so the overhead is paid once and this prints <code>5200</code>.</p></div><textarea class="pc-src pc-code" hidden>CALL_OVERHEAD, PER_ITEM = 200, 5
+
+def native_sum(items):
+    return CALL_OVERHEAD + PER_ITEM * len(items)     # the cost of one call
+
+items = list(range(1000))
+total_cost = sum(native_sum([x]) for x in items)
+print(total_cost)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;batch the calls&quot;
+    expect_output(&quot;5200&quot;)</textarea><textarea class="pc-src pc-solution" hidden>CALL_OVERHEAD, PER_ITEM = 200, 5
+
+def native_sum(items):
+    return CALL_OVERHEAD + PER_ITEM * len(items)     # the cost of one call
+
+items = list(range(1000))
+total_cost = native_sum(items)
+print(total_cost)</textarea></div>
+<div class="parsons" data-id="w068d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Amdahl&rsquo;s law</div><div class="pc-prompt"><p>Arrange the lines of a function that computes the overall speed-up from a hot fraction and its local speed-up, refusing impossible fractions. One line is a trap.</p></div><script type="application/json">{"lines": ["def overall(f, s):", "    if not 0 <= f <= 1:", "        raise ValueError(\"fraction must be between 0 and 1\")", "    return 1 / ((1 - f) + f / s)"], "distractors": ["    return s * f"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the ceiling on overall speed-up when 75% of the time is in the hot spot
+q = ___   # the ABI tag of a pure-Python wheel
+r = ___   # True or False: &quot;cp39&quot; &lt; &quot;cp313&quot; compared as strings
+s = ___   # cost of 10 items in one call with overhead 100 and 2 per item
+t = ___   # the first rung of the ladder</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 4 and q == &quot;none&quot; and r is False, &quot;p, q and r&quot;
+    assert s == 120 and t == &quot;measure&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 4
+q = &quot;none&quot;
+r = False
+s = 120
+t = &quot;measure&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w068d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What should you try before writing an extension?", "answer": 1, "explain": "Most problems are solved early on the ladder.", "options": ["Nothing", "Measuring, a better algorithm, fast libraries, caching, concurrency, a faster Python", "Rewriting in C at once", "More hardware only"]}, {"type": "mc", "q": "70% of the time is in one function, made 10 times faster. Roughly how much faster is the program?", "answer": 1, "explain": "1 / (0.3 + 0.07).", "options": ["10 times", "About 2.7 times", "7 times", "No faster"]}, {"type": "mc", "q": "Why is a fast native function called once per element from a Python loop often disappointing?", "answer": 1, "explain": "Batch whole arrays into one call.", "options": ["Native code is slow", "The fixed overhead of each call dominates", "The GIL", "It isn&rsquo;t"]}, {"type": "mc", "q": "What is PyPy?", "answer": 1, "explain": "Often much faster for pure-Python loops.", "options": ["A package manager", "Another Python interpreter with a JIT compiler", "A C library", "A Cython mode"]}, {"type": "mc", "q": "What does Numba do?", "answer": 1, "explain": "Especially loops over NumPy arrays.", "options": ["Packages wheels", "Compiles numeric Python functions to machine code with a decorator", "Profiles code", "Tests code"]}, {"type": "mc", "q": "What does the abi3 tag on a wheel mean?", "answer": 1, "explain": "One wheel for many versions.", "options": ["Python 3 only, pure", "Built against the stable ABI: works on that CPython version and later", "Three platforms", "Debug build"]}, {"type": "mc", "q": "What does manylinux_2_17_x86_64 promise?", "answer": 1, "explain": "musllinux is for musl systems such as Alpine.", "options": ["Any Linux", "Linux on x86-64 with glibc 2.17 or newer", "Windows", "Only Ubuntu"]}, {"type": "mc", "q": "Which tool suits calling an existing C library?", "answer": 1, "explain": "No new native code needed.", "options": ["Cython", "ctypes or cffi", "PyO3", "Numba"]}, {"type": "mc", "q": "Which tool suits a large, safety-critical native component?", "answer": 1, "explain": "The compiler checks memory safety.", "options": ["ctypes", "Rust with PyO3", "The raw C API", "Pure Python"]}, {"type": "output", "q": "What does this print?", "answer": "1.3 2.0", "explain": "Half the program can at most double the speed.", "code": "def overall(f, s):\n    return round(1 / ((1 - f) + f / s), 1)\nprint(overall(0.5, 2), overall(0.5, 1000))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: an options report</div><div class="pc-prompt"><p>Help decide how to speed up a program. Write <code>evaluate(hot_fraction, run_seconds, runs_per_year, options)</code> where each option is a dict with <code>name</code>, <code>local_speedup</code>, <code>build_hours</code> and <code>upkeep_hours</code> (per year). For each, compute:</p>
+<ul>
+<li><code>overall</code>: Amdahl&rsquo;s overall speed-up, rounded to 2 places;</li>
+<li><code>saved_hours</code>: hours saved per year, <code>runs_per_year * run_seconds * (1 - 1 / overall) / 3600</code>, rounded to 1 place;</li>
+<li><code>payback_years</code>: <code>build_hours / (saved_hours - upkeep_hours)</code> rounded to 2 places, or <code>None</code> if that isn&rsquo;t positive.</li>
+</ul>
+<p>Return a list of dicts (the option&rsquo;s name plus those three keys), in the order given. Then <code>recommend(hot_fraction, run_seconds, runs_per_year, options, target_speedup, horizon_years=2)</code>: among the options that reach <code>target_speedup</code> overall <strong>and</strong> pay back within the horizon, the one with the fewest <code>build_hours</code> (ties: the higher overall speed-up, then the order given), or <code>None</code>.</p></div><textarea class="pc-src pc-code" hidden>def evaluate(hot_fraction, run_seconds, runs_per_year, options):
+    ___
+
+def recommend(hot_fraction, run_seconds, runs_per_year, options, target_speedup, horizon_years=2):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_report():
+    &quot;choosing an option&quot;
+    options = [
+        {&quot;name&quot;: &quot;NumPy rewrite&quot;, &quot;local_speedup&quot;: 30, &quot;build_hours&quot;: 16, &quot;upkeep_hours&quot;: 2},
+        {&quot;name&quot;: &quot;Cython&quot;, &quot;local_speedup&quot;: 50, &quot;build_hours&quot;: 40, &quot;upkeep_hours&quot;: 10},
+        {&quot;name&quot;: &quot;Rust&quot;, &quot;local_speedup&quot;: 80, &quot;build_hours&quot;: 120, &quot;upkeep_hours&quot;: 15},
+        {&quot;name&quot;: &quot;caching&quot;, &quot;local_speedup&quot;: 2, &quot;build_hours&quot;: 4, &quot;upkeep_hours&quot;: 1},
+    ]
+    report = evaluate(0.9, 60, 20000, options)
+    assert [r[&quot;name&quot;] for r in report] == [&quot;NumPy rewrite&quot;, &quot;Cython&quot;, &quot;Rust&quot;, &quot;caching&quot;]
+    assert report[0] == {&quot;name&quot;: &quot;NumPy rewrite&quot;, &quot;overall&quot;: 7.69, &quot;saved_hours&quot;: 290.0, &quot;payback_years&quot;: 0.06}
+    assert report[3][&quot;overall&quot;] == 1.82 and report[2][&quot;payback_years&quot;] == round(120 / (report[2][&quot;saved_hours&quot;] - 15), 2)
+    assert recommend(0.9, 60, 20000, options, target_speedup=7) == &quot;NumPy rewrite&quot;
+    assert recommend(0.9, 60, 20000, options, target_speedup=8.4) == &quot;Cython&quot;
+    assert recommend(0.9, 60, 20000, options, target_speedup=8.5) == &quot;Rust&quot;
+    assert recommend(0.9, 60, 20000, options, target_speedup=12) is None
+    assert recommend(0.9, 60, 20, options, target_speedup=1.5) is None</textarea><textarea class="pc-src pc-solution" hidden>def evaluate(hot_fraction, run_seconds, runs_per_year, options):
+    rows = []
+    for option in options:
+        overall = round(1 / ((1 - hot_fraction) + hot_fraction / option[&quot;local_speedup&quot;]), 2)
+        saved = round(runs_per_year * run_seconds * (1 - 1 / overall) / 3600, 1)
+        net = saved - option[&quot;upkeep_hours&quot;]
+        payback = round(option[&quot;build_hours&quot;] / net, 2) if net &gt; 0 else None
+        rows.append({&quot;name&quot;: option[&quot;name&quot;], &quot;overall&quot;: overall, &quot;saved_hours&quot;: saved, &quot;payback_years&quot;: payback})
+    return rows
+
+def recommend(hot_fraction, run_seconds, runs_per_year, options, target_speedup, horizon_years=2):
+    rows = evaluate(hot_fraction, run_seconds, runs_per_year, options)
+    good = []
+    for i, (row, option) in enumerate(zip(rows, options)):
+        if row[&quot;overall&quot;] &gt;= target_speedup and row[&quot;payback_years&quot;] is not None and row[&quot;payback_years&quot;] &lt;= horizon_years:
+            good.append((option[&quot;build_hours&quot;], -row[&quot;overall&quot;], i, row[&quot;name&quot;]))
+    return min(good)[3] if good else None</textarea><template class="pc-src pc-hint">Write <code>evaluate</code> first; <code>recommend</code> can call it and filter its rows. Remember that <code>payback_years</code> can be <code>None</code>, which never counts as within the horizon.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Pick the slowest program you&rsquo;ve written in this course and climb the ladder with it on paper: which rung would you stop at? Tomorrow is the Forge: wrapping a C library properly and generating its stubs.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w068d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w068d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w068d5", "week": 68, "day": 5, "title": "When to extend and when not to", "exercises": [{"id": "w068d5-amdahl", "title": "What the hot spot is worth", "points": 10}, {"id": "w068d5-breakeven", "title": "Does it pay for itself?", "points": 10}, {"id": "w068d5-boundary", "title": "The cost of crossing", "points": 10}, {"id": "w068d5-wheels", "title": "Reading wheel names", "points": 15}, {"id": "w068d5-ladder", "title": "The next rung", "points": 10}, {"id": "w068d5-bug1", "title": "Amdahl misapplied", "points": 10}, {"id": "w068d5-bug2", "title": "Versions compared as text", "points": 10}, {"id": "w068d5-bug3", "title": "One call per item", "points": 10}, {"id": "w068d5-trace", "title": "Predict them", "points": 10}, {"id": "w068d5-challenge", "title": "Challenge: an options report", "points": 25}], "points": 120}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

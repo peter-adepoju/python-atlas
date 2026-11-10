@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 68 Day 4: Rust extensions with PyO3 | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Rust is a compiled language with C’s speed and a compiler that refuses to build programs with the memory errors C allows: no dangling pointers, no data...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w068d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 68 Day 4: Rust extensions with PyO3">
+<meta property="og:description" content="Rust is a compiled language with C’s speed and a compiler that refuses to build programs with the memory errors C allows: no dangling pointers, no data...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w068d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-68">Week 68: Extending Python</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#a-pyo3-module" data-sec="a-pyo3-module">A PyO3 module</a></li><li><a href="#types-across-the-boundary" data-sec="types-across-the-boundary">Types across the boundary</a></li><li><a href="#errors-result-option-and-exceptions" data-sec="errors-result-option-and-exceptions">Errors: Result, Option and exceptions</a></li><li><a href="#ownership-and-borrowing" data-sec="ownership-and-borrowing">Ownership and borrowing</a></li><li><a href="#building-with-maturin" data-sec="building-with-maturin">Building with maturin</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w068d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-68">Week 68: Extending Python</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 68, Day 4</span></p>
+      <h1>Rust extensions with PyO3</h1>
+      <div class="day-intro"><p>Rust is a compiled language with C&rsquo;s speed and a compiler that refuses to build programs with the memory errors C allows: no dangling pointers, no data races, no forgotten frees. <strong>PyO3</strong> is a free library that connects Rust to Python: you write Rust functions and types, mark them with attributes like <code>#[pyfunction]</code>, and the tool <strong>maturin</strong> builds them into an extension module, handling reference counts, argument conversion and the GIL for you. A growing number of popular tools are built this way (Ruff, Polars, the core of Pydantic). Rust can&rsquo;t be compiled in the browser, so the Rust code today is for your own computer; the exercises practise what crosses the boundary: types, errors, stubs for type checkers, and the ownership rules that make Rust safe.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Read a PyO3 module with</li><li>Map Rust types to the Python types they become, and write .pyi stubs for type checkers</li><li>Explain Result, Option and the ? operator, and how Rust errors become Python exceptions</li><li>Explain ownership and borrowing, and why they prevent memory errors and data races</li><li>Build and install a PyO3 project with maturin</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="A PyO3 module: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Types across the boundary: 20 min"></span><span class="plan-seg s1" style="flex:25" title="Errors: Result, Option and exceptions: 25 min"></span><span class="plan-seg s0" style="flex:25" title="Ownership and borrowing: 25 min"></span><span class="plan-seg s1" style="flex:15" title="Building with maturin: 15 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">A PyO3 module</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Types across the boundary</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Errors: Result, Option and exceptions</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Ownership and borrowing</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">Building with maturin</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w068d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w068d4.ipynb" download>download it</a>. Exercises today are worth 130 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w068d4-p1"><textarea class="pc-src pc-code" hidden>rust_to_python = {&quot;i64&quot;: &quot;int&quot;, &quot;f64&quot;: &quot;float&quot;, &quot;bool&quot;: &quot;bool&quot;, &quot;String&quot;: &quot;str&quot;, &quot;&amp;str&quot;: &quot;str&quot;}
+
+def python_signature(name, params, returns):
+    args = &quot;, &quot;.join(f&quot;{p}: {rust_to_python[t]}&quot; for p, t in params)
+    return f&quot;def {name}({args}) -&gt; {rust_to_python[returns]}: ...&quot;
+
+print(python_signature(&quot;area&quot;, [(&quot;w&quot;, &quot;f64&quot;), (&quot;h&quot;, &quot;f64&quot;)], &quot;f64&quot;))
+print(python_signature(&quot;shout&quot;, [(&quot;text&quot;, &quot;&amp;str&quot;)], &quot;String&quot;))</textarea></div>
+<p>A Rust function&rsquo;s signature says exactly what types it takes and returns, and PyO3 converts between those and Python&rsquo;s types automatically. Writing out the Python view of each function (a <strong>stub</strong>) is how type checkers and editors learn what a compiled module contains.</p>
+<h2 id="a-pyo3-module">A PyO3 module</h2>
+<p>Here is a complete Rust extension module (in <code>src/lib.rs</code>), with a function and a class:</p>
+<pre><code>use pyo3::prelude::*;
+use pyo3::exceptions::PyValueError;
+
+/// Average of a list of numbers.
+#[pyfunction]
+fn mean(values: Vec&lt;f64&gt;) -&gt; PyResult&lt;f64&gt; {
+    if values.is_empty() {
+        return Err(PyValueError::new_err(&quot;mean of empty list&quot;));
+    }
+    Ok(values.iter().sum::&lt;f64&gt;() / values.len() as f64)
+}
+
+#[pyclass]
+struct Counter {
+    #[pyo3(get)]
+    count: u64,
+}
+
+#[pymethods]
+impl Counter {
+    #[new]
+    fn new() -&gt; Self {
+        Counter { count: 0 }
+    }
+    fn add(&amp;mut self, n: u64) {
+        self.count += n;
+    }
+}
+
+#[pymodule]
+fn stats(m: &amp;Bound&lt;'_, PyModule&gt;) -&gt; PyResult&lt;()&gt; {
+    m.add_function(wrap_pyfunction!(mean, m)?)?;
+    m.add_class::&lt;Counter&gt;()?;
+    Ok(())
+}
+</code></pre>
+<p>In Python: <code>import stats; stats.mean([1, 2, 3])</code> gives <code>2.0</code>; <code>stats.mean([])</code> raises <code>ValueError</code>; <code>c = stats.Counter(); c.add(5); c.count</code> gives <code>5</code>, and <code>c.count = 9</code> fails because only <code>get</code> was allowed. The parts:</p>
+<ul>
+<li><code>#[pyfunction]</code> makes a Rust function callable from Python; its doc comment (<code>///</code>) becomes <code>__doc__</code>.</li>
+<li><code>#[pyclass]</code> makes a Rust struct into a Python class; <code>#[pyo3(get, set)]</code> exposes fields as attributes.</li>
+<li><code>#[pymethods]</code> exposes methods; <code>#[new]</code> is the constructor; <code>&amp;self</code> and <code>&amp;mut self</code> methods read or change the object.</li>
+<li><code>#[pymodule]</code> defines the module and what it contains.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w068d4-e2"><textarea class="pc-src pc-code" hidden>import re
+
+rust = &#x27;&#x27;&#x27;
+#[pyfunction]
+fn mean(values: Vec&lt;f64&gt;) -&gt; PyResult&lt;f64&gt; { ... }
+
+fn helper(x: f64) -&gt; f64 { x * 2.0 }
+
+#[pyfunction]
+fn shout(text: &amp;str) -&gt; String { text.to_uppercase() }
+&#x27;&#x27;&#x27;
+exported = re.findall(r&quot;#\[pyfunction\]\s*fn (\w+)&quot;, rust)
+everything = re.findall(r&quot;fn (\w+)&quot;, rust)
+print(&quot;visible from Python:&quot;, exported)
+print(&quot;Rust-only:&quot;, sorted(set(everything) - set(exported)))</textarea></div>
+<h2 id="types-across-the-boundary">Types across the boundary</h2>
+<p>PyO3 converts arguments from Python to Rust when a function is called, and results back when it returns. The main conversions:</p>
+<table>
+<thead>
+<tr>
+<th>Rust</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>i8</code> &hellip; <code>i64</code>, <code>u8</code> &hellip; <code>u64</code>, <code>isize</code>, <code>usize</code></td>
+<td><code>int</code> (out-of-range values raise <code>OverflowError</code>)</td>
+</tr>
+<tr>
+<td><code>f32</code>, <code>f64</code></td>
+<td><code>float</code></td>
+</tr>
+<tr>
+<td><code>bool</code></td>
+<td><code>bool</code></td>
+</tr>
+<tr>
+<td><code>String</code>, <code>&amp;str</code></td>
+<td><code>str</code></td>
+</tr>
+<tr>
+<td><code>Vec&lt;T&gt;</code></td>
+<td><code>list</code> (any sequence is accepted as an argument)</td>
+</tr>
+<tr>
+<td><code>HashMap&lt;K, V&gt;</code></td>
+<td><code>dict</code></td>
+</tr>
+<tr>
+<td><code>Option&lt;T&gt;</code></td>
+<td><code>T</code> or <code>None</code></td>
+</tr>
+<tr>
+<td><code>(A, B)</code></td>
+<td><code>tuple</code></td>
+</tr>
+<tr>
+<td><code>PyResult&lt;T&gt;</code></td>
+<td><code>T</code>, or an exception</td>
+</tr>
+</tbody>
+</table>
+<p>Converting a <code>Vec&lt;f64&gt;</code> copies the whole list into Rust memory, which costs time for big inputs; PyO3 can also borrow Python objects directly (<code>&amp;Bound&lt;PyList&gt;</code>), and the <code>numpy</code> crate gives zero-copy access to NumPy arrays (the buffer protocol, yesterday).</p>
+<p>Because a compiled module has no Python source, type checkers and editors can&rsquo;t see its signatures. Projects ship a <strong>stub file</strong>, <code>stats.pyi</code>, with the Python signatures and <code>...</code> bodies (PEP 484), so tools know that <code>mean</code> takes <code>list[float]</code> and returns <code>float</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d4-e3"><textarea class="pc-src pc-code" hidden>SIMPLE = {&quot;i32&quot;: &quot;int&quot;, &quot;i64&quot;: &quot;int&quot;, &quot;u64&quot;: &quot;int&quot;, &quot;usize&quot;: &quot;int&quot;, &quot;f64&quot;: &quot;float&quot;,
+          &quot;bool&quot;: &quot;bool&quot;, &quot;String&quot;: &quot;str&quot;, &quot;&amp;str&quot;: &quot;str&quot;}
+
+def python_type(rust):
+    rust = rust.strip()
+    for wrapper, template in ((&quot;Vec&lt;&quot;, &quot;list[{}]&quot;), (&quot;Option&lt;&quot;, &quot;{} | None&quot;), (&quot;PyResult&lt;&quot;, &quot;{}&quot;)):
+        if rust.startswith(wrapper) and rust.endswith(&quot;&gt;&quot;):
+            return template.format(python_type(rust[len(wrapper):-1]))
+    return SIMPLE.get(rust, &quot;object&quot;)
+
+for t in [&quot;f64&quot;, &quot;Vec&lt;f64&gt;&quot;, &quot;Option&lt;String&gt;&quot;, &quot;PyResult&lt;Vec&lt;i64&gt;&gt;&quot;, &quot;PyResult&lt;Option&lt;&amp;str&gt;&gt;&quot;]:
+    print(f&quot;{t:24} -&gt; {python_type(t)}&quot;)</textarea></div>
+<h2 id="errors-result-option-and-exceptions">Errors: Result, Option and exceptions</h2>
+<p>Rust has no exceptions. A function that can fail returns a <strong><code>Result&lt;T, E&gt;</code></strong>: either <code>Ok(value)</code> or <code>Err(error)</code>. A value that may be missing is an <strong><code>Option&lt;T&gt;</code></strong>: <code>Some(value)</code> or <code>None</code>. The compiler insists that you handle both cases before using the value, which is why Rust code rarely crashes from an unexpected <code>None</code>.</p>
+<ul>
+<li><code>match result { Ok(v) =&gt; ..., Err(e) =&gt; ... }</code> handles both cases explicitly.</li>
+<li>The <strong><code>?</code> operator</strong> after an expression returns early with the error if it&rsquo;s an <code>Err</code>, and otherwise unwraps the <code>Ok</code> value: <code>let n: i64 = text.parse()?;</code>.</li>
+<li><code>.unwrap()</code> takes the value and <strong>panics</strong> (crashes) if there isn&rsquo;t one; PyO3 turns a panic into a <code>PanicException</code> in Python rather than crashing the interpreter, but it&rsquo;s still a bug.</li>
+</ul>
+<p>At the boundary, <strong><code>PyResult&lt;T&gt;</code></strong> is <code>Result&lt;T, PyErr&gt;</code>. Returning <code>Err(PyValueError::new_err("..."))</code> raises <code>ValueError</code> in Python; there are matching types for <code>PyTypeError</code>, <code>PyKeyError</code>, <code>PyIndexError</code> and so on. Rust error types can be converted to Python exceptions automatically by implementing <code>From&lt;MyError&gt; for PyErr</code>, which lets <code>?</code> turn a Rust error straight into a Python exception.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d4-e4"><textarea class="pc-src pc-code" hidden>class Ok:
+    def __init__(self, value):
+        self.value = value
+    def __repr__(self):
+        return f&quot;Ok({self.value!r})&quot;
+
+class Err:
+    def __init__(self, error):
+        self.error = error
+    def __repr__(self):
+        return f&quot;Err({self.error!r})&quot;
+
+def parse_int(text):
+    return Ok(int(text)) if text.strip().lstrip(&quot;-&quot;).isdigit() else Err(f&quot;invalid digit in {text!r}&quot;)
+
+def add_parsed(a, b):
+    &quot;What Rust&#x27;s ? does: return the first error, otherwise carry on with the values.&quot;
+    x = parse_int(a)
+    if isinstance(x, Err):
+        return x
+    y = parse_int(b)
+    if isinstance(y, Err):
+        return y
+    return Ok(x.value + y.value)
+
+print(add_parsed(&quot;2&quot;, &quot;40&quot;), add_parsed(&quot;2&quot;, &quot;forty&quot;))</textarea></div>
+<h2 id="ownership-and-borrowing">Ownership and borrowing</h2>
+<p>Rust&rsquo;s safety comes from rules the compiler checks before the program ever runs:</p>
+<ul>
+<li><strong>Every value has exactly one owner</strong>, a variable. When the owner goes out of scope, the value is freed (no garbage collector, no reference counts for ordinary values).</li>
+<li><strong>Assigning or passing a value moves it</strong>: <code>let b = a;</code> makes <code>b</code> the owner, and using <code>a</code> afterwards is a compile-time error (&ldquo;use of moved value&rdquo;). Types such as integers are simply <strong>copied</strong> instead.</li>
+<li><strong>Borrowing</strong> lends access without moving: <code>&amp;a</code> is a shared (read-only) reference, <code>&amp;mut a</code> an exclusive (writable) one. At any moment a value may have <strong>either</strong> any number of shared borrows <strong>or</strong> exactly one mutable borrow, never both. And a borrow can&rsquo;t outlive the value it borrows (<strong>lifetimes</strong>).</li>
+</ul>
+<p>Those rules rule out whole classes of bugs at compile time: use after free, double free, dangling pointers, iterator invalidation, and <strong>data races</strong> (two threads writing the same data needs two mutable borrows, which the rules forbid). That&rsquo;s why Rust is attractive for extensions: you get C&rsquo;s speed without Monday&rsquo;s reference-counting worries, and PyO3 can release the GIL (<code>py.allow_threads(|| ...)</code>) for parallel Rust code with the compiler checking it&rsquo;s safe.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d4-e5"><textarea class="pc-src pc-code" hidden>def check(ops):
+    &quot;A tiny borrow checker: ops are (action, variable).&quot;
+    moved, shared, mutable, errors = set(), {}, set(), []
+    for action, var in ops:
+        if action in (&quot;use&quot;, &quot;move&quot;, &quot;borrow&quot;, &quot;borrow_mut&quot;) and var in moved:
+            errors.append(f&quot;use of moved value {var}&quot;)
+            continue
+        if action == &quot;move&quot;:
+            moved.add(var)
+        elif action == &quot;borrow&quot;:
+            if var in mutable:
+                errors.append(f&quot;{var} is already borrowed as mutable&quot;)
+            shared[var] = shared.get(var, 0) + 1
+        elif action == &quot;borrow_mut&quot;:
+            if var in mutable or shared.get(var):
+                errors.append(f&quot;{var} is already borrowed&quot;)
+            mutable.add(var)
+        elif action == &quot;release&quot;:
+            shared.pop(var, None)
+            mutable.discard(var)
+    return errors
+
+print(check([(&quot;borrow&quot;, &quot;v&quot;), (&quot;borrow&quot;, &quot;v&quot;), (&quot;release&quot;, &quot;v&quot;), (&quot;borrow_mut&quot;, &quot;v&quot;)]))
+print(check([(&quot;move&quot;, &quot;s&quot;), (&quot;use&quot;, &quot;s&quot;)]))
+print(check([(&quot;borrow&quot;, &quot;v&quot;), (&quot;borrow_mut&quot;, &quot;v&quot;)]))</textarea></div>
+<h2 id="building-with-maturin">Building with maturin</h2>
+<p><strong>maturin</strong> (a free tool, <code>pip install maturin</code>) builds and packages PyO3 projects. On your own computer, with Rust installed (<code>rustup</code> from rust-lang.org):</p>
+<pre><code>pip install maturin
+maturin new stats            # choose &quot;pyo3&quot;: creates Cargo.toml, pyproject.toml and src/lib.rs
+cd stats
+maturin develop              # compile and install into the current virtual environment
+python -c &quot;import stats; print(stats.mean([1, 2, 3]))&quot;
+maturin build --release      # build a wheel to distribute
+</code></pre>
+<p><code>Cargo.toml</code> lists the Rust dependencies (<code>pyo3</code>, with the <code>abi3-py39</code> feature for one wheel that works on Python 3.9 and later, like Monday&rsquo;s stable ABI), and <code>pyproject.toml</code> tells <code>pip</code> to use maturin as the build backend. Projects usually publish pre-built wheels for each platform (with the free <code>maturin-action</code> in continuous integration), so users don&rsquo;t need Rust at all.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d4-e6"><textarea class="pc-src pc-code" hidden>def wheel_name(project, version, python_tag, abi_tag, platform):
+    return f&quot;{project}-{version}-{python_tag}-{abi_tag}-{platform}.whl&quot;
+
+print(wheel_name(&quot;stats&quot;, &quot;0.1.0&quot;, &quot;cp39&quot;, &quot;abi3&quot;, &quot;manylinux_2_17_x86_64&quot;))
+print(wheel_name(&quot;stats&quot;, &quot;0.1.0&quot;, &quot;cp313&quot;, &quot;cp313&quot;, &quot;macosx_11_0_arm64&quot;))
+print(&quot;the first works on any CPython from 3.9 on Linux x86-64; the second only on CPython 3.13 on Apple silicon&quot;)</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>PyO3 connects Rust to Python: #[pyfunction] exposes functions (doc comments become docstrings), #[pyclass] structs become classes with #[pyo3(get, set)] fields, #[pymethods] exposes methods with #[new] as the constructor, and #[pymodule] assembles the module. Arguments and results are converted automatically (integers with range checks, f64, bool, String and &amp;str, Vec, HashMap, Option as None, tuples), and .pyi stub files describe compiled modules to type checkers. Rust reports failure with Result (Ok or Err) and absence with Option (Some or None); ? returns early on errors; PyResult errors such as PyValueError::new_err become Python exceptions, and panics become PanicException. Ownership (one owner, moves, borrows: many shared or one mutable) is checked at compile time, preventing use-after-free and data races. maturin new, develop and build make, install and package the extension, with abi3 for one wheel across versions.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d4-types" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Rust types as Python types</div><div class="pc-prompt"><p>Write <code>python_type(rust)</code>: the Python type hint for a Rust type, as a string: integers (<code>i8</code> to <code>i64</code>, <code>u8</code> to <code>u64</code>, <code>isize</code>, <code>usize</code>) give <code>int</code>; <code>f32</code> and <code>f64</code> give <code>float</code>; <code>bool</code> gives <code>bool</code>; <code>String</code> and <code>&amp;str</code> give <code>str</code>; <code>Vec&lt;T&gt;</code> gives <code>list[T]</code>; <code>HashMap&lt;K, V&gt;</code> gives <code>dict[K, V]</code>; <code>Option&lt;T&gt;</code> gives <code>T | None</code>; <code>PyResult&lt;T&gt;</code> gives <code>T</code>; a tuple <code>(A, B, ...)</code> gives <code>tuple[A, B, ...]</code>; <code>()</code> gives <code>None</code>; anything else gives <code>object</code>. Nested types must work, so split at the <strong>top-level</strong> commas only.</p></div><textarea class="pc-src pc-code" hidden>INTS = {&quot;i8&quot;, &quot;i16&quot;, &quot;i32&quot;, &quot;i64&quot;, &quot;u8&quot;, &quot;u16&quot;, &quot;u32&quot;, &quot;u64&quot;, &quot;isize&quot;, &quot;usize&quot;}
+
+def python_type(rust):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_types():
+    &quot;type conversion&quot;
+    cases = {
+        &quot;i64&quot;: &quot;int&quot;, &quot;usize&quot;: &quot;int&quot;, &quot;f32&quot;: &quot;float&quot;, &quot;bool&quot;: &quot;bool&quot;, &quot;&amp;str&quot;: &quot;str&quot;, &quot;String&quot;: &quot;str&quot;,
+        &quot;Vec&lt;f64&gt;&quot;: &quot;list[float]&quot;, &quot;Option&lt;String&gt;&quot;: &quot;str | None&quot;, &quot;PyResult&lt;Vec&lt;i64&gt;&gt;&quot;: &quot;list[int]&quot;,
+        &quot;HashMap&lt;String, Vec&lt;u8&gt;&gt;&quot;: &quot;dict[str, list[int]]&quot;, &quot;(i32, f64)&quot;: &quot;tuple[int, float]&quot;,
+        &quot;()&quot;: &quot;None&quot;, &quot;PyResult&lt;()&gt;&quot;: &quot;None&quot;, &quot;Vec&lt;(String, Option&lt;i64&gt;)&gt;&quot;: &quot;list[tuple[str, int | None]]&quot;,
+        &quot;Counter&quot;: &quot;object&quot;,
+    }
+    for rust, py in cases.items():
+        assert python_type(rust) == py, rust</textarea><textarea class="pc-src pc-solution" hidden>INTS = {&quot;i8&quot;, &quot;i16&quot;, &quot;i32&quot;, &quot;i64&quot;, &quot;u8&quot;, &quot;u16&quot;, &quot;u32&quot;, &quot;u64&quot;, &quot;isize&quot;, &quot;usize&quot;}
+
+def _split(inner):
+    parts, depth, current = [], 0, &quot;&quot;
+    for ch in inner:
+        if ch in &quot;&lt;(&quot;:
+            depth += 1
+        elif ch in &quot;&gt;)&quot;:
+            depth -= 1
+        if ch == &quot;,&quot; and depth == 0:
+            parts.append(current.strip())
+            current = &quot;&quot;
+        else:
+            current += ch
+    if current.strip():
+        parts.append(current.strip())
+    return parts
+
+def python_type(rust):
+    rust = rust.strip()
+    if rust in INTS:
+        return &quot;int&quot;
+    if rust in (&quot;f32&quot;, &quot;f64&quot;):
+        return &quot;float&quot;
+    if rust == &quot;bool&quot;:
+        return &quot;bool&quot;
+    if rust in (&quot;String&quot;, &quot;&amp;str&quot;):
+        return &quot;str&quot;
+    if rust == &quot;()&quot;:
+        return &quot;None&quot;
+    if rust.startswith(&quot;(&quot;) and rust.endswith(&quot;)&quot;):
+        return &quot;tuple[&quot; + &quot;, &quot;.join(python_type(p) for p in _split(rust[1:-1])) + &quot;]&quot;
+    for name in (&quot;Vec&quot;, &quot;Option&quot;, &quot;PyResult&quot;, &quot;HashMap&quot;):
+        if rust.startswith(name + &quot;&lt;&quot;) and rust.endswith(&quot;&gt;&quot;):
+            args = [python_type(p) for p in _split(rust[len(name) + 1:-1])]
+            if name == &quot;Vec&quot;:
+                return f&quot;list[{args[0]}]&quot;
+            if name == &quot;Option&quot;:
+                return f&quot;{args[0]} | None&quot;
+            if name == &quot;PyResult&quot;:
+                return args[0]
+            return f&quot;dict[{args[0]}, {args[1]}]&quot;
+    return &quot;object&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d4-stubs" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Stubs for a compiled module</div><div class="pc-prompt"><p>Write <code>stub_lines(rust_source)</code>: for every function marked <code>#[pyfunction]</code> (the attribute on its own line just before <code>fn</code>), produce a stub line <code>def name(param: type, ...) -&gt; type: ...</code> using a <code>python_type</code> function (given in the starter). Parameters named <code>py</code> (PyO3&rsquo;s GIL token, <code>py: Python&lt;'_&gt;</code>) are left out; a function with no <code>-&gt;</code> returns <code>None</code>. Functions without the attribute are skipped. If the function has a <code>///</code> doc comment directly above the attribute, add it as the docstring: <code>def mean(values: list[float]) -&gt; float:</code> followed by an indented line <code>"""Average of a list."""</code> and <code>...</code>, all as separate list items.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+def python_type(rust):
+    simple = {&quot;i32&quot;: &quot;int&quot;, &quot;i64&quot;: &quot;int&quot;, &quot;u64&quot;: &quot;int&quot;, &quot;usize&quot;: &quot;int&quot;, &quot;f64&quot;: &quot;float&quot;,
+              &quot;bool&quot;: &quot;bool&quot;, &quot;String&quot;: &quot;str&quot;, &quot;&amp;str&quot;: &quot;str&quot;, &quot;()&quot;: &quot;None&quot;}
+    rust = rust.strip()
+    for wrapper, template in ((&quot;Vec&lt;&quot;, &quot;list[{}]&quot;), (&quot;Option&lt;&quot;, &quot;{} | None&quot;), (&quot;PyResult&lt;&quot;, &quot;{}&quot;)):
+        if rust.startswith(wrapper) and rust.endswith(&quot;&gt;&quot;):
+            return template.format(python_type(rust[len(wrapper):-1]))
+    return simple.get(rust, &quot;object&quot;)
+
+def stub_lines(rust_source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_stubs():
+    &quot;generating .pyi stubs&quot;
+    src = &#x27;&#x27;&#x27;
+/// Average of a list.
+#[pyfunction]
+fn mean(values: Vec&lt;f64&gt;) -&gt; PyResult&lt;f64&gt; {
+    Ok(values.iter().sum::&lt;f64&gt;() / values.len() as f64)
+}
+
+fn helper(x: f64) -&gt; f64 { x }
+
+#[pyfunction]
+fn shout(py: Python&lt;&#x27;_&gt;, text: &amp;str, times: usize) -&gt; String {
+    text.repeat(times)
+}
+
+#[pyfunction]
+fn reset() {
+}
+&#x27;&#x27;&#x27;
+    assert stub_lines(src) == [
+        &quot;def mean(values: list[float]) -&gt; float:&quot;,
+        &#x27;    &quot;&quot;&quot;Average of a list.&quot;&quot;&quot;&#x27;,
+        &quot;    ...&quot;,
+        &quot;def shout(text: str, times: int) -&gt; str: ...&quot;,
+        &quot;def reset() -&gt; None: ...&quot;,
+    ]
+    assert stub_lines(&quot;fn private() {}&quot;) == []</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+def python_type(rust):
+    simple = {&quot;i32&quot;: &quot;int&quot;, &quot;i64&quot;: &quot;int&quot;, &quot;u64&quot;: &quot;int&quot;, &quot;usize&quot;: &quot;int&quot;, &quot;f64&quot;: &quot;float&quot;,
+              &quot;bool&quot;: &quot;bool&quot;, &quot;String&quot;: &quot;str&quot;, &quot;&amp;str&quot;: &quot;str&quot;, &quot;()&quot;: &quot;None&quot;}
+    rust = rust.strip()
+    for wrapper, template in ((&quot;Vec&lt;&quot;, &quot;list[{}]&quot;), (&quot;Option&lt;&quot;, &quot;{} | None&quot;), (&quot;PyResult&lt;&quot;, &quot;{}&quot;)):
+        if rust.startswith(wrapper) and rust.endswith(&quot;&gt;&quot;):
+            return template.format(python_type(rust[len(wrapper):-1]))
+    return simple.get(rust, &quot;object&quot;)
+
+PATTERN = re.compile(
+    r&quot;((?:^[ \t]*///[^\n]*\n)*)^[ \t]*#\[pyfunction\]\s*\n\s*fn (\w+)\s*\(([^)]*)\)\s*(?:-&gt;\s*([^{]+?))?\s*\{&quot;,
+    re.M,
+)
+
+def stub_lines(rust_source):
+    lines = []
+    for doc_block, name, params, returns in PATTERN.findall(rust_source):
+        args = []
+        for param in filter(None, (p.strip() for p in params.split(&quot;,&quot;))):
+            pname, ptype = (s.strip() for s in param.split(&quot;:&quot;, 1))
+            if pname != &quot;py&quot;:
+                args.append(f&quot;{pname}: {python_type(ptype)}&quot;)
+        ret = python_type(returns) if returns else &quot;None&quot;
+        header = f&quot;def {name}({&#x27;, &#x27;.join(args)}) -&gt; {ret}:&quot;
+        docs = [line.strip()[3:].strip() for line in doc_block.strip().splitlines() if line.strip()]
+        if docs:
+            lines += [header, f&#x27;    &quot;&quot;&quot;{&quot; &quot;.join(docs)}&quot;&quot;&quot;&#x27;, &quot;    ...&quot;]
+        else:
+            lines.append(header + &quot; ...&quot;)
+    return lines</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d4-result" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Result and the ? operator</div><div class="pc-prompt"><p>Write Python versions of Rust&rsquo;s <code>Result</code>: classes <code>Ok(value)</code> and <code>Err(error)</code>, both with <code>is_ok()</code>, <code>unwrap()</code> (the value, or for <code>Err</code> raise <code>RuntimeError(f"called unwrap on Err: {error}")</code>, like a panic), <code>unwrap_or(default)</code>, <code>map(func)</code> (applies <code>func</code> to an <code>Ok</code>&rsquo;s value, leaving an <code>Err</code> unchanged), <code>and_then(func)</code> (for <code>Ok</code>, returns <code>func(value)</code>, which is itself a result) and <code>==</code>. Then <code>collect(results)</code>: like Rust&rsquo;s <code>?</code> in a loop: <code>Ok(list of values)</code> if every result is <code>Ok</code>, otherwise the <strong>first</strong> <code>Err</code>.</p></div><textarea class="pc-src pc-code" hidden>class Ok:
+    def __init__(self, value):
+        ___
+
+class Err:
+    def __init__(self, error):
+        ___
+
+def collect(results):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_result():
+    &quot;Result&quot;
+    assert Ok(2).map(lambda x: x * 10) == Ok(20) and Err(&quot;bad&quot;).map(lambda x: x * 10) == Err(&quot;bad&quot;)
+    assert Ok(5).unwrap() == 5 and Err(&quot;e&quot;).unwrap_or(0) == 0 and Ok(1).is_ok() and not Err(1).is_ok()
+    half = lambda x: Ok(x // 2) if x % 2 == 0 else Err(f&quot;{x} is odd&quot;)
+    assert Ok(8).and_then(half).and_then(half) == Ok(2) and Ok(6).and_then(half).and_then(half) == Err(&quot;3 is odd&quot;)
+    try:
+        Err(&quot;disk full&quot;).unwrap()
+        assert False
+    except RuntimeError as e:
+        assert str(e) == &quot;called unwrap on Err: disk full&quot;
+    assert collect([Ok(1), Ok(2)]) == Ok([1, 2]) and collect([Ok(1), Err(&quot;a&quot;), Err(&quot;b&quot;)]) == Err(&quot;a&quot;)
+    assert collect([]) == Ok([]) and Ok(1) != Err(1)</textarea><textarea class="pc-src pc-solution" hidden>class Ok:
+    def __init__(self, value):
+        self.value = value
+    def is_ok(self):
+        return True
+    def unwrap(self):
+        return self.value
+    def unwrap_or(self, default):
+        return self.value
+    def map(self, func):
+        return Ok(func(self.value))
+    def and_then(self, func):
+        return func(self.value)
+    def __eq__(self, other):
+        return isinstance(other, Ok) and other.value == self.value
+    def __repr__(self):
+        return f&quot;Ok({self.value!r})&quot;
+
+class Err:
+    def __init__(self, error):
+        self.error = error
+    def is_ok(self):
+        return False
+    def unwrap(self):
+        raise RuntimeError(f&quot;called unwrap on Err: {self.error}&quot;)
+    def unwrap_or(self, default):
+        return default
+    def map(self, func):
+        return self
+    def and_then(self, func):
+        return self
+    def __eq__(self, other):
+        return isinstance(other, Err) and other.error == self.error
+    def __repr__(self):
+        return f&quot;Err({self.error!r})&quot;
+
+def collect(results):
+    values = []
+    for r in results:
+        if not r.is_ok():
+            return r
+        values.append(r.value)
+    return Ok(values)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d4-borrow" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A tiny borrow checker</div><div class="pc-prompt"><p>Simulate Rust&rsquo;s ownership rules. Operations are <code>(action, variable)</code> pairs: <code>"let"</code> (create an owned value), <code>"move"</code> (the value moves away to another owner), <code>"copy"</code> (allowed any time: it&rsquo;s a copyable type), <code>"use"</code>, <code>"borrow"</code> (a shared reference), <code>"borrow_mut"</code> (a mutable reference) and <code>"end"</code> (all borrows of that variable end). Write <code>borrow_errors(ops)</code>: a list of error messages, in order: <code>"use of moved value: x"</code> for any use, move or borrow after a move; <code>"cannot borrow x as mutable because it is also borrowed as immutable"</code>; <code>"cannot borrow x as mutable more than once at a time"</code>; <code>"cannot borrow x as immutable because it is also borrowed as mutable"</code>; and <code>"x is not declared"</code> for using a variable never created with <code>let</code>. An operation that causes an error doesn&rsquo;t change the state.</p></div><textarea class="pc-src pc-code" hidden>def borrow_errors(ops):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_borrow():
+    &quot;ownership and borrowing&quot;
+    assert borrow_errors([(&quot;let&quot;, &quot;v&quot;), (&quot;borrow&quot;, &quot;v&quot;), (&quot;borrow&quot;, &quot;v&quot;), (&quot;end&quot;, &quot;v&quot;), (&quot;borrow_mut&quot;, &quot;v&quot;), (&quot;use&quot;, &quot;v&quot;)]) == []
+    assert borrow_errors([(&quot;let&quot;, &quot;s&quot;), (&quot;move&quot;, &quot;s&quot;), (&quot;use&quot;, &quot;s&quot;)]) == [&quot;use of moved value: s&quot;]
+    assert borrow_errors([(&quot;let&quot;, &quot;v&quot;), (&quot;borrow&quot;, &quot;v&quot;), (&quot;borrow_mut&quot;, &quot;v&quot;)]) == [
+        &quot;cannot borrow v as mutable because it is also borrowed as immutable&quot;]
+    assert borrow_errors([(&quot;let&quot;, &quot;v&quot;), (&quot;borrow_mut&quot;, &quot;v&quot;), (&quot;borrow_mut&quot;, &quot;v&quot;), (&quot;borrow&quot;, &quot;v&quot;)]) == [
+        &quot;cannot borrow v as mutable more than once at a time&quot;,
+        &quot;cannot borrow v as immutable because it is also borrowed as mutable&quot;]
+    assert borrow_errors([(&quot;use&quot;, &quot;ghost&quot;)]) == [&quot;ghost is not declared&quot;]
+    assert borrow_errors([(&quot;let&quot;, &quot;n&quot;), (&quot;copy&quot;, &quot;n&quot;), (&quot;copy&quot;, &quot;n&quot;), (&quot;use&quot;, &quot;n&quot;)]) == []
+    assert borrow_errors([(&quot;let&quot;, &quot;a&quot;), (&quot;move&quot;, &quot;a&quot;), (&quot;borrow&quot;, &quot;a&quot;), (&quot;let&quot;, &quot;a&quot;), (&quot;use&quot;, &quot;a&quot;)]) == [&quot;use of moved value: a&quot;]</textarea><textarea class="pc-src pc-solution" hidden>def borrow_errors(ops):
+    declared, moved, shared, mutable = set(), set(), {}, set()
+    errors = []
+    for action, var in ops:
+        if action == &quot;let&quot;:
+            declared.add(var)
+            moved.discard(var)
+            shared.pop(var, None)
+            mutable.discard(var)
+            continue
+        if var not in declared:
+            errors.append(f&quot;{var} is not declared&quot;)
+            continue
+        if action == &quot;end&quot;:
+            shared.pop(var, None)
+            mutable.discard(var)
+            continue
+        if var in moved and action != &quot;copy&quot;:
+            errors.append(f&quot;use of moved value: {var}&quot;)
+            continue
+        if action == &quot;move&quot;:
+            moved.add(var)
+        elif action == &quot;borrow&quot;:
+            if var in mutable:
+                errors.append(f&quot;cannot borrow {var} as immutable because it is also borrowed as mutable&quot;)
+                continue
+            shared[var] = shared.get(var, 0) + 1
+        elif action == &quot;borrow_mut&quot;:
+            if var in mutable:
+                errors.append(f&quot;cannot borrow {var} as mutable more than once at a time&quot;)
+                continue
+            if shared.get(var):
+                errors.append(f&quot;cannot borrow {var} as mutable because it is also borrowed as immutable&quot;)
+                continue
+            mutable.add(var)
+    return errors</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d4-errors" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Rust errors as Python exceptions</div><div class="pc-prompt"><p>PyO3 raises a Python exception for each Rust error type it&rsquo;s told about. Write <code>raise_for(err)</code>: given a Rust-style error as a <code>(kind, message)</code> pair, raise the matching Python exception from <code>ERRORS</code> (<code>"PyValueError"</code> to <code>ValueError</code>, and so on), and for an unknown kind raise <code>RuntimeError</code> with the message prefixed by the kind (<code>"IoError: disk full"</code>). Then <code>call_rust(func, *args)</code>: call a function returning an <code>("ok", value)</code> or <code>("err", (kind, message))</code> pair, return the value or raise as <code>raise_for</code> does, and turn a Python exception raised <strong>inside</strong> <code>func</code> (a &ldquo;panic&rdquo;) into <code>RuntimeError("panic: " + str(e))</code>.</p></div><textarea class="pc-src pc-code" hidden>ERRORS = {&quot;PyValueError&quot;: ValueError, &quot;PyTypeError&quot;: TypeError, &quot;PyKeyError&quot;: KeyError,
+          &quot;PyIndexError&quot;: IndexError, &quot;PyZeroDivisionError&quot;: ZeroDivisionError}
+
+def raise_for(err):
+    ___
+
+def call_rust(func, *args):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_errors():
+    &quot;exceptions across the boundary&quot;
+    def mean(values):
+        if not values:
+            return (&quot;err&quot;, (&quot;PyValueError&quot;, &quot;mean of empty list&quot;))
+        return (&quot;ok&quot;, sum(values) / len(values))
+    assert call_rust(mean, [1, 2, 3]) == 2.0
+    try:
+        call_rust(mean, [])
+        assert False
+    except ValueError as e:
+        assert str(e) == &quot;mean of empty list&quot;
+    try:
+        raise_for((&quot;IoError&quot;, &quot;disk full&quot;))
+        assert False
+    except RuntimeError as e:
+        assert str(e) == &quot;IoError: disk full&quot;
+    def panics(xs):
+        return (&quot;ok&quot;, xs[10])
+    try:
+        call_rust(panics, [1])
+        assert False
+    except RuntimeError as e:
+        assert str(e) == &quot;panic: list index out of range&quot;</textarea><textarea class="pc-src pc-solution" hidden>ERRORS = {&quot;PyValueError&quot;: ValueError, &quot;PyTypeError&quot;: TypeError, &quot;PyKeyError&quot;: KeyError,
+          &quot;PyIndexError&quot;: IndexError, &quot;PyZeroDivisionError&quot;: ZeroDivisionError}
+
+def raise_for(err):
+    kind, message = err
+    if kind in ERRORS:
+        raise ERRORS[kind](message)
+    raise RuntimeError(f&quot;{kind}: {message}&quot;)
+
+def call_rust(func, *args):
+    try:
+        status, payload = func(*args)
+    except Exception as e:
+        raise RuntimeError(&quot;panic: &quot; + str(e)) from None
+    if status == &quot;ok&quot;:
+        return payload
+    raise_for(payload)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Unwrapping a None</div><div class="pc-prompt"><p>The lookup returns a Rust-style <code>Option</code> (here <code>None</code> when the key is missing), and calling the simulated <code>unwrap</code> on it panics, so this crashes with <code>RuntimeError</code>. Use a default for a missing value instead (Rust&rsquo;s <code>unwrap_or</code>), so this prints <code>0</code>.</p></div><textarea class="pc-src pc-code" hidden>def unwrap(option):
+    if option is None:
+        raise RuntimeError(&quot;called `Option::unwrap()` on a `None` value&quot;)
+    return option
+
+def unwrap_or(option, default):
+    return default if option is None else option
+
+stock = {&quot;tea&quot;: 5}
+print(unwrap(stock.get(&quot;jam&quot;)))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;handle None&quot;
+    expect_output(&quot;0&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def unwrap(option):
+    if option is None:
+        raise RuntimeError(&quot;called `Option::unwrap()` on a `None` value&quot;)
+    return option
+
+def unwrap_or(option, default):
+    return default if option is None else option
+
+stock = {&quot;tea&quot;: 5}
+print(unwrap_or(stock.get(&quot;jam&quot;), 0))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A stub that told the wrong story</div><div class="pc-prompt"><p>The Rust function returns <code>PyResult&lt;Vec&lt;f64&gt;&gt;</code>, but the stub generator only strips <code>PyResult</code> and maps the rest as a plain name, so the stub says <code>-&gt; object</code> and this prints <code>def scores() -&gt; object: ...</code>. Map the inner <code>Vec&lt;f64&gt;</code> too (recursively) so it prints <code>def scores() -&gt; list[float]: ...</code>.</p></div><textarea class="pc-src pc-code" hidden>SIMPLE = {&quot;f64&quot;: &quot;float&quot;, &quot;i64&quot;: &quot;int&quot;, &quot;String&quot;: &quot;str&quot;}
+
+def python_type(rust):
+    if rust.startswith(&quot;PyResult&lt;&quot;):
+        rust = rust[len(&quot;PyResult&lt;&quot;):-1]
+    return SIMPLE.get(rust, &quot;object&quot;)
+
+print(f&quot;def scores() -&gt; {python_type(&#x27;PyResult&lt;Vec&lt;f64&gt;&gt;&#x27;)}: ...&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;recursive types&quot;
+    expect_output(&quot;def scores() -&gt; list[float]: ...&quot;)</textarea><textarea class="pc-src pc-solution" hidden>SIMPLE = {&quot;f64&quot;: &quot;float&quot;, &quot;i64&quot;: &quot;int&quot;, &quot;String&quot;: &quot;str&quot;}
+
+def python_type(rust):
+    if rust.startswith(&quot;PyResult&lt;&quot;):
+        return python_type(rust[len(&quot;PyResult&lt;&quot;):-1])
+    if rust.startswith(&quot;Vec&lt;&quot;):
+        return f&quot;list[{python_type(rust[len(&#x27;Vec&lt;&#x27;):-1])}]&quot;
+    return SIMPLE.get(rust, &quot;object&quot;)
+
+print(f&quot;def scores() -&gt; {python_type(&#x27;PyResult&lt;Vec&lt;f64&gt;&gt;&#x27;)}: ...&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">An error that wasn&rsquo;t passed on</div><div class="pc-prompt"><p>This imitation of Rust&rsquo;s <code>?</code> checks the first result but ignores an <code>Err</code> in the second, so it adds a string to a number and crashes with <code>TypeError</code>. Return the second error too, as <code>?</code> would, so this prints <code>Err: bad digit 'x'</code>.</p></div><textarea class="pc-src pc-code" hidden>def parse(text):
+    return (&quot;ok&quot;, int(text)) if text.isdigit() else (&quot;err&quot;, f&quot;bad digit {text!r}&quot;)
+
+def add(a, b):
+    x = parse(a)
+    if x[0] == &quot;err&quot;:
+        return x
+    y = parse(b)
+    return (&quot;ok&quot;, x[1] + y[1])
+
+result = add(&quot;2&quot;, &quot;x&quot;)
+print(f&quot;Err: {result[1]}&quot; if result[0] == &quot;err&quot; else result[1])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;pass errors on&quot;
+    expect_output(&quot;Err: bad digit &#x27;x&#x27;&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def parse(text):
+    return (&quot;ok&quot;, int(text)) if text.isdigit() else (&quot;err&quot;, f&quot;bad digit {text!r}&quot;)
+
+def add(a, b):
+    x = parse(a)
+    if x[0] == &quot;err&quot;:
+        return x
+    y = parse(b)
+    if y[0] == &quot;err&quot;:
+        return y
+    return (&quot;ok&quot;, x[1] + y[1])
+
+result = add(&quot;2&quot;, &quot;x&quot;)
+print(f&quot;Err: {result[1]}&quot; if result[0] == &quot;err&quot; else result[1])</textarea></div>
+<div class="parsons" data-id="w068d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A PyO3 function</div><div class="pc-prompt"><p>Arrange the lines of a Rust function exposed to Python that raises <code>ValueError</code> for an empty list (as you&rsquo;d write it in <code>src/lib.rs</code>). One line is a trap.</p></div><script type="application/json">{"lines": ["#[pyfunction]", "fn mean(values: Vec<f64>) -> PyResult<f64> {", "    if values.is_empty() {", "        return Err(PyValueError::new_err(\"mean of empty list\"));", "    }", "    Ok(values.iter().sum::<f64>() / values.len() as f64)", "}"], "distractors": ["    raise ValueError(\"mean of empty list\")"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the Python type for the Rust type Option&lt;i64&gt;, as a string
+q = ___   # the attribute that exposes a Rust function to Python
+r = ___   # True or False: in Rust, a value can have a mutable borrow and a shared borrow at the same time
+s = ___   # the Python exception for Err(PyKeyError::new_err(&quot;x&quot;)), as a string
+t = ___   # the maturin command that compiles and installs into the current environment</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;int | None&quot; and q == &quot;#[pyfunction]&quot; and r is False, &quot;p, q and r&quot;
+    assert s == &quot;KeyError&quot; and t == &quot;maturin develop&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;int | None&quot;
+q = &quot;#[pyfunction]&quot;
+r = False
+s = &quot;KeyError&quot;
+t = &quot;maturin develop&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w068d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What is PyO3?", "answer": 1, "explain": "It handles conversions, reference counts and the GIL.", "options": ["A Python interpreter", "A Rust library for writing Python extension modules", "A C compiler", "A package index"]}, {"type": "mc", "q": "What does", "answer": 1, "explain": "<h1>[pymethods] adds its methods.</h1>", "options": ["Defines a Rust trait", "Makes a Rust struct into a Python class", "Imports a class", "Nothing"]}, {"type": "mc", "q": "What does Vec<f64> become in Python?", "answer": 1, "explain": "Copied across the boundary.", "options": ["A tuple", "A list of floats", "A NumPy array", "A string"]}, {"type": "mc", "q": "What is a .pyi file for?", "answer": 1, "explain": "Compiled modules have no Python source to read.", "options": ["Compiling", "Describing a module&rsquo;s Python signatures to type checkers and editors", "Tests", "Documentation only"]}, {"type": "mc", "q": "What does Rust&rsquo;s ? operator do?", "answer": 1, "explain": "Like re-raising, but explicit.", "options": ["Asks a question", "Returns early with the error if a Result is Err, otherwise unwraps the value", "Panics", "Prints"]}, {"type": "mc", "q": "How does a PyO3 function raise ValueError?", "answer": 1, "explain": "PyResult carries the error.", "options": ["raise ValueError", "Return Err(PyValueError::new_err(&ldquo;&hellip;&rdquo;))", "panic!", "It can&rsquo;t"]}, {"type": "mc", "q": "What happens when a Rust value is moved?", "answer": 1, "explain": "One owner at a time.", "options": ["It&rsquo;s copied", "The old variable can&rsquo;t be used any more", "It&rsquo;s freed", "Nothing"]}, {"type": "mc", "q": "Which borrows can exist at once?", "answer": 1, "explain": "That rule rules out data races.", "options": ["Any", "Many shared borrows, or exactly one mutable borrow", "Only one shared borrow", "Two mutable borrows"]}, {"type": "mc", "q": "What does maturin develop do?", "answer": 1, "explain": "maturin build makes wheels.", "options": ["Writes Rust", "Compiles the extension and installs it into the current environment", "Publishes to PyPI", "Runs tests"]}, {"type": "output", "q": "What does this print?", "answer": "float object", "explain": "Containers need recursive handling.", "code": "def python_type(t):\n    return {\"f64\": \"float\"}.get(t, \"object\")\nprint(python_type(\"f64\"), python_type(\"Vec<f64>\"))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a stub file for a whole module</div><div class="pc-prompt"><p>Write <code>module_stub(rust_source)</code>: the text of a <code>.pyi</code> stub for a PyO3 module, built from:</p>
+<ul>
+<li><code>#[pyfunction]</code> functions, as in the stubs exercise (without docstrings), excluding a <code>py</code> parameter;</li>
+<li><code>#[pyclass] struct Name { ... }</code> blocks: a <code>class Name:</code> line, then, for each field with <code>#[pyo3(get)]</code> or <code>#[pyo3(get, set)]</code> on the line before it, an indented <code>field: type</code> line (fields without those aren&rsquo;t visible from Python);</li>
+<li><code>#[pymethods] impl Name { ... }</code> blocks: inside the class, a method stub for each <code>fn</code>: the constructor (marked <code>#[new]</code>) becomes <code>def __init__(self, ...) -&gt; None: ...</code>; methods with <code>&amp;self</code> or <code>&amp;mut self</code> become <code>def name(self, ...) -&gt; type: ...</code>; the <code>self</code> parameter is written as <code>self</code>.</li>
+</ul>
+<p>Use the <code>python_type</code> helper in the starter. Output, in order: the function stubs, then each class (fields first, then methods), with a blank line before each class. Classes with nothing visible get an indented <code>...</code>.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+def python_type(rust):
+    simple = {&quot;i32&quot;: &quot;int&quot;, &quot;i64&quot;: &quot;int&quot;, &quot;u64&quot;: &quot;int&quot;, &quot;usize&quot;: &quot;int&quot;, &quot;f64&quot;: &quot;float&quot;,
+              &quot;bool&quot;: &quot;bool&quot;, &quot;String&quot;: &quot;str&quot;, &quot;&amp;str&quot;: &quot;str&quot;, &quot;()&quot;: &quot;None&quot;, &quot;Self&quot;: &quot;None&quot;}
+    rust = rust.strip()
+    for wrapper, template in ((&quot;Vec&lt;&quot;, &quot;list[{}]&quot;), (&quot;Option&lt;&quot;, &quot;{} | None&quot;), (&quot;PyResult&lt;&quot;, &quot;{}&quot;)):
+        if rust.startswith(wrapper) and rust.endswith(&quot;&gt;&quot;):
+            return template.format(python_type(rust[len(wrapper):-1]))
+    return simple.get(rust, &quot;object&quot;)
+
+def module_stub(rust_source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_module_stub():
+    &quot;a .pyi for a module&quot;
+    src = &#x27;&#x27;&#x27;
+#[pyfunction]
+fn mean(values: Vec&lt;f64&gt;) -&gt; PyResult&lt;f64&gt; {
+    Ok(0.0)
+}
+
+#[pyclass]
+struct Counter {
+    #[pyo3(get)]
+    count: u64,
+    step: u64,
+    #[pyo3(get, set)]
+    label: String,
+}
+
+#[pymethods]
+impl Counter {
+    #[new]
+    fn new(step: u64) -&gt; Self {
+        Counter { count: 0, step, label: String::new() }
+    }
+    fn add(&amp;mut self, times: u64) {
+        self.count += self.step * times;
+    }
+    fn describe(&amp;self) -&gt; String {
+        format!(&quot;{}&quot;, self.count)
+    }
+}
+
+#[pyclass]
+struct Empty {
+    hidden: i64,
+}
+&#x27;&#x27;&#x27;
+    assert module_stub(src) == (
+        &quot;def mean(values: list[float]) -&gt; float: ...\n&quot;
+        &quot;\n&quot;
+        &quot;class Counter:\n&quot;
+        &quot;    count: int\n&quot;
+        &quot;    label: str\n&quot;
+        &quot;    def __init__(self, step: int) -&gt; None: ...\n&quot;
+        &quot;    def add(self, times: int) -&gt; None: ...\n&quot;
+        &quot;    def describe(self) -&gt; str: ...\n&quot;
+        &quot;\n&quot;
+        &quot;class Empty:\n&quot;
+        &quot;    ...&quot;
+    )</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+def python_type(rust):
+    simple = {&quot;i32&quot;: &quot;int&quot;, &quot;i64&quot;: &quot;int&quot;, &quot;u64&quot;: &quot;int&quot;, &quot;usize&quot;: &quot;int&quot;, &quot;f64&quot;: &quot;float&quot;,
+              &quot;bool&quot;: &quot;bool&quot;, &quot;String&quot;: &quot;str&quot;, &quot;&amp;str&quot;: &quot;str&quot;, &quot;()&quot;: &quot;None&quot;, &quot;Self&quot;: &quot;None&quot;}
+    rust = rust.strip()
+    for wrapper, template in ((&quot;Vec&lt;&quot;, &quot;list[{}]&quot;), (&quot;Option&lt;&quot;, &quot;{} | None&quot;), (&quot;PyResult&lt;&quot;, &quot;{}&quot;)):
+        if rust.startswith(wrapper) and rust.endswith(&quot;&gt;&quot;):
+            return template.format(python_type(rust[len(wrapper):-1]))
+    return simple.get(rust, &quot;object&quot;)
+
+FN = re.compile(r&quot;fn (\w+)\s*\(([^)]*)\)\s*(?:-&gt;\s*([^{]+?))?\s*\{&quot;)
+
+def _params(params, keep_self):
+    out = []
+    for p in filter(None, (x.strip() for x in params.split(&quot;,&quot;))):
+        if p in (&quot;&amp;self&quot;, &quot;&amp;mut self&quot;, &quot;self&quot;):
+            if keep_self:
+                out.append(&quot;self&quot;)
+            continue
+        name, rtype = (s.strip() for s in p.split(&quot;:&quot;, 1))
+        if name != &quot;py&quot;:
+            out.append(f&quot;{name}: {python_type(rtype)}&quot;)
+    return out
+
+def module_stub(rust_source):
+    lines = []
+    for m in re.finditer(r&quot;#\[pyfunction\]\s*\n\s*&quot; + FN.pattern, rust_source):
+        name, params, returns = m.group(1), m.group(2), m.group(3)
+        ret = python_type(returns) if returns else &quot;None&quot;
+        lines.append(f&quot;def {name}({&#x27;, &#x27;.join(_params(params, False))}) -&gt; {ret}: ...&quot;)
+    methods = {}
+    for m in re.finditer(r&quot;#\[pymethods\]\s*impl (\w+)\s*\{(.*?)\n\}&quot;, rust_source, re.S):
+        cls, body = m.group(1), m.group(2)
+        out = []
+        for fm in re.finditer(r&quot;(#\[new\]\s*)?&quot; + FN.pattern, body):
+            is_new, name, params, returns = fm.group(1), fm.group(2), fm.group(3), fm.group(4)
+            args = [&quot;self&quot;] + _params(params, False)
+            if is_new:
+                out.append(f&quot;    def __init__({&#x27;, &#x27;.join(args)}) -&gt; None: ...&quot;)
+            else:
+                ret = python_type(returns) if returns else &quot;None&quot;
+                out.append(f&quot;    def {name}({&#x27;, &#x27;.join(args)}) -&gt; {ret}: ...&quot;)
+        methods[cls] = out
+    for m in re.finditer(r&quot;#\[pyclass\]\s*struct (\w+)\s*\{(.*?)\n\}&quot;, rust_source, re.S):
+        cls, body = m.group(1), m.group(2)
+        visible, exposed = [], False
+        for raw in body.splitlines():
+            line = raw.strip()
+            if line.startswith(&quot;#[pyo3(&quot;) and &quot;get&quot; in line:
+                exposed = True
+                continue
+            if &quot;:&quot; in line and exposed:
+                name, rtype = (s.strip() for s in line.rstrip(&quot;,&quot;).split(&quot;:&quot;, 1))
+                visible.append(f&quot;    {name}: {python_type(rtype)}&quot;)
+            exposed = False
+        members = visible + methods.get(cls, [])
+        lines += [&quot;&quot;, f&quot;class {cls}:&quot;] + (members or [&quot;    ...&quot;])
+    return &quot;\n&quot;.join(lines)</textarea><template class="pc-src pc-hint">Use regular expressions for each kind of block: <code>#\[pyclass\]\s*struct (\w+)\s*\{(.*?)\n\}</code> with <code>re.S</code> captures a struct&rsquo;s name and body. Inside a body, look at it line by line, remembering whether the previous line was a <code>#[pyo3(get...)]</code> attribute. For <code>impl</code> blocks, find each <code>fn</code> with its parameters and optional <code>-&gt;</code> type, and note whether <code>#[new]</code> came just before it.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, install Rust with <code>rustup</code>, then follow the maturin steps above to build the <code>stats</code> module and call it from Python. Tomorrow: the most important question of the week, which is when extending Python is worth it at all.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w068d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w068d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w068d4", "week": 68, "day": 4, "title": "Rust extensions with PyO3", "exercises": [{"id": "w068d4-types", "title": "Rust types as Python types", "points": 15}, {"id": "w068d4-stubs", "title": "Stubs for a compiled module", "points": 15}, {"id": "w068d4-result", "title": "Result and the ? operator", "points": 10}, {"id": "w068d4-borrow", "title": "A tiny borrow checker", "points": 15}, {"id": "w068d4-errors", "title": "Rust errors as Python exceptions", "points": 10}, {"id": "w068d4-bug1", "title": "Unwrapping a None", "points": 10}, {"id": "w068d4-bug2", "title": "A stub that told the wrong story", "points": 10}, {"id": "w068d4-bug3", "title": "An error that wasn't passed on", "points": 10}, {"id": "w068d4-trace", "title": "Predict them", "points": 10}, {"id": "w068d4-challenge", "title": "Challenge: a stub file for a whole module", "points": 25}], "points": 130}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
