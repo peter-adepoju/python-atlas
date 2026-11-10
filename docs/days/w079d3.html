@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="b54d8b61c9">
+<title>Week 79 Day 3: Secrets and configuration | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=b54d8b61c9">
+<link rel="stylesheet" href="../assets/css/site.css?v=b54d8b61c9">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=b54d8b61c9"></script>
+<script src="../assets/vendor/codemirror.js?v=b54d8b61c9" defer></script>
+<meta name="description" content="Passwords, API keys, signing keys and database URLs are the keys to everything else, and they leak in boring ways: pasted into code and pushed to a public...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w079d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 79 Day 3: Secrets and configuration">
+<meta property="og:description" content="Passwords, API keys, signing keys and database URLs are the keys to everything else, and they leak in boring ways: pasted into code and pushed to a public...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w079d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-79">Week 79: Security</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#where-secrets-leak" data-sec="where-secrets-leak">Where secrets leak</a></li><li><a href="#configuration-from-the-environment" data-sec="configuration-from-the-environment">Configuration from the environment</a></li><li><a href="#finding-leaked-secrets" data-sec="finding-leaked-secrets">Finding leaked secrets</a></li><li><a href="#making-storing-and-rotating-secrets" data-sec="making-storing-and-rotating-secrets">Making, storing and rotating secrets</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w079d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-79">Week 79: Security</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 79, Day 3</span></p>
+      <h1>Secrets and configuration</h1>
+      <div class="day-intro"><p>Passwords, API keys, signing keys and database URLs are the keys to everything else, and they leak in boring ways: pasted into code and pushed to a public repository, printed in a log, shown on an error page, baked into a container image, or left in a URL that every proxy records. Today is about keeping secrets out of all those places. You&rsquo;ll load configuration from the environment and from .env files without committing them, wrap secrets so they can&rsquo;t be printed by accident, scan code for keys before it&rsquo;s pushed, generate and store API keys properly, and rotate keys without downtime. And you&rsquo;ll learn the rule for when a secret does leak: revoke it first, ask questions later.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>List where secrets leak, and keep them out of code, repositories, logs, URLs and images</li><li>Load configuration from environment variables and .env files, validating it at startup</li><li>Wrap secrets so that printing or logging them shows a mask, not the value</li><li>Detect committed secrets by pattern and by entropy, and respond properly to a leak</li><li>Generate API keys with secrets, store only their hashes, and rotate signing keys safely</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Where secrets leak: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Configuration from the environment: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Finding leaked secrets: 20 min"></span><span class="plan-seg s0" style="flex:15" title="Making, storing and rotating secrets: 15 min"></span><span class="plan-seg s1" style="flex:65" title="Practice: 65 min"></span><span class="plan-seg s0" style="flex:25" title="Quiz and daily challenge: 25 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">7 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Where secrets leak</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Configuration from the environment</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Finding leaked secrets</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Making, storing and rotating secrets</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">65 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">25 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w079d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w079d3.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w079d3-p1"><textarea class="pc-src pc-code" hidden>import random, secrets
+
+random.seed(2026)
+reset_token = &quot;&quot;.join(random.choice(&quot;abcdef0123456789&quot;) for _ in range(16))
+
+random.seed(2026)                     # an attacker who guesses the seed
+guess = &quot;&quot;.join(random.choice(&quot;abcdef0123456789&quot;) for _ in range(16))
+print(reset_token == guess)
+
+print(len(secrets.token_hex(16)), len(secrets.token_urlsafe(32)))</textarea></div>
+<p>The <code>random</code> module is built for simulations: its numbers are <strong>predictable</strong> from its internal state, and that state can be recovered from a few hundred outputs, or guessed if it was seeded with something like the time. Anything an attacker shouldn&rsquo;t be able to guess (tokens, passwords, keys, reset links) comes from the <strong><code>secrets</code></strong> module, which uses the operating system&rsquo;s cryptographic random source.</p>
+<h2 id="where-secrets-leak">Where secrets leak</h2>
+<p>A <strong>secret</strong> is anything that grants access: passwords, API keys and tokens, private keys, signing keys (Week 77&rsquo;s <code>SECRET_KEY</code>), database URLs with passwords in them, and session cookies. The usual ways they escape:</p>
+<ul>
+<li><strong>Source code</strong>: <code>API_KEY = "sk_live_..."</code> in a file, pushed to a repository. Bots scan public repositories for keys within <strong>minutes</strong> of a push, and deleting the file doesn&rsquo;t help: it&rsquo;s still in the <strong>Git history</strong> (Week 21) and in every clone.</li>
+<li><strong>Logs and error pages</strong>: a request logged with its <code>Authorization</code> header, an exception message containing a connection string, a debug page showing settings (Monday).</li>
+<li><strong>URLs</strong>: <code>https://api.example/data?key=SECRET</code> is recorded by proxies, servers, browser history and analytics. Send secrets in <strong>headers</strong> instead.</li>
+<li><strong>Images and packages</strong>: a <code>.env</code> file copied into a Docker image (Week 77), or included in a published package (Week 73).</li>
+<li><strong>The client side</strong>: anything in JavaScript, a mobile app or a desktop app can be read by its users. Only <strong>public</strong> keys (like this site&rsquo;s Supabase publishable key) belong there; real secrets stay on the server.</li>
+<li><strong>People</strong>: secrets pasted into chat, tickets, screenshots and emails.</li>
+</ul>
+<p>The rules that follow: <strong>secrets are configuration, not code</strong>; they come from the <strong>environment</strong> at run time; they&rsquo;re <strong>never printed</strong>; and each one has an <strong>owner</strong>, a <strong>scope</strong> (as little access as possible) and a way to be <strong>rotated</strong>.</p>
+<h2 id="configuration-from-the-environment">Configuration from the environment</h2>
+<p>The widely followed &ldquo;twelve-factor&rdquo; approach keeps all configuration that changes between environments (development, test, production) in <strong>environment variables</strong>. The same code then runs everywhere, and the secrets live with whoever runs it:</p>
+<ul>
+<li><strong>Production</strong>: the platform (a cloud service, Kubernetes, systemd, a CI system) injects them, ideally from a <strong>secret manager</strong> (HashiCorp Vault, AWS Secrets Manager, Google Secret Manager, Azure Key Vault), which stores them encrypted, controls who can read them, and logs every access. Some platforms provide secrets as <strong>files</strong> (Docker and Kubernetes mount them under <code>/run/secrets/</code>), which keeps them out of the process&rsquo;s environment, where child processes and crash dumps could see them.</li>
+<li><strong>Development</strong>: a <strong><code>.env</code> file</strong> in the project folder holds local values, loaded by a small parser (or <code>python-dotenv</code>). It&rsquo;s listed in <code>.gitignore</code> and <strong>never committed</strong>; a committed <strong><code>.env.example</code></strong> shows which variables exist, with placeholder values.</li>
+</ul>
+<p>Load <strong>all</strong> configuration in one place at <strong>start-up</strong>, check it, and refuse to start if anything required is missing or malformed (Week 77 Day 5), reporting <strong>every</strong> problem at once. Then pass a settings object around, rather than reading <code>os.environ</code> all over the code.</p>
+<p><strong>Wrap secrets</strong> in a small class whose <code>repr</code> and <code>str</code> show a mask, so a settings object can be logged or printed in a traceback without revealing anything. You read the real value deliberately, with a method:</p>
+<div class="pc pc-example" data-kind="example" data-id="w079d3-e2"><textarea class="pc-src pc-code" hidden>class Secret:
+    def __init__(self, value):
+        self._value = value
+    def reveal(self):
+        return self._value
+    def __repr__(self):
+        return &quot;Secret(&#x27;********&#x27;)&quot;
+    __str__ = __repr__
+
+settings = {&quot;debug&quot;: False, &quot;database_url&quot;: Secret(&quot;postgres://app:S3cret@db/main&quot;)}
+print(settings)
+print(f&quot;connecting with {settings[&#x27;database_url&#x27;]}&quot;)
+print(settings[&quot;database_url&quot;].reveal().startswith(&quot;postgres://&quot;))</textarea></div>
+<p>Pydantic&rsquo;s settings support has the same idea built in (<code>SecretStr</code>), and dataclasses can hide a field from <code>repr</code> with <code>field(repr=False)</code>.</p>
+<h2 id="finding-leaked-secrets">Finding leaked secrets</h2>
+<p>Two ways to spot a secret in text:</p>
+<ul>
+<li><strong>Known patterns</strong>: many providers give their keys a recognisable shape: AWS access keys start <code>AKIA</code> followed by 16 capitals and digits, GitHub tokens start <code>ghp_</code> (and <code>gho_</code>, <code>ghs_</code>&hellip;), Stripe live keys start <code>sk_live_</code>, and private keys start with a <code>-----BEGIN ... PRIVATE KEY-----</code> line. Providers design them this way precisely so scanners can find them.</li>
+<li><strong>Entropy</strong>: random keys look random. <strong>Shannon entropy</strong> measures how unpredictable a string&rsquo;s characters are, in bits per character: <code>-sum(p * log2(p))</code> over the frequency <code>p</code> of each distinct character. English words and placeholders score low (<code>changeme</code> is about 2.8); random keys score high (4 or more for long mixed-character strings). Combined with a suspicious <strong>name</strong> (<code>password</code>, <code>secret</code>, <code>token</code>, <code>api_key</code>) and a minimum length, it catches keys with no known pattern. Both methods give false positives, so scanners let you mark known-safe lines.</li>
+</ul>
+<p>Run a scanner <strong>before</strong> secrets reach the repository: as a pre-commit hook (Week 74) with tools like <strong>gitleaks</strong> or <strong>detect-secrets</strong>, and in CI. GitHub also scans pushes and can block known key formats (push protection). It works: while this lesson was being written, GitHub refused to accept it, because the sample Stripe key in today&rsquo;s scanner exercise looked real. The exercise now builds its sample keys from pieces, the usual way to keep test data from tripping a scanner.</p>
+<p><strong>When a secret leaks</strong>, the order matters:</p>
+<ol>
+<li><strong>Revoke or rotate it at once</strong>: make the leaked value useless. Assume it has already been copied; cleaning it from Git history first only gives an attacker more time.</li>
+<li><strong>Check what it was used for</strong>: the provider&rsquo;s access logs since the leak.</li>
+<li><strong>Then clean up</strong>: remove it from the code, rewrite history if the repository is public, and find out how it happened.</li>
+</ol>
+<h2 id="making-storing-and-rotating-secrets">Making, storing and rotating secrets</h2>
+<p><strong>Making them</strong>: <code>secrets.token_urlsafe(32)</code> gives 32 random bytes (256 bits) as URL-safe text, plenty for any token or key. <code>secrets.token_hex</code> gives hexadecimal, <code>secrets.choice</code> picks from a sequence (for generated passwords), and <code>secrets.compare_digest</code> is <code>hmac.compare_digest</code> again. A <strong>prefix</strong> such as <code>atlas_live_</code> makes your keys recognisable to scanners and to people.</p>
+<p><strong>Storing them</strong>: an API key you issue to a user is a password. Store only its <strong>hash</strong> (SHA-256 is enough here, because a 256-bit random key can&rsquo;t be guessed, unlike a human password, which needs a slow hash (Week 77)), show the key <strong>once</strong> when it&rsquo;s created, and keep a short non-secret prefix to help people tell their keys apart. If your database leaks, the hashes are useless.</p>
+<p><strong>Rotating them</strong>: keys should be changed regularly, and immediately after a leak, without breaking everything signed with the old one. Give each key an <strong>id</strong> (<code>kid</code>), sign new things with the <strong>current</strong> key, accept signatures from any key still <strong>active</strong>, and retire old keys after their tokens have expired. JWTs carry the <code>kid</code> in their header for exactly this.</p>
+<h3 id="on-your-own-computer">On your own computer</h3>
+<p><code>python-dotenv</code> loads <code>.env</code> files (<code>from dotenv import load_dotenv; load_dotenv()</code>), Pydantic&rsquo;s <code>BaseSettings</code> (in <code>pydantic-settings</code>) reads and validates settings with <code>SecretStr</code> fields, and <code>keyring</code> stores secrets in your operating system&rsquo;s keychain for desktop tools. Install <strong>gitleaks</strong> or <strong>detect-secrets</strong> as a pre-commit hook, and run <code>git log -p | grep -i "api_key"</code> on a repository you own to see whether anything slipped in long ago.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Secrets (passwords, API keys, tokens, private and signing keys, credentialed URLs, session cookies) leak through code and Git history, logs and error pages, URLs, images and packages, client-side code, and people. Keep them in the environment: injected from a secret manager or mounted files in production, a git-ignored .env file in development with a committed .env.example; load and validate all settings at start-up and fail fast with every problem listed; wrap secrets so repr and str mask them (SecretStr, field(repr=False)). Find leaks by known patterns (AKIA, ghp_, sk_live_, BEGIN PRIVATE KEY) and by Shannon entropy with suspicious names; scan in pre-commit hooks and CI. When one leaks: revoke first, check usage, then clean up. Generate with secrets.token_urlsafe(32), never random; store issued API keys as hashes and show them once; rotate with key ids, signing with the current key and verifying with any active one.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d3-dotenv" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Reading a .env file</div><div class="pc-prompt"><p>Write <code>parse_dotenv(text)</code>: a dict of the variables in a <code>.env</code> file. Skip blank lines and lines whose first non-space character is <code>#</code>. Each other line is <code>NAME=VALUE</code>, optionally starting with <code>export</code>; NAME (stripped) must match <code>[A-Za-z_][A-Za-z0-9_]*</code>, else raise <code>ValueError(f"line N: bad variable name")</code>; a line without <code>=</code> raises <code>ValueError(f"line N: expected NAME=VALUE")</code>. The value is stripped; if it&rsquo;s wrapped in double quotes, remove them and turn <code>\n</code> into a newline and <code>\"</code> into <code>"</code>; if it&rsquo;s wrapped in single quotes, remove them and take the rest literally; otherwise, a <code>#</code> (space then hash) starts a comment, which is removed (and the value stripped again). A later line overrides an earlier one. Nothing is ever expanded or run.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+def parse_dotenv(text):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_dotenv():
+    &quot;quotes, comments and export&quot;
+    text = &quot;&quot;&quot;# local settings
+DEBUG=true
+export DATABASE_URL = postgres://app:pw@localhost/dev
+SECRET_KEY=&quot;a b \\&quot;c\\&quot;\\nd&quot;
+LITERAL=&#x27;$HOME \\n stays&#x27;
+GREETING=hello world # a comment
+HASH=abc#def
+EMPTY=
+
+DEBUG=false
+&quot;&quot;&quot;
+    assert parse_dotenv(text) == {&quot;DEBUG&quot;: &quot;false&quot;, &quot;DATABASE_URL&quot;: &quot;postgres://app:pw@localhost/dev&quot;, &quot;SECRET_KEY&quot;: &#x27;a b &quot;c&quot;\nd&#x27;,
+                                  &quot;LITERAL&quot;: &quot;$HOME \\n stays&quot;, &quot;GREETING&quot;: &quot;hello world&quot;, &quot;HASH&quot;: &quot;abc#def&quot;, &quot;EMPTY&quot;: &quot;&quot;}
+
+def test_errors():
+    &quot;line numbers&quot;
+    for text, message in [(&quot;OK=1\njust words&quot;, &quot;line 2: expected NAME=VALUE&quot;), (&quot;1BAD=x&quot;, &quot;line 1: bad variable name&quot;),
+                          (&quot;MY-VAR=x&quot;, &quot;line 1: bad variable name&quot;), (&quot;\n\n=x&quot;, &quot;line 3: bad variable name&quot;)]:
+        try:
+            parse_dotenv(text)
+        except ValueError as e:
+            assert str(e) == message, text
+        else:
+            raise AssertionError(text)
+    assert parse_dotenv(&quot;CMD=$(rm -rf ~)&quot;) == {&quot;CMD&quot;: &quot;$(rm -rf ~)&quot;}</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+def parse_dotenv(text):
+    values = {}
+    for n, raw in enumerate(text.splitlines(), 1):
+        line = raw.strip()
+        if not line or line.startswith(&quot;#&quot;):
+            continue
+        if line.startswith(&quot;export &quot;):
+            line = line[7:]
+        name, eq, value = line.partition(&quot;=&quot;)
+        if not eq:
+            raise ValueError(f&quot;line {n}: expected NAME=VALUE&quot;)
+        name, value = name.strip(), value.strip()
+        if not re.fullmatch(r&quot;[A-Za-z_][A-Za-z0-9_]*&quot;, name):
+            raise ValueError(f&quot;line {n}: bad variable name&quot;)
+        if len(value) &gt;= 2 and value[0] == value[-1] == &#x27;&quot;&#x27;:
+            value = value[1:-1].replace(&quot;\\n&quot;, &quot;\n&quot;).replace(&#x27;\\&quot;&#x27;, &#x27;&quot;&#x27;)
+        elif len(value) &gt;= 2 and value[0] == value[-1] == &quot;&#x27;&quot;:
+            value = value[1:-1]
+        elif &quot; #&quot; in value:
+            value = value.split(&quot; #&quot;, 1)[0].strip()
+        values[name] = value
+    return values</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d3-settings" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Settings that can&rsquo;t be printed</div><div class="pc-prompt"><p>Write a class <code>Secret(value)</code> with <code>reveal()</code> returning the value, a <code>repr</code> of <code>Secret('********')</code> (also used for <code>str</code>), and equality with another <code>Secret</code> comparing values with <code>hmac.compare_digest</code>. Then <code>load_settings(env)</code> returning a dict, built from the dict <code>env</code>: <code>DATABASE_URL</code> (required, must start with <code>postgres://</code> or <code>sqlite:///</code>, a <code>Secret</code>), <code>SECRET_KEY</code> (required, at least 32 characters, a <code>Secret</code>), <code>PORT</code> (optional, default <code>8000</code>, an <code>int</code> from 1 to 65535) and <code>DEBUG</code> (optional, default <code>False</code>; <code>"true"</code>/<code>"false"</code> in any case). Check everything first, then raise <code>RuntimeError</code> listing <strong>every</strong> problem in variable-name order, joined with <code>"; "</code>, each as <code>NAME is required</code> or <code>NAME is invalid</code>. A problem message must never contain the value.</p></div><textarea class="pc-src pc-code" hidden>import hmac
+
+class Secret:
+    ___
+
+def load_settings(env):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_secret():
+    &quot;masked everywhere&quot;
+    s = Secret(&quot;hunter2-hunter2&quot;)
+    assert repr(s) == &quot;Secret(&#x27;********&#x27;)&quot; and str(s) == repr(s) and f&quot;{s}&quot; == repr(s)
+    assert s.reveal() == &quot;hunter2-hunter2&quot; and s == Secret(&quot;hunter2-hunter2&quot;) and s != Secret(&quot;other&quot;)
+    assert &quot;hunter2&quot; not in repr({&quot;k&quot;: s}) and &quot;hunter2&quot; not in str([s])
+
+def test_settings():
+    &quot;types, defaults and masking&quot;
+    env = {&quot;DATABASE_URL&quot;: &quot;postgres://app:S3cret@db/main&quot;, &quot;SECRET_KEY&quot;: &quot;k&quot; * 40, &quot;PORT&quot;: &quot;8080&quot;, &quot;DEBUG&quot;: &quot;TRUE&quot;}
+    s = load_settings(env)
+    assert s[&quot;PORT&quot;] == 8080 and s[&quot;DEBUG&quot;] is True and s[&quot;SECRET_KEY&quot;].reveal() == &quot;k&quot; * 40
+    assert &quot;S3cret&quot; not in repr(s) and &quot;kkkk&quot; not in repr(s)
+    s = load_settings({&quot;DATABASE_URL&quot;: &quot;sqlite:///dev.db&quot;, &quot;SECRET_KEY&quot;: &quot;x&quot; * 32})
+    assert s[&quot;PORT&quot;] == 8000 and s[&quot;DEBUG&quot;] is False
+
+def test_problems():
+    &quot;every problem, no values&quot;
+    try:
+        load_settings({&quot;DATABASE_URL&quot;: &quot;mysql://root:Pa55@db&quot;, &quot;PORT&quot;: &quot;eighty&quot;, &quot;DEBUG&quot;: &quot;maybe&quot;})
+    except RuntimeError as e:
+        assert str(e) == &quot;DATABASE_URL is invalid; DEBUG is invalid; PORT is invalid; SECRET_KEY is required&quot;
+        assert &quot;Pa55&quot; not in str(e)
+    else:
+        raise AssertionError(&quot;should refuse to start&quot;)
+    try:
+        load_settings({&quot;DATABASE_URL&quot;: &quot;sqlite:///x&quot;, &quot;SECRET_KEY&quot;: &quot;short&quot;, &quot;PORT&quot;: &quot;70000&quot;})
+    except RuntimeError as e:
+        assert str(e) == &quot;PORT is invalid; SECRET_KEY is invalid&quot; and &quot;short&quot; not in str(e)</textarea><textarea class="pc-src pc-solution" hidden>import hmac
+
+class Secret:
+    def __init__(self, value):
+        self._value = value
+
+    def reveal(self):
+        return self._value
+
+    def __repr__(self):
+        return &quot;Secret(&#x27;********&#x27;)&quot;
+
+    __str__ = __repr__
+
+    def __eq__(self, other):
+        return isinstance(other, Secret) and hmac.compare_digest(self._value.encode(), other._value.encode())
+
+    __hash__ = None
+
+def load_settings(env):
+    problems, settings = {}, {}
+    url = env.get(&quot;DATABASE_URL&quot;)
+    if url is None:
+        problems[&quot;DATABASE_URL&quot;] = &quot;required&quot;
+    elif not url.startswith((&quot;postgres://&quot;, &quot;sqlite:///&quot;)):
+        problems[&quot;DATABASE_URL&quot;] = &quot;invalid&quot;
+    else:
+        settings[&quot;DATABASE_URL&quot;] = Secret(url)
+    key = env.get(&quot;SECRET_KEY&quot;)
+    if key is None:
+        problems[&quot;SECRET_KEY&quot;] = &quot;required&quot;
+    elif len(key) &lt; 32:
+        problems[&quot;SECRET_KEY&quot;] = &quot;invalid&quot;
+    else:
+        settings[&quot;SECRET_KEY&quot;] = Secret(key)
+    port = env.get(&quot;PORT&quot;, &quot;8000&quot;)
+    if port.isdigit() and 1 &lt;= int(port) &lt;= 65535:
+        settings[&quot;PORT&quot;] = int(port)
+    else:
+        problems[&quot;PORT&quot;] = &quot;invalid&quot;
+    debug = env.get(&quot;DEBUG&quot;, &quot;false&quot;).lower()
+    if debug in (&quot;true&quot;, &quot;false&quot;):
+        settings[&quot;DEBUG&quot;] = debug == &quot;true&quot;
+    else:
+        problems[&quot;DEBUG&quot;] = &quot;invalid&quot;
+    if problems:
+        raise RuntimeError(&quot;; &quot;.join(f&quot;{name} is {kind}&quot; for name, kind in sorted(problems.items())))
+    return settings</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d3-scan" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A secret scanner</div><div class="pc-prompt"><p>Write <code>entropy(text)</code>: the Shannon entropy in bits per character (<code>0.0</code> for empty text). Then <code>scan(files)</code>: <code>files</code> maps file names to their text; return a sorted list of <code>(file, line_number, kind)</code> for every line that contains a secret, checking in this order and reporting only the first kind found on a line: <code>"aws access key"</code> (<code>AKIA</code> then 16 capital letters or digits, as a whole word), <code>"github token"</code> (<code>ghp_</code>, <code>gho_</code>, <code>ghu_</code>, <code>ghs_</code> or <code>ghr_</code> then 36 letters or digits), <code>"stripe live key"</code> (<code>sk_live_</code> then at least 24 letters or digits), <code>"private key"</code> (a line containing <code>-----BEGIN</code> and <code>PRIVATE KEY-----</code>), and <code>"high-entropy secret"</code>: an assignment matching <code>NAME = VALUE</code> or <code>NAME: VALUE</code> (with optional spaces and optional quotes around the value) where NAME contains <code>password</code>, <code>secret</code>, <code>token</code> or <code>api_key</code>/<code>apikey</code> (any case), and VALUE is at least 16 characters with entropy of at least <code>3.5</code>. A line containing <code># not-a-secret</code> is skipped.</p></div><textarea class="pc-src pc-code" hidden>import math
+import re
+from collections import Counter
+
+def entropy(text):
+    ___
+
+def scan(files):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_entropy():
+    &quot;bits per character&quot;
+    assert entropy(&quot;&quot;) == 0.0 and entropy(&quot;aaaa&quot;) == 0.0 and entropy(&quot;abab&quot;) == 1.0
+    assert round(entropy(&quot;abcdefgh&quot;), 3) == 3.0 and entropy(&quot;changeme&quot;) &lt; 3
+
+def test_scan():
+    &quot;patterns and entropy&quot;
+    # The sample keys are built from pieces, so the course&#x27;s own repository doesn&#x27;t trip GitHub&#x27;s secret scanning.
+    aws, gh, stripe = &quot;AKIA&quot; + &quot;IOSFODNN7EXAMPLE&quot;, &quot;gh&quot; + &quot;p_16C7e42F292c6912E7710c838347Ae178B4a&quot;, &quot;sk_&quot; + &quot;live_&quot; + &quot;4eC39HqLyjWDarjtT1zdp7dc&quot;
+    files = {
+        &quot;settings.py&quot;: &#x27;DEBUG = True\nAWS_KEY = &quot;&#x27; + aws + &#x27;&quot;\nSECRET_KEY = &quot;9fK2xQ7pL0vZ3mW8sT1yB6nR4hC5jD&quot;\nPASSWORD = &quot;changeme-changeme&quot;\n&#x27;,
+        &quot;ci.yml&quot;: &quot;env:\n  GH: &quot; + gh + &quot;\n  api_key: &#x27;&quot; + stripe + &quot;&#x27;\n&quot;,
+        &quot;keys/id_rsa&quot;: &quot;-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjEAAAAA\n-----END OPENSSH PRIVATE KEY-----\n&quot;,
+        &quot;README.md&quot;: &quot;Set SECRET_TOKEN = &#x27;your-secret-token-here&#x27; in .env\nAuth: token = &#x27;9fK2xQ7pL0vZ3mW8sT1yB6nR4hC5jD&#x27;  # not-a-secret\n&quot;,
+        &quot;app.py&quot;: &quot;token = os.environ[&#x27;API_TOKEN&#x27;]\nurl = &#x27;https://example.org/a/b/c/d/e/f&#x27;\n&quot;,
+    }
+    assert scan(files) == [(&quot;ci.yml&quot;, 2, &quot;github token&quot;), (&quot;ci.yml&quot;, 3, &quot;stripe live key&quot;), (&quot;keys/id_rsa&quot;, 1, &quot;private key&quot;),
+                           (&quot;settings.py&quot;, 2, &quot;aws access key&quot;), (&quot;settings.py&quot;, 3, &quot;high-entropy secret&quot;)]</textarea><textarea class="pc-src pc-solution" hidden>import math
+import re
+from collections import Counter
+
+PATTERNS = [
+    (&quot;aws access key&quot;, re.compile(r&quot;\bAKIA[0-9A-Z]{16}\b&quot;)),
+    (&quot;github token&quot;, re.compile(r&quot;\bgh[pousr]_[A-Za-z0-9]{36}\b&quot;)),
+    (&quot;stripe live key&quot;, re.compile(r&quot;\bsk_live_[A-Za-z0-9]{24,}&quot;)),
+    (&quot;private key&quot;, re.compile(r&quot;-----BEGIN .*PRIVATE KEY-----&quot;)),
+]
+ASSIGNMENT = re.compile(r&quot;&quot;&quot;([A-Za-z_][A-Za-z0-9_]*)\s*[:=]\s*[&quot;&#x27;]?([^&quot;&#x27;\s]+)[&quot;&#x27;]?&quot;&quot;&quot;)
+
+def entropy(text):
+    if not text:
+        return 0.0
+    n = len(text)
+    return -sum(c / n * math.log2(c / n) for c in Counter(text).values()) + 0.0
+
+def suspicious(name):
+    n = name.lower()
+    return any(w in n for w in (&quot;password&quot;, &quot;secret&quot;, &quot;token&quot;, &quot;api_key&quot;, &quot;apikey&quot;))
+
+def scan(files):
+    found = []
+    for name, text in files.items():
+        for number, line in enumerate(text.splitlines(), 1):
+            if &quot;# not-a-secret&quot; in line:
+                continue
+            kind = next((k for k, pattern in PATTERNS if pattern.search(line)), None)
+            if kind is None:
+                for var, value in ASSIGNMENT.findall(line):
+                    if suspicious(var) and len(value) &gt;= 16 and entropy(value) &gt;= 3.5:
+                        kind = &quot;high-entropy secret&quot;
+                        break
+            if kind:
+                found.append((name, number, kind))
+    return sorted(found)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d3-apikeys" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Issuing API keys</div><div class="pc-prompt"><p>Write a class <code>KeyStore</code> for API keys. <code>issue(owner)</code> makes a key <code>atlas_</code> + <code>secrets.token_urlsafe(32)</code>, stores only <code>{"owner": owner, "hash": SHA256_HEX, "prefix": FIRST_12_CHARS}</code> under a new id (counting from 1), and returns <code>(id, key)</code>; the key itself is never stored. <code>check(key)</code> returns the owner for a valid key (finding it by hashing the key and comparing each stored hash with <code>hmac.compare_digest</code>), or <code>None</code>. <code>revoke(id)</code> deletes it. <code>list(owner)</code> returns <code>[(id, prefix)]</code> for that owner&rsquo;s keys, by id.</p></div><textarea class="pc-src pc-code" hidden>import hashlib
+import hmac
+import secrets
+
+class KeyStore:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_keys():
+    &quot;issued, checked, listed and revoked&quot;
+    store = KeyStore()
+    id1, key1 = store.issue(&quot;ada&quot;)
+    id2, key2 = store.issue(&quot;bob&quot;)
+    id3, key3 = store.issue(&quot;ada&quot;)
+    assert (id1, id2, id3) == (1, 2, 3) and key1.startswith(&quot;atlas_&quot;) and len(key1) == 6 + 43 and key1 != key3
+    assert store.check(key1) == &quot;ada&quot; and store.check(key2) == &quot;bob&quot; and store.check(&quot;atlas_guess&quot;) is None
+    assert store.list(&quot;ada&quot;) == [(1, key1[:12]), (3, key3[:12])]
+    store.revoke(1)
+    assert store.check(key1) is None and store.list(&quot;ada&quot;) == [(3, key3[:12])]
+    assert key2 not in repr(store.__dict__) and key3 not in repr(store.__dict__), &quot;never store the key itself&quot;</textarea><textarea class="pc-src pc-solution" hidden>import hashlib
+import hmac
+import secrets
+
+class KeyStore:
+    def __init__(self):
+        self.keys = {}
+        self.next_id = 1
+
+    def issue(self, owner):
+        key = &quot;atlas_&quot; + secrets.token_urlsafe(32)
+        key_id = self.next_id
+        self.next_id += 1
+        self.keys[key_id] = {&quot;owner&quot;: owner, &quot;hash&quot;: hashlib.sha256(key.encode()).hexdigest(), &quot;prefix&quot;: key[:12]}
+        return key_id, key
+
+    def check(self, key):
+        digest = hashlib.sha256(key.encode()).hexdigest()
+        owner = None
+        for record in self.keys.values():
+            if hmac.compare_digest(digest, record[&quot;hash&quot;]):
+                owner = record[&quot;owner&quot;]
+        return owner
+
+    def revoke(self, key_id):
+        self.keys.pop(key_id, None)
+
+    def list(self, owner):
+        return [(i, r[&quot;prefix&quot;]) for i, r in sorted(self.keys.items()) if r[&quot;owner&quot;] == owner]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d3-rotation" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Rotating a signing key</div><div class="pc-prompt"><p>Write a class <code>KeyRing</code> for HMAC-SHA256 signing with rotation. <code>add(kid, key)</code> adds an active key (bytes) and makes it the <strong>current</strong> one. <code>sign(message)</code> returns <code>"KID.SIGNATURE"</code>, signing the message (bytes) with the current key, where SIGNATURE is the hex digest. <code>verify(message, token)</code> returns <code>True</code> if the token&rsquo;s key id is <strong>active</strong> and its signature matches (compared with <code>hmac.compare_digest</code>), else <code>False</code> (also for a malformed token). <code>retire(kid)</code> removes a key; retiring the current key raises <code>ValueError("can't retire the current key")</code>.</p></div><textarea class="pc-src pc-code" hidden>import hashlib
+import hmac
+
+class KeyRing:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_rotation():
+    &quot;old tokens keep working until their key retires&quot;
+    ring = KeyRing()
+    ring.add(&quot;2026-10&quot;, b&quot;old key&quot;)
+    t_old = ring.sign(b&quot;user=7&quot;)
+    assert t_old.startswith(&quot;2026-10.&quot;) and ring.verify(b&quot;user=7&quot;, t_old)
+    ring.add(&quot;2026-11&quot;, b&quot;new key&quot;)
+    t_new = ring.sign(b&quot;user=7&quot;)
+    assert t_new.startswith(&quot;2026-11.&quot;) and ring.verify(b&quot;user=7&quot;, t_new) and ring.verify(b&quot;user=7&quot;, t_old)
+    assert not ring.verify(b&quot;user=8&quot;, t_new) and not ring.verify(b&quot;user=7&quot;, &quot;2026-11.&quot; + &quot;0&quot; * 64)
+    assert not ring.verify(b&quot;user=7&quot;, &quot;nonsense&quot;) and not ring.verify(b&quot;user=7&quot;, &quot;2025-01.&quot; + t_new.split(&quot;.&quot;)[1])
+    ring.retire(&quot;2026-10&quot;)
+    assert not ring.verify(b&quot;user=7&quot;, t_old) and ring.verify(b&quot;user=7&quot;, t_new)
+    try:
+        ring.retire(&quot;2026-11&quot;)
+    except ValueError as e:
+        assert str(e) == &quot;can&#x27;t retire the current key&quot;
+    else:
+        raise AssertionError(&quot;the current key can&#x27;t go&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import hashlib
+import hmac
+
+class KeyRing:
+    def __init__(self):
+        self.keys = {}
+        self.current = None
+
+    def add(self, kid, key):
+        self.keys[kid] = key
+        self.current = kid
+
+    def _sig(self, kid, message):
+        return hmac.new(self.keys[kid], message, hashlib.sha256).hexdigest()
+
+    def sign(self, message):
+        return f&quot;{self.current}.{self._sig(self.current, message)}&quot;
+
+    def verify(self, message, token):
+        kid, dot, sig = token.rpartition(&quot;.&quot;)
+        if not dot or kid not in self.keys:
+            return False
+        return hmac.compare_digest(sig, self._sig(kid, message))
+
+    def retire(self, kid):
+        if kid == self.current:
+            raise ValueError(&quot;can&#x27;t retire the current key&quot;)
+        self.keys.pop(kid, None)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d3-urls" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Secrets out of URLs</div><div class="pc-prompt"><p>Write <code>redact_url(url)</code>: the URL with any password in it (<code>https://user:PASSWORD@host/...</code>) replaced by <code>****</code>, and the value of any query parameter whose name (in lower case) is <code>key</code>, <code>api_key</code>, <code>apikey</code>, <code>token</code>, <code>access_token</code>, <code>password</code>, <code>secret</code> or <code>signature</code> replaced by <code>****</code>, keeping everything else as it was (parameter order included). Use <code>urllib.parse</code> (<code>urlsplit</code>, <code>parse_qsl</code> with <code>keep_blank_values=True</code>, <code>urlencode</code> with <code>safe="*"</code>, <code>urlunsplit</code>). URLs without a password or query come back unchanged.</p></div><textarea class="pc-src pc-code" hidden>from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
+SECRET_PARAMS = {&quot;key&quot;, &quot;api_key&quot;, &quot;apikey&quot;, &quot;token&quot;, &quot;access_token&quot;, &quot;password&quot;, &quot;secret&quot;, &quot;signature&quot;}
+
+def redact_url(url):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_redact():
+    &quot;passwords and secret parameters&quot;
+    assert redact_url(&quot;postgres://app:S3cret@db.internal:5432/main&quot;) == &quot;postgres://app:****@db.internal:5432/main&quot;
+    assert redact_url(&quot;https://api.example/v1/data?city=Leeds&amp;api_key=abc123&amp;page=2&quot;) == &quot;https://api.example/v1/data?city=Leeds&amp;api_key=****&amp;page=2&quot;
+    assert redact_url(&quot;https://x.example/cb?Token=t&amp;TOKEN=u&amp;sig=ok&amp;empty=&quot;) == &quot;https://x.example/cb?Token=****&amp;TOKEN=****&amp;sig=ok&amp;empty=&quot;
+    assert redact_url(&quot;https://ada@git.example/repo.git&quot;) == &quot;https://ada@git.example/repo.git&quot;
+    assert redact_url(&quot;https://example.org/a/b?q=hello%20world&quot;) == &quot;https://example.org/a/b?q=hello%20world&quot;
+    assert redact_url(&quot;https://example.org/path&quot;) == &quot;https://example.org/path&quot;</textarea><textarea class="pc-src pc-solution" hidden>from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
+SECRET_PARAMS = {&quot;key&quot;, &quot;api_key&quot;, &quot;apikey&quot;, &quot;token&quot;, &quot;access_token&quot;, &quot;password&quot;, &quot;secret&quot;, &quot;signature&quot;}
+
+def redact_url(url):
+    parts = urlsplit(url)
+    netloc = parts.netloc
+    if parts.password is not None:
+        userinfo, host = netloc.rsplit(&quot;@&quot;, 1)
+        netloc = f&quot;{userinfo.split(&#x27;:&#x27;, 1)[0]}:****@{host}&quot;
+    query = parts.query
+    if query:
+        pairs = parse_qsl(query, keep_blank_values=True)
+        if any(k.lower() in SECRET_PARAMS for k, _ in pairs):
+            query = urlencode([(k, &quot;****&quot; if k.lower() in SECRET_PARAMS else v) for k, v in pairs], safe=&quot;*&quot;)
+    return urlunsplit((parts.scheme, netloc, parts.path, query, parts.fragment))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w079d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A guessable reset link</div><div class="pc-prompt"><p>Password-reset tokens are made with <code>random</code>, seeded with the time, so an attacker who knows roughly when the reset was requested can recreate them, and this prints <code>attacker can guess it: True</code>. Make the token with the <code>secrets</code> module, so it prints <code>attacker can guess it: False</code>.</p></div><textarea class="pc-src pc-code" hidden>import random
+
+def reset_token(now):
+    random.seed(now)
+    return &quot;%032x&quot; % random.getrandbits(128)
+
+token = reset_token(1794320400)
+guessed = any(reset_token(t) == token for t in range(1794320400 - 60, 1794320400 + 60))
+print(&quot;attacker can guess it:&quot;, guessed)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;secrets&quot;
+    expect_output(&quot;attacker can guess it: False&quot;)
+    assert &quot;secrets&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>import random
+import secrets
+
+def reset_token(now):
+    return secrets.token_hex(16)
+
+token = reset_token(1794320400)
+guessed = any(reset_token(t) == token for t in range(1794320400 - 60, 1794320400 + 60))
+print(&quot;attacker can guess it:&quot;, guessed)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w079d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A password in the start-up log</div><div class="pc-prompt"><p>The app logs its settings at start-up, and the dataclass&rsquo;s <code>repr</code> includes the database password, so this prints <code>starting with Settings(port=8000, db_password='S3cret')</code>. Hide that field from the <code>repr</code>, so it prints <code>starting with Settings(port=8000)</code>.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass, field
+
+@dataclass
+class Settings:
+    port: int
+    db_password: str
+
+settings = Settings(8000, &quot;S3cret&quot;)
+print(f&quot;starting with {settings!r}&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;field(repr=False)&quot;
+    expect_output(&quot;starting with Settings(port=8000)&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass, field
+
+@dataclass
+class Settings:
+    port: int
+    db_password: str = field(repr=False)
+
+settings = Settings(8000, &quot;S3cret&quot;)
+print(f&quot;starting with {settings!r}&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w079d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A key in the access log</div><div class="pc-prompt"><p>The client sends its API key in the query string, so it ends up in every access log: this prints <code>GET /v1/report?key=sk_9f2a</code>. Send the key in an <code>Authorization: Bearer KEY</code> header instead, keeping the path clean, so the log prints <code>GET /v1/report</code> and the server still finds the key, printing <code>key received: True</code>.</p></div><textarea class="pc-src pc-code" hidden>API_KEY = &quot;sk_9f2a&quot;
+log = []
+
+def server(path, headers):
+    log.append(f&quot;GET {path}&quot;)
+    key = path.partition(&quot;key=&quot;)[2] or headers.get(&quot;Authorization&quot;, &quot;&quot;).removeprefix(&quot;Bearer &quot;)
+    return key == API_KEY
+
+ok = server(f&quot;/v1/report?key={API_KEY}&quot;, {})
+print(log[0])
+print(&quot;key received:&quot;, ok)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;headers, not URLs&quot;
+    expect_output(&quot;GET /v1/report\nkey received: True&quot;)</textarea><textarea class="pc-src pc-solution" hidden>API_KEY = &quot;sk_9f2a&quot;
+log = []
+
+def server(path, headers):
+    log.append(f&quot;GET {path}&quot;)
+    key = path.partition(&quot;key=&quot;)[2] or headers.get(&quot;Authorization&quot;, &quot;&quot;).removeprefix(&quot;Bearer &quot;)
+    return key == API_KEY
+
+ok = server(&quot;/v1/report&quot;, {&quot;Authorization&quot;: f&quot;Bearer {API_KEY}&quot;})
+print(log[0])
+print(&quot;key received:&quot;, ok)</textarea></div>
+<div class="parsons" data-id="w079d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Responding to a leaked key</div><div class="pc-prompt"><p>Arrange the response to finding a live API key in a public repository, in the right order. One line is a trap.</p></div><script type="application/json">{"lines": ["revoke the leaked key with the provider, so it stops working", "issue a new key and put it in the secret manager, not the code", "deploy the services that use it, reading it from the environment", "check the provider's access logs for use of the old key since the leak", "remove the key from the code and rewrite the public history", "add a secret scanner to pre-commit hooks and CI"], "distractors": ["delete the file and hope nobody saw it"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the module for tokens an attacker must not guess
+q = ___   # len(secrets.token_hex(16))
+r = ___   # the first step when a secret leaks: &quot;revoke&quot; or &quot;rewrite history&quot;
+s = ___   # the entropy of &quot;abab&quot; in bits per character
+t = ___   # True or False: a .env file should be committed</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;secrets&quot; and q == 32 and r == &quot;revoke&quot;, &quot;p, q and r&quot;
+    assert s == 1.0 and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;secrets&quot;
+q = 32
+r = &quot;revoke&quot;
+s = 1.0
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w079d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why isn&rsquo;t deleting a committed secret enough?", "answer": 1, "explain": "Revoke it first.", "options": ["It is enough", "It&rsquo;s still in the Git history and every clone, and may already have been copied", "Git encrypts it", "GitHub deletes it"]}, {"type": "mc", "q": "Why not put an API key in a URL&rsquo;s query string?", "answer": 1, "explain": "Send it in a header.", "options": ["URLs are too short", "URLs are recorded by servers, proxies, history and analytics", "It&rsquo;s slower", "Browsers block it"]}, {"type": "mc", "q": "Where should production secrets come from?", "answer": 1, "explain": "Secrets are configuration, not code.", "options": ["The code", "The environment, injected from a secret manager or mounted files", "A committed config file", "The client"]}, {"type": "mc", "q": "What&rsquo;s the role of .env.example?", "answer": 1, "explain": "The real .env is git-ignored.", "options": ["It holds the real secrets", "It&rsquo;s committed, listing the variables with placeholder values", "It&rsquo;s a backup", "It configures Git"]}, {"type": "mc", "q": "Why wrap a secret in a class with a masked repr?", "answer": 1, "explain": "Read the value deliberately with a method.", "options": ["Encryption", "So printing, logging or a traceback can&rsquo;t reveal it by accident", "Speed", "Type checking"]}, {"type": "mc", "q": "What does high Shannon entropy suggest?", "answer": 1, "explain": "Scanners combine it with suspicious names.", "options": ["An English word", "A random-looking string, such as a key", "A short string", "A number"]}, {"type": "mc", "q": "How should you store API keys you issue?", "answer": 1, "explain": "A leaked table of hashes is useless.", "options": ["As they are", "As hashes, showing each key only once", "Encrypted with the same key", "In the client"]}, {"type": "mc", "q": "Why give signing keys ids?", "answer": 1, "explain": "Rotation without downtime.", "options": ["For logging", "So new tokens use the current key while old ones still verify, until the old key retires", "To make them longer", "Speed"]}, {"type": "mc", "q": "Why use secrets rather than random for tokens?", "answer": 1, "explain": "secrets uses the system&rsquo;s cryptographic source.", "options": ["It&rsquo;s faster", "random&rsquo;s output is predictable from its state or seed", "random can&rsquo;t make strings", "secrets is shorter"]}, {"type": "output", "q": "What does this print?", "answer": "1.0", "explain": "Two equally likely characters: one bit each.", "code": "import math\nfrom collections import Counter\ns = \"aabb\"\nprint(-sum(c / len(s) * math.log2(c / len(s)) for c in Counter(s).values()))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a configuration loader</div><div class="pc-prompt"><p>Write <code>load_config(dotenv_text, environ, secret_files)</code> for a service. Sources, lowest priority first: the <code>.env</code> text (parsed by the given <code>parse_dotenv</code>), then <code>environ</code> (a dict), then <code>secret_files</code> (a dict from file name to contents, like files mounted in <code>/run/secrets/</code>, where a file named <code>database_url</code> provides <code>DATABASE_URL</code>: the upper-cased name, contents stripped). Settings: <code>DATABASE_URL</code> (required secret; must start with <code>postgres://</code>), <code>SECRET_KEY</code> (required secret; at least 32 characters), <code>ALLOWED_HOSTS</code> (required; a comma-separated list, each item stripped, none empty), <code>PORT</code> (optional int 1 to 65535, default 8000) and <code>LOG_LEVEL</code> (optional, one of <code>DEBUG</code>, <code>INFO</code>, <code>WARNING</code>, <code>ERROR</code>, upper-cased, default <code>INFO</code>). Return <code>(config, sources)</code>: <code>config</code> holds <code>Secret</code> objects for the two secrets, a list for the hosts, an int and a string; <code>sources</code> maps each setting to <code>"default"</code>, <code>".env"</code>, <code>"environment"</code> or <code>"secret file"</code>. Problems are collected and raised together as <code>RuntimeError</code> with sorted <code>NAME is required</code> / <code>NAME is invalid</code> parts joined by <code>"; "</code>, never including a value. Also write <code>describe(config, sources)</code>: a list of lines <code>NAME = VALUE (from SOURCE)</code> in name order, with secrets shown as <code>********</code>, safe to log at start-up.</p></div><textarea class="pc-src pc-code" hidden>import hmac
+import re
+
+def parse_dotenv(text):
+    values = {}
+    for n, raw in enumerate(text.splitlines(), 1):
+        line = raw.strip()
+        if not line or line.startswith(&quot;#&quot;):
+            continue
+        name, eq, value = line.removeprefix(&quot;export &quot;).partition(&quot;=&quot;)
+        if not eq or not re.fullmatch(r&quot;[A-Za-z_][A-Za-z0-9_]*&quot;, name.strip()):
+            raise ValueError(f&quot;line {n}: bad line&quot;)
+        value = value.strip()
+        if len(value) &gt;= 2 and value[0] == value[-1] and value[0] in &quot;&#x27;\&quot;&quot;:
+            value = value[1:-1]
+        values[name.strip()] = value
+    return values
+
+class Secret:
+    def __init__(self, value):
+        self._value = value
+    def reveal(self):
+        return self._value
+    def __repr__(self):
+        return &quot;Secret(&#x27;********&#x27;)&quot;
+    __str__ = __repr__
+
+def load_config(dotenv_text, environ, secret_files):
+    ___
+
+def describe(config, sources):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>GOOD_ENV = &quot;&quot;&quot;# dev settings
+DATABASE_URL=postgres://dev:devpw@localhost/dev
+SECRET_KEY=&quot;dev-only-secret-key-0123456789abcdef&quot;
+ALLOWED_HOSTS=localhost, 127.0.0.1
+LOG_LEVEL=debug
+&quot;&quot;&quot;
+
+def test_precedence():
+    &quot;secret files beat the environment, which beats .env&quot;
+    config, sources = load_config(GOOD_ENV, {&quot;PORT&quot;: &quot;9000&quot;, &quot;ALLOWED_HOSTS&quot;: &quot;atlas.example ,api.atlas.example&quot;},
+                                  {&quot;database_url&quot;: &quot;postgres://app:Pr0d@db/main\n&quot;, &quot;secret_key&quot;: &quot;s&quot; * 48})
+    assert config[&quot;DATABASE_URL&quot;].reveal() == &quot;postgres://app:Pr0d@db/main&quot; and config[&quot;SECRET_KEY&quot;].reveal() == &quot;s&quot; * 48
+    assert config[&quot;ALLOWED_HOSTS&quot;] == [&quot;atlas.example&quot;, &quot;api.atlas.example&quot;] and config[&quot;PORT&quot;] == 9000 and config[&quot;LOG_LEVEL&quot;] == &quot;DEBUG&quot;
+    assert sources == {&quot;DATABASE_URL&quot;: &quot;secret file&quot;, &quot;SECRET_KEY&quot;: &quot;secret file&quot;, &quot;ALLOWED_HOSTS&quot;: &quot;environment&quot;, &quot;PORT&quot;: &quot;environment&quot;, &quot;LOG_LEVEL&quot;: &quot;.env&quot;}
+    lines = describe(config, sources)
+    assert lines == [&quot;ALLOWED_HOSTS = atlas.example,api.atlas.example (from environment)&quot;, &quot;DATABASE_URL = ******** (from secret file)&quot;,
+                     &quot;LOG_LEVEL = DEBUG (from .env)&quot;, &quot;PORT = 9000 (from environment)&quot;, &quot;SECRET_KEY = ******** (from secret file)&quot;]
+    assert &quot;Pr0d&quot; not in &quot;\n&quot;.join(lines) and &quot;sss&quot; not in repr(config)
+
+def test_defaults():
+    &quot;defaults fill the gaps&quot;
+    config, sources = load_config(&quot;&quot;, {&quot;DATABASE_URL&quot;: &quot;postgres://a:b@c/d&quot;, &quot;SECRET_KEY&quot;: &quot;k&quot; * 32, &quot;ALLOWED_HOSTS&quot;: &quot;x.example&quot;}, {})
+    assert config[&quot;PORT&quot;] == 8000 and config[&quot;LOG_LEVEL&quot;] == &quot;INFO&quot; and sources[&quot;PORT&quot;] == &quot;default&quot; and sources[&quot;LOG_LEVEL&quot;] == &quot;default&quot;
+
+def test_problems():
+    &quot;everything wrong, at once, with no values&quot;
+    try:
+        load_config(&quot;DATABASE_URL=mysql://root:Hunter2@db\nPORT=http\n&quot;, {&quot;SECRET_KEY&quot;: &quot;too-short&quot;, &quot;LOG_LEVEL&quot;: &quot;LOUD&quot;, &quot;ALLOWED_HOSTS&quot;: &quot;a,,b&quot;}, {})
+    except RuntimeError as e:
+        assert str(e) == &quot;ALLOWED_HOSTS is invalid; DATABASE_URL is invalid; LOG_LEVEL is invalid; PORT is invalid; SECRET_KEY is invalid&quot;
+        assert &quot;Hunter2&quot; not in str(e) and &quot;too-short&quot; not in str(e)
+    else:
+        raise AssertionError(&quot;should refuse to start&quot;)
+    try:
+        load_config(&quot;&quot;, {}, {})
+    except RuntimeError as e:
+        assert str(e) == &quot;ALLOWED_HOSTS is required; DATABASE_URL is required; SECRET_KEY is required&quot;</textarea><textarea class="pc-src pc-solution" hidden>import hmac
+import re
+
+def parse_dotenv(text):
+    values = {}
+    for n, raw in enumerate(text.splitlines(), 1):
+        line = raw.strip()
+        if not line or line.startswith(&quot;#&quot;):
+            continue
+        name, eq, value = line.removeprefix(&quot;export &quot;).partition(&quot;=&quot;)
+        if not eq or not re.fullmatch(r&quot;[A-Za-z_][A-Za-z0-9_]*&quot;, name.strip()):
+            raise ValueError(f&quot;line {n}: bad line&quot;)
+        value = value.strip()
+        if len(value) &gt;= 2 and value[0] == value[-1] and value[0] in &quot;&#x27;\&quot;&quot;:
+            value = value[1:-1]
+        values[name.strip()] = value
+    return values
+
+class Secret:
+    def __init__(self, value):
+        self._value = value
+    def reveal(self):
+        return self._value
+    def __repr__(self):
+        return &quot;Secret(&#x27;********&#x27;)&quot;
+    __str__ = __repr__
+
+NAMES = [&quot;DATABASE_URL&quot;, &quot;SECRET_KEY&quot;, &quot;ALLOWED_HOSTS&quot;, &quot;PORT&quot;, &quot;LOG_LEVEL&quot;]
+DEFAULTS = {&quot;PORT&quot;: &quot;8000&quot;, &quot;LOG_LEVEL&quot;: &quot;INFO&quot;}
+
+def load_config(dotenv_text, environ, secret_files):
+    raw, sources = {}, {}
+    for name, value in DEFAULTS.items():
+        raw[name], sources[name] = value, &quot;default&quot;
+    layers = [(parse_dotenv(dotenv_text), &quot;.env&quot;), (environ, &quot;environment&quot;),
+              ({k.upper(): v.strip() for k, v in secret_files.items()}, &quot;secret file&quot;)]
+    for values, source in layers:
+        for name in NAMES:
+            if name in values:
+                raw[name], sources[name] = values[name], source
+    config, problems = {}, {}
+    for name in (&quot;DATABASE_URL&quot;, &quot;SECRET_KEY&quot;, &quot;ALLOWED_HOSTS&quot;):
+        if name not in raw:
+            problems[name] = &quot;required&quot;
+    if &quot;DATABASE_URL&quot; in raw:
+        if raw[&quot;DATABASE_URL&quot;].startswith(&quot;postgres://&quot;):
+            config[&quot;DATABASE_URL&quot;] = Secret(raw[&quot;DATABASE_URL&quot;])
+        else:
+            problems[&quot;DATABASE_URL&quot;] = &quot;invalid&quot;
+    if &quot;SECRET_KEY&quot; in raw:
+        if len(raw[&quot;SECRET_KEY&quot;]) &gt;= 32:
+            config[&quot;SECRET_KEY&quot;] = Secret(raw[&quot;SECRET_KEY&quot;])
+        else:
+            problems[&quot;SECRET_KEY&quot;] = &quot;invalid&quot;
+    if &quot;ALLOWED_HOSTS&quot; in raw:
+        hosts = [h.strip() for h in raw[&quot;ALLOWED_HOSTS&quot;].split(&quot;,&quot;)]
+        if all(hosts):
+            config[&quot;ALLOWED_HOSTS&quot;] = hosts
+        else:
+            problems[&quot;ALLOWED_HOSTS&quot;] = &quot;invalid&quot;
+    if raw[&quot;PORT&quot;].isdigit() and 1 &lt;= int(raw[&quot;PORT&quot;]) &lt;= 65535:
+        config[&quot;PORT&quot;] = int(raw[&quot;PORT&quot;])
+    else:
+        problems[&quot;PORT&quot;] = &quot;invalid&quot;
+    level = raw[&quot;LOG_LEVEL&quot;].upper()
+    if level in (&quot;DEBUG&quot;, &quot;INFO&quot;, &quot;WARNING&quot;, &quot;ERROR&quot;):
+        config[&quot;LOG_LEVEL&quot;] = level
+    else:
+        problems[&quot;LOG_LEVEL&quot;] = &quot;invalid&quot;
+    if problems:
+        raise RuntimeError(&quot;; &quot;.join(f&quot;{n} is {k}&quot; for n, k in sorted(problems.items())))
+    return config, {n: sources[n] for n in NAMES}
+
+def describe(config, sources):
+    lines = []
+    for name in sorted(config):
+        value = config[name]
+        if isinstance(value, Secret):
+            shown = &quot;********&quot;
+        elif isinstance(value, list):
+            shown = &quot;,&quot;.join(value)
+        else:
+            shown = value
+        lines.append(f&quot;{name} = {shown} (from {sources[name]})&quot;)
+    return lines</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Check one repository of your own for a committed <code>.env</code> file or a key in its history (<code>git log --all --full-history -- .env</code> shows whether a <code>.env</code> was ever committed). Tomorrow: <strong>dependency security</strong>: the code you didn&rsquo;t write, from vulnerable versions to malicious packages.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w079d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w079d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w079d3", "week": 79, "day": 3, "title": "Secrets and configuration", "exercises": [{"id": "w079d3-dotenv", "title": "Reading a .env file", "points": 15}, {"id": "w079d3-settings", "title": "Settings that can't be printed", "points": 15}, {"id": "w079d3-scan", "title": "A secret scanner", "points": 15}, {"id": "w079d3-apikeys", "title": "Issuing API keys", "points": 10}, {"id": "w079d3-rotation", "title": "Rotating a signing key", "points": 10}, {"id": "w079d3-urls", "title": "Secrets out of URLs", "points": 10}, {"id": "w079d3-bug1", "title": "A guessable reset link", "points": 10}, {"id": "w079d3-bug2", "title": "A password in the start-up log", "points": 10}, {"id": "w079d3-bug3", "title": "A key in the access log", "points": 10}, {"id": "w079d3-trace", "title": "Predict them", "points": 10}, {"id": "w079d3-challenge", "title": "Challenge: a configuration loader", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=b54d8b61c9"></script>
+</body>
+</html>
