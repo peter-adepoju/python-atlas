@@ -593,7 +593,9 @@ def build():
             t0 += mins
         hours = f"{total // 60} h" + (f" {total % 60} min" if total % 60 else "")
         plan = (f'<div class="plan-bar" aria-hidden="true">{"".join(bar)}</div>'
-                f'<ol class="plan-list">{"".join(plan_rows)}</ol>')
+                f'<button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">'
+                f'{len(steps)} parts. Show the plan</button>'
+                f'<ol class="plan-list" id="plan-list">{"".join(plan_rows)}</ol>')
         goals = "".join(f"<li>{md_inline(g)}</li>" for g in meta.get("goals", []))
         toc_html = "".join(f'<li><a href="#{s}" data-sec="{s}">{esc(t)}</a></li>' for s, t in toc)
         pts = sum(x["points"] for x in day.exercises)

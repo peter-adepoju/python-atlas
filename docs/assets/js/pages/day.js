@@ -1,10 +1,10 @@
-import "./common.js?v=86aca22b42";
-import { $, $$, h, pageData, toast } from "../site.js?v=86aca22b42";
-import { mountConsoles } from "../console.js?v=86aca22b42";
-import { mountQuizzes, mountParsons } from "../quiz.js?v=86aca22b42";
-import { mountWidgets } from "../widgets/index.js?v=86aca22b42";
-import { progress, saveNow } from "../progress.js?v=86aca22b42";
-import { ensure } from "../runtime.js?v=86aca22b42";
+import "./common.js?v=b54d8b61c9";
+import { $, $$, h, pageData, toast } from "../site.js?v=b54d8b61c9";
+import { mountConsoles } from "../console.js?v=b54d8b61c9";
+import { mountQuizzes, mountParsons } from "../quiz.js?v=b54d8b61c9";
+import { mountWidgets } from "../widgets/index.js?v=b54d8b61c9";
+import { progress, saveNow } from "../progress.js?v=b54d8b61c9";
+import { ensure } from "../runtime.js?v=b54d8b61c9";
 
 const data = pageData("day-data");
 
@@ -16,6 +16,14 @@ function start() {
   // Start Python in the background so the first Run is quick.
   setTimeout(() => ensure().catch(() => {}), 400);
   progress.set("last:day", { id: data.id });
+
+  // The plan is folded into one line; the button opens the full timetable.
+  const planBtn = $(".plan-toggle");
+  if (planBtn) planBtn.addEventListener("click", () => {
+    const open = planBtn.closest(".day-plan").classList.toggle("is-open");
+    planBtn.setAttribute("aria-expanded", String(open));
+    planBtn.textContent = planBtn.textContent.replace(open ? "Show" : "Hide", open ? "Hide" : "Show");
+  });
 
   // Highlight the section being read in the outline.
   const links = $$(".rail-toc a");
