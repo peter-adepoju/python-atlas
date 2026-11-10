@@ -1,0 +1,1326 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="97b2d34bb1">
+<title>Week 84 Day 5: PyTorch: a first look | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=97b2d34bb1">
+<link rel="stylesheet" href="../assets/css/site.css?v=97b2d34bb1">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=97b2d34bb1"></script>
+<script src="../assets/vendor/codemirror.js?v=97b2d34bb1" defer></script>
+<meta name="description" content="Yesterday’s network needed every gradient worked out by hand, and one wrong sign in backward broke it. Real networks have hundreds of layers of many kinds,...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w084d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 84 Day 5: PyTorch: a first look">
+<meta property="og:description" content="Yesterday’s network needed every gradient worked out by hand, and one wrong sign in backward broke it. Real networks have hundreds of layers of many kinds,...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w084d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-84">Week 84: Python for machine learning</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#what-pytorch-adds" data-sec="what-pytorch-adds">What PyTorch adds</a></li><li><a href="#automatic-differentiation" data-sec="automatic-differentiation">Automatic differentiation</a></li><li><a href="#modules-and-parameters" data-sec="modules-and-parameters">Modules and parameters</a></li><li><a href="#the-training-loop" data-sec="the-training-loop">The training loop</a></li><li><a href="#on-your-own-computer" data-sec="on-your-own-computer">On your own computer</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w084d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-84">Week 84: Python for machine learning</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 84, Day 5</span></p>
+      <h1>PyTorch: a first look</h1>
+      <div class="day-intro"><p>Yesterday&rsquo;s network needed every gradient worked out by hand, and one wrong sign in <code>backward</code> broke it. Real networks have hundreds of layers of many kinds, so nobody writes their gradients: libraries work them out automatically. <strong>PyTorch</strong>, a free, open-source library, is the most widely used of them. It gives you <strong>tensors</strong> (NumPy-like arrays that can run on graphics cards), <strong>automatic differentiation</strong> (call <code>loss.backward()</code> and every parameter gets its gradient), building blocks for networks, and optimisers. PyTorch is too big to run in a web page, so today you&rsquo;ll build a tiny version of its core yourself, in plain Python: a value that remembers how it was computed and can send gradients back through that history, then neurons, layers and an optimiser shaped exactly like PyTorch&rsquo;s. The last section shows the same programs in real PyTorch, to run on your own computer.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain what PyTorch provides beyond NumPy, in particular automatic differentiation</li><li>Build a scalar autograd engine that records operations and backpropagates through them</li><li>Build modules (neuron, layer, network) that expose their parameters</li><li>Write the PyTorch training loop (zero_grad, forward, loss, backward, step), and say why each step is there</li><li>Read and run the equivalent programs in real PyTorch on your own computer</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="What PyTorch adds: 15 min"></span><span class="plan-seg s0" style="flex:25" title="Automatic differentiation: 25 min"></span><span class="plan-seg s1" style="flex:15" title="Modules and parameters: 15 min"></span><span class="plan-seg s0" style="flex:15" title="The training loop: 15 min"></span><span class="plan-seg s1" style="flex:10" title="On your own computer: 10 min"></span><span class="plan-seg s0" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s1" style="flex:30" title="Quiz and daily challenge: 30 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">8 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">What PyTorch adds</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">Automatic differentiation</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Modules and parameters</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:05</span><span class="plan-what">The training loop</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">On your own computer</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:30</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">30 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w084d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w084d5.ipynb" download>download it</a>. Exercises today are worth 145 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w084d5-p1"><textarea class="pc-src pc-code" hidden>class Value:
+    def __init__(self, data, parents=()):
+        self.data, self.grad, self.parents = data, 0.0, parents
+
+a = Value(3.0)
+b = Value(4.0)
+c = Value(a.data * b.data, parents=(a, b))
+# dc/da is b, and dc/db is a: the chain rule starts here
+a.grad, b.grad = b.data, a.data
+print(c.data, a.grad, b.grad, [p.data for p in c.parents])</textarea></div>
+<p>If every result remembers the values it was made from (its <strong>parents</strong>) and the local rule for its derivative, then gradients can be worked out automatically by walking that history backwards. That&rsquo;s all automatic differentiation is, and today you&rsquo;ll build it properly.</p>
+<h2 id="what-pytorch-adds">What PyTorch adds</h2>
+<p>PyTorch&rsquo;s four main parts, each something you&rsquo;ve already done by hand:</p>
+<ul>
+<li><strong>Tensors</strong>: multi-dimensional arrays like NumPy&rsquo;s, with the same kind of operations and broadcasting, that can also live on a graphics card (GPU), where large matrix multiplications are many times faster.</li>
+<li><strong>Autograd</strong>: a tensor created with <code>requires_grad=True</code> records every operation done with it. Calling <code>.backward()</code> on a result (the loss) fills in <code>.grad</code> for every such tensor, using the chain rule, exactly as yesterday&rsquo;s <code>backward</code> did, but for any program.</li>
+<li><strong><code>torch.nn</code></strong>: layers (<code>nn.Linear</code>, <code>nn.Conv2d</code>, &hellip;), activations (<code>nn.ReLU</code>), losses (<code>nn.BCEWithLogitsLoss</code>, <code>nn.MSELoss</code>) and <code>nn.Module</code>, the base class for models, which keeps track of their parameters.</li>
+<li><strong><code>torch.optim</code></strong>: optimisers (<code>SGD</code>, <code>Adam</code>) that update every parameter from its gradient.</li>
+</ul>
+<p>The training loop is the same four steps as yesterday. What changes is that you never write the backward pass.</p>
+<h2 id="automatic-differentiation">Automatic differentiation</h2>
+<p>Build it for single numbers. A <code>Value</code> holds <code>data</code>, a <code>grad</code> (starting at 0), the <code>Value</code>s it was computed from, and a small function <code>_backward</code> that knows the <strong>local derivative</strong> of the operation that made it. For <code>out = a + b</code>, both inputs get <code>out.grad</code> (the derivative of a sum with respect to each term is 1); for <code>out = a * b</code>, <code>a</code> gets <code>b.data × out.grad</code> and <code>b</code> gets <code>a.data × out.grad</code>. That multiplication by <code>out.grad</code> is the chain rule.</p>
+<p>Two details matter:</p>
+<ul>
+<li>Gradients must be <strong>added</strong> (<code>+=</code>), not assigned: if a value is used twice (<code>a * a</code>, or one weight used for many examples), its gradient is the sum of both paths.</li>
+<li><code>backward()</code> must call each node&rsquo;s <code>_backward</code> <strong>after</strong> every node that uses it has passed its gradient down: put the nodes in <strong>topological order</strong> (each after its parents), set the output&rsquo;s gradient to 1, and go through that order in reverse.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w084d5-e2"><textarea class="pc-src pc-code" hidden>class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad = float(data), 0.0
+        self._prev = tuple(children)
+        self._backward = lambda: None
+
+    def __add__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data + other.data, (self, other))
+        def _backward():
+            self.grad += out.grad
+            other.grad += out.grad
+        out._backward = _backward
+        return out
+
+    def __mul__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+
+    def backward(self):
+        order, seen = [], set()
+        def visit(v):
+            if id(v) not in seen:
+                seen.add(id(v))
+                for child in v._prev:
+                    visit(child)
+                order.append(v)
+        visit(self)
+        self.grad = 1.0
+        for v in reversed(order):
+            v._backward()
+
+x, w, b = Value(2.0), Value(-3.0), Value(1.0)
+y = x * w + b          # -5.0
+z = y * y              # 25.0, uses y twice
+z.backward()
+print(z.data, y.grad, w.grad, x.grad, b.grad)</textarea></div>
+<p><code>dz/dy = 2y = −10</code>, so <code>dz/dw = −10 × x = −20</code>, <code>dz/dx = −10 × w = 30</code> and <code>dz/db = −10</code>. Nothing was written specially for this expression. This design follows <strong>micrograd</strong>, a tiny autograd engine by Andrej Karpathy (MIT licence), which today&rsquo;s exercises adapt.</p>
+<h2 id="modules-and-parameters">Modules and parameters</h2>
+<p>With <code>Value</code>, a neuron is a list of weight <code>Value</code>s and a bias <code>Value</code>; calling it on inputs builds the expression <code>activation(Σ wᵢxᵢ + b)</code>. A layer is a list of neurons; a network is a list of layers. Each provides <strong><code>parameters()</code></strong>, the list of every <code>Value</code> that training should change. PyTorch&rsquo;s <code>nn.Module</code> does the same job: any <code>nn.Linear</code> you assign as an attribute of your model is found by <code>model.parameters()</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w084d5-e3"><textarea class="pc-src pc-code" hidden>import math
+import random
+
+class V:
+    def __init__(self, data):
+        self.data, self.grad = data, 0.0
+
+class Neuron:
+    def __init__(self, n_in, rng):
+        self.w = [V(rng.uniform(-1, 1)) for _ in range(n_in)]
+        self.b = V(0.0)
+
+    def parameters(self):
+        return self.w + [self.b]
+
+class Layer:
+    def __init__(self, n_in, n_out, rng):
+        self.neurons = [Neuron(n_in, rng) for _ in range(n_out)]
+
+    def parameters(self):
+        return [p for n in self.neurons for p in n.parameters()]
+
+rng = random.Random(0)
+net = [Layer(3, 4, rng), Layer(4, 4, rng), Layer(4, 1, rng)]
+print(sum(len(layer.parameters()) for layer in net), &quot;parameters&quot;)</textarea></div>
+<p><code>(3 + 1) × 4 + (4 + 1) × 4 + (4 + 1) × 1 = 41</code>: every weight and bias, found by asking the modules.</p>
+<h2 id="the-training-loop">The training loop</h2>
+<p>In PyTorch every training loop has the same five lines inside it:</p>
+<pre><code class="language-python">for epoch in range(epochs):
+    optimizer.zero_grad()            # 1. clear last step's gradients
+    predictions = model(X)           # 2. forward pass (records the graph)
+    loss = loss_fn(predictions, y)   # 3. one number to minimise
+    loss.backward()                  # 4. fill in every parameter's .grad
+    optimizer.step()                 # 5. update every parameter
+</code></pre>
+<p>Step 1 exists because gradients <strong>accumulate</strong> (<code>+=</code>, as in <code>Value</code>): without it, each step would use the sum of all previous gradients. An <strong>optimiser</strong> holds the list of parameters: <code>SGD</code> does <code>p.data -= lr * p.grad</code> for each; <strong><code>Adam</code></strong> keeps a running average of each parameter&rsquo;s gradient and of its square, and scales each step by them, which usually trains faster with less tuning of the learning rate.</p>
+<p>After training, predict inside <code>with torch.no_grad():</code> (don&rsquo;t record a graph you won&rsquo;t use) and call <code>model.eval()</code> (some layers behave differently while training).</p>
+<h2 id="on-your-own-computer">On your own computer</h2>
+<p>Install PyTorch (<code>pip install torch</code>; the PyTorch website has a selector for your system, and the CPU version is fine for everything here), then run this, which is yesterday&rsquo;s XOR network with automatic gradients:</p>
+<pre><code class="language-python">import torch
+from torch import nn
+
+torch.manual_seed(0)
+X = torch.tensor([[0., 0.], [0., 1.], [1., 0.], [1., 1.]])
+y = torch.tensor([[0.], [1.], [1.], [0.]])
+
+model = nn.Sequential(nn.Linear(2, 8), nn.ReLU(), nn.Linear(8, 1))
+loss_fn = nn.BCEWithLogitsLoss()          # sigmoid and cross-entropy in one stable step
+optimizer = torch.optim.Adam(model.parameters(), lr=0.05)
+
+for epoch in range(500):
+    optimizer.zero_grad()
+    loss = loss_fn(model(X), y)
+    loss.backward()
+    optimizer.step()
+
+with torch.no_grad():
+    print(loss.item(), (torch.sigmoid(model(X)) &gt; 0.5).int().ravel().tolist())
+
+a = torch.tensor(2.0, requires_grad=True)
+b = (a * a + 3 * a)
+b.backward()
+print(a.grad)                              # 2a + 3 = 7
+</code></pre>
+<p>For a model you write yourself, subclass <code>nn.Module</code>:</p>
+<pre><code class="language-python">class Net(nn.Module):
+    def __init__(self, n_in, n_hidden):
+        super().__init__()
+        self.hidden = nn.Linear(n_in, n_hidden)
+        self.out = nn.Linear(n_hidden, 1)
+
+    def forward(self, x):
+        return self.out(torch.relu(self.hidden(x)))
+</code></pre>
+<p>Bigger data goes through a <code>torch.utils.data.DataLoader</code>, which hands out shuffled mini-batches; <code>model.to("cuda")</code> and <code>X.to("cuda")</code> move work to a graphics card if you have a suitable one; <code>torch.save(model.state_dict(), "model.pt")</code> saves the learned weights.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>PyTorch provides tensors (NumPy-like, GPU-capable), autograd (<code>requires_grad=True</code>, then <code>loss.backward()</code> fills every <code>.grad</code>), <code>torch.nn</code> (layers, activations, losses, <code>nn.Module</code>) and <code>torch.optim</code> (SGD, Adam). Automatic differentiation records each operation&rsquo;s inputs and local derivative; <code>backward()</code> sets the output&rsquo;s gradient to 1 and calls each node&rsquo;s backward rule in reverse topological order, <strong>adding</strong> to gradients so values used twice get both contributions. Modules expose <code>parameters()</code>. Every training loop is: <code>zero_grad()</code> (gradients accumulate), forward, loss, <code>backward()</code>, <code>step()</code>. Predict under <code>torch.no_grad()</code> after <code>model.eval()</code>. This lesson&rsquo;s engine follows Andrej Karpathy&rsquo;s micrograd.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d5-value" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A value that remembers</div><div class="pc-prompt"><p>Write a class <code>Value(data, children=())</code> with <code>data</code> (a float), <code>grad</code> (starting at <code>0.0</code>), <code>_prev</code> (the tuple of children) and <code>_backward</code> (a function doing nothing until an operation sets it). Support <code>+</code> and <code>*</code> between <code>Value</code>s and with plain numbers on <strong>either</strong> side (<code>__add__</code>, <code>__radd__</code>, <code>__mul__</code>, <code>__rmul__</code>; wrap numbers in <code>Value</code>), each setting the result&rsquo;s <code>_backward</code> so it <strong>adds</strong> the right amounts to its inputs&rsquo; gradients. Then <code>backward()</code>: order the nodes so each comes after its children, set this node&rsquo;s <code>grad</code> to 1 and call every <code>_backward</code> in reverse order.</p></div><textarea class="pc-src pc-code" hidden>class Value:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_add_mul():
+    &quot;local rules and the chain rule&quot;
+    x, w, b = Value(2.0), Value(-3.0), Value(1.0)
+    y = x * w + b
+    z = y * y
+    z.backward()
+    assert (z.data, y.grad, w.grad, x.grad, b.grad) == (25.0, -10.0, -20.0, 30.0, -10.0)
+
+def test_numbers_and_reuse():
+    &quot;numbers on either side; reused values add up&quot;
+    a = Value(3.0)
+    out = 2 * a + a * a + 1
+    out.backward()
+    assert out.data == 16.0 and a.grad == 8.0
+    c = Value(5.0)
+    d = c + c + c
+    d.backward()
+    assert c.grad == 3.0 and isinstance(d._prev, tuple)</textarea><textarea class="pc-src pc-solution" hidden>class Value:
+    def __init__(self, data, children=()):
+        self.data = float(data)
+        self.grad = 0.0
+        self._prev = tuple(children)
+        self._backward = lambda: None
+
+    @staticmethod
+    def _wrap(other):
+        return other if isinstance(other, Value) else Value(other)
+
+    def __add__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data + other.data, (self, other))
+        def _backward():
+            self.grad += out.grad
+            other.grad += out.grad
+        out._backward = _backward
+        return out
+
+    def __radd__(self, other):
+        return self + other
+
+    def __mul__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+
+    def __rmul__(self, other):
+        return self * other
+
+    def backward(self):
+        order, seen = [], set()
+        def visit(v):
+            if id(v) not in seen:
+                seen.add(id(v))
+                for child in v._prev:
+                    visit(child)
+                order.append(v)
+        visit(self)
+        self.grad = 1.0
+        for v in reversed(order):
+            v._backward()</textarea><template class="pc-src pc-hint">Each <code>_backward</code> is a nested function that can see <code>self</code>, <code>other</code> and <code>out</code>. For <code>backward</code>, a depth-first visit that appends a node after visiting its children gives the order; go through it reversed.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d5-ops" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">More operations</div><div class="pc-prompt"><p>Extend the given <code>Value</code> with <code>__neg__</code>, <code>__sub__</code> and <code>__rsub__</code>, <code>__pow__</code> (for a plain-number exponent: the derivative of <code>xⁿ</code> is <code>n·xⁿ⁻¹</code>), <code>__truediv__</code> and <code>__rtruediv__</code> (via <code>** -1</code>), and the methods <code>exp()</code>, <code>log()</code>, <code>tanh()</code> (derivative <code>1 − tanh²</code>) and <code>relu()</code> (derivative 1 where the result is positive, else 0). Build the new operations from the existing ones where you can.</p></div><textarea class="pc-src pc-code" hidden>import math
+
+class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad = float(data), 0.0
+        self._prev, self._backward = tuple(children), lambda: None
+
+    @staticmethod
+    def _wrap(other):
+        return other if isinstance(other, Value) else Value(other)
+
+    def __add__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data + other.data, (self, other))
+        def _backward():
+            self.grad += out.grad
+            other.grad += out.grad
+        out._backward = _backward
+        return out
+
+    def __radd__(self, other):
+        return self + other
+
+    def __mul__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+
+    def __rmul__(self, other):
+        return self * other
+
+    def backward(self):
+        order, seen = [], set()
+        def visit(v):
+            if id(v) not in seen:
+                seen.add(id(v))
+                for child in v._prev:
+                    visit(child)
+                order.append(v)
+        visit(self)
+        self.grad = 1.0
+        for v in reversed(order):
+            v._backward()
+
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import math
+
+def _check(f, x0):
+    v = Value(x0)
+    out = f(v)
+    out.backward()
+    h = 1e-6
+    numeric = (f(Value(x0 + h)).data - f(Value(x0 - h)).data) / (2 * h)
+    assert abs(v.grad - numeric) &lt; 1e-5, (v.grad, numeric)
+    return out.data
+
+def test_ops():
+    &quot;every derivative agrees with a numerical one&quot;
+    assert _check(lambda x: x - 3, 1.0) == -2.0
+    assert _check(lambda x: 10 - x * 2, 1.5) == 7.0
+    assert _check(lambda x: -x, 4.0) == -4.0
+    assert _check(lambda x: x ** 3, 2.0) == 8.0
+    assert _check(lambda x: x / 4, 2.0) == 0.5
+    assert _check(lambda x: 1 / x, 4.0) == 0.25
+    assert abs(_check(lambda x: x.exp(), 1.0) - math.e) &lt; 1e-12
+    assert _check(lambda x: x.log(), 1.0) == 0.0
+    assert abs(_check(lambda x: x.tanh(), 0.5) - math.tanh(0.5)) &lt; 1e-12
+    assert _check(lambda x: (x * 2).relu(), 1.5) == 3.0 and _check(lambda x: x.relu(), -2.0) == 0.0
+    assert abs(_check(lambda x: (x * x + 1).log() / x, 0.7) - math.log(1.49) / 0.7) &lt; 1e-12</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad = float(data), 0.0
+        self._prev, self._backward = tuple(children), lambda: None
+
+    @staticmethod
+    def _wrap(other):
+        return other if isinstance(other, Value) else Value(other)
+
+    def __add__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data + other.data, (self, other))
+        def _backward():
+            self.grad += out.grad
+            other.grad += out.grad
+        out._backward = _backward
+        return out
+
+    def __radd__(self, other):
+        return self + other
+
+    def __mul__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+
+    def __rmul__(self, other):
+        return self * other
+
+    def backward(self):
+        order, seen = [], set()
+        def visit(v):
+            if id(v) not in seen:
+                seen.add(id(v))
+                for child in v._prev:
+                    visit(child)
+                order.append(v)
+        visit(self)
+        self.grad = 1.0
+        for v in reversed(order):
+            v._backward()
+
+    def __neg__(self):
+        return self * -1
+
+    def __sub__(self, other):
+        return self + (-self._wrap(other))
+
+    def __rsub__(self, other):
+        return self._wrap(other) + (-self)
+
+    def __pow__(self, n):
+        out = Value(self.data ** n, (self,))
+        def _backward():
+            self.grad += n * self.data ** (n - 1) * out.grad
+        out._backward = _backward
+        return out
+
+    def __truediv__(self, other):
+        return self * self._wrap(other) ** -1
+
+    def __rtruediv__(self, other):
+        return self._wrap(other) * self ** -1
+
+    def _unary(self, value, slope):
+        out = Value(value, (self,))
+        def _backward():
+            self.grad += slope * out.grad
+        out._backward = _backward
+        return out
+
+    def exp(self):
+        e = math.exp(self.data)
+        return self._unary(e, e)
+
+    def log(self):
+        return self._unary(math.log(self.data), 1 / self.data)
+
+    def tanh(self):
+        t = math.tanh(self.data)
+        return self._unary(t, 1 - t * t)
+
+    def relu(self):
+        r = max(0.0, self.data)
+        return self._unary(r, 1.0 if r &gt; 0 else 0.0)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d5-modules" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Neurons, layers and a network</div><div class="pc-prompt"><p>Using the given <code>Value</code>, write <code>Neuron(n_in, rng, activation="relu")</code> with weights <code>Value(rng.uniform(-1, 1))</code> (one per input, drawn in order) and a bias <code>Value(0.0)</code>; calling it on a list of inputs returns <code>Σ wᵢxᵢ + b</code> passed through <code>relu</code>, <code>tanh</code>, or nothing for <code>"linear"</code>. <code>Layer(n_in, n_out, rng, activation)</code> holds <code>n_out</code> neurons and returns a list of their outputs. <code>MLP(n_in, sizes, rng)</code> holds one layer per size, all <code>"relu"</code> except the last, which is <code>"linear"</code>; calling it returns the last layer&rsquo;s list, or the single <code>Value</code> if that layer has one neuron. All three have <code>parameters()</code>.</p></div><textarea class="pc-src pc-code" hidden>import math
+import random
+
+class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad = float(data), 0.0
+        self._prev, self._backward = tuple(children), lambda: None
+    @staticmethod
+    def _wrap(o):
+        return o if isinstance(o, Value) else Value(o)
+    def __add__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data + other.data, (self, other))
+        def _backward():
+            self.grad += out.grad
+            other.grad += out.grad
+        out._backward = _backward
+        return out
+    __radd__ = __add__
+    def __mul__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+    __rmul__ = __mul__
+    def _unary(self, value, slope):
+        out = Value(value, (self,))
+        def _backward():
+            self.grad += slope * out.grad
+        out._backward = _backward
+        return out
+    def tanh(self):
+        t = math.tanh(self.data)
+        return self._unary(t, 1 - t * t)
+    def relu(self):
+        r = max(0.0, self.data)
+        return self._unary(r, 1.0 if r &gt; 0 else 0.0)
+    def backward(self):
+        order, seen, stack = [], set(), [(self, False)]
+        while stack:
+            v, done = stack.pop()
+            if done:
+                order.append(v)
+            elif id(v) not in seen:
+                seen.add(id(v))
+                stack.append((v, True))
+                stack.extend((c, False) for c in v._prev)
+        self.grad = 1.0
+        for v in reversed(order):
+            v._backward()
+
+class Neuron:
+    ___
+
+class Layer:
+    ___
+
+class MLP:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+
+def test_modules():
+    &quot;parameters found by asking&quot;
+    rng = random.Random(0)
+    n = Neuron(3, rng, &quot;linear&quot;)
+    rng2 = random.Random(0)
+    assert [w.data for w in n.w] == [rng2.uniform(-1, 1) for _ in range(3)] and n.b.data == 0.0
+    out = n([1.0, 2.0, 3.0])
+    assert abs(out.data - sum(w.data * x for w, x in zip(n.w, [1, 2, 3]))) &lt; 1e-12
+    assert len(n.parameters()) == 4
+    net = MLP(3, [4, 4, 1], random.Random(1))
+    assert len(net.parameters()) == 41
+    y = net([0.5, -1.0, 2.0])
+    assert isinstance(y, Value)
+    y.backward()
+    assert any(p.grad != 0 for p in net.parameters())
+    two = MLP(2, [3, 2], random.Random(2))([1.0, 1.0])
+    assert isinstance(two, list) and len(two) == 2
+    r = Neuron(2, random.Random(3), &quot;relu&quot;)([-5.0, -5.0])
+    assert r.data &gt;= 0</textarea><textarea class="pc-src pc-solution" hidden>import math
+import random
+
+class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad = float(data), 0.0
+        self._prev, self._backward = tuple(children), lambda: None
+    @staticmethod
+    def _wrap(o):
+        return o if isinstance(o, Value) else Value(o)
+    def __add__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data + other.data, (self, other))
+        def _backward():
+            self.grad += out.grad
+            other.grad += out.grad
+        out._backward = _backward
+        return out
+    __radd__ = __add__
+    def __mul__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+    __rmul__ = __mul__
+    def _unary(self, value, slope):
+        out = Value(value, (self,))
+        def _backward():
+            self.grad += slope * out.grad
+        out._backward = _backward
+        return out
+    def tanh(self):
+        t = math.tanh(self.data)
+        return self._unary(t, 1 - t * t)
+    def relu(self):
+        r = max(0.0, self.data)
+        return self._unary(r, 1.0 if r &gt; 0 else 0.0)
+    def backward(self):
+        order, seen, stack = [], set(), [(self, False)]
+        while stack:
+            v, done = stack.pop()
+            if done:
+                order.append(v)
+            elif id(v) not in seen:
+                seen.add(id(v))
+                stack.append((v, True))
+                stack.extend((c, False) for c in v._prev)
+        self.grad = 1.0
+        for v in reversed(order):
+            v._backward()
+
+class Neuron:
+    def __init__(self, n_in, rng, activation=&quot;relu&quot;):
+        self.w = [Value(rng.uniform(-1, 1)) for _ in range(n_in)]
+        self.b = Value(0.0)
+        self.activation = activation
+
+    def __call__(self, x):
+        total = sum((w * xi for w, xi in zip(self.w, x)), self.b)
+        if self.activation == &quot;relu&quot;:
+            return total.relu()
+        if self.activation == &quot;tanh&quot;:
+            return total.tanh()
+        return total
+
+    def parameters(self):
+        return self.w + [self.b]
+
+class Layer:
+    def __init__(self, n_in, n_out, rng, activation=&quot;relu&quot;):
+        self.neurons = [Neuron(n_in, rng, activation) for _ in range(n_out)]
+
+    def __call__(self, x):
+        return [n(x) for n in self.neurons]
+
+    def parameters(self):
+        return [p for n in self.neurons for p in n.parameters()]
+
+class MLP:
+    def __init__(self, n_in, sizes, rng):
+        dims = [n_in] + list(sizes)
+        self.layers = [Layer(dims[i], dims[i + 1], rng, &quot;relu&quot; if i &lt; len(sizes) - 1 else &quot;linear&quot;)
+                       for i in range(len(sizes))]
+
+    def __call__(self, x):
+        for layer in self.layers:
+            x = layer(x)
+        return x[0] if len(x) == 1 else x
+
+    def parameters(self):
+        return [p for layer in self.layers for p in layer.parameters()]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d5-sgd" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">An optimiser</div><div class="pc-prompt"><p>Write a class <code>SGD(params, lr)</code> with <code>zero_grad()</code> (set every parameter&rsquo;s <code>grad</code> to 0) and <code>step()</code> (move every parameter&rsquo;s <code>data</code> by <code>−lr × grad</code>). Give it the same shape as <code>torch.optim.SGD</code>: it keeps the list of parameters it was given.</p></div><textarea class="pc-src pc-code" hidden>class P:
+    def __init__(self, data, grad=0.0):
+        self.data, self.grad = data, grad
+
+class SGD:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_sgd():
+    &quot;zero_grad and step&quot;
+    params = [P(1.0, 0.5), P(-2.0, -1.0)]
+    opt = SGD(params, lr=0.1)
+    opt.step()
+    assert [round(p.data, 6) for p in params] == [0.95, -1.9]
+    opt.zero_grad()
+    assert [p.grad for p in params] == [0.0, 0.0]
+    opt.step()
+    assert [round(p.data, 6) for p in params] == [0.95, -1.9]
+    assert opt.params is params or list(opt.params) == params</textarea><textarea class="pc-src pc-solution" hidden>class P:
+    def __init__(self, data, grad=0.0):
+        self.data, self.grad = data, grad
+
+class SGD:
+    def __init__(self, params, lr):
+        self.params = params
+        self.lr = lr
+
+    def zero_grad(self):
+        for p in self.params:
+            p.grad = 0.0
+
+    def step(self):
+        for p in self.params:
+            p.data -= self.lr * p.grad</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d5-loop" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The training loop</div><div class="pc-prompt"><p>With the given <code>Value</code>, <code>MLP</code> and <code>SGD</code>, write <code>train(model, X, y, lr=0.05, epochs=100)</code>: a PyTorch-style loop that, each epoch, clears the gradients, computes the <strong>mean squared error</strong> of <code>model(x)</code> against each label (<code>Σ (pred − label)²</code> over the examples, divided by their number, as a <code>Value</code>), calls <code>backward()</code> on it and steps the optimiser. Return the list of the loss&rsquo;s <code>data</code> for each epoch.</p></div><textarea class="pc-src pc-code" hidden>import math
+import random
+
+class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad = float(data), 0.0
+        self._prev, self._backward = tuple(children), lambda: None
+    @staticmethod
+    def _wrap(o):
+        return o if isinstance(o, Value) else Value(o)
+    def __add__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data + other.data, (self, other))
+        def _backward():
+            self.grad += out.grad
+            other.grad += out.grad
+        out._backward = _backward
+        return out
+    __radd__ = __add__
+    def __mul__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+    __rmul__ = __mul__
+    def __neg__(self):
+        return self * -1
+    def __sub__(self, other):
+        return self + (-self._wrap(other))
+    def __pow__(self, n):
+        out = Value(self.data ** n, (self,))
+        def _backward():
+            self.grad += n * self.data ** (n - 1) * out.grad
+        out._backward = _backward
+        return out
+    def relu(self):
+        out = Value(max(0.0, self.data), (self,))
+        def _backward():
+            self.grad += (1.0 if out.data &gt; 0 else 0.0) * out.grad
+        out._backward = _backward
+        return out
+    def backward(self):
+        order, seen, stack = [], set(), [(self, False)]
+        while stack:
+            v, done = stack.pop()
+            if done:
+                order.append(v)
+            elif id(v) not in seen:
+                seen.add(id(v))
+                stack.append((v, True))
+                stack.extend((c, False) for c in v._prev)
+        self.grad = 1.0
+        for v in reversed(order):
+            v._backward()
+
+class Neuron:
+    def __init__(self, n_in, rng, relu=True):
+        self.w = [Value(rng.uniform(-1, 1)) for _ in range(n_in)]
+        self.b, self.relu = Value(0.0), relu
+    def __call__(self, x):
+        total = sum((w * xi for w, xi in zip(self.w, x)), self.b)
+        return total.relu() if self.relu else total
+    def parameters(self):
+        return self.w + [self.b]
+
+class MLP:
+    def __init__(self, n_in, sizes, rng):
+        dims = [n_in] + list(sizes)
+        self.layers = [[Neuron(dims[i], rng, i &lt; len(sizes) - 1) for _ in range(dims[i + 1])] for i in range(len(sizes))]
+    def __call__(self, x):
+        for layer in self.layers:
+            x = [n(x) for n in layer]
+        return x[0] if len(x) == 1 else x
+    def parameters(self):
+        return [p for layer in self.layers for n in layer for p in n.parameters()]
+
+class SGD:
+    def __init__(self, params, lr):
+        self.params, self.lr = params, lr
+    def zero_grad(self):
+        for p in self.params:
+            p.grad = 0.0
+    def step(self):
+        for p in self.params:
+            p.data -= self.lr * p.grad
+
+def train(model, X, y, lr=0.05, epochs=100):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import random
+
+def test_loop():
+    &quot;the loss falls&quot;
+    X = [[2.0, 3.0, -1.0], [3.0, -1.0, 0.5], [0.5, 1.0, 1.0], [1.0, 1.0, -1.0]]
+    y = [1.0, -1.0, -1.0, 1.0]
+    model = MLP(3, [4, 4, 1], random.Random(0))
+    losses = train(model, X, y, lr=0.05, epochs=100)
+    assert len(losses) == 100 and losses[-1] &lt; losses[0] / 5 and losses[-1] &lt; 0.1, (losses[0], losses[-1])
+    preds = [model(x).data for x in X]
+    assert all((p &gt; 0) == (t &gt; 0) for p, t in zip(preds, y))
+    again = train(MLP(3, [4, 4, 1], random.Random(0)), X, y, lr=0.05, epochs=100)
+    assert again == losses, &quot;the same seed gives the same training&quot;</textarea><textarea class="pc-src pc-solution" hidden>import math
+import random
+
+class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad = float(data), 0.0
+        self._prev, self._backward = tuple(children), lambda: None
+    @staticmethod
+    def _wrap(o):
+        return o if isinstance(o, Value) else Value(o)
+    def __add__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data + other.data, (self, other))
+        def _backward():
+            self.grad += out.grad
+            other.grad += out.grad
+        out._backward = _backward
+        return out
+    __radd__ = __add__
+    def __mul__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+    __rmul__ = __mul__
+    def __neg__(self):
+        return self * -1
+    def __sub__(self, other):
+        return self + (-self._wrap(other))
+    def __pow__(self, n):
+        out = Value(self.data ** n, (self,))
+        def _backward():
+            self.grad += n * self.data ** (n - 1) * out.grad
+        out._backward = _backward
+        return out
+    def relu(self):
+        out = Value(max(0.0, self.data), (self,))
+        def _backward():
+            self.grad += (1.0 if out.data &gt; 0 else 0.0) * out.grad
+        out._backward = _backward
+        return out
+    def backward(self):
+        order, seen, stack = [], set(), [(self, False)]
+        while stack:
+            v, done = stack.pop()
+            if done:
+                order.append(v)
+            elif id(v) not in seen:
+                seen.add(id(v))
+                stack.append((v, True))
+                stack.extend((c, False) for c in v._prev)
+        self.grad = 1.0
+        for v in reversed(order):
+            v._backward()
+
+class Neuron:
+    def __init__(self, n_in, rng, relu=True):
+        self.w = [Value(rng.uniform(-1, 1)) for _ in range(n_in)]
+        self.b, self.relu = Value(0.0), relu
+    def __call__(self, x):
+        total = sum((w * xi for w, xi in zip(self.w, x)), self.b)
+        return total.relu() if self.relu else total
+    def parameters(self):
+        return self.w + [self.b]
+
+class MLP:
+    def __init__(self, n_in, sizes, rng):
+        dims = [n_in] + list(sizes)
+        self.layers = [[Neuron(dims[i], rng, i &lt; len(sizes) - 1) for _ in range(dims[i + 1])] for i in range(len(sizes))]
+    def __call__(self, x):
+        for layer in self.layers:
+            x = [n(x) for n in layer]
+        return x[0] if len(x) == 1 else x
+    def parameters(self):
+        return [p for layer in self.layers for n in layer for p in n.parameters()]
+
+class SGD:
+    def __init__(self, params, lr):
+        self.params, self.lr = params, lr
+    def zero_grad(self):
+        for p in self.params:
+            p.grad = 0.0
+    def step(self):
+        for p in self.params:
+            p.data -= self.lr * p.grad
+
+def train(model, X, y, lr=0.05, epochs=100):
+    optimizer = SGD(model.parameters(), lr)
+    losses = []
+    for _ in range(epochs):
+        optimizer.zero_grad()
+        loss = sum(((model(x) - t) ** 2 for x, t in zip(X, y)), Value(0.0)) * (1 / len(X))
+        loss.backward()
+        optimizer.step()
+        losses.append(loss.data)
+    return losses</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d5-accumulate" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Why zero_grad?</div><div class="pc-prompt"><p>Gradients <strong>accumulate</strong>. Using the given <code>Value</code>, write <code>grads_without_zeroing(x0, times)</code>: make <code>x = Value(x0)</code>, then <code>times</code> times build <code>y = x * x * 3</code> and call <code>y.backward()</code> <strong>without</strong> resetting <code>x.grad</code>; return <code>x.grad</code>. Then <code>grads_with_zeroing(x0, times)</code>: the same, but set <code>x.grad = 0.0</code> before each backward pass; return <code>x.grad</code>. (The true derivative of <code>3x²</code> is <code>6x</code>.)</p></div><textarea class="pc-src pc-code" hidden>class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad = float(data), 0.0
+        self._prev, self._backward = tuple(children), lambda: None
+    def __mul__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+    def backward(self):
+        order, seen = [], set()
+        def visit(v):
+            if id(v) not in seen:
+                seen.add(id(v))
+                for c in v._prev:
+                    visit(c)
+                order.append(v)
+        visit(self)
+        self.grad = 1.0
+        for v in reversed(order):
+            v._backward()
+
+def grads_without_zeroing(x0, times):
+    ___
+
+def grads_with_zeroing(x0, times):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_accumulate():
+    &quot;the sum of every pass, unless cleared&quot;
+    assert grads_with_zeroing(2.0, 1) == 12.0
+    assert grads_without_zeroing(2.0, 3) == 36.0
+    assert grads_with_zeroing(2.0, 3) == 12.0</textarea><textarea class="pc-src pc-solution" hidden>class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad = float(data), 0.0
+        self._prev, self._backward = tuple(children), lambda: None
+    def __mul__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+    def backward(self):
+        order, seen = [], set()
+        def visit(v):
+            if id(v) not in seen:
+                seen.add(id(v))
+                for c in v._prev:
+                    visit(c)
+                order.append(v)
+        visit(self)
+        self.grad = 1.0
+        for v in reversed(order):
+            v._backward()
+
+def grads_without_zeroing(x0, times):
+    x = Value(x0)
+    for _ in range(times):
+        (x * x * 3).backward()
+    return x.grad
+
+def grads_with_zeroing(x0, times):
+    x = Value(x0)
+    for _ in range(times):
+        x.grad = 0.0
+        (x * x * 3).backward()
+    return x.grad</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w084d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Half a gradient</div><div class="pc-prompt"><p>The multiplication&rsquo;s backward rule <strong>assigns</strong> gradients instead of adding them, so for <code>a * a</code> the second path overwrites the first: it prints <code>3.0</code>, but <code>d(a²)/da</code> at 3 is <code>6.0</code>. Fix the rule so it prints <code>6.0</code>.</p></div><textarea class="pc-src pc-code" hidden>class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad, self._prev, self._backward = data, 0.0, children, lambda: None
+    def __mul__(self, other):
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad = other.data * out.grad
+            other.grad = self.data * out.grad
+        out._backward = _backward
+        return out
+
+a = Value(3.0)
+out = a * a
+out.grad = 1.0
+out._backward()
+print(a.grad)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;+=&quot;
+    expect_output(&quot;6.0&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad, self._prev, self._backward = data, 0.0, children, lambda: None
+    def __mul__(self, other):
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+
+a = Value(3.0)
+out = a * a
+out.grad = 1.0
+out._backward()
+print(a.grad)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w084d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Backwards in the wrong order</div><div class="pc-prompt"><p><code>backward</code> calls the nodes&rsquo; rules in the order they were <strong>visited</strong> (children first), so each child runs before its parent has passed any gradient down: every gradient stays <code>0.0</code>. Run them in <strong>reverse</strong> so it prints <code>x.grad = -3.0</code>.</p></div><textarea class="pc-src pc-code" hidden>class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad, self._prev, self._backward = data, 0.0, children, lambda: None
+    def __mul__(self, other):
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+    def backward(self):
+        order, seen = [], set()
+        def visit(v):
+            if id(v) not in seen:
+                seen.add(id(v))
+                for c in v._prev:
+                    visit(c)
+                order.append(v)
+        visit(self)
+        self.grad = 1.0
+        for v in order:
+            v._backward()
+
+x, w, k = Value(2.0), Value(-3.0), Value(1.0)
+(x * w * k).backward()
+print(&quot;x.grad =&quot;, x.grad)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;reverse topological order&quot;
+    expect_output(&quot;x.grad = -3.0&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad, self._prev, self._backward = data, 0.0, children, lambda: None
+    def __mul__(self, other):
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+    def backward(self):
+        order, seen = [], set()
+        def visit(v):
+            if id(v) not in seen:
+                seen.add(id(v))
+                for c in v._prev:
+                    visit(c)
+                order.append(v)
+        visit(self)
+        self.grad = 1.0
+        for v in reversed(order):
+            v._backward()
+
+x, w, k = Value(2.0), Value(-3.0), Value(1.0)
+(x * w * k).backward()
+print(&quot;x.grad =&quot;, x.grad)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w084d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Steps that keep growing</div><div class="pc-prompt"><p>The loop never clears the gradient, so each step uses the sum of all the gradients so far and the parameter shoots past the answer: it prints a huge number. Clear the gradient at the start of each step so <code>w</code> settles at the minimum of <code>(w − 3)²</code>: <code>w = 3.0</code>.</p></div><textarea class="pc-src pc-code" hidden>class P:
+    def __init__(self, data):
+        self.data, self.grad = data, 0.0
+
+w = P(0.0)
+for _ in range(100):
+    w.grad += 2 * (w.data - 3)      # what loss.backward() would add
+    w.data -= 0.1 * w.grad
+print(&quot;w =&quot;, round(w.data, 3))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;zero_grad first&quot;
+    expect_output(&quot;w = 3.0&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class P:
+    def __init__(self, data):
+        self.data, self.grad = data, 0.0
+
+w = P(0.0)
+for _ in range(100):
+    w.grad = 0.0
+    w.grad += 2 * (w.data - 3)      # what loss.backward() would add
+    w.data -= 0.1 * w.grad
+print(&quot;w =&quot;, round(w.data, 3))</textarea></div>
+<div class="parsons" data-id="w084d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A PyTorch training loop</div><div class="pc-prompt"><p>Arrange a real PyTorch training loop (to run on your own computer). One line is a trap.</p></div><script type="application/json">{"lines": ["optimizer = torch.optim.Adam(model.parameters(), lr=0.05)", "for epoch in range(500):", "    optimizer.zero_grad()", "    predictions = model(X)", "    loss = loss_fn(predictions, y)", "    loss.backward()", "    optimizer.step()"], "distractors": ["    optimizer.step(); loss.backward()"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # for out = a * b with a = 3 and b = 5, the gradient a receives when out.grad is 1
+q = ___   # for out = a + a, the gradient a receives when out.grad is 1
+r = ___   # the PyTorch call that fills in every parameter&#x27;s .grad
+s = ___   # the optimiser call that must come first in each step, because gradients accumulate
+t = ___   # how many parameters nn.Linear(2, 8) has</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 5 and q == 2, &quot;p and q&quot;
+    assert r in (&quot;loss.backward()&quot;, &quot;backward()&quot;, &quot;backward&quot;) and s in (&quot;optimizer.zero_grad()&quot;, &quot;zero_grad()&quot;, &quot;zero_grad&quot;) and t == 24, &quot;r, s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 5
+q = 2
+r = &quot;loss.backward()&quot;
+s = &quot;optimizer.zero_grad()&quot;
+t = 24</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w084d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does PyTorch&rsquo;s autograd do?", "answer": 1, "explain": "No hand-written backward pass.", "options": ["Speeds up loops", "Records operations on tensors and computes gradients with backward()", "Downloads models", "Plots losses"]}, {"type": "mc", "q": "In automatic differentiation, what does each node store besides its value?", "answer": 1, "explain": "The local derivative and the chain rule do the rest.", "options": ["Its name", "Its inputs and the rule for passing gradients back to them", "A copy of the network", "Nothing"]}, {"type": "mc", "q": "Why must gradients be added (+=) rather than assigned?", "answer": 1, "explain": "a * a has two paths back to a.", "options": ["Speed", "A value used in several places gets a contribution from each path", "Python requires it", "To avoid overflow"]}, {"type": "mc", "q": "Why process nodes in reverse topological order?", "answer": 1, "explain": "Outputs first, inputs last.", "options": ["It&rsquo;s faster", "Each node must receive all its gradient before passing it on to its inputs", "Alphabetical order", "It doesn&rsquo;t matter"]}, {"type": "mc", "q": "Why call <code>optimizer.zero_grad()</code> every step?", "answer": 1, "explain": "Forget it and steps grow.", "options": ["To reset the weights", "Gradients accumulate, so last step&rsquo;s would be added to this one&rsquo;s", "To save memory", "It&rsquo;s optional"]}, {"type": "mc", "q": "What does <code>model.parameters()</code> give an optimiser?", "answer": 1, "explain": "nn.Module finds them for you.", "options": ["The training data", "Every tensor the model will learn", "The loss", "The layers&rsquo; names"]}, {"type": "mc", "q": "What&rsquo;s the order of a training step?", "answer": 1, "explain": "The same five lines in every loop.", "options": ["step, backward, loss", "zero_grad, forward, loss, backward, step", "backward, forward, step", "forward, step, backward"]}, {"type": "mc", "q": "Why predict under <code>torch.no_grad()</code>?", "answer": 1, "explain": "Recording is only for training.", "options": ["It&rsquo;s more accurate", "There&rsquo;s no need to record a graph for backward, which saves time and memory", "It&rsquo;s required", "It resets weights"]}, {"type": "mc", "q": "What does Adam do differently from plain SGD?", "answer": 1, "explain": "Often trains faster with less tuning.", "options": ["Nothing", "Scales each parameter&rsquo;s step using running averages of its gradients", "Uses no learning rate", "Skips backward"]}, {"type": "output", "q": "What does this print?", "answer": "16.0", "explain": "Two accumulated passes of 8.", "code": "class V:\n    def __init__(self, d): self.data, self.grad = d, 0.0\na = V(4.0)\nfor _ in range(2):\n    a.grad += 2 * a.data\nprint(a.grad)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: Adam against SGD</div><div class="pc-prompt"><p>Write <code>Adam(params, lr=0.05, betas=(0.9, 0.999), eps=1e-8)</code> with <code>zero_grad()</code> and <code>step()</code>. For each parameter it keeps <code>m</code> and <code>v</code> (starting at 0) and a step count <code>t</code> shared by all; each step does <code>t += 1</code>, then for every parameter <code>m = β₁m + (1 − β₁)g</code>, <code>v = β₂v + (1 − β₂)g²</code>, <code>m̂ = m / (1 − β₁ᵗ)</code>, <code>v̂ = v / (1 − β₂ᵗ)</code> and <code>data -= lr × m̂ / (√v̂ + eps)</code>. Then <code>fit(make_model, X, y, optimiser, epochs)</code>: build a model with <code>make_model()</code>, an optimiser with <code>optimiser(model.parameters())</code>, and train with the PyTorch loop on the <strong>mean squared error</strong> (as in the training-loop exercise); return <code>(model, losses)</code>. With the same model and epochs, Adam should end with a much lower loss than SGD at the same learning rate on the data in the checks.</p></div><textarea class="pc-src pc-code" hidden>import math
+import random
+
+class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad = float(data), 0.0
+        self._prev, self._backward = tuple(children), lambda: None
+    @staticmethod
+    def _wrap(o):
+        return o if isinstance(o, Value) else Value(o)
+    def __add__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data + other.data, (self, other))
+        def _backward():
+            self.grad += out.grad
+            other.grad += out.grad
+        out._backward = _backward
+        return out
+    __radd__ = __add__
+    def __mul__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+    __rmul__ = __mul__
+    def __sub__(self, other):
+        return self + self._wrap(other) * -1
+    def __pow__(self, n):
+        out = Value(self.data ** n, (self,))
+        def _backward():
+            self.grad += n * self.data ** (n - 1) * out.grad
+        out._backward = _backward
+        return out
+    def tanh(self):
+        t = math.tanh(self.data)
+        out = Value(t, (self,))
+        def _backward():
+            self.grad += (1 - t * t) * out.grad
+        out._backward = _backward
+        return out
+    def backward(self):
+        order, seen, stack = [], set(), [(self, False)]
+        while stack:
+            v, done = stack.pop()
+            if done:
+                order.append(v)
+            elif id(v) not in seen:
+                seen.add(id(v))
+                stack.append((v, True))
+                stack.extend((c, False) for c in v._prev)
+        self.grad = 1.0
+        for v in reversed(order):
+            v._backward()
+
+class MLP:
+    def __init__(self, n_in, n_hidden, rng):
+        self.hidden = [([Value(rng.uniform(-1, 1)) for _ in range(n_in)], Value(0.0)) for _ in range(n_hidden)]
+        self.out = ([Value(rng.uniform(-1, 1)) for _ in range(n_hidden)], Value(0.0))
+    def __call__(self, x):
+        h = [sum((w * xi for w, xi in zip(ws, x)), b).tanh() for ws, b in self.hidden]
+        ws, b = self.out
+        return sum((w * hi for w, hi in zip(ws, h)), b)
+    def parameters(self):
+        return [p for ws, b in self.hidden + [self.out] for p in ws + [b]]
+
+class SGD:
+    def __init__(self, params, lr=0.05):
+        self.params, self.lr = params, lr
+    def zero_grad(self):
+        for p in self.params:
+            p.grad = 0.0
+    def step(self):
+        for p in self.params:
+            p.data -= self.lr * p.grad
+
+class Adam:
+    ___
+
+def fit(make_model, X, y, optimiser, epochs):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import math
+import random
+
+X = [[x / 4] for x in range(-8, 9)]
+Y = [math.sin(2 * x[0]) for x in X]
+
+def test_adam_step():
+    &quot;the update rule&quot;
+    class P:
+        def __init__(self, data, grad):
+            self.data, self.grad = data, grad
+    p = P(1.0, 0.5)
+    opt = Adam([p], lr=0.1)
+    opt.step()
+    assert abs(p.data - 0.9) &lt; 1e-6, &quot;the first Adam step moves by about lr&quot;
+    opt.zero_grad()
+    assert p.grad == 0.0
+    p.grad = 0.5
+    opt.step()
+    assert abs(p.data - 0.8) &lt; 1e-6 and opt.t == 2
+
+def test_compare():
+    &quot;Adam trains this faster&quot;
+    make = lambda: MLP(1, 8, random.Random(0))
+    sgd_model, sgd_losses = fit(make, X, Y, lambda ps: SGD(ps, lr=0.01), 150)
+    adam_model, adam_losses = fit(make, X, Y, lambda ps: Adam(ps, lr=0.01), 150)
+    assert len(sgd_losses) == len(adam_losses) == 150
+    assert adam_losses[-1] &lt; adam_losses[0] / 5 and adam_losses[-1] &lt; sgd_losses[-1] / 2, (sgd_losses[-1], adam_losses[-1])
+    assert abs(adam_model([0.5]).data - math.sin(1.0)) &lt; 0.3</textarea><textarea class="pc-src pc-solution" hidden>import math
+import random
+
+class Value:
+    def __init__(self, data, children=()):
+        self.data, self.grad = float(data), 0.0
+        self._prev, self._backward = tuple(children), lambda: None
+    @staticmethod
+    def _wrap(o):
+        return o if isinstance(o, Value) else Value(o)
+    def __add__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data + other.data, (self, other))
+        def _backward():
+            self.grad += out.grad
+            other.grad += out.grad
+        out._backward = _backward
+        return out
+    __radd__ = __add__
+    def __mul__(self, other):
+        other = self._wrap(other)
+        out = Value(self.data * other.data, (self, other))
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        return out
+    __rmul__ = __mul__
+    def __sub__(self, other):
+        return self + self._wrap(other) * -1
+    def __pow__(self, n):
+        out = Value(self.data ** n, (self,))
+        def _backward():
+            self.grad += n * self.data ** (n - 1) * out.grad
+        out._backward = _backward
+        return out
+    def tanh(self):
+        t = math.tanh(self.data)
+        out = Value(t, (self,))
+        def _backward():
+            self.grad += (1 - t * t) * out.grad
+        out._backward = _backward
+        return out
+    def backward(self):
+        order, seen, stack = [], set(), [(self, False)]
+        while stack:
+            v, done = stack.pop()
+            if done:
+                order.append(v)
+            elif id(v) not in seen:
+                seen.add(id(v))
+                stack.append((v, True))
+                stack.extend((c, False) for c in v._prev)
+        self.grad = 1.0
+        for v in reversed(order):
+            v._backward()
+
+class MLP:
+    def __init__(self, n_in, n_hidden, rng):
+        self.hidden = [([Value(rng.uniform(-1, 1)) for _ in range(n_in)], Value(0.0)) for _ in range(n_hidden)]
+        self.out = ([Value(rng.uniform(-1, 1)) for _ in range(n_hidden)], Value(0.0))
+    def __call__(self, x):
+        h = [sum((w * xi for w, xi in zip(ws, x)), b).tanh() for ws, b in self.hidden]
+        ws, b = self.out
+        return sum((w * hi for w, hi in zip(ws, h)), b)
+    def parameters(self):
+        return [p for ws, b in self.hidden + [self.out] for p in ws + [b]]
+
+class SGD:
+    def __init__(self, params, lr=0.05):
+        self.params, self.lr = params, lr
+    def zero_grad(self):
+        for p in self.params:
+            p.grad = 0.0
+    def step(self):
+        for p in self.params:
+            p.data -= self.lr * p.grad
+
+class Adam:
+    def __init__(self, params, lr=0.05, betas=(0.9, 0.999), eps=1e-8):
+        self.params, self.lr, self.eps = params, lr, eps
+        self.b1, self.b2 = betas
+        self.m = [0.0] * len(params)
+        self.v = [0.0] * len(params)
+        self.t = 0
+
+    def zero_grad(self):
+        for p in self.params:
+            p.grad = 0.0
+
+    def step(self):
+        self.t += 1
+        for i, p in enumerate(self.params):
+            g = p.grad
+            self.m[i] = self.b1 * self.m[i] + (1 - self.b1) * g
+            self.v[i] = self.b2 * self.v[i] + (1 - self.b2) * g * g
+            m_hat = self.m[i] / (1 - self.b1 ** self.t)
+            v_hat = self.v[i] / (1 - self.b2 ** self.t)
+            p.data -= self.lr * m_hat / (math.sqrt(v_hat) + self.eps)
+
+def fit(make_model, X, y, optimiser, epochs):
+    model = make_model()
+    opt = optimiser(model.parameters())
+    losses = []
+    for _ in range(epochs):
+        opt.zero_grad()
+        loss = sum(((model(x) - t) ** 2 for x, t in zip(X, y)), Value(0.0)) * (1 / len(X))
+        loss.backward()
+        opt.step()
+        losses.append(loss.data)
+    return model, losses</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>If you can, install PyTorch on your own computer and run the XOR program from &ldquo;On your own computer&rdquo;. Then change it: remove <code>optimizer.zero_grad()</code> and watch what happens to the loss; swap <code>Adam</code> for <code>torch.optim.SGD</code> with the same learning rate; print <code>model[0].weight.grad</code> after a backward pass. Each experiment matches something you built today. Tomorrow is the Week 84 <strong>Forge</strong>: a complete machine-learning project, from raw text to an evaluated classifier.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w084d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w084d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w084d5", "week": 84, "day": 5, "title": "PyTorch: a first look", "exercises": [{"id": "w084d5-value", "title": "A value that remembers", "points": 15}, {"id": "w084d5-ops", "title": "More operations", "points": 15}, {"id": "w084d5-modules", "title": "Neurons, layers and a network", "points": 15}, {"id": "w084d5-sgd", "title": "An optimiser", "points": 10}, {"id": "w084d5-loop", "title": "The training loop", "points": 15}, {"id": "w084d5-accumulate", "title": "Why zero_grad?", "points": 10}, {"id": "w084d5-bug1", "title": "Half a gradient", "points": 10}, {"id": "w084d5-bug2", "title": "Backwards in the wrong order", "points": 10}, {"id": "w084d5-bug3", "title": "Steps that keep growing", "points": 10}, {"id": "w084d5-trace", "title": "Predict them", "points": 10}, {"id": "w084d5-challenge", "title": "Challenge: Adam against SGD", "points": 25}], "points": 145}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=97b2d34bb1"></script>
+</body>
+</html>

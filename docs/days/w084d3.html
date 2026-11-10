@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="97b2d34bb1">
+<title>Week 84 Day 3: Evaluating models | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=97b2d34bb1">
+<link rel="stylesheet" href="../assets/css/site.css?v=97b2d34bb1">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=97b2d34bb1"></script>
+<script src="../assets/vendor/codemirror.js?v=97b2d34bb1" defer></script>
+<meta name="description" content="A model is only as good as the evidence that it works, and the most common mistakes in machine learning are mistakes of measurement, not of modelling. Today...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w084d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 84 Day 3: Evaluating models">
+<meta property="og:description" content="A model is only as good as the evidence that it works, and the most common mistakes in machine learning are mistakes of measurement, not of modelling. Today...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w084d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-84">Week 84: Python for machine learning</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#what-accuracy-hides" data-sec="what-accuracy-hides">What accuracy hides</a></li><li><a href="#precision-and-recall" data-sec="precision-and-recall">Precision and recall</a></li><li><a href="#thresholds-and-roc-auc" data-sec="thresholds-and-roc-auc">Thresholds and ROC AUC</a></li><li><a href="#regression-errors" data-sec="regression-errors">Regression errors</a></li><li><a href="#cross-validation-and-tuning" data-sec="cross-validation-and-tuning">Cross-validation and tuning</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w084d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-84">Week 84: Python for machine learning</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 84, Day 3</span></p>
+      <h1>Evaluating models</h1>
+      <div class="day-intro"><p>A model is only as good as the evidence that it works, and the most common mistakes in machine learning are mistakes of measurement, not of modelling. Today is about measuring honestly. A factory checks parts for faults, and only one part in ten is faulty: a &ldquo;model&rdquo; that passes everything is 90% accurate and catches nothing. You&rsquo;ll take accuracy apart into the <strong>confusion matrix</strong>, and measure what matters with <strong>precision</strong>, <strong>recall</strong> and <strong>F1</strong>; move the <strong>decision threshold</strong> to trade one kind of mistake for another, and compare models across all thresholds at once with <strong>ROC AUC</strong>; measure regression errors properly; and replace a single lucky (or unlucky) test split with <strong>cross-validation</strong>, which also lets you tune hyperparameters without ever touching the test set.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain why accuracy misleads on imbalanced data, and build a confusion matrix</li><li>Compute precision, recall and F1, and choose between them by the cost of each mistake</li><li>Move a classifier&rsquo;s threshold, and compare classifiers across thresholds with ROC AUC</li><li>Report MAE, RMSE and R² for regression, and inspect the worst residuals</li><li>Use k-fold cross-validation and grid search on training data, keeping the test set for the end</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h 5 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="What accuracy hides: 15 min"></span><span class="plan-seg s0" style="flex:20" title="Precision and recall: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Thresholds and ROC AUC: 20 min"></span><span class="plan-seg s0" style="flex:10" title="Regression errors: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Cross-validation and tuning: 20 min"></span><span class="plan-seg s0" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s1" style="flex:30" title="Quiz and daily challenge: 30 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">8 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">What accuracy hides</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">Precision and recall</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:45</span><span class="plan-what">Thresholds and ROC AUC</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:05</span><span class="plan-what">Regression errors</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Cross-validation and tuning</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">30 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w084d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w084d3.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w084d3-p1"><textarea class="pc-src pc-code" hidden>import numpy as np
+
+faulty = np.array([0] * 90 + [1] * 10)        # 1 means the part is faulty
+pass_everything = np.zeros(100, dtype=int)
+print(&quot;accuracy:&quot;, (pass_everything == faulty).mean())
+print(&quot;faults caught:&quot;, int(((pass_everything == 1) &amp; (faulty == 1)).sum()), &quot;of&quot;, int(faulty.sum()))</textarea></div>
+<p>Ninety per cent accurate, and useless. When one class is rare, <strong>accuracy</strong> rewards ignoring it. This is the normal situation, not an odd one: fraud, faults, disease, spam in a well-filtered inbox. Always ask how good the <strong>baseline</strong> is, and look at the kinds of mistake, not just their number.</p>
+<h2 id="what-accuracy-hides">What accuracy hides</h2>
+<p>For a yes/no classifier, call the class you&rsquo;re looking for <strong>positive</strong> (faulty) and the other <strong>negative</strong> (fine). Every prediction lands in one of four boxes, the <strong>confusion matrix</strong>:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>predicted positive</th>
+<th>predicted negative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>actually positive</strong></td>
+<td>true positive (TP): caught</td>
+<td>false negative (FN): <strong>missed</strong></td>
+</tr>
+<tr>
+<td><strong>actually negative</strong></td>
+<td>false positive (FP): <strong>false alarm</strong></td>
+<td>true negative (TN): correctly passed</td>
+</tr>
+</tbody>
+</table>
+<p>Accuracy is <code>(TP + TN) / total</code>: it adds the boxes together and loses the difference between a missed fault and a false alarm, which usually cost very different amounts. scikit-learn&rsquo;s <code>confusion_matrix(y, pred)</code> returns the matrix with rows for the actual classes and columns for the predictions, negatives first: <code>[[TN, FP], [FN, TP]]</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w084d3-e2"><textarea class="pc-src pc-code" hidden>import numpy as np
+from sklearn.metrics import confusion_matrix
+
+y    = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+pred = np.array([0, 0, 0, 1, 0, 0, 1, 0, 1, 0])
+tp = int(((y == 1) &amp; (pred == 1)).sum())
+fp = int(((y == 0) &amp; (pred == 1)).sum())
+fn = int(((y == 1) &amp; (pred == 0)).sum())
+tn = int(((y == 0) &amp; (pred == 0)).sum())
+print(&quot;TP&quot;, tp, &quot;FP&quot;, fp, &quot;FN&quot;, fn, &quot;TN&quot;, tn)
+print(confusion_matrix(y, pred).tolist())
+print(&quot;accuracy&quot;, (tp + tn) / len(y))</textarea></div>
+<h2 id="precision-and-recall">Precision and recall</h2>
+<p>Two questions about the positives:</p>
+<ul>
+<li><strong>Precision</strong> <code>= TP / (TP + FP)</code>: of the parts the model flagged, how many were really faulty? Low precision means many <strong>false alarms</strong>.</li>
+<li><strong>Recall</strong> <code>= TP / (TP + FN)</code>: of the faulty parts, how many did the model catch? Low recall means many <strong>misses</strong>. (Also called sensitivity, or the true positive rate.)</li>
+<li><strong>F1</strong> <code>= 2 × precision × recall / (precision + recall)</code> combines them; it&rsquo;s high only when both are.</li>
+</ul>
+<p>Which matters more depends on what each mistake <strong>costs</strong>. A missed fault that reaches a customer costs far more than re-checking a good part, so the factory wants high recall. A spam filter that hides a real email does more harm than letting a spam through, so it wants high precision. Write the costs down before choosing a model.</p>
+<div class="pc pc-example" data-kind="example" data-id="w084d3-e3"><textarea class="pc-src pc-code" hidden>from sklearn.metrics import f1_score, precision_score, recall_score
+
+y    = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1]
+pred = [0, 0, 0, 1, 0, 0, 1, 0, 1, 0]
+print(precision_score(y, pred), recall_score(y, pred), round(f1_score(y, pred), 3))
+print(recall_score(y, [0] * 10), precision_score(y, [0] * 10, zero_division=0))</textarea></div>
+<p>Passing everything has a recall of 0: the number accuracy hid.</p>
+<h2 id="thresholds-and-roc-auc">Thresholds and ROC AUC</h2>
+<p>Most classifiers produce a <strong>score</strong> (with <code>predict_proba</code>, a probability) and <code>predict</code> turns it into a class at a <strong>threshold</strong> of 0.5. That&rsquo;s a choice, not a law. Lowering the threshold flags more parts: recall goes up, precision usually goes down. Raising it does the reverse. Choose the threshold from the costs, on <strong>training</strong> or validation data, never by peeking at the test set.</p>
+<p>To compare models without picking a threshold, plot recall (the true positive rate) against the false positive rate <code>FP / (FP + TN)</code> for every threshold: the <strong>ROC curve</strong>. The area under it, <strong>ROC AUC</strong>, is 1 for a perfect ranking and 0.5 for random guessing. It has a plain meaning: the probability that a randomly chosen positive gets a <strong>higher score</strong> than a randomly chosen negative. On very imbalanced data, also look at the precision-recall trade-off directly, because a high AUC can still hide poor precision.</p>
+<div class="pc pc-example" data-kind="example" data-id="w084d3-e4"><textarea class="pc-src pc-code" hidden>import numpy as np
+from sklearn.metrics import roc_auc_score
+
+y      = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+scores = np.array([0.1, 0.3, 0.2, 0.6, 0.15, 0.4, 0.9, 0.35, 0.7, 0.45])
+for t in (0.5, 0.4, 0.3):
+    pred = scores &gt;= t
+    tp, fp = int((pred &amp; (y == 1)).sum()), int((pred &amp; (y == 0)).sum())
+    print(t, &quot;recall&quot;, tp / 4, &quot;false positive rate&quot;, round(fp / 6, 2))
+pairs = [(p, n) for p in scores[y == 1] for n in scores[y == 0]]
+print(sum(p &gt; n for p, n in pairs) / len(pairs), roc_auc_score(y, scores))</textarea></div>
+<h2 id="regression-errors">Regression errors</h2>
+<p>For numeric predictions: <strong>MAE</strong> (mean absolute error) is in the label&rsquo;s units and easy to explain (&ldquo;about £35 out&rdquo;); <strong>RMSE</strong> (the square root of the MSE) is also in those units but weighs big errors more, so it&rsquo;s larger than MAE when some errors are large; <strong>R²</strong> compares the model with predicting the mean (1 is perfect, 0 is no better, negative is worse). Report a baseline next to each, and look at the <strong>residuals</strong> (<code>y − prediction</code>): the largest ones often reveal data errors or a kind of example the model doesn&rsquo;t understand.</p>
+<div class="pc pc-example" data-kind="example" data-id="w084d3-e5"><textarea class="pc-src pc-code" hidden>import numpy as np
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+y    = np.array([1000, 1150, 1450, 900, 1700])
+pred = np.array([1020, 1100, 1400, 960, 1450])
+print(mean_absolute_error(y, pred), round(float(np.sqrt(mean_squared_error(y, pred))), 1), round(r2_score(y, pred), 3))
+residuals = y - pred
+print(residuals.tolist(), int(np.abs(residuals).argmax()))</textarea></div>
+<p>One flat is £250 out, which pulls RMSE well above MAE: worth a look at what&rsquo;s special about it.</p>
+<h2 id="cross-validation-and-tuning">Cross-validation and tuning</h2>
+<p>A single train/test split is one sample: a different split gives a different score. <strong>k-fold cross-validation</strong> splits the <strong>training</strong> data into <code>k</code> folds, trains on <code>k − 1</code> of them and scores on the remaining one, <code>k</code> times, so every example is scored once; report the <strong>mean and spread</strong> of the <code>k</code> scores. <code>cross_val_score(model, X, y, cv=5)</code> does it; for classification it uses <strong>stratified</strong> folds (each with the same class balance). Put preprocessing inside a pipeline so each fold fits its own scaler: otherwise the scaler sees the fold it&rsquo;s scored on, which is a leak.</p>
+<p>Cross-validation is also how to choose <strong>hyperparameters</strong> (<code>k</code> for nearest neighbours, <code>max_depth</code> for a tree) honestly: <strong><code>GridSearchCV(model, {"n_neighbors": [1, 3, 5, 7]}, cv=5)</code></strong> cross-validates every setting on the training data and refits the best. The test set is used <strong>once</strong>, at the very end, to report the final score. If you tune by looking at test scores, the test score stops being an honest estimate: you&rsquo;ve fitted to it.</p>
+<div class="pc pc-example" data-kind="example" data-id="w084d3-e6"><textarea class="pc-src pc-code" hidden>from sklearn.datasets import load_iris
+from sklearn.model_selection import GridSearchCV, StratifiedKFold, cross_val_score, train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0, stratify=y)
+scores = cross_val_score(KNeighborsClassifier(5), X_train, y_train, cv=StratifiedKFold(5))
+print(scores.round(3).tolist(), round(scores.mean(), 3), round(scores.std(), 3))
+search = GridSearchCV(KNeighborsClassifier(), {&quot;n_neighbors&quot;: [1, 3, 5, 7, 9, 15]}, cv=StratifiedKFold(5))
+search.fit(X_train, y_train)
+print(search.best_params_, round(search.best_score_, 3))
+print(&quot;final test score:&quot;, round(search.score(X_test, y_test), 3))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>On imbalanced data accuracy misleads; compare with the majority baseline and look at the confusion matrix (TP, FP, FN, TN; scikit-learn gives <code>[[TN, FP], [FN, TP]]</code>). Precision is TP/(TP+FP), the share of flags that were right; recall is TP/(TP+FN), the share of positives caught; F1 combines them. Choose between them by the cost of each mistake. Classifiers score, then threshold: lowering the threshold raises recall and usually lowers precision; choose it from costs on training or validation data. ROC AUC is the chance a positive outscores a negative (0.5 is random, 1 perfect). For regression report MAE, RMSE (weighs big errors) and R², with a baseline, and inspect the largest residuals. Cross-validate on training data (<code>cross_val_score</code>, stratified folds, preprocessing inside a pipeline) and tune with <code>GridSearchCV</code>; use the test set once, at the end.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d3-confusion" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The four boxes</div><div class="pc-prompt"><p>Write <code>confusion(y, pred)</code>: a dict with <code>tp</code>, <code>fp</code>, <code>fn</code> and <code>tn</code> as whole numbers, where <code>1</code> is the positive class. Then <code>precision(c)</code>, <code>recall(c)</code> and <code>f1(c)</code> for such a dict, each rounded to 3 places, and <code>0.0</code> when the formula would divide by zero.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def confusion(y, pred):
+    ___
+
+def precision(c):
+    ___
+
+def recall(c):
+    ___
+
+def f1(c):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import numpy as np
+from sklearn.metrics import f1_score, precision_score, recall_score
+
+def test_confusion():
+    &quot;from scratch, matching scikit-learn&quot;
+    y = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+    pred = np.array([0, 0, 0, 1, 0, 0, 1, 0, 1, 0])
+    c = confusion(y, pred)
+    assert c == {&quot;tp&quot;: 2, &quot;fp&quot;: 1, &quot;fn&quot;: 2, &quot;tn&quot;: 5}
+    assert precision(c) == round(precision_score(y, pred), 3) == 0.667
+    assert recall(c) == 0.5 and f1(c) == round(f1_score(y, pred), 3)
+    none = confusion(y, np.zeros(10, dtype=int))
+    assert none == {&quot;tp&quot;: 0, &quot;fp&quot;: 0, &quot;fn&quot;: 4, &quot;tn&quot;: 6} and precision(none) == 0.0 and recall(none) == 0.0 and f1(none) == 0.0</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def confusion(y, pred):
+    y, pred = np.asarray(y), np.asarray(pred)
+    return {&quot;tp&quot;: int(((y == 1) &amp; (pred == 1)).sum()), &quot;fp&quot;: int(((y == 0) &amp; (pred == 1)).sum()),
+            &quot;fn&quot;: int(((y == 1) &amp; (pred == 0)).sum()), &quot;tn&quot;: int(((y == 0) &amp; (pred == 0)).sum())}
+
+def _ratio(a, b):
+    return round(a / b, 3) if b else 0.0
+
+def precision(c):
+    return _ratio(c[&quot;tp&quot;], c[&quot;tp&quot;] + c[&quot;fp&quot;])
+
+def recall(c):
+    return _ratio(c[&quot;tp&quot;], c[&quot;tp&quot;] + c[&quot;fn&quot;])
+
+def f1(c):
+    p, r = c[&quot;tp&quot;] / (c[&quot;tp&quot;] + c[&quot;fp&quot;]) if c[&quot;tp&quot;] + c[&quot;fp&quot;] else 0, c[&quot;tp&quot;] / (c[&quot;tp&quot;] + c[&quot;fn&quot;]) if c[&quot;tp&quot;] + c[&quot;fn&quot;] else 0
+    return round(2 * p * r / (p + r), 3) if p + r else 0.0</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d3-thresholds" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Moving the threshold</div><div class="pc-prompt"><p>Write <code>sweep(y, scores, thresholds)</code>: for each threshold (a score at or above it counts as positive), a tuple <code>(threshold, precision, recall)</code> with both rounded to 3 places (<code>0.0</code> when undefined). Then <code>threshold_for_recall(y, scores, target, thresholds)</code>: the <strong>highest</strong> threshold whose recall is at least <code>target</code> (<code>None</code> if none is), and <code>cheapest(y, scores, thresholds, cost_fp, cost_fn)</code>: the threshold with the lowest total cost <code>FP × cost_fp + FN × cost_fn</code> (ties: the highest threshold).</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def sweep(y, scores, thresholds):
+    ___
+
+def threshold_for_recall(y, scores, target, thresholds):
+    ___
+
+def cheapest(y, scores, thresholds, cost_fp, cost_fn):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import numpy as np
+
+Y = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+S = np.array([0.1, 0.3, 0.2, 0.6, 0.15, 0.4, 0.9, 0.35, 0.7, 0.45])
+T = [0.6, 0.5, 0.4, 0.3, 0.2]
+
+def test_sweep():
+    &quot;lower thresholds catch more&quot;
+    assert sweep(Y, S, T) == [(0.6, 0.667, 0.5), (0.5, 0.667, 0.5), (0.4, 0.6, 0.75), (0.3, 0.571, 1.0), (0.2, 0.5, 1.0)]
+    assert threshold_for_recall(Y, S, 0.75, T) == 0.4 and threshold_for_recall(Y, S, 1.0, T) == 0.3
+    assert threshold_for_recall(Y, S, 1.0, [0.95]) is None
+    assert cheapest(Y, S, T, cost_fp=1, cost_fn=10) == 0.3
+    assert cheapest(Y, S, T, cost_fp=10, cost_fn=1) == 0.6</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def _counts(y, scores, t):
+    pred = np.asarray(scores) &gt;= t
+    y = np.asarray(y)
+    return int((pred &amp; (y == 1)).sum()), int((pred &amp; (y == 0)).sum()), int((~pred &amp; (y == 1)).sum())
+
+def sweep(y, scores, thresholds):
+    rows = []
+    for t in thresholds:
+        tp, fp, fn = _counts(y, scores, t)
+        p = round(tp / (tp + fp), 3) if tp + fp else 0.0
+        r = round(tp / (tp + fn), 3) if tp + fn else 0.0
+        rows.append((t, p, r))
+    return rows
+
+def threshold_for_recall(y, scores, target, thresholds):
+    good = [t for t, p, r in sweep(y, scores, thresholds) if r &gt;= target]
+    return max(good) if good else None
+
+def cheapest(y, scores, thresholds, cost_fp, cost_fn):
+    def cost(t):
+        tp, fp, fn = _counts(y, scores, t)
+        return fp * cost_fp + fn * cost_fn
+    return min(thresholds, key=lambda t: (cost(t), -t))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d3-auc" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">ROC AUC by counting</div><div class="pc-prompt"><p>Write <code>auc(y, scores)</code> from its meaning: over every pair of one positive and one negative example, the fraction where the positive has the higher score, counting a tie as half; rounded to 3 places. (It should match <code>roc_auc_score</code>.) Then <code>random_auc(y, rng)</code>: the AUC of random scores from <code>rng.random(len(y))</code>, which should be near 0.5.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def auc(y, scores):
+    ___
+
+def random_auc(y, rng):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import numpy as np
+from sklearn.metrics import roc_auc_score
+
+def test_auc():
+    &quot;pairs of positive and negative&quot;
+    y = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+    s = np.array([0.1, 0.3, 0.2, 0.6, 0.15, 0.4, 0.9, 0.35, 0.7, 0.45])
+    assert auc(y, s) == round(roc_auc_score(y, s), 3) == 0.875
+    assert auc([0, 1, 0, 1], [0.5, 0.5, 0.2, 0.9]) == 0.875, &quot;ties count half&quot;
+    assert auc([0, 1], [0.9, 0.1]) == 0.0
+    big = np.array([0, 1] * 500)
+    assert abs(random_auc(big, np.random.default_rng(0)) - 0.5) &lt; 0.05</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def auc(y, scores):
+    y, scores = np.asarray(y), np.asarray(scores, dtype=float)
+    pos, neg = scores[y == 1], scores[y == 0]
+    wins = (pos[:, None] &gt; neg[None, :]).sum() + 0.5 * (pos[:, None] == neg[None, :]).sum()
+    return round(float(wins / (len(pos) * len(neg))), 3)
+
+def random_auc(y, rng):
+    return auc(y, rng.random(len(y)))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d3-regression" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Regression report</div><div class="pc-prompt"><p>Write <code>regression_report(y, pred, baseline)</code>: a dict with <code>mae</code>, <code>rmse</code> and <code>r2</code> of the predictions, each rounded to 2 places, plus <code>baseline_mae</code>, the MAE of predicting the single number <code>baseline</code> for every example. Then <code>worst(y, pred, n)</code>: the positions of the <code>n</code> largest absolute residuals, largest first.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def regression_report(y, pred, baseline):
+    ___
+
+def worst(y, pred, n):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import numpy as np
+
+def test_regression():
+    &quot;errors and residuals&quot;
+    y = np.array([1000, 1150, 1450, 900, 1700])
+    pred = np.array([1020, 1100, 1400, 960, 1450])
+    assert regression_report(y, pred, 1200) == {&quot;mae&quot;: 86.0, &quot;rmse&quot;: 119.58, &quot;r2&quot;: 0.84, &quot;baseline_mae&quot;: 260.0}
+    assert worst(y, pred, 2) == [4, 3]</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def regression_report(y, pred, baseline):
+    y, pred = np.asarray(y, dtype=float), np.asarray(pred, dtype=float)
+    err = y - pred
+    return {&quot;mae&quot;: round(float(np.abs(err).mean()), 2), &quot;rmse&quot;: round(float(np.sqrt((err ** 2).mean())), 2),
+            &quot;r2&quot;: round(float(1 - (err ** 2).sum() / ((y - y.mean()) ** 2).sum()), 2),
+            &quot;baseline_mae&quot;: round(float(np.abs(y - baseline).mean()), 2)}
+
+def worst(y, pred, n):
+    residual = np.abs(np.asarray(y, dtype=float) - np.asarray(pred, dtype=float))
+    return np.argsort(-residual, kind=&quot;stable&quot;)[:n].tolist()</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d3-kfold" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Cross-validation from scratch</div><div class="pc-prompt"><p>Write <code>kfold_indices(n, k)</code>: split the positions <code>0</code> to <code>n − 1</code>, in order, into <code>k</code> consecutive folds whose sizes differ by at most one, with the larger folds first (like scikit-learn&rsquo;s <code>KFold</code> without shuffling); return a list of <code>(train, test)</code> pairs of lists. Then <code>cross_val(make_model, X, y, k)</code>: for each fold, fit a <strong>new</strong> model from <code>make_model()</code> on the training rows and score it on the test rows; return the list of scores, rounded to 3 places.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def kfold_indices(n, k):
+    ___
+
+def cross_val(make_model, X, y, k):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import KFold, cross_val_score
+
+def test_folds():
+    &quot;every example tested once&quot;
+    folds = kfold_indices(10, 3)
+    assert [test for _, test in folds] == [[0, 1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    assert folds[1][0] == [0, 1, 2, 3, 7, 8, 9]
+    assert sorted(i for _, t in kfold_indices(23, 5) for i in t) == list(range(23))
+
+def test_cross_val():
+    &quot;matches scikit-learn&quot;
+    X, y = make_classification(n_samples=120, n_features=4, random_state=3)
+    mine = cross_val(lambda: LogisticRegression(max_iter=1000), X, y, 4)
+    theirs = cross_val_score(LogisticRegression(max_iter=1000), X, y, cv=KFold(4)).round(3).tolist()
+    assert mine == theirs and len(mine) == 4</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def kfold_indices(n, k):
+    sizes = [n // k + (1 if i &lt; n % k else 0) for i in range(k)]
+    folds, start = [], 0
+    for size in sizes:
+        test = list(range(start, start + size))
+        train = [i for i in range(n) if i &lt; start or i &gt;= start + size]
+        folds.append((train, test))
+        start += size
+    return folds
+
+def cross_val(make_model, X, y, k):
+    scores = []
+    for train, test in kfold_indices(len(X), k):
+        model = make_model().fit(X[train], y[train])
+        scores.append(round(float(model.score(X[test], y[test])), 3))
+    return scores</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d3-tuning" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Tuning without peeking</div><div class="pc-prompt"><p>Write <code>tune_knn(X_train, y_train, ks)</code>: a <code>GridSearchCV</code> over <code>n_neighbors</code> in <code>ks</code>, with 5 stratified folds (<code>StratifiedKFold(5)</code>), wrapped around a pipeline that scales and then classifies (<code>make_pipeline(StandardScaler(), KNeighborsClassifier())</code>, whose parameter is called <code>kneighborsclassifier__n_neighbors</code>); fit it on the training data and return it. Then <code>final_score(search, X_test, y_test)</code>: the fitted search&rsquo;s test accuracy, rounded to 3 places.</p></div><textarea class="pc-src pc-code" hidden>from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+def tune_knn(X_train, y_train, ks):
+    ___
+
+def final_score(search, X_test, y_test):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+def test_tuning():
+    &quot;cross-validated on training data, tested once&quot;
+    X, y = load_iris(return_X_y=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0, stratify=y)
+    search = tune_knn(X_train, y_train, [1, 3, 5, 7, 9, 15])
+    best = search.best_params_[&quot;kneighborsclassifier__n_neighbors&quot;]
+    assert best in [1, 3, 5, 7, 9, 15] and search.best_score_ &gt; 0.9
+    assert len(search.cv_results_[&quot;mean_test_score&quot;]) == 6
+    assert search.n_splits_ == 5
+    assert final_score(search, X_test, y_test) &gt;= 0.89</textarea><textarea class="pc-src pc-solution" hidden>from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+def tune_knn(X_train, y_train, ks):
+    pipe = make_pipeline(StandardScaler(), KNeighborsClassifier())
+    search = GridSearchCV(pipe, {&quot;kneighborsclassifier__n_neighbors&quot;: list(ks)}, cv=StratifiedKFold(5))
+    return search.fit(X_train, y_train)
+
+def final_score(search, X_test, y_test):
+    return round(float(search.score(X_test, y_test)), 3)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w084d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Ninety per cent of nothing</div><div class="pc-prompt"><p>The report is meant to say how many faulty parts the model catches, but it prints accuracy, which looks fine: <code>0.9</code>. Report the <strong>recall</strong> of the faulty class instead, so it prints <code>recall: 0.0</code>.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+faulty = np.array([0] * 9 + [1])
+predicted = np.zeros(10, dtype=int)
+print(&quot;recall:&quot;, float((predicted == faulty).mean()))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the number accuracy hides&quot;
+    expect_output(&quot;recall: 0.0&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+faulty = np.array([0] * 9 + [1])
+predicted = np.zeros(10, dtype=int)
+caught = ((predicted == 1) &amp; (faulty == 1)).sum()
+print(&quot;recall:&quot;, float(caught / (faulty == 1).sum()))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w084d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Precision with the wrong bottom</div><div class="pc-prompt"><p>Precision divides by everything the model <strong>flagged</strong> (TP + FP), but this divides by everything that was really positive, which is recall: it prints <code>precision: 0.5</code>. Fix it so it prints <code>precision: 0.667</code>.</p></div><textarea class="pc-src pc-code" hidden>tp, fp, fn = 2, 1, 2
+precision = tp / (tp + fn)
+print(&quot;precision:&quot;, round(precision, 3))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;TP over flagged&quot;
+    expect_output(&quot;precision: 0.667&quot;)</textarea><textarea class="pc-src pc-solution" hidden>tp, fp, fn = 2, 1, 2
+precision = tp / (tp + fp)
+print(&quot;precision:&quot;, round(precision, 3))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w084d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">An RMSE that grows with the data</div><div class="pc-prompt"><p>RMSE is the square root of the <strong>mean</strong> squared error, but this takes the square root of the <strong>sum</strong>, so the more examples there are the bigger it gets: <code>rmse: 267.39</code>. Fix it so it prints <code>rmse: 119.58</code>.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+y = np.array([1000, 1150, 1450, 900, 1700])
+pred = np.array([1020, 1100, 1400, 960, 1450])
+print(&quot;rmse:&quot;, round(float(np.sqrt(((y - pred) ** 2).sum())), 2))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;mean, then square root&quot;
+    expect_output(&quot;rmse: 119.58&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+y = np.array([1000, 1150, 1450, 900, 1700])
+pred = np.array([1020, 1100, 1400, 960, 1450])
+print(&quot;rmse:&quot;, round(float(np.sqrt(((y - pred) ** 2).mean())), 2))</textarea></div>
+<div class="parsons" data-id="w084d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Tune, then test once</div><div class="pc-prompt"><p>Arrange the lines so that hyperparameters are chosen by cross-validation on the training data and the test set is used exactly once, at the end. One line is a trap.</p></div><script type="application/json">{"lines": ["X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, stratify=y)", "search = GridSearchCV(make_pipeline(StandardScaler(), KNeighborsClassifier()), grid, cv=5)", "search.fit(X_train, y_train)", "print(\"chosen:\", search.best_params_)", "print(\"cross-validated:\", round(search.best_score_, 3))", "print(\"test:\", round(search.score(X_test, y_test), 3))"], "distractors": ["search.fit(X_test, y_test)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # precision for TP=8, FP=2, FN=8
+q = ___   # recall for the same
+r = ___   # &quot;precision&quot; or &quot;recall&quot;: what to favour when a miss is far costlier than a false alarm
+s = ___   # the ROC AUC of scores that rank every positive above every negative
+t = ___   # how many models GridSearchCV fits for 4 settings and cv=5, before the final refit</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 0.8 and q == 0.5 and r == &quot;recall&quot;, &quot;p, q and r&quot;
+    assert s == 1.0 and t == 20, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 0.8
+q = 0.5
+r = &quot;recall&quot;
+s = 1.0
+t = 20</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w084d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why is accuracy misleading when 95% of parts are fine?", "answer": 1, "explain": "Compare with the majority baseline.", "options": ["It&rsquo;s hard to compute", "Passing everything scores 95% while catching no faults", "It&rsquo;s always wrong", "It isn&rsquo;t"]}, {"type": "mc", "q": "What does recall measure?", "answer": 1, "explain": "TP / (TP + FN).", "options": ["Flags that were right", "The share of actual positives the model caught", "Overall correctness", "Speed"]}, {"type": "mc", "q": "What does precision measure?", "answer": 0, "explain": "TP / (TP + FP).", "options": ["The share of flagged examples that really were positive", "Positives caught", "Negatives caught", "Accuracy"]}, {"type": "mc", "q": "What usually happens when you lower the threshold?", "answer": 1, "explain": "More flags: more caught, more false alarms.", "options": ["Nothing", "Recall rises and precision falls", "Both fall", "Precision rises"]}, {"type": "mc", "q": "What does a ROC AUC of 0.5 mean?", "answer": 1, "explain": "1 is perfect ranking.", "options": ["Perfect", "No better than random ranking", "Half the data", "Overfitting"]}, {"type": "mc", "q": "Why is RMSE often larger than MAE?", "answer": 1, "explain": "A few big errors pull it up.", "options": ["A bug", "Squaring weighs large errors more heavily", "It uses more data", "It isn&rsquo;t"]}, {"type": "mc", "q": "What does k-fold cross-validation give you that one split doesn&rsquo;t?", "answer": 1, "explain": "One split is one sample.", "options": ["Higher scores", "Several scores, so a mean and a spread, with every example tested once", "No need for data", "Speed"]}, {"type": "mc", "q": "Why put the scaler inside the pipeline when cross-validating?", "answer": 1, "explain": "Otherwise the scores leak.", "options": ["Speed", "So each fold fits its scaler without seeing the fold it&rsquo;s scored on", "It&rsquo;s required", "To save memory"]}, {"type": "mc", "q": "Why not choose hyperparameters by test-set score?", "answer": 1, "explain": "Tune with cross-validation; test once.", "options": ["It&rsquo;s slow", "The test score then stops being an honest estimate, because you&rsquo;ve fitted to it", "It&rsquo;s not allowed", "It&rsquo;s fine"]}, {"type": "output", "q": "What does this print?", "answer": "[[1, 1], [1, 2]]", "explain": "Rows are actual (0 then 1), columns predicted: TN=1, FP=1, FN=1, TP=2.", "code": "from sklearn.metrics import confusion_matrix\nprint(confusion_matrix([1, 0, 1, 1, 0], [1, 0, 0, 1, 1]).tolist())"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a model report card</div><div class="pc-prompt"><p>Write <code>report_card(model, X_train, y_train, X_test, y_test, cost_fp=1, cost_fn=10, thresholds=None)</code> for a binary classifier with <code>predict_proba</code> (positive class 1). <code>thresholds</code> defaults to <code>0.05, 0.10, ..., 0.95</code> (rounded to 2 places). Without touching the test set, choose the <strong>tuned threshold</strong>: get out-of-fold probabilities for the training data with <code>cross_val_predict(clone(model), X_train, y_train, cv=StratifiedKFold(5), method="predict_proba")</code>, and pick the threshold with the lowest cost <code>FP × cost_fp + FN × cost_fn</code> on them (ties: the highest threshold). Also cross-validate accuracy on the training data with the same folds. Then fit a fresh <code>clone(model)</code> on all the training data and report on the test set. Return a dict: <code>accuracy</code> (at 0.5), <code>baseline_accuracy</code> (always predicting the majority <strong>training</strong> class), <code>auc</code> (all 3 places), <code>cv_accuracy</code> (<code>(mean, std)</code>, 3 places), and <code>default</code> and <code>tuned</code>: for thresholds 0.5 and the tuned one, a dict with <code>threshold</code>, <code>confusion</code> (<code>tp</code>, <code>fp</code>, <code>fn</code>, <code>tn</code>), <code>precision</code>, <code>recall</code> (3 places, 0.0 when undefined) and <code>cost</code>.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+from sklearn.base import clone
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import StratifiedKFold, cross_val_predict, cross_val_score
+
+def report_card(model, X_train, y_train, X_test, y_test, cost_fp=1, cost_fn=10, thresholds=None):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+def _data():
+    X, y = make_classification(n_samples=600, n_features=5, n_informative=3, weights=[0.9], flip_y=0.02, random_state=7)
+    return train_test_split(X, y, test_size=0.3, random_state=0, stratify=y)
+
+def test_card():
+    &quot;accuracy, baseline, AUC and cross-validation&quot;
+    X_train, X_test, y_train, y_test = _data()
+    card = report_card(LogisticRegression(max_iter=1000), X_train, y_train, X_test, y_test)
+    assert card[&quot;baseline_accuracy&quot;] == 0.894 and abs(card[&quot;accuracy&quot;] - 0.944) &lt;= 0.006
+    assert abs(card[&quot;auc&quot;] - 0.912) &lt; 0.01 and abs(card[&quot;cv_accuracy&quot;][0] - 0.962) &lt; 0.01
+    d = card[&quot;default&quot;]
+    assert d[&quot;threshold&quot;] == 0.5 and sum(d[&quot;confusion&quot;].values()) == 180
+    assert d[&quot;cost&quot;] == d[&quot;confusion&quot;][&quot;fp&quot;] * 1 + d[&quot;confusion&quot;][&quot;fn&quot;] * 10
+
+def test_tuning():
+    &quot;the threshold follows the costs&quot;
+    X_train, X_test, y_train, y_test = _data()
+    card = report_card(LogisticRegression(max_iter=1000), X_train, y_train, X_test, y_test)
+    assert card[&quot;tuned&quot;][&quot;threshold&quot;] &lt; 0.5, &quot;misses cost more, so flag more&quot;
+    assert card[&quot;tuned&quot;][&quot;recall&quot;] &gt;= card[&quot;default&quot;][&quot;recall&quot;] and card[&quot;tuned&quot;][&quot;cost&quot;] &lt;= card[&quot;default&quot;][&quot;cost&quot;]
+    cautious = report_card(LogisticRegression(max_iter=1000), X_train, y_train, X_test, y_test, cost_fp=10, cost_fn=1)
+    assert cautious[&quot;tuned&quot;][&quot;threshold&quot;] &gt; 0.5 and cautious[&quot;tuned&quot;][&quot;precision&quot;] &gt;= card[&quot;default&quot;][&quot;precision&quot;]
+    one = report_card(LogisticRegression(max_iter=1000), X_train, y_train, X_test, y_test, thresholds=[0.3])
+    assert one[&quot;tuned&quot;][&quot;threshold&quot;] == 0.3</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+from sklearn.base import clone
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import StratifiedKFold, cross_val_predict, cross_val_score
+
+def _counts(y, pred):
+    y, pred = np.asarray(y), np.asarray(pred)
+    return {&quot;tp&quot;: int(((y == 1) &amp; (pred == 1)).sum()), &quot;fp&quot;: int(((y == 0) &amp; (pred == 1)).sum()),
+            &quot;fn&quot;: int(((y == 1) &amp; (pred == 0)).sum()), &quot;tn&quot;: int(((y == 0) &amp; (pred == 0)).sum())}
+
+def _cost(c, cost_fp, cost_fn):
+    return c[&quot;fp&quot;] * cost_fp + c[&quot;fn&quot;] * cost_fn
+
+def report_card(model, X_train, y_train, X_test, y_test, cost_fp=1, cost_fn=10, thresholds=None):
+    if thresholds is None:
+        thresholds = [round(0.05 * i, 2) for i in range(1, 20)]
+    cv = StratifiedKFold(5)
+    cv_scores = cross_val_score(clone(model), X_train, y_train, cv=cv)
+    cv_probs = cross_val_predict(clone(model), X_train, y_train, cv=cv, method=&quot;predict_proba&quot;)[:, 1]
+    best = min(thresholds, key=lambda t: (_cost(_counts(y_train, cv_probs &gt;= t), cost_fp, cost_fn), -t))
+    probs = clone(model).fit(X_train, y_train).predict_proba(X_test)[:, 1]
+    majority = int(np.bincount(y_train).argmax())
+
+    def at(t):
+        c = _counts(y_test, (probs &gt;= t).astype(int))
+        precision = round(c[&quot;tp&quot;] / (c[&quot;tp&quot;] + c[&quot;fp&quot;]), 3) if c[&quot;tp&quot;] + c[&quot;fp&quot;] else 0.0
+        recall = round(c[&quot;tp&quot;] / (c[&quot;tp&quot;] + c[&quot;fn&quot;]), 3) if c[&quot;tp&quot;] + c[&quot;fn&quot;] else 0.0
+        return {&quot;threshold&quot;: t, &quot;confusion&quot;: c, &quot;precision&quot;: precision, &quot;recall&quot;: recall,
+                &quot;cost&quot;: _cost(c, cost_fp, cost_fn)}
+
+    return {&quot;accuracy&quot;: round(float(((probs &gt;= 0.5).astype(int) == y_test).mean()), 3),
+            &quot;baseline_accuracy&quot;: round(float((np.asarray(y_test) == majority).mean()), 3),
+            &quot;auc&quot;: round(float(roc_auc_score(y_test, probs)), 3),
+            &quot;cv_accuracy&quot;: (round(float(cv_scores.mean()), 3), round(float(cv_scores.std()), 3)),
+            &quot;default&quot;: at(0.5), &quot;tuned&quot;: at(best)}</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>For a classifier you might build (a spam filter, a fault detector, a &ldquo;will this bus be late&rdquo; predictor), write down what a false positive and a false negative would each cost, in money, time or harm. Which would you rather have more of, and so which of precision and recall would you favour? Tomorrow is <strong>a neural network from scratch</strong>: the model behind most of modern machine learning, built from NumPy and the chain rule.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w084d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w084d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w084d3", "week": 84, "day": 3, "title": "Evaluating models", "exercises": [{"id": "w084d3-confusion", "title": "The four boxes", "points": 15}, {"id": "w084d3-thresholds", "title": "Moving the threshold", "points": 15}, {"id": "w084d3-auc", "title": "ROC AUC by counting", "points": 10}, {"id": "w084d3-regression", "title": "Regression report", "points": 10}, {"id": "w084d3-kfold", "title": "Cross-validation from scratch", "points": 15}, {"id": "w084d3-tuning", "title": "Tuning without peeking", "points": 10}, {"id": "w084d3-bug1", "title": "Ninety per cent of nothing", "points": 10}, {"id": "w084d3-bug2", "title": "Precision with the wrong bottom", "points": 10}, {"id": "w084d3-bug3", "title": "An RMSE that grows with the data", "points": 10}, {"id": "w084d3-trace", "title": "Predict them", "points": 10}, {"id": "w084d3-challenge", "title": "Challenge: a model report card", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=97b2d34bb1"></script>
+</body>
+</html>
