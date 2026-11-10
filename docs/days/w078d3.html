@@ -1,0 +1,936 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="b54d8b61c9">
+<title>Week 78 Day 3: Scheduling jobs | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=b54d8b61c9">
+<link rel="stylesheet" href="../assets/css/site.css?v=b54d8b61c9">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=b54d8b61c9"></script>
+<script src="../assets/vendor/codemirror.js?v=b54d8b61c9" defer></script>
+<meta name="description" content="A script you have to remember to run isn’t automation yet. Today is about running jobs on their own: every night at two, every fifteen minutes, on the first...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w078d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 78 Day 3: Scheduling jobs">
+<meta property="og:description" content="A script you have to remember to run isn’t automation yet. Today is about running jobs on their own: every night at two, every fifteen minutes, on the first...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w078d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-78">Week 78: Automation</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#cron-expressions" data-sec="cron-expressions">Cron expressions</a></li><li><a href="#schedulers-in-python" data-sec="schedulers-in-python">Schedulers in Python</a></li><li><a href="#jobs-that-run-alone" data-sec="jobs-that-run-alone">Jobs that run alone</a></li><li><a href="#where-schedules-live" data-sec="where-schedules-live">Where schedules live</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w078d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-78">Week 78: Automation</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 78, Day 3</span></p>
+      <h1>Scheduling jobs</h1>
+      <div class="day-intro"><p>A script you have to remember to run isn&rsquo;t automation yet. Today is about running jobs on their own: every night at two, every fifteen minutes, on the first Monday of the month. You&rsquo;ll learn the cron expressions that almost every scheduler understands (Linux, GitHub Actions, cloud schedulers), build a scheduler you can test with a fake clock, and learn the habits that keep unattended jobs honest: they don&rsquo;t overlap, they don&rsquo;t drift, they retry sensibly, and when they fail at three in the morning, somebody finds out.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Read and write cron expressions, including ranges, steps and the day-of-month or day-of-week rule</li><li>Work out when a cron schedule next runs</li><li>Build an in-process scheduler that runs jobs on time without drifting, tested with an injected clock</li><li>Stop runs overlapping with a lock, and retry failures with exponential backoff</li><li>Make unattended jobs idempotent, logged and loud when they fail</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Cron expressions: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Schedulers in Python: 20 min"></span><span class="plan-seg s1" style="flex:25" title="Jobs that run alone: 25 min"></span><span class="plan-seg s0" style="flex:10" title="Where schedules live: 10 min"></span><span class="plan-seg s1" style="flex:70" title="Practice: 70 min"></span><span class="plan-seg s0" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">7 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Cron expressions</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Schedulers in Python</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Jobs that run alone</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Where schedules live</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">70 min</span></li><li><span class="plan-at">2:40</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w078d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w078d3.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w078d3-p1"><textarea class="pc-src pc-code" hidden>from datetime import datetime, timedelta
+
+start = datetime(2026, 11, 10, 9, 0)
+interval = timedelta(minutes=15)
+times = [start + interval * n for n in range(4)]
+print([t.strftime(&quot;%H:%M&quot;) for t in times])
+
+late = datetime(2026, 11, 10, 9, 17, 40)
+print((late + interval).strftime(&quot;%H:%M:%S&quot;))
+missed = (late - start) // interval
+print(missed, (start + interval * (missed + 1)).strftime(&quot;%H:%M&quot;))</textarea></div>
+<p>Two ways to schedule &ldquo;every 15 minutes&rdquo;: from <strong>when the job last ran</strong> (which creeps later every time a run is slow) or from <strong>the original grid</strong> (09:00, 09:15, 09:30&hellip;). Good schedulers use the grid. Floor division of one <code>timedelta</code> by another counts the whole intervals that fit, which is how a scheduler works out how many runs it missed.</p>
+<h2 id="cron-expressions">Cron expressions</h2>
+<p><strong>cron</strong> is the Unix job scheduler, and its five-field expressions are the common language of scheduling: Linux and macOS crontabs, GitHub Actions (<code>on: schedule: - cron: "30 2 * * *"</code>), Kubernetes CronJobs and every cloud scheduler use them.</p>
+<pre><code>┌───────── minute        0-59
+│ ┌─────── hour          0-23
+│ │ ┌───── day of month  1-31
+│ │ │ ┌─── month         1-12
+│ │ │ │ ┌─ day of week   0-6 (0 is Sunday; 7 is Sunday too)
+│ │ │ │ │
+30 2 * * *     every day at 02:30
+</code></pre>
+<p>Each field is a list of values, separated by commas, where each item is:</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Means</th>
+<th>Example (in the minute field)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>*</code></td>
+<td>every value</td>
+<td>every minute</td>
+</tr>
+<tr>
+<td><code>5</code></td>
+<td>that value</td>
+<td>at minute 5</td>
+</tr>
+<tr>
+<td><code>1-5</code></td>
+<td>a range, inclusive</td>
+<td>minutes 1 to 5</td>
+</tr>
+<tr>
+<td><code>*/15</code></td>
+<td>every 15th value from the start</td>
+<td>0, 15, 30, 45</td>
+</tr>
+<tr>
+<td><code>10-40/10</code></td>
+<td>every 10th within the range</td>
+<td>10, 20, 30, 40</td>
+</tr>
+<tr>
+<td><code>0,30</code></td>
+<td>a list</td>
+<td>0 and 30</td>
+</tr>
+</tbody>
+</table>
+<p>A time matches when <strong>every</strong> field matches, with one famous exception: when <strong>both</strong> day of month and day of week are restricted (neither is <code>*</code>), a day matches if <strong>either</strong> does. So <code>0 9 1 * 1</code> means &ldquo;09:00 on the 1st of every month <strong>and</strong> every Monday&rdquo;, not &ldquo;on Mondays that fall on the 1st&rdquo;.</p>
+<table>
+<thead>
+<tr>
+<th>Expression</th>
+<th>Runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>*/5 * * * *</code></td>
+<td>every five minutes</td>
+</tr>
+<tr>
+<td><code>0 * * * *</code></td>
+<td>on the hour, every hour</td>
+</tr>
+<tr>
+<td><code>0 9 * * 1-5</code></td>
+<td>09:00 on weekdays</td>
+</tr>
+<tr>
+<td><code>30 2 * * 0</code></td>
+<td>02:30 every Sunday</td>
+</tr>
+<tr>
+<td><code>0 0 1 * *</code></td>
+<td>midnight on the 1st of each month</td>
+</tr>
+<tr>
+<td><code>0 */6 * * *</code></td>
+<td>00:00, 06:00, 12:00, 18:00</td>
+</tr>
+<tr>
+<td><code>15 14 1,15 * *</code></td>
+<td>14:15 on the 1st and 15th</td>
+</tr>
+</tbody>
+</table>
+<p>Many schedulers also accept shortcuts: <code>@hourly</code> (<code>0 * * * *</code>), <code>@daily</code> (<code>0 0 * * *</code>), <code>@weekly</code> (<code>0 0 * * 0</code>), <code>@monthly</code> (<code>0 0 1 * *</code>) and <code>@yearly</code>. <strong>Time zones</strong> matter: cron uses the machine&rsquo;s time zone (GitHub Actions uses UTC), and daylight-saving changes mean a 02:30 job is skipped on the night the clocks go forward and may run twice when they go back. Schedule important jobs in UTC, or away from the small hours.</p>
+<div class="pc pc-example" data-kind="example" data-id="w078d3-e2"><textarea class="pc-src pc-code" hidden>from datetime import datetime, timedelta
+
+def every(field_value, n):
+    return field_value % n == 0
+
+# &quot;*/20 9-10 * * 1-5&quot;: every 20 minutes from 09:00 to 10:40 on weekdays
+def matches(t):
+    cron_weekday = (t.weekday() + 1) % 7      # Python: Monday is 0; cron: Sunday is 0
+    return every(t.minute, 20) and 9 &lt;= t.hour &lt;= 10 and 1 &lt;= cron_weekday &lt;= 5
+
+t = datetime(2026, 11, 13, 8, 50)            # a Friday
+runs = []
+while len(runs) &lt; 7:
+    t += timedelta(minutes=1)
+    if matches(t):
+        runs.append(t.strftime(&quot;%a %H:%M&quot;))
+print(runs)</textarea></div>
+<p>Note the weekday conversion: Python&rsquo;s <code>weekday()</code> counts from <strong>Monday = 0</strong>, cron from <strong>Sunday = 0</strong>. Mixing them up is the classic cron bug.</p>
+<h2 id="schedulers-in-python">Schedulers in Python</h2>
+<p>Cron starts a <strong>new process</strong> for each run. Sometimes you want a long-running program that runs its own jobs instead (a bot, a small service, a script that should poll every minute while it&rsquo;s open). The parts of any scheduler:</p>
+<ul>
+<li>a list of <strong>jobs</strong>, each with its next <strong>due time</strong>;</li>
+<li>a loop that asks &ldquo;what&rsquo;s due now?&rdquo;, runs it, works out its next due time, and sleeps until the next one;</li>
+<li>the <strong>clock</strong> it reads, which should be a parameter (<code>clock=time.time</code>), so tests can pass a fake clock and check a whole day of runs in a millisecond.</li>
+</ul>
+<p>Two decisions every scheduler makes:</p>
+<ul>
+<li><strong>No drift</strong>: the next due time is the <strong>scheduled</strong> time plus the interval, not &ldquo;now&rdquo; plus the interval; otherwise each slow run pushes every later run back.</li>
+<li><strong>Missed runs</strong>: if the program was asleep (or a job took an hour) and three runs were missed, run the job <strong>once</strong> and skip ahead to the next future slot, rather than running it three times in a row. (Some jobs need every run made up; most don&rsquo;t.)</li>
+</ul>
+<p>The standard library has <code>sched</code> (a small event scheduler driven by any clock and sleep function you pass). Third-party libraries add friendlier interfaces: <strong><code>schedule</code></strong> (<code>schedule.every(10).minutes.do(job)</code>) and <strong>APScheduler</strong> (cron-style triggers, persistent job stores). They all work the way you&rsquo;ll build today.</p>
+<div class="pc pc-example" data-kind="example" data-id="w078d3-e3"><textarea class="pc-src pc-code" hidden>class FakeClock:
+    def __init__(self, t=0):
+        self.t = t
+    def __call__(self):
+        return self.t
+
+clock = FakeClock(1000)
+jobs = [{&quot;name&quot;: &quot;poll&quot;, &quot;every&quot;: 60, &quot;due&quot;: 1000}]
+
+def run_pending():
+    now, ran = clock(), []
+    for job in jobs:
+        if job[&quot;due&quot;] &lt;= now:
+            ran.append(job[&quot;name&quot;])
+            missed = (now - job[&quot;due&quot;]) // job[&quot;every&quot;]
+            job[&quot;due&quot;] += (missed + 1) * job[&quot;every&quot;]     # on the grid, skipping missed slots
+    return ran
+
+for t in (1000, 1030, 1075, 1250, 1260):
+    clock.t = t
+    print(t, run_pending(), &quot;next&quot;, jobs[0][&quot;due&quot;])</textarea></div>
+<h2 id="jobs-that-run-alone">Jobs that run alone</h2>
+<p>A job that runs unattended has nobody watching it, so it has to look after itself:</p>
+<ul>
+<li><strong>Idempotent</strong>: running it twice (because of a retry, a catch-up or an overlap) must do no harm. Write &ldquo;make sure X is true&rdquo; jobs (sync these files, send emails <strong>not already sent</strong>, store the last processed id), not &ldquo;do X again&rdquo; jobs.</li>
+<li><strong>No overlaps</strong>: if a run takes longer than the interval, the next one starts while it&rsquo;s still going. Take a <strong>lock</strong> at the start (a lock file created with <code>open(path, "x")</code>, which fails if it already exists), skip the run if it&rsquo;s taken, and <strong>always</strong> release it in a <code>finally</code>. Record the time in the lock so a lock left behind by a crashed run can be recognised as <strong>stale</strong> and taken over.</li>
+<li><strong>Retries with backoff</strong>: a network blip shouldn&rsquo;t fail the night&rsquo;s backup, but hammering a struggling server makes things worse. Retry a few times, waiting longer each time: <strong>exponential backoff</strong> (1, 2, 4, 8 seconds), with a cap, and ideally a little random <strong>jitter</strong> so a thousand clients don&rsquo;t retry in step.</li>
+<li><strong>Logs with timestamps</strong>: when it went wrong at 03:00, the log is all you have. Log the start, the end, how long it took, what it did, and the full error.</li>
+<li><strong>Loud failures</strong>: exit with a non-zero code, and make sure someone is told: an email (cron mails a job&rsquo;s output to its owner if mail is set up), a chat message, or a <strong>dead man&rsquo;s switch</strong> (the job pings a monitoring service on success, and the service alerts you when the ping <strong>stops</strong> arriving, which also catches a job that never ran at all).</li>
+<li><strong>Cron&rsquo;s bare environment</strong>: cron runs jobs with a minimal <code>PATH</code>, from your home folder, without your shell&rsquo;s settings. Use absolute paths for everything (the Python interpreter, the script, the files), and set what the job needs explicitly.</li>
+</ul>
+<h2 id="where-schedules-live">Where schedules live</h2>
+<h3 id="on-your-own-computer">On your own computer</h3>
+<ul>
+<li><strong>Linux and macOS</strong>: <code>crontab -e</code> edits your crontab; each line is an expression and a command, such as <code>30 2 * * * /home/ada/venv/bin/python /home/ada/backup.py &gt;&gt; /home/ada/backup.log 2&gt;&amp;1</code>. On Linux, <strong>systemd timers</strong> do the same with better logging (<code>journalctl</code>) and catch-up of missed runs (<code>Persistent=true</code>).</li>
+<li><strong>Windows</strong>: Task Scheduler (the app, or <code>schtasks</code> on the command line).</li>
+<li><strong>GitHub Actions</strong>: a workflow with <code>on: schedule: - cron: "0 6 * * 1"</code> runs in GitHub&rsquo;s cloud (in UTC, and not to the exact minute), with no server of your own; good for reports, link checks and data refreshes.</li>
+</ul>
+<p>Check expressions before trusting them: sites such as crontab.guru explain one in words, and the third-party <code>croniter</code> library computes next run times in Python.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Cron expressions have five fields (minute, hour, day of month, month, day of week with 0 and 7 as Sunday); items are *, values, ranges a-b, steps */n and a-b/n, and comma lists; a time matches when every field matches, except that when both day fields are restricted, either may match. Shortcuts: @hourly, @daily, @weekly, @monthly. Python&rsquo;s weekday() has Monday as 0, cron has Sunday as 0. Cron uses the machine&rsquo;s time zone (GitHub Actions uses UTC); DST can skip or repeat small-hours jobs. A scheduler keeps jobs with due times, reads an injected clock, reschedules on the grid (scheduled time plus interval) and runs missed slots once. Unattended jobs must be idempotent, lock against overlaps (open(path, &ldquo;x&rdquo;), released in finally, stale locks taken over), retry with capped exponential backoff and jitter, log with timestamps, and fail loudly (exit codes, alerts, a dead man&rsquo;s switch); under cron, use absolute paths.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w078d3-field" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Parse a cron field</div><div class="pc-prompt"><p>Write <code>parse_field(text, low, high)</code>: the set of values a cron field allows, for a field whose values run from <code>low</code> to <code>high</code>. Items are separated by commas; each is <code>*</code>, a number, a range <code>a-b</code>, or either of those followed by a step <code>/n</code> (<code>*/15</code>, <code>10-40/10</code>, and <code>5/20</code> meaning from 5 to <code>high</code> in steps of 20). Raise <code>ValueError(f"bad cron field: {text}")</code> for anything malformed: a value outside <code>low</code> to <code>high</code>, a range that goes backwards, a step of <code>0</code>, an empty item, or text that isn&rsquo;t a number. Then <code>parse_cron(expr)</code>: split the expression into its five fields and return a list of five sets (minute 0 to 59, hour 0 to 23, day 1 to 31, month 1 to 12, weekday 0 to 7, with <code>7</code> turned into <code>0</code>), raising <code>ValueError(f"expected 5 fields: {expr}")</code> for the wrong number of fields.</p></div><textarea class="pc-src pc-code" hidden>def parse_field(text, low, high):
+    ___
+
+def parse_cron(expr):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_field():
+    &quot;every item form&quot;
+    assert parse_field(&quot;*&quot;, 0, 5) == {0, 1, 2, 3, 4, 5}
+    assert parse_field(&quot;*/15&quot;, 0, 59) == {0, 15, 30, 45}
+    assert parse_field(&quot;10-40/10&quot;, 0, 59) == {10, 20, 30, 40}
+    assert parse_field(&quot;5/20&quot;, 0, 59) == {5, 25, 45}
+    assert parse_field(&quot;1,15,30-31&quot;, 1, 31) == {1, 15, 30, 31}
+    assert parse_field(&quot;1-5&quot;, 0, 7) == {1, 2, 3, 4, 5}
+    for bad in (&quot;60&quot;, &quot;5-1&quot;, &quot;*/0&quot;, &quot;1,,2&quot;, &quot;a&quot;, &quot;&quot;, &quot;-3&quot;, &quot;1-&quot;):
+        try:
+            parse_field(bad, 0, 59)
+        except ValueError as e:
+            assert str(e) == f&quot;bad cron field: {bad}&quot;, bad
+        else:
+            raise AssertionError(f&quot;{bad!r} should be refused&quot;)
+
+def test_cron():
+    &quot;five fields, Sunday as 0 or 7&quot;
+    m, h, dom, mon, dow = parse_cron(&quot;30 2 * * 7&quot;)
+    assert m == {30} and h == {2} and dom == set(range(1, 32)) and mon == set(range(1, 13)) and dow == {0}
+    assert parse_cron(&quot;0 9 * * 1-5&quot;)[4] == {1, 2, 3, 4, 5} and parse_cron(&quot;0 0 * * *&quot;)[4] == set(range(7))
+    try:
+        parse_cron(&quot;0 9 * *&quot;)
+    except ValueError as e:
+        assert str(e) == &quot;expected 5 fields: 0 9 * *&quot;
+    else:
+        raise AssertionError(&quot;four fields&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def parse_field(text, low, high):
+    def bad():
+        return ValueError(f&quot;bad cron field: {text}&quot;)
+    values = set()
+    for item in text.split(&quot;,&quot;):
+        base, slash, step_text = item.partition(&quot;/&quot;)
+        try:
+            step = int(step_text) if slash else 1
+            if base == &quot;*&quot;:
+                start, end = low, high
+            elif &quot;-&quot; in base:
+                a, b = base.split(&quot;-&quot;)
+                start, end = int(a), int(b)
+            else:
+                start = int(base)
+                end = high if slash else start
+        except ValueError:
+            raise bad() from None
+        if step &lt; 1 or not low &lt;= start &lt;= end &lt;= high:
+            raise bad()
+        values.update(range(start, end + 1, step))
+    return values
+
+def parse_cron(expr):
+    fields = expr.split()
+    if len(fields) != 5:
+        raise ValueError(f&quot;expected 5 fields: {expr}&quot;)
+    ranges = [(0, 59), (0, 23), (1, 31), (1, 12), (0, 7)]
+    sets = [parse_field(f, lo, hi) for f, (lo, hi) in zip(fields, ranges)]
+    sets[4] = {0 if d == 7 else d for d in sets[4]}
+    return sets</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w078d3-matches" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Does it run now?</div><div class="pc-prompt"><p>Write <code>matches(expr, when)</code>: <code>True</code> if the cron expression matches the <code>datetime</code> <code>when</code> (to the minute; seconds are ignored). Use your <code>parse_field</code> (include it again) and remember both rules: cron&rsquo;s Sunday is <code>0</code> (Python&rsquo;s <code>weekday()</code> has Monday as <code>0</code>), and when <strong>both</strong> day fields are restricted (neither is exactly <code>*</code>), the day matches if <strong>either</strong> matches. Accept the shortcuts <code>@hourly</code>, <code>@daily</code>, <code>@weekly</code>, <code>@monthly</code> and <code>@yearly</code> too.</p></div><textarea class="pc-src pc-code" hidden>from datetime import datetime
+
+SHORTCUTS = {&quot;@hourly&quot;: &quot;0 * * * *&quot;, &quot;@daily&quot;: &quot;0 0 * * *&quot;, &quot;@weekly&quot;: &quot;0 0 * * 0&quot;,
+             &quot;@monthly&quot;: &quot;0 0 1 * *&quot;, &quot;@yearly&quot;: &quot;0 0 1 1 *&quot;}
+
+def parse_field(text, low, high):
+    ___
+
+def matches(expr, when):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_matches():
+    &quot;fields and weekdays&quot;
+    from datetime import datetime
+    mon = datetime(2026, 11, 9, 9, 0, 42)         # a Monday
+    assert matches(&quot;0 9 * * 1-5&quot;, mon) and not matches(&quot;0 9 * * 0,6&quot;, mon)
+    assert matches(&quot;*/15 * * * *&quot;, datetime(2026, 11, 9, 9, 45)) and not matches(&quot;*/15 * * * *&quot;, datetime(2026, 11, 9, 9, 50))
+    sun = datetime(2026, 11, 15, 2, 30)
+    assert matches(&quot;30 2 * * 0&quot;, sun) and matches(&quot;30 2 * * 7&quot;, sun) and not matches(&quot;30 2 * * 1&quot;, sun)
+    assert matches(&quot;0 0 1 * *&quot;, datetime(2026, 12, 1)) and not matches(&quot;0 0 1 * *&quot;, datetime(2026, 12, 2))
+
+def test_or_rule():
+    &quot;either day field, when both are restricted&quot;
+    from datetime import datetime
+    assert matches(&quot;0 9 1 * 1&quot;, datetime(2026, 11, 9, 9))       # a Monday, not the 1st
+    assert matches(&quot;0 9 1 * 1&quot;, datetime(2026, 10, 1, 9))       # the 1st, a Thursday
+    assert not matches(&quot;0 9 1 * 1&quot;, datetime(2026, 11, 10, 9))  # neither
+    assert not matches(&quot;0 9 * * 1&quot;, datetime(2026, 10, 1, 9))   # day of month is *: weekday decides
+
+def test_shortcuts():
+    &quot;@daily and friends&quot;
+    from datetime import datetime
+    assert matches(&quot;@daily&quot;, datetime(2026, 5, 4)) and not matches(&quot;@daily&quot;, datetime(2026, 5, 4, 1))
+    assert matches(&quot;@weekly&quot;, datetime(2026, 11, 15)) and matches(&quot;@yearly&quot;, datetime(2027, 1, 1))
+    assert matches(&quot;@hourly&quot;, datetime(2026, 5, 4, 13)) and matches(&quot;@monthly&quot;, datetime(2026, 2, 1))</textarea><textarea class="pc-src pc-solution" hidden>from datetime import datetime
+
+SHORTCUTS = {&quot;@hourly&quot;: &quot;0 * * * *&quot;, &quot;@daily&quot;: &quot;0 0 * * *&quot;, &quot;@weekly&quot;: &quot;0 0 * * 0&quot;,
+             &quot;@monthly&quot;: &quot;0 0 1 * *&quot;, &quot;@yearly&quot;: &quot;0 0 1 1 *&quot;}
+
+def parse_field(text, low, high):
+    values = set()
+    for item in text.split(&quot;,&quot;):
+        base, slash, step_text = item.partition(&quot;/&quot;)
+        step = int(step_text) if slash else 1
+        if base == &quot;*&quot;:
+            start, end = low, high
+        elif &quot;-&quot; in base:
+            start, end = map(int, base.split(&quot;-&quot;))
+        else:
+            start = int(base)
+            end = high if slash else start
+        if step &lt; 1 or not low &lt;= start &lt;= end &lt;= high:
+            raise ValueError(f&quot;bad cron field: {text}&quot;)
+        values.update(range(start, end + 1, step))
+    return values
+
+def matches(expr, when):
+    fields = SHORTCUTS.get(expr, expr).split()
+    minute, hour, dom, month, dow = fields
+    weekdays = {0 if d == 7 else d for d in parse_field(dow, 0, 7)}
+    if when.minute not in parse_field(minute, 0, 59) or when.hour not in parse_field(hour, 0, 23):
+        return False
+    if when.month not in parse_field(month, 1, 12):
+        return False
+    day_ok = when.day in parse_field(dom, 1, 31)
+    weekday_ok = (when.weekday() + 1) % 7 in weekdays
+    if dom != &quot;*&quot; and dow != &quot;*&quot;:
+        return day_ok or weekday_ok
+    return day_ok and weekday_ok</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w078d3-nextrun" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">When does it next run?</div><div class="pc-prompt"><p>Using <code>matches</code> (include it and <code>parse_field</code>), write <code>next_runs(expr, after, n)</code>: the next <code>n</code> times strictly after the <code>datetime</code> <code>after</code> that match, as a list of <code>datetime</code>s with zero seconds. Step minute by minute, but skip whole days quickly: when a day can&rsquo;t match at all (check the day at midnight with the hour and minute fields ignored), jump straight to the next midnight. Raise <code>ValueError("no run within a year")</code> if no match turns up within 366 days of the starting point.</p></div><textarea class="pc-src pc-code" hidden>from datetime import datetime, timedelta
+
+SHORTCUTS = {&quot;@hourly&quot;: &quot;0 * * * *&quot;, &quot;@daily&quot;: &quot;0 0 * * *&quot;, &quot;@weekly&quot;: &quot;0 0 * * 0&quot;,
+             &quot;@monthly&quot;: &quot;0 0 1 * *&quot;, &quot;@yearly&quot;: &quot;0 0 1 1 *&quot;}
+
+def parse_field(text, low, high):
+    ___
+
+def matches(expr, when):
+    ___
+
+def next_runs(expr, after, n):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_next():
+    &quot;the next few runs&quot;
+    from datetime import datetime
+    got = next_runs(&quot;0 9 * * 1-5&quot;, datetime(2026, 11, 13, 9, 0), 3)          # from Friday 09:00
+    assert got == [datetime(2026, 11, 16, 9), datetime(2026, 11, 17, 9), datetime(2026, 11, 18, 9)]
+    assert next_runs(&quot;*/20 * * * *&quot;, datetime(2026, 1, 1, 23, 45, 10), 2) == [datetime(2026, 1, 2, 0, 0), datetime(2026, 1, 2, 0, 20)]
+    assert next_runs(&quot;@monthly&quot;, datetime(2026, 12, 15), 2) == [datetime(2027, 1, 1), datetime(2027, 2, 1)]
+    assert next_runs(&quot;0 12 29 2 *&quot;, datetime(2027, 3, 1), 1) == [datetime(2028, 2, 29, 12)]
+
+def test_never():
+    &quot;an impossible schedule&quot;
+    from datetime import datetime
+    try:
+        next_runs(&quot;0 0 31 2 *&quot;, datetime(2026, 1, 1), 1)
+    except ValueError as e:
+        assert str(e) == &quot;no run within a year&quot;
+    else:
+        raise AssertionError(&quot;February 31st never comes&quot;)
+
+def test_fast():
+    &quot;days are skipped, not walked minute by minute&quot;
+    import time
+    from datetime import datetime
+    start = time.perf_counter()
+    assert next_runs(&quot;0 0 1 1 *&quot;, datetime(2026, 1, 1, 0, 1), 1) == [datetime(2027, 1, 1)]
+    assert time.perf_counter() - start &lt; 3, &quot;too slow: skip days that can&#x27;t match&quot;</textarea><textarea class="pc-src pc-solution" hidden>from datetime import datetime, timedelta
+
+SHORTCUTS = {&quot;@hourly&quot;: &quot;0 * * * *&quot;, &quot;@daily&quot;: &quot;0 0 * * *&quot;, &quot;@weekly&quot;: &quot;0 0 * * 0&quot;,
+             &quot;@monthly&quot;: &quot;0 0 1 * *&quot;, &quot;@yearly&quot;: &quot;0 0 1 1 *&quot;}
+
+def parse_field(text, low, high):
+    values = set()
+    for item in text.split(&quot;,&quot;):
+        base, slash, step_text = item.partition(&quot;/&quot;)
+        step = int(step_text) if slash else 1
+        if base == &quot;*&quot;:
+            start, end = low, high
+        elif &quot;-&quot; in base:
+            start, end = map(int, base.split(&quot;-&quot;))
+        else:
+            start = int(base)
+            end = high if slash else start
+        if step &lt; 1 or not low &lt;= start &lt;= end &lt;= high:
+            raise ValueError(f&quot;bad cron field: {text}&quot;)
+        values.update(range(start, end + 1, step))
+    return values
+
+def matches(expr, when):
+    minute, hour, dom, month, dow = SHORTCUTS.get(expr, expr).split()
+    weekdays = {0 if d == 7 else d for d in parse_field(dow, 0, 7)}
+    if when.minute not in parse_field(minute, 0, 59) or when.hour not in parse_field(hour, 0, 23):
+        return False
+    if when.month not in parse_field(month, 1, 12):
+        return False
+    day_ok = when.day in parse_field(dom, 1, 31)
+    weekday_ok = (when.weekday() + 1) % 7 in weekdays
+    if dom != &quot;*&quot; and dow != &quot;*&quot;:
+        return day_ok or weekday_ok
+    return day_ok and weekday_ok
+
+def next_runs(expr, after, n):
+    fields = SHORTCUTS.get(expr, expr).split()
+    day_only = &quot; &quot;.join([&quot;*&quot;, &quot;*&quot;] + fields[2:])
+    t = after.replace(second=0, microsecond=0) + timedelta(minutes=1)
+    limit = after + timedelta(days=366)
+    runs = []
+    while len(runs) &lt; n:
+        if t &gt; limit:
+            raise ValueError(&quot;no run within a year&quot;)
+        if not matches(day_only, t.replace(hour=0, minute=0)):
+            t = t.replace(hour=0, minute=0) + timedelta(days=1)
+            continue
+        if matches(expr, t):
+            runs.append(t)
+        t += timedelta(minutes=1)
+    return runs</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w078d3-scheduler" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A scheduler with a fake clock</div><div class="pc-prompt"><p>Write a class <code>Scheduler(clock)</code>, where <code>clock()</code> returns the time in seconds. <code>every(seconds, func, name)</code> adds a job, first due <code>seconds</code> after the current time. <code>run_pending()</code> runs every job that is due (due time at or before <code>clock()</code>), in order of due time and then name; a job that raises is logged as failed but doesn&rsquo;t stop the others. After each run, the job&rsquo;s next due time moves <strong>along its grid</strong>: the old due time plus the interval, as many times as needed to be after now (missed slots aren&rsquo;t run again). It returns a list of <code>(name, "ok")</code> or <code>(name, "failed: MESSAGE")</code> pairs for the jobs it ran. <code>next_due()</code> returns the earliest due time, or <code>None</code> if there are no jobs.</p></div><textarea class="pc-src pc-code" hidden>class Scheduler:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_grid():
+    &quot;on time, no drift, missed slots skipped&quot;
+    class Clock:
+        t = 1000
+        def __call__(self):
+            return self.t
+    clock = Clock()
+    s = Scheduler(clock)
+    ran = []
+    s.every(60, lambda: ran.append(&quot;poll&quot;), &quot;poll&quot;)
+    s.every(300, lambda: ran.append(&quot;report&quot;), &quot;report&quot;)
+    assert s.next_due() == 1060 and s.run_pending() == []
+    clock.t = 1075
+    assert s.run_pending() == [(&quot;poll&quot;, &quot;ok&quot;)] and s.next_due() == 1120
+    clock.t = 1300
+    assert s.run_pending() == [(&quot;poll&quot;, &quot;ok&quot;), (&quot;report&quot;, &quot;ok&quot;)]
+    assert s.next_due() == 1360
+    clock.t = 1599
+    assert s.run_pending() == [(&quot;poll&quot;, &quot;ok&quot;)] and s.next_due() == 1600
+    clock.t = 1600
+    assert s.run_pending() == [(&quot;poll&quot;, &quot;ok&quot;), (&quot;report&quot;, &quot;ok&quot;)]
+    assert ran == [&quot;poll&quot;, &quot;poll&quot;, &quot;report&quot;, &quot;poll&quot;, &quot;poll&quot;, &quot;report&quot;]
+
+def test_failures():
+    &quot;a failing job doesn&#x27;t stop the others&quot;
+    class Clock:
+        t = 0
+        def __call__(self):
+            return self.t
+    clock = Clock()
+    s = Scheduler(clock)
+    def broken():
+        raise ConnectionError(&quot;server down&quot;)
+    s.every(10, broken, &quot;b-sync&quot;)
+    s.every(10, lambda: None, &quot;a-clean&quot;)
+    clock.t = 10
+    assert s.run_pending() == [(&quot;a-clean&quot;, &quot;ok&quot;), (&quot;b-sync&quot;, &quot;failed: server down&quot;)]
+    assert Scheduler(clock).next_due() is None</textarea><textarea class="pc-src pc-solution" hidden>class Scheduler:
+    def __init__(self, clock):
+        self.clock = clock
+        self.jobs = []
+
+    def every(self, seconds, func, name):
+        self.jobs.append({&quot;name&quot;: name, &quot;every&quot;: seconds, &quot;func&quot;: func, &quot;due&quot;: self.clock() + seconds})
+
+    def next_due(self):
+        return min((job[&quot;due&quot;] for job in self.jobs), default=None)
+
+    def run_pending(self):
+        now = self.clock()
+        results = []
+        for job in sorted(self.jobs, key=lambda j: (j[&quot;due&quot;], j[&quot;name&quot;])):
+            if job[&quot;due&quot;] &gt; now:
+                continue
+            try:
+                job[&quot;func&quot;]()
+                results.append((job[&quot;name&quot;], &quot;ok&quot;))
+            except Exception as e:
+                results.append((job[&quot;name&quot;], f&quot;failed: {e}&quot;))
+            missed = (now - job[&quot;due&quot;]) // job[&quot;every&quot;]
+            job[&quot;due&quot;] += (missed + 1) * job[&quot;every&quot;]
+        return results</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w078d3-lock" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">One run at a time</div><div class="pc-prompt"><p>Write <code>run_locked(lock_path, job, now, stale_after=3600)</code>: run <code>job()</code> only if no other run holds the lock. Create the lock file with mode <code>"x"</code> (which fails with <code>FileExistsError</code> if it&rsquo;s there) and write <code>now</code> into it. If it already exists and holds a time less than <code>stale_after</code> seconds before <code>now</code>, return <code>"skipped"</code> without running; if it&rsquo;s older (or unreadable), it&rsquo;s stale: delete it and take the lock. Always remove the lock when the job finishes, even if the job raises (let the exception propagate). Return <code>"ran"</code> after a successful run.</p></div><textarea class="pc-src pc-code" hidden>import os
+from pathlib import Path
+
+def run_locked(lock_path, job, now, stale_after=3600):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_lock():
+    &quot;skips while locked, cleans up after&quot;
+    from pathlib import Path
+    lock = Path(&quot;job.lock&quot;)
+    lock.unlink(missing_ok=True)
+    seen = []
+    def job():
+        seen.append(lock.read_text())
+        assert run_locked(lock, lambda: seen.append(&quot;inner&quot;), 1001) == &quot;skipped&quot;
+    assert run_locked(lock, job, 1000) == &quot;ran&quot;
+    assert seen == [&quot;1000&quot;] and not lock.exists()
+
+def test_stale_and_errors():
+    &quot;stale locks are taken over; the lock is released after a crash&quot;
+    from pathlib import Path
+    lock = Path(&quot;job.lock&quot;)
+    lock.write_text(&quot;100&quot;)
+    assert run_locked(lock, lambda: None, 5000) == &quot;ran&quot; and not lock.exists()
+    lock.write_text(&quot;4000&quot;)
+    assert run_locked(lock, lambda: None, 5000) == &quot;skipped&quot; and lock.exists()
+    lock.write_text(&quot;garbage&quot;)
+    assert run_locked(lock, lambda: None, 5000) == &quot;ran&quot;
+    def boom():
+        raise RuntimeError(&quot;disk full&quot;)
+    try:
+        run_locked(lock, boom, 6000)
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError(&quot;the error should propagate&quot;)
+    assert not lock.exists()</textarea><textarea class="pc-src pc-solution" hidden>import os
+from pathlib import Path
+
+def run_locked(lock_path, job, now, stale_after=3600):
+    lock_path = Path(lock_path)
+    for _ in range(2):
+        try:
+            with open(lock_path, &quot;x&quot;) as f:
+                f.write(str(now))
+            break
+        except FileExistsError:
+            try:
+                taken = float(lock_path.read_text())
+            except ValueError:
+                taken = None
+            if taken is not None and now - taken &lt; stale_after:
+                return &quot;skipped&quot;
+            lock_path.unlink()
+    else:
+        return &quot;skipped&quot;
+    try:
+        job()
+    finally:
+        lock_path.unlink(missing_ok=True)
+    return &quot;ran&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w078d3-retry" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Retry with backoff</div><div class="pc-prompt"><p>Write <code>retry(func, attempts=4, base=1.0, cap=30.0, sleep=time.sleep, retry_on=(OSError,))</code>: call <code>func()</code> and return its result. If it raises one of the <code>retry_on</code> exceptions, wait and try again, up to <code>attempts</code> calls in all; the waits are <code>base</code>, <code>base*2</code>, <code>base*4</code>&hellip; each capped at <code>cap</code>, and they&rsquo;re passed to <code>sleep</code> (so tests can record them). After the last attempt, re-raise the last exception. Other exceptions are raised at once, without retrying.</p></div><textarea class="pc-src pc-code" hidden>import time
+
+def retry(func, attempts=4, base=1.0, cap=30.0, sleep=time.sleep, retry_on=(OSError,)):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_retry():
+    &quot;backoff, success and giving up&quot;
+    calls, waits = [], []
+    def flaky():
+        calls.append(1)
+        if len(calls) &lt; 3:
+            raise ConnectionError(&quot;blip&quot;)
+        return &quot;done&quot;
+    assert retry(flaky, sleep=waits.append) == &quot;done&quot; and waits == [1.0, 2.0] and len(calls) == 3
+    waits = []
+    def down():
+        raise TimeoutError(&quot;still down&quot;)
+    try:
+        retry(down, attempts=6, base=5, cap=30, sleep=waits.append)
+    except TimeoutError as e:
+        assert str(e) == &quot;still down&quot;
+    else:
+        raise AssertionError(&quot;should give up&quot;)
+    assert waits == [5, 10, 20, 30, 30]
+
+def test_no_retry():
+    &quot;only the listed errors are retried&quot;
+    waits = []
+    def bad():
+        raise ValueError(&quot;bad input&quot;)
+    try:
+        retry(bad, sleep=waits.append)
+    except ValueError:
+        pass
+    assert waits == []</textarea><textarea class="pc-src pc-solution" hidden>import time
+
+def retry(func, attempts=4, base=1.0, cap=30.0, sleep=time.sleep, retry_on=(OSError,)):
+    for attempt in range(attempts):
+        try:
+            return func()
+        except retry_on:
+            if attempt == attempts - 1:
+                raise
+            sleep(min(cap, base * 2 ** attempt))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w078d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A job that drifted</div><div class="pc-prompt"><p>This scheduler sets the next run from <strong>when the job finished</strong>, so each slow run pushes the schedule later, and the four runs come at <code>['09:00', '09:15:20', '09:30:40', '09:46:00']</code>. Keep it on the 15-minute grid, so it prints <code>['09:00', '09:15', '09:30', '09:45']</code>.</p></div><textarea class="pc-src pc-code" hidden>from datetime import datetime, timedelta
+
+interval = timedelta(minutes=15)
+due = datetime(2026, 11, 10, 9, 0)
+starts = []
+for _ in range(4):
+    starts.append(due)
+    finished = due + timedelta(seconds=20)     # each run takes 20 seconds
+    due = finished + interval
+print([t.strftime(&quot;%H:%M&quot; if t.second == 0 else &quot;%H:%M:%S&quot;) for t in starts])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;scheduled time plus the interval&quot;
+    expect_output(&quot;[&#x27;09:00&#x27;, &#x27;09:15&#x27;, &#x27;09:30&#x27;, &#x27;09:45&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from datetime import datetime, timedelta
+
+interval = timedelta(minutes=15)
+due = datetime(2026, 11, 10, 9, 0)
+starts = []
+for _ in range(4):
+    starts.append(due)
+    finished = due + timedelta(seconds=20)     # each run takes 20 seconds
+    due = due + interval
+print([t.strftime(&quot;%H:%M&quot; if t.second == 0 else &quot;%H:%M:%S&quot;) for t in starts])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w078d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Mondays at the wrong time</div><div class="pc-prompt"><p>The report should run at 09:00 every weekday, but the check converts Python&rsquo;s weekday straight into cron&rsquo;s, where Sunday is <code>0</code>, so Monday counts as <code>0</code> (Sunday) and Saturday as <code>5</code>, and this prints <code>['Tue', 'Wed', 'Thu', 'Fri', 'Sat']</code>. Convert properly, so it prints <code>['Mon', 'Tue', 'Wed', 'Thu', 'Fri']</code>.</p></div><textarea class="pc-src pc-code" hidden>from datetime import datetime, timedelta
+
+WEEKDAYS = {1, 2, 3, 4, 5}       # cron&#x27;s Monday to Friday
+day = datetime(2026, 11, 9, 9, 0)   # a Monday
+runs = []
+for n in range(7):
+    t = day + timedelta(days=n)
+    if t.weekday() in WEEKDAYS:
+        runs.append(t.strftime(&quot;%a&quot;))
+print(runs)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;Sunday is 0 in cron&quot;
+    expect_output(&quot;[&#x27;Mon&#x27;, &#x27;Tue&#x27;, &#x27;Wed&#x27;, &#x27;Thu&#x27;, &#x27;Fri&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from datetime import datetime, timedelta
+
+WEEKDAYS = {1, 2, 3, 4, 5}       # cron&#x27;s Monday to Friday
+day = datetime(2026, 11, 9, 9, 0)   # a Monday
+runs = []
+for n in range(7):
+    t = day + timedelta(days=n)
+    if (t.weekday() + 1) % 7 in WEEKDAYS:
+        runs.append(t.strftime(&quot;%a&quot;))
+print(runs)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w078d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A lock that never let go</div><div class="pc-prompt"><p>When the job fails, the lock file is never removed, so every later run is skipped and this prints <code>ran, failed, skipped, skipped</code>. Release the lock however the job ends, so it prints <code>ran, failed, ran, ran</code>.</p></div><textarea class="pc-src pc-code" hidden>from pathlib import Path
+
+LOCK = Path(&quot;nightly.lock&quot;)
+LOCK.unlink(missing_ok=True)
+
+def run(job):
+    try:
+        LOCK.touch(exist_ok=False)
+    except FileExistsError:
+        return &quot;skipped&quot;
+    try:
+        job()
+    except Exception:
+        return &quot;failed&quot;
+    LOCK.unlink()
+    return &quot;ran&quot;
+
+def fails():
+    raise OSError(&quot;disk full&quot;)
+
+print(&quot;, &quot;.join([run(lambda: None), run(fails), run(lambda: None), run(lambda: None)]))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;finally&quot;
+    expect_output(&quot;ran, failed, ran, ran&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from pathlib import Path
+
+LOCK = Path(&quot;nightly.lock&quot;)
+LOCK.unlink(missing_ok=True)
+
+def run(job):
+    try:
+        LOCK.touch(exist_ok=False)
+    except FileExistsError:
+        return &quot;skipped&quot;
+    try:
+        job()
+    except Exception:
+        return &quot;failed&quot;
+    finally:
+        LOCK.unlink()
+    return &quot;ran&quot;
+
+def fails():
+    raise OSError(&quot;disk full&quot;)
+
+print(&quot;, &quot;.join([run(lambda: None), run(fails), run(lambda: None), run(lambda: None)]))</textarea></div>
+<div class="parsons" data-id="w078d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A job that looks after itself</div><div class="pc-prompt"><p>Arrange a nightly job that takes a lock, logs its start and end, reports failure with an exit code, and always releases the lock. One line is a trap.</p></div><script type="application/json">{"lines": ["def main():", "    if not take_lock(LOCK):", "        log(\"another run is still going; skipping\")", "        return 0", "    try:", "        log(\"backup started\")", "        backup()", "        log(\"backup finished\")", "        return 0", "    except Exception as e:", "        log(f\"backup failed: {e!r}\")", "        return 1", "    finally:", "        release_lock(LOCK)"], "distractors": ["        return 0  # failures are fine at night"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w078d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the hours in the cron field &quot;*/6&quot; for hours (a sorted list)
+q = ___   # the cron day of week for a datetime whose weekday() is 6
+r = ___   # the expression for 02:30 every day
+s = ___   # True or False: &quot;0 9 1 * 1&quot; runs on a Monday the 9th
+t = ___   # the waits, capped at 10, for 5 attempts with base 2 (a list)</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [0, 6, 12, 18] and q == 0 and r == &quot;30 2 * * *&quot;, &quot;p, q and r&quot;
+    assert s is True and t == [2, 4, 8, 10], &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = [0, 6, 12, 18]
+q = 0
+r = &quot;30 2 * * *&quot;
+s = True
+t = [2, 4, 8, 10]</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w078d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What are the five cron fields, in order?", "answer": 1, "explain": "Minute comes first.", "options": ["hour minute day month weekday", "minute hour day-of-month month day-of-week", "second minute hour day month", "day month year hour minute"]}, {"type": "mc", "q": "When does */15 in the minute field run?", "answer": 1, "explain": "Every 15th value from the start of the range.", "options": ["Every 15 hours", "At minutes 0, 15, 30 and 45", "At minute 15 only", "15 times an hour"]}, {"type": "mc", "q": "What does 0 9 1 * 1 mean?", "answer": 1, "explain": "When both day fields are restricted, either may match.", "options": ["09:00 on Mondays that are the 1st", "09:00 on the 1st of each month and every Monday", "09:01 on Mondays", "January the 1st at 09:00"]}, {"type": "mc", "q": "How does Python&rsquo;s weekday() number the days?", "answer": 1, "explain": "Cron has Sunday as 0, so convert with (weekday() + 1) % 7.", "options": ["Sunday is 0", "Monday is 0", "Monday is 1", "Saturday is 0"]}, {"type": "mc", "q": "What&rsquo;s the danger of scheduling a job at 02:30 local time?", "answer": 1, "explain": "Use UTC or avoid the small hours.", "options": ["None", "Daylight-saving changes can skip it or run it twice", "Cron can&rsquo;t do half hours", "It&rsquo;s too early"]}, {"type": "mc", "q": "How should a scheduler compute a job&rsquo;s next due time?", "answer": 1, "explain": "Otherwise the schedule drifts later.", "options": ["now + interval", "The scheduled time + interval, skipping slots already missed", "A random time", "The finish time + interval"]}, {"type": "mc", "q": "What stops two runs of a job overlapping?", "answer": 1, "explain": "Recognise stale locks left by crashes too.", "options": ["A longer interval", "A lock taken at the start and released in finally", "Running it faster", "Logging"]}, {"type": "mc", "q": "Why use exponential backoff for retries?", "answer": 1, "explain": "Add a cap and a little jitter.", "options": ["It&rsquo;s simpler", "To give a struggling service time to recover instead of hammering it", "To fail faster", "It&rsquo;s required by HTTP"]}, {"type": "mc", "q": "What is a dead man&rsquo;s switch?", "answer": 1, "explain": "It catches jobs that never ran at all.", "options": ["A lock file", "A monitor that alerts you when a job&rsquo;s regular success ping stops arriving", "A kill command", "A retry policy"]}, {"type": "output", "q": "What does this print?", "answer": "3", "explain": "Three whole intervals fit in 47 minutes.", "code": "from datetime import timedelta\nlate = timedelta(minutes=47)\nprint(late // timedelta(minutes=15))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w078d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a crontab runner</div><div class="pc-prompt"><p>Write <code>simulate(crontab, start, end, jobs)</code>. <code>crontab</code> is the text of a crontab: blank lines and lines starting with <code>#</code> are ignored; every other line is a schedule (five fields or a shortcut such as <code>@daily</code>) followed by a job name, such as <code>30 2 * * * backup</code>. <code>jobs</code> maps names to functions that take the run time (a <code>datetime</code>) and return nothing or raise. Simulate every minute from <code>start</code> up to and including <code>end</code> (both on whole minutes): at each minute, run every line that matches, in crontab order. Return the log as a list of strings: <code>YYYY-MM-DD HH:MM NAME ok</code> or <code>YYYY-MM-DD HH:MM NAME failed: MESSAGE</code>. Before running anything, check the whole crontab: a line with a bad schedule raises <code>ValueError(f"line N: bad schedule")</code>, and a line naming a job that isn&rsquo;t in <code>jobs</code> raises <code>ValueError(f"line N: unknown job NAME")</code> (N counts every line from 1). A job that has failed three runs in a row is disabled for the rest of the simulation: log <code>... NAME disabled after 3 failures</code> once, straight after its third failure, and skip it afterwards. To stay fast, skip days that no line can match.</p></div><textarea class="pc-src pc-code" hidden>from datetime import datetime, timedelta
+
+SHORTCUTS = {&quot;@hourly&quot;: &quot;0 * * * *&quot;, &quot;@daily&quot;: &quot;0 0 * * *&quot;, &quot;@weekly&quot;: &quot;0 0 * * 0&quot;,
+             &quot;@monthly&quot;: &quot;0 0 1 * *&quot;, &quot;@yearly&quot;: &quot;0 0 1 1 *&quot;}
+
+def simulate(crontab, start, end, jobs):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_runs():
+    &quot;a day of jobs&quot;
+    from datetime import datetime
+    seen = []
+    jobs = {&quot;backup&quot;: lambda t: seen.append((&quot;backup&quot;, t.hour)),
+            &quot;poll&quot;: lambda t: None,
+            &quot;report&quot;: lambda t: seen.append((&quot;report&quot;, t.strftime(&quot;%a&quot;)))}
+    tab = &quot;&quot;&quot;
+# nightly backup
+30 2 * * * backup
+
+*/30 9-10 * * 1-5 poll
+@weekly report
+&quot;&quot;&quot;
+    log = simulate(tab, datetime(2026, 11, 14, 0, 0), datetime(2026, 11, 16, 9, 30), jobs)
+    assert log == [&quot;2026-11-14 02:30 backup ok&quot;, &quot;2026-11-15 00:00 report ok&quot;, &quot;2026-11-15 02:30 backup ok&quot;,
+                   &quot;2026-11-16 02:30 backup ok&quot;, &quot;2026-11-16 09:00 poll ok&quot;, &quot;2026-11-16 09:30 poll ok&quot;]
+    assert seen == [(&quot;backup&quot;, 2), (&quot;report&quot;, &quot;Sun&quot;), (&quot;backup&quot;, 2), (&quot;backup&quot;, 2)]
+
+def test_failures():
+    &quot;three failures in a row disable a job&quot;
+    from datetime import datetime
+    count = {&quot;n&quot;: 0}
+    def flaky(t):
+        count[&quot;n&quot;] += 1
+        if count[&quot;n&quot;] in (1, 3, 4, 5):
+            raise ConnectionError(&quot;no route&quot;)
+    log = simulate(&quot;*/10 * * * * sync&quot;, datetime(2026, 1, 1, 0, 0), datetime(2026, 1, 1, 1, 30), {&quot;sync&quot;: flaky})
+    assert log == [&quot;2026-01-01 00:00 sync failed: no route&quot;, &quot;2026-01-01 00:10 sync ok&quot;,
+                   &quot;2026-01-01 00:20 sync failed: no route&quot;, &quot;2026-01-01 00:30 sync failed: no route&quot;,
+                   &quot;2026-01-01 00:40 sync failed: no route&quot;, &quot;2026-01-01 00:40 sync disabled after 3 failures&quot;]
+
+def test_checks():
+    &quot;the crontab is checked before anything runs&quot;
+    from datetime import datetime
+    ran = []
+    for tab, message in ((&quot;0 0 * * * a\n61 * * * * a&quot;, &quot;line 2: bad schedule&quot;), (&quot;# hi\n0 0 * * * nope&quot;, &quot;line 2: unknown job nope&quot;),
+                         (&quot;0 0 * * a&quot;, &quot;line 1: bad schedule&quot;), (&quot;@daily&quot;, &quot;line 1: bad schedule&quot;)):
+        try:
+            simulate(tab, datetime(2026, 1, 1), datetime(2026, 1, 2), {&quot;a&quot;: ran.append})
+        except ValueError as e:
+            assert str(e) == message, (tab, str(e))
+        else:
+            raise AssertionError(tab)
+    assert ran == []
+
+def test_fast():
+    &quot;a whole year of a monthly job&quot;
+    import time
+    from datetime import datetime
+    started = time.perf_counter()
+    log = simulate(&quot;0 3 1 * * a&quot;, datetime(2026, 1, 1), datetime(2026, 12, 31, 23, 59), {&quot;a&quot;: lambda t: None})
+    assert len(log) == 12 and log[-1] == &quot;2026-12-01 03:00 a ok&quot;
+    assert time.perf_counter() - started &lt; 5, &quot;skip days that can&#x27;t match&quot;</textarea><textarea class="pc-src pc-solution" hidden>from datetime import datetime, timedelta
+
+SHORTCUTS = {&quot;@hourly&quot;: &quot;0 * * * *&quot;, &quot;@daily&quot;: &quot;0 0 * * *&quot;, &quot;@weekly&quot;: &quot;0 0 * * 0&quot;,
+             &quot;@monthly&quot;: &quot;0 0 1 * *&quot;, &quot;@yearly&quot;: &quot;0 0 1 1 *&quot;}
+RANGES = [(0, 59), (0, 23), (1, 31), (1, 12), (0, 7)]
+
+def parse_field(text, low, high):
+    values = set()
+    for item in text.split(&quot;,&quot;):
+        base, slash, step_text = item.partition(&quot;/&quot;)
+        step = int(step_text) if slash else 1
+        if base == &quot;*&quot;:
+            start, end = low, high
+        elif &quot;-&quot; in base:
+            start, end = map(int, base.split(&quot;-&quot;))
+        else:
+            start = int(base)
+            end = high if slash else start
+        if step &lt; 1 or not low &lt;= start &lt;= end &lt;= high:
+            raise ValueError(text)
+        values.update(range(start, end + 1, step))
+    return values
+
+class Line:
+    def __init__(self, fields, name):
+        sets = [parse_field(f, lo, hi) for f, (lo, hi) in zip(fields, RANGES)]
+        self.minute, self.hour, self.dom, self.month, dow = sets
+        self.dow = {0 if d == 7 else d for d in dow}
+        self.either = fields[2] != &quot;*&quot; and fields[4] != &quot;*&quot;
+        self.name = name
+
+    def day_ok(self, t):
+        if t.month not in self.month:
+            return False
+        d, w = t.day in self.dom, (t.weekday() + 1) % 7 in self.dow
+        return (d or w) if self.either else (d and w)
+
+    def matches(self, t):
+        return t.minute in self.minute and t.hour in self.hour and self.day_ok(t)
+
+def parse_crontab(crontab, jobs):
+    lines = []
+    for n, raw in enumerate(crontab.splitlines(), 1):
+        text = raw.strip()
+        if not text or text.startswith(&quot;#&quot;):
+            continue
+        parts = text.split()
+        if parts[0].startswith(&quot;@&quot;):
+            fields, rest = SHORTCUTS.get(parts[0], &quot;&quot;).split(), parts[1:]
+            if not fields:
+                raise ValueError(f&quot;line {n}: bad schedule&quot;)
+        else:
+            fields, rest = parts[:5], parts[5:]
+        if len(fields) != 5 or len(rest) != 1:
+            raise ValueError(f&quot;line {n}: bad schedule&quot;)
+        try:
+            line = Line(fields, rest[0])
+        except ValueError:
+            raise ValueError(f&quot;line {n}: bad schedule&quot;) from None
+        if line.name not in jobs:
+            raise ValueError(f&quot;line {n}: unknown job {line.name}&quot;)
+        lines.append(line)
+    return lines
+
+def simulate(crontab, start, end, jobs):
+    lines = parse_crontab(crontab, jobs)
+    log, failures, disabled = [], {}, set()
+    t = start
+    while t &lt;= end:
+        midnight = t.replace(hour=0, minute=0)
+        if not any(line.day_ok(midnight) for line in lines):
+            t = midnight + timedelta(days=1)
+            continue
+        for line in lines:
+            if line.name in disabled or not line.matches(t):
+                continue
+            stamp = f&quot;{t:%Y-%m-%d %H:%M} {line.name}&quot;
+            try:
+                jobs[line.name](t)
+                log.append(f&quot;{stamp} ok&quot;)
+                failures[line.name] = 0
+            except Exception as e:
+                log.append(f&quot;{stamp} failed: {e}&quot;)
+                failures[line.name] = failures.get(line.name, 0) + 1
+                if failures[line.name] == 3:
+                    disabled.add(line.name)
+                    log.append(f&quot;{stamp} disabled after 3 failures&quot;)
+        t += timedelta(minutes=1)
+    return log</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Look at the schedules your own computer already runs (<code>crontab -l</code> and <code>systemctl list-timers</code> on Linux, Task Scheduler on Windows) and read a few of them with your new eyes. Tomorrow: <strong>web scraping, responsibly</strong>: reading data out of web pages, and doing it in a way that respects the people who run the site.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w078d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w078d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w078d3", "week": 78, "day": 3, "title": "Scheduling jobs", "exercises": [{"id": "w078d3-field", "title": "Parse a cron field", "points": 15}, {"id": "w078d3-matches", "title": "Does it run now?", "points": 15}, {"id": "w078d3-nextrun", "title": "When does it next run?", "points": 10}, {"id": "w078d3-scheduler", "title": "A scheduler with a fake clock", "points": 15}, {"id": "w078d3-lock", "title": "One run at a time", "points": 10}, {"id": "w078d3-retry", "title": "Retry with backoff", "points": 10}, {"id": "w078d3-bug1", "title": "A job that drifted", "points": 10}, {"id": "w078d3-bug2", "title": "Mondays at the wrong time", "points": 10}, {"id": "w078d3-bug3", "title": "A lock that never let go", "points": 10}, {"id": "w078d3-trace", "title": "Predict them", "points": 10}, {"id": "w078d3-challenge", "title": "Challenge: a crontab runner", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=b54d8b61c9"></script>
+</body>
+</html>
