@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 68 Day 1: The C API: an overview | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Many of the libraries you rely on (NumPy, the json and re accelerators, database drivers, cryptography) are partly written in C, plugged into Python through...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w068d1.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 68 Day 1: The C API: an overview">
+<meta property="og:description" content="Many of the libraries you rely on (NumPy, the json and re accelerators, database drivers, cryptography) are partly written in C, plugged into Python through...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w068d1.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-68">Week 68: Extending Python</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#a-whole-extension-module" data-sec="a-whole-extension-module">A whole extension module</a></li><li><a href="#arguments-pyarg-parsetuple" data-sec="arguments-pyarg-parsetuple">Arguments: PyArg_ParseTuple</a></li><li><a href="#reference-counting-rules" data-sec="reference-counting-rules">Reference counting rules</a></li><li><a href="#errors-the-gil-and-building" data-sec="errors-the-gil-and-building">Errors, the GIL and building</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w068d1.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-68">Week 68: Extending Python</a></li><li aria-current="page">Day 1 of 6</li></ol>
+      <p class="day-where"><span>Week 68, Day 1</span></p>
+      <h1>The C API: an overview</h1>
+      <div class="day-intro"><p>Many of the libraries you rely on (NumPy, the <code>json</code> and <code>re</code> accelerators, database drivers, cryptography) are partly written in C, plugged into Python through its <strong>C API</strong>: the set of C functions and structs CPython exposes for building <strong>extension modules</strong>. Week 64 showed what objects look like in C; this week is about extending Python with other languages. Today is the foundation: what an extension module looks like, how C functions receive and parse Python arguments, the <strong>reference counting</strong> rules that every C extension must follow exactly, how errors are reported, and how extensions release the GIL. The browser can&rsquo;t compile C, so the C code is for reading and for your own computer, and the runnable exercises simulate the rules so you can check your understanding of them.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Read a small C extension module and name its parts</li><li>Explain how PyArg_ParseTuple turns Python arguments into C values, and simulate it</li><li>Apply the reference counting rules for new, borrowed and stolen references</li><li>Explain the C API&rsquo;s error convention (NULL or -1 plus a set exception)</li><li>Describe building extensions, releasing the GIL, and the limited API and stable ABI</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="A whole extension module: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Arguments: PyArg_ParseTuple: 25 min"></span><span class="plan-seg s1" style="flex:25" title="Reference counting rules: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Errors, the GIL and building: 20 min"></span><span class="plan-seg s1" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s0" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">A whole extension module</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Arguments: PyArg_ParseTuple</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Reference counting rules</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Errors, the GIL and building</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:40</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w068d1.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w068d1.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w068d1-p1"><textarea class="pc-src pc-code" hidden>import math, json, sys
+
+for f in (math.sqrt, json.dumps, len, print):
+    kind = type(f).__name__
+    print(f&quot;{f.__name__:6} {kind}&quot;)
+
+print(type(math).__name__, getattr(math, &quot;__file__&quot;, &quot;built into the interpreter&quot;)[-12:])</textarea></div>
+<p><code>math.sqrt</code>, <code>len</code> and <code>print</code> are <code>builtin_function_or_method</code>: functions written in C, not Python. <code>json.dumps</code> is a Python function (though <code>json</code> speeds itself up with a C helper module behind the scenes). The C API is what lets C code define functions and types that look exactly like Python ones.</p>
+<h2 id="a-whole-extension-module">A whole extension module</h2>
+<p>Here is a complete extension module in C, defining one function, <code>fastmath.hypot(x, y)</code>. Read it slowly: every C extension has these parts.</p>
+<pre><code>#define PY_SSIZE_T_CLEAN
+#include &lt;Python.h&gt;
+#include &lt;math.h&gt;
+
+/* 1. The function: always takes and returns PyObject pointers. */
+static PyObject *
+fastmath_hypot(PyObject *self, PyObject *args)
+{
+    double x, y;
+    if (!PyArg_ParseTuple(args, &quot;dd&quot;, &amp;x, &amp;y))   /* 2. parse two floats */
+        return NULL;                             /*    on failure, an exception is already set */
+    return PyFloat_FromDouble(sqrt(x * x + y * y));   /* 3. a NEW reference to a Python float */
+}
+
+/* 4. The method table: Python name, C function, calling convention, docstring. */
+static PyMethodDef fastmath_methods[] = {
+    {&quot;hypot&quot;, fastmath_hypot, METH_VARARGS, &quot;Length of the hypotenuse.&quot;},
+    {NULL, NULL, 0, NULL}                        /* the end marker */
+};
+
+/* 5. The module definition. */
+static struct PyModuleDef fastmath_module = {
+    PyModuleDef_HEAD_INIT, &quot;fastmath&quot;, &quot;Fast maths.&quot;, -1, fastmath_methods
+};
+
+/* 6. The initialisation function, found by name when Python imports the module. */
+PyMODINIT_FUNC
+PyInit_fastmath(void)
+{
+    return PyModule_Create(&amp;fastmath_module);
+}
+</code></pre>
+<p>Compiled into a shared library (<code>fastmath.cpython-313-x86_64-linux-gnu.so</code> on Linux, <code>.pyd</code> on Windows), it imports like any module: <code>import fastmath; fastmath.hypot(3, 4)</code> gives <code>5.0</code>. Week 64&rsquo;s import system finds it with the extension-module loader and calls <code>PyInit_fastmath</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d1-e2"><textarea class="pc-src pc-code" hidden>import re
+
+c_source = &#x27;&#x27;&#x27;
+static PyMethodDef fastmath_methods[] = {
+    {&quot;hypot&quot;, fastmath_hypot, METH_VARARGS, &quot;Length of the hypotenuse.&quot;},
+    {&quot;clamp&quot;, fastmath_clamp, METH_VARARGS | METH_KEYWORDS, &quot;Limit a value.&quot;},
+    {NULL, NULL, 0, NULL}
+};
+&#x27;&#x27;&#x27;
+entries = re.findall(r&#x27;\{&quot;(\w+)&quot;,\s*(\w+),\s*([\w| ]+),&#x27;, c_source)
+for name, c_function, flags in entries:
+    print(f&quot;Python name {name!r} -&gt; C function {c_function} ({flags.strip()})&quot;)</textarea></div>
+<h2 id="arguments-pyarg-parsetuple">Arguments: PyArg_ParseTuple</h2>
+<p>A <code>METH_VARARGS</code> function receives its positional arguments as one Python tuple. <strong><code>PyArg_ParseTuple(args, format, &amp;var1, &amp;var2, ...)</code></strong> checks them against a <strong>format string</strong> and stores C values in the variables:</p>
+<table>
+<thead>
+<tr>
+<th>code</th>
+<th>Python value</th>
+<th>C value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>i</code></td>
+<td><code>int</code> (must fit a C <code>int</code>)</td>
+<td><code>int</code></td>
+</tr>
+<tr>
+<td><code>l</code>, <code>L</code></td>
+<td><code>int</code></td>
+<td><code>long</code>, <code>long long</code></td>
+</tr>
+<tr>
+<td><code>d</code></td>
+<td><code>float</code> (or anything with <code>__float__</code>, such as an <code>int</code>)</td>
+<td><code>double</code></td>
+</tr>
+<tr>
+<td><code>s</code></td>
+<td><code>str</code></td>
+<td><code>const char *</code> (UTF-8, read-only)</td>
+</tr>
+<tr>
+<td><code>p</code></td>
+<td>anything (its truth value)</td>
+<td><code>int</code> (0 or 1)</td>
+</tr>
+<tr>
+<td><code>O</code></td>
+<td>any object</td>
+<td><code>PyObject *</code> (a borrowed reference)</td>
+</tr>
+<tr>
+<td><code>\|</code></td>
+<td>the rest are optional</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>If the arguments don&rsquo;t match, it sets a <code>TypeError</code> (or <code>OverflowError</code> for a number too big) and returns 0, and the function returns <code>NULL</code> straight away. <code>PyArg_ParseTupleAndKeywords</code> does the same with keyword names. For speed, modern extensions often use <code>METH_FASTCALL</code> (an array of arguments, no tuple) and <strong>Argument Clinic</strong>, a tool CPython itself uses to generate the parsing code from a declaration.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d1-e3"><textarea class="pc-src pc-code" hidden>def parse(fmt, args):
+    &quot;A simplified PyArg_ParseTuple: returns the converted values or raises.&quot;
+    required, _, optional = fmt.partition(&quot;|&quot;)
+    codes = required + optional
+    if not len(required) &lt;= len(args) &lt;= len(codes):
+        raise TypeError(f&quot;function takes {len(required)} to {len(codes)} arguments ({len(args)} given)&quot;)
+    out = []
+    for code, value in zip(codes, args):
+        if code == &quot;d&quot;:
+            if not isinstance(value, (int, float)):
+                raise TypeError(f&quot;must be real number, not {type(value).__name__}&quot;)
+            out.append(float(value))
+        elif code == &quot;i&quot;:
+            if isinstance(value, float) or not isinstance(value, int):
+                raise TypeError(f&quot;&#x27;{type(value).__name__}&#x27; object cannot be interpreted as an integer&quot;)
+            out.append(value)
+        elif code == &quot;s&quot;:
+            if not isinstance(value, str):
+                raise TypeError(f&quot;argument must be str, not {type(value).__name__}&quot;)
+            out.append(value)
+    return out
+
+print(parse(&quot;dd&quot;, (3, 4.5)), parse(&quot;s|i&quot;, (&quot;tea&quot;,)))
+for bad in [(&quot;dd&quot;, (3,)), (&quot;i&quot;, (2.5,)), (&quot;s&quot;, (42,))]:
+    try:
+        parse(*bad)
+    except TypeError as e:
+        print(&quot;TypeError:&quot;, e)</textarea></div>
+<h2 id="reference-counting-rules">Reference counting rules</h2>
+<p>In C, nothing manages reference counts for you (Week 62&rsquo;s reference counting is done by hand, with <code>Py_INCREF(obj)</code> and <code>Py_DECREF(obj)</code>). Every C API function&rsquo;s documentation says what it does with references, in one of three ways:</p>
+<ul>
+<li>It returns a <strong>new reference</strong>: you <strong>own</strong> it, and you must <code>Py_DECREF</code> it when you&rsquo;re done (or pass ownership on, for example by returning it). <code>PyFloat_FromDouble</code>, <code>PyLong_FromLong</code>, <code>PyList_New</code>, <code>PyObject_GetAttrString</code> and most functions that create or look things up return new references.</li>
+<li>It returns a <strong>borrowed reference</strong>: you may use it, but you <strong>don&rsquo;t own</strong> it, so you mustn&rsquo;t <code>Py_DECREF</code> it, and it&rsquo;s only valid while its owner keeps it alive. <code>PyList_GetItem</code>, <code>PyTuple_GetItem</code> and <code>PyDict_GetItem</code> return borrowed references. To keep one beyond that, <code>Py_INCREF</code> it first.</li>
+<li>It <strong>steals</strong> a reference you pass in: it takes over your ownership. <code>PyList_SetItem</code> and <code>PyTuple_SetItem</code> steal; after calling them you no longer own that reference.</li>
+</ul>
+<p>Getting this wrong is the classic C extension bug. A missing <code>Py_DECREF</code> is a <strong>memory leak</strong>; an extra one frees an object that&rsquo;s still in use, which crashes later in some unrelated place. Tools such as debug builds of Python, <code>sys.gettotalrefcount()</code> there, and <code>Py_XDECREF</code> (which ignores <code>NULL</code>) help; so does writing extensions in Cython or Rust (later this week), which handle reference counts for you.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d1-e4"><textarea class="pc-src pc-code" hidden>counts = {}
+owned = []
+
+def new_ref(name):                    # e.g. PyLong_FromLong: we own it
+    counts[name] = counts.get(name, 0) + 1
+    owned.append(name)
+
+def decref(name):
+    counts[name] -= 1
+    owned.remove(name)
+    if counts[name] == 0:
+        print(&quot;  freed&quot;, name)
+
+new_ref(&quot;total&quot;)
+new_ref(&quot;label&quot;)
+decref(&quot;label&quot;)                        # finished with it
+print(&quot;still owned:&quot;, owned, &quot;(we must DECREF or return &#x27;total&#x27;)&quot;)</textarea></div>
+<h2 id="errors-the-gil-and-building">Errors, the GIL and building</h2>
+<p><strong>Errors</strong> follow one convention throughout the C API: a function that fails <strong>sets an exception</strong> (with <code>PyErr_SetString(PyExc_ValueError, "...")</code> or by calling something that set one) and returns an <strong>error indicator</strong>: <code>NULL</code> for functions returning <code>PyObject *</code>, <code>-1</code> for functions returning <code>int</code>. The caller checks the result and, if it&rsquo;s the indicator, returns its own indicator at once, so the exception travels up to Python code, which sees an ordinary exception. Forgetting to check a result is another classic bug.</p>
+<p><strong>The GIL</strong> (Week 66): C code that doesn&rsquo;t touch Python objects for a while (a long computation, a blocking system call) should release it so other threads can run:</p>
+<pre><code>Py_BEGIN_ALLOW_THREADS
+result = expensive_c_work(buffer, n);   /* no Python objects in here */
+Py_END_ALLOW_THREADS
+</code></pre>
+<p><strong>Building</strong>: a <code>setuptools</code> project with an <code>Extension("fastmath", ["fastmath.c"])</code> in <code>setup.py</code> (or <code>ext-modules</code> in <code>pyproject.toml</code>), built with <code>pip install .</code> or <code>python -m build</code>, which runs your platform&rsquo;s C compiler. The result is tied to one Python version unless you use the <strong>limited API</strong> (<code>Py_LIMITED_API</code>), a subset of the C API whose <strong>stable ABI</strong> lets one compiled file (an <code>abi3</code> wheel) work on every later Python 3 version.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d1-e5"><textarea class="pc-src pc-code" hidden>class CError:
+    &quot;The current exception, as CPython keeps it per thread.&quot;
+    current = None
+
+def c_divide(a, b):
+    if b == 0:
+        CError.current = ZeroDivisionError(&quot;division by zero&quot;)
+        return None                         # NULL
+    return a / b
+
+def c_average(values):
+    total = 0.0
+    for v in values:
+        part = c_divide(v, len(values))
+        if part is None:                     # check every result...
+            return None                      # ...and pass the error up
+        total += part
+    return total
+
+def call_from_python(func, *args):
+    result = func(*args)
+    if result is None and CError.current is not None:
+        error, CError.current = CError.current, None
+        raise error
+    return result
+
+print(call_from_python(c_average, [2, 4, 6]))
+def c_ratio(a, b):
+    part = c_divide(a, b)
+    return None if part is None else round(part, 3)
+
+try:
+    call_from_python(c_ratio, 1, 0)
+except ZeroDivisionError as e:
+    print(&quot;ZeroDivisionError reached Python:&quot;, e)</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>An extension module is C code that includes Python.h, defines functions taking and returning PyObject *, lists them in a PyMethodDef table, describes the module in a PyModuleDef, and exposes PyInit_name, which import calls. PyArg_ParseTuple converts the argument tuple using a format string (i, l, d, s, p, O, | for optional), setting TypeError or OverflowError on a mismatch. Reference counts are managed by hand: new references are owned and must be released (Py_DECREF) or passed on; borrowed references mustn&rsquo;t be released and must be Py_INCREFed to keep; some functions steal references. Errors set an exception and return NULL or -1, and every caller must check and pass it up. Release the GIL around long C work with Py_BEGIN_ALLOW_THREADS. Build with setuptools; the limited API gives abi3 wheels for many Python versions.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d1-parse" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Parsing arguments like C does</div><div class="pc-prompt"><p>Write <code>parse_args(fmt, args)</code>, a simplified <code>PyArg_ParseTuple</code> returning a list of converted values. Codes: <code>i</code> (an <code>int</code>, not a <code>bool</code> or <code>float</code>, from -2147483648 to 2147483647, otherwise <code>OverflowError("signed integer is out of range")</code>), <code>d</code> (an <code>int</code> or <code>float</code>, returned as <code>float</code>; <code>bool</code> counts as an <code>int</code>), <code>s</code> (a <code>str</code>), <code>p</code> (anything, converted with <code>bool</code>), and <code>O</code> (anything, unchanged). A <code>|</code> marks where optional arguments begin. Wrong counts raise <code>TypeError("expected N to M arguments, got K")</code> (or <code>"expected N arguments, got K"</code> when there&rsquo;s nothing optional); wrong types raise <code>TypeError</code> naming the code, like <code>"argument 2 must be d, not str"</code>.</p></div><textarea class="pc-src pc-code" hidden>def parse_args(fmt, args):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_parse():
+    &quot;PyArg_ParseTuple&quot;
+    assert parse_args(&quot;dd&quot;, (3, 4.5)) == [3.0, 4.5] and parse_args(&quot;s|ip&quot;, (&quot;tea&quot;,)) == [&quot;tea&quot;]
+    assert parse_args(&quot;s|ip&quot;, (&quot;tea&quot;, 2, [])) == [&quot;tea&quot;, 2, False] and parse_args(&quot;O&quot;, ([1],)) == [[1]]
+    assert parse_args(&quot;d&quot;, (True,)) == [1.0]
+    cases = [
+        (&quot;dd&quot;, (3,), TypeError, &quot;expected 2 arguments, got 1&quot;),
+        (&quot;s|i&quot;, (), TypeError, &quot;expected 1 to 2 arguments, got 0&quot;),
+        (&quot;di&quot;, (1.0, 2.5), TypeError, &quot;argument 2 must be i, not float&quot;),
+        (&quot;i&quot;, (True,), TypeError, &quot;argument 1 must be i, not bool&quot;),
+        (&quot;i&quot;, (2 ** 31,), OverflowError, &quot;signed integer is out of range&quot;),
+        (&quot;s&quot;, (b&quot;x&quot;,), TypeError, &quot;argument 1 must be s, not bytes&quot;),
+    ]
+    for fmt, args, err, message in cases:
+        try:
+            parse_args(fmt, args)
+            assert False, fmt
+        except err as e:
+            assert str(e) == message, str(e)</textarea><textarea class="pc-src pc-solution" hidden>def parse_args(fmt, args):
+    required, _, optional = fmt.partition(&quot;|&quot;)
+    codes = required + optional
+    low, high = len(required), len(codes)
+    if not low &lt;= len(args) &lt;= high:
+        expected = f&quot;{low}&quot; if low == high else f&quot;{low} to {high}&quot;
+        raise TypeError(f&quot;expected {expected} arguments, got {len(args)}&quot;)
+    out = []
+    for position, (code, value) in enumerate(zip(codes, args), 1):
+        wrong = TypeError(f&quot;argument {position} must be {code}, not {type(value).__name__}&quot;)
+        if code == &quot;i&quot;:
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise wrong
+            if not -2 ** 31 &lt;= value &lt; 2 ** 31:
+                raise OverflowError(&quot;signed integer is out of range&quot;)
+            out.append(value)
+        elif code == &quot;d&quot;:
+            if not isinstance(value, (int, float)):
+                raise wrong
+            out.append(float(value))
+        elif code == &quot;s&quot;:
+            if not isinstance(value, str):
+                raise wrong
+            out.append(value)
+        elif code == &quot;p&quot;:
+            out.append(bool(value))
+        elif code == &quot;O&quot;:
+            out.append(value)
+        else:
+            raise ValueError(f&quot;unknown format code {code}&quot;)
+    return out</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d1-refs" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Who owns this reference?</div><div class="pc-prompt"><p>Audit a sequence of simulated C API calls for reference counting mistakes. Each operation is a tuple: <code>("new", name)</code> (a function returned a new reference: we own one), <code>("borrow", name)</code> (we hold a borrowed reference: we own nothing), <code>("incref", name)</code>, <code>("decref", name)</code>, <code>("steal", name)</code> (we passed our reference to a function that steals it), and <code>("return", name)</code> (we return it to the caller, passing ownership). Write <code>audit(ops)</code>: a dict with <code>"leaks"</code> (sorted names we still own references to at the end, each once) and <code>"errors"</code> (a list, in order, of messages: <code>"decref of borrowed x"</code> when we <code>decref</code> or <code>steal</code> or <code>return</code> something we don&rsquo;t own).</p></div><textarea class="pc-src pc-code" hidden>def audit(ops):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_refs():
+    &quot;new, borrowed and stolen references&quot;
+    good = [(&quot;new&quot;, &quot;total&quot;), (&quot;new&quot;, &quot;label&quot;), (&quot;decref&quot;, &quot;label&quot;), (&quot;return&quot;, &quot;total&quot;)]
+    assert audit(good) == {&quot;leaks&quot;: [], &quot;errors&quot;: []}
+    leaky = [(&quot;new&quot;, &quot;a&quot;), (&quot;new&quot;, &quot;b&quot;), (&quot;new&quot;, &quot;a&quot;), (&quot;decref&quot;, &quot;a&quot;)]
+    assert audit(leaky) == {&quot;leaks&quot;: [&quot;a&quot;, &quot;b&quot;], &quot;errors&quot;: []}
+    wrong = [(&quot;borrow&quot;, &quot;item&quot;), (&quot;decref&quot;, &quot;item&quot;), (&quot;new&quot;, &quot;x&quot;), (&quot;steal&quot;, &quot;x&quot;), (&quot;decref&quot;, &quot;x&quot;)]
+    assert audit(wrong) == {&quot;leaks&quot;: [], &quot;errors&quot;: [&quot;decref of borrowed item&quot;, &quot;decref of borrowed x&quot;]}
+    kept = [(&quot;borrow&quot;, &quot;item&quot;), (&quot;incref&quot;, &quot;item&quot;), (&quot;return&quot;, &quot;item&quot;)]
+    assert audit(kept) == {&quot;leaks&quot;: [], &quot;errors&quot;: []}
+    assert audit([(&quot;borrow&quot;, &quot;y&quot;), (&quot;return&quot;, &quot;y&quot;)]) == {&quot;leaks&quot;: [], &quot;errors&quot;: [&quot;decref of borrowed y&quot;]}</textarea><textarea class="pc-src pc-solution" hidden>def audit(ops):
+    owned = {}
+    errors = []
+    for op, name in ops:
+        if op in (&quot;new&quot;, &quot;incref&quot;):
+            owned[name] = owned.get(name, 0) + 1
+        elif op == &quot;borrow&quot;:
+            owned.setdefault(name, 0)
+        elif op in (&quot;decref&quot;, &quot;steal&quot;, &quot;return&quot;):
+            if owned.get(name, 0) == 0:
+                errors.append(f&quot;decref of borrowed {name}&quot;)
+            else:
+                owned[name] -= 1
+    leaks = sorted(name for name, n in owned.items() if n &gt; 0)
+    return {&quot;leaks&quot;: leaks, &quot;errors&quot;: errors}</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d1-ctypes_fit" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Does it fit in C?</div><div class="pc-prompt"><p>C integers have fixed sizes (Week 65&rsquo;s NumPy pitfall, again). Using the table <code>LIMITS</code> of C type names, write <code>limits(ctype)</code>: the <code>(minimum, maximum)</code> of a signed type of <code>bits</code> bits (<code>-(2 ** (bits - 1))</code> to <code>2 ** (bits - 1) - 1</code>) or an unsigned one (<code>0</code> to <code>2 ** bits - 1</code>); <code>fits(value, ctype)</code>: True if a Python int fits; and <code>smallest_type(values)</code>: the first type in <code>ORDER</code> that every value fits in, or <code>None</code>.</p></div><textarea class="pc-src pc-code" hidden>LIMITS = {&quot;int8&quot;: (8, True), &quot;uint8&quot;: (8, False), &quot;int16&quot;: (16, True), &quot;uint16&quot;: (16, False),
+          &quot;int32&quot;: (32, True), &quot;uint32&quot;: (32, False), &quot;int64&quot;: (64, True), &quot;uint64&quot;: (64, False)}
+ORDER = [&quot;uint8&quot;, &quot;int8&quot;, &quot;uint16&quot;, &quot;int16&quot;, &quot;uint32&quot;, &quot;int32&quot;, &quot;uint64&quot;, &quot;int64&quot;]
+
+def limits(ctype):
+    ___
+
+def fits(value, ctype):
+    ___
+
+def smallest_type(values):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_fit():
+    &quot;C integer ranges&quot;
+    assert limits(&quot;int8&quot;) == (-128, 127) and limits(&quot;uint16&quot;) == (0, 65535) and limits(&quot;int64&quot;)[1] == 2 ** 63 - 1
+    assert fits(255, &quot;uint8&quot;) and not fits(256, &quot;uint8&quot;) and not fits(-1, &quot;uint32&quot;) and fits(-2 ** 31, &quot;int32&quot;)
+    assert smallest_type([0, 200]) == &quot;uint8&quot; and smallest_type([-5, 100]) == &quot;int8&quot; and smallest_type([-1, 200]) == &quot;int16&quot;
+    assert smallest_type([2 ** 70]) is None and smallest_type([]) == &quot;uint8&quot;</textarea><textarea class="pc-src pc-solution" hidden>LIMITS = {&quot;int8&quot;: (8, True), &quot;uint8&quot;: (8, False), &quot;int16&quot;: (16, True), &quot;uint16&quot;: (16, False),
+          &quot;int32&quot;: (32, True), &quot;uint32&quot;: (32, False), &quot;int64&quot;: (64, True), &quot;uint64&quot;: (64, False)}
+ORDER = [&quot;uint8&quot;, &quot;int8&quot;, &quot;uint16&quot;, &quot;int16&quot;, &quot;uint32&quot;, &quot;int32&quot;, &quot;uint64&quot;, &quot;int64&quot;]
+
+def limits(ctype):
+    bits, signed = LIMITS[ctype]
+    if signed:
+        return -(2 ** (bits - 1)), 2 ** (bits - 1) - 1
+    return 0, 2 ** bits - 1
+
+def fits(value, ctype):
+    low, high = limits(ctype)
+    return low &lt;= value &lt;= high
+
+def smallest_type(values):
+    for ctype in ORDER:
+        if all(fits(v, ctype) for v in values):
+            return ctype
+    return None</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d1-errors" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">The error convention</div><div class="pc-prompt"><p>Simulate the C API&rsquo;s way of reporting errors. <code>ErrorState</code> holds the current exception: <code>set(exc)</code>, <code>occurred()</code> (the exception or <code>None</code>) and <code>clear()</code>. Write <code>c_parse_int(text, state)</code>: return the integer, or set <code>ValueError(f"invalid literal: {text!r}")</code> and return <code>None</code> (C&rsquo;s <code>NULL</code>); <code>c_sum_parsed(texts, state)</code>: parse each with <code>c_parse_int</code>, <strong>checking every result</strong> and returning <code>None</code> at once (leaving the exception set) if one fails; and <code>to_python(func, *args)</code>: call a C-style function with a fresh <code>ErrorState</code> and either return its result or raise the exception it set. A function that returns <code>None</code> without setting an exception is itself a bug: raise <code>SystemError("error return without exception set")</code>, as CPython does.</p></div><textarea class="pc-src pc-code" hidden>class ErrorState:
+    def __init__(self):
+        ___
+
+def c_parse_int(text, state):
+    ___
+
+def c_sum_parsed(texts, state):
+    ___
+
+def to_python(func, *args):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_errors():
+    &quot;NULL plus a set exception&quot;
+    s = ErrorState()
+    assert c_parse_int(&quot;12&quot;, s) == 12 and s.occurred() is None
+    assert c_parse_int(&quot;x&quot;, s) is None and isinstance(s.occurred(), ValueError)
+    s.clear()
+    assert s.occurred() is None
+    assert to_python(c_sum_parsed, [&quot;1&quot;, &quot;2&quot;, &quot;3&quot;]) == 6
+    try:
+        to_python(c_sum_parsed, [&quot;1&quot;, &quot;oops&quot;, &quot;3&quot;])
+        assert False
+    except ValueError as e:
+        assert str(e) == &quot;invalid literal: &#x27;oops&#x27;&quot;
+    def careless(state):
+        return None
+    try:
+        to_python(careless)
+        assert False
+    except SystemError as e:
+        assert str(e) == &quot;error return without exception set&quot;</textarea><textarea class="pc-src pc-solution" hidden>class ErrorState:
+    def __init__(self):
+        self._exc = None
+
+    def set(self, exc):
+        self._exc = exc
+
+    def occurred(self):
+        return self._exc
+
+    def clear(self):
+        self._exc = None
+
+def c_parse_int(text, state):
+    try:
+        return int(text)
+    except ValueError:
+        state.set(ValueError(f&quot;invalid literal: {text!r}&quot;))
+        return None
+
+def c_sum_parsed(texts, state):
+    total = 0
+    for text in texts:
+        value = c_parse_int(text, state)
+        if value is None:
+            return None
+        total += value
+    return total
+
+def to_python(func, *args):
+    state = ErrorState()
+    result = func(*args, state)
+    if result is None:
+        exc = state.occurred()
+        if exc is None:
+            raise SystemError(&quot;error return without exception set&quot;)
+        raise exc
+    return result</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d1-methods" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Reading a method table</div><div class="pc-prompt"><p>Write <code>method_table(c_source)</code>: find the <code>PyMethodDef</code> entries in C source (lines like <code>{"hypot", fastmath_hypot, METH_VARARGS, "Doc."},</code>) with a regular expression, and return a list of dicts with <code>name</code>, <code>function</code>, <code>flags</code> (a list of the <code>METH_</code> flags, in order) and <code>doc</code> (the docstring, or <code>None</code> if it&rsquo;s <code>NULL</code>), stopping at the <code>{NULL, ...}</code> end marker. Then <code>module_name(c_source)</code>: the name from <code>PyInit_name</code>, or <code>None</code>.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+def method_table(c_source):
+    ___
+
+def module_name(c_source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_methods():
+    &quot;the parts of an extension module&quot;
+    src = &quot;&quot;&quot;
+static PyMethodDef geo_methods[] = {
+    {&quot;hypot&quot;, geo_hypot, METH_VARARGS, &quot;Length of the hypotenuse.&quot;},
+    {&quot;clamp&quot;, geo_clamp, METH_VARARGS | METH_KEYWORDS, NULL},
+    {&quot;origin&quot;, geo_origin, METH_NOARGS, &quot;The point (0, 0).&quot;},
+    {NULL, NULL, 0, NULL}
+};
+PyMODINIT_FUNC
+PyInit_geo(void)
+{
+    return PyModule_Create(&amp;geo_module);
+}
+&quot;&quot;&quot;
+    table = method_table(src)
+    assert [m[&quot;name&quot;] for m in table] == [&quot;hypot&quot;, &quot;clamp&quot;, &quot;origin&quot;]
+    assert table[1] == {&quot;name&quot;: &quot;clamp&quot;, &quot;function&quot;: &quot;geo_clamp&quot;, &quot;flags&quot;: [&quot;METH_VARARGS&quot;, &quot;METH_KEYWORDS&quot;], &quot;doc&quot;: None}
+    assert table[2][&quot;doc&quot;] == &quot;The point (0, 0).&quot; and module_name(src) == &quot;geo&quot;
+    assert method_table(&quot;int x;&quot;) == [] and module_name(&quot;int x;&quot;) is None</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+ENTRY = re.compile(r&#x27;\{\s*&quot;(\w+)&quot;\s*,\s*(\w+)\s*,\s*([\w\s|]+?)\s*,\s*(NULL|&quot;((?:[^&quot;\\]|\\.)*)&quot;)\s*\}&#x27;)
+
+def method_table(c_source):
+    out = []
+    for name, func, flags, doc_raw, doc in ENTRY.findall(c_source):
+        out.append({
+            &quot;name&quot;: name,
+            &quot;function&quot;: func,
+            &quot;flags&quot;: [f.strip() for f in flags.split(&quot;|&quot;)],
+            &quot;doc&quot;: None if doc_raw == &quot;NULL&quot; else doc,
+        })
+    return out
+
+def module_name(c_source):
+    m = re.search(r&quot;PyInit_(\w+)\s*\(&quot;, c_source)
+    return m.group(1) if m else None</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d1-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A leak in a loop</div><div class="pc-prompt"><p>Each pass through the loop gets a <strong>new</strong> reference to a temporary object and never releases it, so the audit finds a leak: this prints <code>['tmp']</code>. Release the temporary at the end of each pass so it prints <code>[]</code>.</p></div><textarea class="pc-src pc-code" hidden>owned = {}
+
+def new(name):
+    owned[name] = owned.get(name, 0) + 1
+
+def decref(name):
+    owned[name] -= 1
+
+for i in range(3):
+    new(&quot;tmp&quot;)
+    # ... use tmp ...
+
+print(sorted(n for n, c in owned.items() if c &gt; 0))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;release what you own&quot;
+    expect_output(&quot;[]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>owned = {}
+
+def new(name):
+    owned[name] = owned.get(name, 0) + 1
+
+def decref(name):
+    owned[name] -= 1
+
+for i in range(3):
+    new(&quot;tmp&quot;)
+    # ... use tmp ...
+    decref(&quot;tmp&quot;)
+
+print(sorted(n for n, c in owned.items() if c &gt; 0))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d1-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A float where C wanted an int</div><div class="pc-prompt"><p>The format string says <code>i</code> for an argument that&rsquo;s meant to be a price in pounds, which can have pence, so passing <code>2.5</code> fails with <code>TypeError</code>. The C function really wants a <code>double</code>: use <code>d</code> so this prints <code>[2.5, 3]</code>.</p></div><textarea class="pc-src pc-code" hidden>def parse(fmt, args):
+    out = []
+    for code, value in zip(fmt, args):
+        if code == &quot;i&quot; and not isinstance(value, int):
+            raise TypeError(f&quot;&#x27;{type(value).__name__}&#x27; object cannot be interpreted as an integer&quot;)
+        out.append(float(value) if code == &quot;d&quot; else value)
+    return out
+
+print(parse(&quot;ii&quot;, (2.5, 3)))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the right format code&quot;
+    expect_output(&quot;[2.5, 3]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def parse(fmt, args):
+    out = []
+    for code, value in zip(fmt, args):
+        if code == &quot;i&quot; and not isinstance(value, int):
+            raise TypeError(f&quot;&#x27;{type(value).__name__}&#x27; object cannot be interpreted as an integer&quot;)
+        out.append(float(value) if code == &quot;d&quot; else value)
+    return out
+
+print(parse(&quot;di&quot;, (2.5, 3)))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d1-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">An error ignored</div><div class="pc-prompt"><p><code>c_total</code> calls a C-style helper that returns <code>None</code> (NULL) on failure, but doesn&rsquo;t check the result, so it carries on with <code>None</code> and crashes later with a confusing <code>TypeError</code> instead of the real problem. Check the result and return <code>None</code> at once, so the caller sees the real error and this prints <code>ValueError: bad value: 'x'</code>.</p></div><textarea class="pc-src pc-code" hidden>error = []
+
+def c_value(text):
+    if not text.isdigit():
+        error.append(ValueError(f&quot;bad value: {text!r}&quot;))
+        return None
+    return int(text)
+
+def c_total(texts):
+    total = 0
+    for t in texts:
+        total += c_value(t)
+    return total
+
+result = c_total([&quot;1&quot;, &quot;x&quot;])
+if result is None:
+    print(f&quot;{type(error[0]).__name__}: {error[0]}&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;check every result&quot;
+    expect_output(&quot;ValueError: bad value: &#x27;x&#x27;&quot;)</textarea><textarea class="pc-src pc-solution" hidden>error = []
+
+def c_value(text):
+    if not text.isdigit():
+        error.append(ValueError(f&quot;bad value: {text!r}&quot;))
+        return None
+    return int(text)
+
+def c_total(texts):
+    total = 0
+    for t in texts:
+        value = c_value(t)
+        if value is None:
+            return None
+        total += value
+    return total
+
+result = c_total([&quot;1&quot;, &quot;x&quot;])
+if result is None:
+    print(f&quot;{type(error[0]).__name__}: {error[0]}&quot;)</textarea></div>
+<div class="parsons" data-id="w068d1-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A C function&rsquo;s body</div><div class="pc-prompt"><p>Arrange the lines of the body of a C extension function that adds two doubles (as you&rsquo;d write it in C). One line is a trap.</p></div><script type="application/json">{"lines": ["double a, b;", "if (!PyArg_ParseTuple(args, \"dd\", &a, &b))", "    return NULL;", "return PyFloat_FromDouble(a + b);"], "distractors": ["    return 0;"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d1-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the format code for a C double
+q = ___   # what a C API function returning PyObject * returns on failure, as a string
+r = ___   # &quot;new&quot; or &quot;borrowed&quot;: the reference PyList_GetItem returns
+s = ___   # True or False: you must Py_DECREF a borrowed reference when you&#x27;re done with it
+t = ___   # the C function import calls to create a module named fastmath</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;d&quot; and q == &quot;NULL&quot; and r == &quot;borrowed&quot;, &quot;p, q and r&quot;
+    assert s is False and t == &quot;PyInit_fastmath&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;d&quot;
+q = &quot;NULL&quot;
+r = &quot;borrowed&quot;
+s = False
+t = &quot;PyInit_fastmath&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w068d1-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What is an extension module?", "answer": 1, "explain": "import calls its PyInit function.", "options": ["A Python file", "A compiled library written against the C API that imports like a module", "A package", "A wheel"]}, {"type": "mc", "q": "What does PyArg_ParseTuple do?", "answer": 1, "explain": "And sets TypeError on a mismatch.", "options": ["Parses source code", "Converts the argument tuple into C values using a format string", "Builds tuples", "Imports modules"]}, {"type": "mc", "q": "What does the format string &ldquo;s|i&rdquo; mean?", "answer": 1, "explain": "| starts the optional arguments.", "options": ["Two strings", "A required str, then an optional int", "A str or an int", "A list"]}, {"type": "mc", "q": "What must you do with a new reference?", "answer": 1, "explain": "Otherwise it leaks.", "options": ["Nothing", "Release it with Py_DECREF, or pass ownership on (for example by returning it)", "Py_INCREF it", "Free it with free()"]}, {"type": "mc", "q": "What happens if you Py_DECREF a borrowed reference?", "answer": 1, "explain": "You don&rsquo;t own it.", "options": ["Nothing", "The object may be freed while its real owner still uses it: a crash later", "A TypeError", "A leak"]}, {"type": "mc", "q": "What does a function that steals a reference do?", "answer": 1, "explain": "PyList_SetItem and PyTuple_SetItem steal.", "options": ["Copies the object", "Takes over your ownership, so you mustn&rsquo;t release it afterwards", "Leaks", "Raises"]}, {"type": "mc", "q": "How does C code report an error to Python?", "answer": 1, "explain": "Every caller checks and passes it up.", "options": ["By printing", "It sets an exception and returns NULL (or -1)", "By calling exit()", "It can&rsquo;t"]}, {"type": "mc", "q": "Why release the GIL in C code?", "answer": 1, "explain": "Py_BEGIN_ALLOW_THREADS.", "options": ["Speed of the C code itself", "So other Python threads can run during long work that doesn&rsquo;t touch Python objects", "To avoid errors", "It&rsquo;s required"]}, {"type": "mc", "q": "What does the limited API give you?", "answer": 1, "explain": "At the cost of a smaller API.", "options": ["Faster code", "A stable ABI: one compiled abi3 wheel works on later Python 3 versions", "More functions", "No reference counting"]}, {"type": "output", "q": "What does this print?", "answer": "builtin_function_or_method function", "explain": "One written in C, one in Python.", "code": "import math\nprint(type(math.sqrt).__name__, type(lambda: 0).__name__)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d1-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a pretend extension module</div><div class="pc-prompt"><p>Put today&rsquo;s rules together in a simulation of what an extension module gives Python. Write <code>extension(name, doc, methods)</code>, which returns a real module object (<code>types.ModuleType</code>) whose functions behave like C functions:</p>
+<ul>
+<li><code>methods</code> is a list of <code>(python_name, format, implementation, docstring)</code>. <code>implementation(*c_values, state)</code> is a &ldquo;C function&rdquo;: it receives the values <code>parse_args</code> produced and an <code>ErrorState</code>, and returns a result or <code>None</code> after setting an exception.</li>
+<li>Each module function parses its positional arguments with <code>parse_args(format, args)</code> (copy your version from the first exercise, keeping its errors), calls the implementation, and turns <code>None</code> plus an exception into a raised exception (or <code>SystemError("error return without exception set")</code> when no exception was set). Keyword arguments raise <code>TypeError(f"{python_name}() takes no keyword arguments")</code>, as <code>METH_VARARGS</code> functions do.</li>
+<li>Each function&rsquo;s <code>__name__</code> and <code>__doc__</code> come from the table; the module&rsquo;s <code>__doc__</code> is <code>doc</code>, and <code>module.__methods__</code> lists the names in order.</li>
+<li><code>calls(module)</code> returns a dict from each function name to how many times it has been called successfully.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import types
+
+class ErrorState:
+    def __init__(self):
+        self._exc = None
+    def set(self, exc):
+        self._exc = exc
+    def occurred(self):
+        return self._exc
+
+def parse_args(fmt, args):
+    ___
+
+def extension(name, doc, methods):
+    ___
+
+def calls(module):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_extension():
+    &quot;a module of C-style functions&quot;
+    import math
+    def c_hypot(x, y, state):
+        return math.sqrt(x * x + y * y)
+    def c_divide(a, b, state):
+        if b == 0:
+            state.set(ZeroDivisionError(&quot;division by zero&quot;))
+            return None
+        return a / b
+    def c_broken(state):
+        return None
+    geo = extension(&quot;geo&quot;, &quot;Geometry helpers.&quot;, [
+        (&quot;hypot&quot;, &quot;dd&quot;, c_hypot, &quot;Length of the hypotenuse.&quot;),
+        (&quot;divide&quot;, &quot;dd&quot;, c_divide, &quot;Divide two numbers.&quot;),
+        (&quot;broken&quot;, &quot;&quot;, c_broken, None),
+    ])
+    assert geo.__name__ == &quot;geo&quot; and geo.__doc__ == &quot;Geometry helpers.&quot; and geo.__methods__ == [&quot;hypot&quot;, &quot;divide&quot;, &quot;broken&quot;]
+    assert geo.hypot(3, 4) == 5.0 and geo.hypot.__name__ == &quot;hypot&quot; and geo.hypot.__doc__ == &quot;Length of the hypotenuse.&quot;
+    assert geo.divide(1, 4) == 0.25
+    for call, err, message in [(lambda: geo.divide(1, 0), ZeroDivisionError, &quot;division by zero&quot;),
+                               (lambda: geo.hypot(3), TypeError, &quot;expected 2 arguments, got 1&quot;),
+                               (lambda: geo.hypot(&quot;3&quot;, 4), TypeError, &quot;argument 1 must be d, not str&quot;),
+                               (lambda: geo.hypot(x=3, y=4), TypeError, &quot;hypot() takes no keyword arguments&quot;),
+                               (lambda: geo.broken(), SystemError, &quot;error return without exception set&quot;)]:
+        try:
+            call()
+            assert False
+        except err as e:
+            assert str(e) == message
+    assert calls(geo) == {&quot;hypot&quot;: 1, &quot;divide&quot;: 1, &quot;broken&quot;: 0}</textarea><textarea class="pc-src pc-solution" hidden>import types
+
+class ErrorState:
+    def __init__(self):
+        self._exc = None
+    def set(self, exc):
+        self._exc = exc
+    def occurred(self):
+        return self._exc
+
+def parse_args(fmt, args):
+    required, _, optional = fmt.partition(&quot;|&quot;)
+    codes = required + optional
+    low, high = len(required), len(codes)
+    if not low &lt;= len(args) &lt;= high:
+        expected = f&quot;{low}&quot; if low == high else f&quot;{low} to {high}&quot;
+        raise TypeError(f&quot;expected {expected} arguments, got {len(args)}&quot;)
+    out = []
+    for position, (code, value) in enumerate(zip(codes, args), 1):
+        wrong = TypeError(f&quot;argument {position} must be {code}, not {type(value).__name__}&quot;)
+        if code == &quot;i&quot;:
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise wrong
+            if not -2 ** 31 &lt;= value &lt; 2 ** 31:
+                raise OverflowError(&quot;signed integer is out of range&quot;)
+            out.append(value)
+        elif code == &quot;d&quot;:
+            if not isinstance(value, (int, float)):
+                raise wrong
+            out.append(float(value))
+        elif code == &quot;s&quot;:
+            if not isinstance(value, str):
+                raise wrong
+            out.append(value)
+        elif code == &quot;p&quot;:
+            out.append(bool(value))
+        else:
+            out.append(value)
+    return out
+
+def extension(name, doc, methods):
+    module = types.ModuleType(name, doc)
+    module._calls = {}
+    module.__methods__ = []
+
+    def make(python_name, fmt, implementation, docstring):
+        def wrapper(*args, **kwargs):
+            if kwargs:
+                raise TypeError(f&quot;{python_name}() takes no keyword arguments&quot;)
+            values = parse_args(fmt, args)
+            state = ErrorState()
+            result = implementation(*values, state)
+            if result is None:
+                exc = state.occurred()
+                if exc is None:
+                    raise SystemError(&quot;error return without exception set&quot;)
+                raise exc
+            module._calls[python_name] += 1
+            return result
+        wrapper.__name__ = wrapper.__qualname__ = python_name
+        wrapper.__doc__ = docstring
+        return wrapper
+
+    for python_name, fmt, implementation, docstring in methods:
+        module._calls[python_name] = 0
+        module.__methods__.append(python_name)
+        setattr(module, python_name, make(python_name, fmt, implementation, docstring))
+    return module
+
+def calls(module):
+    return dict(module._calls)</textarea><template class="pc-src pc-hint">Build each wrapper in a helper function (so each closure gets its own implementation, Week 60), and keep the call counts in a dict stored on the module, for example as <code>module._calls</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, if you have a C compiler (on Linux and macOS you probably do; on Windows, the free &ldquo;Build Tools for Visual Studio&rdquo;), save the <code>fastmath.c</code> module above, add a <code>setup.py</code> with <code>setuptools.setup(ext_modules=[setuptools.Extension("fastmath", ["fastmath.c"])])</code>, and run <code>pip install .</code>. Tomorrow: calling C libraries directly from Python, with no C code of your own, using <code>ctypes</code>.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w067d6.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w068d2.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w068d1", "week": 68, "day": 1, "title": "The C API: an overview", "exercises": [{"id": "w068d1-parse", "title": "Parsing arguments like C does", "points": 15}, {"id": "w068d1-refs", "title": "Who owns this reference?", "points": 15}, {"id": "w068d1-ctypes_fit", "title": "Does it fit in C?", "points": 10}, {"id": "w068d1-errors", "title": "The error convention", "points": 10}, {"id": "w068d1-methods", "title": "Reading a method table", "points": 10}, {"id": "w068d1-bug1", "title": "A leak in a loop", "points": 10}, {"id": "w068d1-bug2", "title": "A float where C wanted an int", "points": 10}, {"id": "w068d1-bug3", "title": "An error ignored", "points": 10}, {"id": "w068d1-trace", "title": "Predict them", "points": 10}, {"id": "w068d1-challenge", "title": "Challenge: a pretend extension module", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

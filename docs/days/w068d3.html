@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 68 Day 3: Cython | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Writing C by hand (Monday) is slow and error-prone; calling existing C (Tuesday) only helps if the C already exists. Cython sits in between: it’s a language...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w068d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 68 Day 3: Cython">
+<meta property="og:description" content="Writing C by hand (Monday) is slow and error-prone; calling existing C (Tuesday) only helps if the C already exists. Cython sits in between: it’s a language...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w068d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-68">Week 68: Extending Python</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#what-cython-is" data-sec="what-cython-is">What Cython is</a></li><li><a href="#adding-types" data-sec="adding-types">Adding types</a></li><li><a href="#what-stays-slow" data-sec="what-stays-slow">What stays slow</a></li><li><a href="#memoryviews-and-the-buffer-protocol" data-sec="memoryviews-and-the-buffer-protocol">Memoryviews and the buffer protocol</a></li><li><a href="#c-semantics-and-nogil" data-sec="c-semantics-and-nogil">C semantics and nogil</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w068d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-68">Week 68: Extending Python</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 68, Day 3</span></p>
+      <h1>Cython</h1>
+      <div class="day-intro"><p>Writing C by hand (Monday) is slow and error-prone; calling existing C (Tuesday) only helps if the C already exists. <strong>Cython</strong> sits in between: it&rsquo;s a language that looks like Python with optional C type declarations, compiled to C and then to an extension module. Plain Python code compiles and runs a little faster; code with <strong>types</strong> on its hot variables can run at C speed, because Cython turns it into plain C arithmetic with no Python objects involved. Many important libraries are partly written in it (pandas, scikit-learn, parts of SciPy). Cython needs a C compiler, so the Cython code today is for your own computer; the exercises practise the decisions it asks you to make: which code to type, which Python features stop it going fast, and how C&rsquo;s numbers differ from Python&rsquo;s.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain what Cython does, from .pyx source to an extension module</li><li>Add C types with cdef and cpdef, and in pure-Python mode with annotations</li><li>Recognise the Python features that keep code slow, and read Cython&rsquo;s annotation report</li><li>Use typed memoryviews and the buffer protocol, which memoryview shows in Python</li><li>Allow for C arithmetic - fixed-size integers, division and the GIL with nogil</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="What Cython is: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Adding types: 25 min"></span><span class="plan-seg s1" style="flex:20" title="What stays slow: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Memoryviews and the buffer protocol: 20 min"></span><span class="plan-seg s1" style="flex:20" title="C semantics and nogil: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">What Cython is</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Adding types</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">What stays slow</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Memoryviews and the buffer protocol</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">C semantics and nogil</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w068d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w068d3.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w068d3-p1"><textarea class="pc-src pc-code" hidden>import ctypes
+
+python_total = 0
+c_total = ctypes.c_int32(0)
+for _ in range(3):
+    python_total += 1_000_000_000
+    c_total.value += 1_000_000_000
+
+print(python_total)
+print(c_total.value)
+print(-7 // 2, int(-7 / 2))</textarea></div>
+<p>Python integers never overflow; a 32-bit C <code>int</code> does, silently wrapping round to a negative number. And Python&rsquo;s <code>//</code> rounds down (towards minus infinity) while C&rsquo;s integer division rounds towards zero. When Cython turns your Python into C for speed, these are the differences you have to keep in mind.</p>
+<h2 id="what-cython-is">What Cython is</h2>
+<p>You write a <code>.pyx</code> file in the Cython language, a superset of Python. The <code>cython</code> compiler translates it to a C file that uses the C API (Monday&rsquo;s reference counting, argument parsing and error handling, all generated correctly for you), and your C compiler turns that into an extension module you <code>import</code>.</p>
+<pre><code># primes.pyx
+def count_primes(int limit):          # the argument is a C int
+    cdef int n, d, count = 0          # C locals: no Python objects
+    cdef bint is_prime
+    for n in range(2, limit):
+        is_prime = True
+        d = 2
+        while d * d &lt;= n:
+            if n % d == 0:
+                is_prime = False
+                break
+            d += 1
+        if is_prime:
+            count += 1
+    return count
+</code></pre>
+<p>Build it, on your own computer, with <code>pip install cython</code> and a <code>setup.py</code> containing <code>from Cython.Build import cythonize</code> and <code>setup(ext_modules=cythonize("primes.pyx"))</code>, then <code>pip install .</code>; or try it in a notebook with the <code>%%cython</code> cell magic. With the types, the loops become plain C and the function is typically tens of times faster than the Python version. Without any types, the same file still compiles, and is usually only modestly faster, because every operation still works on Python objects.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d3-e2"><textarea class="pc-src pc-code" hidden>import time
+
+def count_primes(limit):
+    count = 0
+    for n in range(2, limit):
+        d, is_prime = 2, True
+        while d * d &lt;= n:
+            if n % d == 0:
+                is_prime = False
+                break
+            d += 1
+        count += is_prime
+    return count
+
+start = time.perf_counter()
+print(count_primes(5000))
+print(&quot;pure Python took&quot;, &quot;under&quot; if time.perf_counter() - start &lt; 5 else &quot;over&quot;, &quot;5 seconds here; Cython with types would take a few milliseconds&quot;)</textarea></div>
+<h2 id="adding-types">Adding types</h2>
+<p>Cython has three kinds of function and a way to type variables:</p>
+<ul>
+<li><strong><code>def</code></strong>: an ordinary Python function, callable from Python. Its typed arguments are converted on entry (<code>def f(int n)</code> raises <code>TypeError</code> or <code>OverflowError</code> for bad values, just as <code>PyArg_ParseTuple</code> would).</li>
+<li><strong><code>cdef</code></strong>: a C function, callable only from Cython code, with no Python call overhead: <code>cdef double square(double x): return x * x</code>.</li>
+<li><strong><code>cpdef</code></strong>: both: a fast C version for Cython callers and a Python wrapper for everyone else.</li>
+<li><strong><code>cdef</code> variables</strong>: <code>cdef int i</code>, <code>cdef double total = 0</code>, <code>cdef list items</code> (a typed Python object), <code>cdef int[:] view</code> (a typed memoryview).</li>
+</ul>
+<p>C types to know: <code>int</code>, <code>long</code>, <code>long long</code>, <code>double</code>, <code>float</code>, <code>bint</code> (a C int used as a bool), <code>size_t</code>, <code>Py_ssize_t</code> (the right type for indices and lengths), and <code>char *</code>.</p>
+<p><strong>Pure-Python mode</strong> puts the same information in normal Python syntax, so the file stays valid Python and still runs (slowly) without compiling:</p>
+<pre><code>import cython
+
+@cython.cfunc
+def square(x: cython.double) -&gt; cython.double:
+    return x * x
+
+def total(n: cython.int) -&gt; cython.double:
+    i: cython.int
+    acc: cython.double = 0
+    for i in range(n):
+        acc += square(i)
+    return acc
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w068d3-e3"><textarea class="pc-src pc-code" hidden>TYPE_MAP = {&quot;int&quot;: &quot;long&quot;, &quot;float&quot;: &quot;double&quot;, &quot;bool&quot;: &quot;bint&quot;, &quot;str&quot;: &quot;str&quot;, &quot;bytes&quot;: &quot;bytes&quot;}
+
+def cython_signature(name, params, returns, kind=&quot;cpdef&quot;):
+    &quot;Translate Python annotations into a Cython signature.&quot;
+    args = &quot;, &quot;.join(f&quot;{TYPE_MAP.get(t, &#x27;object&#x27;)} {p}&quot; for p, t in params)
+    return f&quot;{kind} {TYPE_MAP.get(returns, &#x27;object&#x27;)} {name}({args}):&quot;
+
+print(cython_signature(&quot;area&quot;, [(&quot;w&quot;, &quot;float&quot;), (&quot;h&quot;, &quot;float&quot;)], &quot;float&quot;))
+print(cython_signature(&quot;count&quot;, [(&quot;items&quot;, &quot;list&quot;), (&quot;limit&quot;, &quot;int&quot;)], &quot;int&quot;, kind=&quot;cdef&quot;))</textarea></div>
+<h2 id="what-stays-slow">What stays slow</h2>
+<p>Cython speeds up code by replacing Python operations with C ones. It can only do that where it <strong>knows the types</strong>. Anything it can&rsquo;t type stays a Python operation, as slow as in Python (or a little faster, since the interpreter loop is skipped). Typical causes:</p>
+<ul>
+<li><strong>Untyped variables in hot loops</strong>: <code>total = 0</code> without <code>cdef</code> stays a Python int.</li>
+<li><strong>Calls to Python functions and methods</strong> inside the loop (<code>items.append</code>, <code>math.sqrt</code> on objects, your own <code>def</code> functions): each is a full Python call. Use <code>cdef</code> functions and C library functions (<code>from libc.math cimport sqrt</code>).</li>
+<li><strong>Python containers</strong>: indexing a <code>list</code> or <code>dict</code> works on objects. Use typed memoryviews or C arrays for numeric data.</li>
+<li><strong>Dynamic features</strong>: <code>*args</code>, <code>**kwargs</code>, <code>getattr</code> with computed names, <code>eval</code>, closures, generators. They work, but at Python speed.</li>
+</ul>
+<p>The tool for finding these is <strong><code>cython -a file.pyx</code></strong>, which writes an HTML <strong>annotation report</strong>: each line is shaded yellow according to how much it interacts with Python, and clicking a line shows the generated C. The goal is white lines inside the hot loops; yellow elsewhere doesn&rsquo;t matter. (Profile first, Week 65: only the hot loops need this attention.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d3-e4"><textarea class="pc-src pc-code" hidden>import ast
+
+DYNAMIC_CALLS = {&quot;eval&quot;, &quot;exec&quot;, &quot;getattr&quot;, &quot;setattr&quot;, &quot;globals&quot;, &quot;locals&quot;}
+
+def slow_spots(source):
+    found = []
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in DYNAMIC_CALLS:
+            found.append((node.lineno, f&quot;{node.func.id}()&quot;))
+        elif isinstance(node, (ast.Yield, ast.YieldFrom)):
+            found.append((node.lineno, &quot;generator&quot;))
+        elif isinstance(node, ast.Lambda):
+            found.append((node.lineno, &quot;lambda&quot;))
+    return sorted(found)
+
+code = &quot;def f(obj, name):\n    key = getattr(obj, name)\n    return sorted(obj, key=lambda x: x[key])\n&quot;
+print(slow_spots(code))</textarea></div>
+<h2 id="memoryviews-and-the-buffer-protocol">Memoryviews and the buffer protocol</h2>
+<p>Numeric data in Python usually lives in a <strong>buffer</strong>: a block of raw memory inside a <code>bytes</code>, <code>bytearray</code>, <code>array.array</code>, NumPy array, or a C library&rsquo;s memory. The <strong>buffer protocol</strong> lets code see that memory directly, without copying, along with its element <strong>format</strong> (<code>"d"</code> for doubles, <code>"i"</code> for ints, <code>"B"</code> for unsigned bytes), item size and shape.</p>
+<p>In Python, <strong><code>memoryview(obj)</code></strong> gives that direct view: slicing it doesn&rsquo;t copy, writing through it changes the original, and <code>.cast("i")</code> reinterprets the bytes as another format. In Cython, a <strong>typed memoryview</strong> such as <code>double[:] values</code> does the same at C speed: <code>values[i]</code> compiles to a plain memory access, which is why Cython code that takes NumPy arrays as <code>double[:]</code> arguments runs so fast.</p>
+<pre><code>def scale(double[:] values, double factor):
+    cdef Py_ssize_t i
+    for i in range(values.shape[0]):
+        values[i] *= factor            # plain C: no Python objects
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w068d3-e5"><textarea class="pc-src pc-code" hidden>from array import array
+
+readings = array(&quot;d&quot;, [1.5, 2.5, 4.0])
+view = memoryview(readings)
+print(view.format, view.itemsize, view.nbytes, view.tolist())
+view[1] = 9.0                         # writes into the array: no copy
+print(readings.tolist())
+
+raw = bytearray(8)
+as_ints = memoryview(raw).cast(&quot;i&quot;)   # the same 8 bytes, seen as two C ints
+as_ints[0] = 258
+print(as_ints.tolist(), list(raw[:4]))
+
+part = view[1:]                        # a slice is another view, not a copy
+part[0] = 0.0
+print(readings.tolist(), part.obj is readings)</textarea></div>
+<h2 id="c-semantics-and-nogil">C semantics and nogil</h2>
+<p>Typed Cython code follows <strong>C&rsquo;s rules</strong>, not Python&rsquo;s:</p>
+<ul>
+<li><strong>Fixed-size integers overflow</strong> silently (the warm-up), so choose <code>long long</code> or check ranges; Cython&rsquo;s <code>overflowcheck</code> directive can catch it, at some cost.</li>
+<li><strong>Division</strong>: by default Cython keeps Python&rsquo;s semantics for <code>//</code> and <code>%</code> on C integers (rounding down, and raising <code>ZeroDivisionError</code>), at a small cost. With the directive <code>cdivision=True</code>, it uses C&rsquo;s: rounding towards zero, a remainder with the sign of the dividend, and no check for zero (a crash instead).</li>
+<li><strong>Index checking</strong>: memoryview indexing checks bounds and allows negative indices unless you turn that off with <code>boundscheck(False)</code> and <code>wraparound(False)</code>, which is faster and unsafe.</li>
+</ul>
+<p>And because typed code needn&rsquo;t touch Python objects, it can <strong>release the GIL</strong> (Week 66): <code>with nogil:</code> around such a block lets other threads run Python meanwhile, and <code>prange</code> from <code>cython.parallel</code> runs a loop&rsquo;s iterations on several cores with OpenMP. That&rsquo;s how Cython code gets real parallelism inside one process.</p>
+<div class="pc pc-example" data-kind="example" data-id="w068d3-e6"><textarea class="pc-src pc-code" hidden>def c_div(a, b):
+    &quot;C&#x27;s integer division: truncate towards zero.&quot;
+    q = abs(a) // abs(b)
+    return q if (a &gt;= 0) == (b &gt;= 0) else -q
+
+def c_mod(a, b):
+    return a - b * c_div(a, b)
+
+for a, b in [(7, 2), (-7, 2), (7, -2)]:
+    print(f&quot;{a:3} / {b:2}: Python {a // b:2} remainder {a % b:2}   C {c_div(a, b):2} remainder {c_mod(a, b):2}&quot;)</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Cython compiles a Python superset (.pyx, or plain Python in pure-Python mode) to C that uses the C API correctly, then to an extension module; untyped code runs modestly faster, typed hot loops run at C speed. def functions are Python-callable, cdef functions are C-only and fast, cpdef gives both; cdef declares C variables (int, double, bint, Py_ssize_t) and typed objects. Untyped variables, Python calls, Python containers and dynamic features stay slow; cython -a shades lines by Python interaction. The buffer protocol shares raw memory without copying (memoryview in Python, typed memoryviews like double[:] in Cython). Typed code follows C rules: integers overflow, cdivision truncates and skips zero checks, boundscheck and wraparound can be turned off; with nogil releases the GIL and prange runs loops in parallel.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d3-signature" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">From annotations to Cython</div><div class="pc-prompt"><p>Write <code>to_cython(source)</code>: for every function in some Python source whose parameters and return are annotated, produce its Cython signature line, mapping annotations with <code>C_TYPES</code> (<code>int</code> to <code>long</code>, <code>float</code> to <code>double</code>, <code>bool</code> to <code>bint</code>, anything else, or no annotation, to <code>object</code>): functions whose names start with <code>_</code> become <code>cdef</code>, the others <code>cpdef</code>. Return the list of lines like <code>cpdef double area(double w, double h):</code>, in source order. Then <code>needs_wrapper(line)</code>: True for <code>cpdef</code> and <code>def</code> lines (Python can call them), False for <code>cdef</code>.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+C_TYPES = {&quot;int&quot;: &quot;long&quot;, &quot;float&quot;: &quot;double&quot;, &quot;bool&quot;: &quot;bint&quot;}
+
+def to_cython(source):
+    ___
+
+def needs_wrapper(line):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_signature():
+    &quot;Cython signatures&quot;
+    src = (
+        &quot;def area(w: float, h: float) -&gt; float:\n    return w * h\n&quot;
+        &quot;def _square(x: int) -&gt; int:\n    return x * x\n&quot;
+        &quot;def label(name: str, n) -&gt; str:\n    return name * n\n&quot;
+        &quot;def flag(ok: bool) -&gt; bool:\n    return not ok\n&quot;
+    )
+    assert to_cython(src) == [
+        &quot;cpdef double area(double w, double h):&quot;,
+        &quot;cdef long _square(long x):&quot;,
+        &quot;cpdef object label(object name, object n):&quot;,
+        &quot;cpdef bint flag(bint ok):&quot;,
+    ]
+    assert to_cython(&quot;x = 1&quot;) == []
+    assert needs_wrapper(&quot;cpdef double area(double w):&quot;) and not needs_wrapper(&quot;cdef long f(long x):&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+C_TYPES = {&quot;int&quot;: &quot;long&quot;, &quot;float&quot;: &quot;double&quot;, &quot;bool&quot;: &quot;bint&quot;}
+
+def _ctype(annotation):
+    if isinstance(annotation, ast.Name):
+        return C_TYPES.get(annotation.id, &quot;object&quot;)
+    return &quot;object&quot;
+
+def to_cython(source):
+    lines = []
+    for node in ast.parse(source).body:
+        if isinstance(node, ast.FunctionDef):
+            kind = &quot;cdef&quot; if node.name.startswith(&quot;_&quot;) else &quot;cpdef&quot;
+            params = &quot;, &quot;.join(f&quot;{_ctype(a.annotation)} {a.arg}&quot; for a in node.args.args)
+            lines.append(f&quot;{kind} {_ctype(node.returns)} {node.name}({params}):&quot;)
+    return lines
+
+def needs_wrapper(line):
+    return line.startswith((&quot;cpdef &quot;, &quot;def &quot;))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d3-slowspots" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Finding what stays slow</div><div class="pc-prompt"><p>Write <code>slow_features(source)</code>: a sorted list of <code>(line, feature)</code> pairs for the Python features inside functions that keep Cython from compiling code to plain C: <code>"*args"</code> and <code>"**kwargs"</code> parameters (reported on the <code>def</code> line), <code>"generator"</code> (any <code>yield</code>), <code>"lambda"</code>, <code>"closure"</code> (a function defined inside another function), and <code>"dynamic call"</code> for calls to <code>eval</code>, <code>exec</code>, <code>getattr</code> or <code>setattr</code>. Then <code>is_simple(source)</code>: True if there are none.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def slow_features(source):
+    ___
+
+def is_simple(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_slowspots():
+    &quot;dynamic features&quot;
+    src = (
+        &quot;def total(*values, **options):\n&quot;
+        &quot;    key = getattr(options, &#x27;key&#x27;, None)\n&quot;
+        &quot;    def inner(x):\n&quot;
+        &quot;        return x * 2\n&quot;
+        &quot;    return sorted(values, key=lambda v: v)\n&quot;
+        &quot;def stream(n):\n&quot;
+        &quot;    for i in range(n):\n&quot;
+        &quot;        yield i\n&quot;
+        &quot;def plain(a, b):\n&quot;
+        &quot;    return a * b + 1\n&quot;
+    )
+    assert slow_features(src) == [(1, &quot;**kwargs&quot;), (1, &quot;*args&quot;), (2, &quot;dynamic call&quot;), (3, &quot;closure&quot;), (5, &quot;lambda&quot;), (8, &quot;generator&quot;)]
+    assert is_simple(&quot;def plain(a, b):\n    return a * b + 1\n&quot;) and not is_simple(src)</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+DYNAMIC = {&quot;eval&quot;, &quot;exec&quot;, &quot;getattr&quot;, &quot;setattr&quot;}
+
+def slow_features(source):
+    found = set()
+    for func in ast.walk(ast.parse(source)):
+        if not isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        if func.args.vararg:
+            found.add((func.lineno, &quot;*args&quot;))
+        if func.args.kwarg:
+            found.add((func.lineno, &quot;**kwargs&quot;))
+        for node in ast.walk(func):
+            if node is not func and isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                found.add((node.lineno, &quot;closure&quot;))
+            elif isinstance(node, (ast.Yield, ast.YieldFrom)):
+                found.add((node.lineno, &quot;generator&quot;))
+            elif isinstance(node, ast.Lambda):
+                found.add((node.lineno, &quot;lambda&quot;))
+            elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in DYNAMIC:
+                found.add((node.lineno, &quot;dynamic call&quot;))
+    return sorted(found)
+
+def is_simple(source):
+    return not slow_features(source)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d3-views" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The buffer protocol</div><div class="pc-prompt"><p>Using <code>memoryview</code> (no copying of the data), write <code>total(buffer)</code>: the sum of a buffer of numbers (an <code>array.array</code> or anything supporting the buffer protocol with a numeric format); <code>scale_in_place(buffer, factor)</code>: multiply every element through a memoryview, changing the original; <code>as_format(raw, fmt)</code>: the elements of a <code>bytes</code> or <code>bytearray</code> reinterpreted with <code>memoryview(raw).cast(fmt)</code>, as a list; and <code>describe(buffer)</code>: a dict with the view&rsquo;s <code>format</code>, <code>itemsize</code>, <code>count</code> (number of elements) and <code>readonly</code>.</p></div><textarea class="pc-src pc-code" hidden>def total(buffer):
+    ___
+
+def scale_in_place(buffer, factor):
+    ___
+
+def as_format(raw, fmt):
+    ___
+
+def describe(buffer):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_views():
+    &quot;memoryview&quot;
+    from array import array
+    a = array(&quot;d&quot;, [1.5, 2.5, 4.0])
+    assert total(a) == 8.0 and total(array(&quot;i&quot;, [1, 2, 3])) == 6
+    scale_in_place(a, 2)
+    assert a.tolist() == [3.0, 5.0, 8.0]
+    ints = array(&quot;i&quot;, [1, 2])
+    scale_in_place(ints, 3)
+    assert ints.tolist() == [3, 6]
+    import struct
+    raw = struct.pack(&quot;=ii&quot;, 258, 7)
+    assert as_format(raw, &quot;i&quot;) == [258, 7] and as_format(bytes([1, 2, 3]), &quot;B&quot;) == [1, 2, 3]
+    assert describe(a) == {&quot;format&quot;: &quot;d&quot;, &quot;itemsize&quot;: 8, &quot;count&quot;: 3, &quot;readonly&quot;: False}
+    assert describe(b&quot;abc&quot;)[&quot;readonly&quot;] is True and describe(b&quot;abc&quot;)[&quot;count&quot;] == 3
+    try:
+        scale_in_place(bytearray(b&quot;ab&quot;), 300)
+        assert False
+    except (ValueError, TypeError):
+        pass</textarea><textarea class="pc-src pc-solution" hidden>def total(buffer):
+    view = memoryview(buffer)
+    result = 0
+    for x in view:
+        result += x
+    return result
+
+def scale_in_place(buffer, factor):
+    view = memoryview(buffer)
+    for i in range(len(view)):
+        view[i] = view[i] * factor
+
+def as_format(raw, fmt):
+    return memoryview(raw).cast(fmt).tolist()
+
+def describe(buffer):
+    view = memoryview(buffer)
+    return {&quot;format&quot;: view.format, &quot;itemsize&quot;: view.itemsize, &quot;count&quot;: len(view), &quot;readonly&quot;: view.readonly}</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d3-cmath" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">C&rsquo;s integer rules</div><div class="pc-prompt"><p>Model the arithmetic of typed Cython code. Write <code>c_add(a, b, bits=32)</code>: the sum wrapped to a signed integer of <code>bits</code> bits, as C would compute it; <code>c_div(a, b)</code> and <code>c_mod(a, b)</code>: C&rsquo;s division (truncating towards zero) and remainder (with the sign of <code>a</code>, so that <code>c_div(a, b) * b + c_mod(a, b) == a</code>), raising <code>ZeroDivisionError</code> for <code>b == 0</code>; and <code>differs_from_python(a, b)</code>: True if C&rsquo;s division or remainder gives a different answer from Python&rsquo;s <code>//</code> or <code>%</code>.</p></div><textarea class="pc-src pc-code" hidden>def c_add(a, b, bits=32):
+    ___
+
+def c_div(a, b):
+    ___
+
+def c_mod(a, b):
+    ___
+
+def differs_from_python(a, b):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cmath():
+    &quot;C semantics&quot;
+    assert c_add(2 ** 31 - 1, 1) == -(2 ** 31) and c_add(100, 28, bits=8) == -128 and c_add(5, 6) == 11
+    assert c_add(-(2 ** 63), -1, bits=64) == 2 ** 63 - 1
+    assert c_div(7, 2) == 3 and c_div(-7, 2) == -3 and c_div(7, -2) == -3 and c_div(-7, -2) == 3
+    assert c_mod(-7, 2) == -1 and c_mod(7, -2) == 1 and c_mod(7, 2) == 1
+    for a, b in [(-7, 2), (7, -2), (9, 4), (-9, -4)]:
+        assert c_div(a, b) * b + c_mod(a, b) == a
+    assert differs_from_python(-7, 2) and not differs_from_python(7, 2) and not differs_from_python(-8, 2)
+    try:
+        c_div(1, 0)
+        assert False
+    except ZeroDivisionError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>def c_add(a, b, bits=32):
+    mask = 1 &lt;&lt; bits
+    total = (a + b) % mask
+    return total - mask if total &gt;= mask // 2 else total
+
+def c_div(a, b):
+    if b == 0:
+        raise ZeroDivisionError(&quot;integer division by zero&quot;)
+    q = abs(a) // abs(b)
+    return q if (a &gt;= 0) == (b &gt;= 0) else -q
+
+def c_mod(a, b):
+    return a - b * c_div(a, b)
+
+def differs_from_python(a, b):
+    return c_div(a, b) != a // b or c_mod(a, b) != a % b</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d3-hotloop" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Typing the hot loop</div><div class="pc-prompt"><p>A profile shows which lines are hot. Given a list of <code>(line_text, runs, python_ops)</code> entries for a function (how many times each line runs, and how many Python object operations it does per run when untyped), write <code>python_cost(lines)</code>: the total <code>runs * python_ops</code>; <code>worth_typing(lines, share=0.8)</code>: the smallest set of line texts, taken from the costliest first (ties in their order in the list), whose combined cost reaches at least <code>share</code> of the total, as a list in that order; and <code>after_typing(lines, typed)</code>: the remaining cost if the lines in <code>typed</code> become plain C (cost 0).</p></div><textarea class="pc-src pc-code" hidden>def python_cost(lines):
+    ___
+
+def worth_typing(lines, share=0.8):
+    ___
+
+def after_typing(lines, typed):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_hotloop():
+    &quot;where to add types&quot;
+    lines = [(&quot;count = 0&quot;, 1, 2), (&quot;for n in range(limit):&quot;, 10000, 3), (&quot;d = 2&quot;, 10000, 1),
+             (&quot;while d * d &lt;= n:&quot;, 200000, 4), (&quot;if n % d == 0:&quot;, 190000, 3), (&quot;d += 1&quot;, 190000, 2),
+             (&quot;return count&quot;, 1, 1)]
+    assert python_cost(lines) == 2 + 30000 + 10000 + 800000 + 570000 + 380000 + 1
+    assert worth_typing(lines) == [&quot;while d * d &lt;= n:&quot;, &quot;if n % d == 0:&quot;, &quot;d += 1&quot;]
+    assert worth_typing(lines, share=0.4) == [&quot;while d * d &lt;= n:&quot;]
+    assert after_typing(lines, worth_typing(lines)) == 40003
+    assert worth_typing([]) == []</textarea><textarea class="pc-src pc-solution" hidden>def python_cost(lines):
+    return sum(runs * ops for _, runs, ops in lines)
+
+def worth_typing(lines, share=0.8):
+    total = python_cost(lines)
+    order = sorted(range(len(lines)), key=lambda i: (-lines[i][1] * lines[i][2], i))
+    chosen, covered = [], 0
+    for i in order:
+        if total == 0 or covered &gt;= share * total:
+            break
+        chosen.append(lines[i][0])
+        covered += lines[i][1] * lines[i][2]
+    return chosen
+
+def after_typing(lines, typed):
+    return sum(runs * ops for text, runs, ops in lines if text not in typed)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A C int that overflowed</div><div class="pc-prompt"><p>The total is kept in a 32-bit C integer, as an untyped-to-<code>int</code> Cython variable would be, and adding three billions overflows it: this prints a negative number. Keep it in a 64-bit integer (<code>c_int64</code>, like Cython&rsquo;s <code>long long</code>) so it prints <code>3000000000</code>.</p></div><textarea class="pc-src pc-code" hidden>import ctypes
+
+total = ctypes.c_int32(0)
+for amount in (1_000_000_000, 1_000_000_000, 1_000_000_000):
+    total.value += amount
+print(total.value)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a wide enough type&quot;
+    expect_output(&quot;3000000000&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import ctypes
+
+total = ctypes.c_int64(0)
+for amount in (1_000_000_000, 1_000_000_000, 1_000_000_000):
+    total.value += amount
+print(total.value)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A read-only buffer</div><div class="pc-prompt"><p><code>bytes</code> objects are immutable, so a memoryview of one is <strong>read-only</strong> and writing through it raises <code>TypeError</code>. Use a <code>bytearray</code>, whose buffer can be written, so this prints <code>b'Hello'</code>.</p></div><textarea class="pc-src pc-code" hidden>data = b&quot;hello&quot;
+view = memoryview(data)
+view[0] = ord(&quot;H&quot;)
+print(bytes(data))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a writable buffer&quot;
+    expect_output(&quot;b&#x27;Hello&#x27;&quot;)</textarea><textarea class="pc-src pc-solution" hidden>data = bytearray(b&quot;hello&quot;)
+view = memoryview(data)
+view[0] = ord(&quot;H&quot;)
+print(bytes(data))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w068d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Rounding the wrong way</div><div class="pc-prompt"><p>This helper was meant to match Python&rsquo;s <code>//</code> (which rounds down), but <code>int(a / b)</code> truncates towards zero, as C does, so for negative numbers it&rsquo;s out by one: this prints <code>-3</code>. Use floor division so it prints <code>-4</code>.</p></div><textarea class="pc-src pc-code" hidden>def floor_div(a, b):
+    return int(a / b)
+
+print(floor_div(-7, 2))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;floor division&quot;
+    expect_output(&quot;-4&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def floor_div(a, b):
+    return a // b
+
+print(floor_div(-7, 2))</textarea></div>
+<div class="parsons" data-id="w068d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A typed Cython function</div><div class="pc-prompt"><p>Arrange the lines of a Cython function (as you&rsquo;d write it in a <code>.pyx</code> file on your own computer) that sums a typed memoryview of doubles. One line is a trap.</p></div><script type="application/json">{"lines": ["def total(double[:] values):", "    cdef Py_ssize_t i", "    cdef double acc = 0", "    for i in range(values.shape[0]):", "        acc += values[i]", "    return acc"], "distractors": ["    acc = []"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the kind of Cython function callable only from Cython: &quot;def&quot;, &quot;cdef&quot; or &quot;cpdef&quot;
+q = ___   # the Cython type for a C integer used as a bool
+r = ___   # C&#x27;s -7 / 2 for integers, truncating towards zero
+s = ___   # memoryview(b&quot;abc&quot;).readonly
+t = ___   # the command-line flag that makes Cython write its annotation report: &quot;-a&quot; or &quot;-x&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;cdef&quot; and q == &quot;bint&quot; and r == -3, &quot;p, q and r&quot;
+    assert s is True and t == &quot;-a&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;cdef&quot;
+q = &quot;bint&quot;
+r = -3
+s = True
+t = &quot;-a&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w068d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does Cython produce from a .pyx file?", "answer": 1, "explain": "The C uses the C API for you.", "options": ["Bytecode", "C code, compiled into an extension module", "A Python file", "Rust"]}, {"type": "mc", "q": "Why is untyped code only modestly faster in Cython?", "answer": 1, "explain": "Types are what turn it into plain C.", "options": ["Cython is slow", "Every operation still works on Python objects", "It isn&rsquo;t compiled", "The GIL"]}, {"type": "mc", "q": "What&rsquo;s the difference between def, cdef and cpdef?", "answer": 1, "explain": "cpdef adds a Python wrapper.", "options": ["None", "def is Python-callable, cdef is C-only and fast, cpdef gives both", "cdef is for classes", "cpdef is deprecated"]}, {"type": "mc", "q": "What does pure-Python mode give you?", "answer": 1, "explain": "@cython.cfunc and cython.int.", "options": ["Faster Python", "Cython types written as annotations, in a file that still runs as plain Python", "No compiler needed for speed", "Rust support"]}, {"type": "mc", "q": "What does cython -a show?", "answer": 1, "explain": "Aim for white lines in hot loops.", "options": ["Errors", "An HTML report shading each line by how much it interacts with Python", "Assembly", "Tests"]}, {"type": "mc", "q": "What is the buffer protocol?", "answer": 1, "explain": "memoryview in Python; typed memoryviews in Cython.", "options": ["A network protocol", "A way for objects to expose raw memory, with its format, without copying", "File I/O", "Pickling"]}, {"type": "mc", "q": "What does slicing a memoryview do?", "answer": 1, "explain": "Writing through it changes the original.", "options": ["Copies the data", "Makes another view of the same memory", "Raises", "Converts to a list"]}, {"type": "mc", "q": "What does cdivision=True change?", "answer": 1, "explain": "Faster, less safe.", "options": ["Nothing", "Integer division uses C&rsquo;s rules: truncating, and no zero check", "Float division", "Python&rsquo;s //"]}, {"type": "mc", "q": "What does with nogil allow?", "answer": 1, "explain": "prange uses it for parallel loops.", "options": ["Skipping types", "Releasing the GIL around code that doesn&rsquo;t touch Python objects, so threads run in parallel", "Faster imports", "Calling Python"]}, {"type": "output", "q": "What does this print?", "answer": "[10, 2, 3] True", "explain": "The view writes into the array.", "code": "from array import array\na = array(\"i\", [1, 2, 3])\nv = memoryview(a)\nv[0] = 10\nprint(a.tolist(), v.itemsize * len(v) == v.nbytes)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w068d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a tiny translator to Cython</div><div class="pc-prompt"><p>Write <code>cythonize_function(source)</code>: translate one annotated Python function into Cython pure-<code>.pyx</code> text:</p>
+<ul>
+<li>the signature line as in the first exercise (<code>cpdef</code> or <code>cdef</code> by name, mapping <code>int</code>, <code>float</code> and <code>bool</code>; others <code>object</code>);</li>
+<li>every <strong>annotated local assignment</strong> (<code>total: float = 0</code> or <code>i: int</code>) at the top level of the body becomes a <code>cdef</code> declaration line at the start of the body, <code>cdef double total = 0</code> or <code>cdef long i</code>, in order, using <code>ast.unparse</code> for the value; the rest of the body is kept, without those annotated lines (but an annotated assignment with a value becomes a <code>cdef</code> with that value, so it isn&rsquo;t repeated);</li>
+<li>the body is indented four spaces and produced with <code>ast.unparse</code> statement by statement (each statement&rsquo;s lines indented);</li>
+<li>raise <code>ValueError("one function expected")</code> unless the source contains exactly one function.</li>
+</ul>
+<p>Return the text as one string, lines joined by newlines.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+C_TYPES = {&quot;int&quot;: &quot;long&quot;, &quot;float&quot;: &quot;double&quot;, &quot;bool&quot;: &quot;bint&quot;}
+
+def cythonize_function(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_translate():
+    &quot;Python to Cython&quot;
+    src = (
+        &quot;def total(n: int) -&gt; float:\n&quot;
+        &quot;    acc: float = 0\n&quot;
+        &quot;    i: int\n&quot;
+        &quot;    for i in range(n):\n&quot;
+        &quot;        acc += i * 0.5\n&quot;
+        &quot;    return acc\n&quot;
+    )
+    assert cythonize_function(src) == (
+        &quot;cpdef double total(long n):\n&quot;
+        &quot;    cdef double acc = 0\n&quot;
+        &quot;    cdef long i\n&quot;
+        &quot;    for i in range(n):\n&quot;
+        &quot;        acc += i * 0.5\n&quot;
+        &quot;    return acc&quot;
+    )
+    helper = &quot;def _sq(x: float) -&gt; float:\n    return x * x\n&quot;
+    assert cythonize_function(helper) == &quot;cdef double _sq(double x):\n    return x * x&quot;
+    for bad in (&quot;x = 1&quot;, &quot;def a():\n    pass\ndef b():\n    pass\n&quot;):
+        try:
+            cythonize_function(bad)
+            assert False
+        except ValueError as e:
+            assert str(e) == &quot;one function expected&quot;</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+C_TYPES = {&quot;int&quot;: &quot;long&quot;, &quot;float&quot;: &quot;double&quot;, &quot;bool&quot;: &quot;bint&quot;}
+
+def _ctype(annotation):
+    if isinstance(annotation, ast.Name):
+        return C_TYPES.get(annotation.id, &quot;object&quot;)
+    return &quot;object&quot;
+
+def cythonize_function(source):
+    tree = ast.parse(source)
+    funcs = [n for n in tree.body if isinstance(n, ast.FunctionDef)]
+    if len(funcs) != 1 or len(tree.body) != 1:
+        raise ValueError(&quot;one function expected&quot;)
+    func = funcs[0]
+    kind = &quot;cdef&quot; if func.name.startswith(&quot;_&quot;) else &quot;cpdef&quot;
+    params = &quot;, &quot;.join(f&quot;{_ctype(a.annotation)} {a.arg}&quot; for a in func.args.args)
+    lines = [f&quot;{kind} {_ctype(func.returns)} {func.name}({params}):&quot;]
+    declarations, body = [], []
+    for stmt in func.body:
+        if isinstance(stmt, ast.AnnAssign) and isinstance(stmt.target, ast.Name):
+            line = f&quot;cdef {_ctype(stmt.annotation)} {stmt.target.id}&quot;
+            if stmt.value is not None:
+                line += f&quot; = {ast.unparse(stmt.value)}&quot;
+            declarations.append(line)
+        else:
+            body.extend(ast.unparse(stmt).split(&quot;\n&quot;))
+    lines.extend(&quot;    &quot; + line for line in declarations + body)
+    return &quot;\n&quot;.join(lines)</textarea><template class="pc-src pc-hint">Go through <code>func.body</code>: <code>ast.AnnAssign</code> nodes whose target is a <code>Name</code> become <code>cdef</code> lines; everything else is kept. For each kept statement, <code>ast.unparse(stmt).split("\n")</code> gives its lines; indent each by four spaces.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, <code>pip install cython</code>, put <code>%load_ext cython</code> in a Jupyter notebook, and time the prime-counting function with and without its <code>cdef</code> lines in a <code>%%cython -a</code> cell; the report shows exactly which lines the types made white. Tomorrow: writing extensions in Rust with PyO3.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w068d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w068d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w068d3", "week": 68, "day": 3, "title": "Cython", "exercises": [{"id": "w068d3-signature", "title": "From annotations to Cython", "points": 15}, {"id": "w068d3-slowspots", "title": "Finding what stays slow", "points": 10}, {"id": "w068d3-views", "title": "The buffer protocol", "points": 15}, {"id": "w068d3-cmath", "title": "C's integer rules", "points": 10}, {"id": "w068d3-hotloop", "title": "Typing the hot loop", "points": 10}, {"id": "w068d3-bug1", "title": "A C int that overflowed", "points": 10}, {"id": "w068d3-bug2", "title": "A read-only buffer", "points": 10}, {"id": "w068d3-bug3", "title": "Rounding the wrong way", "points": 10}, {"id": "w068d3-trace", "title": "Predict them", "points": 10}, {"id": "w068d3-challenge", "title": "Challenge: a tiny translator to Cython", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
