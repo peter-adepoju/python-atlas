@@ -1,0 +1,1369 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 67 Day 3: Async I/O patterns | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Yesterday’s tools (coroutines, tasks, gather) are the vocabulary of asyncio. Today is the grammar: the patterns real async programs are built from. You’ll...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w067d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 67 Day 3: Async I/O patterns">
+<meta property="og:description" content="Yesterday’s tools (coroutines, tasks, gather) are the vocabulary of asyncio. Today is the grammar: the patterns real async programs are built from. You’ll...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w067d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-67">Week 67: Concurrency II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#limiting-concurrency" data-sec="limiting-concurrency">Limiting concurrency</a></li><li><a href="#queues-between-tasks" data-sec="queues-between-tasks">Queues between tasks</a></li><li><a href="#timeouts-and-retries" data-sec="timeouts-and-retries">Timeouts and retries</a></li><li><a href="#async-context-managers" data-sec="async-context-managers">Async context managers</a></li><li><a href="#streams" data-sec="streams">Streams</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w067d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-67">Week 67: Concurrency II</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 67, Day 3</span></p>
+      <h1>Async I/O patterns</h1>
+      <div class="day-intro"><p>Yesterday&rsquo;s tools (coroutines, tasks, <code>gather</code>) are the vocabulary of <code>asyncio</code>. Today is the grammar: the patterns real async programs are built from. You&rsquo;ll limit how many operations run at once with a <strong>semaphore</strong>, pass work between tasks with an <strong>async queue</strong>, put deadlines on slow operations with <strong>timeouts</strong>, retry failures with <strong>exponential backoff</strong>, manage connections with <strong>async context managers</strong>, and process streams of data with <strong>async generators</strong>. Each pattern appears first in real <code>asyncio</code>, as you&rsquo;d write it on your own computer, and then in exercises using the small event loop from yesterday, which is given in each starter so you can concentrate on the pattern.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Limit concurrency with a semaphore and async with</li><li>Pass work between tasks with an async queue and sentinels</li><li>Put deadlines on operations with wait_for and timeout, and retry with exponential backoff</li><li>Write async context managers with <strong>aenter</strong> and <strong>aexit</strong></li><li>Produce and consume streams with async generators and async for</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Limiting concurrency: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Queues between tasks: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Timeouts and retries: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Async context managers: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Streams: 20 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Limiting concurrency</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Queues between tasks</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Timeouts and retries</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Async context managers</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Streams</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w067d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w067d3.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w067d3-p1"><textarea class="pc-src pc-code" hidden>def bounded(delays, limit):
+    &quot;Start each job, in order, when one of `limit` slots is free.&quot;
+    free_at = [0] * limit
+    finish = []
+    for d in delays:
+        i = free_at.index(min(free_at))
+        free_at[i] += d
+        finish.append(free_at[i])
+    return finish
+
+delays = [2, 2, 2, 2, 2, 2]
+print(bounded(delays, 6), bounded(delays, 2))
+print(max(bounded(delays, 6)), max(bounded(delays, 2)))</textarea></div>
+<p>With no limit, six two-second jobs finish together at 2; with at most two at a time, they finish in pairs, at 6. Limiting concurrency trades some speed for not overwhelming a server (or your own machine), and choosing the limit is a design decision.</p>
+<h2 id="limiting-concurrency">Limiting concurrency</h2>
+<p><code>gather</code> with a thousand coroutines starts a thousand requests at once. Servers often refuse that (and may block you), and your machine may run out of sockets or file handles. <strong><code>asyncio.Semaphore(n)</code></strong> lets at most <code>n</code> tasks into a section at a time:</p>
+<pre><code>import asyncio
+
+async def fetch(session, url, limit):
+    async with limit:                       # waits while n tasks are inside
+        return await session.get(url)
+
+async def main(urls):
+    limit = asyncio.Semaphore(10)
+    return await asyncio.gather(*(fetch(session, u, limit) for u in urls))
+</code></pre>
+<p>The <code>async with</code> releases the permit even if the request fails. (<code>asyncio.Lock</code> is the special case <code>n = 1</code>, for protecting state across an <code>await</code>.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w067d3-e2"><textarea class="pc-src pc-code" hidden>def peak_concurrency(starts_and_ends):
+    &quot;The most intervals open at once.&quot;
+    events = sorted([(s, 1) for s, e in starts_and_ends] + [(e, -1) for s, e in starts_and_ends])
+    open_now = peak = 0
+    for _, change in events:
+        open_now += change
+        peak = max(peak, open_now)
+    return peak
+
+unlimited = [(0, 2)] * 6
+limited = [(0, 2), (0, 2), (2, 4), (2, 4), (4, 6), (4, 6)]
+print(peak_concurrency(unlimited), peak_concurrency(limited))</textarea></div>
+<h2 id="queues-between-tasks">Queues between tasks</h2>
+<p><strong><code>asyncio.Queue</code></strong> is the async version of <code>queue.Queue</code>: <code>await q.put(item)</code> (waiting if a <code>maxsize</code> is reached), <code>await q.get()</code> (waiting while it&rsquo;s empty), <code>q.task_done()</code> and <code>await q.join()</code>. It&rsquo;s the natural way to build <strong>pipelines</strong>: producer tasks put work, a fixed pool of consumer tasks takes it, and the pool size is the concurrency limit.</p>
+<pre><code>async def worker(queue, results):
+    while True:
+        url = await queue.get()
+        if url is None:                      # a sentinel: stop
+            return
+        results.append(await fetch(url))
+
+async def main(urls, n=5):
+    queue, results = asyncio.Queue(), []
+    workers = [asyncio.create_task(worker(queue, results)) for _ in range(n)]
+    for url in urls:
+        await queue.put(url)
+    for _ in workers:
+        await queue.put(None)
+    await asyncio.gather(*workers)
+    return results
+</code></pre>
+<p>Inside, a queue is a list of items plus a list of tasks waiting for an item; <code>put</code> adds an item and wakes <strong>one</strong> waiter. The exercises build exactly that.</p>
+<div class="pc pc-example" data-kind="example" data-id="w067d3-e3"><textarea class="pc-src pc-code" hidden>from collections import deque
+
+def simulate_queue(events):
+    &quot;events: (&#x27;put&#x27;, item) or (&#x27;get&#x27;, name). Waiting getters are served in order.&quot;
+    items, waiting, served = deque(), deque(), []
+    for kind, value in events:
+        if kind == &quot;put&quot;:
+            if waiting:
+                served.append((waiting.popleft(), value))
+            else:
+                items.append(value)
+        elif items:
+            served.append((value, items.popleft()))
+        else:
+            waiting.append(value)
+    return served, list(waiting)
+
+print(simulate_queue([(&quot;get&quot;, &quot;w1&quot;), (&quot;get&quot;, &quot;w2&quot;), (&quot;put&quot;, &quot;a&quot;), (&quot;put&quot;, &quot;b&quot;), (&quot;put&quot;, &quot;c&quot;), (&quot;get&quot;, &quot;w3&quot;)]))</textarea></div>
+<h2 id="timeouts-and-retries">Timeouts and retries</h2>
+<p>Network operations can hang. Always put a <strong>deadline</strong> on them:</p>
+<ul>
+<li><code>await asyncio.wait_for(coro, timeout=5)</code> cancels the operation and raises <code>TimeoutError</code> if it takes longer than 5 seconds (yesterday&rsquo;s challenge built one);</li>
+<li><code>async with asyncio.timeout(5):</code> (3.11+) puts a deadline on a whole block.</li>
+</ul>
+<p>When an operation fails for a <strong>temporary</strong> reason (a timeout, a connection refused, a &ldquo;try again later&rdquo; reply), <strong>retry</strong> it, but not immediately and not for ever: wait with <strong>exponential backoff</strong> (1, 2, 4, 8 seconds, up to a cap), give up after a few attempts, and add a little <strong>jitter</strong> (randomness) to the waits so that many clients don&rsquo;t all retry at the same moment. Never retry operations that aren&rsquo;t safe to repeat (such as charging a payment) unless the server guarantees it&rsquo;s idempotent.</p>
+<pre><code>async def fetch_with_retry(url, attempts=4):
+    for i in range(attempts):
+        try:
+            return await asyncio.wait_for(fetch(url), timeout=5)
+        except (TimeoutError, ConnectionError):
+            if i == attempts - 1:
+                raise
+            await asyncio.sleep(min(30, 2 ** i) + random.random())
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w067d3-e4"><textarea class="pc-src pc-code" hidden>import random
+
+def backoff(attempts, base=1, factor=2, cap=30, jitter=0.0, rng=None):
+    rng = rng or random.Random(0)
+    return [min(cap, base * factor ** i) + jitter * rng.random() for i in range(attempts - 1)]
+
+print(backoff(6))
+print([round(x, 2) for x in backoff(4, jitter=1.0, rng=random.Random(42))])
+print(&quot;total waiting before giving up:&quot;, sum(backoff(6)))</textarea></div>
+<h2 id="async-context-managers">Async context managers</h2>
+<p>Some set-up and clean-up needs to <strong>wait</strong>: opening a connection, starting a transaction, closing politely. <strong><code>async with</code></strong> is the async version of Week 61&rsquo;s <code>with</code>: it awaits <code>__aenter__()</code> on entry and <code>__aexit__(exc_type, exc, tb)</code> on exit, which must both be coroutines. <code>contextlib.asynccontextmanager</code> turns an async generator with one <code>yield</code> into one, just as <code>@contextmanager</code> does.</p>
+<pre><code>from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def connected(host):
+    conn = await open_connection(host)
+    try:
+        yield conn
+    finally:
+        await conn.close()
+
+async def main():
+    async with connected(&quot;db.local&quot;) as conn:
+        rows = await conn.query(&quot;select ...&quot;)
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w067d3-e5"><textarea class="pc-src pc-code" hidden>class Pause:
+    def __await__(self):
+        yield
+
+class Session:
+    def __init__(self, log):
+        self.log = log
+    async def __aenter__(self):
+        await Pause()
+        self.log.append(&quot;open&quot;)
+        return self
+    async def __aexit__(self, exc_type, exc, tb):
+        await Pause()
+        self.log.append(&quot;close&quot;)
+        return False
+
+async def main(log):
+    async with Session(log) as s:
+        log.append(&quot;work&quot;)
+    return log
+
+coro = main([])
+try:
+    while True:
+        coro.send(None)
+except StopIteration as done:
+    print(done.value)</textarea></div>
+<h2 id="streams">Streams</h2>
+<p>An <strong>async generator</strong> (<code>async def</code> with <code>yield</code>) produces values that take time to arrive: lines from a socket, pages of an API&rsquo;s results, messages from a queue. Consume one with <strong><code>async for</code></strong>, or an <strong>async comprehension</strong>, <code>[x async for x in stream]</code>. They compose like ordinary generators (Week 59): one async generator can filter or transform another.</p>
+<pre><code>async def pages(api):
+    url = api.first_page
+    while url:
+        page = await api.get(url)
+        for item in page.items:
+            yield item
+        url = page.next
+
+async def main(api):
+    async for item in pages(api):
+        print(item)
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w067d3-e6"><textarea class="pc-src pc-code" hidden>class Pause:
+    def __await__(self):
+        yield
+
+async def numbers(n):
+    for i in range(n):
+        await Pause()
+        yield i
+
+async def evens(stream):
+    async for x in stream:
+        if x % 2 == 0:
+            yield x
+
+async def main():
+    return [x * 10 async for x in evens(numbers(7))]
+
+coro = main()
+try:
+    while True:
+        coro.send(None)
+except StopIteration as done:
+    print(done.value)</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Limit concurrency with asyncio.Semaphore(n) and async with around each operation. Pass work between tasks with asyncio.Queue: put, get (waiting while empty), a fixed pool of consumers and one sentinel per consumer; inside, put wakes one waiting getter, which re-checks the queue. Put deadlines on I/O with wait_for or asyncio.timeout, and retry temporary failures with exponential backoff (capped, with jitter) only when the operation is safe to repeat. Async context managers await <strong>aenter</strong> and <strong>aexit</strong> (or use asynccontextmanager) for set-up and clean-up that waits. Async generators produce streams consumed with async for and async comprehensions, and compose like ordinary generators.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d3-bounded" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Bounded concurrency in numbers</div><div class="pc-prompt"><p>Write <code>bounded_finish(delays, limit)</code>: the finish time of each job when jobs start in order, each as soon as one of <code>limit</code> slots is free (the slot free first; the lowest-numbered on ties), and <code>peak(intervals)</code>: the most <code>(start, end)</code> intervals open at the same time, where an interval ending at the same moment another starts doesn&rsquo;t overlap it. Then <code>smallest_limit(delays, deadline)</code>: the smallest limit (from 1 up to the number of jobs) under which everything finishes by <code>deadline</code>, or <code>None</code> if even no limit at all is too slow.</p></div><textarea class="pc-src pc-code" hidden>def bounded_finish(delays, limit):
+    ___
+
+def peak(intervals):
+    ___
+
+def smallest_limit(delays, deadline):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_bounded():
+    &quot;concurrency limits&quot;
+    assert bounded_finish([2, 2, 2, 2], 2) == [2, 2, 4, 4] and bounded_finish([5, 1, 1, 1], 2) == [5, 1, 2, 3]
+    assert peak([(0, 2), (0, 2), (2, 4)]) == 2 and peak([]) == 0 and peak([(0, 5), (1, 2), (1, 3)]) == 3
+    assert smallest_limit([2] * 6, 6) == 2 and smallest_limit([2] * 6, 2) == 6 and smallest_limit([5], 4) is None
+    assert smallest_limit([], 1) == 1</textarea><textarea class="pc-src pc-solution" hidden>def bounded_finish(delays, limit):
+    free_at = [0] * limit
+    out = []
+    for d in delays:
+        i = free_at.index(min(free_at))
+        free_at[i] += d
+        out.append(free_at[i])
+    return out
+
+def peak(intervals):
+    events = sorted([(s, 1) for s, _ in intervals] + [(e, -1) for _, e in intervals], key=lambda ev: (ev[0], ev[1]))
+    open_now = best = 0
+    for _, change in events:
+        open_now += change
+        best = max(best, open_now)
+    return best
+
+def smallest_limit(delays, deadline):
+    for limit in range(1, max(len(delays), 1) + 1):
+        if max(bounded_finish(delays, limit), default=0) &lt;= deadline:
+            return limit
+    return None</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d3-retry" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Retrying with backoff</div><div class="pc-prompt"><p>Network calls fail now and then, and the standard cure is to <strong>retry</strong> with <strong>exponential backoff</strong>: wait 1, then 2, then 4 units, and so on, up to a cap, so a struggling server isn&rsquo;t hammered. Using the loop given in the starter, write <code>backoff_delays(attempts, base=1, factor=2, cap=30)</code>: the list of waits between <code>attempts</code> tries (one fewer than the attempts), and a coroutine <code>retry(loop, op, attempts, base=1, factor=2, cap=30)</code> that awaits <code>op()</code> (a coroutine function), and on an exception waits the next backoff delay with <code>Sleep</code> and tries again, re-raising the last exception if every attempt fails.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Waitable:
+    &quot;Anything tasks can wait on: the loop adds the waiting task to .waiters.&quot;
+    def __init__(self):
+        self.waiters = deque()
+    def wait(self):
+        return _Wait(self)
+
+class _Wait:
+    def __init__(self, target):
+        self.target = target
+    def __await__(self):
+        yield (&quot;wait&quot;, self.target)
+
+class Task(Waitable):
+    def __init__(self, coro):
+        super().__init__()
+        self.coro, self.done, self.result = coro, False, None
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self._seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+    def wake(self, waitable, count=None):
+        &quot;Move waiting tasks (all, or up to count) back to the ready queue.&quot;
+        while waitable.waiters and (count is None or count &gt; 0):
+            self.ready.append(waitable.waiters.popleft())
+            if count is not None:
+                count -= 1
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.wake(task)
+            return
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            arg.waiters.append(task)
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result
+
+def backoff_delays(attempts, base=1, factor=2, cap=30):
+    ___
+
+async def retry(loop, op, attempts, base=1, factor=2, cap=30):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_retry():
+    &quot;retries with backoff&quot;
+    assert backoff_delays(4) == [1, 2, 4] and backoff_delays(6, base=2, cap=10) == [2, 4, 8, 10, 10]
+    assert backoff_delays(1) == []
+    loop = Loop()
+    calls = []
+    async def flaky():
+        calls.append(loop.now)
+        if len(calls) &lt; 3:
+            raise ConnectionError(&quot;down&quot;)
+        return &quot;ok&quot;
+    async def main():
+        return await retry(loop, flaky, attempts=5)
+    assert loop.run_until_complete(main()) == &quot;ok&quot; and calls == [0, 1, 3]
+    loop2 = Loop()
+    async def always_fails():
+        raise ConnectionError(&quot;down&quot;)
+    async def main2():
+        try:
+            await retry(loop2, always_fails, attempts=3, base=5)
+        except ConnectionError:
+            return &quot;gave up&quot;, loop2.now
+    assert loop2.run_until_complete(main2()) == (&quot;gave up&quot;, 15)</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Waitable:
+    &quot;Anything tasks can wait on: the loop adds the waiting task to .waiters.&quot;
+    def __init__(self):
+        self.waiters = deque()
+    def wait(self):
+        return _Wait(self)
+
+class _Wait:
+    def __init__(self, target):
+        self.target = target
+    def __await__(self):
+        yield (&quot;wait&quot;, self.target)
+
+class Task(Waitable):
+    def __init__(self, coro):
+        super().__init__()
+        self.coro, self.done, self.result = coro, False, None
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self._seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+    def wake(self, waitable, count=None):
+        &quot;Move waiting tasks (all, or up to count) back to the ready queue.&quot;
+        while waitable.waiters and (count is None or count &gt; 0):
+            self.ready.append(waitable.waiters.popleft())
+            if count is not None:
+                count -= 1
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.wake(task)
+            return
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            arg.waiters.append(task)
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result
+
+def backoff_delays(attempts, base=1, factor=2, cap=30):
+    return [min(cap, base * factor ** i) for i in range(attempts - 1)]
+
+async def retry(loop, op, attempts, base=1, factor=2, cap=30):
+    waits = backoff_delays(attempts, base, factor, cap)
+    for i in range(attempts):
+        try:
+            return await op()
+        except Exception:
+            if i == attempts - 1:
+                raise
+            await Sleep(waits[i])</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d3-aqueue" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">An async queue</div><div class="pc-prompt"><p>Write <code>AsyncQueue(loop)</code>, a <code>Waitable</code> (from the loop code in the starter) holding items: <code>put(item)</code> adds an item and wakes <strong>one</strong> waiting task with <code>loop.wake(self, 1)</code>; the coroutine <code>get()</code> waits (with <code>await self.wait()</code>) while the queue is empty, then returns the oldest item. Then a coroutine <code>pipeline(loop, items, workers, handle)</code>: start <code>workers</code> worker tasks that take items from a queue and record <code>(worker number, await handle(item))</code> in a shared list in the order they finish, put the items and then one <code>None</code> sentinel per worker, wait for all the workers, and return the list.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Waitable:
+    &quot;Anything tasks can wait on: the loop adds the waiting task to .waiters.&quot;
+    def __init__(self):
+        self.waiters = deque()
+    def wait(self):
+        return _Wait(self)
+
+class _Wait:
+    def __init__(self, target):
+        self.target = target
+    def __await__(self):
+        yield (&quot;wait&quot;, self.target)
+
+class Task(Waitable):
+    def __init__(self, coro):
+        super().__init__()
+        self.coro, self.done, self.result = coro, False, None
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self._seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+    def wake(self, waitable, count=None):
+        &quot;Move waiting tasks (all, or up to count) back to the ready queue.&quot;
+        while waitable.waiters and (count is None or count &gt; 0):
+            self.ready.append(waitable.waiters.popleft())
+            if count is not None:
+                count -= 1
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.wake(task)
+            return
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            arg.waiters.append(task)
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result
+
+class AsyncQueue(Waitable):
+    def __init__(self, loop):
+        ___
+
+async def pipeline(loop, items, workers, handle):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_queue():
+    &quot;an async queue&quot;
+    loop = Loop()
+    q = AsyncQueue(loop)
+    got = []
+    async def consumer():
+        for _ in range(2):
+            got.append((await q.get(), loop.now))
+    async def producer():
+        await Sleep(3)
+        q.put(&quot;a&quot;)
+        await Sleep(2)
+        q.put(&quot;b&quot;)
+    async def main():
+        c = loop.create_task(consumer())
+        await producer()
+        await c
+    loop.run_until_complete(main())
+    assert got == [(&quot;a&quot;, 3), (&quot;b&quot;, 5)]
+    loop2 = Loop()
+    async def handle(x):
+        await Sleep(x)
+        return x * 10
+    async def main2():
+        return await pipeline(loop2, [3, 1, 1, 1], workers=2, handle=handle)
+    results = loop2.run_until_complete(main2())
+    assert sorted(r for _, r in results) == [10, 10, 10, 30] and loop2.now == 3
+    assert results == [(1, 10), (1, 10), (0, 30), (1, 10)]</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Waitable:
+    &quot;Anything tasks can wait on: the loop adds the waiting task to .waiters.&quot;
+    def __init__(self):
+        self.waiters = deque()
+    def wait(self):
+        return _Wait(self)
+
+class _Wait:
+    def __init__(self, target):
+        self.target = target
+    def __await__(self):
+        yield (&quot;wait&quot;, self.target)
+
+class Task(Waitable):
+    def __init__(self, coro):
+        super().__init__()
+        self.coro, self.done, self.result = coro, False, None
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self._seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+    def wake(self, waitable, count=None):
+        &quot;Move waiting tasks (all, or up to count) back to the ready queue.&quot;
+        while waitable.waiters and (count is None or count &gt; 0):
+            self.ready.append(waitable.waiters.popleft())
+            if count is not None:
+                count -= 1
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.wake(task)
+            return
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            arg.waiters.append(task)
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result
+
+class AsyncQueue(Waitable):
+    def __init__(self, loop):
+        super().__init__()
+        self.loop = loop
+        self.items = deque()
+
+    def put(self, item):
+        self.items.append(item)
+        self.loop.wake(self, 1)
+
+    async def get(self):
+        while not self.items:
+            await self.wait()
+        return self.items.popleft()
+
+async def pipeline(loop, items, workers, handle):
+    queue = AsyncQueue(loop)
+    results = []
+
+    async def worker(name):
+        while True:
+            item = await queue.get()
+            if item is None:
+                return
+            results.append((name, await handle(item)))
+
+    tasks = [loop.create_task(worker(i)) for i in range(workers)]
+    for item in items:
+        queue.put(item)
+    for _ in range(workers):
+        queue.put(None)
+    for t in tasks:
+        await t
+    return results</textarea><template class="pc-src pc-hint">A waiting <code>get</code> must re-check the queue after waking (<code>while not self.items:</code>), because another task may have taken the item first.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d3-awith" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">An async context manager</div><div class="pc-prompt"><p>Some set-up and clean-up must itself wait: opening a network connection, closing it politely. Classes support <code>async with</code> through the coroutines <code>__aenter__</code> and <code>__aexit__</code>. Write <code>Connection(log)</code>: entering waits 1 unit (<code>await Sleep(1)</code>), sets <code>open</code> and logs <code>"connected"</code>; leaving waits 1 unit, clears <code>open</code> and logs <code>"closed"</code>, or <code>"closed after KeyError"</code> (the exception&rsquo;s type name) if the block raised, without suppressing the exception; the coroutine <code>query(sql)</code> raises <code>RuntimeError("not connected")</code> if it isn&rsquo;t open, otherwise waits 2 units and returns <code>"rows for " + sql</code>. Then the coroutine <code>use(conn, sql)</code>, which runs one query inside <code>async with</code>.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Waitable:
+    &quot;Anything tasks can wait on: the loop adds the waiting task to .waiters.&quot;
+    def __init__(self):
+        self.waiters = deque()
+    def wait(self):
+        return _Wait(self)
+
+class _Wait:
+    def __init__(self, target):
+        self.target = target
+    def __await__(self):
+        yield (&quot;wait&quot;, self.target)
+
+class Task(Waitable):
+    def __init__(self, coro):
+        super().__init__()
+        self.coro, self.done, self.result = coro, False, None
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self._seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+    def wake(self, waitable, count=None):
+        &quot;Move waiting tasks (all, or up to count) back to the ready queue.&quot;
+        while waitable.waiters and (count is None or count &gt; 0):
+            self.ready.append(waitable.waiters.popleft())
+            if count is not None:
+                count -= 1
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.wake(task)
+            return
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            arg.waiters.append(task)
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result
+
+class Connection:
+    def __init__(self, log):
+        ___
+
+async def use(conn, sql):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_async_with():
+    &quot;async context managers&quot;
+    loop = Loop()
+    log = []
+    conn = Connection(log)
+    async def main():
+        return await use(conn, &quot;select 1&quot;), loop.now
+    assert loop.run_until_complete(main()) == (&quot;rows for select 1&quot;, 4) and log == [&quot;connected&quot;, &quot;closed&quot;]
+    loop2 = Loop()
+    log2 = []
+    async def bad():
+        async with Connection(log2) as c:
+            raise KeyError(&quot;x&quot;)
+    async def main2():
+        try:
+            await bad()
+        except KeyError:
+            return &quot;caught&quot;
+    assert loop2.run_until_complete(main2()) == &quot;caught&quot; and log2 == [&quot;connected&quot;, &quot;closed after KeyError&quot;]
+    loop3 = Loop()
+    async def unconnected():
+        try:
+            await Connection([]).query(&quot;x&quot;)
+        except RuntimeError as e:
+            return str(e)
+    assert loop3.run_until_complete(unconnected()) == &quot;not connected&quot;</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Waitable:
+    &quot;Anything tasks can wait on: the loop adds the waiting task to .waiters.&quot;
+    def __init__(self):
+        self.waiters = deque()
+    def wait(self):
+        return _Wait(self)
+
+class _Wait:
+    def __init__(self, target):
+        self.target = target
+    def __await__(self):
+        yield (&quot;wait&quot;, self.target)
+
+class Task(Waitable):
+    def __init__(self, coro):
+        super().__init__()
+        self.coro, self.done, self.result = coro, False, None
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self._seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+    def wake(self, waitable, count=None):
+        &quot;Move waiting tasks (all, or up to count) back to the ready queue.&quot;
+        while waitable.waiters and (count is None or count &gt; 0):
+            self.ready.append(waitable.waiters.popleft())
+            if count is not None:
+                count -= 1
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.wake(task)
+            return
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            arg.waiters.append(task)
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result
+
+class Connection:
+    def __init__(self, log):
+        self.log = log
+        self.open = False
+
+    async def __aenter__(self):
+        await Sleep(1)
+        self.open = True
+        self.log.append(&quot;connected&quot;)
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await Sleep(1)
+        self.open = False
+        self.log.append(&quot;closed&quot; if exc_type is None else f&quot;closed after {exc_type.__name__}&quot;)
+        return False
+
+    async def query(self, sql):
+        if not self.open:
+            raise RuntimeError(&quot;not connected&quot;)
+        await Sleep(2)
+        return f&quot;rows for {sql}&quot;
+
+async def use(conn, sql):
+    async with conn as c:
+        return await c.query(sql)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d3-streams" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Streams with async generators</div><div class="pc-prompt"><p>Write two async generators using the loop in the starter: <code>ticks(loop, n, interval)</code> sleeps <code>interval</code> and then yields the current <code>loop.now</code>, <code>n</code> times; and <code>rate_limited(loop, items, gap)</code> yields the items with at least <code>gap</code> units between them, measuring from when the previous item was <strong>yielded</strong> (so a slow consumer doesn&rsquo;t cause extra waiting). Then the coroutine <code>collect(agen)</code>, returning everything an async generator yields as a list, using an async comprehension (<code>[x async for x in agen]</code>).</p></div><textarea class="pc-src pc-code" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Waitable:
+    &quot;Anything tasks can wait on: the loop adds the waiting task to .waiters.&quot;
+    def __init__(self):
+        self.waiters = deque()
+    def wait(self):
+        return _Wait(self)
+
+class _Wait:
+    def __init__(self, target):
+        self.target = target
+    def __await__(self):
+        yield (&quot;wait&quot;, self.target)
+
+class Task(Waitable):
+    def __init__(self, coro):
+        super().__init__()
+        self.coro, self.done, self.result = coro, False, None
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self._seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+    def wake(self, waitable, count=None):
+        &quot;Move waiting tasks (all, or up to count) back to the ready queue.&quot;
+        while waitable.waiters and (count is None or count &gt; 0):
+            self.ready.append(waitable.waiters.popleft())
+            if count is not None:
+                count -= 1
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.wake(task)
+            return
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            arg.waiters.append(task)
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result
+
+async def ticks(loop, n, interval):
+    ___
+
+async def rate_limited(loop, items, gap):
+    ___
+
+async def collect(agen):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_streams():
+    &quot;async generators&quot;
+    loop = Loop()
+    async def main():
+        return await collect(ticks(loop, 3, 2))
+    assert loop.run_until_complete(main()) == [2, 4, 6]
+    loop2 = Loop()
+    async def main2():
+        out = []
+        async for item in rate_limited(loop2, [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;], 5):
+            out.append((item, loop2.now))
+        return out
+    assert loop2.run_until_complete(main2()) == [(&quot;a&quot;, 0), (&quot;b&quot;, 5), (&quot;c&quot;, 10)]
+    loop3 = Loop()
+    async def slow_consumer():
+        out = []
+        async for item in rate_limited(loop3, [1, 2, 3], 2):
+            out.append((item, loop3.now))
+            await Sleep(3)
+        return out
+    assert loop3.run_until_complete(slow_consumer()) == [(1, 0), (2, 3), (3, 6)]</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Waitable:
+    &quot;Anything tasks can wait on: the loop adds the waiting task to .waiters.&quot;
+    def __init__(self):
+        self.waiters = deque()
+    def wait(self):
+        return _Wait(self)
+
+class _Wait:
+    def __init__(self, target):
+        self.target = target
+    def __await__(self):
+        yield (&quot;wait&quot;, self.target)
+
+class Task(Waitable):
+    def __init__(self, coro):
+        super().__init__()
+        self.coro, self.done, self.result = coro, False, None
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self._seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+    def wake(self, waitable, count=None):
+        &quot;Move waiting tasks (all, or up to count) back to the ready queue.&quot;
+        while waitable.waiters and (count is None or count &gt; 0):
+            self.ready.append(waitable.waiters.popleft())
+            if count is not None:
+                count -= 1
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.wake(task)
+            return
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            arg.waiters.append(task)
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result
+
+async def ticks(loop, n, interval):
+    for _ in range(n):
+        await Sleep(interval)
+        yield loop.now
+
+async def rate_limited(loop, items, gap):
+    last = None
+    for item in items:
+        if last is not None:
+            wait = last + gap - loop.now
+            if wait &gt; 0:
+                await Sleep(wait)
+        last = loop.now
+        yield item
+
+async def collect(agen):
+    return [x async for x in agen]</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Backoff that starts too high</div><div class="pc-prompt"><p>The exponent starts at 1 instead of 0, so the first retry waits 2 units instead of 1, and every wait is doubled: this prints <code>[2, 4, 8]</code>. Start the exponent at 0 so it prints <code>[1, 2, 4]</code>.</p></div><textarea class="pc-src pc-code" hidden>def backoff_delays(attempts, base=1, factor=2):
+    return [base * factor ** i for i in range(1, attempts)]
+
+print(backoff_delays(4))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;exponents from 0&quot;
+    expect_output(&quot;[1, 2, 4]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def backoff_delays(attempts, base=1, factor=2):
+    return [base * factor ** i for i in range(attempts - 1)]
+
+print(backoff_delays(4))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A connection never closed</div><div class="pc-prompt"><p>The code enters the session by calling <code>__aenter__</code> by hand, so when the work raises, nothing calls <code>__aexit__</code> and the log never records <code>close</code>: this prints <code>['open']</code>. Use <code>async with</code>, which closes it even after the error, so this prints <code>['open', 'close']</code>.</p></div><textarea class="pc-src pc-code" hidden>class Pause:
+    def __await__(self):
+        yield
+
+class Session:
+    def __init__(self, log):
+        self.log = log
+    async def __aenter__(self):
+        await Pause()
+        self.log.append(&quot;open&quot;)
+        return self
+    async def __aexit__(self, *exc):
+        self.log.append(&quot;close&quot;)
+        return False
+
+async def main(log):
+    s = await Session(log).__aenter__()
+    raise KeyError(&quot;lost&quot;)
+
+log = []
+coro = main(log)
+try:
+    while True:
+        coro.send(None)
+except (StopIteration, KeyError):
+    pass
+print(log)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;async with&quot;
+    expect_output(&quot;[&#x27;open&#x27;, &#x27;close&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Pause:
+    def __await__(self):
+        yield
+
+class Session:
+    def __init__(self, log):
+        self.log = log
+    async def __aenter__(self):
+        await Pause()
+        self.log.append(&quot;open&quot;)
+        return self
+    async def __aexit__(self, *exc):
+        self.log.append(&quot;close&quot;)
+        return False
+
+async def main(log):
+    async with Session(log) as s:
+        raise KeyError(&quot;lost&quot;)
+
+log = []
+coro = main(log)
+try:
+    while True:
+        coro.send(None)
+except (StopIteration, KeyError):
+    pass
+print(log)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Results in the wrong order</div><div class="pc-prompt"><p>This &ldquo;gather&rdquo; collects results in the order the jobs <strong>finished</strong>, but callers expect them in the order the jobs were <strong>given</strong> (as <code>asyncio.gather</code> returns them), so this prints <code>['fast', 'mid', 'slow']</code>. Return them in input order so it prints <code>['slow', 'fast', 'mid']</code>.</p></div><textarea class="pc-src pc-code" hidden>jobs = [(&quot;slow&quot;, 5), (&quot;fast&quot;, 1), (&quot;mid&quot;, 3)]
+finished = sorted(jobs, key=lambda job: job[1])
+print([name for name, _ in finished])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;input order&quot;
+    expect_output(&quot;[&#x27;slow&#x27;, &#x27;fast&#x27;, &#x27;mid&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>jobs = [(&quot;slow&quot;, 5), (&quot;fast&quot;, 1), (&quot;mid&quot;, 3)]
+print([name for name, _ in jobs])</textarea></div>
+<div class="parsons" data-id="w067d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Fetching with a limit</div><div class="pc-prompt"><p>Arrange the lines of a coroutine that fetches every URL with at most five requests in flight (real <code>asyncio</code>). One line is a trap.</p></div><script type="application/json">{"lines": ["async def fetch_all(urls):", "    limit = asyncio.Semaphore(5)", "    async def one(url):", "        async with limit:", "            return await fetch(url)", "    return await asyncio.gather(*(one(u) for u in urls))"], "distractors": ["        with limit:"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # waits before attempts 2, 3 and 4 with base 1 and factor 2, as a list
+q = ___   # how many permits asyncio.Lock has
+r = ___   # the methods async with calls, as a tuple of two names
+s = ___   # how many None sentinels stop 3 queue workers
+t = ___   # True or False: async for works on an ordinary generator</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == [1, 2, 4] and q == 1 and r == (&quot;__aenter__&quot;, &quot;__aexit__&quot;), &quot;p, q and r&quot;
+    assert s == 3 and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = [1, 2, 4]
+q = 1
+r = (&quot;__aenter__&quot;, &quot;__aexit__&quot;)
+s = 3
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w067d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why limit concurrency in an async program?", "answer": 1, "explain": "A Semaphore sets the limit.", "options": ["asyncio requires it", "Too many simultaneous requests can overwhelm servers or exhaust sockets", "It&rsquo;s faster", "To avoid the GIL"]}, {"type": "mc", "q": "What does async with semaphore do?", "answer": 1, "explain": "Even if the block raises.", "options": ["Starts a thread", "Waits for a permit, and returns it when the block ends", "Locks the loop", "Nothing"]}, {"type": "mc", "q": "How do consumer tasks know to stop?", "answer": 1, "explain": "One sentinel per consumer.", "options": ["They&rsquo;re cancelled", "Each gets a sentinel value such as None", "The queue empties", "A timeout"]}, {"type": "mc", "q": "What does asyncio.wait_for(coro, 5) do after 5 seconds?", "answer": 1, "explain": "Always put deadlines on I/O.", "options": ["Nothing", "Cancels the operation and raises TimeoutError", "Retries", "Returns None"]}, {"type": "mc", "q": "What is exponential backoff?", "answer": 1, "explain": "Plus jitter, and a limit on attempts.", "options": ["Retrying at once", "Waiting longer after each failure: 1, 2, 4, 8 &hellip; up to a cap", "Slowing the loop", "Cancelling"]}, {"type": "mc", "q": "Why add jitter to retry waits?", "answer": 1, "explain": "Spreads the load.", "options": ["Style", "So many clients don&rsquo;t all retry at the same moment", "To be slower", "It&rsquo;s required"]}, {"type": "mc", "q": "What does async with call?", "answer": 1, "explain": "Or use asynccontextmanager.", "options": ["<strong>enter</strong> and <strong>exit</strong>", "The coroutines <strong>aenter</strong> and <strong>aexit</strong>", "<strong>await</strong>", "<strong>aiter</strong>"]}, {"type": "mc", "q": "What is an async generator?", "answer": 1, "explain": "Streams of values that take time to arrive.", "options": ["A generator in a thread", "An async def function containing yield, consumed with async for", "A coroutine", "A task"]}, {"type": "mc", "q": "Which operations are safe to retry automatically?", "answer": 1, "explain": "Never blindly repeat a charge.", "options": ["All", "Idempotent ones, which give the same result if repeated", "Payments", "None"]}, {"type": "output", "q": "What does this print?", "answer": "[3, 2]", "explain": "Two slots: the short jobs share the second.", "code": "free_at = [0, 0]\nfor d in [3, 1, 1]:\n    i = free_at.index(min(free_at))\n    free_at[i] += d\nprint(free_at)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: limiting concurrency</div><div class="pc-prompt"><p>Opening a thousand connections at once can overwhelm a server or your own machine, so real async programs <strong>limit concurrency</strong> with a semaphore: <code>async with sem:</code> around the work. Using the loop in the starter, write <code>AsyncSemaphore(loop, value)</code>, a <code>Waitable</code> with a coroutine <code>acquire()</code> (waiting while no permits are left), <code>release()</code> (returning a permit and waking one waiter), <code>async with</code> support (released even if the block raises), and counters <code>active</code> and <code>peak</code> (the most permits held at once). Then the coroutine <code>bounded_gather(loop, coros, limit)</code>: run the coroutines concurrently with at most <code>limit</code> running at a time, returning <code>(results in the order given, peak)</code>.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Waitable:
+    &quot;Anything tasks can wait on: the loop adds the waiting task to .waiters.&quot;
+    def __init__(self):
+        self.waiters = deque()
+    def wait(self):
+        return _Wait(self)
+
+class _Wait:
+    def __init__(self, target):
+        self.target = target
+    def __await__(self):
+        yield (&quot;wait&quot;, self.target)
+
+class Task(Waitable):
+    def __init__(self, coro):
+        super().__init__()
+        self.coro, self.done, self.result = coro, False, None
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self._seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+    def wake(self, waitable, count=None):
+        &quot;Move waiting tasks (all, or up to count) back to the ready queue.&quot;
+        while waitable.waiters and (count is None or count &gt; 0):
+            self.ready.append(waitable.waiters.popleft())
+            if count is not None:
+                count -= 1
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.wake(task)
+            return
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            arg.waiters.append(task)
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result
+
+class AsyncSemaphore(Waitable):
+    def __init__(self, loop, value):
+        ___
+
+async def bounded_gather(loop, coros, limit):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_bounded():
+    &quot;a semaphore&quot;
+    loop = Loop()
+    starts = []
+    async def job(name, delay):
+        starts.append((name, loop.now))
+        await Sleep(delay)
+        return name
+    async def main():
+        return await bounded_gather(loop, [job(&quot;a&quot;, 4), job(&quot;b&quot;, 1), job(&quot;c&quot;, 2), job(&quot;d&quot;, 1)], limit=2)
+    results, peak = loop.run_until_complete(main())
+    assert results == [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;] and peak == 2 and loop.now == 4
+    assert starts == [(&quot;a&quot;, 0), (&quot;b&quot;, 0), (&quot;c&quot;, 1), (&quot;d&quot;, 3)]
+    loop2 = Loop()
+    async def main2():
+        return await bounded_gather(loop2, [job(str(i), 1) for i in range(6)], limit=3)
+    assert loop2.run_until_complete(main2())[1] == 3 and loop2.now == 2
+    loop3 = Loop()
+    sem = AsyncSemaphore(loop3, 1)
+    async def boom():
+        async with sem:
+            raise ValueError
+    async def main3():
+        try:
+            await boom()
+        except ValueError:
+            pass
+        async with sem:
+            return sem.value
+    assert loop3.run_until_complete(main3()) == 0 and sem.value == 1</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Waitable:
+    &quot;Anything tasks can wait on: the loop adds the waiting task to .waiters.&quot;
+    def __init__(self):
+        self.waiters = deque()
+    def wait(self):
+        return _Wait(self)
+
+class _Wait:
+    def __init__(self, target):
+        self.target = target
+    def __await__(self):
+        yield (&quot;wait&quot;, self.target)
+
+class Task(Waitable):
+    def __init__(self, coro):
+        super().__init__()
+        self.coro, self.done, self.result = coro, False, None
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self._seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+    def wake(self, waitable, count=None):
+        &quot;Move waiting tasks (all, or up to count) back to the ready queue.&quot;
+        while waitable.waiters and (count is None or count &gt; 0):
+            self.ready.append(waitable.waiters.popleft())
+            if count is not None:
+                count -= 1
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.wake(task)
+            return
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            arg.waiters.append(task)
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result
+
+class AsyncSemaphore(Waitable):
+    def __init__(self, loop, value):
+        super().__init__()
+        self.loop, self.value = loop, value
+        self.active = 0
+        self.peak = 0
+
+    async def acquire(self):
+        while self.value == 0:
+            await self.wait()
+        self.value -= 1
+        self.active += 1
+        self.peak = max(self.peak, self.active)
+
+    def release(self):
+        self.value += 1
+        self.active -= 1
+        self.loop.wake(self, 1)
+
+    async def __aenter__(self):
+        await self.acquire()
+        return self
+
+    async def __aexit__(self, *exc):
+        self.release()
+        return False
+
+async def bounded_gather(loop, coros, limit):
+    sem = AsyncSemaphore(loop, limit)
+
+    async def guarded(coro):
+        async with sem:
+            return await coro
+
+    tasks = [loop.create_task(guarded(c)) for c in coros]
+    results = [await t for t in tasks]
+    return results, sem.peak</textarea><template class="pc-src pc-hint">Wrap each coroutine in a small coroutine that does <code>async with sem: return await coro</code>, create a task for each wrapper, then await the tasks in order.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, use real <code>asyncio</code> to run twenty <code>asyncio.sleep(1)</code> &ldquo;downloads&rdquo; with a <code>Semaphore(5)</code> and check that they take about four seconds. Tomorrow: the mistakes that make async programs slow, stuck or wrong.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w067d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w067d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w067d3", "week": 67, "day": 3, "title": "Async I/O patterns", "exercises": [{"id": "w067d3-bounded", "title": "Bounded concurrency in numbers", "points": 10}, {"id": "w067d3-retry", "title": "Retrying with backoff", "points": 15}, {"id": "w067d3-aqueue", "title": "An async queue", "points": 15}, {"id": "w067d3-awith", "title": "An async context manager", "points": 10}, {"id": "w067d3-streams", "title": "Streams with async generators", "points": 10}, {"id": "w067d3-bug1", "title": "Backoff that starts too high", "points": 10}, {"id": "w067d3-bug2", "title": "A connection never closed", "points": 10}, {"id": "w067d3-bug3", "title": "Results in the wrong order", "points": 10}, {"id": "w067d3-trace", "title": "Predict them", "points": 10}, {"id": "w067d3-challenge", "title": "Challenge: limiting concurrency", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
