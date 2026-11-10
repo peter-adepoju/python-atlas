@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="b54d8b61c9">
+<title>Week 79 Day 4: Dependency security | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=b54d8b61c9">
+<link rel="stylesheet" href="../assets/css/site.css?v=b54d8b61c9">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=b54d8b61c9"></script>
+<script src="../assets/vendor/codemirror.js?v=b54d8b61c9" defer></script>
+<meta name="description" content="Most of the code your program runs, you didn’t write. A small web app pulls in dozens of packages, and they pull in more; each is maintained by people...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w079d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 79 Day 4: Dependency security">
+<meta property="og:description" content="Most of the code your program runs, you didn’t write. A small web app pulls in dozens of packages, and they pull in more; each is maintained by people...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w079d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-79">Week 79: Security</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#the-supply-chain" data-sec="the-supply-chain">The supply chain</a></li><li><a href="#versions-and-specifiers" data-sec="versions-and-specifiers">Versions and specifiers</a></li><li><a href="#locking-and-auditing" data-sec="locking-and-auditing">Locking and auditing</a></li><li><a href="#choosing-dependencies" data-sec="choosing-dependencies">Choosing dependencies</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w079d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-79">Week 79: Security</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 79, Day 4</span></p>
+      <h1>Dependency security</h1>
+      <div class="day-intro"><p>Most of the code your program runs, you didn&rsquo;t write. A small web app pulls in dozens of packages, and they pull in more; each is maintained by people you&rsquo;ve never met, and each new version is code you&rsquo;ve agreed to run. Today is about that supply chain: known vulnerabilities in the versions you use, malicious packages with names one letter away from popular ones, internal names hijacked from a public index, and updates that change under you. You&rsquo;ll compare versions and specifiers the way pip does, audit a locked set of packages against advisories, check that installs match their hashes, work out why a vulnerable package is installed at all, and spot names that look like typosquats.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Describe the main supply-chain risks, from known vulnerabilities to typosquatting and dependency confusion</li><li>Compare versions and check them against specifiers such as &gt;=, &lt; and ~=</li><li>Audit locked dependencies against advisories, and find the smallest fixed version</li><li>Pin dependencies with hashes, and verify downloads against them</li><li>Trace why a package is installed, and judge a new dependency before adding it</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="The supply chain: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Versions and specifiers: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Locking and auditing: 20 min"></span><span class="plan-seg s0" style="flex:15" title="Choosing dependencies: 15 min"></span><span class="plan-seg s1" style="flex:65" title="Practice: 65 min"></span><span class="plan-seg s0" style="flex:25" title="Quiz and daily challenge: 25 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">7 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">The supply chain</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Versions and specifiers</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Locking and auditing</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Choosing dependencies</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">65 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">25 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w079d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w079d4.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w079d4-p1"><textarea class="pc-src pc-code" hidden>versions = [&quot;1.9.0&quot;, &quot;1.10.0&quot;, &quot;1.2.0&quot;]
+print(sorted(versions))
+
+def key(v):
+    return tuple(int(part) for part in v.split(&quot;.&quot;))
+print(sorted(versions, key=key))
+print(&quot;1.10.0&quot; &gt; &quot;1.9.0&quot;, key(&quot;1.10.0&quot;) &gt; key(&quot;1.9.0&quot;))</textarea></div>
+<p>Version numbers aren&rsquo;t text: as strings, <code>"1.10.0"</code> sorts before <code>"1.9.0"</code>, because <code>"1"</code> comes before <code>"9"</code>. A tool that compared versions as strings would think a vulnerable <code>1.9.0</code> was newer than the fixed <code>1.10.0</code>. Compare them as tuples of numbers, and handle the rest of the rules, as pip&rsquo;s <code>packaging</code> library does.</p>
+<h2 id="the-supply-chain">The supply chain</h2>
+<p>Your <strong>dependencies</strong> are the packages you install directly; <strong>transitive</strong> dependencies are theirs, and theirs. A typical Flask app installs about ten packages for the one you asked for; a data-science project, hundreds. Every one is code that runs with your program&rsquo;s permissions, and some run code <strong>while they install</strong>. The main risks:</p>
+<ul>
+<li><strong>Known vulnerabilities</strong>: a bug in a version you use, published as an advisory with an identifier (a <strong>CVE</strong> such as <code>CVE-2023-32681</code>, or a <code>GHSA-...</code> or <code>PYSEC-...</code> id) and the range of affected versions. Attackers read advisories too, so old versions in production are the easiest way in.</li>
+<li><strong>Typosquatting</strong>: a malicious package named like a popular one (<code>reqeusts</code>, <code>python-dateutils</code>, <code>beautifulsoup</code> instead of <code>beautifulsoup4</code>) waiting for a typing mistake. Hundreds are found on PyPI every year.</li>
+<li><strong>Dependency confusion</strong>: your company&rsquo;s internal package <code>acme-billing</code> lives on a private index; an attacker publishes <code>acme-billing</code> with a higher version number on the <strong>public</strong> index, and an installer that looks at both picks theirs.</li>
+<li><strong>Compromised maintainers or updates</strong>: a stolen account, or a hostile new owner, publishes a malicious <strong>new version</strong> of a trusted package; everyone who installs &ldquo;the latest&rdquo; gets it.</li>
+<li><strong>Abandoned packages</strong>: no fixes coming, ever.</li>
+<li><strong>Licences</strong>: some licences place conditions on how you distribute your own code (Week 73).</li>
+</ul>
+<p>The defences fit together: <strong>know</strong> what you run (a lock file, or an SBOM: a &ldquo;software bill of materials&rdquo; listing every component and version), <strong>pin</strong> it exactly with hashes so nothing changes under you, <strong>audit</strong> it against advisories continuously, <strong>update</strong> deliberately and often, and <strong>think</strong> before adding anything new.</p>
+<h2 id="versions-and-specifiers">Versions and specifiers</h2>
+<p>Python versions follow <strong>PEP 440</strong>: a release made of numbers separated by dots (<code>2.31.0</code>), optionally followed by a pre-release marker: <code>a</code> (alpha), <code>b</code> (beta) or <code>rc</code> (release candidate) and a number (<code>3.0rc1</code>). Ordering rules:</p>
+<ul>
+<li>compare the release numbers as a tuple, after removing trailing zeros, so <code>1.0</code> equals <code>1.0.0</code>, and <code>1.10</code> is after <code>1.9</code>;</li>
+<li>for the same release, pre-releases come <strong>before</strong> the final: <code>2.0a1 &lt; 2.0b2 &lt; 2.0rc1 &lt; 2.0</code>.</li>
+</ul>
+<p>(The full standard also has post-releases, development releases, local versions and epochs; <code>packaging.version.Version</code> handles them all.)</p>
+<p>A <strong>specifier</strong> says which versions are acceptable, as a comma-separated list of conditions that must <strong>all</strong> hold:</p>
+<table>
+<thead>
+<tr>
+<th>Specifier</th>
+<th>Means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>==2.31.0</code></td>
+<td>exactly that version</td>
+</tr>
+<tr>
+<td><code>!=2.30.0</code></td>
+<td>anything but that</td>
+</tr>
+<tr>
+<td><code>&gt;=2.28</code>, <code>&lt;3</code></td>
+<td>the usual comparisons</td>
+</tr>
+<tr>
+<td><code>~=2.28</code></td>
+<td>&ldquo;compatible release&rdquo;: <code>&gt;=2.28</code> and <code>==2.*</code> (the last number may rise)</td>
+</tr>
+<tr>
+<td><code>~=2.28.1</code></td>
+<td><code>&gt;=2.28.1</code> and <code>==2.28.*</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>requests&gt;=2.28,&lt;3</code> in your <code>pyproject.toml</code> (Week 73) says which versions your code works with; a <strong>lock file</strong> records the exact versions actually chosen.</p>
+<div class="pc pc-example" data-kind="example" data-id="w079d4-e2"><textarea class="pc-src pc-code" hidden>import re
+
+PRE = {&quot;a&quot;: 0, &quot;b&quot;: 1, &quot;rc&quot;: 2}
+
+def key(text):
+    m = re.fullmatch(r&quot;(\d+(?:\.\d+)*)(?:(a|b|rc)(\d+))?&quot;, text)
+    release = [int(x) for x in m[1].split(&quot;.&quot;)]
+    while len(release) &gt; 1 and release[-1] == 0:
+        release.pop()
+    pre = (PRE[m[2]], int(m[3])) if m[2] else (3, 0)
+    return (tuple(release), pre)
+
+versions = [&quot;2.0&quot;, &quot;2.0rc1&quot;, &quot;1.10&quot;, &quot;1.9.3&quot;, &quot;2.0a2&quot;, &quot;2.0.0b1&quot;, &quot;1.10.0&quot;]
+print(sorted(versions, key=key))
+print(key(&quot;1.10&quot;) == key(&quot;1.10.0&quot;))</textarea></div>
+<h2 id="locking-and-auditing">Locking and auditing</h2>
+<p><strong>Lock exactly.</strong> A lock file lists <strong>every</strong> package, transitive ones included, at an exact version, with the <strong>hashes</strong> of the files that may be installed:</p>
+<pre><code>requests==2.32.3 \
+    --hash=sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6
+</code></pre>
+<p>Installing with <code>pip install --require-hashes -r requirements.txt</code> refuses any file whose SHA-256 doesn&rsquo;t match, so a package replaced on the index (or a man-in-the-middle) can&rsquo;t slip in. Tools write lock files for you: <code>pip-compile --generate-hashes</code> (pip-tools), <code>uv lock</code>, <code>poetry lock</code>. Commit the lock file, and install from it everywhere (CI, containers, production), so what you tested is what runs.</p>
+<p><strong>Audit continuously.</strong> An audit takes the locked versions and checks each against a database of advisories (the PyPA Advisory Database, OSV, GitHub&rsquo;s advisories). Each advisory lists the <strong>affected</strong> versions (usually as ranges) and the <strong>fixed</strong> ones. For each match, you want the smallest version that fixes it (the least disruptive upgrade), and a severity (often a <strong>CVSS</strong> score from 0 to 10) to decide what to do first. Not every advisory matters to you (the vulnerable function may be one you never call), but checking that is work; upgrading is usually quicker.</p>
+<p>Package names need <strong>normalising</strong> before you compare them: PyPI treats <code>PyYAML</code>, <code>pyyaml</code> and <code>py_yaml</code> as&hellip; not quite: it lower-cases and treats runs of <code>-</code>, <code>_</code> and <code>.</code> as one <code>-</code> (PEP 503), so <code>Flask_SQLAlchemy</code>, <code>flask.sqlalchemy</code> and <code>flask-sqlalchemy</code> are the same project.</p>
+<p><strong>Update deliberately.</strong> Small, frequent updates are easier than rare huge ones. Bots such as <strong>Dependabot</strong> and <strong>Renovate</strong> open a pull request when a new version (or a security fix) appears; your CI (Week 74) runs the tests on it, and you merge when it&rsquo;s green.</p>
+<h2 id="choosing-dependencies">Choosing dependencies</h2>
+<p>Before adding a package, spend five minutes on it:</p>
+<ul>
+<li><strong>Is it really needed?</strong> Twenty lines of your own code can be better than a dependency with its own dependencies. The standard library covers a lot.</li>
+<li><strong>Is it the real one?</strong> Check the exact name on PyPI and in the project&rsquo;s documentation; look for look-alikes.</li>
+<li><strong>Is it alive and trusted?</strong> Recent releases, several maintainers, an active repository, a security policy, many dependents.</li>
+<li><strong>What does it bring with it?</strong> Its own dependency tree, and anything it runs at install time.</li>
+<li><strong>Is its licence acceptable</strong> for how you&rsquo;ll distribute your code?</li>
+</ul>
+<p>And protect the installer itself: install internal packages only from your own index (<code>--index-url</code>, not <code>--extra-index-url</code>, which mixes indexes and invites dependency confusion), and register your internal names on the public index too, so nobody else can.</p>
+<h3 id="on-your-own-computer">On your own computer</h3>
+<p><code>pip-audit</code> checks an environment or a requirements file against advisories (<code>pip install pip-audit</code>, then <code>pip-audit -r requirements.txt</code>); <code>pip list --outdated</code> shows what&rsquo;s behind; <code>pipdeptree</code> shows why each package is installed; <code>uv lock</code> and <code>pip-compile --generate-hashes</code> write hashed lock files; and GitHub&rsquo;s Dependabot can be switched on in a repository&rsquo;s settings. Publishers can use PyPI&rsquo;s <strong>Trusted Publishing</strong>, which publishes from CI without long-lived passwords and attaches provenance, so users can check where a release was built.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Dependencies include transitive ones, and all run with your permissions (some at install time). Risks: known vulnerabilities (advisories with CVE, GHSA or PYSEC ids and affected ranges), typosquats, dependency confusion between private and public indexes, compromised maintainers or updates, abandoned packages, licences. PEP 440: compare release numbers as tuples without trailing zeros; a1 &lt; b1 &lt; rc1 &lt; final. Specifiers: ==, !=, &lt;, &lt;=, &gt;, &gt;=, ~= (compatible release), comma-separated and all required. Lock every package exactly with hashes and install with &ndash;require-hashes; audit the lock against advisories (normalise names per PEP 503), take the smallest fixed version, prioritise by severity; update often with Dependabot or Renovate and CI. Before adding a package: need, real name, maintenance, its own dependencies, licence; use &ndash;index-url for private packages and claim internal names publicly.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d4-version" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Comparing versions</div><div class="pc-prompt"><p>Write a class <code>Version(text)</code> for PEP 440 versions of the form <code>N(.N)*</code>, optionally followed by <code>a</code>, <code>b</code> or <code>rc</code> and a number (raise <code>ValueError(f"not a version: {text!r}")</code> otherwise; surrounding spaces are ignored). Give it <code>release</code> (a tuple of ints as written), <code>pre</code> (<code>None</code>, or a tuple like <code>("rc", 1)</code>), <code>str()</code> giving the version as written (without the spaces), and comparisons (<code>==</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, and hashing consistent with <code>==</code>) using the rules: trailing zeros in the release don&rsquo;t matter, and pre-releases come before the final release, in the order <code>a</code>, <code>b</code>, <code>rc</code>. Use <code>functools.total_ordering</code>.</p></div><textarea class="pc-src pc-code" hidden>import functools
+import re
+
+@functools.total_ordering
+class Version:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_parse():
+    &quot;parts&quot;
+    v = Version(&quot; 2.0rc1 &quot;)
+    assert v.release == (2, 0) and v.pre == (&quot;rc&quot;, 1) and str(v) == &quot;2.0rc1&quot;
+    assert Version(&quot;1.10.0&quot;).release == (1, 10, 0) and Version(&quot;3&quot;).pre is None
+    for bad in (&quot;1.x&quot;, &quot;v1.0&quot;, &quot;1..2&quot;, &quot;&quot;, &quot;2.0beta1&quot;, &quot;1.0-rc1&quot;):
+        try:
+            Version(bad)
+        except ValueError as e:
+            assert str(e) == f&quot;not a version: {bad!r}&quot;
+        else:
+            raise AssertionError(bad)
+
+def test_order():
+    &quot;PEP 440 ordering&quot;
+    texts = [&quot;2.0&quot;, &quot;2.0rc1&quot;, &quot;1.10&quot;, &quot;1.9.3&quot;, &quot;2.0a2&quot;, &quot;2.0.0b1&quot;, &quot;1.10.0.1&quot;, &quot;0.9&quot;, &quot;2.0a10&quot;]
+    assert [str(v) for v in sorted(Version(t) for t in texts)] == [&quot;0.9&quot;, &quot;1.9.3&quot;, &quot;1.10&quot;, &quot;1.10.0.1&quot;, &quot;2.0a2&quot;, &quot;2.0a10&quot;, &quot;2.0.0b1&quot;, &quot;2.0rc1&quot;, &quot;2.0&quot;]
+    assert Version(&quot;1.0&quot;) == Version(&quot;1.0.0&quot;) == Version(&quot;1&quot;) and hash(Version(&quot;1.0&quot;)) == hash(Version(&quot;1&quot;))
+    assert Version(&quot;1.0rc1&quot;) != Version(&quot;1.0&quot;) and Version(&quot;1.0b1&quot;) &lt; Version(&quot;1.0rc1&quot;) &lt;= Version(&quot;1.0rc1&quot;)
+    assert len({Version(&quot;2&quot;), Version(&quot;2.0&quot;), Version(&quot;2.0.0&quot;)}) == 1</textarea><textarea class="pc-src pc-solution" hidden>import functools
+import re
+
+PRE_ORDER = {&quot;a&quot;: 0, &quot;b&quot;: 1, &quot;rc&quot;: 2}
+
+@functools.total_ordering
+class Version:
+    def __init__(self, text):
+        text = text.strip()
+        m = re.fullmatch(r&quot;(\d+(?:\.\d+)*)(?:(a|b|rc)(\d+))?&quot;, text)
+        if not m:
+            raise ValueError(f&quot;not a version: {text!r}&quot;)
+        self.text = text
+        self.release = tuple(int(x) for x in m[1].split(&quot;.&quot;))
+        self.pre = (m[2], int(m[3])) if m[2] else None
+
+    def _key(self):
+        release = list(self.release)
+        while len(release) &gt; 1 and release[-1] == 0:
+            release.pop()
+        pre = (PRE_ORDER[self.pre[0]], self.pre[1]) if self.pre else (3, 0)
+        return tuple(release), pre
+
+    def __str__(self):
+        return self.text
+
+    def __repr__(self):
+        return f&quot;Version({self.text!r})&quot;
+
+    def __eq__(self, other):
+        return self._key() == other._key()
+
+    def __lt__(self, other):
+        return self._key() &lt; other._key()
+
+    def __hash__(self):
+        return hash(self._key())</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d4-specifiers" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Does it satisfy the specifier?</div><div class="pc-prompt"><p>Using <code>Version</code> (the starter includes it), write <code>satisfies(version, spec)</code>: <code>True</code> if the version text meets every comma-separated condition in <code>spec</code> (spaces anywhere are ignored; an empty spec allows anything). Operators: <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, and <code>~=V</code>, which means <code>&gt;=V</code> and the same release numbers as V <strong>except its last one</strong> (so <code>~=2.28</code> needs <code>2.*</code>, and <code>~=2.28.1</code> needs <code>2.28.*</code>; <code>~=</code> needs at least two release numbers, else raise <code>ValueError("~= needs at least two release numbers")</code>). An unknown operator raises <code>ValueError(f"bad specifier: {part!r}")</code>. Then <code>best(available, spec)</code>: the highest version text in <code>available</code> that satisfies the spec and isn&rsquo;t a pre-release, or <code>None</code>.</p></div><textarea class="pc-src pc-code" hidden>import functools
+import re
+
+PRE_ORDER = {&quot;a&quot;: 0, &quot;b&quot;: 1, &quot;rc&quot;: 2}
+
+@functools.total_ordering
+class Version:
+    def __init__(self, text):
+        text = text.strip()
+        m = re.fullmatch(r&quot;(\d+(?:\.\d+)*)(?:(a|b|rc)(\d+))?&quot;, text)
+        if not m:
+            raise ValueError(f&quot;not a version: {text!r}&quot;)
+        self.text = text
+        self.release = tuple(int(x) for x in m[1].split(&quot;.&quot;))
+        self.pre = (m[2], int(m[3])) if m[2] else None
+    def _key(self):
+        release = list(self.release)
+        while len(release) &gt; 1 and release[-1] == 0:
+            release.pop()
+        return tuple(release), (PRE_ORDER[self.pre[0]], self.pre[1]) if self.pre else (3, 0)
+    def __str__(self):
+        return self.text
+    def __eq__(self, other):
+        return self._key() == other._key()
+    def __lt__(self, other):
+        return self._key() &lt; other._key()
+    def __hash__(self):
+        return hash(self._key())
+
+def satisfies(version, spec):
+    ___
+
+def best(available, spec):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_satisfies():
+    &quot;each operator&quot;
+    assert satisfies(&quot;2.31.0&quot;, &quot;&gt;=2.28, &lt;3&quot;) and not satisfies(&quot;3.0&quot;, &quot;&gt;=2.28,&lt;3&quot;) and satisfies(&quot;2.28&quot;, &quot;&gt;=2.28.0&quot;)
+    assert satisfies(&quot;1.4.2&quot;, &quot;==1.4.2&quot;) and satisfies(&quot;1.4.2&quot;, &quot;==1.4.2.0&quot;) and not satisfies(&quot;1.4.2&quot;, &quot;!=1.4.2&quot;)
+    assert satisfies(&quot;2.30&quot;, &quot;~=2.28&quot;) and not satisfies(&quot;3.1&quot;, &quot;~=2.28&quot;) and not satisfies(&quot;2.27&quot;, &quot;~=2.28&quot;)
+    assert satisfies(&quot;2.28.9&quot;, &quot;~=2.28.1&quot;) and not satisfies(&quot;2.29.0&quot;, &quot;~=2.28.1&quot;) and not satisfies(&quot;2.28.0&quot;, &quot;~=2.28.1&quot;)
+    assert satisfies(&quot;0.1&quot;, &quot;&quot;) and satisfies(&quot;5&quot;, &quot; &gt; 4 , &lt;= 5 &quot;) and not satisfies(&quot;4&quot;, &quot;&gt;4&quot;)
+    for spec, message in [(&quot;~=2&quot;, &quot;~= needs at least two release numbers&quot;), (&quot;=&gt;2&quot;, &quot;bad specifier: &#x27;=&gt;2&#x27;&quot;), (&quot;2.0&quot;, &quot;bad specifier: &#x27;2.0&#x27;&quot;)]:
+        try:
+            satisfies(&quot;2.0&quot;, spec)
+        except ValueError as e:
+            assert str(e) == message, spec
+        else:
+            raise AssertionError(spec)
+
+def test_best():
+    &quot;the newest acceptable final release&quot;
+    available = [&quot;2.27.1&quot;, &quot;2.28.0&quot;, &quot;2.28.2&quot;, &quot;2.31.0&quot;, &quot;2.32.0rc1&quot;, &quot;3.0.0&quot;]
+    assert best(available, &quot;&gt;=2.28,&lt;3&quot;) == &quot;2.31.0&quot; and best(available, &quot;~=2.28.0&quot;) == &quot;2.28.2&quot;
+    assert best(available, &quot;&gt;=4&quot;) is None and best([&quot;1.0rc1&quot;], &quot;&quot;) is None</textarea><textarea class="pc-src pc-solution" hidden>import functools
+import re
+
+PRE_ORDER = {&quot;a&quot;: 0, &quot;b&quot;: 1, &quot;rc&quot;: 2}
+
+@functools.total_ordering
+class Version:
+    def __init__(self, text):
+        text = text.strip()
+        m = re.fullmatch(r&quot;(\d+(?:\.\d+)*)(?:(a|b|rc)(\d+))?&quot;, text)
+        if not m:
+            raise ValueError(f&quot;not a version: {text!r}&quot;)
+        self.text = text
+        self.release = tuple(int(x) for x in m[1].split(&quot;.&quot;))
+        self.pre = (m[2], int(m[3])) if m[2] else None
+    def _key(self):
+        release = list(self.release)
+        while len(release) &gt; 1 and release[-1] == 0:
+            release.pop()
+        return tuple(release), (PRE_ORDER[self.pre[0]], self.pre[1]) if self.pre else (3, 0)
+    def __str__(self):
+        return self.text
+    def __eq__(self, other):
+        return self._key() == other._key()
+    def __lt__(self, other):
+        return self._key() &lt; other._key()
+    def __hash__(self):
+        return hash(self._key())
+
+OPS = {&quot;==&quot;: lambda a, b: a == b, &quot;!=&quot;: lambda a, b: a != b, &quot;&lt;=&quot;: lambda a, b: a &lt;= b,
+       &quot;&gt;=&quot;: lambda a, b: a &gt;= b, &quot;&lt;&quot;: lambda a, b: a &lt; b, &quot;&gt;&quot;: lambda a, b: a &gt; b}
+
+def check(v, part):
+    if part.startswith(&quot;~=&quot;):
+        target = Version(part[2:])
+        if len(target.release) &lt; 2:
+            raise ValueError(&quot;~= needs at least two release numbers&quot;)
+        prefix = target.release[:-1]
+        padded = v.release + (0,) * len(prefix)
+        return v &gt;= target and padded[:len(prefix)] == prefix
+    for op in (&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;, &quot;&lt;&quot;, &quot;&gt;&quot;):
+        if part.startswith(op):
+            try:
+                return OPS[op](v, Version(part[len(op):]))
+            except ValueError:
+                break
+    raise ValueError(f&quot;bad specifier: {part!r}&quot;)
+
+def satisfies(version, spec):
+    v = Version(version)
+    parts = [p for p in spec.replace(&quot; &quot;, &quot;&quot;).split(&quot;,&quot;) if p]
+    return all(check(v, p) for p in parts)
+
+def best(available, spec):
+    good = [Version(a) for a in available if Version(a).pre is None and satisfies(a, spec)]
+    return str(max(good)) if good else None</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d4-audit" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Auditing a lock file</div><div class="pc-prompt"><p>Write <code>normalise(name)</code>: the PEP 503 form (lower case, every run of <code>-</code>, <code>_</code> and <code>.</code> replaced by one <code>-</code>). Then <code>audit(locked, advisories)</code>: <code>locked</code> maps package names (any spelling) to version texts; each advisory is a dict with <code>id</code>, <code>package</code>, <code>affected</code> (a list of specifier strings, the version is affected if it satisfies <strong>any</strong> of them), <code>fixed</code> (a list of version texts) and <code>severity</code> (a CVSS score). Return a list of findings, <code>{"package": NORMALISED, "version": V, "id": ID, "severity": S, "fix": F}</code>, where F is the smallest fixed version greater than the installed one, or <code>None</code> if there isn&rsquo;t one; sorted by severity (highest first), then package, then id. <code>satisfies</code> and <code>Version</code> are given.</p></div><textarea class="pc-src pc-code" hidden>import functools
+import re
+
+PRE_ORDER = {&quot;a&quot;: 0, &quot;b&quot;: 1, &quot;rc&quot;: 2}
+
+@functools.total_ordering
+class Version:
+    def __init__(self, text):
+        text = text.strip()
+        m = re.fullmatch(r&quot;(\d+(?:\.\d+)*)(?:(a|b|rc)(\d+))?&quot;, text)
+        if not m:
+            raise ValueError(f&quot;not a version: {text!r}&quot;)
+        self.text = text
+        self.release = tuple(int(x) for x in m[1].split(&quot;.&quot;))
+        self.pre = (m[2], int(m[3])) if m[2] else None
+    def _key(self):
+        release = list(self.release)
+        while len(release) &gt; 1 and release[-1] == 0:
+            release.pop()
+        return tuple(release), (PRE_ORDER[self.pre[0]], self.pre[1]) if self.pre else (3, 0)
+    def __str__(self):
+        return self.text
+    def __eq__(self, other):
+        return self._key() == other._key()
+    def __lt__(self, other):
+        return self._key() &lt; other._key()
+    def __hash__(self):
+        return hash(self._key())
+
+OPS = {&quot;==&quot;: lambda a, b: a == b, &quot;!=&quot;: lambda a, b: a != b, &quot;&lt;=&quot;: lambda a, b: a &lt;= b,
+       &quot;&gt;=&quot;: lambda a, b: a &gt;= b, &quot;&lt;&quot;: lambda a, b: a &lt; b, &quot;&gt;&quot;: lambda a, b: a &gt; b}
+
+def satisfies(version, spec):
+    v = Version(version)
+    for part in [p for p in spec.replace(&quot; &quot;, &quot;&quot;).split(&quot;,&quot;) if p]:
+        op = next(o for o in (&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;, &quot;&lt;&quot;, &quot;&gt;&quot;) if part.startswith(o))
+        if not OPS[op](v, Version(part[len(op):])):
+            return False
+    return True
+
+def normalise(name):
+    ___
+
+def audit(locked, advisories):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>ADVISORIES = [
+    {&quot;id&quot;: &quot;PYSEC-2023-74&quot;, &quot;package&quot;: &quot;requests&quot;, &quot;affected&quot;: [&quot;&gt;=2.3.0,&lt;2.31.0&quot;], &quot;fixed&quot;: [&quot;2.31.0&quot;], &quot;severity&quot;: 6.1},
+    {&quot;id&quot;: &quot;GHSA-9wx4&quot;, &quot;package&quot;: &quot;Jinja2&quot;, &quot;affected&quot;: [&quot;&lt;3.1.3&quot;], &quot;fixed&quot;: [&quot;3.1.3&quot;], &quot;severity&quot;: 5.4},
+    {&quot;id&quot;: &quot;GHSA-h5c8&quot;, &quot;package&quot;: &quot;jinja2&quot;, &quot;affected&quot;: [&quot;&lt;3.1.4&quot;], &quot;fixed&quot;: [&quot;3.1.4&quot;], &quot;severity&quot;: 5.4},
+    {&quot;id&quot;: &quot;CVE-2024-1135&quot;, &quot;package&quot;: &quot;gunicorn&quot;, &quot;affected&quot;: [&quot;&lt;22.0.0&quot;], &quot;fixed&quot;: [&quot;22.0.0&quot;], &quot;severity&quot;: 7.5},
+    {&quot;id&quot;: &quot;PYSEC-2021-1&quot;, &quot;package&quot;: &quot;PyYAML&quot;, &quot;affected&quot;: [&quot;&lt;5.4&quot;, &quot;&gt;=6.0,&lt;6.0.1&quot;], &quot;fixed&quot;: [&quot;5.4&quot;, &quot;6.0.1&quot;], &quot;severity&quot;: 9.8},
+    {&quot;id&quot;: &quot;GHSA-old&quot;, &quot;package&quot;: &quot;abandoned.lib&quot;, &quot;affected&quot;: [&quot;&gt;=0&quot;], &quot;fixed&quot;: [], &quot;severity&quot;: 4.0},
+]
+
+def test_normalise():
+    &quot;PEP 503&quot;
+    assert normalise(&quot;Flask_SQLAlchemy&quot;) == normalise(&quot;flask.sqlalchemy&quot;) == normalise(&quot;flask--sqlalchemy&quot;) == &quot;flask-sqlalchemy&quot;
+    assert normalise(&quot;PyYAML&quot;) == &quot;pyyaml&quot;
+
+def test_audit():
+    &quot;findings, fixes and order&quot;
+    locked = {&quot;Requests&quot;: &quot;2.28.1&quot;, &quot;jinja2&quot;: &quot;3.1.2&quot;, &quot;gunicorn&quot;: &quot;22.0.0&quot;, &quot;pyyaml&quot;: &quot;6.0&quot;, &quot;Abandoned_Lib&quot;: &quot;1.2&quot;, &quot;click&quot;: &quot;8.1.7&quot;}
+    got = audit(locked, ADVISORIES)
+    assert got == [
+        {&quot;package&quot;: &quot;pyyaml&quot;, &quot;version&quot;: &quot;6.0&quot;, &quot;id&quot;: &quot;PYSEC-2021-1&quot;, &quot;severity&quot;: 9.8, &quot;fix&quot;: &quot;6.0.1&quot;},
+        {&quot;package&quot;: &quot;requests&quot;, &quot;version&quot;: &quot;2.28.1&quot;, &quot;id&quot;: &quot;PYSEC-2023-74&quot;, &quot;severity&quot;: 6.1, &quot;fix&quot;: &quot;2.31.0&quot;},
+        {&quot;package&quot;: &quot;jinja2&quot;, &quot;version&quot;: &quot;3.1.2&quot;, &quot;id&quot;: &quot;GHSA-9wx4&quot;, &quot;severity&quot;: 5.4, &quot;fix&quot;: &quot;3.1.3&quot;},
+        {&quot;package&quot;: &quot;jinja2&quot;, &quot;version&quot;: &quot;3.1.2&quot;, &quot;id&quot;: &quot;GHSA-h5c8&quot;, &quot;severity&quot;: 5.4, &quot;fix&quot;: &quot;3.1.4&quot;},
+        {&quot;package&quot;: &quot;abandoned-lib&quot;, &quot;version&quot;: &quot;1.2&quot;, &quot;id&quot;: &quot;GHSA-old&quot;, &quot;severity&quot;: 4.0, &quot;fix&quot;: None}]
+    assert audit({&quot;pyyaml&quot;: &quot;5.3.1&quot;}, ADVISORIES)[0][&quot;fix&quot;] == &quot;5.4&quot; and audit({&quot;requests&quot;: &quot;2.32.3&quot;}, ADVISORIES) == []</textarea><textarea class="pc-src pc-solution" hidden>import functools
+import re
+
+PRE_ORDER = {&quot;a&quot;: 0, &quot;b&quot;: 1, &quot;rc&quot;: 2}
+
+@functools.total_ordering
+class Version:
+    def __init__(self, text):
+        text = text.strip()
+        m = re.fullmatch(r&quot;(\d+(?:\.\d+)*)(?:(a|b|rc)(\d+))?&quot;, text)
+        if not m:
+            raise ValueError(f&quot;not a version: {text!r}&quot;)
+        self.text = text
+        self.release = tuple(int(x) for x in m[1].split(&quot;.&quot;))
+        self.pre = (m[2], int(m[3])) if m[2] else None
+    def _key(self):
+        release = list(self.release)
+        while len(release) &gt; 1 and release[-1] == 0:
+            release.pop()
+        return tuple(release), (PRE_ORDER[self.pre[0]], self.pre[1]) if self.pre else (3, 0)
+    def __str__(self):
+        return self.text
+    def __eq__(self, other):
+        return self._key() == other._key()
+    def __lt__(self, other):
+        return self._key() &lt; other._key()
+    def __hash__(self):
+        return hash(self._key())
+
+OPS = {&quot;==&quot;: lambda a, b: a == b, &quot;!=&quot;: lambda a, b: a != b, &quot;&lt;=&quot;: lambda a, b: a &lt;= b,
+       &quot;&gt;=&quot;: lambda a, b: a &gt;= b, &quot;&lt;&quot;: lambda a, b: a &lt; b, &quot;&gt;&quot;: lambda a, b: a &gt; b}
+
+def satisfies(version, spec):
+    v = Version(version)
+    for part in [p for p in spec.replace(&quot; &quot;, &quot;&quot;).split(&quot;,&quot;) if p]:
+        op = next(o for o in (&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;, &quot;&lt;&quot;, &quot;&gt;&quot;) if part.startswith(o))
+        if not OPS[op](v, Version(part[len(op):])):
+            return False
+    return True
+
+def normalise(name):
+    return re.sub(r&quot;[-_.]+&quot;, &quot;-&quot;, name).lower()
+
+def audit(locked, advisories):
+    installed = {normalise(name): version for name, version in locked.items()}
+    findings = []
+    for adv in advisories:
+        package = normalise(adv[&quot;package&quot;])
+        if package not in installed:
+            continue
+        version = installed[package]
+        if not any(satisfies(version, spec) for spec in adv[&quot;affected&quot;]):
+            continue
+        later = [Version(f) for f in adv[&quot;fixed&quot;] if Version(f) &gt; Version(version)]
+        findings.append({&quot;package&quot;: package, &quot;version&quot;: version, &quot;id&quot;: adv[&quot;id&quot;], &quot;severity&quot;: adv[&quot;severity&quot;],
+                         &quot;fix&quot;: str(min(later)) if later else None})
+    return sorted(findings, key=lambda f: (-f[&quot;severity&quot;], f[&quot;package&quot;], f[&quot;id&quot;]))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d4-hashes" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Installing only what was locked</div><div class="pc-prompt"><p>A hashed requirements file has entries like <code>NAME==VERSION --hash=sha256:HEX</code> (one or more <code>--hash</code> options; real files often split them over lines ending with <code>\</code>, which you should join first). Write <code>parse_locked(text)</code>: skip blank lines and <code>#</code> comments, and return <code>{normalised_name: (version, {hex, ...})}</code>; raise <code>ValueError(f"not pinned: {LINE}")</code> for an entry without <code>==</code> or without any <code>--hash=sha256:</code>. Then <code>verify(locked, name, version, data)</code>: return <code>True</code> only if the package is locked at exactly that version and the SHA-256 of <code>data</code> (bytes) is one of its hashes (compare hex digests in lower case); otherwise <code>False</code>.</p></div><textarea class="pc-src pc-code" hidden>import hashlib
+import re
+
+def parse_locked(text):
+    ___
+
+def verify(locked, name, version, data):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_lock():
+    &quot;hashes and pins&quot;
+    import hashlib
+    good = b&quot;pretend this is a wheel&quot;
+    h1, h2 = hashlib.sha256(good).hexdigest(), hashlib.sha256(b&quot;the sdist&quot;).hexdigest()
+    text = f&quot;&quot;&quot;# generated by pip-compile --generate-hashes
+Flask==3.0.3 \\
+    --hash=sha256:{h1.upper()} \\
+    --hash=sha256:{h2}
+
+click==8.1.7 --hash=sha256:{&quot;ab&quot; * 32}
+&quot;&quot;&quot;
+    locked = parse_locked(text)
+    assert locked == {&quot;flask&quot;: (&quot;3.0.3&quot;, {h1, h2}), &quot;click&quot;: (&quot;8.1.7&quot;, {&quot;ab&quot; * 32})}
+    assert verify(locked, &quot;flask&quot;, &quot;3.0.3&quot;, good) and verify(locked, &quot;Flask&quot;, &quot;3.0.3&quot;, b&quot;the sdist&quot;)
+    assert not verify(locked, &quot;flask&quot;, &quot;3.0.3&quot;, good + b&quot;!&quot;) and not verify(locked, &quot;flask&quot;, &quot;3.0.4&quot;, good)
+    assert not verify(locked, &quot;requests&quot;, &quot;2.32.3&quot;, good)
+    for bad in (&quot;requests&gt;=2.28 --hash=sha256:&quot; + &quot;a&quot; * 64, &quot;requests==2.32.3&quot;):
+        try:
+            parse_locked(bad)
+        except ValueError as e:
+            assert str(e) == f&quot;not pinned: {bad}&quot;
+        else:
+            raise AssertionError(bad)</textarea><textarea class="pc-src pc-solution" hidden>import hashlib
+import re
+
+def parse_locked(text):
+    joined = re.sub(r&quot;\\\n&quot;, &quot; &quot;, text)
+    locked = {}
+    for line in joined.splitlines():
+        line = &quot; &quot;.join(line.split())
+        if not line or line.startswith(&quot;#&quot;):
+            continue
+        requirement = line.split()[0]
+        hashes = {h.lower() for h in re.findall(r&quot;--hash=sha256:([0-9A-Fa-f]{64})&quot;, line)}
+        if &quot;==&quot; not in requirement or not hashes:
+            raise ValueError(f&quot;not pinned: {line}&quot;)
+        name, version = requirement.split(&quot;==&quot;, 1)
+        locked[re.sub(r&quot;[-_.]+&quot;, &quot;-&quot;, name).lower()] = (version, hashes)
+    return locked
+
+def verify(locked, name, version, data):
+    entry = locked.get(re.sub(r&quot;[-_.]+&quot;, &quot;-&quot;, name).lower())
+    if entry is None or entry[0] != version:
+        return False
+    return hashlib.sha256(data).hexdigest().lower() in entry[1]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d4-why" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Why is this installed?</div><div class="pc-prompt"><p><code>deps</code> maps each package to the list of packages it depends on directly (names already normalised). Write <code>installed(direct, deps)</code>: every package installed for the list of direct dependencies, transitive ones included, sorted. Then <code>why(package, direct, deps)</code>: every chain from a direct dependency down to <code>package</code>, as lists of names (<code>["flask", "werkzeug", "markupsafe"]</code>), sorted; a direct dependency that <strong>is</strong> the package gives a chain of one. Cycles in <code>deps</code> must not loop forever (a chain never visits a package twice).</p></div><textarea class="pc-src pc-code" hidden>def installed(direct, deps):
+    ___
+
+def why(package, direct, deps):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>DEPS = {&quot;flask&quot;: [&quot;werkzeug&quot;, &quot;jinja2&quot;, &quot;click&quot;, &quot;itsdangerous&quot;, &quot;blinker&quot;], &quot;werkzeug&quot;: [&quot;markupsafe&quot;], &quot;jinja2&quot;: [&quot;markupsafe&quot;],
+        &quot;click&quot;: [], &quot;itsdangerous&quot;: [], &quot;blinker&quot;: [], &quot;markupsafe&quot;: [], &quot;requests&quot;: [&quot;urllib3&quot;, &quot;idna&quot;, &quot;certifi&quot;, &quot;charset-normalizer&quot;],
+        &quot;urllib3&quot;: [], &quot;idna&quot;: [], &quot;certifi&quot;: [], &quot;charset-normalizer&quot;: [], &quot;a&quot;: [&quot;b&quot;], &quot;b&quot;: [&quot;a&quot;, &quot;markupsafe&quot;]}
+
+def test_installed():
+    &quot;the whole tree&quot;
+    assert installed([&quot;flask&quot;], DEPS) == [&quot;blinker&quot;, &quot;click&quot;, &quot;flask&quot;, &quot;itsdangerous&quot;, &quot;jinja2&quot;, &quot;markupsafe&quot;, &quot;werkzeug&quot;]
+    assert len(installed([&quot;flask&quot;, &quot;requests&quot;], DEPS)) == 12 and installed([&quot;a&quot;], DEPS) == [&quot;a&quot;, &quot;b&quot;, &quot;markupsafe&quot;]
+
+def test_why():
+    &quot;every chain&quot;
+    assert why(&quot;markupsafe&quot;, [&quot;flask&quot;, &quot;requests&quot;], DEPS) == [[&quot;flask&quot;, &quot;jinja2&quot;, &quot;markupsafe&quot;], [&quot;flask&quot;, &quot;werkzeug&quot;, &quot;markupsafe&quot;]]
+    assert why(&quot;requests&quot;, [&quot;flask&quot;, &quot;requests&quot;], DEPS) == [[&quot;requests&quot;]]
+    assert why(&quot;markupsafe&quot;, [&quot;a&quot;], DEPS) == [[&quot;a&quot;, &quot;b&quot;, &quot;markupsafe&quot;]] and why(&quot;idna&quot;, [&quot;flask&quot;], DEPS) == []</textarea><textarea class="pc-src pc-solution" hidden>def installed(direct, deps):
+    seen, stack = set(), list(direct)
+    while stack:
+        name = stack.pop()
+        if name not in seen:
+            seen.add(name)
+            stack.extend(deps.get(name, []))
+    return sorted(seen)
+
+def why(package, direct, deps):
+    chains = []
+
+    def walk(path):
+        name = path[-1]
+        if name == package:
+            chains.append(list(path))
+            return
+        for child in deps.get(name, []):
+            if child not in path:
+                walk(path + [child])
+
+    for top in direct:
+        walk([top])
+    return sorted(chains)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d4-typos" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Spotting typosquats</div><div class="pc-prompt"><p>Write <code>distance(a, b)</code>: the Damerau-Levenshtein distance (the fewest single-character insertions, deletions, substitutions <strong>or swaps of two neighbouring characters</strong> that turn <code>a</code> into <code>b</code>; the &ldquo;optimal string alignment&rdquo; version is fine). Then <code>suspicious(name, popular)</code>: compare the normalised name (PEP 503) with each normalised popular name; return the sorted list of popular names it&rsquo;s <strong>not equal</strong> to but looks like: distance 1 for names of up to 8 characters, up to 2 for longer ones, or equal once all <code>-</code> are removed (<code>python-dateutil</code> versus <code>pythondateutil</code>).</p></div><textarea class="pc-src pc-code" hidden>import re
+
+def distance(a, b):
+    ___
+
+def suspicious(name, popular):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>POPULAR = [&quot;requests&quot;, &quot;numpy&quot;, &quot;python-dateutil&quot;, &quot;beautifulsoup4&quot;, &quot;django&quot;, &quot;urllib3&quot;, &quot;pyyaml&quot;]
+
+def test_distance():
+    &quot;edits and swaps&quot;
+    assert distance(&quot;requests&quot;, &quot;requests&quot;) == 0 and distance(&quot;reqeusts&quot;, &quot;requests&quot;) == 1
+    assert distance(&quot;kitten&quot;, &quot;sitting&quot;) == 3 and distance(&quot;&quot;, &quot;abc&quot;) == 3 and distance(&quot;ab&quot;, &quot;ba&quot;) == 1
+
+def test_suspicious():
+    &quot;look-alikes&quot;
+    assert suspicious(&quot;reqeusts&quot;, POPULAR) == [&quot;requests&quot;] and suspicious(&quot;requests&quot;, POPULAR) == []
+    assert suspicious(&quot;nunpy&quot;, POPULAR) == [&quot;numpy&quot;] and suspicious(&quot;Python_DateUtils&quot;, POPULAR) == [&quot;python-dateutil&quot;]
+    assert suspicious(&quot;pythondateutil&quot;, POPULAR) == [&quot;python-dateutil&quot;] and suspicious(&quot;beautifulsoup&quot;, POPULAR) == [&quot;beautifulsoup4&quot;]
+    assert suspicious(&quot;djangoo&quot;, POPULAR) == [&quot;django&quot;] and suspicious(&quot;flask&quot;, POPULAR) == [] and suspicious(&quot;PyYAML&quot;, POPULAR) == []
+    assert suspicious(&quot;urlib3&quot;, POPULAR) == [&quot;urllib3&quot;] and suspicious(&quot;pandas&quot;, POPULAR) == []</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+def norm(name):
+    return re.sub(r&quot;[-_.]+&quot;, &quot;-&quot;, name).lower()
+
+def distance(a, b):
+    d = [[0] * (len(b) + 1) for _ in range(len(a) + 1)]
+    for i in range(len(a) + 1):
+        d[i][0] = i
+    for j in range(len(b) + 1):
+        d[0][j] = j
+    for i in range(1, len(a) + 1):
+        for j in range(1, len(b) + 1):
+            cost = a[i - 1] != b[j - 1]
+            d[i][j] = min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost)
+            if i &gt; 1 and j &gt; 1 and a[i - 1] == b[j - 2] and a[i - 2] == b[j - 1]:
+                d[i][j] = min(d[i][j], d[i - 2][j - 2] + 1)
+    return d[len(a)][len(b)]
+
+def suspicious(name, popular):
+    n = norm(name)
+    found = []
+    for p in popular:
+        q = norm(p)
+        if n == q:
+            continue
+        limit = 1 if len(q) &lt;= 8 else 2
+        if distance(n, q) &lt;= limit or n.replace(&quot;-&quot;, &quot;&quot;) == q.replace(&quot;-&quot;, &quot;&quot;):
+            found.append(p)
+    return sorted(found)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w079d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">An upgrade that looked like a downgrade</div><div class="pc-prompt"><p>The check compares versions as strings, so <code>"1.10.0" &lt; "1.9.0"</code> and the fixed version looks <strong>older</strong>: this prints <code>still vulnerable: True</code>. Compare numerically, so it prints <code>still vulnerable: False</code>.</p></div><textarea class="pc-src pc-code" hidden>installed = &quot;1.10.0&quot;
+fixed_in = &quot;1.9.0&quot;
+print(&quot;still vulnerable:&quot;, installed &lt; fixed_in)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;tuples of numbers&quot;
+    expect_output(&quot;still vulnerable: False&quot;)</textarea><textarea class="pc-src pc-solution" hidden>installed = &quot;1.10.0&quot;
+fixed_in = &quot;1.9.0&quot;
+
+def key(v):
+    return tuple(int(x) for x in v.split(&quot;.&quot;))
+
+print(&quot;still vulnerable:&quot;, key(installed) &lt; key(fixed_in))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w079d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">An advisory that matched nothing</div><div class="pc-prompt"><p>The advisory names the package <code>PyYAML</code>, but the lock file says <code>pyyaml</code>, and the audit compares the names exactly, so it finds nothing and prints <code>0 finding(s)</code>. Normalise both names (PEP 503), so it prints <code>1 finding(s)</code>.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+advisories = [{&quot;package&quot;: &quot;PyYAML&quot;, &quot;id&quot;: &quot;PYSEC-2021-1&quot;}, {&quot;package&quot;: &quot;requests&quot;, &quot;id&quot;: &quot;PYSEC-2023-74&quot;}]
+locked = {&quot;pyyaml&quot;: &quot;5.3.1&quot;, &quot;flask&quot;: &quot;3.0.3&quot;}
+found = [a for a in advisories if a[&quot;package&quot;] in locked]
+print(len(found), &quot;finding(s)&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;normalise&quot;
+    expect_output(&quot;1 finding(s)&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+def norm(name):
+    return re.sub(r&quot;[-_.]+&quot;, &quot;-&quot;, name).lower()
+
+advisories = [{&quot;package&quot;: &quot;PyYAML&quot;, &quot;id&quot;: &quot;PYSEC-2021-1&quot;}, {&quot;package&quot;: &quot;requests&quot;, &quot;id&quot;: &quot;PYSEC-2023-74&quot;}]
+locked = {norm(k): v for k, v in {&quot;pyyaml&quot;: &quot;5.3.1&quot;, &quot;flask&quot;: &quot;3.0.3&quot;}.items()}
+found = [a for a in advisories if norm(a[&quot;package&quot;]) in locked]
+print(len(found), &quot;finding(s)&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w079d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A genuine file rejected</div><div class="pc-prompt"><p>The lock file stores hashes in capitals, but <code>hexdigest()</code> is lower case, so the comparison fails for the genuine file and this prints <code>genuine: False, tampered: False</code>. Compare them case-insensitively, so it prints <code>genuine: True, tampered: False</code>.</p></div><textarea class="pc-src pc-code" hidden>import hashlib
+
+wheel = b&quot;genuine wheel bytes&quot;
+locked_hash = hashlib.sha256(wheel).hexdigest().upper()
+
+def ok(data):
+    return hashlib.sha256(data).hexdigest() == locked_hash
+
+print(f&quot;genuine: {ok(wheel)}, tampered: {ok(wheel + b&#x27;!&#x27;)}&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;lower-case both&quot;
+    expect_output(&quot;genuine: True, tampered: False&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import hashlib
+
+wheel = b&quot;genuine wheel bytes&quot;
+locked_hash = hashlib.sha256(wheel).hexdigest().upper()
+
+def ok(data):
+    return hashlib.sha256(data).hexdigest() == locked_hash.lower()
+
+print(f&quot;genuine: {ok(wheel)}, tampered: {ok(wheel + b&#x27;!&#x27;)}&quot;)</textarea></div>
+<div class="parsons" data-id="w079d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Adding a dependency carefully</div><div class="pc-prompt"><p>Arrange the steps for adding a new package to a project. One line is a trap.</p></div><script type="application/json">{"lines": ["check that the stdlib or an existing dependency can't already do the job", "confirm the exact package name on PyPI and in the project's own documentation", "look at its maintenance, licence and the dependencies it brings", "add it to pyproject.toml with a range of versions your code supports", "regenerate the lock file with hashes and commit both files", "let CI install from the lock file, run the tests and the audit"], "distractors": ["pip install it on the production server to try it out"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # True or False: Version(&quot;2.0rc1&quot;) &lt; Version(&quot;2.0&quot;)
+q = ___   # the versions ~=2.28 allows, written like &quot;2.*&quot;
+r = ___   # the PEP 503 form of &quot;Zope.Interface&quot;
+s = ___   # the pip option that refuses files whose hashes don&#x27;t match
+t = ___   # &quot;--index-url&quot; or &quot;--extra-index-url&quot;: the safer way to use a private index</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p is True and q == &quot;2.*&quot; and r == &quot;zope-interface&quot;, &quot;p, q and r&quot;
+    assert s == &quot;--require-hashes&quot; and t == &quot;--index-url&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = True
+q = &quot;2.*&quot;
+r = &quot;zope-interface&quot;
+s = &quot;--require-hashes&quot;
+t = &quot;--index-url&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w079d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What is a transitive dependency?", "answer": 1, "explain": "They run with your permissions too.", "options": ["One you wrote", "A dependency of one of your dependencies", "A development tool", "A deprecated package"]}, {"type": "mc", "q": "What is typosquatting?", "answer": 1, "explain": "reqeusts instead of requests.", "options": ["A spelling checker", "Publishing a malicious package named like a popular one", "A version conflict", "A licence problem"]}, {"type": "mc", "q": "How does dependency confusion work?", "answer": 1, "explain": "Use &ndash;index-url, and claim your names.", "options": ["Two versions conflict", "An attacker publishes your internal package&rsquo;s name on the public index with a higher version", "A typo in pyproject.toml", "A broken lock file"]}, {"type": "mc", "q": "Which is the newest?", "answer": 2, "explain": "Pre-releases come before the final release.", "options": ["2.0rc1", "2.0b3", "2.0", "2.0a9"]}, {"type": "mc", "q": "What does ~=2.28 allow?", "answer": 1, "explain": "The last number may rise.", "options": ["Exactly 2.28", "<blockquote>\n<p>=2.28 and 2.*</p>\n</blockquote>", "Anything above 2", "2.28.*"]}, {"type": "mc", "q": "What do hashes in a lock file protect against?", "answer": 1, "explain": "pip install &ndash;require-hashes enforces them.", "options": ["Slow installs", "A different file being installed under the same name and version", "Licence problems", "Typos"]}, {"type": "mc", "q": "Which fix version should an audit suggest?", "answer": 1, "explain": "The least disruptive upgrade that fixes it.", "options": ["The newest release", "The smallest fixed version greater than the installed one", "Any version", "The oldest"]}, {"type": "mc", "q": "Why normalise package names before comparing?", "answer": 1, "explain": "PEP 503.", "options": ["For speed", "PyPI treats case and runs of -, _ and . as the same name", "To shorten them", "Git requires it"]}, {"type": "mc", "q": "What do Dependabot and Renovate do?", "answer": 1, "explain": "CI tests each update before you merge.", "options": ["Delete old packages", "Open pull requests for new versions and security fixes", "Write code", "Scan for typosquats"]}, {"type": "output", "q": "What does this print?", "answer": "flask-sql-alchemy", "explain": "Each run of separators becomes one -.", "code": "import re\nprint(re.sub(r\"[-_.]+\", \"-\", \"Flask__SQL.Alchemy\").lower())"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w079d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a dependency report</div><div class="pc-prompt"><p>Write <code>report(direct, locked_text, advisories, popular, licences, allowed)</code>. <code>direct</code> maps the project&rsquo;s direct dependencies to their specifiers (from <code>pyproject.toml</code>); <code>locked_text</code> is a hashed lock file (parse it with the given <code>parse_locked</code>); <code>advisories</code> are as in today&rsquo;s audit (use the given <code>audit</code>); <code>popular</code> is a list of popular package names; <code>licences</code> maps normalised names to licence identifiers; <code>allowed</code> is the set of acceptable licences. Return <code>(lines, code)</code>: <code>lines</code> holds one line per problem, in this order of sections, each section&rsquo;s lines sorted: <code>missing from lock: NAME</code> for a direct dependency not in the lock; <code>outside range: NAME VERSION (wants SPEC)</code> when the locked version doesn&rsquo;t satisfy the direct dependency&rsquo;s specifier; <code>vulnerable: NAME VERSION ID (severity S): upgrade to FIX</code> (or <code>: no fix yet</code>), in the audit&rsquo;s order rather than sorted; <code>licence: NAME uses LICENCE</code> for a locked package whose licence isn&rsquo;t allowed (or <code>licence: NAME has no known licence</code> if it&rsquo;s missing from <code>licences</code>); and <code>possible typosquat: NAME looks like POPULAR</code> for each locked package that <code>suspicious</code> flags (one line per popular name). Names in lines are normalised. <code>code</code> is <code>0</code> if there are no problems, <code>2</code> if any vulnerability has severity 7.0 or more, else <code>1</code>. If there are no problems, <code>lines</code> is <code>["no problems found"]</code>.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+def norm(name):
+    return re.sub(r&quot;[-_.]+&quot;, &quot;-&quot;, name).lower()
+
+def key(text):
+    m = re.fullmatch(r&quot;(\d+(?:\.\d+)*)(?:(a|b|rc)(\d+))?&quot;, text.strip())
+    nums = [int(x) for x in m[1].split(&quot;.&quot;)]
+    while len(nums) &gt; 1 and nums[-1] == 0:
+        nums.pop()
+    return tuple(nums), ({&quot;a&quot;: 0, &quot;b&quot;: 1, &quot;rc&quot;: 2}[m[2]], int(m[3])) if m[2] else (3, 0)
+
+def satisfies(version, spec):
+    ops = {&quot;==&quot;: lambda a, b: a == b, &quot;!=&quot;: lambda a, b: a != b, &quot;&lt;=&quot;: lambda a, b: a &lt;= b,
+           &quot;&gt;=&quot;: lambda a, b: a &gt;= b, &quot;&lt;&quot;: lambda a, b: a &lt; b, &quot;&gt;&quot;: lambda a, b: a &gt; b}
+    for part in [p for p in spec.replace(&quot; &quot;, &quot;&quot;).split(&quot;,&quot;) if p]:
+        op = next(o for o in (&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;, &quot;&lt;&quot;, &quot;&gt;&quot;) if part.startswith(o))
+        if not ops[op](key(version), key(part[len(op):])):
+            return False
+    return True
+
+def parse_locked(text):
+    locked = {}
+    for line in re.sub(r&quot;\\\n&quot;, &quot; &quot;, text).splitlines():
+        line = &quot; &quot;.join(line.split())
+        if line and not line.startswith(&quot;#&quot;):
+            name, version = line.split()[0].split(&quot;==&quot;, 1)
+            locked[norm(name)] = (version, set(re.findall(r&quot;--hash=sha256:([0-9a-fA-F]{64})&quot;, line)))
+    return locked
+
+def audit(locked_versions, advisories):
+    found = []
+    for adv in advisories:
+        name = norm(adv[&quot;package&quot;])
+        version = locked_versions.get(name)
+        if version is None or not any(satisfies(version, s) for s in adv[&quot;affected&quot;]):
+            continue
+        later = sorted((f for f in adv[&quot;fixed&quot;] if key(f) &gt; key(version)), key=key)
+        found.append({&quot;package&quot;: name, &quot;version&quot;: version, &quot;id&quot;: adv[&quot;id&quot;], &quot;severity&quot;: adv[&quot;severity&quot;], &quot;fix&quot;: later[0] if later else None})
+    return sorted(found, key=lambda f: (-f[&quot;severity&quot;], f[&quot;package&quot;], f[&quot;id&quot;]))
+
+def distance(a, b):
+    d = [[i + j if i * j == 0 else 0 for j in range(len(b) + 1)] for i in range(len(a) + 1)]
+    for i in range(1, len(a) + 1):
+        for j in range(1, len(b) + 1):
+            d[i][j] = min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] != b[j - 1]))
+            if i &gt; 1 and j &gt; 1 and a[i - 1] == b[j - 2] and a[i - 2] == b[j - 1]:
+                d[i][j] = min(d[i][j], d[i - 2][j - 2] + 1)
+    return d[len(a)][len(b)]
+
+def suspicious(name, popular):
+    n = norm(name)
+    return sorted(p for p in popular if norm(p) != n and (distance(n, norm(p)) &lt;= (1 if len(norm(p)) &lt;= 8 else 2)
+                                                          or n.replace(&quot;-&quot;, &quot;&quot;) == norm(p).replace(&quot;-&quot;, &quot;&quot;)))
+
+def report(direct, locked_text, advisories, popular, licences, allowed):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>H = &quot;--hash=sha256:&quot; + &quot;a&quot; * 64
+LOCK = f&quot;&quot;&quot;requests==2.28.1 {H}
+urllib3==1.26.18 {H}
+Flask==3.0.3 {H}
+jinja2==3.1.2 {H}
+reqeusts==1.0 {H}
+gpl-thing==0.3 {H}
+&quot;&quot;&quot;
+ADVISORIES = [
+    {&quot;id&quot;: &quot;PYSEC-2023-74&quot;, &quot;package&quot;: &quot;requests&quot;, &quot;affected&quot;: [&quot;&gt;=2.3.0,&lt;2.31.0&quot;], &quot;fixed&quot;: [&quot;2.31.0&quot;], &quot;severity&quot;: 6.1},
+    {&quot;id&quot;: &quot;GHSA-9wx4&quot;, &quot;package&quot;: &quot;Jinja2&quot;, &quot;affected&quot;: [&quot;&lt;3.1.3&quot;], &quot;fixed&quot;: [&quot;3.1.3&quot;], &quot;severity&quot;: 5.4},
+    {&quot;id&quot;: &quot;CVE-2024-37891&quot;, &quot;package&quot;: &quot;urllib3&quot;, &quot;affected&quot;: [&quot;&lt;1.26.19&quot;, &quot;&gt;=2.0.0,&lt;2.2.2&quot;], &quot;fixed&quot;: [&quot;1.26.19&quot;, &quot;2.2.2&quot;], &quot;severity&quot;: 7.2},
+    {&quot;id&quot;: &quot;GHSA-none&quot;, &quot;package&quot;: &quot;gpl_thing&quot;, &quot;affected&quot;: [&quot;&gt;=0&quot;], &quot;fixed&quot;: [], &quot;severity&quot;: 3.0},
+]
+LICENCES = {&quot;requests&quot;: &quot;Apache-2.0&quot;, &quot;urllib3&quot;: &quot;MIT&quot;, &quot;flask&quot;: &quot;BSD-3-Clause&quot;, &quot;jinja2&quot;: &quot;BSD-3-Clause&quot;, &quot;gpl-thing&quot;: &quot;GPL-3.0&quot;}
+ALLOWED = {&quot;MIT&quot;, &quot;BSD-3-Clause&quot;, &quot;Apache-2.0&quot;}
+POPULAR = [&quot;requests&quot;, &quot;flask&quot;, &quot;jinja2&quot;, &quot;urllib3&quot;]
+
+def test_report():
+    &quot;every section&quot;
+    direct = {&quot;requests&quot;: &quot;&gt;=2.31,&lt;3&quot;, &quot;flask&quot;: &quot;&gt;=3&quot;, &quot;click&quot;: &quot;&gt;=8&quot;, &quot;gpl_thing&quot;: &quot;&quot;}
+    lines, code = report(direct, LOCK, ADVISORIES, POPULAR, LICENCES, ALLOWED)
+    assert lines == [
+        &quot;missing from lock: click&quot;,
+        &quot;outside range: requests 2.28.1 (wants &gt;=2.31,&lt;3)&quot;,
+        &quot;vulnerable: urllib3 1.26.18 CVE-2024-37891 (severity 7.2): upgrade to 1.26.19&quot;,
+        &quot;vulnerable: requests 2.28.1 PYSEC-2023-74 (severity 6.1): upgrade to 2.31.0&quot;,
+        &quot;vulnerable: jinja2 3.1.2 GHSA-9wx4 (severity 5.4): upgrade to 3.1.3&quot;,
+        &quot;vulnerable: gpl-thing 0.3 GHSA-none (severity 3.0): no fix yet&quot;,
+        &quot;licence: gpl-thing uses GPL-3.0&quot;,
+        &quot;licence: reqeusts has no known licence&quot;,
+        &quot;possible typosquat: reqeusts looks like requests&quot;]
+    assert code == 2
+
+def test_clean_and_codes():
+    &quot;exit codes&quot;
+    lock = f&quot;flask==3.0.3 {H}\njinja2==3.1.4 {H}\n&quot;
+    assert report({&quot;Flask&quot;: &quot;&gt;=3&quot;}, lock, ADVISORIES, POPULAR, LICENCES, ALLOWED) == ([&quot;no problems found&quot;], 0)
+    lines, code = report({&quot;flask&quot;: &quot;&gt;=3&quot;}, f&quot;flask==3.0.3 {H}\njinja2==3.1.2 {H}\n&quot;, ADVISORIES, POPULAR, LICENCES, ALLOWED)
+    assert lines == [&quot;vulnerable: jinja2 3.1.2 GHSA-9wx4 (severity 5.4): upgrade to 3.1.3&quot;] and code == 1</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+def norm(name):
+    return re.sub(r&quot;[-_.]+&quot;, &quot;-&quot;, name).lower()
+
+def key(text):
+    m = re.fullmatch(r&quot;(\d+(?:\.\d+)*)(?:(a|b|rc)(\d+))?&quot;, text.strip())
+    nums = [int(x) for x in m[1].split(&quot;.&quot;)]
+    while len(nums) &gt; 1 and nums[-1] == 0:
+        nums.pop()
+    return tuple(nums), ({&quot;a&quot;: 0, &quot;b&quot;: 1, &quot;rc&quot;: 2}[m[2]], int(m[3])) if m[2] else (3, 0)
+
+def satisfies(version, spec):
+    ops = {&quot;==&quot;: lambda a, b: a == b, &quot;!=&quot;: lambda a, b: a != b, &quot;&lt;=&quot;: lambda a, b: a &lt;= b,
+           &quot;&gt;=&quot;: lambda a, b: a &gt;= b, &quot;&lt;&quot;: lambda a, b: a &lt; b, &quot;&gt;&quot;: lambda a, b: a &gt; b}
+    for part in [p for p in spec.replace(&quot; &quot;, &quot;&quot;).split(&quot;,&quot;) if p]:
+        op = next(o for o in (&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;, &quot;&lt;&quot;, &quot;&gt;&quot;) if part.startswith(o))
+        if not ops[op](key(version), key(part[len(op):])):
+            return False
+    return True
+
+def parse_locked(text):
+    locked = {}
+    for line in re.sub(r&quot;\\\n&quot;, &quot; &quot;, text).splitlines():
+        line = &quot; &quot;.join(line.split())
+        if line and not line.startswith(&quot;#&quot;):
+            name, version = line.split()[0].split(&quot;==&quot;, 1)
+            locked[norm(name)] = (version, set(re.findall(r&quot;--hash=sha256:([0-9a-fA-F]{64})&quot;, line)))
+    return locked
+
+def audit(locked_versions, advisories):
+    found = []
+    for adv in advisories:
+        name = norm(adv[&quot;package&quot;])
+        version = locked_versions.get(name)
+        if version is None or not any(satisfies(version, s) for s in adv[&quot;affected&quot;]):
+            continue
+        later = sorted((f for f in adv[&quot;fixed&quot;] if key(f) &gt; key(version)), key=key)
+        found.append({&quot;package&quot;: name, &quot;version&quot;: version, &quot;id&quot;: adv[&quot;id&quot;], &quot;severity&quot;: adv[&quot;severity&quot;], &quot;fix&quot;: later[0] if later else None})
+    return sorted(found, key=lambda f: (-f[&quot;severity&quot;], f[&quot;package&quot;], f[&quot;id&quot;]))
+
+def distance(a, b):
+    d = [[i + j if i * j == 0 else 0 for j in range(len(b) + 1)] for i in range(len(a) + 1)]
+    for i in range(1, len(a) + 1):
+        for j in range(1, len(b) + 1):
+            d[i][j] = min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] != b[j - 1]))
+            if i &gt; 1 and j &gt; 1 and a[i - 1] == b[j - 2] and a[i - 2] == b[j - 1]:
+                d[i][j] = min(d[i][j], d[i - 2][j - 2] + 1)
+    return d[len(a)][len(b)]
+
+def suspicious(name, popular):
+    n = norm(name)
+    return sorted(p for p in popular if norm(p) != n and (distance(n, norm(p)) &lt;= (1 if len(norm(p)) &lt;= 8 else 2)
+                                                          or n.replace(&quot;-&quot;, &quot;&quot;) == norm(p).replace(&quot;-&quot;, &quot;&quot;)))
+
+def report(direct, locked_text, advisories, popular, licences, allowed):
+    locked = {name: version for name, (version, _) in parse_locked(locked_text).items()}
+    wanted = {norm(name): spec for name, spec in direct.items()}
+    missing = sorted(f&quot;missing from lock: {n}&quot; for n in wanted if n not in locked)
+    outside = sorted(f&quot;outside range: {n} {locked[n]} (wants {spec})&quot; for n, spec in wanted.items()
+                     if n in locked and not satisfies(locked[n], spec))
+    findings = audit(locked, advisories)
+    vulnerable = [f&quot;vulnerable: {f[&#x27;package&#x27;]} {f[&#x27;version&#x27;]} {f[&#x27;id&#x27;]} (severity {f[&#x27;severity&#x27;]}): &quot;
+                  + (f&quot;upgrade to {f[&#x27;fix&#x27;]}&quot; if f[&quot;fix&quot;] else &quot;no fix yet&quot;) for f in findings]
+    licence_lines = []
+    for n in locked:
+        if n not in licences:
+            licence_lines.append(f&quot;licence: {n} has no known licence&quot;)
+        elif licences[n] not in allowed:
+            licence_lines.append(f&quot;licence: {n} uses {licences[n]}&quot;)
+    typos = [f&quot;possible typosquat: {n} looks like {norm(p)}&quot; for n in locked for p in suspicious(n, popular)]
+    lines = missing + outside + vulnerable + sorted(licence_lines) + sorted(typos)
+    if not lines:
+        return [&quot;no problems found&quot;], 0
+    code = 2 if any(f[&quot;severity&quot;] &gt;= 7.0 for f in findings) else 1
+    return lines, code</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, run <code>pip-audit</code> and <code>pip list --outdated</code> in a project&rsquo;s virtual environment, and look up one finding&rsquo;s advisory to see what the vulnerability actually was. Tomorrow: <strong>cryptography basics</strong>: hashing, message authentication, password storage, encryption and signatures, and which of them to reach for when.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w079d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w079d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w079d4", "week": 79, "day": 4, "title": "Dependency security", "exercises": [{"id": "w079d4-version", "title": "Comparing versions", "points": 15}, {"id": "w079d4-specifiers", "title": "Does it satisfy the specifier?", "points": 15}, {"id": "w079d4-audit", "title": "Auditing a lock file", "points": 15}, {"id": "w079d4-hashes", "title": "Installing only what was locked", "points": 10}, {"id": "w079d4-why", "title": "Why is this installed?", "points": 10}, {"id": "w079d4-typos", "title": "Spotting typosquats", "points": 10}, {"id": "w079d4-bug1", "title": "An upgrade that looked like a downgrade", "points": 10}, {"id": "w079d4-bug2", "title": "An advisory that matched nothing", "points": 10}, {"id": "w079d4-bug3", "title": "A genuine file rejected", "points": 10}, {"id": "w079d4-trace", "title": "Predict them", "points": 10}, {"id": "w079d4-challenge", "title": "Challenge: a dependency report", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=b54d8b61c9"></script>
+</body>
+</html>
