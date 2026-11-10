@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 67 Day 4: Async pitfalls | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="asyncio programs fail in their own particular ways. A single blocking call freezes every task. A forgotten await silently does nothing. A background task...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w067d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 67 Day 4: Async pitfalls">
+<meta property="og:description" content="asyncio programs fail in their own particular ways. A single blocking call freezes every task. A forgotten await silently does nothing. A background task...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w067d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-67">Week 67: Concurrency II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#blocking-the-loop" data-sec="blocking-the-loop">Blocking the loop</a></li><li><a href="#forgetting-await" data-sec="forgetting-await">Forgetting await</a></li><li><a href="#lost-tasks-and-lost-exceptions" data-sec="lost-tasks-and-lost-exceptions">Lost tasks and lost exceptions</a></li><li><a href="#cancellation-done-right" data-sec="cancellation-done-right">Cancellation done right</a></li><li><a href="#races-across-await-and-failing-groups" data-sec="races-across-await-and-failing-groups">Races across await, and failing groups</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w067d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-67">Week 67: Concurrency II</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 67, Day 4</span></p>
+      <h1>Async pitfalls</h1>
+      <div class="day-intro"><p><code>asyncio</code> programs fail in their own particular ways. A single blocking call freezes every task. A forgotten <code>await</code> silently does nothing. A background task disappears because nothing kept a reference to it. A cancelled task swallows the cancellation and runs for ever. And state shared across an <code>await</code> can still race, even with one thread. None of these raise a helpful error at the point of the mistake, so today is about recognising them: in simulations you can run here, in real <code>asyncio</code> code to try on your own computer, and in a small checker that finds several of them by reading the source.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain why blocking calls freeze the event loop, and offload them with to_thread or an executor</li><li>Spot missing awaits and what an unawaited coroutine does (nothing)</li><li>Keep references to background tasks and observe their exceptions</li><li>Handle cancellation correctly - clean up, and never swallow CancelledError</li><li>Recognise races across await, and how gather and TaskGroup handle failures</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Blocking the loop: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Forgetting await: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Lost tasks and lost exceptions: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Cancellation done right: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Races across await, and failing groups: 20 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Blocking the loop</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Forgetting await</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Lost tasks and lost exceptions</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Cancellation done right</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Races across await, and failing groups</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w067d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w067d4.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w067d4-p1"><textarea class="pc-src pc-code" hidden>def finish_times(tasks):
+    &quot;Each step is (&#x27;wait&#x27;, t): other tasks may run; or (&#x27;block&#x27;, t): nothing else can run.&quot;
+    clock, finished, running = 0, {}, {name: list(steps) for name, steps in tasks}
+    waits = {}
+    while running:
+        for name in list(running):
+            if waits.get(name, 0) &gt; clock:
+                continue
+            if not running[name]:
+                finished[name] = max(clock, waits.get(name, 0))
+                del running[name]
+                continue
+            kind, t = running[name].pop(0)
+            if kind == &quot;block&quot;:
+                clock += t                 # the whole loop is stuck
+            else:
+                waits[name] = clock + t
+        if running and all(waits.get(n, 0) &gt; clock for n in running):
+            clock = min(waits[n] for n in running)
+    return finished
+
+polite = [(&quot;a&quot;, [(&quot;wait&quot;, 5)]), (&quot;b&quot;, [(&quot;wait&quot;, 1)])]
+rude = [(&quot;a&quot;, [(&quot;block&quot;, 5)]), (&quot;b&quot;, [(&quot;wait&quot;, 1)])]
+print(finish_times(polite), finish_times(rude))</textarea></div>
+<p>When task <code>a</code> waits politely, <code>b</code> finishes at 1. When <code>a</code> <strong>blocks</strong> for the same five units (with <code>time.sleep(5)</code>, or five seconds of computation), <code>b</code> can&rsquo;t even start its wait until <code>a</code> is done, and finishes at 6. One blocking call delays every other task.</p>
+<h2 id="blocking-the-loop">Blocking the loop</h2>
+<p>The event loop runs on <strong>one thread</strong>, switching tasks only at <code>await</code>. Anything that holds the thread without awaiting stops <strong>all</strong> tasks:</p>
+<ul>
+<li><strong><code>time.sleep(n)</code></strong> instead of <code>await asyncio.sleep(n)</code>;</li>
+<li><strong>blocking I/O libraries</strong>: <code>requests.get</code>, ordinary file reads of large files, database drivers that aren&rsquo;t async, <code>input()</code>;</li>
+<li><strong>CPU-heavy work</strong>: parsing a huge JSON file, image processing, a long loop.</li>
+</ul>
+<p>Symptoms: everything gets slow at once, timeouts fire for no clear reason, and a server stops answering while one request is handled. <code>asyncio</code>&rsquo;s <strong>debug mode</strong> (<code>asyncio.run(main(), debug=True)</code>, or <code>PYTHONASYNCIODEBUG=1</code>) logs any callback that runs for more than 100 milliseconds.</p>
+<p>Fixes: use async libraries for I/O (<code>aiohttp</code>, <code>httpx</code>, <code>asyncpg</code> and others), and push unavoidable blocking calls onto a thread with <strong><code>await asyncio.to_thread(func, *args)</code></strong> (3.9+), or CPU-bound work onto a process pool with <code>loop.run_in_executor(pool, func, *args)</code>. The loop keeps running while the thread or process works.</p>
+<pre><code>import asyncio, time
+
+async def bad():
+    time.sleep(2)                          # freezes the loop for 2 seconds
+async def good():
+    await asyncio.sleep(2)                 # other tasks run meanwhile
+async def wrapped():
+    await asyncio.to_thread(time.sleep, 2) # a blocking call moved to a thread
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w067d4-e2"><textarea class="pc-src pc-code" hidden>def latency_of_others(blocking_ms, others):
+    &quot;How long each other task waits before it can even start, if one task blocks first.&quot;
+    return [blocking_ms] * others
+
+print(latency_of_others(200, 3), &quot;ms: every request waits for the blocking one&quot;)
+
+def with_offload(blocking_ms, others, thread_start_ms=1):
+    return [thread_start_ms] * others            # the loop is free while a thread does the work
+
+print(with_offload(200, 3), &quot;ms with asyncio.to_thread&quot;)</textarea></div>
+<h2 id="forgetting-await">Forgetting await</h2>
+<p>Calling a coroutine function without <code>await</code> creates a coroutine object and <strong>does nothing else</strong>. The work never happens, and there&rsquo;s often no error at all:</p>
+<ul>
+<li><code>save(record)</code> instead of <code>await save(record)</code>: nothing is saved; Python may print <code>RuntimeWarning: coroutine 'save' was never awaited</code> when the object is garbage collected, but only as a warning;</li>
+<li><code>if is_allowed(user):</code> with an async <code>is_allowed</code>: a coroutine object is <strong>always true</strong>, so everyone is allowed;</li>
+<li><code>results = [fetch(u) for u in urls]</code> builds a list of coroutines, not results (use <code>await asyncio.gather(*...)</code>).</li>
+</ul>
+<p>Type checkers (Week 33&rsquo;s mypy) catch many of these, because the result&rsquo;s type is <code>Coroutine</code>, not <code>bool</code> or <code>str</code>. Linters warn too.</p>
+<div class="pc pc-example" data-kind="example" data-id="w067d4-e3"><textarea class="pc-src pc-code" hidden>import warnings
+
+async def is_allowed(user):
+    return user != &quot;mallory&quot;
+
+def check_wrongly(user):
+    result = is_allowed(user)          # forgot await: a coroutine object
+    allowed = bool(result)
+    result.close()                     # tidy up the never-run coroutine
+    return allowed
+
+print(check_wrongly(&quot;mallory&quot;), &quot;(a coroutine object is always true)&quot;)
+
+async def check_rightly(user):
+    return await is_allowed(user)
+
+c = check_rightly(&quot;mallory&quot;)
+try:
+    c.send(None)
+except StopIteration as done:
+    print(done.value)</textarea></div>
+<h2 id="lost-tasks-and-lost-exceptions">Lost tasks and lost exceptions</h2>
+<p><code>asyncio.create_task(job())</code> schedules a task, but the event loop holds only a <strong>weak</strong> reference to it. If your code doesn&rsquo;t keep a reference either, the task can be garbage collected <strong>before it finishes</strong>, vanishing mid-way. The documented fix is to keep tasks in a set and remove each when it&rsquo;s done:</p>
+<pre><code>background = set()
+
+def spawn(coro):
+    task = asyncio.create_task(coro)
+    background.add(task)
+    task.add_done_callback(background.discard)
+    return task
+</code></pre>
+<p>A related problem: if a task raises and <strong>nobody awaits it</strong> (or calls <code>task.exception()</code>), the exception goes nowhere useful; <code>asyncio</code> logs &ldquo;Task exception was never retrieved&rdquo; much later, when the task is garbage collected. Every task should be awaited somewhere, or have a done callback that checks for errors. <code>asyncio.TaskGroup</code> (next section) solves both problems by tying tasks to a block.</p>
+<div class="pc pc-example" data-kind="example" data-id="w067d4-e4"><textarea class="pc-src pc-code" hidden>from concurrent.futures import Future
+
+background = set()
+
+def track(task):
+    background.add(task)
+    task.add_done_callback(background.discard)
+    task.add_done_callback(report_errors)
+    return task
+
+errors = []
+def report_errors(task):
+    if not task.cancelled() and task.exception() is not None:
+        errors.append(repr(task.exception()))
+
+a, b = track(Future()), track(Future())
+print(len(background))
+a.set_result(&quot;ok&quot;)
+b.set_exception(ValueError(&quot;disk full&quot;))
+print(len(background), errors)</textarea></div>
+<h2 id="cancellation-done-right">Cancellation done right</h2>
+<p>Cancelling a task (<code>task.cancel()</code>, or a timeout) raises <strong><code>asyncio.CancelledError</code></strong> inside it at its current <code>await</code>. Since Python 3.8 it inherits from <code>BaseException</code>, not <code>Exception</code>, precisely so that <code>except Exception:</code> doesn&rsquo;t catch it by accident. The rules:</p>
+<ul>
+<li><strong>Clean up in <code>finally</code></strong> (or <code>async with</code>): close connections, release locks, delete temporary files. Clean-up code may <code>await</code>.</li>
+<li><strong>Don&rsquo;t swallow it.</strong> If you catch <code>CancelledError</code> (or use a bare <code>except:</code> or <code>except BaseException:</code>), re-raise it. A task that swallows cancellation keeps running, and <code>wait_for</code> or <code>TaskGroup</code> may wait for it for ever.</li>
+<li><strong>Don&rsquo;t treat cancellation as an error</strong> to log loudly: it&rsquo;s normal control flow.</li>
+<li><code>asyncio.shield(aw)</code> protects an inner operation from being cancelled along with its caller, for things that must finish (like committing a transaction).</li>
+</ul>
+<pre><code>async def worker(conn):
+    try:
+        while True:
+            job = await queue.get()
+            await handle(conn, job)
+    finally:
+        await conn.close()              # runs on cancellation too
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w067d4-e5"><textarea class="pc-src pc-code" hidden>import asyncio
+
+print(issubclass(asyncio.CancelledError, Exception), issubclass(asyncio.CancelledError, BaseException))
+
+class Pause:
+    def __await__(self):
+        yield
+
+async def well_behaved(log):
+    try:
+        while True:
+            await Pause()
+    finally:
+        log.append(&quot;cleaned up&quot;)
+
+async def swallows(log):
+    while True:
+        try:
+            await Pause()
+        except asyncio.CancelledError:
+            log.append(&quot;ignored a cancellation&quot;)
+
+for coro_fn in (well_behaved, swallows):
+    log = []
+    c = coro_fn(log)
+    c.send(None)
+    try:
+        c.throw(asyncio.CancelledError())
+        outcome = &quot;still running&quot;
+    except asyncio.CancelledError:
+        outcome = &quot;cancelled&quot;
+    print(coro_fn.__name__, outcome, log)
+    try:
+        c.close()
+    except RuntimeError:
+        print(&quot;  and it even ignored close()&quot;)</textarea></div>
+<h2 id="races-across-await-and-failing-groups">Races across await, and failing groups</h2>
+<p>One thread doesn&rsquo;t mean no races. A task can&rsquo;t be interrupted <strong>between</strong> awaits, but anything can happen <strong>during</strong> an <code>await</code>. Check-then-act across an <code>await</code> is a race:</p>
+<pre><code>async def book(seat):
+    if seat not in taken:              # check
+        await save_to_database(seat)   # other tasks run here, and may book the same seat
+        taken.add(seat)                # act
+</code></pre>
+<p>Keep the check and the act with no <code>await</code> between them, or protect the whole sequence with an <strong><code>asyncio.Lock</code></strong> (<code>async with lock:</code>).</p>
+<p><strong>When one task in a group fails</strong>:</p>
+<ul>
+<li><code>await asyncio.gather(a(), b(), c())</code> raises the <strong>first</strong> exception, but the other tasks <strong>keep running</strong> in the background, unwatched. <code>gather(..., return_exceptions=True)</code> returns exceptions in the result list instead of raising.</li>
+<li><code>async with asyncio.TaskGroup() as tg:</code> (3.11+) <strong>cancels</strong> the other tasks when one fails, waits for them, and raises an <code>ExceptionGroup</code> of the failures (Week 59&rsquo;s <code>except*</code> handles those). It&rsquo;s usually the better choice: no task outlives the block.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w067d4-e6"><textarea class="pc-src pc-code" hidden>def book_all(requests, seats, use_lock):
+    &quot;Every request checks, awaits a save, then marks the seat taken.&quot;
+    taken, booked, checked = set(), [], []
+    if use_lock:
+        for who, seat in requests:              # with a lock, each check-save-mark runs as one unit
+            if seat not in taken:
+                taken.add(seat)
+                booked.append((who, seat))
+        return booked
+    for who, seat in requests:                  # all checks happen before any save finishes
+        checked.append((who, seat, seat not in taken))
+    for who, seat, free in checked:
+        if free:
+            taken.add(seat)
+            booked.append((who, seat))
+    return booked
+
+requests = [(&quot;ada&quot;, &quot;12A&quot;), (&quot;ben&quot;, &quot;12A&quot;)]
+print(book_all(requests, [&quot;12A&quot;], use_lock=False))
+print(book_all(requests, [&quot;12A&quot;], use_lock=True))</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>The event loop is one thread, so a blocking call (time.sleep, blocking I/O, heavy computation) freezes every task: use async libraries, await asyncio.to_thread for blocking calls and run_in_executor with a process pool for CPU work; debug mode reports slow callbacks. Calling a coroutine function without await does nothing (and a coroutine object is always true). The loop keeps only weak references to tasks: hold them in a set with add_done_callback(discard), and observe their exceptions. CancelledError is a BaseException: clean up in finally, re-raise it if caught, and never swallow it with bare except. Races still happen across await, so keep check and act together or use asyncio.Lock. gather raises the first error and leaves the rest running (return_exceptions=True collects them); TaskGroup cancels the rest and raises an ExceptionGroup.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d4-blocking" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Who is blocking whom?</div><div class="pc-prompt"><p>Simulate a single-threaded event loop. Each task is <code>(name, steps)</code>: <code>("wait", t)</code> lets other tasks run while it waits <code>t</code> units; <code>("block", t)</code> holds the loop for <code>t</code> units, so <strong>nothing else</strong> happens meanwhile; <code>("offload", t)</code> hands the work to a thread, so it&rsquo;s like a wait (the loop stays free). Write <code>simulate(tasks)</code>: tasks take turns in the order given; at each turn a task runs its next step; blocks advance the clock immediately; a waiting task is skipped until its wait is over; when every unfinished task is waiting, the clock jumps to the earliest wake-up. A task finishes when it has no steps left and isn&rsquo;t waiting. Return a dict of finish times. Then <code>worst_delay(tasks)</code>: the largest difference between a task&rsquo;s finish time with these steps and with every <code>"block"</code> turned into <code>"offload"</code>.</p></div><textarea class="pc-src pc-code" hidden>def simulate(tasks):
+    ___
+
+def worst_delay(tasks):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_blocking():
+    &quot;blocking freezes everyone&quot;
+    assert simulate([(&quot;a&quot;, [(&quot;wait&quot;, 5)]), (&quot;b&quot;, [(&quot;wait&quot;, 1)])]) == {&quot;b&quot;: 1, &quot;a&quot;: 5}
+    assert simulate([(&quot;a&quot;, [(&quot;block&quot;, 5)]), (&quot;b&quot;, [(&quot;wait&quot;, 1)])]) == {&quot;a&quot;: 5, &quot;b&quot;: 6}
+    assert simulate([(&quot;a&quot;, [(&quot;offload&quot;, 5)]), (&quot;b&quot;, [(&quot;wait&quot;, 1)])]) == {&quot;b&quot;: 1, &quot;a&quot;: 5}
+    mixed = [(&quot;web&quot;, [(&quot;wait&quot;, 1), (&quot;wait&quot;, 1)]), (&quot;report&quot;, [(&quot;block&quot;, 3), (&quot;wait&quot;, 1)])]
+    assert simulate(mixed) == {&quot;web&quot;: 4, &quot;report&quot;: 4}
+    assert worst_delay(mixed) == 2 and worst_delay([(&quot;x&quot;, [(&quot;wait&quot;, 2)])]) == 0
+    assert simulate([]) == {}</textarea><textarea class="pc-src pc-solution" hidden>def simulate(tasks):
+    clock = 0
+    steps = {name: list(s) for name, s in tasks}
+    order = [name for name, _ in tasks]
+    wake = {name: 0 for name in order}
+    finished = {}
+    while len(finished) &lt; len(order):
+        progressed = False
+        for name in order:
+            if name in finished or wake[name] &gt; clock:
+                continue
+            if not steps[name]:
+                finished[name] = max(clock, wake[name])
+                progressed = True
+                continue
+            kind, t = steps[name].pop(0)
+            progressed = True
+            if kind == &quot;block&quot;:
+                clock += t
+            else:
+                wake[name] = clock + t
+        if not progressed:
+            clock = min(wake[n] for n in order if n not in finished)
+    return finished
+
+def worst_delay(tasks):
+    actual = simulate(tasks)
+    ideal = simulate([(n, [(&quot;offload&quot; if k == &quot;block&quot; else k, t) for k, t in s]) for n, s in tasks])
+    return max((actual[n] - ideal[n] for n in actual), default=0)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d4-registry" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Keeping background tasks alive</div><div class="pc-prompt"><p>Write <code>TaskRegistry</code> to hold strong references to background tasks: <code>track(task)</code> adds it to a set and registers done callbacks that remove it again and record any <strong>exception</strong> it raised (but not cancellations) in <code>errors</code> as <code>(name, exception type name)</code>, where <code>name</code> is the name given to <code>track(task, name)</code>; <code>pending()</code> is how many are still running; and <code>track</code> returns the task. The tests use <code>concurrent.futures.Future</code> objects as stand-ins for tasks (they have the same <code>add_done_callback</code>, <code>cancelled</code> and <code>exception</code> methods).</p></div><textarea class="pc-src pc-code" hidden>class TaskRegistry:
+    def __init__(self):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_registry():
+    &quot;strong references and observed errors&quot;
+    from concurrent.futures import Future
+    reg = TaskRegistry()
+    a, b, c = Future(), Future(), Future()
+    assert reg.track(a, &quot;email&quot;) is a
+    reg.track(b, &quot;upload&quot;)
+    reg.track(c, &quot;cleanup&quot;)
+    assert reg.pending() == 3
+    a.set_result(&quot;sent&quot;)
+    b.set_exception(ConnectionError(&quot;down&quot;))
+    c.cancel()
+    assert reg.pending() == 0 and reg.errors == [(&quot;upload&quot;, &quot;ConnectionError&quot;)]
+    done = Future()
+    done.set_result(1)
+    reg.track(done, &quot;already&quot;)
+    assert reg.pending() == 0</textarea><textarea class="pc-src pc-solution" hidden>class TaskRegistry:
+    def __init__(self):
+        self._tasks = set()
+        self.errors = []
+
+    def track(self, task, name=None):
+        self._tasks.add(task)
+
+        def finished(t):
+            self._tasks.discard(t)
+            if not t.cancelled() and t.exception() is not None:
+                self.errors.append((name, type(t.exception()).__name__))
+
+        task.add_done_callback(finished)
+        return task
+
+    def pending(self):
+        return len(self._tasks)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d4-gather" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">What gather does with failures</div><div class="pc-prompt"><p>Model <code>asyncio.gather</code>&rsquo;s error handling. Each outcome is a result value or an exception instance, listed in the <strong>order given</strong> to gather, with <code>finish_order</code> giving the indices in the order they finished. Write <code>gather_result(outcomes, finish_order, return_exceptions=False)</code>: with <code>return_exceptions=True</code>, return the outcomes as a list in input order (exceptions included as values); otherwise, if any outcome is an exception, raise the one that <strong>finished first</strong>, else return the list. Then <code>still_running(outcomes, finish_order)</code>: when gather (without <code>return_exceptions</code>) raises, the indices (sorted) of tasks that hadn&rsquo;t finished yet and keep running unobserved; an empty list if it doesn&rsquo;t raise.</p></div><textarea class="pc-src pc-code" hidden>def gather_result(outcomes, finish_order, return_exceptions=False):
+    ___
+
+def still_running(outcomes, finish_order):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_gather():
+    &quot;gather and errors&quot;
+    outcomes = [&quot;a&quot;, ValueError(&quot;v&quot;), &quot;c&quot;, KeyError(&quot;k&quot;)]
+    order = [2, 3, 0, 1]
+    assert gather_result(outcomes, order, return_exceptions=True)[0] == &quot;a&quot;
+    assert isinstance(gather_result(outcomes, order, True)[3], KeyError)
+    try:
+        gather_result(outcomes, order)
+        assert False
+    except KeyError:
+        pass
+    except ValueError:
+        assert False, &quot;the first to finish was the KeyError&quot;
+    assert still_running(outcomes, order) == [0, 1]
+    assert gather_result([&quot;x&quot;, &quot;y&quot;], [1, 0]) == [&quot;x&quot;, &quot;y&quot;] and still_running([&quot;x&quot;], [0]) == []</textarea><textarea class="pc-src pc-solution" hidden>def gather_result(outcomes, finish_order, return_exceptions=False):
+    if return_exceptions:
+        return list(outcomes)
+    for i in finish_order:
+        if isinstance(outcomes[i], BaseException):
+            raise outcomes[i]
+    return list(outcomes)
+
+def still_running(outcomes, finish_order):
+    for position, i in enumerate(finish_order):
+        if isinstance(outcomes[i], BaseException):
+            return sorted(finish_order[position + 1:])
+    return []</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d4-cancel" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Does it respect cancellation?</div><div class="pc-prompt"><p>Write <code>respects_cancellation(coro_fn)</code>: start a coroutine from <code>coro_fn()</code> by sending <code>None</code> once, throw <code>asyncio.CancelledError()</code> into it, and drive it until it ends (sending <code>None</code> whenever it suspends, at most 100 times). Return <code>True</code> if the <code>CancelledError</code> came back out, <code>False</code> if the coroutine kept running or finished normally instead. Close the coroutine when you&rsquo;re done. Then write <code>careful_worker(log)</code>, a coroutine that awaits the provided <code>Pause()</code> in an endless loop and appends <code>"closed"</code> to <code>log</code> in a <code>finally</code>, so it passes the check and cleans up.</p></div><textarea class="pc-src pc-code" hidden>import asyncio
+
+class Pause:
+    def __await__(self):
+        yield
+
+def respects_cancellation(coro_fn):
+    ___
+
+async def careful_worker(log):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cancel():
+    &quot;CancelledError&quot;
+    import asyncio
+    log = []
+    assert respects_cancellation(lambda: careful_worker(log)) and log == [&quot;closed&quot;]
+    async def swallower():
+        while True:
+            try:
+                await Pause()
+            except asyncio.CancelledError:
+                pass
+    async def eats_then_returns():
+        try:
+            await Pause()
+        except asyncio.CancelledError:
+            return &quot;pretended nothing happened&quot;
+    async def catches_exception_only():
+        try:
+            while True:
+                await Pause()
+        except Exception:
+            return &quot;never reached&quot;
+    assert not respects_cancellation(swallower) and not respects_cancellation(eats_then_returns)
+    assert respects_cancellation(catches_exception_only)</textarea><textarea class="pc-src pc-solution" hidden>import asyncio
+
+class Pause:
+    def __await__(self):
+        yield
+
+def respects_cancellation(coro_fn):
+    coro = coro_fn()
+    try:
+        coro.send(None)
+        try:
+            coro.throw(asyncio.CancelledError())
+            for _ in range(100):
+                coro.send(None)
+            return False
+        except asyncio.CancelledError:
+            return True
+        except StopIteration:
+            return False
+    finally:
+        try:
+            coro.close()
+        except RuntimeError:
+            pass
+
+async def careful_worker(log):
+    try:
+        while True:
+            await Pause()
+    finally:
+        log.append(&quot;closed&quot;)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d4-race" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A race across an await</div><div class="pc-prompt"><p>Two kinds of booking coroutine run under a round-robin driver: each booking checks whether a seat is free, then <code>await</code>s a save (letting the others run), then marks the seat taken. Write <code>book(seat, taken, booked, name)</code>: the racy version, appending <code>name</code> to <code>booked</code> if it found the seat free; and <code>book_locked(seat, taken, booked, name, lock)</code>: the same, inside <code>async with lock:</code> using the provided <code>SimLock</code>. Then <code>round_robin(coros)</code>: drive a list of coroutines one step each in turn until all are done (a coroutine suspended on a <code>SimLock</code> that&rsquo;s held is skipped until it&rsquo;s free: the lock tells you with <code>can_enter</code>). With the plain version two people book the same seat; with the lock, only one does.</p></div><textarea class="pc-src pc-code" hidden>class Pause:
+    def __await__(self):
+        yield
+
+class SimLock:
+    &quot;An asyncio-style lock for the round-robin driver.&quot;
+    def __init__(self):
+        self.owner = None
+    def can_enter(self, coro):
+        return self.owner is None or self.owner is coro
+    async def __aenter__(self):
+        while self.owner is not None and self.owner is not _current[0]:
+            await Pause()
+        self.owner = _current[0]
+        return self
+    async def __aexit__(self, *exc):
+        self.owner = None
+        return False
+
+_current = [None]
+
+async def book(seat, taken, booked, name):
+    ___
+
+async def book_locked(seat, taken, booked, name, lock):
+    ___
+
+def round_robin(coros):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_race():
+    &quot;check-then-act across await&quot;
+    taken, booked = set(), []
+    round_robin([book(&quot;12A&quot;, taken, booked, &quot;ada&quot;), book(&quot;12A&quot;, taken, booked, &quot;ben&quot;)])
+    assert booked == [&quot;ada&quot;, &quot;ben&quot;] and taken == {&quot;12A&quot;}
+    taken2, booked2, lock = set(), [], SimLock()
+    round_robin([book_locked(&quot;12A&quot;, taken2, booked2, &quot;ada&quot;, lock), book_locked(&quot;12A&quot;, taken2, booked2, &quot;ben&quot;, lock)])
+    assert booked2 == [&quot;ada&quot;] and lock.owner is None
+    taken3, booked3, lock3 = set(), [], SimLock()
+    round_robin([book_locked(s, taken3, booked3, n, lock3) for n, s in [(&quot;a&quot;, &quot;1&quot;), (&quot;b&quot;, &quot;2&quot;), (&quot;c&quot;, &quot;1&quot;)]])
+    assert booked3 == [&quot;a&quot;, &quot;b&quot;]</textarea><textarea class="pc-src pc-solution" hidden>class Pause:
+    def __await__(self):
+        yield
+
+class SimLock:
+    &quot;An asyncio-style lock for the round-robin driver.&quot;
+    def __init__(self):
+        self.owner = None
+    def can_enter(self, coro):
+        return self.owner is None or self.owner is coro
+    async def __aenter__(self):
+        while self.owner is not None and self.owner is not _current[0]:
+            await Pause()
+        self.owner = _current[0]
+        return self
+    async def __aexit__(self, *exc):
+        self.owner = None
+        return False
+
+_current = [None]
+
+async def book(seat, taken, booked, name):
+    free = seat not in taken
+    await Pause()
+    if free:
+        taken.add(seat)
+        booked.append(name)
+
+async def book_locked(seat, taken, booked, name, lock):
+    async with lock:
+        free = seat not in taken
+        await Pause()
+        if free:
+            taken.add(seat)
+            booked.append(name)
+
+def round_robin(coros):
+    active = list(coros)
+    while active:
+        for coro in list(active):
+            _current[0] = coro
+            try:
+                coro.send(None)
+            except StopIteration:
+                active.remove(coro)
+        _current[0] = None</textarea><template class="pc-src pc-hint">In <code>round_robin</code>, set <code>_current[0]</code> to the coroutine before each <code>send(None)</code>, so the lock knows who is entering. The racy <code>book</code> is three lines: <code>free = seat not in taken</code>, <code>await Pause()</code>, then <code>if free:</code> mark and record.</template></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A coroutine that&rsquo;s always true</div><div class="pc-prompt"><p><code>is_banned</code> is a coroutine function, and the check calls it without <code>await</code>, so <code>if</code> tests a coroutine object, which is always true, and even Ada is refused: this prints <code>refused</code>. Await the check (inside an async function) so it prints <code>welcome</code>.</p></div><textarea class="pc-src pc-code" hidden>async def is_banned(user):
+    return user == &quot;mallory&quot;
+
+async def enter(user):
+    if is_banned(user):
+        return &quot;refused&quot;
+    return &quot;welcome&quot;
+
+c = enter(&quot;ada&quot;)
+try:
+    c.send(None)
+except StopIteration as done:
+    print(done.value)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;await the check&quot;
+    expect_output(&quot;welcome&quot;)</textarea><textarea class="pc-src pc-solution" hidden>async def is_banned(user):
+    return user == &quot;mallory&quot;
+
+async def enter(user):
+    if await is_banned(user):
+        return &quot;refused&quot;
+    return &quot;welcome&quot;
+
+c = enter(&quot;ada&quot;)
+try:
+    c.send(None)
+except StopIteration as done:
+    print(done.value)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A cancellation that was eaten</div><div class="pc-prompt"><p>The worker catches <strong>everything</strong> with <code>except BaseException</code>, including the <code>CancelledError</code> used to stop it, so cancelling it does nothing and this prints <code>still running</code>. Let the cancellation through (catch only <code>Exception</code>, or re-raise <code>CancelledError</code>) so it prints <code>cancelled</code>.</p></div><textarea class="pc-src pc-code" hidden>import asyncio
+
+class Pause:
+    def __await__(self):
+        yield
+
+async def worker():
+    while True:
+        try:
+            await Pause()
+        except BaseException:
+            pass
+
+c = worker()
+c.send(None)
+try:
+    c.throw(asyncio.CancelledError())
+    print(&quot;still running&quot;)
+except asyncio.CancelledError:
+    print(&quot;cancelled&quot;)
+try:
+    c.close()
+except RuntimeError:
+    pass</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;don&#x27;t swallow cancellation&quot;
+    expect_output(&quot;cancelled&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import asyncio
+
+class Pause:
+    def __await__(self):
+        yield
+
+async def worker():
+    while True:
+        try:
+            await Pause()
+        except Exception:
+            pass
+
+c = worker()
+c.send(None)
+try:
+    c.throw(asyncio.CancelledError())
+    print(&quot;still running&quot;)
+except asyncio.CancelledError:
+    print(&quot;cancelled&quot;)
+try:
+    c.close()
+except RuntimeError:
+    pass</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Tasks that are never forgotten</div><div class="pc-prompt"><p>The background set keeps every task for ever, because nothing removes them when they finish, so it grows without limit and this prints <code>3</code>. Register <code>background.discard</code> as a done callback so finished tasks leave the set, and this prints <code>0</code>.</p></div><textarea class="pc-src pc-code" hidden>from concurrent.futures import Future
+
+background = set()
+
+def spawn(task):
+    background.add(task)
+    return task
+
+tasks = [spawn(Future()) for _ in range(3)]
+for t in tasks:
+    t.set_result(&quot;done&quot;)
+print(len(background))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;discard when done&quot;
+    expect_output(&quot;0&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from concurrent.futures import Future
+
+background = set()
+
+def spawn(task):
+    background.add(task)
+    task.add_done_callback(background.discard)
+    return task
+
+tasks = [spawn(Future()) for _ in range(3)]
+for t in tasks:
+    t.set_result(&quot;done&quot;)
+print(len(background))</textarea></div>
+<div class="parsons" data-id="w067d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Offloading a blocking call</div><div class="pc-prompt"><p>Arrange the lines of a coroutine that reads a large file without blocking the event loop (real <code>asyncio</code>). One line is a trap.</p></div><script type="application/json">{"lines": ["def read_all(path):", "    with open(path) as f:", "        return f.read()", "async def load(path):", "    text = await asyncio.to_thread(read_all, path)", "    return len(text)"], "distractors": ["    text = read_all(path)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # True or False: issubclass(asyncio.CancelledError, Exception)
+q = ___   # what time.sleep(2) inside a coroutine does to other tasks: &quot;nothing&quot; or &quot;delays them&quot;
+r = ___   # bool of a coroutine object (one returning False)
+s = ___   # what gather does with the other tasks when one raises: &quot;cancels them&quot; or &quot;leaves them running&quot;
+t = ___   # what TaskGroup does with the other tasks when one raises: &quot;cancels them&quot; or &quot;leaves them running&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p is False and q == &quot;delays them&quot; and r is True, &quot;p, q and r&quot;
+    assert s == &quot;leaves them running&quot; and t == &quot;cancels them&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = False
+q = &quot;delays them&quot;
+r = True
+s = &quot;leaves them running&quot;
+t = &quot;cancels them&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w067d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What happens if a coroutine calls time.sleep(5)?", "answer": 1, "explain": "Use await asyncio.sleep.", "options": ["Only it waits", "The whole event loop, and so every task, is stuck for 5 seconds", "An error", "It&rsquo;s converted to asyncio.sleep"]}, {"type": "mc", "q": "How do you run a blocking function from a coroutine without freezing the loop?", "answer": 1, "explain": "Or run_in_executor for processes.", "options": ["Call it directly", "await asyncio.to_thread(func, *args)", "Use time.sleep", "Wrap it in async def"]}, {"type": "mc", "q": "What does calling an async function without await do?", "answer": 1, "explain": "Python may warn later.", "options": ["Runs it in the background", "Creates a coroutine object and nothing else", "Raises at once", "Runs it synchronously"]}, {"type": "mc", "q": "Why keep references to tasks you create?", "answer": 1, "explain": "A set plus add_done_callback(discard).", "options": ["Speed", "The loop holds tasks only weakly, so unreferenced tasks can vanish before finishing", "To cancel them", "It&rsquo;s required for gather"]}, {"type": "mc", "q": "Why is CancelledError a BaseException?", "answer": 1, "explain": "Since Python 3.8.", "options": ["Accident", "So that except Exception doesn&rsquo;t catch it by accident", "It&rsquo;s an error", "For speed"]}, {"type": "mc", "q": "What should a coroutine do if it catches CancelledError?", "answer": 1, "explain": "Never swallow cancellation.", "options": ["Ignore it", "Clean up and re-raise it", "Log an error and continue", "Return None"]}, {"type": "mc", "q": "Can asyncio code have race conditions?", "answer": 1, "explain": "Use asyncio.Lock or avoid await between check and act.", "options": ["No, it&rsquo;s one thread", "Yes, across an await, where other tasks run", "Only with threads", "Only in 3.13"]}, {"type": "mc", "q": "What does gather(return_exceptions=True) do?", "answer": 1, "explain": "Each result can be checked.", "options": ["Hides errors", "Returns exceptions in the result list instead of raising", "Retries", "Cancels on error"]}, {"type": "mc", "q": "How does TaskGroup handle a failing task?", "answer": 1, "explain": "No task outlives the block.", "options": ["Ignores it", "Cancels the others, waits for them, and raises an ExceptionGroup", "Retries it", "Leaves the others running"]}, {"type": "output", "q": "What does this print?", "answer": "caught as BaseException", "explain": "CancelledError isn&rsquo;t an Exception.", "code": "import asyncio\ntry:\n    raise asyncio.CancelledError()\nexcept Exception:\n    print(\"caught as Exception\")\nexcept BaseException:\n    print(\"caught as BaseException\")"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: an async checker</div><div class="pc-prompt"><p>Linters catch many async mistakes by reading the code (Week 64&rsquo;s <code>ast</code>). Write <code>check_async(source)</code>, returning a sorted list of <code>(line, code, message)</code> problems found <strong>inside <code>async def</code> functions</strong> (including nested ones):</p>
+<table>
+<thead>
+<tr>
+<th>code</th>
+<th>finds</th>
+<th>message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>A001</code></td>
+<td>a call to <code>time.sleep(...)</code></td>
+<td><code>blocking call time.sleep in async function</code></td>
+</tr>
+<tr>
+<td><code>A002</code></td>
+<td>a call to <code>requests.get</code>, <code>requests.post</code>, <code>requests.put</code> or <code>requests.delete</code></td>
+<td><code>blocking call requests.get in async function</code> (with the real name)</td>
+</tr>
+<tr>
+<td><code>A003</code></td>
+<td>a call, as a plain statement or a condition, to a coroutine function <strong>defined in the same source</strong> (any <code>async def</code> name), that isn&rsquo;t awaited</td>
+<td><code>coroutine 'name' is never awaited</code></td>
+</tr>
+<tr>
+<td><code>A004</code></td>
+<td><code>asyncio.create_task(...)</code> used as a plain statement (its result isn&rsquo;t kept)</td>
+<td><code>task created but no reference kept</code></td>
+</tr>
+<tr>
+<td><code>A005</code></td>
+<td>an <code>except</code> that would swallow cancellation: a bare <code>except:</code>, <code>except BaseException</code>, or <code>except asyncio.CancelledError</code>, whose body doesn&rsquo;t end with a <code>raise</code></td>
+<td><code>cancellation swallowed</code></td>
+</tr>
+<tr>
+<td><code>A006</code></td>
+<td><code>asyncio.run(...)</code> called inside an async function</td>
+<td><code>asyncio.run inside a running event loop</code></td>
+</tr>
+</tbody>
+</table>
+<p>&ldquo;Not awaited&rdquo; means the <code>Call</code> node isn&rsquo;t the value of an <code>Await</code> node. A condition means the test of an <code>if</code> or <code>while</code>.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def check_async(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_checker():
+    &quot;finding async mistakes&quot;
+    src = (
+        &quot;import asyncio, time, requests\n&quot;
+        &quot;async def save(x):\n&quot;
+        &quot;    time.sleep(1)\n&quot;
+        &quot;    return x\n&quot;
+        &quot;async def main():\n&quot;
+        &quot;    save(1)\n&quot;
+        &quot;    await save(2)\n&quot;
+        &quot;    if save(3):\n&quot;
+        &quot;        pass\n&quot;
+        &quot;    asyncio.create_task(save(4))\n&quot;
+        &quot;    keep = asyncio.create_task(save(5))\n&quot;
+        &quot;    r = requests.get(&#x27;https://example.org&#x27;)\n&quot;
+        &quot;    try:\n&quot;
+        &quot;        await save(6)\n&quot;
+        &quot;    except asyncio.CancelledError:\n&quot;
+        &quot;        print(&#x27;ignored&#x27;)\n&quot;
+        &quot;    try:\n&quot;
+        &quot;        await save(7)\n&quot;
+        &quot;    except BaseException:\n&quot;
+        &quot;        raise\n&quot;
+        &quot;    asyncio.run(save(8))\n&quot;
+        &quot;def sync_helper():\n&quot;
+        &quot;    time.sleep(1)\n&quot;
+    )
+    assert check_async(src) == [
+        (3, &quot;A001&quot;, &quot;blocking call time.sleep in async function&quot;),
+        (6, &quot;A003&quot;, &quot;coroutine &#x27;save&#x27; is never awaited&quot;),
+        (8, &quot;A003&quot;, &quot;coroutine &#x27;save&#x27; is never awaited&quot;),
+        (10, &quot;A004&quot;, &quot;task created but no reference kept&quot;),
+        (12, &quot;A002&quot;, &quot;blocking call requests.get in async function&quot;),
+        (15, &quot;A005&quot;, &quot;cancellation swallowed&quot;),
+        (21, &quot;A006&quot;, &quot;asyncio.run inside a running event loop&quot;),
+    ]
+    assert check_async(&quot;async def f():\n    try:\n        pass\n    except:\n        pass\n&quot;) == [(4, &quot;A005&quot;, &quot;cancellation swallowed&quot;)]
+    assert check_async(&quot;def f():\n    asyncio.run(g())\n&quot;) == []</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+BLOCKING = {&quot;time.sleep&quot;: &quot;A001&quot;, &quot;requests.get&quot;: &quot;A002&quot;, &quot;requests.post&quot;: &quot;A002&quot;,
+            &quot;requests.put&quot;: &quot;A002&quot;, &quot;requests.delete&quot;: &quot;A002&quot;}
+
+def _dotted(func):
+    if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+        return f&quot;{func.value.id}.{func.attr}&quot;
+    if isinstance(func, ast.Name):
+        return func.id
+    return None
+
+def check_async(source):
+    tree = ast.parse(source)
+    coroutines = {n.name for n in ast.walk(tree) if isinstance(n, ast.AsyncFunctionDef)}
+    problems = set()
+    for func in ast.walk(tree):
+        if not isinstance(func, ast.AsyncFunctionDef):
+            continue
+        awaited = {id(n.value) for n in ast.walk(func) if isinstance(n, ast.Await)}
+        statement_calls = set()
+        for n in ast.walk(func):
+            if isinstance(n, ast.Expr) and isinstance(n.value, ast.Call):
+                statement_calls.add(id(n.value))
+            if isinstance(n, (ast.If, ast.While)) and isinstance(n.test, ast.Call):
+                statement_calls.add(id(n.test))
+        for n in ast.walk(func):
+            if isinstance(n, ast.Call):
+                name = _dotted(n.func)
+                if name in BLOCKING:
+                    code = BLOCKING[name]
+                    problems.add((n.lineno, code, f&quot;blocking call {name} in async function&quot;))
+                if (isinstance(n.func, ast.Name) and n.func.id in coroutines
+                        and id(n) not in awaited and id(n) in statement_calls):
+                    problems.add((n.lineno, &quot;A003&quot;, f&quot;coroutine &#x27;{n.func.id}&#x27; is never awaited&quot;))
+                if name == &quot;asyncio.create_task&quot; and id(n) in statement_calls:
+                    problems.add((n.lineno, &quot;A004&quot;, &quot;task created but no reference kept&quot;))
+                if name == &quot;asyncio.run&quot;:
+                    problems.add((n.lineno, &quot;A006&quot;, &quot;asyncio.run inside a running event loop&quot;))
+            if isinstance(n, ast.ExceptHandler):
+                kind = _dotted(n.type) if n.type is not None else None
+                swallowing = n.type is None or kind in (&quot;BaseException&quot;, &quot;asyncio.CancelledError&quot;, &quot;CancelledError&quot;)
+                ends_with_raise = bool(n.body) and isinstance(n.body[-1], ast.Raise)
+                if swallowing and not ends_with_raise:
+                    problems.add((n.lineno, &quot;A005&quot;, &quot;cancellation swallowed&quot;))
+    return sorted(problems)</textarea><template class="pc-src pc-hint">Collect every <code>async def</code> name first. Then, for each <code>AsyncFunctionDef</code>, walk its body. Build a set of the <code>id</code>s of <code>Call</code> nodes that are the <code>value</code> of an <code>Await</code>, so you can tell awaited calls from others. A dotted name like <code>time.sleep</code> is an <code>Attribute</code> whose <code>value</code> is a <code>Name</code>: compare <code>f"{value.id}.{attr}"</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, run an <code>asyncio</code> program with <code>asyncio.run(main(), debug=True)</code> and put a <code>time.sleep(0.5)</code> in one coroutine: the debug output names the slow callback. Tomorrow: choosing between threads, processes and <code>asyncio</code>, and combining them.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w067d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w067d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w067d4", "week": 67, "day": 4, "title": "Async pitfalls", "exercises": [{"id": "w067d4-blocking", "title": "Who is blocking whom?", "points": 15}, {"id": "w067d4-registry", "title": "Keeping background tasks alive", "points": 10}, {"id": "w067d4-gather", "title": "What gather does with failures", "points": 10}, {"id": "w067d4-cancel", "title": "Does it respect cancellation?", "points": 10}, {"id": "w067d4-race", "title": "A race across an await", "points": 15}, {"id": "w067d4-bug1", "title": "A coroutine that's always true", "points": 10}, {"id": "w067d4-bug2", "title": "A cancellation that was eaten", "points": 10}, {"id": "w067d4-bug3", "title": "Tasks that are never forgotten", "points": 10}, {"id": "w067d4-trace", "title": "Predict them", "points": 10}, {"id": "w067d4-challenge", "title": "Challenge: an async checker", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

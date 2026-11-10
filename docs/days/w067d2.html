@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 67 Day 2: asyncio basics | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Threads let the operating system switch between tasks at any moment, which is why they need locks. asyncio takes the opposite approach: tasks are coroutines...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w067d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 67 Day 2: asyncio basics">
+<meta property="og:description" content="Threads let the operating system switch between tasks at any moment, which is why they need locks. asyncio takes the opposite approach: tasks are coroutines...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w067d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-67">Week 67: Concurrency II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#coroutines-and-await" data-sec="coroutines-and-await">Coroutines and await</a></li><li><a href="#the-event-loop" data-sec="the-event-loop">The event loop</a></li><li><a href="#tasks-and-gather" data-sec="tasks-and-gather">Tasks and gather</a></li><li><a href="#inside-a-coroutine" data-sec="inside-a-coroutine">Inside a coroutine</a></li><li><a href="#a-tiny-event-loop" data-sec="a-tiny-event-loop">A tiny event loop</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w067d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-67">Week 67: Concurrency II</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 67, Day 2</span></p>
+      <h1>asyncio basics</h1>
+      <div class="day-intro"><p>Threads let the operating system switch between tasks at any moment, which is why they need locks. <code>asyncio</code> takes the opposite approach: tasks are <strong>coroutines</strong> that run until they reach an <code>await</code>, and only there can another task run. All of it happens in <strong>one thread</strong>, driven by an <strong>event loop</strong>. It&rsquo;s the most efficient way to handle thousands of simultaneous network connections, and it&rsquo;s how most modern Python web frameworks work. Today you&rsquo;ll learn <code>async def</code>, <code>await</code>, tasks and <code>gather</code>, and then see how it all works by building a small event loop yourself, out of the generator ideas from Week 59 and the schedulers from last week. The browser can&rsquo;t run <code>asyncio</code>&rsquo;s own loop, so the real code is in the &ldquo;On your own computer&rdquo; sections.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Write coroutines with async def and await, and explain what calling one returns</li><li>Explain the event loop, cooperative switching at await, and why one thread is enough for I/O</li><li>Run coroutines concurrently with create_task and gather, and predict the total time</li><li>Drive coroutines by hand with send, and write awaitable objects with <strong>await</strong></li><li>Build a small event loop with simulated time, tasks and sleeping</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Coroutines and await: 20 min"></span><span class="plan-seg s0" style="flex:20" title="The event loop: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Tasks and gather: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Inside a coroutine: 25 min"></span><span class="plan-seg s1" style="flex:20" title="A tiny event loop: 20 min"></span><span class="plan-seg s0" style="flex:50" title="Practice: 50 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Coroutines and await</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">The event loop</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Tasks and gather</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Inside a coroutine</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">A tiny event loop</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Practice</span><span class="plan-min">50 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w067d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w067d2.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w067d2-p1"><textarea class="pc-src pc-code" hidden>async def greet(name):
+    return f&quot;hello {name}&quot;
+
+c = greet(&quot;Ada&quot;)
+print(type(c).__name__)
+try:
+    c.send(None)
+except StopIteration as done:
+    print(&quot;finished with&quot;, repr(done.value))</textarea></div>
+<p>Calling an <code>async def</code> function doesn&rsquo;t run it: it returns a <strong>coroutine</strong> object. The code runs only when something drives the coroutine (here, <code>send(None)</code>), and when it finishes, its return value travels inside <code>StopIteration</code>, exactly as for a generator. An event loop is just a program that does this driving for many coroutines at once.</p>
+<h2 id="coroutines-and-await">Coroutines and await</h2>
+<ul>
+<li><strong><code>async def f(...)</code></strong> defines a <strong>coroutine function</strong>. Calling it returns a coroutine object, without running any of the body.</li>
+<li><strong><code>await x</code></strong> inside a coroutine pauses it until the <strong>awaitable</strong> <code>x</code> has a result, then gives back that result. You can only <code>await</code> inside <code>async def</code>.</li>
+<li><strong>Awaitables</strong> are coroutines, <code>asyncio</code> <strong>tasks</strong> and <strong>futures</strong>, and any object with an <code>__await__</code> method.</li>
+<li><strong><code>asyncio.run(main())</code></strong> creates an event loop, runs the coroutine <code>main()</code> to completion, and closes the loop. It&rsquo;s normally called once, at the top of the program.</li>
+<li><code>await asyncio.sleep(1)</code> pauses for a second <strong>without blocking</strong> the thread: other tasks run meanwhile. (<code>time.sleep(1)</code> would block everything: Thursday.)</li>
+</ul>
+<p>On your own computer:</p>
+<pre><code>import asyncio
+
+async def fetch(name, delay):
+    print(&quot;start&quot;, name)
+    await asyncio.sleep(delay)          # stands for waiting on the network
+    print(&quot;done&quot;, name)
+    return f&quot;{name} page&quot;
+
+async def main():
+    page = await fetch(&quot;home&quot;, 1)       # waits for this one; nothing else is running
+    print(page)
+
+asyncio.run(main())
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w067d2-e2"><textarea class="pc-src pc-code" hidden>import inspect
+
+async def fetch(name):
+    return f&quot;{name} page&quot;
+
+print(inspect.iscoroutinefunction(fetch), inspect.iscoroutinefunction(print))
+coro = fetch(&quot;home&quot;)
+print(inspect.iscoroutine(coro))
+coro.close()                       # tidy up: this coroutine will never be awaited
+
+async def main():
+    page = await fetch(&quot;home&quot;)     # awaiting a coroutine runs it and gives its result
+    return page.upper()
+
+c = main()
+try:
+    c.send(None)
+except StopIteration as done:
+    print(done.value)</textarea></div>
+<h2 id="the-event-loop">The event loop</h2>
+<p>The <strong>event loop</strong> is the scheduler at the heart of <code>asyncio</code>. It keeps a set of <strong>tasks</strong> (coroutines it&rsquo;s responsible for), and repeatedly:</p>
+<ol>
+<li>runs each ready task until it reaches an <code>await</code> on something that isn&rsquo;t ready yet, at which point the task gives control back to the loop;</li>
+<li>asks the operating system which network sockets and files have data (with one efficient call, such as <code>select</code> or <code>epoll</code>), and which timers have expired;</li>
+<li>marks the tasks waiting for those as ready again.</li>
+</ol>
+<p>Two consequences follow:</p>
+<ul>
+<li><strong>Switching is cooperative</strong>: a task is only ever paused at an <code>await</code>. Between two <code>await</code>s, a task runs without interruption, so most code needs <strong>no locks</strong> (unlike threads). The price: a task that computes for a long time, or calls a blocking function, freezes <strong>every</strong> task (Thursday).</li>
+<li><strong>One thread can serve thousands of connections</strong>, because a waiting task costs only a small object, not a thread with its own stack. That&rsquo;s why web servers and chat services use <code>asyncio</code>.</li>
+</ul>
+<p><code>asyncio</code> helps with <strong>I/O-bound</strong> work only: CPU-bound work still needs processes (yesterday).</p>
+<div class="pc pc-example" data-kind="example" data-id="w067d2-e3"><textarea class="pc-src pc-code" hidden>def concurrency_cost(connections, per_thread_kb=1024, per_task_kb=2):
+    &quot;Rough memory for waiting connections: a thread each, or a task each.&quot;
+    return connections * per_thread_kb // 1024, connections * per_task_kb // 1024
+
+for n in (100, 10_000):
+    threads_mb, tasks_mb = concurrency_cost(n)
+    print(f&quot;{n} connections: threads about {threads_mb} MB of stack, tasks about {tasks_mb} MB&quot;)</textarea></div>
+<h2 id="tasks-and-gather">Tasks and gather</h2>
+<p><code>await fetch(...)</code> runs one coroutine to the end before the next line, so three awaits in a row take the <strong>sum</strong> of their times. To run coroutines <strong>concurrently</strong>:</p>
+<ul>
+<li><strong><code>asyncio.create_task(coro)</code></strong> wraps a coroutine in a <strong>task</strong> and schedules it on the loop at once; it starts running the next time the current task awaits. Awaiting the task later gives its result. Keep a reference to every task you create (Thursday explains why).</li>
+<li><strong><code>await asyncio.gather(*coros)</code></strong> runs several awaitables concurrently and returns their results <strong>in the order given</strong>, taking about as long as the slowest.</li>
+<li><strong><code>asyncio.TaskGroup</code></strong> (3.11+) is the structured alternative: <code>async with asyncio.TaskGroup() as tg: tg.create_task(...)</code> waits for all its tasks at the end of the block and cancels the rest if one fails (Wednesday).</li>
+</ul>
+<p>On your own computer:</p>
+<pre><code>async def main():
+    start = time.perf_counter()
+    pages = await asyncio.gather(fetch(&quot;a&quot;, 3), fetch(&quot;b&quot;, 1), fetch(&quot;c&quot;, 2))
+    print(pages, round(time.perf_counter() - start, 1), &quot;seconds&quot;)   # about 3, not 6
+
+asyncio.run(main())
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w067d2-e4"><textarea class="pc-src pc-code" hidden>def sequential_time(delays):
+    return sum(delays)                 # await one, then the next, then the next
+
+def gathered_time(delays):
+    return max(delays, default=0)      # all waiting at the same time
+
+delays = [3, 1, 2]
+print(sequential_time(delays), gathered_time(delays))
+
+def finish_order(names, delays):
+    &quot;gather returns results in the order given, but they finish in order of delay.&quot;
+    return [n for n, _ in sorted(zip(names, delays), key=lambda p: p[1])]
+
+print(finish_order([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;], delays), &quot;finish; gather returns&quot;, [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;])</textarea></div>
+<h2 id="inside-a-coroutine">Inside a coroutine</h2>
+<p>Coroutines are built on the same machinery as generators (Week 59):</p>
+<ul>
+<li><code>coro.send(value)</code> runs the coroutine until it next <strong>suspends</strong>, and returns whatever it yielded to the loop; the value sent becomes the result of the expression where it was suspended. <code>send(None)</code> starts it.</li>
+<li>When the coroutine returns, <code>send</code> raises <strong><code>StopIteration</code></strong> carrying the return value.</li>
+<li><code>coro.throw(exc)</code> raises an exception inside it at the point where it&rsquo;s suspended (that&rsquo;s how cancellation works: Thursday), and <code>coro.close()</code> stops it.</li>
+</ul>
+<p>Where does a coroutine actually suspend? <code>await</code> passes control down a chain of awaitables until it reaches an object whose <strong><code>__await__</code></strong> method <strong>yields</strong>. That yielded value travels all the way up to whoever called <code>send</code>: the event loop. In <code>asyncio</code>, it&rsquo;s a future that the loop should wait for; in our own loop, it can be any <strong>request</strong> we choose, such as <code>("sleep", 2)</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w067d2-e5"><textarea class="pc-src pc-code" hidden>class Pause:
+    &quot;An awaitable that suspends once, sending a request to whoever drives the coroutine.&quot;
+    def __init__(self, request):
+        self.request = request
+    def __await__(self):
+        reply = yield self.request         # suspends here; the driver&#x27;s send() value comes back
+        return reply
+
+async def worker():
+    first = await Pause((&quot;sleep&quot;, 2))
+    second = await Pause((&quot;ask&quot;, &quot;name?&quot;))
+    return f&quot;{first}, {second}&quot;
+
+c = worker()
+print(c.send(None))                        # runs to the first yield: the request
+print(c.send(&quot;woke up&quot;))                   # resumes; the next request
+try:
+    c.send(&quot;Ada&quot;)
+except StopIteration as done:
+    print(done.value)</textarea></div>
+<h2 id="a-tiny-event-loop">A tiny event loop</h2>
+<p>With awaitables that yield requests, an event loop takes about thirty lines. Ours uses <strong>simulated time</strong>, so it runs instantly and the same way every time:</p>
+<ul>
+<li>a <strong><code>Sleep(t)</code></strong> awaitable yields <code>("sleep", t)</code>;</li>
+<li>a <strong><code>Task</code></strong> wraps a coroutine; awaiting a task that isn&rsquo;t finished yields <code>("wait", task)</code>;</li>
+<li>the <strong>loop</strong> keeps a queue of ready tasks and a heap of sleeping ones, runs each ready task until its next request with <code>send(None)</code>, and when a task finishes, wakes the tasks waiting for it. When nothing is ready, time jumps to the next wake-up.</li>
+</ul>
+<p><code>asyncio</code>&rsquo;s real loop has the same structure, with sockets and timers in place of simulated sleeps.</p>
+<div class="pc pc-example" data-kind="example" data-id="w067d2-e6"><textarea class="pc-src pc-code" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Task:
+    def __init__(self, coro):
+        self.coro, self.done, self.result, self.waiters = coro, False, None, []
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self.seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.ready.extend(task.waiters)
+            return
+        if kind == &quot;sleep&quot;:
+            self.seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self.seq, task))
+        else:
+            arg.waiters.append(task)
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result
+
+loop = Loop()
+log = []
+
+async def fetch(name, delay):
+    log.append((loop.now, &quot;start&quot;, name))
+    await Sleep(delay)
+    log.append((loop.now, &quot;done&quot;, name))
+    return name.upper()
+
+async def main():
+    tasks = [loop.create_task(fetch(n, d)) for n, d in [(&quot;a&quot;, 3), (&quot;b&quot;, 1), (&quot;c&quot;, 2)]]
+    return [await t for t in tasks]          # what gather does
+
+print(loop.run_until_complete(main()), &quot;at time&quot;, loop.now)
+print(log)</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>async def defines a coroutine function; calling it returns a coroutine object without running it, and await inside another coroutine runs it and gives its result. asyncio.run(main()) runs the top-level coroutine on an event loop, in one thread. The loop runs ready tasks until they await something not ready, then waits for I/O and timers; switching happens only at await (cooperative), so tasks rarely need locks, but a task that blocks or computes freezes all of them. Awaiting coroutines one after another takes the sum of their times; create_task and gather run them concurrently (about the maximum), and gather returns results in the order given. Coroutines are driven with send (StopIteration carries the result) and suspend where an <strong>await</strong> method yields; that yielded request is what the event loop acts on.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d2-drive" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Driving a coroutine by hand</div><div class="pc-prompt"><p>Write <code>drive(coro)</code>: run a coroutine to completion by calling <code>send(None)</code> repeatedly (whatever it yields is ignored), returning <code>(result, steps)</code>, where <code>steps</code> is how many times it suspended. Then <code>Yield</code>, an awaitable class whose <code>__await__</code> suspends exactly once (yielding <code>None</code>), so <code>await Yield()</code> gives other tasks a turn, like <code>asyncio.sleep(0)</code>.</p></div><textarea class="pc-src pc-code" hidden>class Yield:
+    ___
+
+def drive(coro):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_drive():
+    &quot;send and StopIteration&quot;
+    async def three_steps():
+        await Yield()
+        await Yield()
+        await Yield()
+        return &quot;done&quot;
+    assert drive(three_steps()) == (&quot;done&quot;, 3)
+    async def immediate():
+        return 42
+    assert drive(immediate()) == (42, 0)
+    async def nested():
+        a = await immediate()
+        await Yield()
+        return a + 1
+    assert drive(nested()) == (43, 1)</textarea><textarea class="pc-src pc-solution" hidden>class Yield:
+    def __await__(self):
+        yield
+
+def drive(coro):
+    steps = 0
+    while True:
+        try:
+            coro.send(None)
+        except StopIteration as done:
+            return done.value, steps
+        steps += 1</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d2-sleeping" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">One coroutine, simulated time</div><div class="pc-prompt"><p>Write <code>Sleep(seconds)</code>, an awaitable that yields <code>("sleep", seconds)</code>, and <code>run_sleeping(coro)</code>: drive the coroutine, adding up the time it asks to sleep, and return <code>(result, total_time)</code>. Requests that aren&rsquo;t sleeps raise <code>ValueError</code>. Then <code>time_of(coro_fn, *args)</code>: just the total time.</p></div><textarea class="pc-src pc-code" hidden>class Sleep:
+    ___
+
+def run_sleeping(coro):
+    ___
+
+def time_of(coro_fn, *args):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_sleeping():
+    &quot;a simulated clock&quot;
+    async def fetch(delay):
+        await Sleep(delay)
+        return delay * 10
+    async def two_in_a_row():
+        a = await fetch(2)
+        b = await fetch(3)
+        return a + b
+    assert run_sleeping(two_in_a_row()) == (50, 5) and time_of(fetch, 4) == 4
+    class Odd:
+        def __await__(self):
+            yield (&quot;dance&quot;, 1)
+    async def odd():
+        await Odd()
+    try:
+        run_sleeping(odd())
+        assert False
+    except ValueError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+def run_sleeping(coro):
+    total = 0
+    while True:
+        try:
+            request = coro.send(None)
+        except StopIteration as done:
+            return done.value, total
+        if not (isinstance(request, tuple) and request[0] == &quot;sleep&quot;):
+            raise ValueError(f&quot;unknown request {request!r}&quot;)
+        total += request[1]
+
+def time_of(coro_fn, *args):
+    return run_sleeping(coro_fn(*args))[1]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d2-loop" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A loop with tasks</div><div class="pc-prompt"><p>Write the tiny event loop: <code>Sleep(seconds)</code> yields <code>("sleep", seconds)</code>; <code>Task(coro)</code> has <code>done</code> and <code>result</code>, and awaiting an unfinished task yields <code>("wait", task)</code> and then returns its result; <code>Loop</code> has <code>now</code> (starting at 0), <code>create_task(coro)</code> (scheduled to run, returns the task), and <code>run_until_complete(coro)</code>, which runs everything, returns the coroutine&rsquo;s result, and leaves <code>now</code> at the time the last task finished. Ready tasks run in FIFO order; when none are ready, time jumps to the earliest wake-up (ties in sleep order); finished tasks wake their waiters in the order they started waiting.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    ___
+
+class Task:
+    ___
+
+class Loop:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_loop():
+    &quot;tasks and simulated time&quot;
+    loop = Loop()
+    log = []
+    async def fetch(name, delay):
+        log.append((loop.now, &quot;start&quot;, name))
+        await Sleep(delay)
+        log.append((loop.now, &quot;done&quot;, name))
+        return name * 2
+    async def main():
+        tasks = [loop.create_task(fetch(n, d)) for n, d in [(&quot;a&quot;, 3), (&quot;b&quot;, 1), (&quot;c&quot;, 2)]]
+        return [await t for t in tasks]
+    assert loop.run_until_complete(main()) == [&quot;aa&quot;, &quot;bb&quot;, &quot;cc&quot;] and loop.now == 3
+    assert log == [(0, &quot;start&quot;, &quot;a&quot;), (0, &quot;start&quot;, &quot;b&quot;), (0, &quot;start&quot;, &quot;c&quot;),
+                   (1, &quot;done&quot;, &quot;b&quot;), (2, &quot;done&quot;, &quot;c&quot;), (3, &quot;done&quot;, &quot;a&quot;)]
+    loop2 = Loop()
+    async def one_by_one():
+        return [await fetch(&quot;x&quot;, 2), await fetch(&quot;y&quot;, 2)]
+    assert loop2.run_until_complete(one_by_one()) == [&quot;xx&quot;, &quot;yy&quot;] and loop2.now == 4
+    loop3 = Loop()
+    async def quick():
+        return 7
+    async def waits_for_done():
+        t = loop3.create_task(quick())
+        await Sleep(5)
+        return await t
+    assert loop3.run_until_complete(waits_for_done()) == 7 and loop3.now == 5</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Task:
+    def __init__(self, coro):
+        self.coro = coro
+        self.done = False
+        self.result = None
+        self.waiters = []
+
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now = 0
+        self.ready = deque()
+        self.sleepers = []
+        self._seq = 0
+
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.ready.extend(task.waiters)
+            task.waiters = []
+            return
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            arg.waiters.append(task)
+
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d2-gather" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">gather</div><div class="pc-prompt"><p>Using the loop below (the one from the previous exercise, given here), write a coroutine <code>gather(loop, *coros)</code> that runs the coroutines concurrently as tasks and returns their results <strong>in the order given</strong>, and a coroutine <code>first_done(loop, *coros)</code> that returns the result of whichever finishes <strong>first</strong> in simulated time (ties: the earliest given), without waiting for the others to finish (they keep running in the background).</p></div><textarea class="pc-src pc-code" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Task:
+    def __init__(self, coro):
+        self.coro, self.done, self.result, self.waiters = coro, False, None, []
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self._seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.ready.extend(task.waiters)
+            task.waiters = []
+            return
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            arg.waiters.append(task)
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result
+
+async def gather(loop, *coros):
+    ___
+
+async def first_done(loop, *coros):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_gather():
+    &quot;concurrent coroutines&quot;
+    loop = Loop()
+    async def job(name, delay):
+        await Sleep(delay)
+        return name
+    async def main():
+        results = await gather(loop, job(&quot;slow&quot;, 5), job(&quot;fast&quot;, 1), job(&quot;mid&quot;, 3))
+        return results, loop.now
+    assert loop.run_until_complete(main()) == ([&quot;slow&quot;, &quot;fast&quot;, &quot;mid&quot;], 5)
+    loop2 = Loop()
+    async def race():
+        winner = await first_done(loop2, job(&quot;slow&quot;, 5), job(&quot;fast&quot;, 1), job(&quot;mid&quot;, 3))
+        return winner, loop2.now
+    assert loop2.run_until_complete(race()) == (&quot;fast&quot;, 1) and loop2.now == 5
+    loop3 = Loop()
+    async def empty():
+        return await gather(loop3)
+    assert loop3.run_until_complete(empty()) == []</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Task:
+    def __init__(self, coro):
+        self.coro, self.done, self.result, self.waiters = coro, False, None, []
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self._seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        task = Task(coro)
+        self.ready.append(task)
+        return task
+    def _step(self, task):
+        try:
+            kind, arg = task.coro.send(None)
+        except StopIteration as stop:
+            task.done, task.result = True, stop.value
+            self.ready.extend(task.waiters)
+            task.waiters = []
+            return
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            arg.waiters.append(task)
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        return main.result
+
+async def gather(loop, *coros):
+    tasks = [loop.create_task(c) for c in coros]
+    return [await t for t in tasks]
+
+class _Signal:
+    &quot;An awaitable that waits until a task-like object marked done.&quot;
+    def __init__(self):
+        self.done, self.result, self.waiters = False, None, []
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+async def first_done(loop, *coros):
+    signal = _Signal()
+
+    async def watch(coro):
+        value = await coro
+        if not signal.done:
+            signal.done, signal.result = True, value
+            loop.ready.extend(signal.waiters)
+            signal.waiters = []
+        return value
+
+    for c in coros:
+        loop.create_task(watch(c))
+    return await signal</textarea><template class="pc-src pc-hint">For <code>first_done</code>, make a small awaitable &ldquo;signal&rdquo; object shaped like <code>Task</code> (with <code>done</code>, <code>result</code> and <code>waiters</code>, yielding <code>("wait", self)</code> until done). Wrap each coroutine in a watcher coroutine that awaits it and, if the signal isn&rsquo;t settled yet, settles it with the result and moves its waiters onto <code>loop.ready</code>. Start a task for each watcher, then await the signal.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d2-agen" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Async generators</div><div class="pc-prompt"><p><code>async def</code> functions that <code>yield</code> are <strong>async generators</strong>, consumed with <code>async for</code>. Write an async generator <code>countdown(n)</code> yielding <code>n, n - 1, ..., 1</code> and awaiting <code>Pause()</code> (a provided awaitable that suspends once) before each value, and a coroutine <code>collect(agen)</code> that gathers everything an async generator yields into a list with <code>async for</code>. Then <code>drive(coro)</code> returning <code>(result, suspensions)</code> as in the first exercise, to run <code>collect</code> here.</p></div><textarea class="pc-src pc-code" hidden>class Pause:
+    def __await__(self):
+        yield
+
+async def countdown(n):
+    ___
+
+async def collect(agen):
+    ___
+
+def drive(coro):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_agen():
+    &quot;async for&quot;
+    import inspect
+    assert inspect.isasyncgenfunction(countdown)
+    assert drive(collect(countdown(3))) == ([3, 2, 1], 3)
+    assert drive(collect(countdown(0))) == ([], 0)
+    async def doubled():
+        out = []
+        async for x in countdown(2):
+            out.append(x * 2)
+        return out
+    assert drive(doubled())[0] == [4, 2]</textarea><textarea class="pc-src pc-solution" hidden>class Pause:
+    def __await__(self):
+        yield
+
+async def countdown(n):
+    for i in range(n, 0, -1):
+        await Pause()
+        yield i
+
+async def collect(agen):
+    out = []
+    async for item in agen:
+        out.append(item)
+    return out
+
+def drive(coro):
+    steps = 0
+    while True:
+        try:
+            coro.send(None)
+        except StopIteration as done:
+            return done.value, steps
+        steps += 1</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A coroutine that never ran</div><div class="pc-prompt"><p><code>main</code> calls <code>fetch(...)</code> but doesn&rsquo;t <code>await</code> it, so it gets a coroutine object instead of the page, and this prints <code>coroutine</code>. Await the call so it prints <code>HOME PAGE</code>.</p></div><textarea class="pc-src pc-code" hidden>async def fetch(name):
+    return f&quot;{name} page&quot;
+
+async def main():
+    page = fetch(&quot;home&quot;)
+    return page.upper() if isinstance(page, str) else type(page).__name__
+
+c = main()
+try:
+    c.send(None)
+except StopIteration as done:
+    print(done.value)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;await it&quot;
+    expect_output(&quot;HOME PAGE&quot;)</textarea><textarea class="pc-src pc-solution" hidden>async def fetch(name):
+    return f&quot;{name} page&quot;
+
+async def main():
+    page = await fetch(&quot;home&quot;)
+    return page.upper() if isinstance(page, str) else type(page).__name__
+
+c = main()
+try:
+    c.send(None)
+except StopIteration as done:
+    print(done.value)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Concurrent in name only</div><div class="pc-prompt"><p>The three downloads are awaited one after another, so their waits add up and this prints <code>6</code>. Start them all as tasks first and then await them, so they wait at the same time and this prints <code>3</code>.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, s):
+        self.s = s
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.s)
+
+class Task:
+    def __init__(self, coro):
+        self.coro, self.done, self.result, self.waiters = coro, False, None, []
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self.seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        t = Task(coro)
+        self.ready.append(t)
+        return t
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, t = heapq.heappop(self.sleepers)
+                self.ready.append(t)
+                continue
+            t = self.ready.popleft()
+            try:
+                kind, arg = t.coro.send(None)
+            except StopIteration as stop:
+                t.done, t.result = True, stop.value
+                self.ready.extend(t.waiters)
+                continue
+            if kind == &quot;sleep&quot;:
+                self.seq += 1
+                heapq.heappush(self.sleepers, (self.now + arg, self.seq, t))
+            else:
+                arg.waiters.append(t)
+        return main.result
+
+loop = Loop()
+
+async def download(seconds):
+    await Sleep(seconds)
+
+async def main():
+    for s in (3, 1, 2):
+        await download(s)
+
+loop.run_until_complete(main())
+print(loop.now)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;create tasks first&quot;
+    expect_output(&quot;3&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+from collections import deque
+
+class Sleep:
+    def __init__(self, s):
+        self.s = s
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.s)
+
+class Task:
+    def __init__(self, coro):
+        self.coro, self.done, self.result, self.waiters = coro, False, None, []
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now, self.ready, self.sleepers, self.seq = 0, deque(), [], 0
+    def create_task(self, coro):
+        t = Task(coro)
+        self.ready.append(t)
+        return t
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, t = heapq.heappop(self.sleepers)
+                self.ready.append(t)
+                continue
+            t = self.ready.popleft()
+            try:
+                kind, arg = t.coro.send(None)
+            except StopIteration as stop:
+                t.done, t.result = True, stop.value
+                self.ready.extend(t.waiters)
+                continue
+            if kind == &quot;sleep&quot;:
+                self.seq += 1
+                heapq.heappush(self.sleepers, (self.now + arg, self.seq, t))
+            else:
+                arg.waiters.append(t)
+        return main.result
+
+loop = Loop()
+
+async def download(seconds):
+    await Sleep(seconds)
+
+async def main():
+    tasks = [loop.create_task(download(s)) for s in (3, 1, 2)]
+    for t in tasks:
+        await t
+
+loop.run_until_complete(main())
+print(loop.now)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A result lost in StopIteration</div><div class="pc-prompt"><p>The driver catches <code>StopIteration</code> but throws away the coroutine&rsquo;s return value, which travels <strong>inside</strong> the exception, so this prints <code>None</code>. Take the result from the exception&rsquo;s <code>value</code> so it prints <code>42</code>.</p></div><textarea class="pc-src pc-code" hidden>async def answer():
+    return 42
+
+def drive(coro):
+    result = None
+    try:
+        while True:
+            coro.send(None)
+    except StopIteration:
+        pass
+    return result
+
+print(drive(answer()))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;StopIteration.value&quot;
+    expect_output(&quot;42&quot;)</textarea><textarea class="pc-src pc-solution" hidden>async def answer():
+    return 42
+
+def drive(coro):
+    result = None
+    try:
+        while True:
+            coro.send(None)
+    except StopIteration as done:
+        result = done.value
+    return result
+
+print(drive(answer()))</textarea></div>
+<div class="parsons" data-id="w067d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Running coroutines concurrently</div><div class="pc-prompt"><p>Arrange the lines of a <code>main</code> coroutine that runs three fetches at the same time and prints the pages in the order requested (as you&rsquo;d write it with real <code>asyncio</code>). One line is a trap.</p></div><script type="application/json">{"lines": ["async def main():", "    pages = await asyncio.gather(fetch(\"a\"), fetch(\"b\"), fetch(\"c\"))", "    for page in pages:", "        print(page)", "asyncio.run(main())"], "distractors": ["    pages = [await fetch(name) for name in \"abc\"]"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # what calling an async def function returns: &quot;its result&quot; or &quot;a coroutine&quot;
+q = ___   # three awaits in a row of 2, 3 and 1 seconds take how long in total?
+r = ___   # the same three run with gather take how long?
+s = ___   # True or False: a task can be paused by asyncio between two lines that have no await
+t = ___   # the exception whose value carries a finished coroutine&#x27;s return value, as a string</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;a coroutine&quot; and q == 6 and r == 3, &quot;p, q and r&quot;
+    assert s is False and t == &quot;StopIteration&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;a coroutine&quot;
+q = 6
+r = 3
+s = False
+t = &quot;StopIteration&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w067d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does calling an async def function do?", "answer": 1, "explain": "Something must await or drive it.", "options": ["Runs it", "Returns a coroutine object without running the body", "Starts a thread", "Raises"]}, {"type": "mc", "q": "Where can a coroutine be paused?", "answer": 1, "explain": "Cooperative switching.", "options": ["Anywhere", "Only at an await", "Only at return", "Between any two instructions"]}, {"type": "mc", "q": "Why do asyncio programs rarely need locks?", "answer": 1, "explain": "Shared state across an await can still race.", "options": ["They&rsquo;re slow", "Tasks switch only at await, so code between awaits runs uninterrupted", "asyncio forbids them", "They use processes"]}, {"type": "mc", "q": "What does asyncio.run(main()) do?", "answer": 1, "explain": "Usually called once.", "options": ["Starts threads", "Creates an event loop, runs main() to completion and closes the loop", "Imports asyncio", "Compiles main"]}, {"type": "mc", "q": "Three awaited calls of 1, 2 and 3 seconds in a row take about&hellip;", "answer": 1, "explain": "Use gather or tasks for concurrency.", "options": ["3 seconds", "6 seconds", "1 second", "0 seconds"]}, {"type": "mc", "q": "In what order does gather return results?", "answer": 1, "explain": "Like map.", "options": ["Finishing order", "The order the awaitables were given", "Random", "Reverse"]}, {"type": "mc", "q": "What makes an object awaitable?", "answer": 1, "explain": "<strong>await</strong> returns an iterator.", "options": ["Being a function", "An <strong>await</strong> method (or being a coroutine, task or future)", "A <strong>call</strong> method", "Being async"]}, {"type": "mc", "q": "How does a finished coroutine report its return value to whoever drives it?", "answer": 1, "explain": "As with generators.", "options": ["It prints it", "Inside the StopIteration raised by send", "Through a global", "It can&rsquo;t"]}, {"type": "mc", "q": "Which kind of work does asyncio speed up?", "answer": 1, "explain": "It&rsquo;s one thread.", "options": ["CPU-bound", "I/O-bound, with many waits", "Both", "Neither"]}, {"type": "output", "q": "What does this print?", "answer": "xx", "explain": "Neither coroutine ever suspends.", "code": "async def f():\n    return \"x\"\nasync def g():\n    return await f() + await f()\nc = g()\ntry:\n    c.send(None)\nexcept StopIteration as s:\n    print(s.value)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: timeouts and cancellation</div><div class="pc-prompt"><p>Extend the tiny loop so tasks can be <strong>cancelled</strong>, which is how <code>asyncio.wait_for</code> implements timeouts. Write <code>Sleep</code>, <code>Task</code>, <code>Loop</code> and these, using a <code>Cancelled</code> exception class:</p>
+<ul>
+<li><code>task.cancel()</code>: if the task hasn&rsquo;t finished, it&rsquo;s marked to be cancelled; the next time the loop would run it (it&rsquo;s woken at once if it was sleeping or waiting), the loop calls <code>task.coro.throw(Cancelled())</code> instead of <code>send(None)</code>. If the coroutine lets the exception escape, the task finishes as <strong>cancelled</strong> (<code>task.cancelled</code> is True); awaiting a cancelled task raises <code>Cancelled</code>. A coroutine may catch <code>Cancelled</code> to clean up (in a <code>finally</code>).</li>
+<li>An exception escaping any other task is stored in <code>task.error</code>, and awaiting that task re-raises it.</li>
+<li><code>wait_for(loop, coro, timeout)</code>: a coroutine that runs <code>coro</code> as a task and returns its result, but if it hasn&rsquo;t finished after <code>timeout</code> units of simulated time, cancels it and raises <code>TimeoutError</code>.</li>
+<li><code>run_until_complete(coro)</code> returns the main task&rsquo;s result, or raises its error.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import heapq
+from collections import deque
+
+class Cancelled(Exception):
+    pass
+
+class Sleep:
+    ___
+
+class Task:
+    ___
+
+class Loop:
+    ___
+
+async def wait_for(loop, coro, timeout):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_timeouts():
+    &quot;wait_for&quot;
+    loop = Loop()
+    log = []
+    async def fetch(delay):
+        try:
+            await Sleep(delay)
+            return &quot;page&quot;
+        finally:
+            log.append((&quot;cleanup&quot;, loop.now))
+    async def main():
+        quick = await wait_for(loop, fetch(2), timeout=5)
+        try:
+            await wait_for(loop, fetch(10), timeout=3)
+        except TimeoutError:
+            return quick, &quot;timed out&quot;, loop.now
+    assert loop.run_until_complete(main()) == (&quot;page&quot;, &quot;timed out&quot;, 5)
+    assert log == [(&quot;cleanup&quot;, 2), (&quot;cleanup&quot;, 5)]
+
+def test_cancel_and_errors():
+    &quot;cancellation and exceptions&quot;
+    loop = Loop()
+    async def forever():
+        while True:
+            await Sleep(1)
+    async def broken():
+        await Sleep(1)
+        raise KeyError(&quot;missing&quot;)
+    async def main():
+        t = loop.create_task(forever())
+        await Sleep(3)
+        t.cancel()
+        try:
+            await t
+        except Cancelled:
+            pass
+        b = loop.create_task(broken())
+        try:
+            await b
+        except KeyError:
+            return t.cancelled, isinstance(b.error, KeyError), loop.now
+    assert loop.run_until_complete(main()) == (True, True, 4)
+    loop2 = Loop()
+    async def fails():
+        raise ValueError(&quot;bad&quot;)
+    try:
+        loop2.run_until_complete(fails())
+        assert False
+    except ValueError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+from collections import deque
+
+class Cancelled(Exception):
+    pass
+
+class Sleep:
+    def __init__(self, seconds):
+        self.seconds = seconds
+
+    def __await__(self):
+        yield (&quot;sleep&quot;, self.seconds)
+
+class Task:
+    def __init__(self, coro, loop):
+        self.coro, self.loop = coro, loop
+        self.done = self.cancelled = self.cancel_requested = False
+        self.result = self.error = None
+        self.waiters = []
+        self.waiting_on = None
+
+    def cancel(self):
+        if self.done or self.cancel_requested:
+            return False
+        self.cancel_requested = True
+        self.loop._wake(self)
+        return True
+
+    def __await__(self):
+        if not self.done:
+            yield (&quot;wait&quot;, self)
+        if self.cancelled:
+            raise Cancelled()
+        if self.error is not None:
+            raise self.error
+        return self.result
+
+class Loop:
+    def __init__(self):
+        self.now = 0
+        self.ready = deque()
+        self.sleepers = []
+        self._seq = 0
+
+    def create_task(self, coro):
+        task = Task(coro, self)
+        self.ready.append(task)
+        return task
+
+    def _wake(self, task):
+        for i, entry in enumerate(self.sleepers):
+            if entry[2] is task:
+                self.sleepers.pop(i)
+                heapq.heapify(self.sleepers)
+                self.ready.append(task)
+                return
+        if task.waiting_on is not None:
+            if task in task.waiting_on.waiters:
+                task.waiting_on.waiters.remove(task)
+            task.waiting_on = None
+            self.ready.append(task)
+
+    def _finish(self, task):
+        task.done = True
+        self.ready.extend(task.waiters)
+        for w in task.waiters:
+            w.waiting_on = None
+        task.waiters = []
+
+    def _step(self, task):
+        try:
+            if task.cancel_requested:
+                task.cancel_requested = False
+                request = task.coro.throw(Cancelled())
+            else:
+                request = task.coro.send(None)
+        except StopIteration as stop:
+            task.result = stop.value
+            self._finish(task)
+            return
+        except Cancelled:
+            task.cancelled = True
+            self._finish(task)
+            return
+        except Exception as e:
+            task.error = e
+            self._finish(task)
+            return
+        kind, arg = request
+        if kind == &quot;sleep&quot;:
+            self._seq += 1
+            heapq.heappush(self.sleepers, (self.now + arg, self._seq, task))
+        elif kind == &quot;wait&quot;:
+            task.waiting_on = arg
+            arg.waiters.append(task)
+
+    def run_until_complete(self, coro):
+        main = self.create_task(coro)
+        while self.ready or self.sleepers:
+            if not self.ready:
+                self.now, _, task = heapq.heappop(self.sleepers)
+                self.ready.append(task)
+                continue
+            self._step(self.ready.popleft())
+        if main.error is not None:
+            raise main.error
+        return main.result
+
+async def wait_for(loop, coro, timeout):
+    task = loop.create_task(coro)
+    fired = []
+
+    async def timer():
+        await Sleep(timeout)
+        if not task.done:
+            fired.append(True)
+            task.cancel()
+
+    loop.create_task(timer())
+    try:
+        return await task
+    except Cancelled:
+        if fired:
+            raise TimeoutError(&quot;timed out&quot;) from None
+        raise</textarea><template class="pc-src pc-hint">Give each task <code>cancel_requested</code>. When <code>cancel()</code> is called on a sleeping or waiting task, remove it from wherever it is (the sleepers heap, or its target&rsquo;s waiters list) and add it to the ready queue. In <code>_step</code>, use <code>throw(Cancelled())</code> if a cancel was requested, else <code>send(None)</code>; catch <code>StopIteration</code> (finished), <code>Cancelled</code> (cancelled) and <code>Exception</code> (error) separately. For <code>wait_for</code>, start the task, start a timer task that sleeps <code>timeout</code> and then cancels it if it isn&rsquo;t done, then await the task and turn <code>Cancelled</code> into <code>TimeoutError</code> if the timer fired.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, run the <code>gather</code> example with real <code>asyncio</code> and check that three downloads of 3, 1 and 2 seconds take about 3 seconds. Then add <code>print</code> calls to see the order in which they start and finish. Tomorrow: the patterns that real async programs use, from limiting concurrency to queues and timeouts.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w067d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w067d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w067d2", "week": 67, "day": 2, "title": "asyncio basics", "exercises": [{"id": "w067d2-drive", "title": "Driving a coroutine by hand", "points": 10}, {"id": "w067d2-sleeping", "title": "One coroutine, simulated time", "points": 10}, {"id": "w067d2-loop", "title": "A loop with tasks", "points": 15}, {"id": "w067d2-gather", "title": "gather", "points": 15}, {"id": "w067d2-agen", "title": "Async generators", "points": 10}, {"id": "w067d2-bug1", "title": "A coroutine that never ran", "points": 10}, {"id": "w067d2-bug2", "title": "Concurrent in name only", "points": 10}, {"id": "w067d2-bug3", "title": "A result lost in StopIteration", "points": 10}, {"id": "w067d2-trace", "title": "Predict them", "points": 10}, {"id": "w067d2-challenge", "title": "Challenge: timeouts and cancellation", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 67 Day 5: Choosing a concurrency model | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="You now know three ways to do several things at once in Python: threads, processes and asyncio. Each has a natural job, and real systems often combine them:...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w067d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 67 Day 5: Choosing a concurrency model">
+<meta property="og:description" content="You now know three ways to do several things at once in Python: threads, processes and asyncio. Each has a natural job, and real systems often combine them:...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w067d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-67">Week 67: Concurrency II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#the-questions-that-decide" data-sec="the-questions-that-decide">The questions that decide</a></li><li><a href="#what-each-model-costs" data-sec="what-each-model-costs">What each model costs</a></li><li><a href="#combining-models" data-sec="combining-models">Combining models</a></li><li><a href="#pipelines-and-bottlenecks" data-sec="pipelines-and-bottlenecks">Pipelines and bottlenecks</a></li><li><a href="#measuring-and-knowing-when-to-stop" data-sec="measuring-and-knowing-when-to-stop">Measuring, and knowing when to stop</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w067d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-67">Week 67: Concurrency II</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 67, Day 5</span></p>
+      <h1>Choosing a concurrency model</h1>
+      <div class="day-intro"><p>You now know three ways to do several things at once in Python: threads, processes and <code>asyncio</code>. Each has a natural job, and real systems often combine them: a web server might run several processes (for the cores), each with an event loop (for thousands of connections), handing blocking library calls to a thread pool. Today is about choosing: the questions that decide, rough numbers for what each model costs, how to estimate the result before writing code, how to measure it afterwards, and how to combine models safely. It ends with a simulation of exactly that kind of server.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Choose between sequential code, threads, processes and asyncio from the shape of the work</li><li>Estimate run time and memory under each model with simple cost models</li><li>Combine models - asyncio with to_thread and process pools, and processes running event loops</li><li>Find a pipeline&rsquo;s bottleneck and measure speed-up and efficiency</li><li>Decide when concurrency isn&rsquo;t worth its complexity</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="The questions that decide: 25 min"></span><span class="plan-seg s0" style="flex:20" title="What each model costs: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Combining models: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Pipelines and bottlenecks: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Measuring, and knowing when to stop: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">The questions that decide</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">What each model costs</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Combining models</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Pipelines and bottlenecks</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Measuring, and knowing when to stop</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w067d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w067d5.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w067d5-p1"><textarea class="pc-src pc-code" hidden>tasks = 100
+cpu_ms, io_ms = 5, 95             # each task: a little computing, a lot of waiting
+cores = 4
+
+sequential = tasks * (cpu_ms + io_ms)
+threads_or_async = tasks * cpu_ms + io_ms          # waits overlap; computing still one at a time
+processes = (tasks * cpu_ms) / cores + io_ms * tasks / cores
+print(sequential, threads_or_async, processes)</textarea></div>
+<p>For I/O-heavy work, overlapping the waits (threads or <code>asyncio</code>) wins easily: 595 ms instead of 10 seconds. Four processes that each handle tasks one at a time help much less here (2,500 ms). Change the numbers so the work is mostly computing, and the ranking flips. The shape of the work decides.</p>
+<h2 id="the-questions-that-decide">The questions that decide</h2>
+<p>Ask, in order:</p>
+<ol>
+<li><strong>Is it slow enough to matter?</strong> If not, stay sequential: it&rsquo;s simpler, easier to test, and has no races (Week 65&rsquo;s first rule).</li>
+<li><strong>Where does the time go: waiting or computing?</strong> Profile it (Week 65).</li>
+<li><strong>Waiting (I/O-bound)</strong>:<ul>
+<li><strong>A modest number of tasks</strong> (up to a few hundred), or blocking libraries you can&rsquo;t replace: <strong>threads</strong> (<code>ThreadPoolExecutor</code>).</li>
+<li><strong>Many simultaneous connections</strong> (thousands), or a framework that&rsquo;s already async: <strong><code>asyncio</code></strong>. It needs async libraries throughout.</li>
+</ul>
+</li>
+<li><strong>Computing (CPU-bound)</strong>:<ul>
+<li><strong>Numeric work on arrays</strong>: <strong>NumPy</strong> first (Week 65), which may make concurrency unnecessary.</li>
+<li><strong>Pure-Python computation</strong>: <strong>processes</strong> (<code>ProcessPoolExecutor</code>), with sizeable chunks of work and small data to send; or <strong>threads on a free-threaded build</strong> (Python 3.13+), once your libraries support it.</li>
+</ul>
+</li>
+<li><strong>Both</strong>: combine (next sections): an event loop or thread pool for the waiting, a process pool for the computing.</li>
+</ol>
+<p>Two more constraints often decide in practice: <strong>shared state</strong> (threads share memory easily; processes need copying or explicit sharing; <code>asyncio</code> shares freely within one thread) and the <strong>ecosystem</strong> (a library you depend on may only be blocking, or only async).</p>
+<div class="pc pc-example" data-kind="example" data-id="w067d5-e2"><textarea class="pc-src pc-code" hidden>def choose(slow_enough, io_bound, many_connections=False, numeric=False, free_threaded=False):
+    if not slow_enough:
+        return &quot;sequential&quot;
+    if io_bound:
+        return &quot;asyncio&quot; if many_connections else &quot;threads&quot;
+    if numeric:
+        return &quot;NumPy&quot;
+    return &quot;threads (free-threaded build)&quot; if free_threaded else &quot;processes&quot;
+
+cases = {
+    &quot;a script that runs in 2 s once a day&quot;: dict(slow_enough=False, io_bound=True),
+    &quot;download 200 files&quot;: dict(slow_enough=True, io_bound=True),
+    &quot;a chat server with 10,000 users&quot;: dict(slow_enough=True, io_bound=True, many_connections=True),
+    &quot;resize 5,000 images in pure Python&quot;: dict(slow_enough=True, io_bound=False),
+    &quot;statistics on a million readings&quot;: dict(slow_enough=True, io_bound=False, numeric=True),
+}
+for name, args in cases.items():
+    print(f&quot;{name:40} -&gt; {choose(**args)}&quot;)</textarea></div>
+<h2 id="what-each-model-costs">What each model costs</h2>
+<p>Rough orders of magnitude (they vary a lot by machine and version, so measure your own):</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>start-up</th>
+<th>memory per unit</th>
+<th>switching</th>
+<th>good scale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>thread</td>
+<td>tens of microseconds</td>
+<td>an OS stack (reserved space; real use is often tens of KB)</td>
+<td>OS decides, any time</td>
+<td>up to hundreds</td>
+</tr>
+<tr>
+<td>process</td>
+<td>milliseconds (spawn: tens of ms)</td>
+<td>a whole interpreter: many MB</td>
+<td>OS decides</td>
+<td>up to the number of cores</td>
+</tr>
+<tr>
+<td>asyncio task</td>
+<td>a few microseconds</td>
+<td>about a KB or two</td>
+<td>only at await</td>
+<td>tens of thousands</td>
+</tr>
+</tbody>
+</table>
+<p>And the costs that aren&rsquo;t in the table: threads bring <strong>races</strong> and the need for locks; processes bring <strong>pickling</strong> and copied data; <code>asyncio</code> brings <strong>function colouring</strong> (async code can only be awaited from async code, so it spreads through a program) and the need for async libraries everywhere.</p>
+<p>A simple time model for <code>n</code> tasks, each with <code>cpu</code> time computing and <code>io</code> time waiting, on <code>c</code> cores:</p>
+<ul>
+<li>sequential: <code>n * (cpu + io)</code>;</li>
+<li>threads or asyncio (with the GIL): <code>n * cpu + io</code> when the waits all overlap (computing is still one at a time);</li>
+<li>processes: about <code>n * (cpu + io) / c</code> when each process works through its share sequentially.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w067d5-e3"><textarea class="pc-src pc-code" hidden>def estimate(n, cpu, io, cores, model):
+    if model == &quot;sequential&quot;:
+        return n * (cpu + io)
+    if model in (&quot;threads&quot;, &quot;asyncio&quot;):
+        return n * cpu + io
+    if model == &quot;processes&quot;:
+        per_process = -(-n // cores)
+        return per_process * (cpu + io)
+    raise ValueError(model)
+
+for cpu, io in [(5, 95), (95, 5)]:
+    times = {m: estimate(100, cpu, io, 4, m) for m in (&quot;sequential&quot;, &quot;threads&quot;, &quot;processes&quot;)}
+    print(f&quot;cpu={cpu} io={io}:&quot;, times, &quot;best:&quot;, min(times, key=times.get))</textarea></div>
+<h2 id="combining-models">Combining models</h2>
+<p>Real programs often need more than one model. The safe combinations:</p>
+<ul>
+<li><strong><code>asyncio</code> + a thread pool</strong>: <code>await asyncio.to_thread(blocking_call, ...)</code> for a library that isn&rsquo;t async (a database driver, file system work, an image library). The event loop stays responsive.</li>
+<li><strong><code>asyncio</code> + a process pool</strong>: <code>await loop.run_in_executor(process_pool, cpu_heavy, data)</code> for computation, so the event loop handles I/O while other cores compute.</li>
+<li><strong>Threads + <code>queue.Queue</code></strong>: a thread pool doing blocking I/O, passing results to one thread that owns shared state. No locks needed for that state.</li>
+<li><strong>Several processes, each with an event loop (or thread pool)</strong>: how production web servers scale across cores (a &ldquo;pre-fork&rdquo; or &ldquo;worker&rdquo; model: Gunicorn, Uvicorn workers). A load balancer or the operating system spreads connections across them.</li>
+</ul>
+<p>Rules that keep combinations sane: decide which thread or process <strong>owns</strong> each piece of state; pass messages between models (queues, futures) rather than sharing objects; never call blocking code directly in a coroutine; and never call <code>asyncio.run</code> inside an already running loop (use <code>await</code> instead, or <code>asyncio.run_coroutine_threadsafe</code> to submit work to a loop from another thread).</p>
+<pre><code>import asyncio
+from concurrent.futures import ProcessPoolExecutor
+
+def analyse(data):                       # CPU-heavy, pure Python
+    return sum(x * x for x in data)
+
+async def handle(request, pool):
+    data = await fetch(request)          # I/O: awaited on the event loop
+    loop = asyncio.get_running_loop()
+    result = await loop.run_in_executor(pool, analyse, data)   # computing in another process
+    await save(result)                   # I/O again
+
+async def main(requests):
+    with ProcessPoolExecutor() as pool:
+        await asyncio.gather(*(handle(r, pool) for r in requests))
+</code></pre>
+<div class="pc pc-example" data-kind="example" data-id="w067d5-e4"><textarea class="pc-src pc-code" hidden>def hybrid_time(n, cpu, io, cores):
+    &quot;Event loop overlaps every wait; a process pool runs the computing across cores.&quot;
+    return -(-n // cores) * cpu + io
+
+def threads_time(n, cpu, io):
+    return n * cpu + io
+
+for cpu, io in [(5, 95), (50, 50), (95, 5)]:
+    print(f&quot;cpu={cpu} io={io}: threads {threads_time(100, cpu, io)}, asyncio + process pool {hybrid_time(100, cpu, io, 4)}&quot;)</textarea></div>
+<h2 id="pipelines-and-bottlenecks">Pipelines and bottlenecks</h2>
+<p>Many concurrent programs are <strong>pipelines</strong>: download, then parse, then store. Each <strong>stage</strong> has its own work per item and its own number of workers, and the whole pipeline can go no faster than its <strong>slowest stage</strong>, the <strong>bottleneck</strong>:</p>
+<ul>
+<li>a stage&rsquo;s <strong>throughput</strong> is <code>workers / time_per_item</code> items per unit of time;</li>
+<li>the pipeline&rsquo;s throughput is the <strong>minimum</strong> over its stages;</li>
+<li>adding workers to any stage <strong>except</strong> the bottleneck changes nothing; items just pile up before the bottleneck (so bound the queues between stages, Week 66&rsquo;s back-pressure).</li>
+</ul>
+<p>This also tells you which model each stage needs: I/O stages get threads or tasks, CPU stages get processes, and the number of workers per stage is chosen to balance throughputs.</p>
+<div class="pc pc-example" data-kind="example" data-id="w067d5-e5"><textarea class="pc-src pc-code" hidden>def throughput(stages):
+    &quot;stages: name -&gt; (workers, time per item).&quot;
+    rates = {name: workers / t for name, (workers, t) in stages.items()}
+    bottleneck = min(rates, key=rates.get)
+    return rates, bottleneck, rates[bottleneck]
+
+stages = {&quot;download&quot;: (8, 0.4), &quot;parse&quot;: (2, 0.05), &quot;store&quot;: (4, 0.1)}
+rates, slowest, total = throughput(stages)
+print({k: round(v, 1) for k, v in rates.items()}, &quot;bottleneck:&quot;, slowest, round(total, 1), &quot;items per second&quot;)
+stages[&quot;download&quot;] = (32, 0.4)
+print(throughput(stages)[1:])</textarea></div>
+<h2 id="measuring-and-knowing-when-to-stop">Measuring, and knowing when to stop</h2>
+<p>After choosing, <strong>measure</strong> (Week 65): time the whole job with 1, 2, 4, 8 &hellip; workers and compute:</p>
+<ul>
+<li><strong>speed-up</strong> <code>S(n) = T(1) / T(n)</code>;</li>
+<li><strong>efficiency</strong> <code>E(n) = S(n) / n</code>: the fraction of each added worker that&rsquo;s actually used.</li>
+</ul>
+<p>Efficiency usually falls as <code>n</code> grows (Amdahl&rsquo;s serial part, overheads, contention for locks, memory bandwidth, the network). Stop adding workers where efficiency drops below what&rsquo;s worth paying for, often around 0.5 to 0.7.</p>
+<p>And know when <strong>not</strong> to use concurrency at all: when the job is fast enough already, when the work is mostly serial, when correctness is hard to guarantee and the gain is small, or when a better algorithm or NumPy would give a bigger speed-up for less complexity. Concurrency multiplies the difficulty of testing and debugging; spend that cost only where it buys something you need.</p>
+<div class="pc pc-example" data-kind="example" data-id="w067d5-e6"><textarea class="pc-src pc-code" hidden>measured = {1: 100.0, 2: 52.0, 4: 28.0, 8: 18.0, 16: 15.0}
+
+for n, t in measured.items():
+    speedup = measured[1] / t
+    print(f&quot;{n:2} workers: speed-up {speedup:4.1f}, efficiency {speedup / n:.2f}&quot;)
+
+worth_it = max(n for n, t in measured.items() if measured[1] / t / n &gt;= 0.6)
+print(&quot;the most workers still at least 60% efficient:&quot;, worth_it)</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Stay sequential unless it&rsquo;s slow enough to matter; profile to see whether time goes on waiting or computing. Waiting: threads for modest numbers of tasks or blocking libraries, asyncio for thousands of connections with async libraries. Computing: NumPy for array work, processes for pure Python (free-threaded threads once libraries support them). Threads are cheap but race; processes are isolated but costly and copy data; asyncio tasks are tiny but need async code throughout. Combine models with asyncio.to_thread, run_in_executor with a process pool, queues between owners of state, and several processes each with an event loop. A pipeline runs at the throughput of its slowest stage, so balance workers per stage and bound queues. Measure speed-up T(1)/T(n) and efficiency S(n)/n, stop adding workers when efficiency falls too low, and skip concurrency when it doesn&rsquo;t buy what you need.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d5-choose" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A decision function</div><div class="pc-prompt"><p>Write <code>choose(work)</code> for a dict with keys <code>seconds</code> (how long it takes now), <code>target</code> (how long it may take), <code>io_fraction</code> (0 to 1: the share of time spent waiting), <code>connections</code> (how many simultaneous tasks), <code>numeric</code> (bool) and <code>async_libraries</code> (bool: async versions of the libraries it needs exist). Rules, in order: <code>"sequential"</code> if <code>seconds &lt;= target</code>; for <code>io_fraction &gt;= 0.5</code>, <code>"asyncio"</code> if there are at least 1000 connections <strong>and</strong> async libraries exist, otherwise <code>"threads"</code>; for CPU-bound work, <code>"numpy"</code> if numeric, otherwise <code>"processes"</code>. Then <code>reasons(work)</code>: a list of short strings explaining each decision taken on the way, from these: <code>"fast enough"</code>, <code>"mostly waiting"</code>, <code>"mostly computing"</code>, <code>"many connections"</code>, <code>"no async libraries"</code>, <code>"array work"</code>.</p></div><textarea class="pc-src pc-code" hidden>def choose(work):
+    ___
+
+def reasons(work):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_choose():
+    &quot;choosing a model&quot;
+    base = {&quot;seconds&quot;: 60, &quot;target&quot;: 10, &quot;io_fraction&quot;: 0.9, &quot;connections&quot;: 50, &quot;numeric&quot;: False, &quot;async_libraries&quot;: True}
+    assert choose(dict(base, seconds=5)) == &quot;sequential&quot; and reasons(dict(base, seconds=5)) == [&quot;fast enough&quot;]
+    assert choose(base) == &quot;threads&quot; and reasons(base) == [&quot;mostly waiting&quot;]
+    many = dict(base, connections=5000)
+    assert choose(many) == &quot;asyncio&quot; and reasons(many) == [&quot;mostly waiting&quot;, &quot;many connections&quot;]
+    blocked = dict(many, async_libraries=False)
+    assert choose(blocked) == &quot;threads&quot; and reasons(blocked) == [&quot;mostly waiting&quot;, &quot;many connections&quot;, &quot;no async libraries&quot;]
+    cpu = dict(base, io_fraction=0.1)
+    assert choose(cpu) == &quot;processes&quot; and choose(dict(cpu, numeric=True)) == &quot;numpy&quot;
+    assert reasons(dict(cpu, numeric=True)) == [&quot;mostly computing&quot;, &quot;array work&quot;]</textarea><textarea class="pc-src pc-solution" hidden>def _decide(work):
+    why = []
+    if work[&quot;seconds&quot;] &lt;= work[&quot;target&quot;]:
+        return &quot;sequential&quot;, [&quot;fast enough&quot;]
+    if work[&quot;io_fraction&quot;] &gt;= 0.5:
+        why.append(&quot;mostly waiting&quot;)
+        if work[&quot;connections&quot;] &gt;= 1000:
+            why.append(&quot;many connections&quot;)
+            if work[&quot;async_libraries&quot;]:
+                return &quot;asyncio&quot;, why
+            why.append(&quot;no async libraries&quot;)
+        return &quot;threads&quot;, why
+    why.append(&quot;mostly computing&quot;)
+    if work[&quot;numeric&quot;]:
+        why.append(&quot;array work&quot;)
+        return &quot;numpy&quot;, why
+    return &quot;processes&quot;, why
+
+def choose(work):
+    return _decide(work)[0]
+
+def reasons(work):
+    return _decide(work)[1]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d5-estimate" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Estimating each model</div><div class="pc-prompt"><p>For <code>n</code> independent tasks, each computing for <code>cpu</code> and waiting for <code>io</code>, write <code>estimate(n, cpu, io, model, cores=1, workers=None)</code>:</p>
+<ul>
+<li><code>"sequential"</code>: <code>n * (cpu + io)</code>;</li>
+<li><code>"threads"</code> with <code>workers</code> threads (default <code>n</code>): computing is one at a time (the GIL); tasks are started in batches of <code>workers</code>, each batch taking <code>batch_size * cpu + io</code>; total is the sum over batches;</li>
+<li><code>"asyncio"</code>: like threads with <code>workers = n</code> (every wait overlaps);</li>
+<li><code>"processes"</code> with <code>cores</code> processes, each working through its share of tasks one after another: the largest share times <code>(cpu + io)</code>.</li>
+</ul>
+<p>Then <code>best(n, cpu, io, cores)</code>: the model with the smallest estimate among those four (threads with the default number of workers), ties in the order listed.</p></div><textarea class="pc-src pc-code" hidden>def estimate(n, cpu, io, model, cores=1, workers=None):
+    ___
+
+def best(n, cpu, io, cores):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_estimate():
+    &quot;cost models&quot;
+    assert estimate(100, 5, 95, &quot;sequential&quot;) == 10000
+    assert estimate(100, 5, 95, &quot;asyncio&quot;) == 595 and estimate(100, 5, 95, &quot;threads&quot;) == 595
+    assert estimate(100, 5, 95, &quot;threads&quot;, workers=10) == 10 * (50 + 95)
+    assert estimate(100, 5, 95, &quot;processes&quot;, cores=4) == 2500 and estimate(10, 1, 1, &quot;processes&quot;, cores=3) == 8
+    assert best(100, 5, 95, 4) == &quot;threads&quot; and best(100, 95, 5, 4) == &quot;processes&quot; and best(1, 1, 1, 1) == &quot;sequential&quot;</textarea><textarea class="pc-src pc-solution" hidden>def estimate(n, cpu, io, model, cores=1, workers=None):
+    if model == &quot;sequential&quot;:
+        return n * (cpu + io)
+    if model == &quot;asyncio&quot;:
+        model, workers = &quot;threads&quot;, n
+    if model == &quot;threads&quot;:
+        workers = workers or n
+        total, left = 0, n
+        while left &gt; 0:
+            batch = min(workers, left)
+            total += batch * cpu + io
+            left -= batch
+        return total
+    if model == &quot;processes&quot;:
+        return -(-n // cores) * (cpu + io)
+    raise ValueError(model)
+
+def best(n, cpu, io, cores):
+    models = [&quot;sequential&quot;, &quot;threads&quot;, &quot;asyncio&quot;, &quot;processes&quot;]
+    return min(models, key=lambda m: (estimate(n, cpu, io, m, cores=cores), models.index(m)))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d5-memory" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">How many connections fit?</div><div class="pc-prompt"><p>Using the per-unit memory costs in <code>COSTS_KB</code> (a rough guide: a thread&rsquo;s stack, a process&rsquo;s interpreter, an asyncio task), write <code>memory_mb(connections, model)</code>: the memory in MB (KB divided by 1024, rounded to 1 place) for one unit per connection, plus a fixed <code>BASE_KB</code> for the program itself; and <code>max_connections(budget_mb, model)</code>: the most connections that fit in the budget (0 if not even the base fits).</p></div><textarea class="pc-src pc-code" hidden>COSTS_KB = {&quot;thread&quot;: 256, &quot;process&quot;: 30_000, &quot;task&quot;: 2}
+BASE_KB = 20_000
+
+def memory_mb(connections, model):
+    ___
+
+def max_connections(budget_mb, model):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_memory():
+    &quot;memory per connection&quot;
+    assert memory_mb(0, &quot;task&quot;) == 19.5 and memory_mb(10_000, &quot;task&quot;) == 39.1
+    assert memory_mb(1000, &quot;thread&quot;) == 269.5 and memory_mb(10, &quot;process&quot;) == 312.5
+    assert max_connections(100, &quot;task&quot;) == 41_200 and max_connections(100, &quot;thread&quot;) == 321
+    assert max_connections(100, &quot;process&quot;) == 2 and max_connections(10, &quot;task&quot;) == 0</textarea><textarea class="pc-src pc-solution" hidden>COSTS_KB = {&quot;thread&quot;: 256, &quot;process&quot;: 30_000, &quot;task&quot;: 2}
+BASE_KB = 20_000
+
+def memory_mb(connections, model):
+    return round((BASE_KB + connections * COSTS_KB[model]) / 1024, 1)
+
+def max_connections(budget_mb, model):
+    spare_kb = budget_mb * 1024 - BASE_KB
+    if spare_kb &lt; 0:
+        return 0
+    return int(spare_kb // COSTS_KB[model])</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d5-pipeline" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Finding the bottleneck</div><div class="pc-prompt"><p>A pipeline&rsquo;s stages are given as a list of <code>(name, workers, seconds_per_item)</code>. Write <code>rates(stages)</code>: a dict from stage name to items per second (<code>workers / seconds_per_item</code>, rounded to 2 places); <code>bottleneck(stages)</code>: the name of the slowest stage (the first on ties); and <code>balance(stages, budget)</code>: given a total number of workers to share out, return a dict from stage name to its number of workers that <strong>maximises</strong> the pipeline&rsquo;s throughput: start with one worker per stage, then give each remaining worker, one at a time, to the current bottleneck (each stage keeps its own <code>seconds_per_item</code>).</p></div><textarea class="pc-src pc-code" hidden>def rates(stages):
+    ___
+
+def bottleneck(stages):
+    ___
+
+def balance(stages, budget):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_pipeline():
+    &quot;pipelines&quot;
+    stages = [(&quot;download&quot;, 8, 0.4), (&quot;parse&quot;, 2, 0.05), (&quot;store&quot;, 4, 0.1)]
+    assert rates(stages) == {&quot;download&quot;: 20.0, &quot;parse&quot;: 40.0, &quot;store&quot;: 40.0} and bottleneck(stages) == &quot;download&quot;
+    assert bottleneck([(&quot;a&quot;, 1, 1), (&quot;b&quot;, 1, 1)]) == &quot;a&quot;
+    plan = balance(stages, 10)
+    assert sum(plan.values()) == 10 and plan == {&quot;download&quot;: 7, &quot;parse&quot;: 1, &quot;store&quot;: 2}
+    assert balance([(&quot;x&quot;, 0, 2), (&quot;y&quot;, 0, 1)], 3) == {&quot;x&quot;: 2, &quot;y&quot;: 1}</textarea><textarea class="pc-src pc-solution" hidden>def rates(stages):
+    return {name: round(workers / t, 2) for name, workers, t in stages}
+
+def bottleneck(stages):
+    r = rates(stages)
+    return min(r, key=lambda name: r[name])
+
+def balance(stages, budget):
+    plan = {name: 1 for name, _, _ in stages}
+    times = {name: t for name, _, t in stages}
+    for _ in range(budget - len(stages)):
+        current = [(name, plan[name], times[name]) for name, _, _ in stages]
+        plan[bottleneck(current)] += 1
+    return plan</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d5-efficiency" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Speed-up and efficiency</div><div class="pc-prompt"><p>Given measured times as a dict from number of workers to seconds (it always includes 1), write <code>speedups(times)</code>: a dict from workers to speed-up <code>T(1) / T(n)</code> rounded to 2 places; <code>efficiencies(times)</code>: a dict from workers to <code>speedup / n</code> rounded to 2 places; and <code>worth_it(times, threshold)</code>: the largest worker count whose efficiency is at least <code>threshold</code>.</p></div><textarea class="pc-src pc-code" hidden>def speedups(times):
+    ___
+
+def efficiencies(times):
+    ___
+
+def worth_it(times, threshold):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_efficiency():
+    &quot;measuring scaling&quot;
+    t = {1: 100.0, 2: 52.0, 4: 28.0, 8: 18.0, 16: 15.0}
+    assert speedups(t) == {1: 1.0, 2: 1.92, 4: 3.57, 8: 5.56, 16: 6.67}
+    assert efficiencies(t) == {1: 1.0, 2: 0.96, 4: 0.89, 8: 0.69, 16: 0.42}
+    assert worth_it(t, 0.6) == 8 and worth_it(t, 0.9) == 2 and worth_it(t, 1.0) == 1</textarea><textarea class="pc-src pc-solution" hidden>def speedups(times):
+    return {n: round(times[1] / t, 2) for n, t in times.items()}
+
+def efficiencies(times):
+    return {n: round(times[1] / t / n, 2) for n, t in times.items()}
+
+def worth_it(times, threshold):
+    e = efficiencies(times)
+    return max(n for n, value in e.items() if value &gt;= threshold)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Threads for the wrong job</div><div class="pc-prompt"><p>The rule picks threads whenever the work is slow, so this CPU-bound job gets threads, which the GIL stops from computing in parallel, and this prints <code>threads</code>. Choose processes for CPU-bound work and threads only for I/O-bound work, so it prints <code>processes</code>.</p></div><textarea class="pc-src pc-code" hidden>def choose(slow, io_bound):
+    if not slow:
+        return &quot;sequential&quot;
+    return &quot;threads&quot;
+
+print(choose(slow=True, io_bound=False))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;processes for computing&quot;
+    expect_output(&quot;processes&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def choose(slow, io_bound):
+    if not slow:
+        return &quot;sequential&quot;
+    return &quot;threads&quot; if io_bound else &quot;processes&quot;
+
+print(choose(slow=True, io_bound=False))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Efficiency upside down</div><div class="pc-prompt"><p>Efficiency is speed-up divided by the number of workers, but this divides the <strong>time</strong> by the workers, giving a meaningless number: this prints <code>7.0</code>. Compute the speed-up first, <code>T(1) / T(n)</code>, then divide it by <code>n</code>, so it prints <code>0.89</code>.</p></div><textarea class="pc-src pc-code" hidden>times = {1: 100.0, 4: 28.0}
+n = 4
+print(round(times[n] / n, 2))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;speed-up over workers&quot;
+    expect_output(&quot;0.89&quot;)</textarea><textarea class="pc-src pc-solution" hidden>times = {1: 100.0, 4: 28.0}
+n = 4
+print(round(times[1] / times[n] / n, 2))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The fastest stage isn&rsquo;t the limit</div><div class="pc-prompt"><p>The pipeline&rsquo;s throughput is limited by its <strong>slowest</strong> stage, but this takes the fastest, so it reports <code>40.0</code> items per second. Take the minimum stage rate so it prints <code>20.0</code>.</p></div><textarea class="pc-src pc-code" hidden>stages = {&quot;download&quot;: 8 / 0.4, &quot;parse&quot;: 2 / 0.05, &quot;store&quot;: 4 / 0.1}
+print(max(stages.values()))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the bottleneck&quot;
+    expect_output(&quot;20.0&quot;)</textarea><textarea class="pc-src pc-solution" hidden>stages = {&quot;download&quot;: 8 / 0.4, &quot;parse&quot;: 2 / 0.05, &quot;store&quot;: 4 / 0.1}
+print(min(stages.values()))</textarea></div>
+<div class="parsons" data-id="w067d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Computing without blocking the loop</div><div class="pc-prompt"><p>Arrange the lines of a coroutine that awaits I/O on the event loop but runs a CPU-heavy function in a process pool (real <code>asyncio</code>). One line is a trap.</p></div><script type="application/json">{"lines": ["async def handle(request, pool):", "    data = await fetch(request)", "    loop = asyncio.get_running_loop()", "    result = await loop.run_in_executor(pool, analyse, data)", "    await save(result)"], "distractors": ["    result = analyse(data)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the model for a chat server with 20,000 connections and async libraries
+q = ___   # the model for pure-Python image processing on 8 cores (normal build)
+r = ___   # throughput of a pipeline with stage rates 10, 4 and 7 items per second
+s = ___   # efficiency with 4 workers when T(1) = 80 and T(4) = 25
+t = ___   # True or False: asyncio.run can be called inside a coroutine already running on a loop</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;asyncio&quot; and q == &quot;processes&quot; and r == 4, &quot;p, q and r&quot;
+    assert s == 0.8 and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;asyncio&quot;
+q = &quot;processes&quot;
+r = 4
+s = 0.8
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w067d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What&rsquo;s the first question before adding concurrency?", "answer": 1, "explain": "Sequential code is simplest.", "options": ["Which library?", "Is it slow enough to matter?", "How many cores?", "Threads or processes?"]}, {"type": "mc", "q": "Which model suits thousands of simultaneous network connections?", "answer": 1, "explain": "Tasks are tiny.", "options": ["Processes", "asyncio", "Sequential", "One thread per connection"]}, {"type": "mc", "q": "Which model suits pure-Python CPU-bound work in a normal build?", "answer": 1, "explain": "One GIL per process.", "options": ["Threads", "Processes", "asyncio", "Sequential"]}, {"type": "mc", "q": "What should you try before processes for numeric array work?", "answer": 1, "explain": "Vectorising may make concurrency unnecessary.", "options": ["Threads", "NumPy", "asyncio", "Recursion"]}, {"type": "mc", "q": "What is function colouring?", "answer": 1, "explain": "A cost of asyncio.", "options": ["Syntax highlighting", "async code can only be awaited from async code, so it spreads through a program", "Type hints", "Decorators"]}, {"type": "mc", "q": "How do you call a blocking library from asyncio?", "answer": 1, "explain": "The loop stays free.", "options": ["Directly", "await asyncio.to_thread(func, &hellip;)", "asyncio.run", "time.sleep"]}, {"type": "mc", "q": "What limits a pipeline&rsquo;s throughput?", "answer": 1, "explain": "The bottleneck.", "options": ["The fastest stage", "Its slowest stage", "The first stage", "The number of stages"]}, {"type": "mc", "q": "What happens if you add workers to a stage that isn&rsquo;t the bottleneck?", "answer": 1, "explain": "Balance the stages.", "options": ["Throughput rises", "Nothing useful: items pile up before the bottleneck", "It slows down", "It crashes"]}, {"type": "mc", "q": "What is efficiency in scaling?", "answer": 1, "explain": "The share of each worker actually used.", "options": ["Speed-up times workers", "Speed-up divided by the number of workers", "Time divided by workers", "Memory per worker"]}, {"type": "output", "q": "What does this print?", "answer": "[1.0, 0.94, 0.75]", "explain": "Efficiency falls as workers are added.", "code": "times = {1: 60.0, 2: 32.0, 4: 20.0}\nprint([round(times[1] / t / n, 2) for n, t in times.items()])"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a server of event loops</div><div class="pc-prompt"><p>Simulate a server built the usual way: <code>processes</code> worker processes, each running an event loop. Requests are <code>(arrival_time, cpu, io)</code>: each needs <code>cpu</code> units of computing (holding its process&rsquo;s single core, since the GIL serialises Python code in a process) and then <code>io</code> units of waiting (which overlaps freely with anything). Write <code>serve(requests, processes, limit)</code>:</p>
+<ul>
+<li>requests are dispatched in arrival order (ties: list order), each to the process with the <strong>fewest unfinished requests</strong> (lowest-numbered on ties) at its arrival time;</li>
+<li>a process accepts at most <code>limit</code> unfinished requests; a request arriving when every process is full waits in a global queue and is dispatched, in order, the moment some request finishes;</li>
+<li>within a process, computing is done one request at a time, in the order they reached that process; a request&rsquo;s waiting starts as soon as its computing ends.</li>
+</ul>
+<p>Return a list of finish times in input order, and write <code>slowest_wait(requests, processes, limit)</code>: the largest <code>finish - arrival - cpu - io</code> (time spent queuing or waiting for the core).</p></div><textarea class="pc-src pc-code" hidden>import heapq
+
+def serve(requests, processes, limit):
+    ___
+
+def slowest_wait(requests, processes, limit):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_server():
+    &quot;processes of event loops&quot;
+    assert serve([(0, 2, 10), (0, 2, 10)], 1, 10) == [12, 14]
+    assert serve([(0, 2, 10), (0, 2, 10)], 2, 10) == [12, 12]
+    assert serve([(0, 1, 5), (0, 1, 5), (0, 1, 5)], 1, 2) == [6, 7, 12]
+    reqs = [(0, 3, 1), (1, 3, 1), (2, 3, 1), (2, 1, 20)]
+    assert serve(reqs, 2, 5) == [4, 5, 7, 25]
+    assert slowest_wait(reqs, 2, 5) == 2 and slowest_wait([(0, 1, 1)], 1, 1) == 0
+    assert serve([], 3, 2) == []</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+from collections import deque
+
+def serve(requests, processes, limit):
+    finish = [None] * len(requests)
+    count = [0] * processes
+    core_queue = [deque() for _ in range(processes)]
+    core_busy = [False] * processes
+    waiting = deque()
+    events = []
+    seq = [0]
+
+    def push(t, order, payload):
+        seq[0] += 1
+        heapq.heappush(events, (t, order, seq[0], payload))
+
+    def start_core(p, now):
+        if not core_busy[p] and core_queue[p]:
+            i = core_queue[p].popleft()
+            core_busy[p] = True
+            push(now + requests[i][1], 0, (&quot;cpu_done&quot;, p, i))
+
+    def dispatch(i, now):
+        p = min(range(processes), key=lambda k: (count[k], k))
+        if count[p] &gt;= limit:
+            waiting.append(i)
+            return
+        count[p] += 1
+        core_queue[p].append(i)
+        start_core(p, now)
+
+    for i, (arrival, cpu, io) in enumerate(requests):
+        push(arrival, 2, (&quot;arrive&quot;, i))
+    while events:
+        now, _, _, payload = heapq.heappop(events)
+        if payload[0] == &quot;arrive&quot;:
+            dispatch(payload[1], now)
+        elif payload[0] == &quot;cpu_done&quot;:
+            _, p, i = payload
+            core_busy[p] = False
+            push(now + requests[i][2], 1, (&quot;io_done&quot;, p, i))
+            start_core(p, now)
+        else:
+            _, p, i = payload
+            finish[i] = now
+            count[p] -= 1
+            if waiting:
+                dispatch(waiting.popleft(), now)
+    return finish
+
+def slowest_wait(requests, processes, limit):
+    done = serve(requests, processes, limit)
+    return max((f - a - c - io for f, (a, c, io) in zip(done, requests)), default=0)</textarea><template class="pc-src pc-hint">Process events in time order: arrivals, ends of computing, and ends of waiting. Track, per process, its unfinished count, a queue of requests waiting for its core, and when its core is next free. When a request finishes its waiting, decrement its process&rsquo;s count and dispatch from the global queue if anything is waiting. A heap of <code>(time, kind_order, sequence, ...)</code> with arrivals sorting after completions at the same time keeps it deterministic.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Think of a program you&rsquo;d like to build that does several things at once. Write down where its time goes, which model fits each part, and what the bottleneck would be. Tomorrow is the Forge: an async job system, built on your own event loop, using this week&rsquo;s patterns together.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w067d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w067d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w067d5", "week": 67, "day": 5, "title": "Choosing a concurrency model", "exercises": [{"id": "w067d5-choose", "title": "A decision function", "points": 10}, {"id": "w067d5-estimate", "title": "Estimating each model", "points": 15}, {"id": "w067d5-memory", "title": "How many connections fit?", "points": 10}, {"id": "w067d5-pipeline", "title": "Finding the bottleneck", "points": 15}, {"id": "w067d5-efficiency", "title": "Speed-up and efficiency", "points": 10}, {"id": "w067d5-bug1", "title": "Threads for the wrong job", "points": 10}, {"id": "w067d5-bug2", "title": "Efficiency upside down", "points": 10}, {"id": "w067d5-bug3", "title": "The fastest stage isn't the limit", "points": 10}, {"id": "w067d5-trace", "title": "Predict them", "points": 10}, {"id": "w067d5-challenge", "title": "Challenge: a server of event loops", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

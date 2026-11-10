@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 67 Day 1: multiprocessing | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Last week ended with a rule: for CPU-bound pure-Python work, use processes, because each has its own interpreter and its own GIL. Today is the...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w067d1.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 67 Day 1: multiprocessing">
+<meta property="og:description" content="Last week ended with a rule: for CPU-bound pure-Python work, use processes, because each has its own interpreter and its own GIL. Today is the...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w067d1.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-67">Week 67: Concurrency II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#process-and-pool" data-sec="process-and-pool">Process and Pool</a></li><li><a href="#what-travels-between-processes" data-sec="what-travels-between-processes">What travels between processes</a></li><li><a href="#chunks" data-sec="chunks">Chunks</a></li><li><a href="#talking-between-processes" data-sec="talking-between-processes">Talking between processes</a></li><li><a href="#start-methods" data-sec="start-methods">Start methods</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w067d1.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-67">Week 67: Concurrency II</a></li><li aria-current="page">Day 1 of 6</li></ol>
+      <p class="day-where"><span>Week 67, Day 1</span></p>
+      <h1>multiprocessing</h1>
+      <div class="day-intro"><p>Last week ended with a rule: for CPU-bound pure-Python work, use processes, because each has its own interpreter and its own GIL. Today is the <code>multiprocessing</code> module that does it: <code>Process</code>, <code>Pool</code> and its <code>map</code> family, <code>Queue</code> and <code>Pipe</code> for passing messages, shared memory for the rare cases that need it, and the <strong>start methods</strong> that decide how a new process begins. The browser can&rsquo;t start processes, so the runnable exercises simulate the parts that matter (pickling, chunking, scheduling chunks on workers, message passing), and the real code to run is in the &ldquo;On your own computer&rdquo; sections.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Run work in other processes with Process and Pool, using the <strong>main</strong> guard</li><li>Explain what is pickled, and why functions must be importable and data picklable</li><li>Choose a chunksize, and predict how chunking affects overhead and balance</li><li>Pass messages with Queue and Pipe, and know when shared memory and Managers are needed</li><li>Explain the fork, spawn and forkserver start methods</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Process and Pool: 20 min"></span><span class="plan-seg s0" style="flex:20" title="What travels between processes: 20 min"></span><span class="plan-seg s1" style="flex:25" title="Chunks: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Talking between processes: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Start methods: 15 min"></span><span class="plan-seg s0" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz and daily challenge: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Process and Pool</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">What travels between processes</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Chunks</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Talking between processes</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Start methods</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w067d1.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w067d1.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w067d1-p1"><textarea class="pc-src pc-code" hidden>def chunks_needed(n_items, chunksize):
+    return -(-n_items // chunksize)          # ceiling division
+
+def total_time(n_items, workers, chunksize, per_item=1, per_chunk=20):
+    n_chunks = chunks_needed(n_items, chunksize)
+    cost_per_chunk = per_chunk + chunksize * per_item     # overhead + work
+    rounds = -(-n_chunks // workers)
+    return rounds * cost_per_chunk
+
+for size in (1, 10, 100, 1000):
+    print(size, total_time(1000, workers=4, chunksize=size))</textarea></div>
+<p>Sending items to worker processes one at a time pays the overhead a thousand times; sending them in a few huge chunks leaves workers idle. The best chunk size is in between, which is why <code>Pool.map</code> has a <code>chunksize</code> argument.</p>
+<h2 id="process-and-pool">Process and Pool</h2>
+<p><code>multiprocessing</code> mirrors <code>threading</code>, but each worker is a separate <strong>process</strong>:</p>
+<pre><code>import multiprocessing as mp
+
+def crunch(n):
+    return sum(i * i for i in range(n))
+
+if __name__ == &quot;__main__&quot;:                       # required: see &quot;Start methods&quot;
+    p = mp.Process(target=crunch, args=(10_000_000,))
+    p.start()
+    p.join()                                      # the return value is lost, as with threads
+    print(&quot;exit code&quot;, p.exitcode)
+
+    with mp.Pool(processes=4) as pool:            # defaults to os.cpu_count()
+        print(pool.map(crunch, [10**6] * 8))      # results in input order
+        print(pool.apply(crunch, (1000,)))        # one call, waiting for it
+        for r in pool.imap_unordered(crunch, [10**5] * 4):
+            print(r)                              # as they finish
+</code></pre>
+<ul>
+<li><strong><code>Pool.map(func, items, chunksize=None)</code></strong> splits <code>items</code> into chunks, sends them to workers and returns a list of results in input order. <code>imap</code> returns them lazily in order; <code>imap_unordered</code> as they finish; <code>starmap</code> unpacks argument tuples; <code>apply_async</code> and <code>map_async</code> return result objects with <code>.get()</code>.</li>
+<li><code>concurrent.futures.ProcessPoolExecutor</code> (last Friday) offers the same in the futures style, and is usually the simpler choice for new code.</li>
+<li>A worker that crashes outright (rather than raising) breaks a <code>ProcessPoolExecutor</code> (<code>BrokenProcessPool</code>); exceptions raised normally are pickled and re-raised in the parent.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w067d1-e2"><textarea class="pc-src pc-code" hidden>import os
+
+def crunch(n):
+    return sum(i * i for i in range(n))
+
+def simulated_map(func, items, workers):
+    &quot;What Pool.map promises: each item handled by some worker, results in input order.&quot;
+    assignments = {i: f&quot;worker {i % workers}&quot; for i in range(len(items))}
+    results = [func(x) for x in items]          # in reality these run in parallel processes
+    return results, assignments
+
+results, who = simulated_map(crunch, [10, 100, 1000], workers=2)
+print(results, who)
+print(&quot;this machine has&quot;, os.cpu_count() or &quot;an unknown number of&quot;, &quot;CPUs&quot;)</textarea></div>
+<h2 id="what-travels-between-processes">What travels between processes</h2>
+<p>Processes don&rsquo;t share memory, so everything that crosses between them is <strong>pickled</strong> in one process and unpickled in the other:</p>
+<ul>
+<li>the <strong>function</strong> to call (pickled by <strong>reference</strong>: its module and name, so the worker must be able to import it; that&rsquo;s why lambdas, nested functions and functions defined in the interactive prompt fail);</li>
+<li>the <strong>arguments</strong> and the <strong>results</strong> (pickled by value: copies, so changes a worker makes to an argument never reach the parent);</li>
+<li><strong>exceptions</strong> raised in workers.</li>
+</ul>
+<p>Consequences: keep arguments and results <strong>small</strong> (pickling a big list for every task costs more than the work); things like open files, sockets, locks and generators can&rsquo;t be sent; and global variables changed in the parent after the pool starts aren&rsquo;t seen by workers. Send what each task needs, return what it produces, and nothing else.</p>
+<div class="pc pc-example" data-kind="example" data-id="w067d1-e3"><textarea class="pc-src pc-code" hidden>import pickle
+
+def sendable(obj):
+    try:
+        pickle.dumps(obj)
+        return True
+    except Exception:
+        return False
+
+print(sendable(len), sendable(lambda x: x), sendable((1, [2, &quot;three&quot;])))
+print(sendable(x for x in range(3)))
+
+data = list(range(100_000))
+print(len(pickle.dumps(data)), &quot;bytes to send this list to a worker, every time&quot;)
+print(len(pickle.dumps(len)), &quot;bytes for a function: just its module and name&quot;)
+print(pickle.dumps(len)[-20:])</textarea></div>
+<h2 id="chunks">Chunks</h2>
+<p>Each message between processes has a fixed cost (pickling, a system call, waking the worker), so <code>Pool.map</code> sends items in <strong>chunks</strong>. The trade-off:</p>
+<ul>
+<li><strong>Small chunks</strong>: good <strong>balance</strong> (a worker that finishes early takes more), but the overhead is paid many times.</li>
+<li><strong>Large chunks</strong>: little overhead, but poor balance: if items take different times, one worker may be stuck with a slow chunk while the others sit idle at the end.</li>
+</ul>
+<p>CPython&rsquo;s <code>Pool.map</code> picks a default by dividing the items into about <strong>four chunks per worker</strong>:</p>
+<pre><code>chunksize, extra = divmod(len(items), len(workers) * 4)
+if extra:
+    chunksize += 1
+</code></pre>
+<p><code>imap</code> and <code>imap_unordered</code> default to a chunksize of 1, and <code>ProcessPoolExecutor.map</code> defaults to 1 too, so pass <code>chunksize</code> yourself for many small tasks.</p>
+<div class="pc pc-example" data-kind="example" data-id="w067d1-e4"><textarea class="pc-src pc-code" hidden>def default_chunksize(n_items, workers):
+    chunksize, extra = divmod(n_items, workers * 4)
+    if extra:
+        chunksize += 1
+    return chunksize
+
+for n in (10, 100, 1000, 1_000_000):
+    print(n, &quot;items on 4 workers -&gt;&quot;, default_chunksize(n, 4), &quot;per chunk&quot;)
+
+def make_chunks(items, size):
+    return [items[i:i + size] for i in range(0, len(items), size)]
+
+print(make_chunks(list(&quot;abcdefg&quot;), 3))</textarea></div>
+<h2 id="talking-between-processes">Talking between processes</h2>
+<p>Prefer passing messages to sharing memory:</p>
+<ul>
+<li><strong><code>multiprocessing.Queue()</code></strong>: like <code>queue.Queue</code> but between processes (items are pickled). The producer-consumer pattern with sentinels works the same way.</li>
+<li><strong><code>multiprocessing.Pipe()</code></strong>: returns two <strong>connection</strong> objects, one for each end; <code>conn.send(obj)</code> and <code>conn.recv()</code> (pickled messages), <code>conn.poll(timeout)</code> checks for waiting data, and <code>recv()</code> on a closed pipe raises <code>EOFError</code>. Faster than a queue for exactly two parties.</li>
+<li><strong>Shared memory</strong> when copying is too costly: <code>Value("i", 0)</code> and <code>Array("d", 100)</code> hold C values in memory all processes can see (with a lock: <code>with v.get_lock(): v.value += 1</code>, since races happen across processes too), and <code>multiprocessing.shared_memory.SharedMemory</code> gives a raw shared block (NumPy can use it directly).</li>
+<li><strong><code>Manager()</code></strong>: a server process holding ordinary Python objects (dicts, lists) that other processes use through proxies. Flexible but slow: every access is a message.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w067d1-e5"><textarea class="pc-src pc-code" hidden>import pickle
+from collections import deque
+
+class End:
+    &quot;One end of a simulated pipe: messages are pickled, as in a real one.&quot;
+    def __init__(self):
+        self.inbox, self.other, self.closed = deque(), None, False
+    def send(self, obj):
+        self.other.inbox.append(pickle.dumps(obj))
+    def recv(self):
+        if not self.inbox:
+            raise EOFError(&quot;nothing to receive&quot;)
+        return pickle.loads(self.inbox.popleft())
+    def poll(self):
+        return bool(self.inbox)
+
+def pipe():
+    a, b = End(), End()
+    a.other, b.other = b, a
+    return a, b
+
+parent, child = pipe()
+parent.send({&quot;task&quot;: &quot;resize&quot;, &quot;size&quot;: (800, 600)})
+job = child.recv()
+child.send(f&quot;resized to {job[&#x27;size&#x27;][0]}x{job[&#x27;size&#x27;][1]}&quot;)
+print(parent.poll(), parent.recv(), parent.poll())</textarea></div>
+<h2 id="start-methods">Start methods</h2>
+<p>How a new process begins matters more than it sounds:</p>
+<ul>
+<li><strong>fork</strong> (the classic Unix way): the child is a copy of the parent at that moment, including all its memory. Fast, and children inherit already-loaded data. But copying a process that has threads is unsafe (a lock held by another thread is copied as locked for ever), so it can deadlock in programs that use threads or some libraries.</li>
+<li><strong>spawn</strong> (the default on Windows and macOS): the child starts a <strong>fresh</strong> Python interpreter, imports your main module, and receives the function and arguments by pickling. Safer, slower to start.</li>
+<li><strong>forkserver</strong>: a clean server process is started once, and new workers are forked from it. Python 3.14 made it the default on Linux, replacing fork.</li>
+</ul>
+<p>With <strong>spawn</strong> and <strong>forkserver</strong>, the child <strong>imports your script</strong>. Code at the top level of the script runs again in every child, so creating processes there would create processes for ever: that&rsquo;s why the code that starts processes must be inside <strong><code>if __name__ == "__main__":</code></strong>. Choose explicitly with <code>multiprocessing.set_start_method("spawn")</code> once at start-up, or <code>multiprocessing.get_context("spawn")</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w067d1-e6"><textarea class="pc-src pc-code" hidden>def top_level_runs(guarded, children):
+    &quot;How many times does a script&#x27;s top-level code run, including in spawned children?&quot;
+    runs = 1                                   # the parent
+    runs += children                           # each spawned child imports the script
+    starts_processes_in_children = not guarded
+    return runs, (&quot;children would start more processes&quot; if starts_processes_in_children else &quot;safe&quot;)
+
+print(top_level_runs(guarded=True, children=4))
+print(top_level_runs(guarded=False, children=4))
+
+defaults = {&quot;Windows&quot;: &quot;spawn&quot;, &quot;macOS&quot;: &quot;spawn&quot;, &quot;Linux (Python 3.14+)&quot;: &quot;forkserver&quot;, &quot;Linux (before 3.14)&quot;: &quot;fork&quot;}
+for system, method in defaults.items():
+    print(f&quot;{system:22} {method}&quot;)</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>multiprocessing runs work in separate processes, each with its own interpreter and GIL: Process with start and join, or Pool with map (input order), imap, imap_unordered (finishing order), starmap and apply_async; ProcessPoolExecutor offers the same in the futures style. Everything sent between processes is pickled: functions by importable name (no lambdas or nested functions), arguments and results by copy, so keep them small. Work is sent in chunks: small chunks balance load, large ones cut overhead; Pool.map defaults to about four chunks per worker, while imap and executors default to one item. Pass messages with Queue and Pipe; share memory with Value, Array or shared_memory under a lock only when copying costs too much; Managers are flexible but slow. Start methods are fork, spawn (Windows and macOS) and forkserver (Linux from 3.14); spawned children import the main module, so guard process creation with if <strong>name</strong> == &ldquo;<strong>main</strong>&rdquo;:.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d1-pickling" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">What can be sent?</div><div class="pc-prompt"><p>Write <code>sendable(obj)</code>: True if <code>obj</code> can be pickled. Then <code>why_not(obj)</code>: <code>None</code> if it can be sent, otherwise a short reason chosen by type: <code>"lambdas and nested functions aren't importable"</code> for functions whose <code>__qualname__</code> contains <code>"&lt;lambda&gt;"</code> or <code>"&lt;locals&gt;"</code>, <code>"generators can't be pickled"</code> for generators, <code>"locks can't be pickled"</code> for objects whose type name ends in <code>"lock"</code> (any case), and <code>"can't be pickled"</code> otherwise. Finally <code>payload_size(obj)</code>: the number of bytes <code>pickle.dumps</code> produces.</p></div><textarea class="pc-src pc-code" hidden>import pickle
+import types
+
+def sendable(obj):
+    ___
+
+def why_not(obj):
+    ___
+
+def payload_size(obj):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_pickling():
+    &quot;pickle rules&quot;
+    import threading
+    def nested():
+        return 1
+    def top_level_style(x):
+        return x
+    assert sendable([1, {&quot;a&quot;: (2, 3)}]) and sendable(len) and not sendable(lambda: 0)
+    assert why_not(lambda: 0) == &quot;lambdas and nested functions aren&#x27;t importable&quot;
+    assert why_not(nested) == &quot;lambdas and nested functions aren&#x27;t importable&quot;
+    assert why_not(x for x in []) == &quot;generators can&#x27;t be pickled&quot; and why_not(threading.Lock()) == &quot;locks can&#x27;t be pickled&quot;
+    assert why_not(42) is None and payload_size(list(range(1000))) &gt; payload_size(list(range(10)))</textarea><textarea class="pc-src pc-solution" hidden>import pickle
+import types
+
+def sendable(obj):
+    try:
+        pickle.dumps(obj)
+    except Exception:
+        return False
+    return True
+
+def why_not(obj):
+    if sendable(obj):
+        return None
+    if isinstance(obj, types.FunctionType) and (&quot;&lt;lambda&gt;&quot; in obj.__qualname__ or &quot;&lt;locals&gt;&quot; in obj.__qualname__):
+        return &quot;lambdas and nested functions aren&#x27;t importable&quot;
+    if isinstance(obj, types.GeneratorType):
+        return &quot;generators can&#x27;t be pickled&quot;
+    if type(obj).__name__.lower().endswith(&quot;lock&quot;):
+        return &quot;locks can&#x27;t be pickled&quot;
+    return &quot;can&#x27;t be pickled&quot;
+
+def payload_size(obj):
+    return len(pickle.dumps(obj))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d1-chunksize" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Pool&rsquo;s default chunksize</div><div class="pc-prompt"><p>Write <code>default_chunksize(n_items, workers)</code> using CPython&rsquo;s rule for <code>Pool.map</code> (divide by <code>workers * 4</code>, rounding up; and at least 1 when there are no items, so <code>map</code> still works), <code>make_chunks(items, size)</code>: the list of consecutive chunks of that size (the last may be shorter), and <code>messages(n_items, workers, chunksize=None)</code>: how many chunks (messages) <code>map</code> would send, using the default when <code>chunksize</code> is <code>None</code>.</p></div><textarea class="pc-src pc-code" hidden>def default_chunksize(n_items, workers):
+    ___
+
+def make_chunks(items, size):
+    ___
+
+def messages(n_items, workers, chunksize=None):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_chunksize():
+    &quot;chunking rules&quot;
+    assert default_chunksize(100, 4) == 7 and default_chunksize(96, 4) == 6 and default_chunksize(1, 8) == 1
+    assert default_chunksize(0, 4) == 1
+    assert make_chunks(list(range(7)), 3) == [[0, 1, 2], [3, 4, 5], [6]] and make_chunks([], 2) == []
+    assert messages(100, 4) == 15 and messages(100, 4, chunksize=1) == 100 and messages(0, 4) == 0</textarea><textarea class="pc-src pc-solution" hidden>def default_chunksize(n_items, workers):
+    chunksize, extra = divmod(n_items, workers * 4)
+    if extra:
+        chunksize += 1
+    return max(chunksize, 1)
+
+def make_chunks(items, size):
+    return [items[i:i + size] for i in range(0, len(items), size)]
+
+def messages(n_items, workers, chunksize=None):
+    size = chunksize or default_chunksize(n_items, workers)
+    return -(-n_items // size)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d1-poolsim" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Simulating Pool.map</div><div class="pc-prompt"><p>Simulate <code>Pool.map</code> in time. <code>pool_map(func, items, workers, chunksize, cost, overhead)</code>: split the items into chunks; each chunk goes, in order, to the worker that&rsquo;s free first (lowest-numbered on ties) and takes <code>overhead + sum(cost(x) for x in chunk)</code> time units. Return <code>(results, finish)</code>: the results of <code>func</code> in <strong>input order</strong>, and when the last chunk finishes. Then <code>best_chunksize(items, workers, cost, overhead, candidates)</code>: the candidate chunksize with the earliest finish (the smallest such size on ties).</p></div><textarea class="pc-src pc-code" hidden>def pool_map(func, items, workers, chunksize, cost, overhead):
+    ___
+
+def best_chunksize(items, workers, cost, overhead, candidates):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_poolsim():
+    &quot;chunk scheduling&quot;
+    items = list(range(8))
+    results, finish = pool_map(lambda x: x * x, items, 2, 2, cost=lambda x: 1, overhead=3)
+    assert results == [x * x for x in items] and finish == 10
+    assert pool_map(str, items, 2, 1, lambda x: 1, 3)[1] == 16 and pool_map(str, items, 2, 8, lambda x: 1, 3)[1] == 11
+    assert best_chunksize(items, 2, lambda x: 1, 3, [1, 2, 4, 8]) == 4
+    uneven = [10, 1, 1, 1, 1, 1, 1, 1]
+    assert best_chunksize(uneven, 2, lambda x: x, 1, [1, 2, 4, 8]) == 2
+    assert pool_map(abs, [], 3, 2, lambda x: 1, 5) == ([], 0)</textarea><textarea class="pc-src pc-solution" hidden>def pool_map(func, items, workers, chunksize, cost, overhead):
+    free_at = [0] * workers
+    finish = 0
+    for start in range(0, len(items), chunksize):
+        chunk = items[start:start + chunksize]
+        w = free_at.index(min(free_at))
+        free_at[w] += overhead + sum(cost(x) for x in chunk)
+        finish = max(finish, free_at[w])
+    return [func(x) for x in items], finish
+
+def best_chunksize(items, workers, cost, overhead, candidates):
+    return min(candidates, key=lambda size: (pool_map(lambda x: x, items, workers, size, cost, overhead)[1], size))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d1-pipes" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A pipe between processes</div><div class="pc-prompt"><p>Simulate <code>multiprocessing.Pipe()</code>. Write <code>pipe()</code> returning two connected <code>Connection</code> objects: <code>send(obj)</code> pickles the object and puts the bytes in the <strong>other</strong> end&rsquo;s inbox; <code>recv()</code> returns the next message, unpickled (a <strong>copy</strong>), raising <code>EOFError</code> if nothing is waiting and the other end is closed, and <code>BlockingIOError</code> if nothing is waiting but the other end is still open (a real pipe would wait); <code>poll()</code> says whether a message is waiting; <code>close()</code> closes this end, after which <code>send</code> raises <code>OSError("handle is closed")</code>. <code>sent</code> counts bytes this end has sent.</p></div><textarea class="pc-src pc-code" hidden>import pickle
+from collections import deque
+
+class Connection:
+    def __init__(self):
+        ___
+
+def pipe():
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_pipes():
+    &quot;message passing&quot;
+    a, b = pipe()
+    job = {&quot;items&quot;: [1, 2, 3]}
+    a.send(job)
+    a.send(&quot;second&quot;)
+    assert b.poll() and not a.poll()
+    received = b.recv()
+    assert received == job and received is not job and b.recv() == &quot;second&quot; and not b.poll()
+    b.send(sum(received[&quot;items&quot;]))
+    assert a.recv() == 6 and a.sent &gt; 0
+    try:
+        a.recv()
+        assert False
+    except BlockingIOError:
+        pass
+    b.close()
+    try:
+        a.recv()
+        assert False
+    except EOFError:
+        pass
+    try:
+        b.send(1)
+        assert False
+    except OSError as e:
+        assert str(e) == &quot;handle is closed&quot;
+    try:
+        a.send(lambda: 1)
+        assert False
+    except Exception:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import pickle
+from collections import deque
+
+class Connection:
+    def __init__(self):
+        self.inbox = deque()
+        self.other = None
+        self.closed = False
+        self.sent = 0
+
+    def send(self, obj):
+        if self.closed:
+            raise OSError(&quot;handle is closed&quot;)
+        data = pickle.dumps(obj)
+        self.sent += len(data)
+        self.other.inbox.append(data)
+
+    def recv(self):
+        if self.inbox:
+            return pickle.loads(self.inbox.popleft())
+        if self.other.closed:
+            raise EOFError(&quot;the other end is closed&quot;)
+        raise BlockingIOError(&quot;nothing to receive yet&quot;)
+
+    def poll(self):
+        return bool(self.inbox)
+
+    def close(self):
+        self.closed = True
+
+def pipe():
+    a, b = Connection(), Connection()
+    a.other, b.other = b, a
+    return a, b</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d1-guard" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Why the main guard matters</div><div class="pc-prompt"><p>Model what happens when a script is started with the <strong>spawn</strong> method. Write <code>spawned_runs(guarded, workers, depth=3)</code>: the number of times the script&rsquo;s top-level code runs. The parent runs it once and starts <code>workers</code> children; each child imports the script, running its top-level code once; if the process-starting code is <strong>not</strong> guarded, each child also starts <code>workers</code> children of its own, and so on, stopping (as Python does, with an error) after <code>depth</code> levels of children. Then <code>start_method(system, version)</code>: the default method, <code>"spawn"</code> for <code>"Windows"</code> and <code>"macOS"</code>, and for <code>"Linux"</code> <code>"forkserver"</code> from version <code>(3, 14)</code> on and <code>"fork"</code> before.</p></div><textarea class="pc-src pc-code" hidden>def spawned_runs(guarded, workers, depth=3):
+    ___
+
+def start_method(system, version):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_guard():
+    &quot;spawn and the __main__ guard&quot;
+    assert spawned_runs(True, 4) == 5 and spawned_runs(True, 1) == 2
+    assert spawned_runs(False, 2, depth=3) == 1 + 2 + 4 + 8 and spawned_runs(False, 4, depth=1) == 5
+    assert start_method(&quot;Windows&quot;, (3, 12)) == &quot;spawn&quot; and start_method(&quot;macOS&quot;, (3, 14)) == &quot;spawn&quot;
+    assert start_method(&quot;Linux&quot;, (3, 13)) == &quot;fork&quot; and start_method(&quot;Linux&quot;, (3, 14)) == &quot;forkserver&quot;</textarea><textarea class="pc-src pc-solution" hidden>def spawned_runs(guarded, workers, depth=3):
+    if guarded:
+        return 1 + workers
+    total, level = 1, 1
+    for _ in range(depth):
+        level *= workers
+        total += level
+    return total
+
+def start_method(system, version):
+    if system in (&quot;Windows&quot;, &quot;macOS&quot;):
+        return &quot;spawn&quot;
+    return &quot;forkserver&quot; if tuple(version) &gt;= (3, 14) else &quot;fork&quot;</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d1-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A lambda that can&rsquo;t travel</div><div class="pc-prompt"><p>The work is passed as a lambda, but a process pool sends functions by <strong>name</strong> (that&rsquo;s how pickle stores them), and a lambda has no name a worker could import. This simulated pool checks that, as a real one would, and the program crashes with <code>TypeError</code>. Define the function at the top level of the module with <code>def</code> so it can be sent, and this prints <code>[1, 4, 9]</code>.</p></div><textarea class="pc-src pc-code" hidden>def simulated_pool_map(func, items):
+    if &quot;&lt;lambda&gt;&quot; in func.__qualname__ or &quot;&lt;locals&gt;&quot; in func.__qualname__:
+        raise TypeError(f&quot;can&#x27;t send {func.__qualname__}: workers can&#x27;t import it by name&quot;)
+    return [func(x) for x in items]
+
+print(simulated_pool_map(lambda x: x * x, [1, 2, 3]))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;importable functions&quot;
+    expect_output(&quot;[1, 4, 9]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def simulated_pool_map(func, items):
+    if &quot;&lt;lambda&gt;&quot; in func.__qualname__ or &quot;&lt;locals&gt;&quot; in func.__qualname__:
+        raise TypeError(f&quot;can&#x27;t send {func.__qualname__}: workers can&#x27;t import it by name&quot;)
+    return [func(x) for x in items]
+
+def square(x):
+    return x * x
+
+print(simulated_pool_map(square, [1, 2, 3]))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d1-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A worker that changed a copy</div><div class="pc-prompt"><p>The worker appends its result to the list it was given, expecting the parent to see it, but processes receive <strong>copies</strong>, so the parent&rsquo;s list is still empty and this prints <code>[]</code>. Return the result from the worker and collect it in the parent, so this prints <code>[30]</code>.</p></div><textarea class="pc-src pc-code" hidden>import copy
+
+def worker(results, x):
+    results.append(x * 10)
+
+def run_in_process(func, *args):
+    return func(*copy.deepcopy(args))            # a process gets copies of its arguments
+
+results = []
+run_in_process(worker, results, 3)
+print(results)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;return results&quot;
+    expect_output(&quot;[30]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import copy
+
+def worker(x):
+    return x * 10
+
+def run_in_process(func, *args):
+    return func(*copy.deepcopy(args))            # a process gets copies of its arguments
+
+results = []
+results.append(run_in_process(worker, 3))
+print(results)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w067d1-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A remainder left behind</div><div class="pc-prompt"><p>The chunksize is computed with plain division, rounding down, so a few items at the end never get a chunk of their own and only <code>96</code> of the 100 items are sent. Round up, as <code>Pool.map</code> does, so all of them go and this prints <code>100</code>.</p></div><textarea class="pc-src pc-code" hidden>items = list(range(100))
+workers = 4
+size = len(items) // (workers * 4)
+chunks = [items[i * size:(i + 1) * size] for i in range(workers * 4)]
+print(sum(len(c) for c in chunks))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;round up&quot;
+    expect_output(&quot;100&quot;)</textarea><textarea class="pc-src pc-solution" hidden>items = list(range(100))
+workers = 4
+size, extra = divmod(len(items), workers * 4)
+if extra:
+    size += 1
+chunks = [items[i:i + size] for i in range(0, len(items), size)]
+print(sum(len(c) for c in chunks))</textarea></div>
+<div class="parsons" data-id="w067d1-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Using a pool safely</div><div class="pc-prompt"><p>Arrange the lines of a script that computes squares in a process pool, with the guard that spawned children need (as you&rsquo;d write it on your own computer). One line is a trap.</p></div><script type="application/json">{"lines": ["import multiprocessing as mp", "def square(x):", "    return x * x", "if __name__ == \"__main__\":", "    with mp.Pool(4) as pool:", "        print(pool.map(square, range(10)))"], "distractors": ["        print(pool.map(lambda x: x * x, range(10)))"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d1-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # True or False: a worker process can change the parent&#x27;s list that it was passed
+q = ___   # Pool.map&#x27;s default chunksize for 100 items on 5 workers
+r = ___   # the start method on Windows
+s = ___   # the order imap_unordered yields results in: &quot;input&quot; or &quot;finishing&quot;
+t = ___   # True or False: a lambda can be sent to a process pool</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p is False and q == 5 and r == &quot;spawn&quot;, &quot;p, q and r&quot;
+    assert s == &quot;finishing&quot; and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = False
+q = 5
+r = &quot;spawn&quot;
+s = &quot;finishing&quot;
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w067d1-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why use processes rather than threads for CPU-bound Python work?", "answer": 1, "explain": "One GIL per process.", "options": ["They&rsquo;re lighter", "Each process has its own interpreter and GIL, so they run in parallel", "They share memory", "They start faster"]}, {"type": "mc", "q": "How is a function sent to a worker process?", "answer": 1, "explain": "No lambdas or nested functions.", "options": ["Its bytecode is copied", "It&rsquo;s pickled by module and name, so the worker must be able to import it", "It isn&rsquo;t", "As source code"]}, {"type": "mc", "q": "What happens when a worker changes a list it received?", "answer": 1, "explain": "Arguments are pickled copies.", "options": ["The parent sees it", "Only the worker&rsquo;s copy changes", "An error", "Both change"]}, {"type": "mc", "q": "What&rsquo;s the trade-off in choosing a chunksize?", "answer": 1, "explain": "Pool.map aims for about four chunks per worker.", "options": ["None", "Small chunks balance work but add overhead; large ones cut overhead but balance poorly", "Large chunks are always best", "Chunks don&rsquo;t matter"]}, {"type": "mc", "q": "In what order does Pool.map return results?", "answer": 1, "explain": "imap_unordered gives finishing order.", "options": ["Finishing order", "Input order", "Random", "By worker"]}, {"type": "mc", "q": "Which is usually best for communication between processes?", "answer": 1, "explain": "Share memory only when copying costs too much.", "options": ["Shared global variables", "Passing messages with Queue or Pipe", "Files", "Managers for everything"]}, {"type": "mc", "q": "Why does a shared Value still need a lock?", "answer": 1, "explain": "with v.get_lock(): v.value += 1.", "options": ["It doesn&rsquo;t", "+= on it is still read-modify-write, and processes can interleave", "Values are slow", "Locks are required by Python"]}, {"type": "mc", "q": "What does the spawn start method do?", "answer": 1, "explain": "Safer than fork, slower to start.", "options": ["Copies the parent", "Starts a fresh interpreter that imports your main module", "Uses threads", "Nothing"]}, {"type": "mc", "q": "Why do spawned processes need the main-module guard around code that starts processes?", "answer": 1, "explain": "It would start processes for ever.", "options": ["Style", "Children import the script, so unguarded process creation would run again in every child", "Speed", "For Windows only"]}, {"type": "output", "q": "What does this print?", "answer": "{'a': [1, 2]} False", "explain": "A pickled round trip makes an independent copy.", "code": "import pickle\ndata = {\"a\": [1, 2]}\ncopy = pickle.loads(pickle.dumps(data))\ncopy[\"a\"].append(3)\nprint(data, copy == data)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w067d1-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: map and reduce</div><div class="pc-prompt"><p><strong>MapReduce</strong> splits a big job into a <strong>map</strong> step run in parallel on chunks of the data and a <strong>reduce</strong> step that combines the partial results. Count word frequencies across many documents this way, with the parallel part simulated:</p>
+<ul>
+<li><code>map_chunk(docs)</code>: a <code>collections.Counter</code> of lower-cased words (split on whitespace, with <code>.,!?;:</code> stripped from each word&rsquo;s ends, empty words skipped) in a list of documents. It must be a <strong>top-level</strong> function, so it could be sent to a real pool.</li>
+<li><code>run_job(docs, workers, chunksize)</code>: split the documents into chunks, &ldquo;send&rdquo; each chunk to a worker by pickling <code>("map_chunk", chunk)</code> (a function travels as its name, which is what pickle does with functions) and unpickling it, look the function up by name in the dict <code>FUNCTIONS = {"map_chunk": map_chunk}</code> (as a worker importing it would), apply it, pickle the partial result back, and finally merge all the partial counters in chunk order. Return <code>(total_counter, bytes_sent)</code>, where <code>bytes_sent</code> is the total size of everything pickled in both directions.</li>
+<li><code>top_words(counter, k)</code>: the <code>k</code> most common <code>(word, count)</code> pairs, ties alphabetical.</li>
+</ul>
+<p>The result must equal a single-process count, whatever the chunksize.</p></div><textarea class="pc-src pc-code" hidden>import pickle
+from collections import Counter
+
+def map_chunk(docs):
+    ___
+
+def run_job(docs, workers, chunksize):
+    ___
+
+def top_words(counter, k):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_mapreduce():
+    &quot;a parallel word count&quot;
+    docs = [&quot;The cat sat.&quot;, &quot;The dog sat!&quot;, &quot;A cat, a dog; the end?&quot;] * 20
+    single = map_chunk(docs)
+    assert single[&quot;the&quot;] == 60 and single[&quot;cat&quot;] == 40 and single[&quot;end&quot;] == 20 and &quot;&quot; not in single
+    for size in (1, 7, 60):
+        total, sent = run_job(docs, workers=3, chunksize=size)
+        assert total == single and sent &gt; 0
+    _, small_chunks = run_job(docs, 3, 1)
+    _, big_chunks = run_job(docs, 3, 60)
+    assert small_chunks &gt; big_chunks
+    assert top_words(single, 3) == [(&quot;the&quot;, 60), (&quot;a&quot;, 40), (&quot;cat&quot;, 40)]
+    assert run_job([], 2, 5) == (Counter(), 0)</textarea><textarea class="pc-src pc-solution" hidden>import pickle
+from collections import Counter
+
+def map_chunk(docs):
+    counts = Counter()
+    for doc in docs:
+        for word in doc.lower().split():
+            word = word.strip(&quot;.,!?;:&quot;)
+            if word:
+                counts[word] += 1
+    return counts
+
+def run_job(docs, workers, chunksize):
+    total, sent = Counter(), 0
+    for start in range(0, len(docs), chunksize):
+        chunk = docs[start:start + chunksize]
+        outgoing = pickle.dumps((&quot;map_chunk&quot;, chunk))
+        sent += len(outgoing)
+        name, received = pickle.loads(outgoing)
+        reply = pickle.dumps(FUNCTIONS[name](received))
+        sent += len(reply)
+        total.update(pickle.loads(reply))
+    return total, sent
+
+FUNCTIONS = {&quot;map_chunk&quot;: map_chunk}
+
+def top_words(counter, k):
+    return sorted(counter.items(), key=lambda wc: (-wc[1], wc[0]))[:k]</textarea><template class="pc-src pc-hint">Send <code>("map_chunk", chunk)</code>: the worker finds the function by its name in <code>FUNCTIONS</code>. Add <code>len(...)</code> of every <code>dumps</code> result to the byte count. <code>Counter.update(other)</code> (or <code>+=</code>) merges counts.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, run the &ldquo;Process and Pool&rdquo; example and compare <code>pool.map(crunch, ...)</code> with a plain loop for eight tasks of ten million: with four or more cores, the pool should be several times faster. Tomorrow: <code>asyncio</code>, a different kind of concurrency, built on coroutines.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w066d6.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w067d2.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w067d1", "week": 67, "day": 1, "title": "multiprocessing", "exercises": [{"id": "w067d1-pickling", "title": "What can be sent?", "points": 10}, {"id": "w067d1-chunksize", "title": "Pool's default chunksize", "points": 10}, {"id": "w067d1-poolsim", "title": "Simulating Pool.map", "points": 15}, {"id": "w067d1-pipes", "title": "A pipe between processes", "points": 15}, {"id": "w067d1-guard", "title": "Why the main guard matters", "points": 10}, {"id": "w067d1-bug1", "title": "A lambda that can't travel", "points": 10}, {"id": "w067d1-bug2", "title": "A worker that changed a copy", "points": 10}, {"id": "w067d1-bug3", "title": "A remainder left behind", "points": 10}, {"id": "w067d1-trace", "title": "Predict them", "points": 10}, {"id": "w067d1-challenge", "title": "Challenge: map and reduce", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
