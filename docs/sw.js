@@ -1,7 +1,7 @@
 // Python Atlas service worker: makes the site installable as an app and usable offline.
 // Pages: network first (always fresh when online), falling back to the saved copy.
 // Site files and Python itself: saved after the first use, so lessons open and run offline.
-const VERSION = "db5173407e";
+const VERSION = "86aca22b42";
 const SITE = "atlas-site-" + VERSION;
 const PYTHON = "atlas-python-v1";
 const CORE = ["./", "index.html", "map.html", "review.html", "playground.html", "offline.html",

@@ -1,7 +1,7 @@
 // The tutor: a chat panel that knows which lesson you're on and what your code is doing.
-import { h, $, SITE, pageData, escapeHtml } from "./site.js?v=db5173407e";
-import { getClient, progress } from "./progress.js?v=db5173407e";
-import { settings, onSettings } from "./settings.js?v=db5173407e";
+import { h, $, SITE, pageData, escapeHtml } from "./site.js?v=86aca22b42";
+import { getClient, progress } from "./progress.js?v=86aca22b42";
+import { settings, onSettings } from "./settings.js?v=86aca22b42";
 
 let panel, log, field, pending = null;
 const history = [];

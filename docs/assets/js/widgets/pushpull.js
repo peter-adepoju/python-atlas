@@ -1,6 +1,6 @@
 // Local and remote: your repository and its copy on GitHub, side by side. Commit, push, let a
 // teammate push, then pull, and watch "ahead" and "behind" change.
-import { h } from "../site.js?v=db5173407e";
+import { h } from "../site.js?v=86aca22b42";
 
 export default function pushpull(el) {
   let local, remote, n, msg;
