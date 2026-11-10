@@ -1,0 +1,1541 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 69 Day 2: Project: tokeniser | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Yesterday’s pieces read numbers and strings. Today you’ll finish the tokeniser: names and keywords, operators of one and two characters, whitespace and...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w069d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 69 Day 2: Project: tokeniser">
+<meta property="og:description" content="Yesterday’s pieces read numbers and strings. Today you’ll finish the tokeniser: names and keywords, operators of one and two characters, whitespace and...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w069d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-69">Week 69: Consolidation project</a>
+      <ol class="rail-toc"><li><a href="#where-we-are" data-sec="where-we-are">Where we are</a></li><li><a href="#step-6-names-and-keywords" data-sec="step-6-names-and-keywords">Step 6: names and keywords</a></li><li><a href="#step-7-operators" data-sec="step-7-operators">Step 7: operators</a></li><li><a href="#step-8-space-and-comments" data-sec="step-8-space-and-comments">Step 8: space and comments</a></li><li><a href="#step-9-the-tokeniser" data-sec="step-9-the-tokeniser">Step 9: the tokeniser</a></li><li><a href="#step-10-every-error-at-once" data-sec="step-10-every-error-at-once">Step 10: every error at once</a></li><li><a href="#checkpoint" data-sec="checkpoint">Checkpoint</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w069d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-69">Week 69: Consolidation project</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 69, Day 2</span></p>
+      <h1>Project: tokeniser</h1>
+      <div class="day-intro"><p>Yesterday&rsquo;s pieces read numbers and strings. Today you&rsquo;ll finish the <strong>tokeniser</strong>: names and keywords, operators of one and two characters, whitespace and comments, and the <code>tokenize</code> function that ties them together into the token list the parser will read tomorrow. You&rsquo;ll finish by making it report <strong>every</strong> error in a file at once, as real compilers do, instead of stopping at the first.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Tell keywords from names, and give keyword tokens their own kinds and values</li><li>Read one- and two-character operators by looking ahead</li><li>Skip whitespace and comments while keeping positions right</li><li>Combine readers into a tokeniser that chooses by the next character</li><li>Recover from errors to report all of them in one pass</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 40 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:15" title="Where we are: 15 min"></span><span class="plan-seg s1" style="flex:15" title="Step 6: names and keywords: 15 min"></span><span class="plan-seg s0" style="flex:20" title="Step 7: operators: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Step 8: space and comments: 15 min"></span><span class="plan-seg s0" style="flex:30" title="Step 9: the tokeniser: 30 min"></span><span class="plan-seg s1" style="flex:30" title="Step 10: every error at once: 30 min"></span><span class="plan-seg s0" style="flex:20" title="Checkpoint: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Where we are</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:15</span><span class="plan-what">Step 6: names and keywords</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Step 7: operators</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Step 8: space and comments</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:05</span><span class="plan-what">Step 9: the tokeniser</span><span class="plan-min">30 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Step 10: every error at once</span><span class="plan-min">30 min</span></li><li><span class="plan-at">2:05</span><span class="plan-what">Checkpoint</span><span class="plan-min">20 min</span></li><li><span class="plan-at">2:25</span><span class="plan-what">Quiz</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w069d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w069d2.ipynb" download>download it</a>. Exercises today are worth 70 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="where-we-are">Where we are</h2>
+<p>So far you have the error family, <code>show_error</code>, <code>Token</code>, <code>Cursor</code>, <code>read_number</code> and <code>read_string</code>. They&rsquo;re collected here, and each exercise below gives you the code it needs:</p>
+<div class="filebox"><div class="filebox-head">The file used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>tiny_lex.py</code></summary><pre class="pc-filetext">from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+</pre></details><script type="application/json" class="page-files">{"tiny_lex.py": "from dataclasses import dataclass\n\n\nclass TinyError(Exception):\n    \"\"\"Base class for every error the Tiny interpreter reports.\"\"\"\n\n    def __init__(self, message, line=None, column=None):\n        super().__init__(message)\n        self.message, self.line, self.column = message, line, column\n\n    def __str__(self):\n        if self.line is None:\n            return self.message\n        if self.column is None:\n            return f\"line {self.line}: {self.message}\"\n        return f\"line {self.line}, column {self.column}: {self.message}\"\n\n\nclass LexError(TinyError):\n    \"\"\"The source contains characters that don't form a token.\"\"\"\n\n\nclass ParseError(TinyError):\n    \"\"\"The tokens don't follow Tiny's grammar.\"\"\"\n\n\nclass TinyRuntimeError(TinyError):\n    \"\"\"Something went wrong while a program ran.\"\"\"\n\n\n@dataclass(frozen=True)\nclass Token:\n    kind: str\n    text: str\n    value: object\n    line: int\n    column: int\n\n\nclass Cursor:\n    def __init__(self, source):\n        self.source, self.pos, self.line, self.column = source, 0, 1, 1\n\n    def at_end(self):\n        return self.pos >= len(self.source)\n\n    def peek(self, ahead=0):\n        i = self.pos + ahead\n        return self.source[i] if i < len(self.source) else \"\"\n\n    def advance(self):\n        ch = self.source[self.pos]\n        self.pos += 1\n        if ch == \"\\n\":\n            self.line, self.column = self.line + 1, 1\n        else:\n            self.column += 1\n        return ch\n\ndef read_number(cursor):\n    line, column, text = cursor.line, cursor.column, \"\"\n    while cursor.peek().isdigit():\n        text += cursor.advance()\n    if cursor.peek() == \".\" and cursor.peek(1).isdigit():\n        text += cursor.advance()\n        while cursor.peek().isdigit():\n            text += cursor.advance()\n        return Token(\"NUMBER\", text, float(text), line, column)\n    return Token(\"NUMBER\", text, int(text), line, column)\n\n\nESCAPES = {\"n\": \"\\n\", \"t\": \"\\t\", '\"': '\"', \"\\\\\": \"\\\\\"}\n\n\ndef read_string(cursor):\n    line, column = cursor.line, cursor.column\n    text = cursor.advance()\n    value = \"\"\n    while True:\n        if cursor.at_end() or cursor.peek() == \"\\n\":\n            raise LexError(\"unterminated string\", line, column)\n        ch = cursor.advance()\n        text += ch\n        if ch == '\"':\n            return Token(\"STRING\", text, value, line, column)\n        if ch == \"\\\\\":\n            if cursor.at_end():\n                raise LexError(\"unterminated string\", line, column)\n            esc_line, esc_col = cursor.line, cursor.column - 1\n            code = cursor.advance()\n            text += code\n            if code not in ESCAPES:\n                raise LexError(f\"unknown escape \\\\{code}\", esc_line, esc_col)\n            value += ESCAPES[code]\n        else:\n            value += ch\n"}</script></div>
+<h2 id="step-6-names-and-keywords">Step 6: names and keywords</h2>
+<p>Names (<code>total</code>, <code>make_counter</code>, <code>_x2</code>) and keywords (<code>let</code>, <code>while</code>, <code>true</code>) look the same to a reader: a letter or underscore followed by letters, digits and underscores. The difference is a lookup: if the word is a keyword, it gets its own token kind, which makes the parser&rsquo;s job much simpler (it can ask &ldquo;is this a <code>WHILE</code>?&rdquo; instead of comparing text). The values of <code>true</code>, <code>false</code> and <code>nil</code> are decided here too, once.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d2-step6" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Step 6: names and keywords</div><div class="pc-prompt"><p>Write <code>read_name(cursor)</code>: with the cursor at a letter or underscore, read letters, digits and underscores. If the word is in <code>KEYWORDS</code>, return a token whose kind is the word in capitals (<code>LET</code>, <code>WHILE</code>, <code>TRUE</code>&hellip;) with value <code>True</code>, <code>False</code> or <code>None</code> for <code>true</code>, <code>false</code> and <code>nil</code> (and <code>None</code> for other keywords); otherwise a <code>NAME</code> token whose value is the name.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+def read_name(cursor):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_names():
+    &quot;names and keywords&quot;
+    c = Cursor(&quot;total_2 = 1&quot;)
+    assert read_name(c) == Token(&quot;NAME&quot;, &quot;total_2&quot;, &quot;total_2&quot;, 1, 1) and c.peek() == &quot; &quot;
+    assert read_name(Cursor(&quot;while(&quot;)) == Token(&quot;WHILE&quot;, &quot;while&quot;, None, 1, 1)
+    assert read_name(Cursor(&quot;true&quot;)).value is True and read_name(Cursor(&quot;false&quot;)).value is False
+    assert read_name(Cursor(&quot;nil&quot;)) == Token(&quot;NIL&quot;, &quot;nil&quot;, None, 1, 1)
+    assert read_name(Cursor(&quot;letter&quot;)).kind == &quot;NAME&quot; and read_name(Cursor(&quot;_x&quot;)).kind == &quot;NAME&quot;
+    assert read_name(Cursor(&quot;print&quot;)).kind == &quot;PRINT&quot;</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+def read_name(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isalnum() or cursor.peek() == &quot;_&quot;:
+        text += cursor.advance()
+    if text in KEYWORDS:
+        value = {&quot;true&quot;: True, &quot;false&quot;: False, &quot;nil&quot;: None}.get(text)
+        return Token(text.upper(), text, value, line, column)
+    return Token(&quot;NAME&quot;, text, text, line, column)</textarea></div>
+<h2 id="step-7-operators">Step 7: operators</h2>
+<p>Some operators are two characters long (<code>&lt;=</code>, <code>==</code>), and some of those start with a character that&rsquo;s also an operator on its own (<code>&lt;</code>, <code>=</code>). The tokeniser must look ahead and take the <strong>longest</strong> match, a rule called <strong>maximal munch</strong>: <code>&lt;=</code> is one token, never <code>&lt;</code> followed by <code>=</code>.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d2-step7" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Step 7: operators</div><div class="pc-prompt"><p>Write <code>read_operator(cursor)</code>: read one of the two-character operators in <code>TWO_CHAR</code> (<code>==</code>, <code>!=</code>, <code>&lt;=</code>, <code>&gt;=</code>) if the next two characters make one, otherwise one of the single characters in <code>ONE_CHAR</code>, and return an <code>OP</code> token whose text and value are the operator. Anything else is a <code>LexError(f"unexpected character {ch!r}")</code> at that position. (<code>!</code> on its own isn&rsquo;t a Tiny operator: <code>not</code> is a keyword.)</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_operator(cursor):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_operators():
+    &quot;one and two characters&quot;
+    c = Cursor(&quot;&lt;=3&quot;)
+    assert read_operator(c) == Token(&quot;OP&quot;, &quot;&lt;=&quot;, &quot;&lt;=&quot;, 1, 1) and c.peek() == &quot;3&quot;
+    c = Cursor(&quot;= =&quot;)
+    assert read_operator(c).text == &quot;=&quot; and c.peek() == &quot; &quot;
+    assert read_operator(Cursor(&quot;==&quot;)).text == &quot;==&quot; and read_operator(Cursor(&quot;!=&quot;)).text == &quot;!=&quot;
+    assert [read_operator(Cursor(ch)).text for ch in &quot;+-*/%&lt;&gt;(){},;&quot;] == list(&quot;+-*/%&lt;&gt;(){},;&quot;)
+    for bad in (&quot;@&quot;, &quot;!&quot;, &quot;&amp;&quot;):
+        try:
+            read_operator(Cursor(bad))
+            assert False
+        except LexError as e:
+            assert e.message == f&quot;unexpected character {bad!r}&quot; and (e.line, e.column) == (1, 1)</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+
+
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_operator(cursor):
+    line, column = cursor.line, cursor.column
+    pair = cursor.peek() + cursor.peek(1)
+    if pair in TWO_CHAR:
+        cursor.advance()
+        cursor.advance()
+        return Token(&quot;OP&quot;, pair, pair, line, column)
+    ch = cursor.peek()
+    if ch in ONE_CHAR:
+        cursor.advance()
+        return Token(&quot;OP&quot;, ch, ch, line, column)
+    raise LexError(f&quot;unexpected character {ch!r}&quot;, line, column)</textarea></div>
+<h2 id="step-8-space-and-comments">Step 8: space and comments</h2>
+<p>Whitespace and comments separate tokens but aren&rsquo;t tokens themselves. The cursor still has to pass through them, though, so that line and column numbers stay right.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d2-step8" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Step 8: space and comments</div><div class="pc-prompt"><p>Write <code>skip_space_and_comments(cursor)</code>: move the cursor past any spaces, tabs, carriage returns and newlines, and past comments (from <code>#</code> to the end of the line, not including the newline, which is then skipped as space), stopping at the first character that&rsquo;s part of a token, or at the end.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+
+def skip_space_and_comments(cursor):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_skip():
+    &quot;skipping what isn&#x27;t a token&quot;
+    c = Cursor(&quot;   \t\n  # a comment\n\n  let&quot;)
+    skip_space_and_comments(c)
+    assert c.peek() == &quot;l&quot; and (c.line, c.column) == (4, 3)
+    c = Cursor(&quot;# only a comment&quot;)
+    skip_space_and_comments(c)
+    assert c.at_end()
+    c = Cursor(&quot;x # trailing&quot;)
+    skip_space_and_comments(c)
+    assert c.peek() == &quot;x&quot;
+    c = Cursor(&quot;&quot;)
+    skip_space_and_comments(c)
+    assert c.at_end()</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+def skip_space_and_comments(cursor):
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch in &quot; \t\r\n&quot;:
+            cursor.advance()
+        elif ch == &quot;#&quot;:
+            while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+                cursor.advance()
+        else:
+            return</textarea></div>
+<h2 id="step-9-the-tokeniser">Step 9: the tokeniser</h2>
+<p>Now the loop that ties it together. The next character decides what kind of token starts here, and each reader leaves the cursor just after its token, ready for the next one. The <code>EOF</code> token at the end saves the parser from checking &ldquo;have I run out?&rdquo; everywhere: it can always look at the next token.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d2-step9" data-points="20"><div class="pc-label"><span>Exercise</span><span class="pc-pts">20 points</span></div><div class="pc-title">Step 9: the tokeniser</div><div class="pc-prompt"><p>Write <code>tokenize(source)</code>: a list of every token in the source, in order, using the functions from the earlier steps (given): skip space and comments; at the end, add an <code>EOF</code> token (text <code>""</code>, value <code>None</code>) at the cursor&rsquo;s position and stop; otherwise choose the reader by the next character: a digit starts a number, <code>"</code> a string, a letter or underscore a name, and anything else an operator.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+
+
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_name(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isalnum() or cursor.peek() == &quot;_&quot;:
+        text += cursor.advance()
+    if text in KEYWORDS:
+        value = {&quot;true&quot;: True, &quot;false&quot;: False, &quot;nil&quot;: None}.get(text)
+        return Token(text.upper(), text, value, line, column)
+    return Token(&quot;NAME&quot;, text, text, line, column)
+
+
+def read_operator(cursor):
+    line, column = cursor.line, cursor.column
+    pair = cursor.peek() + cursor.peek(1)
+    if pair in TWO_CHAR:
+        cursor.advance()
+        cursor.advance()
+        return Token(&quot;OP&quot;, pair, pair, line, column)
+    ch = cursor.peek()
+    if ch in ONE_CHAR:
+        cursor.advance()
+        return Token(&quot;OP&quot;, ch, ch, line, column)
+    raise LexError(f&quot;unexpected character {ch!r}&quot;, line, column)
+
+
+def skip_space_and_comments(cursor):
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch in &quot; \t\r\n&quot;:
+            cursor.advance()
+        elif ch == &quot;#&quot;:
+            while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+                cursor.advance()
+        else:
+            return
+
+
+def tokenize(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_tokenize():
+    &quot;the whole tokeniser&quot;
+    toks = tokenize(&#x27;let x = 3.5;  # set x\nprint &quot;hi&quot; + str(x) &lt;= 4;&#x27;)
+    assert [t.kind for t in toks] == [&quot;LET&quot;, &quot;NAME&quot;, &quot;OP&quot;, &quot;NUMBER&quot;, &quot;OP&quot;, &quot;PRINT&quot;, &quot;STRING&quot;, &quot;OP&quot;,
+                                      &quot;NAME&quot;, &quot;OP&quot;, &quot;NAME&quot;, &quot;OP&quot;, &quot;OP&quot;, &quot;NUMBER&quot;, &quot;OP&quot;, &quot;EOF&quot;]
+    assert [t.text for t in toks[5:9]] == [&quot;print&quot;, &#x27;&quot;hi&quot;&#x27;, &quot;+&quot;, &quot;str&quot;]
+    assert (toks[5].line, toks[5].column) == (2, 1) and toks[-1] == Token(&quot;EOF&quot;, &quot;&quot;, None, 2, 26)
+    assert tokenize(&quot;&quot;) == [Token(&quot;EOF&quot;, &quot;&quot;, None, 1, 1)]
+    assert [t.kind for t in tokenize(&quot;if(not done)&quot;)] == [&quot;IF&quot;, &quot;OP&quot;, &quot;NOT&quot;, &quot;NAME&quot;, &quot;OP&quot;, &quot;EOF&quot;]
+    try:
+        tokenize(&quot;let y = 3 @ 4;&quot;)
+        assert False
+    except LexError as e:
+        assert (e.line, e.column) == (1, 11)</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+
+
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_name(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isalnum() or cursor.peek() == &quot;_&quot;:
+        text += cursor.advance()
+    if text in KEYWORDS:
+        value = {&quot;true&quot;: True, &quot;false&quot;: False, &quot;nil&quot;: None}.get(text)
+        return Token(text.upper(), text, value, line, column)
+    return Token(&quot;NAME&quot;, text, text, line, column)
+
+
+def read_operator(cursor):
+    line, column = cursor.line, cursor.column
+    pair = cursor.peek() + cursor.peek(1)
+    if pair in TWO_CHAR:
+        cursor.advance()
+        cursor.advance()
+        return Token(&quot;OP&quot;, pair, pair, line, column)
+    ch = cursor.peek()
+    if ch in ONE_CHAR:
+        cursor.advance()
+        return Token(&quot;OP&quot;, ch, ch, line, column)
+    raise LexError(f&quot;unexpected character {ch!r}&quot;, line, column)
+
+
+def skip_space_and_comments(cursor):
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch in &quot; \t\r\n&quot;:
+            cursor.advance()
+        elif ch == &quot;#&quot;:
+            while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+                cursor.advance()
+        else:
+            return
+
+def tokenize(source):
+    cursor = Cursor(source)
+    tokens = []
+    while True:
+        skip_space_and_comments(cursor)
+        if cursor.at_end():
+            tokens.append(Token(&quot;EOF&quot;, &quot;&quot;, None, cursor.line, cursor.column))
+            return tokens
+        ch = cursor.peek()
+        if ch.isdigit():
+            tokens.append(read_number(cursor))
+        elif ch == &#x27;&quot;&#x27;:
+            tokens.append(read_string(cursor))
+        elif ch.isalpha() or ch == &quot;_&quot;:
+            tokens.append(read_name(cursor))
+        else:
+            tokens.append(read_operator(cursor))</textarea></div>
+<h2 id="step-10-every-error-at-once">Step 10: every error at once</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d2-step10" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Step 10: every error at once</div><div class="pc-prompt"><p>Stopping at the first error makes people fix their code one problem at a time. Write <code>tokenize_all(source)</code>, which returns <code>(tokens, errors)</code>: it works like <code>tokenize</code>, but when reading a token raises a <code>LexError</code>, it records the error and <strong>recovers</strong>: after an unexpected character, it skips that one character; after an unterminated string, it skips to the end of that line; after an unknown escape, it skips past the rest of the string (to the next unescaped <code>"</code> on the same line, or the end of the line). It always ends with an <code>EOF</code> token. Then <code>summary(errors)</code>: one line per error, <code>"line L, column C: message"</code>, joined with newlines.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+
+
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_name(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isalnum() or cursor.peek() == &quot;_&quot;:
+        text += cursor.advance()
+    if text in KEYWORDS:
+        value = {&quot;true&quot;: True, &quot;false&quot;: False, &quot;nil&quot;: None}.get(text)
+        return Token(text.upper(), text, value, line, column)
+    return Token(&quot;NAME&quot;, text, text, line, column)
+
+
+def read_operator(cursor):
+    line, column = cursor.line, cursor.column
+    pair = cursor.peek() + cursor.peek(1)
+    if pair in TWO_CHAR:
+        cursor.advance()
+        cursor.advance()
+        return Token(&quot;OP&quot;, pair, pair, line, column)
+    ch = cursor.peek()
+    if ch in ONE_CHAR:
+        cursor.advance()
+        return Token(&quot;OP&quot;, ch, ch, line, column)
+    raise LexError(f&quot;unexpected character {ch!r}&quot;, line, column)
+
+
+def skip_space_and_comments(cursor):
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch in &quot; \t\r\n&quot;:
+            cursor.advance()
+        elif ch == &quot;#&quot;:
+            while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+                cursor.advance()
+        else:
+            return
+
+def tokenize(source):
+    cursor = Cursor(source)
+    tokens = []
+    while True:
+        skip_space_and_comments(cursor)
+        if cursor.at_end():
+            tokens.append(Token(&quot;EOF&quot;, &quot;&quot;, None, cursor.line, cursor.column))
+            return tokens
+        ch = cursor.peek()
+        if ch.isdigit():
+            tokens.append(read_number(cursor))
+        elif ch == &#x27;&quot;&#x27;:
+            tokens.append(read_string(cursor))
+        elif ch.isalpha() or ch == &quot;_&quot;:
+            tokens.append(read_name(cursor))
+        else:
+            tokens.append(read_operator(cursor))
+
+
+def tokenize_all(source):
+    ___
+
+def summary(errors):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_recovery():
+    &quot;error recovery&quot;
+    toks, errors = tokenize_all(&#x27;let a = 1 @ 2;\nprint &quot;oops\nlet b = 3 $;\nprint &quot;x\\q&quot; + a;&#x27;)
+    assert [str(e) for e in errors] == [&quot;line 1, column 11: unexpected character &#x27;@&#x27;&quot;,
+                                        &quot;line 2, column 7: unterminated string&quot;,
+                                        &quot;line 3, column 11: unexpected character &#x27;$&#x27;&quot;,
+                                        r&quot;line 4, column 9: unknown escape \q&quot;]
+    kinds = [t.kind for t in toks]
+    assert kinds[:6] == [&quot;LET&quot;, &quot;NAME&quot;, &quot;OP&quot;, &quot;NUMBER&quot;, &quot;NUMBER&quot;, &quot;OP&quot;] and kinds[-1] == &quot;EOF&quot;
+    assert kinds[-5:] == [&quot;PRINT&quot;, &quot;OP&quot;, &quot;NAME&quot;, &quot;OP&quot;, &quot;EOF&quot;] and kinds.count(&quot;PRINT&quot;) == 2
+    assert summary(errors).count(&quot;\n&quot;) == 3 and summary([]) == &quot;&quot;
+    good, none = tokenize_all(&quot;print 1;&quot;)
+    assert none == [] and good == tokenize(&quot;print 1;&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+
+
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_name(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isalnum() or cursor.peek() == &quot;_&quot;:
+        text += cursor.advance()
+    if text in KEYWORDS:
+        value = {&quot;true&quot;: True, &quot;false&quot;: False, &quot;nil&quot;: None}.get(text)
+        return Token(text.upper(), text, value, line, column)
+    return Token(&quot;NAME&quot;, text, text, line, column)
+
+
+def read_operator(cursor):
+    line, column = cursor.line, cursor.column
+    pair = cursor.peek() + cursor.peek(1)
+    if pair in TWO_CHAR:
+        cursor.advance()
+        cursor.advance()
+        return Token(&quot;OP&quot;, pair, pair, line, column)
+    ch = cursor.peek()
+    if ch in ONE_CHAR:
+        cursor.advance()
+        return Token(&quot;OP&quot;, ch, ch, line, column)
+    raise LexError(f&quot;unexpected character {ch!r}&quot;, line, column)
+
+
+def skip_space_and_comments(cursor):
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch in &quot; \t\r\n&quot;:
+            cursor.advance()
+        elif ch == &quot;#&quot;:
+            while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+                cursor.advance()
+        else:
+            return
+
+def tokenize(source):
+    cursor = Cursor(source)
+    tokens = []
+    while True:
+        skip_space_and_comments(cursor)
+        if cursor.at_end():
+            tokens.append(Token(&quot;EOF&quot;, &quot;&quot;, None, cursor.line, cursor.column))
+            return tokens
+        ch = cursor.peek()
+        if ch.isdigit():
+            tokens.append(read_number(cursor))
+        elif ch == &#x27;&quot;&#x27;:
+            tokens.append(read_string(cursor))
+        elif ch.isalpha() or ch == &quot;_&quot;:
+            tokens.append(read_name(cursor))
+        else:
+            tokens.append(read_operator(cursor))
+
+
+def _skip_rest_of_line(cursor):
+    while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+        cursor.advance()
+
+
+def _skip_rest_of_string(cursor):
+    while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+        ch = cursor.advance()
+        if ch == &quot;\\&quot; and not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+            cursor.advance()
+        elif ch == &#x27;&quot;&#x27;:
+            return
+
+
+def tokenize_all(source):
+    cursor = Cursor(source)
+    tokens, errors = [], []
+    while True:
+        skip_space_and_comments(cursor)
+        if cursor.at_end():
+            tokens.append(Token(&quot;EOF&quot;, &quot;&quot;, None, cursor.line, cursor.column))
+            return tokens, errors
+        ch = cursor.peek()
+        try:
+            if ch.isdigit():
+                tokens.append(read_number(cursor))
+            elif ch == &#x27;&quot;&#x27;:
+                tokens.append(read_string(cursor))
+            elif ch.isalpha() or ch == &quot;_&quot;:
+                tokens.append(read_name(cursor))
+            else:
+                tokens.append(read_operator(cursor))
+        except LexError as e:
+            errors.append(e)
+            if e.message == &quot;unterminated string&quot;:
+                _skip_rest_of_line(cursor)
+            elif e.message.startswith(&quot;unknown escape&quot;):
+                _skip_rest_of_string(cursor)
+            else:
+                cursor.advance()
+
+
+def summary(errors):
+    return &quot;\n&quot;.join(str(e) for e in errors)</textarea><template class="pc-src pc-hint">Wrap the reader call in <code>try</code>/<code>except LexError</code>. <code>read_string</code> raises with the cursor somewhere inside the string, so recovery has to move it on itself: write two small helpers, one that skips to the end of the line and one that skips to just after the string&rsquo;s closing quote.</template></div>
+<h2 id="checkpoint">Checkpoint</h2>
+<p>The finished tokeniser on a whole program, printed as a table:</p>
+<div class="pc pc-example" data-kind="example" data-id="w069d2-e1"><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+
+
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_name(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isalnum() or cursor.peek() == &quot;_&quot;:
+        text += cursor.advance()
+    if text in KEYWORDS:
+        value = {&quot;true&quot;: True, &quot;false&quot;: False, &quot;nil&quot;: None}.get(text)
+        return Token(text.upper(), text, value, line, column)
+    return Token(&quot;NAME&quot;, text, text, line, column)
+
+
+def read_operator(cursor):
+    line, column = cursor.line, cursor.column
+    pair = cursor.peek() + cursor.peek(1)
+    if pair in TWO_CHAR:
+        cursor.advance()
+        cursor.advance()
+        return Token(&quot;OP&quot;, pair, pair, line, column)
+    ch = cursor.peek()
+    if ch in ONE_CHAR:
+        cursor.advance()
+        return Token(&quot;OP&quot;, ch, ch, line, column)
+    raise LexError(f&quot;unexpected character {ch!r}&quot;, line, column)
+
+
+def skip_space_and_comments(cursor):
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch in &quot; \t\r\n&quot;:
+            cursor.advance()
+        elif ch == &quot;#&quot;:
+            while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+                cursor.advance()
+        else:
+            return
+
+def tokenize(source):
+    cursor = Cursor(source)
+    tokens = []
+    while True:
+        skip_space_and_comments(cursor)
+        if cursor.at_end():
+            tokens.append(Token(&quot;EOF&quot;, &quot;&quot;, None, cursor.line, cursor.column))
+            return tokens
+        ch = cursor.peek()
+        if ch.isdigit():
+            tokens.append(read_number(cursor))
+        elif ch == &#x27;&quot;&#x27;:
+            tokens.append(read_string(cursor))
+        elif ch.isalpha() or ch == &quot;_&quot;:
+            tokens.append(read_name(cursor))
+        else:
+            tokens.append(read_operator(cursor))
+
+
+program = &quot;&quot;&quot;fn square(n) {
+    return n * n;   # times itself
+}
+print square(4) &gt;= 16;
+&quot;&quot;&quot;
+for tok in tokenize(program):
+    print(f&quot;{tok.line}:{tok.column:&lt;3} {tok.kind:7} {tok.text!r}&quot;)</textarea></div>
+<aside class="callout c-think"><div class="callout-t">One job per stage</div><p>The tokeniser decides nothing about meaning. It doesn&rsquo;t know that <code>let</code> must be followed by a name, or that <code>(</code> needs a matching <code>)</code>. That&rsquo;s deliberate: each stage of the pipeline does one job, which makes each one small enough to test completely on its own. Tomorrow&rsquo;s parser can then assume its input is a clean list of tokens, each with a kind, a value and a position, and concentrate entirely on grammar.</p></aside>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w069d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "How does the tokeniser tell a keyword from a name?", "answer": 1, "explain": "Keywords get their own token kinds.", "options": ["By capital letters", "It reads the word, then looks it up in the set of keywords", "By position", "It doesn&rsquo;t"]}, {"type": "mc", "q": "Why give each keyword its own token kind?", "answer": 1, "explain": "Grammar code becomes simpler.", "options": ["Speed of the tokeniser", "The parser can then ask simply whether the next token is, say, WHILE", "Python requires it", "To save memory"]}, {"type": "mc", "q": "What is maximal munch?", "answer": 1, "explain": "Look ahead before deciding.", "options": ["Eating spaces", "Taking the longest possible token, so &lt;= is one token", "Skipping comments", "Recovering from errors"]}, {"type": "mc", "q": "Why must skipping spaces go through the cursor?", "answer": 1, "explain": "Positions are counted as characters pass.", "options": ["It needn&rsquo;t", "So line and column numbers stay correct", "For speed", "To remove comments"]}, {"type": "mc", "q": "How does tokenize choose which reader to use?", "answer": 1, "explain": "Each kind of token starts differently.", "options": ["By trying each in turn", "By the next character: digit, quote, letter, or other", "By the previous token", "Randomly"]}, {"type": "mc", "q": "Why end the token list with EOF?", "answer": 1, "explain": "A sentinel.", "options": ["Tradition", "The parser can always look at the next token without checking for the end", "To mark errors", "It&rsquo;s a keyword"]}, {"type": "mc", "q": "What does error recovery do?", "answer": 1, "explain": "One run reports every problem.", "options": ["Fixes the code", "Records an error and skips enough to carry on, so later errors are found too", "Stops at once", "Ignores errors"]}, {"type": "mc", "q": "After an unterminated string, where does recovery restart?", "answer": 1, "explain": "Strings can&rsquo;t span lines in Tiny.", "options": ["At the next character", "At the end of that line", "At the end of the file", "At the start"]}, {"type": "mc", "q": "Why doesn&rsquo;t the tokeniser check that brackets match?", "answer": 1, "explain": "One job per stage.", "options": ["It can&rsquo;t count", "That&rsquo;s grammar, the parser&rsquo;s job", "Brackets don&rsquo;t matter", "It does"]}, {"type": "output", "q": "What does this print?", "answer": "['LET', 'NAME', 'IF', 'NAME']", "explain": "Whole words only.", "code": "KEYWORDS = {\"if\", \"let\"}\nwords = \"let letter if iffy\".split()\nprint([w.upper() if w in KEYWORDS else \"NAME\" for w in words])"}]</script></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Run your tokeniser in your head on <code>if(x&lt;=-1)print"neg";</code> (no spaces): which tokens come out, and does any of them depend on maximal munch? Tomorrow: the parser, which turns these tokens into a syntax tree.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w069d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w069d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w069d2", "week": 69, "day": 2, "title": "Project: tokeniser", "exercises": [{"id": "w069d2-step6", "title": "Step 6: names and keywords", "points": 10}, {"id": "w069d2-step7", "title": "Step 7: operators", "points": 15}, {"id": "w069d2-step8", "title": "Step 8: space and comments", "points": 10}, {"id": "w069d2-step9", "title": "Step 9: the tokeniser", "points": 20}, {"id": "w069d2-step10", "title": "Step 10: every error at once", "points": 15}], "points": 70}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>

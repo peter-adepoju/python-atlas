@@ -1,0 +1,4722 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 69 Day 4: Project: evaluator | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="The tokeniser and parser turn Tiny source into a syntax tree. Today the tree comes to life. The evaluator walks it: expressions compute values, statements...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w069d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 69 Day 4: Project: evaluator">
+<meta property="og:description" content="The tokeniser and parser turn Tiny source into a syntax tree. Today the tree comes to life. The evaluator walks it: expressions compute values, statements...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w069d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-69">Week 69: Consolidation project</a>
+      <ol class="rail-toc"><li><a href="#where-we-are" data-sec="where-we-are">Where we are</a></li><li><a href="#step-16-environments" data-sec="step-16-environments">Step 16: environments</a></li><li><a href="#step-17-values-and-truth" data-sec="step-17-values-and-truth">Step 17: values and truth</a></li><li><a href="#step-18-evaluating-expressions" data-sec="step-18-evaluating-expressions">Step 18: evaluating expressions</a></li><li><a href="#step-19-running-statements" data-sec="step-19-running-statements">Step 19: running statements</a></li><li><a href="#step-20-functions-and-closures" data-sec="step-20-functions-and-closures">Step 20: functions and closures</a></li><li><a href="#checkpoint" data-sec="checkpoint">Checkpoint</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w069d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-69">Week 69: Consolidation project</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 69, Day 4</span></p>
+      <h1>Project: evaluator</h1>
+      <div class="day-intro"><p>The tokeniser and parser turn Tiny source into a syntax tree. Today the tree comes to life. The <strong>evaluator</strong> walks it: expressions compute values, statements change variables and print, and functions become <strong>closures</strong> that remember where they were defined. It&rsquo;s a <strong>tree-walking interpreter</strong>, the simplest kind there is (CPython instead compiles to bytecode first, Week 64), and by the end of today it runs every program in Monday&rsquo;s brief.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Keep variables in a chain of environments, one per scope</li><li>Define Tiny&rsquo;s values, truth and printed forms on top of Python&rsquo;s</li><li>Evaluate expressions with type checks and runtime errors that carry lines</li><li>Execute statements, blocks, if and while</li><li>Implement functions as closures, with return and a recursion limit</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 55 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:15" title="Where we are: 15 min"></span><span class="plan-seg s1" style="flex:20" title="Step 16: environments: 20 min"></span><span class="plan-seg s0" style="flex:15" title="Step 17: values and truth: 15 min"></span><span class="plan-seg s1" style="flex:30" title="Step 18: evaluating expressions: 30 min"></span><span class="plan-seg s0" style="flex:25" title="Step 19: running statements: 25 min"></span><span class="plan-seg s1" style="flex:35" title="Step 20: functions and closures: 35 min"></span><span class="plan-seg s0" style="flex:20" title="Checkpoint: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Quiz: 15 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Where we are</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:15</span><span class="plan-what">Step 16: environments</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Step 17: values and truth</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Step 18: evaluating expressions</span><span class="plan-min">30 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Step 19: running statements</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:45</span><span class="plan-what">Step 20: functions and closures</span><span class="plan-min">35 min</span></li><li><span class="plan-at">2:20</span><span class="plan-what">Checkpoint</span><span class="plan-min">20 min</span></li><li><span class="plan-at">2:40</span><span class="plan-what">Quiz</span><span class="plan-min">15 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w069d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w069d4.ipynb" download>download it</a>. Exercises today are worth 85 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="where-we-are">Where we are</h2>
+<p>The front end is finished: <code>parse(source)</code> gives a list of statement nodes. The evaluator needs four small classes besides itself, given here so the exercises can concentrate on the logic:</p>
+<div class="filebox"><div class="filebox-head">The file used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>tiny_runtime.py</code></summary><pre class="pc-filetext">class Environment:
+    def __init__(self, parent=None):
+        self.values, self.parent = {}, parent
+
+    def define(self, name, value):
+        self.values[name] = value
+
+    def find(self, name):
+        env = self
+        while env is not None:
+            if name in env.values:
+                return env
+            env = env.parent
+        return None
+
+    def get(self, name, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;undefined name {name!r}&quot;, line)
+        return env.values[name]
+
+    def assign(self, name, value, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;cannot assign to undefined name {name!r}&quot;, line)
+        env.values[name] = value
+
+
+class ReturnSignal(Exception):
+    def __init__(self, value):
+        self.value = value
+
+
+class TinyFunction:
+    def __init__(self, decl, closure):
+        self.decl, self.closure = decl, closure
+
+    def __repr__(self):
+        return f&quot;&lt;fn {self.decl.name}&gt;&quot;
+
+
+class Builtin:
+    def __init__(self, name, arity, func):
+        self.name, self.arity, self.func = name, arity, func
+
+    def __repr__(self):
+        return f&quot;&lt;builtin {self.name}&gt;&quot;
+</pre></details><script type="application/json" class="page-files">{"tiny_runtime.py": "class Environment:\n    def __init__(self, parent=None):\n        self.values, self.parent = {}, parent\n\n    def define(self, name, value):\n        self.values[name] = value\n\n    def find(self, name):\n        env = self\n        while env is not None:\n            if name in env.values:\n                return env\n            env = env.parent\n        return None\n\n    def get(self, name, line=None):\n        env = self.find(name)\n        if env is None:\n            raise TinyRuntimeError(f\"undefined name {name!r}\", line)\n        return env.values[name]\n\n    def assign(self, name, value, line=None):\n        env = self.find(name)\n        if env is None:\n            raise TinyRuntimeError(f\"cannot assign to undefined name {name!r}\", line)\n        env.values[name] = value\n\n\nclass ReturnSignal(Exception):\n    def __init__(self, value):\n        self.value = value\n\n\nclass TinyFunction:\n    def __init__(self, decl, closure):\n        self.decl, self.closure = decl, closure\n\n    def __repr__(self):\n        return f\"<fn {self.decl.name}>\"\n\n\nclass Builtin:\n    def __init__(self, name, arity, func):\n        self.name, self.arity, self.func = name, arity, func\n\n    def __repr__(self):\n        return f\"<builtin {self.name}>\"\n"}</script></div>
+<p>A <code>TinyFunction</code> is a function&rsquo;s declaration plus the environment it was created in. A <code>Builtin</code> wraps a Python function so Tiny can call it. And <code>ReturnSignal</code> is an exception used for something that isn&rsquo;t an error: a <code>return</code> statement deep inside nested blocks and loops must jump straight out to the function call, and raising an exception is the simplest way to unwind all the Python calls in between.</p>
+<h2 id="step-16-environments">Step 16: environments</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d4-step16" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Step 16: environments</div><div class="pc-prompt"><p>Variables live in <strong>environments</strong>, one per scope, each linked to the one around it. Write <code>Environment(parent=None)</code> with a dict <code>values</code>: <code>define(name, value)</code> creates or replaces a variable <strong>in this scope</strong>; <code>find(name)</code> returns the nearest environment (this one, or a parent, grandparent&hellip;) that has the name, or <code>None</code>; <code>get(name, line=None)</code> returns the value from the nearest scope that has it, raising <code>TinyRuntimeError(f"undefined name {name!r}", line)</code> otherwise; and <code>assign(name, value, line=None)</code> changes the variable <strong>where it was defined</strong>, raising <code>TinyRuntimeError(f"cannot assign to undefined name {name!r}", line)</code> if there&rsquo;s no such variable.</p></div><textarea class="pc-src pc-code" hidden>class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+class Environment:
+    def __init__(self, parent=None):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_environments():
+    &quot;scopes&quot;
+    outer = Environment()
+    outer.define(&quot;x&quot;, 1)
+    inner = Environment(outer)
+    inner.define(&quot;y&quot;, 2)
+    assert inner.get(&quot;x&quot;) == 1 and inner.get(&quot;y&quot;) == 2 and inner.find(&quot;x&quot;) is outer and inner.find(&quot;z&quot;) is None
+    inner.assign(&quot;x&quot;, 10)
+    assert outer.get(&quot;x&quot;) == 10 and &quot;x&quot; not in inner.values
+    inner.define(&quot;x&quot;, 99)
+    assert inner.get(&quot;x&quot;) == 99 and outer.get(&quot;x&quot;) == 10
+    for action, message in ((lambda: outer.get(&quot;y&quot;, 4), &quot;undefined name &#x27;y&#x27;&quot;),
+                            (lambda: inner.assign(&quot;z&quot;, 1, 7), &quot;cannot assign to undefined name &#x27;z&#x27;&quot;)):
+        try:
+            action()
+            assert False
+        except TinyRuntimeError as e:
+            assert e.message == message
+    try:
+        outer.get(&quot;nope&quot;, 4)
+    except TinyRuntimeError as e:
+        assert str(e) == &quot;line 4: undefined name &#x27;nope&#x27;&quot;</textarea><textarea class="pc-src pc-solution" hidden>class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+class Environment:
+    def __init__(self, parent=None):
+        self.values, self.parent = {}, parent
+
+    def define(self, name, value):
+        self.values[name] = value
+
+    def find(self, name):
+        env = self
+        while env is not None:
+            if name in env.values:
+                return env
+            env = env.parent
+        return None
+
+    def get(self, name, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;undefined name {name!r}&quot;, line)
+        return env.values[name]
+
+    def assign(self, name, value, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;cannot assign to undefined name {name!r}&quot;, line)
+        env.values[name] = value</textarea></div>
+<h2 id="step-17-values-and-truth">Step 17: values and truth</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d4-step17" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Step 17: values and truth</div><div class="pc-prompt"><p>Tiny values are Python values underneath: numbers are <code>int</code> or <code>float</code>, strings <code>str</code>, <code>true</code>/<code>false</code> are <code>True</code>/<code>False</code>, <code>nil</code> is <code>None</code>. Write <code>truthy(value)</code> (only <code>nil</code> and <code>false</code> are false: <code>0</code> and <code>""</code> are true, unlike Python); <code>show(value)</code> (how <code>print</code> writes it: <code>nil</code>, <code>true</code>, <code>false</code>, whole floats without <code>.0</code> such as <code>6.0</code> as <code>6</code>, and anything else with <code>str</code>); <code>type_name(value)</code> (<code>"nil"</code>, <code>"bool"</code>, <code>"number"</code>, <code>"string"</code> or <code>"function"</code>); and <code>is_number(value)</code> (an <code>int</code> or <code>float</code> but not a <code>bool</code>).</p></div><textarea class="pc-src pc-code" hidden>def truthy(value):
+    ___
+
+def show(value):
+    ___
+
+def type_name(value):
+    ___
+
+def is_number(value):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;Tiny&#x27;s values&quot;
+    assert [truthy(v) for v in (None, False, 0, &quot;&quot;, True, &quot;no&quot;, 0.0)] == [False, False, True, True, True, True, True]
+    assert [show(v) for v in (None, True, False, 6.0, 3.5, 7, &quot;hi&quot;, -2.0)] == [&quot;nil&quot;, &quot;true&quot;, &quot;false&quot;, &quot;6&quot;, &quot;3.5&quot;, &quot;7&quot;, &quot;hi&quot;, &quot;-2&quot;]
+    assert [type_name(v) for v in (None, True, 3, 2.5, &quot;s&quot;, print)] == [&quot;nil&quot;, &quot;bool&quot;, &quot;number&quot;, &quot;number&quot;, &quot;string&quot;, &quot;function&quot;]
+    assert is_number(3) and is_number(1.5) and not is_number(True) and not is_number(&quot;3&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def truthy(value):
+    return value is not None and value is not False
+
+
+def show(value):
+    if value is None:
+        return &quot;nil&quot;
+    if value is True:
+        return &quot;true&quot;
+    if value is False:
+        return &quot;false&quot;
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value)) if abs(value) &lt; 1e16 else str(value)
+    return str(value)
+
+
+def type_name(value):
+    if value is None:
+        return &quot;nil&quot;
+    if isinstance(value, bool):
+        return &quot;bool&quot;
+    if isinstance(value, (int, float)):
+        return &quot;number&quot;
+    if isinstance(value, str):
+        return &quot;string&quot;
+    return &quot;function&quot;
+
+
+def is_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)</textarea></div>
+<h2 id="step-18-evaluating-expressions">Step 18: evaluating expressions</h2>
+<p>The evaluator is one method with a branch per kind of node, each evaluating the node&rsquo;s children first. It&rsquo;s the same post-order walk as Week 64&rsquo;s compiler, but instead of emitting instructions, it computes values directly.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d4-step18" data-points="20"><div class="pc-label"><span>Exercise</span><span class="pc-pts">20 points</span></div><div class="pc-title">Step 18: evaluating expressions</div><div class="pc-prompt"><p>Write the <code>Interpreter</code> methods that compute expressions (calls come in Step 20). <code>evaluate(node, env)</code> adds 1 to <code>self.steps</code> and returns: the value of a <code>Number</code>, <code>String</code> or <code>Literal</code>; a <code>Name</code>&rsquo;s value from the environment (passing the node&rsquo;s line); for <code>Unary</code>, <code>-</code> of a number (otherwise <code>TinyRuntimeError(f"cannot negate {type}")</code>) or <code>not</code> of the operand&rsquo;s truth; for <code>Logical</code>, short-circuiting <code>and</code>/<code>or</code> that return one of the <strong>operand values</strong>, like Python&rsquo;s; and for <code>Binary</code>, the result of <code>binary(node, left, right)</code>. Write <code>binary</code>: <code>==</code> and <code>!=</code> compare type names and values (so <code>1 == true</code> is false); <code>+</code> joins two strings; otherwise both must be numbers (<code>TinyRuntimeError(f"cannot use {op} with {type} and {type}")</code> with the line); <code>/</code> and <code>%</code> by zero raise <code>"division by zero"</code>; <code>/</code> of two ints that divide exactly gives an <code>int</code> (<code>6 / 3</code> is <code>2</code>, <code>7 / 2</code> is <code>3.5</code>); and the rest work as in Python.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+
+
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_name(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isalnum() or cursor.peek() == &quot;_&quot;:
+        text += cursor.advance()
+    if text in KEYWORDS:
+        value = {&quot;true&quot;: True, &quot;false&quot;: False, &quot;nil&quot;: None}.get(text)
+        return Token(text.upper(), text, value, line, column)
+    return Token(&quot;NAME&quot;, text, text, line, column)
+
+
+def read_operator(cursor):
+    line, column = cursor.line, cursor.column
+    pair = cursor.peek() + cursor.peek(1)
+    if pair in TWO_CHAR:
+        cursor.advance()
+        cursor.advance()
+        return Token(&quot;OP&quot;, pair, pair, line, column)
+    ch = cursor.peek()
+    if ch in ONE_CHAR:
+        cursor.advance()
+        return Token(&quot;OP&quot;, ch, ch, line, column)
+    raise LexError(f&quot;unexpected character {ch!r}&quot;, line, column)
+
+
+def skip_space_and_comments(cursor):
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch in &quot; \t\r\n&quot;:
+            cursor.advance()
+        elif ch == &quot;#&quot;:
+            while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+                cursor.advance()
+        else:
+            return
+
+
+def tokenize(source):
+    cursor = Cursor(source)
+    tokens = []
+    while True:
+        skip_space_and_comments(cursor)
+        if cursor.at_end():
+            tokens.append(Token(&quot;EOF&quot;, &quot;&quot;, None, cursor.line, cursor.column))
+            return tokens
+        ch = cursor.peek()
+        if ch.isdigit():
+            tokens.append(read_number(cursor))
+        elif ch == &#x27;&quot;&#x27;:
+            tokens.append(read_string(cursor))
+        elif ch.isalpha() or ch == &quot;_&quot;:
+            tokens.append(read_name(cursor))
+        else:
+            tokens.append(read_operator(cursor))
+
+@dataclass
+class Number:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class String:
+    value: str
+    line: int = 0
+
+
+@dataclass
+class Literal:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Name:
+    name: str
+    line: int = 0
+
+
+@dataclass
+class Unary:
+    op: str
+    operand: object
+    line: int = 0
+
+
+@dataclass
+class Binary:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Logical:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Call:
+    callee: object
+    args: list
+    line: int = 0
+
+
+@dataclass
+class Let:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Assign:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Print:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class ExprStmt:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Block:
+    body: list
+    line: int = 0
+
+
+@dataclass
+class If:
+    test: object
+    then: object
+    otherwise: object
+    line: int = 0
+
+
+@dataclass
+class While:
+    test: object
+    body: object
+    line: int = 0
+
+
+@dataclass
+class Function:
+    name: str
+    params: list
+    body: list
+    line: int = 0
+
+
+@dataclass
+class Return:
+    value: object
+    line: int = 0
+
+class Parser:
+    def __init__(self, tokens):
+        self.tokens, self.pos = tokens, 0
+
+    def peek(self):
+        return self.tokens[self.pos]
+
+    def at(self, kind, text=None):
+        tok = self.peek()
+        return tok.kind == kind and (text is None or tok.text == text)
+
+    def match(self, kind, text=None):
+        if self.at(kind, text):
+            tok = self.peek()
+            self.pos += 1
+            return tok
+        return None
+
+    def expect(self, kind, text=None, what=None):
+        tok = self.match(kind, text)
+        if tok is None:
+            got = self.peek()
+            shown = &quot;end of input&quot; if got.kind == &quot;EOF&quot; else repr(got.text)
+            raise ParseError(f&quot;expected {what or text or kind.lower()}, got {shown}&quot;, got.line, got.column)
+        return tok
+
+    # --- expressions, lowest precedence first ---
+    def expression(self):
+        return self.logic_or()
+
+    def logic_or(self):
+        node = self.logic_and()
+        while self.at(&quot;OR&quot;):
+            line = self.match(&quot;OR&quot;).line
+            node = Logical(&quot;or&quot;, node, self.logic_and(), line)
+        return node
+
+    def logic_and(self):
+        node = self.equality()
+        while self.at(&quot;AND&quot;):
+            line = self.match(&quot;AND&quot;).line
+            node = Logical(&quot;and&quot;, node, self.equality(), line)
+        return node
+
+    def binary(self, operators, operand):
+        node = operand()
+        while self.peek().kind == &quot;OP&quot; and self.peek().text in operators:
+            tok = self.match(&quot;OP&quot;)
+            node = Binary(tok.text, node, operand(), tok.line)
+        return node
+
+    def equality(self):
+        return self.binary({&quot;==&quot;, &quot;!=&quot;}, self.comparison)
+
+    def comparison(self):
+        return self.binary({&quot;&lt;&quot;, &quot;&lt;=&quot;, &quot;&gt;&quot;, &quot;&gt;=&quot;}, self.term)
+
+    def term(self):
+        return self.binary({&quot;+&quot;, &quot;-&quot;}, self.factor)
+
+    def factor(self):
+        return self.binary({&quot;*&quot;, &quot;/&quot;, &quot;%&quot;}, self.unary)
+
+    def unary(self):
+        if self.at(&quot;OP&quot;, &quot;-&quot;):
+            line = self.match(&quot;OP&quot;).line
+            return Unary(&quot;-&quot;, self.unary(), line)
+        if self.at(&quot;NOT&quot;):
+            line = self.match(&quot;NOT&quot;).line
+            return Unary(&quot;not&quot;, self.unary(), line)
+        return self.call()
+
+    def call(self):
+        node = self.primary()
+        while self.at(&quot;OP&quot;, &quot;(&quot;):
+            line = self.match(&quot;OP&quot;).line
+            args = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                args.append(self.expression())
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    args.append(self.expression())
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            node = Call(node, args, line)
+        return node
+
+    def primary(self):
+        tok = self.peek()
+        if self.match(&quot;NUMBER&quot;):
+            return Number(tok.value, tok.line)
+        if self.match(&quot;STRING&quot;):
+            return String(tok.value, tok.line)
+        if tok.kind in (&quot;TRUE&quot;, &quot;FALSE&quot;, &quot;NIL&quot;):
+            self.pos += 1
+            return Literal(tok.value, tok.line)
+        if self.match(&quot;NAME&quot;):
+            return Name(tok.text, tok.line)
+        if self.match(&quot;OP&quot;, &quot;(&quot;):
+            node = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return node
+        shown = &quot;end of input&quot; if tok.kind == &quot;EOF&quot; else repr(tok.text)
+        raise ParseError(f&quot;expected an expression, got {shown}&quot;, tok.line, tok.column)
+
+    # --- statements ---
+    def statement(self):
+        tok = self.peek()
+        if self.match(&quot;LET&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;=&quot;)
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Let(name, value, tok.line)
+        if self.match(&quot;PRINT&quot;):
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Print(value, tok.line)
+        if self.at(&quot;OP&quot;, &quot;{&quot;):
+            return Block(self.block(), tok.line)
+        if self.match(&quot;IF&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            then = self.statement()
+            otherwise = self.statement() if self.match(&quot;ELSE&quot;) else None
+            return If(test, then, otherwise, tok.line)
+        if self.match(&quot;WHILE&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return While(test, self.statement(), tok.line)
+        if self.match(&quot;FN&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a function name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            params = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return Function(name, params, self.block(), tok.line)
+        if self.match(&quot;RETURN&quot;):
+            value = None if self.at(&quot;OP&quot;, &quot;;&quot;) else self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Return(value, tok.line)
+        if tok.kind == &quot;NAME&quot; and self.tokens[self.pos + 1].kind == &quot;OP&quot; and self.tokens[self.pos + 1].text == &quot;=&quot;:
+            self.pos += 2
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Assign(tok.text, value, tok.line)
+        value = self.expression()
+        self.expect(&quot;OP&quot;, &quot;;&quot;)
+        return ExprStmt(value, tok.line)
+
+    def block(self):
+        self.expect(&quot;OP&quot;, &quot;{&quot;)
+        body = []
+        while not self.at(&quot;OP&quot;, &quot;}&quot;):
+            if self.at(&quot;EOF&quot;):
+                tok = self.peek()
+                raise ParseError(&quot;expected &#x27;}&#x27;, got end of input&quot;, tok.line, tok.column)
+            body.append(self.statement())
+        self.expect(&quot;OP&quot;, &quot;}&quot;)
+        return body
+
+    def program(self):
+        body = []
+        while not self.at(&quot;EOF&quot;):
+            body.append(self.statement())
+        return body
+
+
+def parse(source):
+    return Parser(tokenize(source)).program()
+
+
+class Environment:
+    def __init__(self, parent=None):
+        self.values, self.parent = {}, parent
+
+    def define(self, name, value):
+        self.values[name] = value
+
+    def find(self, name):
+        env = self
+        while env is not None:
+            if name in env.values:
+                return env
+            env = env.parent
+        return None
+
+    def get(self, name, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;undefined name {name!r}&quot;, line)
+        return env.values[name]
+
+    def assign(self, name, value, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;cannot assign to undefined name {name!r}&quot;, line)
+        env.values[name] = value
+
+
+class ReturnSignal(Exception):
+    def __init__(self, value):
+        self.value = value
+
+
+class TinyFunction:
+    def __init__(self, decl, closure):
+        self.decl, self.closure = decl, closure
+
+    def __repr__(self):
+        return f&quot;&lt;fn {self.decl.name}&gt;&quot;
+
+
+class Builtin:
+    def __init__(self, name, arity, func):
+        self.name, self.arity, self.func = name, arity, func
+
+    def __repr__(self):
+        return f&quot;&lt;builtin {self.name}&gt;&quot;
+
+def truthy(value):
+    return value is not None and value is not False
+
+
+def show(value):
+    if value is None:
+        return &quot;nil&quot;
+    if value is True:
+        return &quot;true&quot;
+    if value is False:
+        return &quot;false&quot;
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value)) if abs(value) &lt; 1e16 else str(value)
+    return str(value)
+
+
+def type_name(value):
+    if value is None:
+        return &quot;nil&quot;
+    if isinstance(value, bool):
+        return &quot;bool&quot;
+    if isinstance(value, (int, float)):
+        return &quot;number&quot;
+    if isinstance(value, str):
+        return &quot;string&quot;
+    return &quot;function&quot;
+
+
+def is_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+class Interpreter:
+    def __init__(self, output=None):
+        self.output = [] if output is None else output
+        self.globals = Environment()
+        self.steps = 0
+
+    def evaluate(self, node, env):
+        ___
+
+    def binary(self, node, left, right):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_expressions():
+    &quot;expressions&quot;
+    def ev(src, **variables):
+        interp = Interpreter()
+        env = Environment(interp.globals)
+        for k, v in variables.items():
+            env.define(k, v)
+        return interp.evaluate(Parser(tokenize(src)).expression(), env)
+    assert ev(&quot;1 + 2 * 3&quot;) == 7 and ev(&quot;7 / 2&quot;) == 3.5 and ev(&quot;6 / 3&quot;) == 2 and type(ev(&quot;6 / 3&quot;)) is int
+    assert ev(&quot;-x + 10 % 4&quot;, x=3) == -1 and ev(&#x27;&quot;ab&quot; + &quot;cd&quot;&#x27;) == &quot;abcd&quot; and ev(&quot;1.5 * 2&quot;) == 3.0
+    assert ev(&quot;1 == true&quot;) is False and ev(&quot;nil == nil&quot;) is True and ev(&#x27;&quot;a&quot; != &quot;a&quot;&#x27;) is False and ev(&quot;2 &gt;= 2&quot;) is True
+    assert ev(&quot;nil or 5&quot;) == 5 and ev(&quot;0 and 9&quot;) == 9 and ev(&quot;false and boom&quot;) is False and ev(&quot;not 0&quot;) is False
+    interp = Interpreter()
+    interp.evaluate(Parser(tokenize(&quot;1 + 2&quot;)).expression(), interp.globals)
+    assert interp.steps == 3
+    for src, message in ((&quot;1 + \&quot;a\&quot;&quot;, &quot;cannot use + with number and string&quot;), (&quot;-\&quot;x\&quot;&quot;, &quot;cannot negate string&quot;),
+                         (&quot;5 % 0&quot;, &quot;division by zero&quot;), (&quot;y&quot;, &quot;undefined name &#x27;y&#x27;&quot;), (&quot;true &lt; 1&quot;, &quot;cannot use &lt; with bool and number&quot;)):
+        try:
+            ev(src)
+            assert False, src
+        except TinyRuntimeError as e:
+            assert e.message == message and e.line == 1, e.message</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+
+
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_name(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isalnum() or cursor.peek() == &quot;_&quot;:
+        text += cursor.advance()
+    if text in KEYWORDS:
+        value = {&quot;true&quot;: True, &quot;false&quot;: False, &quot;nil&quot;: None}.get(text)
+        return Token(text.upper(), text, value, line, column)
+    return Token(&quot;NAME&quot;, text, text, line, column)
+
+
+def read_operator(cursor):
+    line, column = cursor.line, cursor.column
+    pair = cursor.peek() + cursor.peek(1)
+    if pair in TWO_CHAR:
+        cursor.advance()
+        cursor.advance()
+        return Token(&quot;OP&quot;, pair, pair, line, column)
+    ch = cursor.peek()
+    if ch in ONE_CHAR:
+        cursor.advance()
+        return Token(&quot;OP&quot;, ch, ch, line, column)
+    raise LexError(f&quot;unexpected character {ch!r}&quot;, line, column)
+
+
+def skip_space_and_comments(cursor):
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch in &quot; \t\r\n&quot;:
+            cursor.advance()
+        elif ch == &quot;#&quot;:
+            while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+                cursor.advance()
+        else:
+            return
+
+
+def tokenize(source):
+    cursor = Cursor(source)
+    tokens = []
+    while True:
+        skip_space_and_comments(cursor)
+        if cursor.at_end():
+            tokens.append(Token(&quot;EOF&quot;, &quot;&quot;, None, cursor.line, cursor.column))
+            return tokens
+        ch = cursor.peek()
+        if ch.isdigit():
+            tokens.append(read_number(cursor))
+        elif ch == &#x27;&quot;&#x27;:
+            tokens.append(read_string(cursor))
+        elif ch.isalpha() or ch == &quot;_&quot;:
+            tokens.append(read_name(cursor))
+        else:
+            tokens.append(read_operator(cursor))
+
+@dataclass
+class Number:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class String:
+    value: str
+    line: int = 0
+
+
+@dataclass
+class Literal:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Name:
+    name: str
+    line: int = 0
+
+
+@dataclass
+class Unary:
+    op: str
+    operand: object
+    line: int = 0
+
+
+@dataclass
+class Binary:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Logical:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Call:
+    callee: object
+    args: list
+    line: int = 0
+
+
+@dataclass
+class Let:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Assign:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Print:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class ExprStmt:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Block:
+    body: list
+    line: int = 0
+
+
+@dataclass
+class If:
+    test: object
+    then: object
+    otherwise: object
+    line: int = 0
+
+
+@dataclass
+class While:
+    test: object
+    body: object
+    line: int = 0
+
+
+@dataclass
+class Function:
+    name: str
+    params: list
+    body: list
+    line: int = 0
+
+
+@dataclass
+class Return:
+    value: object
+    line: int = 0
+
+class Parser:
+    def __init__(self, tokens):
+        self.tokens, self.pos = tokens, 0
+
+    def peek(self):
+        return self.tokens[self.pos]
+
+    def at(self, kind, text=None):
+        tok = self.peek()
+        return tok.kind == kind and (text is None or tok.text == text)
+
+    def match(self, kind, text=None):
+        if self.at(kind, text):
+            tok = self.peek()
+            self.pos += 1
+            return tok
+        return None
+
+    def expect(self, kind, text=None, what=None):
+        tok = self.match(kind, text)
+        if tok is None:
+            got = self.peek()
+            shown = &quot;end of input&quot; if got.kind == &quot;EOF&quot; else repr(got.text)
+            raise ParseError(f&quot;expected {what or text or kind.lower()}, got {shown}&quot;, got.line, got.column)
+        return tok
+
+    # --- expressions, lowest precedence first ---
+    def expression(self):
+        return self.logic_or()
+
+    def logic_or(self):
+        node = self.logic_and()
+        while self.at(&quot;OR&quot;):
+            line = self.match(&quot;OR&quot;).line
+            node = Logical(&quot;or&quot;, node, self.logic_and(), line)
+        return node
+
+    def logic_and(self):
+        node = self.equality()
+        while self.at(&quot;AND&quot;):
+            line = self.match(&quot;AND&quot;).line
+            node = Logical(&quot;and&quot;, node, self.equality(), line)
+        return node
+
+    def binary(self, operators, operand):
+        node = operand()
+        while self.peek().kind == &quot;OP&quot; and self.peek().text in operators:
+            tok = self.match(&quot;OP&quot;)
+            node = Binary(tok.text, node, operand(), tok.line)
+        return node
+
+    def equality(self):
+        return self.binary({&quot;==&quot;, &quot;!=&quot;}, self.comparison)
+
+    def comparison(self):
+        return self.binary({&quot;&lt;&quot;, &quot;&lt;=&quot;, &quot;&gt;&quot;, &quot;&gt;=&quot;}, self.term)
+
+    def term(self):
+        return self.binary({&quot;+&quot;, &quot;-&quot;}, self.factor)
+
+    def factor(self):
+        return self.binary({&quot;*&quot;, &quot;/&quot;, &quot;%&quot;}, self.unary)
+
+    def unary(self):
+        if self.at(&quot;OP&quot;, &quot;-&quot;):
+            line = self.match(&quot;OP&quot;).line
+            return Unary(&quot;-&quot;, self.unary(), line)
+        if self.at(&quot;NOT&quot;):
+            line = self.match(&quot;NOT&quot;).line
+            return Unary(&quot;not&quot;, self.unary(), line)
+        return self.call()
+
+    def call(self):
+        node = self.primary()
+        while self.at(&quot;OP&quot;, &quot;(&quot;):
+            line = self.match(&quot;OP&quot;).line
+            args = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                args.append(self.expression())
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    args.append(self.expression())
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            node = Call(node, args, line)
+        return node
+
+    def primary(self):
+        tok = self.peek()
+        if self.match(&quot;NUMBER&quot;):
+            return Number(tok.value, tok.line)
+        if self.match(&quot;STRING&quot;):
+            return String(tok.value, tok.line)
+        if tok.kind in (&quot;TRUE&quot;, &quot;FALSE&quot;, &quot;NIL&quot;):
+            self.pos += 1
+            return Literal(tok.value, tok.line)
+        if self.match(&quot;NAME&quot;):
+            return Name(tok.text, tok.line)
+        if self.match(&quot;OP&quot;, &quot;(&quot;):
+            node = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return node
+        shown = &quot;end of input&quot; if tok.kind == &quot;EOF&quot; else repr(tok.text)
+        raise ParseError(f&quot;expected an expression, got {shown}&quot;, tok.line, tok.column)
+
+    # --- statements ---
+    def statement(self):
+        tok = self.peek()
+        if self.match(&quot;LET&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;=&quot;)
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Let(name, value, tok.line)
+        if self.match(&quot;PRINT&quot;):
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Print(value, tok.line)
+        if self.at(&quot;OP&quot;, &quot;{&quot;):
+            return Block(self.block(), tok.line)
+        if self.match(&quot;IF&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            then = self.statement()
+            otherwise = self.statement() if self.match(&quot;ELSE&quot;) else None
+            return If(test, then, otherwise, tok.line)
+        if self.match(&quot;WHILE&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return While(test, self.statement(), tok.line)
+        if self.match(&quot;FN&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a function name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            params = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return Function(name, params, self.block(), tok.line)
+        if self.match(&quot;RETURN&quot;):
+            value = None if self.at(&quot;OP&quot;, &quot;;&quot;) else self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Return(value, tok.line)
+        if tok.kind == &quot;NAME&quot; and self.tokens[self.pos + 1].kind == &quot;OP&quot; and self.tokens[self.pos + 1].text == &quot;=&quot;:
+            self.pos += 2
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Assign(tok.text, value, tok.line)
+        value = self.expression()
+        self.expect(&quot;OP&quot;, &quot;;&quot;)
+        return ExprStmt(value, tok.line)
+
+    def block(self):
+        self.expect(&quot;OP&quot;, &quot;{&quot;)
+        body = []
+        while not self.at(&quot;OP&quot;, &quot;}&quot;):
+            if self.at(&quot;EOF&quot;):
+                tok = self.peek()
+                raise ParseError(&quot;expected &#x27;}&#x27;, got end of input&quot;, tok.line, tok.column)
+            body.append(self.statement())
+        self.expect(&quot;OP&quot;, &quot;}&quot;)
+        return body
+
+    def program(self):
+        body = []
+        while not self.at(&quot;EOF&quot;):
+            body.append(self.statement())
+        return body
+
+
+def parse(source):
+    return Parser(tokenize(source)).program()
+
+
+class Environment:
+    def __init__(self, parent=None):
+        self.values, self.parent = {}, parent
+
+    def define(self, name, value):
+        self.values[name] = value
+
+    def find(self, name):
+        env = self
+        while env is not None:
+            if name in env.values:
+                return env
+            env = env.parent
+        return None
+
+    def get(self, name, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;undefined name {name!r}&quot;, line)
+        return env.values[name]
+
+    def assign(self, name, value, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;cannot assign to undefined name {name!r}&quot;, line)
+        env.values[name] = value
+
+
+class ReturnSignal(Exception):
+    def __init__(self, value):
+        self.value = value
+
+
+class TinyFunction:
+    def __init__(self, decl, closure):
+        self.decl, self.closure = decl, closure
+
+    def __repr__(self):
+        return f&quot;&lt;fn {self.decl.name}&gt;&quot;
+
+
+class Builtin:
+    def __init__(self, name, arity, func):
+        self.name, self.arity, self.func = name, arity, func
+
+    def __repr__(self):
+        return f&quot;&lt;builtin {self.name}&gt;&quot;
+
+def truthy(value):
+    return value is not None and value is not False
+
+
+def show(value):
+    if value is None:
+        return &quot;nil&quot;
+    if value is True:
+        return &quot;true&quot;
+    if value is False:
+        return &quot;false&quot;
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value)) if abs(value) &lt; 1e16 else str(value)
+    return str(value)
+
+
+def type_name(value):
+    if value is None:
+        return &quot;nil&quot;
+    if isinstance(value, bool):
+        return &quot;bool&quot;
+    if isinstance(value, (int, float)):
+        return &quot;number&quot;
+    if isinstance(value, str):
+        return &quot;string&quot;
+    return &quot;function&quot;
+
+
+def is_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+class Interpreter:
+    def __init__(self, output=None):
+        self.output = [] if output is None else output
+        self.globals = Environment()
+        self.steps = 0
+
+    def evaluate(self, node, env):
+        self.steps += 1
+        if isinstance(node, (Number, String, Literal)):
+            return node.value
+        if isinstance(node, Name):
+            return env.get(node.name, node.line)
+        if isinstance(node, Unary):
+            value = self.evaluate(node.operand, env)
+            if node.op == &quot;-&quot;:
+                if not is_number(value):
+                    raise TinyRuntimeError(f&quot;cannot negate {type_name(value)}&quot;, node.line)
+                return -value
+            return not truthy(value)
+        if isinstance(node, Logical):
+            left = self.evaluate(node.left, env)
+            if node.op == &quot;or&quot;:
+                return left if truthy(left) else self.evaluate(node.right, env)
+            return left if not truthy(left) else self.evaluate(node.right, env)
+        if isinstance(node, Binary):
+            return self.binary(node, self.evaluate(node.left, env), self.evaluate(node.right, env))
+        raise TinyRuntimeError(f&quot;cannot evaluate {type(node).__name__}&quot;, getattr(node, &quot;line&quot;, None))
+
+    def binary(self, node, left, right):
+        op = node.op
+        if op == &quot;==&quot;:
+            return type_name(left) == type_name(right) and left == right
+        if op == &quot;!=&quot;:
+            return not (type_name(left) == type_name(right) and left == right)
+        if op == &quot;+&quot; and isinstance(left, str) and isinstance(right, str):
+            return left + right
+        if not (is_number(left) and is_number(right)):
+            raise TinyRuntimeError(
+                f&quot;cannot use {op} with {type_name(left)} and {type_name(right)}&quot;, node.line)
+        if op in (&quot;/&quot;, &quot;%&quot;) and right == 0:
+            raise TinyRuntimeError(&quot;division by zero&quot;, node.line)
+        if op == &quot;/&quot;:
+            result = left / right
+            return int(result) if isinstance(left, int) and isinstance(right, int) and result.is_integer() else result
+        return {&quot;+&quot;: lambda: left + right, &quot;-&quot;: lambda: left - right, &quot;*&quot;: lambda: left * right,
+                &quot;%&quot;: lambda: left % right, &quot;&lt;&quot;: lambda: left &lt; right, &quot;&lt;=&quot;: lambda: left &lt;= right,
+                &quot;&gt;&quot;: lambda: left &gt; right, &quot;&gt;=&quot;: lambda: left &gt;= right}[op]()</textarea><template class="pc-src pc-hint">For <code>Logical</code>, evaluate the left side first: <code>or</code> returns it if it&rsquo;s truthy, <code>and</code> returns it if it isn&rsquo;t, and only otherwise evaluate and return the right side. <code>type_name</code> from Step 17 is given.</template></div>
+<h2 id="step-19-running-statements">Step 19: running statements</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d4-step19" data-points="20"><div class="pc-label"><span>Exercise</span><span class="pc-pts">20 points</span></div><div class="pc-title">Step 19: running statements</div><div class="pc-prompt"><p>Add statements to the interpreter (expressions are given). <code>execute(node, env)</code> adds 1 to <code>self.steps</code> and handles: <code>Let</code> (define in <code>env</code>), <code>Assign</code> (assign, passing the line), <code>Print</code> (append <code>show(value)</code> to <code>self.output</code>), <code>ExprStmt</code> (evaluate and discard), <code>Block</code> (run its statements in a <strong>new</strong> environment whose parent is <code>env</code>), <code>If</code> (run <code>then</code> if the test is truthy, else <code>otherwise</code> if there is one), and <code>While</code> (repeat the body while the test is truthy). Then <code>run_block(statements, env)</code> runs a list of statements in order, and <code>run(program)</code> runs a whole program in <code>self.globals</code> and returns <code>self.output</code>.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+
+
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_name(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isalnum() or cursor.peek() == &quot;_&quot;:
+        text += cursor.advance()
+    if text in KEYWORDS:
+        value = {&quot;true&quot;: True, &quot;false&quot;: False, &quot;nil&quot;: None}.get(text)
+        return Token(text.upper(), text, value, line, column)
+    return Token(&quot;NAME&quot;, text, text, line, column)
+
+
+def read_operator(cursor):
+    line, column = cursor.line, cursor.column
+    pair = cursor.peek() + cursor.peek(1)
+    if pair in TWO_CHAR:
+        cursor.advance()
+        cursor.advance()
+        return Token(&quot;OP&quot;, pair, pair, line, column)
+    ch = cursor.peek()
+    if ch in ONE_CHAR:
+        cursor.advance()
+        return Token(&quot;OP&quot;, ch, ch, line, column)
+    raise LexError(f&quot;unexpected character {ch!r}&quot;, line, column)
+
+
+def skip_space_and_comments(cursor):
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch in &quot; \t\r\n&quot;:
+            cursor.advance()
+        elif ch == &quot;#&quot;:
+            while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+                cursor.advance()
+        else:
+            return
+
+
+def tokenize(source):
+    cursor = Cursor(source)
+    tokens = []
+    while True:
+        skip_space_and_comments(cursor)
+        if cursor.at_end():
+            tokens.append(Token(&quot;EOF&quot;, &quot;&quot;, None, cursor.line, cursor.column))
+            return tokens
+        ch = cursor.peek()
+        if ch.isdigit():
+            tokens.append(read_number(cursor))
+        elif ch == &#x27;&quot;&#x27;:
+            tokens.append(read_string(cursor))
+        elif ch.isalpha() or ch == &quot;_&quot;:
+            tokens.append(read_name(cursor))
+        else:
+            tokens.append(read_operator(cursor))
+
+@dataclass
+class Number:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class String:
+    value: str
+    line: int = 0
+
+
+@dataclass
+class Literal:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Name:
+    name: str
+    line: int = 0
+
+
+@dataclass
+class Unary:
+    op: str
+    operand: object
+    line: int = 0
+
+
+@dataclass
+class Binary:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Logical:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Call:
+    callee: object
+    args: list
+    line: int = 0
+
+
+@dataclass
+class Let:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Assign:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Print:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class ExprStmt:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Block:
+    body: list
+    line: int = 0
+
+
+@dataclass
+class If:
+    test: object
+    then: object
+    otherwise: object
+    line: int = 0
+
+
+@dataclass
+class While:
+    test: object
+    body: object
+    line: int = 0
+
+
+@dataclass
+class Function:
+    name: str
+    params: list
+    body: list
+    line: int = 0
+
+
+@dataclass
+class Return:
+    value: object
+    line: int = 0
+
+class Parser:
+    def __init__(self, tokens):
+        self.tokens, self.pos = tokens, 0
+
+    def peek(self):
+        return self.tokens[self.pos]
+
+    def at(self, kind, text=None):
+        tok = self.peek()
+        return tok.kind == kind and (text is None or tok.text == text)
+
+    def match(self, kind, text=None):
+        if self.at(kind, text):
+            tok = self.peek()
+            self.pos += 1
+            return tok
+        return None
+
+    def expect(self, kind, text=None, what=None):
+        tok = self.match(kind, text)
+        if tok is None:
+            got = self.peek()
+            shown = &quot;end of input&quot; if got.kind == &quot;EOF&quot; else repr(got.text)
+            raise ParseError(f&quot;expected {what or text or kind.lower()}, got {shown}&quot;, got.line, got.column)
+        return tok
+
+    # --- expressions, lowest precedence first ---
+    def expression(self):
+        return self.logic_or()
+
+    def logic_or(self):
+        node = self.logic_and()
+        while self.at(&quot;OR&quot;):
+            line = self.match(&quot;OR&quot;).line
+            node = Logical(&quot;or&quot;, node, self.logic_and(), line)
+        return node
+
+    def logic_and(self):
+        node = self.equality()
+        while self.at(&quot;AND&quot;):
+            line = self.match(&quot;AND&quot;).line
+            node = Logical(&quot;and&quot;, node, self.equality(), line)
+        return node
+
+    def binary(self, operators, operand):
+        node = operand()
+        while self.peek().kind == &quot;OP&quot; and self.peek().text in operators:
+            tok = self.match(&quot;OP&quot;)
+            node = Binary(tok.text, node, operand(), tok.line)
+        return node
+
+    def equality(self):
+        return self.binary({&quot;==&quot;, &quot;!=&quot;}, self.comparison)
+
+    def comparison(self):
+        return self.binary({&quot;&lt;&quot;, &quot;&lt;=&quot;, &quot;&gt;&quot;, &quot;&gt;=&quot;}, self.term)
+
+    def term(self):
+        return self.binary({&quot;+&quot;, &quot;-&quot;}, self.factor)
+
+    def factor(self):
+        return self.binary({&quot;*&quot;, &quot;/&quot;, &quot;%&quot;}, self.unary)
+
+    def unary(self):
+        if self.at(&quot;OP&quot;, &quot;-&quot;):
+            line = self.match(&quot;OP&quot;).line
+            return Unary(&quot;-&quot;, self.unary(), line)
+        if self.at(&quot;NOT&quot;):
+            line = self.match(&quot;NOT&quot;).line
+            return Unary(&quot;not&quot;, self.unary(), line)
+        return self.call()
+
+    def call(self):
+        node = self.primary()
+        while self.at(&quot;OP&quot;, &quot;(&quot;):
+            line = self.match(&quot;OP&quot;).line
+            args = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                args.append(self.expression())
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    args.append(self.expression())
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            node = Call(node, args, line)
+        return node
+
+    def primary(self):
+        tok = self.peek()
+        if self.match(&quot;NUMBER&quot;):
+            return Number(tok.value, tok.line)
+        if self.match(&quot;STRING&quot;):
+            return String(tok.value, tok.line)
+        if tok.kind in (&quot;TRUE&quot;, &quot;FALSE&quot;, &quot;NIL&quot;):
+            self.pos += 1
+            return Literal(tok.value, tok.line)
+        if self.match(&quot;NAME&quot;):
+            return Name(tok.text, tok.line)
+        if self.match(&quot;OP&quot;, &quot;(&quot;):
+            node = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return node
+        shown = &quot;end of input&quot; if tok.kind == &quot;EOF&quot; else repr(tok.text)
+        raise ParseError(f&quot;expected an expression, got {shown}&quot;, tok.line, tok.column)
+
+    # --- statements ---
+    def statement(self):
+        tok = self.peek()
+        if self.match(&quot;LET&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;=&quot;)
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Let(name, value, tok.line)
+        if self.match(&quot;PRINT&quot;):
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Print(value, tok.line)
+        if self.at(&quot;OP&quot;, &quot;{&quot;):
+            return Block(self.block(), tok.line)
+        if self.match(&quot;IF&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            then = self.statement()
+            otherwise = self.statement() if self.match(&quot;ELSE&quot;) else None
+            return If(test, then, otherwise, tok.line)
+        if self.match(&quot;WHILE&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return While(test, self.statement(), tok.line)
+        if self.match(&quot;FN&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a function name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            params = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return Function(name, params, self.block(), tok.line)
+        if self.match(&quot;RETURN&quot;):
+            value = None if self.at(&quot;OP&quot;, &quot;;&quot;) else self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Return(value, tok.line)
+        if tok.kind == &quot;NAME&quot; and self.tokens[self.pos + 1].kind == &quot;OP&quot; and self.tokens[self.pos + 1].text == &quot;=&quot;:
+            self.pos += 2
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Assign(tok.text, value, tok.line)
+        value = self.expression()
+        self.expect(&quot;OP&quot;, &quot;;&quot;)
+        return ExprStmt(value, tok.line)
+
+    def block(self):
+        self.expect(&quot;OP&quot;, &quot;{&quot;)
+        body = []
+        while not self.at(&quot;OP&quot;, &quot;}&quot;):
+            if self.at(&quot;EOF&quot;):
+                tok = self.peek()
+                raise ParseError(&quot;expected &#x27;}&#x27;, got end of input&quot;, tok.line, tok.column)
+            body.append(self.statement())
+        self.expect(&quot;OP&quot;, &quot;}&quot;)
+        return body
+
+    def program(self):
+        body = []
+        while not self.at(&quot;EOF&quot;):
+            body.append(self.statement())
+        return body
+
+
+def parse(source):
+    return Parser(tokenize(source)).program()
+
+
+class Environment:
+    def __init__(self, parent=None):
+        self.values, self.parent = {}, parent
+
+    def define(self, name, value):
+        self.values[name] = value
+
+    def find(self, name):
+        env = self
+        while env is not None:
+            if name in env.values:
+                return env
+            env = env.parent
+        return None
+
+    def get(self, name, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;undefined name {name!r}&quot;, line)
+        return env.values[name]
+
+    def assign(self, name, value, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;cannot assign to undefined name {name!r}&quot;, line)
+        env.values[name] = value
+
+
+class ReturnSignal(Exception):
+    def __init__(self, value):
+        self.value = value
+
+
+class TinyFunction:
+    def __init__(self, decl, closure):
+        self.decl, self.closure = decl, closure
+
+    def __repr__(self):
+        return f&quot;&lt;fn {self.decl.name}&gt;&quot;
+
+
+class Builtin:
+    def __init__(self, name, arity, func):
+        self.name, self.arity, self.func = name, arity, func
+
+    def __repr__(self):
+        return f&quot;&lt;builtin {self.name}&gt;&quot;
+
+def truthy(value):
+    return value is not None and value is not False
+
+
+def show(value):
+    if value is None:
+        return &quot;nil&quot;
+    if value is True:
+        return &quot;true&quot;
+    if value is False:
+        return &quot;false&quot;
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value)) if abs(value) &lt; 1e16 else str(value)
+    return str(value)
+
+
+def type_name(value):
+    if value is None:
+        return &quot;nil&quot;
+    if isinstance(value, bool):
+        return &quot;bool&quot;
+    if isinstance(value, (int, float)):
+        return &quot;number&quot;
+    if isinstance(value, str):
+        return &quot;string&quot;
+    return &quot;function&quot;
+
+
+def is_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+class Interpreter:
+    def __init__(self, output=None):
+        self.output = [] if output is None else output
+        self.globals = Environment()
+        self.steps = 0
+
+    def evaluate(self, node, env):
+        self.steps += 1
+        if isinstance(node, (Number, String, Literal)):
+            return node.value
+        if isinstance(node, Name):
+            return env.get(node.name, node.line)
+        if isinstance(node, Unary):
+            value = self.evaluate(node.operand, env)
+            if node.op == &quot;-&quot;:
+                if not is_number(value):
+                    raise TinyRuntimeError(f&quot;cannot negate {type_name(value)}&quot;, node.line)
+                return -value
+            return not truthy(value)
+        if isinstance(node, Logical):
+            left = self.evaluate(node.left, env)
+            if node.op == &quot;or&quot;:
+                return left if truthy(left) else self.evaluate(node.right, env)
+            return left if not truthy(left) else self.evaluate(node.right, env)
+        if isinstance(node, Binary):
+            return self.binary(node, self.evaluate(node.left, env), self.evaluate(node.right, env))
+        raise TinyRuntimeError(f&quot;cannot evaluate {type(node).__name__}&quot;, getattr(node, &quot;line&quot;, None))
+
+    def binary(self, node, left, right):
+        op = node.op
+        if op == &quot;==&quot;:
+            return type_name(left) == type_name(right) and left == right
+        if op == &quot;!=&quot;:
+            return not (type_name(left) == type_name(right) and left == right)
+        if op == &quot;+&quot; and isinstance(left, str) and isinstance(right, str):
+            return left + right
+        if not (is_number(left) and is_number(right)):
+            raise TinyRuntimeError(
+                f&quot;cannot use {op} with {type_name(left)} and {type_name(right)}&quot;, node.line)
+        if op in (&quot;/&quot;, &quot;%&quot;) and right == 0:
+            raise TinyRuntimeError(&quot;division by zero&quot;, node.line)
+        if op == &quot;/&quot;:
+            result = left / right
+            return int(result) if isinstance(left, int) and isinstance(right, int) and result.is_integer() else result
+        return {&quot;+&quot;: lambda: left + right, &quot;-&quot;: lambda: left - right, &quot;*&quot;: lambda: left * right,
+                &quot;%&quot;: lambda: left % right, &quot;&lt;&quot;: lambda: left &lt; right, &quot;&lt;=&quot;: lambda: left &lt;= right,
+                &quot;&gt;&quot;: lambda: left &gt; right, &quot;&gt;=&quot;: lambda: left &gt;= right}[op]()
+
+    def execute(self, node, env):
+        ___
+
+    def run_block(self, statements, env):
+        ___
+
+    def run(self, program):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_statements():
+    &quot;statements and scope&quot;
+    def out(src):
+        return Interpreter().run(parse(src))
+    assert out(&quot;let x = 2; print x * 3; x = x + 1; print x;&quot;) == [&quot;6&quot;, &quot;3&quot;]
+    assert out(&quot;let x = 1; { let x = 2; print x; } print x;&quot;) == [&quot;2&quot;, &quot;1&quot;]
+    assert out(&quot;let x = 1; { x = 5; } print x;&quot;) == [&quot;5&quot;]
+    assert out(&quot;let i = 0; while (i &lt; 3) { print i; i = i + 1; }&quot;) == [&quot;0&quot;, &quot;1&quot;, &quot;2&quot;]
+    assert out(&#x27;if (0) print &quot;zero is true&quot;; else print &quot;never&quot;;&#x27;) == [&quot;zero is true&quot;]
+    assert out(&#x27;if (nil) print 1; else if (false) print 2; else print 3;&#x27;) == [&quot;3&quot;]
+    assert out(&quot;print 7 / 2; print 1 == 1.0; print nil;&quot;) == [&quot;3.5&quot;, &quot;true&quot;, &quot;nil&quot;]
+    try:
+        out(&quot;{ let hidden = 1; } print hidden;&quot;)
+        assert False
+    except TinyRuntimeError as e:
+        assert e.message == &quot;undefined name &#x27;hidden&#x27;&quot;</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+
+
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_name(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isalnum() or cursor.peek() == &quot;_&quot;:
+        text += cursor.advance()
+    if text in KEYWORDS:
+        value = {&quot;true&quot;: True, &quot;false&quot;: False, &quot;nil&quot;: None}.get(text)
+        return Token(text.upper(), text, value, line, column)
+    return Token(&quot;NAME&quot;, text, text, line, column)
+
+
+def read_operator(cursor):
+    line, column = cursor.line, cursor.column
+    pair = cursor.peek() + cursor.peek(1)
+    if pair in TWO_CHAR:
+        cursor.advance()
+        cursor.advance()
+        return Token(&quot;OP&quot;, pair, pair, line, column)
+    ch = cursor.peek()
+    if ch in ONE_CHAR:
+        cursor.advance()
+        return Token(&quot;OP&quot;, ch, ch, line, column)
+    raise LexError(f&quot;unexpected character {ch!r}&quot;, line, column)
+
+
+def skip_space_and_comments(cursor):
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch in &quot; \t\r\n&quot;:
+            cursor.advance()
+        elif ch == &quot;#&quot;:
+            while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+                cursor.advance()
+        else:
+            return
+
+
+def tokenize(source):
+    cursor = Cursor(source)
+    tokens = []
+    while True:
+        skip_space_and_comments(cursor)
+        if cursor.at_end():
+            tokens.append(Token(&quot;EOF&quot;, &quot;&quot;, None, cursor.line, cursor.column))
+            return tokens
+        ch = cursor.peek()
+        if ch.isdigit():
+            tokens.append(read_number(cursor))
+        elif ch == &#x27;&quot;&#x27;:
+            tokens.append(read_string(cursor))
+        elif ch.isalpha() or ch == &quot;_&quot;:
+            tokens.append(read_name(cursor))
+        else:
+            tokens.append(read_operator(cursor))
+
+@dataclass
+class Number:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class String:
+    value: str
+    line: int = 0
+
+
+@dataclass
+class Literal:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Name:
+    name: str
+    line: int = 0
+
+
+@dataclass
+class Unary:
+    op: str
+    operand: object
+    line: int = 0
+
+
+@dataclass
+class Binary:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Logical:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Call:
+    callee: object
+    args: list
+    line: int = 0
+
+
+@dataclass
+class Let:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Assign:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Print:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class ExprStmt:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Block:
+    body: list
+    line: int = 0
+
+
+@dataclass
+class If:
+    test: object
+    then: object
+    otherwise: object
+    line: int = 0
+
+
+@dataclass
+class While:
+    test: object
+    body: object
+    line: int = 0
+
+
+@dataclass
+class Function:
+    name: str
+    params: list
+    body: list
+    line: int = 0
+
+
+@dataclass
+class Return:
+    value: object
+    line: int = 0
+
+class Parser:
+    def __init__(self, tokens):
+        self.tokens, self.pos = tokens, 0
+
+    def peek(self):
+        return self.tokens[self.pos]
+
+    def at(self, kind, text=None):
+        tok = self.peek()
+        return tok.kind == kind and (text is None or tok.text == text)
+
+    def match(self, kind, text=None):
+        if self.at(kind, text):
+            tok = self.peek()
+            self.pos += 1
+            return tok
+        return None
+
+    def expect(self, kind, text=None, what=None):
+        tok = self.match(kind, text)
+        if tok is None:
+            got = self.peek()
+            shown = &quot;end of input&quot; if got.kind == &quot;EOF&quot; else repr(got.text)
+            raise ParseError(f&quot;expected {what or text or kind.lower()}, got {shown}&quot;, got.line, got.column)
+        return tok
+
+    # --- expressions, lowest precedence first ---
+    def expression(self):
+        return self.logic_or()
+
+    def logic_or(self):
+        node = self.logic_and()
+        while self.at(&quot;OR&quot;):
+            line = self.match(&quot;OR&quot;).line
+            node = Logical(&quot;or&quot;, node, self.logic_and(), line)
+        return node
+
+    def logic_and(self):
+        node = self.equality()
+        while self.at(&quot;AND&quot;):
+            line = self.match(&quot;AND&quot;).line
+            node = Logical(&quot;and&quot;, node, self.equality(), line)
+        return node
+
+    def binary(self, operators, operand):
+        node = operand()
+        while self.peek().kind == &quot;OP&quot; and self.peek().text in operators:
+            tok = self.match(&quot;OP&quot;)
+            node = Binary(tok.text, node, operand(), tok.line)
+        return node
+
+    def equality(self):
+        return self.binary({&quot;==&quot;, &quot;!=&quot;}, self.comparison)
+
+    def comparison(self):
+        return self.binary({&quot;&lt;&quot;, &quot;&lt;=&quot;, &quot;&gt;&quot;, &quot;&gt;=&quot;}, self.term)
+
+    def term(self):
+        return self.binary({&quot;+&quot;, &quot;-&quot;}, self.factor)
+
+    def factor(self):
+        return self.binary({&quot;*&quot;, &quot;/&quot;, &quot;%&quot;}, self.unary)
+
+    def unary(self):
+        if self.at(&quot;OP&quot;, &quot;-&quot;):
+            line = self.match(&quot;OP&quot;).line
+            return Unary(&quot;-&quot;, self.unary(), line)
+        if self.at(&quot;NOT&quot;):
+            line = self.match(&quot;NOT&quot;).line
+            return Unary(&quot;not&quot;, self.unary(), line)
+        return self.call()
+
+    def call(self):
+        node = self.primary()
+        while self.at(&quot;OP&quot;, &quot;(&quot;):
+            line = self.match(&quot;OP&quot;).line
+            args = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                args.append(self.expression())
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    args.append(self.expression())
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            node = Call(node, args, line)
+        return node
+
+    def primary(self):
+        tok = self.peek()
+        if self.match(&quot;NUMBER&quot;):
+            return Number(tok.value, tok.line)
+        if self.match(&quot;STRING&quot;):
+            return String(tok.value, tok.line)
+        if tok.kind in (&quot;TRUE&quot;, &quot;FALSE&quot;, &quot;NIL&quot;):
+            self.pos += 1
+            return Literal(tok.value, tok.line)
+        if self.match(&quot;NAME&quot;):
+            return Name(tok.text, tok.line)
+        if self.match(&quot;OP&quot;, &quot;(&quot;):
+            node = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return node
+        shown = &quot;end of input&quot; if tok.kind == &quot;EOF&quot; else repr(tok.text)
+        raise ParseError(f&quot;expected an expression, got {shown}&quot;, tok.line, tok.column)
+
+    # --- statements ---
+    def statement(self):
+        tok = self.peek()
+        if self.match(&quot;LET&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;=&quot;)
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Let(name, value, tok.line)
+        if self.match(&quot;PRINT&quot;):
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Print(value, tok.line)
+        if self.at(&quot;OP&quot;, &quot;{&quot;):
+            return Block(self.block(), tok.line)
+        if self.match(&quot;IF&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            then = self.statement()
+            otherwise = self.statement() if self.match(&quot;ELSE&quot;) else None
+            return If(test, then, otherwise, tok.line)
+        if self.match(&quot;WHILE&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return While(test, self.statement(), tok.line)
+        if self.match(&quot;FN&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a function name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            params = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return Function(name, params, self.block(), tok.line)
+        if self.match(&quot;RETURN&quot;):
+            value = None if self.at(&quot;OP&quot;, &quot;;&quot;) else self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Return(value, tok.line)
+        if tok.kind == &quot;NAME&quot; and self.tokens[self.pos + 1].kind == &quot;OP&quot; and self.tokens[self.pos + 1].text == &quot;=&quot;:
+            self.pos += 2
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Assign(tok.text, value, tok.line)
+        value = self.expression()
+        self.expect(&quot;OP&quot;, &quot;;&quot;)
+        return ExprStmt(value, tok.line)
+
+    def block(self):
+        self.expect(&quot;OP&quot;, &quot;{&quot;)
+        body = []
+        while not self.at(&quot;OP&quot;, &quot;}&quot;):
+            if self.at(&quot;EOF&quot;):
+                tok = self.peek()
+                raise ParseError(&quot;expected &#x27;}&#x27;, got end of input&quot;, tok.line, tok.column)
+            body.append(self.statement())
+        self.expect(&quot;OP&quot;, &quot;}&quot;)
+        return body
+
+    def program(self):
+        body = []
+        while not self.at(&quot;EOF&quot;):
+            body.append(self.statement())
+        return body
+
+
+def parse(source):
+    return Parser(tokenize(source)).program()
+
+
+class Environment:
+    def __init__(self, parent=None):
+        self.values, self.parent = {}, parent
+
+    def define(self, name, value):
+        self.values[name] = value
+
+    def find(self, name):
+        env = self
+        while env is not None:
+            if name in env.values:
+                return env
+            env = env.parent
+        return None
+
+    def get(self, name, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;undefined name {name!r}&quot;, line)
+        return env.values[name]
+
+    def assign(self, name, value, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;cannot assign to undefined name {name!r}&quot;, line)
+        env.values[name] = value
+
+
+class ReturnSignal(Exception):
+    def __init__(self, value):
+        self.value = value
+
+
+class TinyFunction:
+    def __init__(self, decl, closure):
+        self.decl, self.closure = decl, closure
+
+    def __repr__(self):
+        return f&quot;&lt;fn {self.decl.name}&gt;&quot;
+
+
+class Builtin:
+    def __init__(self, name, arity, func):
+        self.name, self.arity, self.func = name, arity, func
+
+    def __repr__(self):
+        return f&quot;&lt;builtin {self.name}&gt;&quot;
+
+def truthy(value):
+    return value is not None and value is not False
+
+
+def show(value):
+    if value is None:
+        return &quot;nil&quot;
+    if value is True:
+        return &quot;true&quot;
+    if value is False:
+        return &quot;false&quot;
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value)) if abs(value) &lt; 1e16 else str(value)
+    return str(value)
+
+
+def type_name(value):
+    if value is None:
+        return &quot;nil&quot;
+    if isinstance(value, bool):
+        return &quot;bool&quot;
+    if isinstance(value, (int, float)):
+        return &quot;number&quot;
+    if isinstance(value, str):
+        return &quot;string&quot;
+    return &quot;function&quot;
+
+
+def is_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+class Interpreter:
+    def __init__(self, output=None):
+        self.output = [] if output is None else output
+        self.globals = Environment()
+        self.steps = 0
+
+    def evaluate(self, node, env):
+        self.steps += 1
+        if isinstance(node, (Number, String, Literal)):
+            return node.value
+        if isinstance(node, Name):
+            return env.get(node.name, node.line)
+        if isinstance(node, Unary):
+            value = self.evaluate(node.operand, env)
+            if node.op == &quot;-&quot;:
+                if not is_number(value):
+                    raise TinyRuntimeError(f&quot;cannot negate {type_name(value)}&quot;, node.line)
+                return -value
+            return not truthy(value)
+        if isinstance(node, Logical):
+            left = self.evaluate(node.left, env)
+            if node.op == &quot;or&quot;:
+                return left if truthy(left) else self.evaluate(node.right, env)
+            return left if not truthy(left) else self.evaluate(node.right, env)
+        if isinstance(node, Binary):
+            return self.binary(node, self.evaluate(node.left, env), self.evaluate(node.right, env))
+        raise TinyRuntimeError(f&quot;cannot evaluate {type(node).__name__}&quot;, getattr(node, &quot;line&quot;, None))
+
+    def binary(self, node, left, right):
+        op = node.op
+        if op == &quot;==&quot;:
+            return type_name(left) == type_name(right) and left == right
+        if op == &quot;!=&quot;:
+            return not (type_name(left) == type_name(right) and left == right)
+        if op == &quot;+&quot; and isinstance(left, str) and isinstance(right, str):
+            return left + right
+        if not (is_number(left) and is_number(right)):
+            raise TinyRuntimeError(
+                f&quot;cannot use {op} with {type_name(left)} and {type_name(right)}&quot;, node.line)
+        if op in (&quot;/&quot;, &quot;%&quot;) and right == 0:
+            raise TinyRuntimeError(&quot;division by zero&quot;, node.line)
+        if op == &quot;/&quot;:
+            result = left / right
+            return int(result) if isinstance(left, int) and isinstance(right, int) and result.is_integer() else result
+        return {&quot;+&quot;: lambda: left + right, &quot;-&quot;: lambda: left - right, &quot;*&quot;: lambda: left * right,
+                &quot;%&quot;: lambda: left % right, &quot;&lt;&quot;: lambda: left &lt; right, &quot;&lt;=&quot;: lambda: left &lt;= right,
+                &quot;&gt;&quot;: lambda: left &gt; right, &quot;&gt;=&quot;: lambda: left &gt;= right}[op]()
+
+    def execute(self, node, env):
+        self.steps += 1
+        if isinstance(node, Let):
+            env.define(node.name, self.evaluate(node.value, env))
+        elif isinstance(node, Assign):
+            env.assign(node.name, self.evaluate(node.value, env), node.line)
+        elif isinstance(node, Print):
+            self.output.append(show(self.evaluate(node.value, env)))
+        elif isinstance(node, ExprStmt):
+            self.evaluate(node.value, env)
+        elif isinstance(node, Block):
+            self.run_block(node.body, Environment(env))
+        elif isinstance(node, If):
+            if truthy(self.evaluate(node.test, env)):
+                self.execute(node.then, env)
+            elif node.otherwise is not None:
+                self.execute(node.otherwise, env)
+        elif isinstance(node, While):
+            while truthy(self.evaluate(node.test, env)):
+                self.execute(node.body, env)
+        else:
+            raise TinyRuntimeError(f&quot;cannot execute {type(node).__name__}&quot;, getattr(node, &quot;line&quot;, None))
+
+    def run_block(self, statements, env):
+        for stmt in statements:
+            self.execute(stmt, env)
+
+    def run(self, program):
+        try:
+            self.run_block(program, self.globals)
+        except ReturnSignal:
+            raise TinyRuntimeError(&quot;return outside a function&quot;) from None
+        return self.output</textarea></div>
+<h2 id="step-20-functions-and-closures">Step 20: functions and closures</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d4-step20" data-points="20"><div class="pc-label"><span>Exercise</span><span class="pc-pts">20 points</span></div><div class="pc-title">Step 20: functions and closures</div><div class="pc-prompt"><p>Finish the interpreter. In <code>execute</code>, a <code>Function</code> statement defines its name as a <code>TinyFunction(node, env)</code>, capturing the environment it was defined in (that&rsquo;s what makes it a <strong>closure</strong>), and a <code>Return</code> raises <code>ReturnSignal</code> with its value (or <code>None</code>). Write <code>call(node, env)</code>: evaluate the callee and the arguments; for a <code>Builtin</code>, check the number of arguments and call its <code>func</code> (re-raising a <code>TinyRuntimeError</code> from it with the call&rsquo;s line); for a <code>TinyFunction</code>, check the number of arguments (<code>f"{name}() takes {n} argument(s), got {m}"</code>), refuse to go deeper than <code>self.max_depth</code> calls (<code>"too much recursion"</code>), run its body in a new environment whose <strong>parent is the closure</strong> with the parameters defined, and return the value of a <code>ReturnSignal</code>, or <code>None</code> if the body finishes without one; calling anything else raises <code>f"cannot call {type}"</code>. Finally, <code>run_source(source)</code>: parse and run a program, returning its output. The rest is given.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+
+
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_name(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isalnum() or cursor.peek() == &quot;_&quot;:
+        text += cursor.advance()
+    if text in KEYWORDS:
+        value = {&quot;true&quot;: True, &quot;false&quot;: False, &quot;nil&quot;: None}.get(text)
+        return Token(text.upper(), text, value, line, column)
+    return Token(&quot;NAME&quot;, text, text, line, column)
+
+
+def read_operator(cursor):
+    line, column = cursor.line, cursor.column
+    pair = cursor.peek() + cursor.peek(1)
+    if pair in TWO_CHAR:
+        cursor.advance()
+        cursor.advance()
+        return Token(&quot;OP&quot;, pair, pair, line, column)
+    ch = cursor.peek()
+    if ch in ONE_CHAR:
+        cursor.advance()
+        return Token(&quot;OP&quot;, ch, ch, line, column)
+    raise LexError(f&quot;unexpected character {ch!r}&quot;, line, column)
+
+
+def skip_space_and_comments(cursor):
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch in &quot; \t\r\n&quot;:
+            cursor.advance()
+        elif ch == &quot;#&quot;:
+            while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+                cursor.advance()
+        else:
+            return
+
+
+def tokenize(source):
+    cursor = Cursor(source)
+    tokens = []
+    while True:
+        skip_space_and_comments(cursor)
+        if cursor.at_end():
+            tokens.append(Token(&quot;EOF&quot;, &quot;&quot;, None, cursor.line, cursor.column))
+            return tokens
+        ch = cursor.peek()
+        if ch.isdigit():
+            tokens.append(read_number(cursor))
+        elif ch == &#x27;&quot;&#x27;:
+            tokens.append(read_string(cursor))
+        elif ch.isalpha() or ch == &quot;_&quot;:
+            tokens.append(read_name(cursor))
+        else:
+            tokens.append(read_operator(cursor))
+
+@dataclass
+class Number:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class String:
+    value: str
+    line: int = 0
+
+
+@dataclass
+class Literal:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Name:
+    name: str
+    line: int = 0
+
+
+@dataclass
+class Unary:
+    op: str
+    operand: object
+    line: int = 0
+
+
+@dataclass
+class Binary:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Logical:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Call:
+    callee: object
+    args: list
+    line: int = 0
+
+
+@dataclass
+class Let:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Assign:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Print:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class ExprStmt:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Block:
+    body: list
+    line: int = 0
+
+
+@dataclass
+class If:
+    test: object
+    then: object
+    otherwise: object
+    line: int = 0
+
+
+@dataclass
+class While:
+    test: object
+    body: object
+    line: int = 0
+
+
+@dataclass
+class Function:
+    name: str
+    params: list
+    body: list
+    line: int = 0
+
+
+@dataclass
+class Return:
+    value: object
+    line: int = 0
+
+class Parser:
+    def __init__(self, tokens):
+        self.tokens, self.pos = tokens, 0
+
+    def peek(self):
+        return self.tokens[self.pos]
+
+    def at(self, kind, text=None):
+        tok = self.peek()
+        return tok.kind == kind and (text is None or tok.text == text)
+
+    def match(self, kind, text=None):
+        if self.at(kind, text):
+            tok = self.peek()
+            self.pos += 1
+            return tok
+        return None
+
+    def expect(self, kind, text=None, what=None):
+        tok = self.match(kind, text)
+        if tok is None:
+            got = self.peek()
+            shown = &quot;end of input&quot; if got.kind == &quot;EOF&quot; else repr(got.text)
+            raise ParseError(f&quot;expected {what or text or kind.lower()}, got {shown}&quot;, got.line, got.column)
+        return tok
+
+    # --- expressions, lowest precedence first ---
+    def expression(self):
+        return self.logic_or()
+
+    def logic_or(self):
+        node = self.logic_and()
+        while self.at(&quot;OR&quot;):
+            line = self.match(&quot;OR&quot;).line
+            node = Logical(&quot;or&quot;, node, self.logic_and(), line)
+        return node
+
+    def logic_and(self):
+        node = self.equality()
+        while self.at(&quot;AND&quot;):
+            line = self.match(&quot;AND&quot;).line
+            node = Logical(&quot;and&quot;, node, self.equality(), line)
+        return node
+
+    def binary(self, operators, operand):
+        node = operand()
+        while self.peek().kind == &quot;OP&quot; and self.peek().text in operators:
+            tok = self.match(&quot;OP&quot;)
+            node = Binary(tok.text, node, operand(), tok.line)
+        return node
+
+    def equality(self):
+        return self.binary({&quot;==&quot;, &quot;!=&quot;}, self.comparison)
+
+    def comparison(self):
+        return self.binary({&quot;&lt;&quot;, &quot;&lt;=&quot;, &quot;&gt;&quot;, &quot;&gt;=&quot;}, self.term)
+
+    def term(self):
+        return self.binary({&quot;+&quot;, &quot;-&quot;}, self.factor)
+
+    def factor(self):
+        return self.binary({&quot;*&quot;, &quot;/&quot;, &quot;%&quot;}, self.unary)
+
+    def unary(self):
+        if self.at(&quot;OP&quot;, &quot;-&quot;):
+            line = self.match(&quot;OP&quot;).line
+            return Unary(&quot;-&quot;, self.unary(), line)
+        if self.at(&quot;NOT&quot;):
+            line = self.match(&quot;NOT&quot;).line
+            return Unary(&quot;not&quot;, self.unary(), line)
+        return self.call()
+
+    def call(self):
+        node = self.primary()
+        while self.at(&quot;OP&quot;, &quot;(&quot;):
+            line = self.match(&quot;OP&quot;).line
+            args = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                args.append(self.expression())
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    args.append(self.expression())
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            node = Call(node, args, line)
+        return node
+
+    def primary(self):
+        tok = self.peek()
+        if self.match(&quot;NUMBER&quot;):
+            return Number(tok.value, tok.line)
+        if self.match(&quot;STRING&quot;):
+            return String(tok.value, tok.line)
+        if tok.kind in (&quot;TRUE&quot;, &quot;FALSE&quot;, &quot;NIL&quot;):
+            self.pos += 1
+            return Literal(tok.value, tok.line)
+        if self.match(&quot;NAME&quot;):
+            return Name(tok.text, tok.line)
+        if self.match(&quot;OP&quot;, &quot;(&quot;):
+            node = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return node
+        shown = &quot;end of input&quot; if tok.kind == &quot;EOF&quot; else repr(tok.text)
+        raise ParseError(f&quot;expected an expression, got {shown}&quot;, tok.line, tok.column)
+
+    # --- statements ---
+    def statement(self):
+        tok = self.peek()
+        if self.match(&quot;LET&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;=&quot;)
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Let(name, value, tok.line)
+        if self.match(&quot;PRINT&quot;):
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Print(value, tok.line)
+        if self.at(&quot;OP&quot;, &quot;{&quot;):
+            return Block(self.block(), tok.line)
+        if self.match(&quot;IF&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            then = self.statement()
+            otherwise = self.statement() if self.match(&quot;ELSE&quot;) else None
+            return If(test, then, otherwise, tok.line)
+        if self.match(&quot;WHILE&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return While(test, self.statement(), tok.line)
+        if self.match(&quot;FN&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a function name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            params = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return Function(name, params, self.block(), tok.line)
+        if self.match(&quot;RETURN&quot;):
+            value = None if self.at(&quot;OP&quot;, &quot;;&quot;) else self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Return(value, tok.line)
+        if tok.kind == &quot;NAME&quot; and self.tokens[self.pos + 1].kind == &quot;OP&quot; and self.tokens[self.pos + 1].text == &quot;=&quot;:
+            self.pos += 2
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Assign(tok.text, value, tok.line)
+        value = self.expression()
+        self.expect(&quot;OP&quot;, &quot;;&quot;)
+        return ExprStmt(value, tok.line)
+
+    def block(self):
+        self.expect(&quot;OP&quot;, &quot;{&quot;)
+        body = []
+        while not self.at(&quot;OP&quot;, &quot;}&quot;):
+            if self.at(&quot;EOF&quot;):
+                tok = self.peek()
+                raise ParseError(&quot;expected &#x27;}&#x27;, got end of input&quot;, tok.line, tok.column)
+            body.append(self.statement())
+        self.expect(&quot;OP&quot;, &quot;}&quot;)
+        return body
+
+    def program(self):
+        body = []
+        while not self.at(&quot;EOF&quot;):
+            body.append(self.statement())
+        return body
+
+
+def parse(source):
+    return Parser(tokenize(source)).program()
+
+class Environment:
+    def __init__(self, parent=None):
+        self.values, self.parent = {}, parent
+
+    def define(self, name, value):
+        self.values[name] = value
+
+    def find(self, name):
+        env = self
+        while env is not None:
+            if name in env.values:
+                return env
+            env = env.parent
+        return None
+
+    def get(self, name, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;undefined name {name!r}&quot;, line)
+        return env.values[name]
+
+    def assign(self, name, value, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;cannot assign to undefined name {name!r}&quot;, line)
+        env.values[name] = value
+
+
+class ReturnSignal(Exception):
+    def __init__(self, value):
+        self.value = value
+
+
+class TinyFunction:
+    def __init__(self, decl, closure):
+        self.decl, self.closure = decl, closure
+
+    def __repr__(self):
+        return f&quot;&lt;fn {self.decl.name}&gt;&quot;
+
+
+class Builtin:
+    def __init__(self, name, arity, func):
+        self.name, self.arity, self.func = name, arity, func
+
+    def __repr__(self):
+        return f&quot;&lt;builtin {self.name}&gt;&quot;
+
+def truthy(value):
+    return value is not None and value is not False
+
+
+def show(value):
+    if value is None:
+        return &quot;nil&quot;
+    if value is True:
+        return &quot;true&quot;
+    if value is False:
+        return &quot;false&quot;
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value)) if abs(value) &lt; 1e16 else str(value)
+    return str(value)
+
+
+def type_name(value):
+    if value is None:
+        return &quot;nil&quot;
+    if isinstance(value, bool):
+        return &quot;bool&quot;
+    if isinstance(value, (int, float)):
+        return &quot;number&quot;
+    if isinstance(value, str):
+        return &quot;string&quot;
+    return &quot;function&quot;
+
+
+def is_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+class Interpreter:
+    def __init__(self, output=None, max_depth=100):
+        self.output = [] if output is None else output
+        self.globals = Environment()
+        self.max_depth, self.depth = max_depth, 0
+        self.steps = 0
+        for name, arity, func in [
+            (&quot;len&quot;, 1, self._len), (&quot;str&quot;, 1, lambda v: show(v)), (&quot;type&quot;, 1, type_name),
+        ]:
+            self.globals.define(name, Builtin(name, arity, func))
+
+    @staticmethod
+    def _len(value):
+        if not isinstance(value, str):
+            raise TinyRuntimeError(f&quot;len() needs a string, not {type_name(value)}&quot;)
+        return len(value)
+
+    def evaluate(self, node, env):
+        self.steps += 1
+        if isinstance(node, (Number, String, Literal)):
+            return node.value
+        if isinstance(node, Name):
+            return env.get(node.name, node.line)
+        if isinstance(node, Unary):
+            value = self.evaluate(node.operand, env)
+            if node.op == &quot;-&quot;:
+                if not is_number(value):
+                    raise TinyRuntimeError(f&quot;cannot negate {type_name(value)}&quot;, node.line)
+                return -value
+            return not truthy(value)
+        if isinstance(node, Logical):
+            left = self.evaluate(node.left, env)
+            if node.op == &quot;or&quot;:
+                return left if truthy(left) else self.evaluate(node.right, env)
+            return left if not truthy(left) else self.evaluate(node.right, env)
+        if isinstance(node, Binary):
+            return self.binary(node, self.evaluate(node.left, env), self.evaluate(node.right, env))
+        if isinstance(node, Call):
+            return self.call(node, env)
+        raise TinyRuntimeError(f&quot;cannot evaluate {type(node).__name__}&quot;, getattr(node, &quot;line&quot;, None))
+
+    def binary(self, node, left, right):
+        op = node.op
+        if op == &quot;==&quot;:
+            return type_name(left) == type_name(right) and left == right
+        if op == &quot;!=&quot;:
+            return not (type_name(left) == type_name(right) and left == right)
+        if op == &quot;+&quot; and isinstance(left, str) and isinstance(right, str):
+            return left + right
+        if not (is_number(left) and is_number(right)):
+            raise TinyRuntimeError(
+                f&quot;cannot use {op} with {type_name(left)} and {type_name(right)}&quot;, node.line)
+        if op in (&quot;/&quot;, &quot;%&quot;) and right == 0:
+            raise TinyRuntimeError(&quot;division by zero&quot;, node.line)
+        if op == &quot;/&quot;:
+            result = left / right
+            return int(result) if isinstance(left, int) and isinstance(right, int) and result.is_integer() else result
+        return {&quot;+&quot;: lambda: left + right, &quot;-&quot;: lambda: left - right, &quot;*&quot;: lambda: left * right,
+                &quot;%&quot;: lambda: left % right, &quot;&lt;&quot;: lambda: left &lt; right, &quot;&lt;=&quot;: lambda: left &lt;= right,
+                &quot;&gt;&quot;: lambda: left &gt; right, &quot;&gt;=&quot;: lambda: left &gt;= right}[op]()
+
+    def call(self, node, env):
+        ___
+
+    def execute(self, node, env):
+        self.steps += 1
+        if isinstance(node, Let):
+            env.define(node.name, self.evaluate(node.value, env))
+        elif isinstance(node, Assign):
+            env.assign(node.name, self.evaluate(node.value, env), node.line)
+        elif isinstance(node, Print):
+            self.output.append(show(self.evaluate(node.value, env)))
+        elif isinstance(node, ExprStmt):
+            self.evaluate(node.value, env)
+        elif isinstance(node, Block):
+            self.run_block(node.body, Environment(env))
+        elif isinstance(node, If):
+            if truthy(self.evaluate(node.test, env)):
+                self.execute(node.then, env)
+            elif node.otherwise is not None:
+                self.execute(node.otherwise, env)
+        elif isinstance(node, While):
+            while truthy(self.evaluate(node.test, env)):
+                self.execute(node.body, env)
+        # Step 20: Function and Return go here
+        ___
+        else:
+            raise TinyRuntimeError(f&quot;cannot execute {type(node).__name__}&quot;, getattr(node, &quot;line&quot;, None))
+
+    def run_block(self, statements, env):
+        for stmt in statements:
+            self.execute(stmt, env)
+
+    def run(self, program):
+        try:
+            self.run_block(program, self.globals)
+        except ReturnSignal:
+            raise TinyRuntimeError(&quot;return outside a function&quot;) from None
+        return self.output
+
+
+def run_source(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_functions():
+    &quot;functions, closures and built-ins&quot;
+    assert run_source(&quot;fn add(a, b) { return a + b; } print add(2, 3);&quot;) == [&quot;5&quot;]
+    assert run_source(&quot;fn fib(n) { if (n &lt; 2) return n; return fib(n - 1) + fib(n - 2); } print fib(15);&quot;) == [&quot;610&quot;]
+    counter = &quot;&quot;&quot;
+fn make_counter() {
+    let n = 0;
+    fn step() { n = n + 1; return n; }
+    return step;
+}
+let a = make_counter();
+let b = make_counter();
+a(); a();
+print a(); print b();
+&quot;&quot;&quot;
+    assert run_source(counter) == [&quot;3&quot;, &quot;1&quot;]
+    assert run_source(&#x27;fn hi() { print &quot;hi&quot;; } print hi();&#x27;) == [&quot;hi&quot;, &quot;nil&quot;]
+    assert run_source(&#x27;print len(&quot;tiny&quot;); print str(2.0) + &quot;!&quot;; print type(len);&#x27;) == [&quot;4&quot;, &quot;2!&quot;, &quot;function&quot;]
+    for src, message in ((&quot;fn f(x) { return x; } f();&quot;, &quot;f() takes 1 argument(s), got 0&quot;),
+                         (&quot;let x = 3; x();&quot;, &quot;cannot call number&quot;),
+                         (&quot;fn f() { return f(); } f();&quot;, &quot;too much recursion&quot;),
+                         (&quot;len(5);&quot;, &quot;len() needs a string, not number&quot;),
+                         (&quot;return 1;&quot;, &quot;return outside a function&quot;)):
+        try:
+            run_source(src)
+            assert False, src
+        except TinyRuntimeError as e:
+            assert e.message == message, e.message</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+
+
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_name(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isalnum() or cursor.peek() == &quot;_&quot;:
+        text += cursor.advance()
+    if text in KEYWORDS:
+        value = {&quot;true&quot;: True, &quot;false&quot;: False, &quot;nil&quot;: None}.get(text)
+        return Token(text.upper(), text, value, line, column)
+    return Token(&quot;NAME&quot;, text, text, line, column)
+
+
+def read_operator(cursor):
+    line, column = cursor.line, cursor.column
+    pair = cursor.peek() + cursor.peek(1)
+    if pair in TWO_CHAR:
+        cursor.advance()
+        cursor.advance()
+        return Token(&quot;OP&quot;, pair, pair, line, column)
+    ch = cursor.peek()
+    if ch in ONE_CHAR:
+        cursor.advance()
+        return Token(&quot;OP&quot;, ch, ch, line, column)
+    raise LexError(f&quot;unexpected character {ch!r}&quot;, line, column)
+
+
+def skip_space_and_comments(cursor):
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch in &quot; \t\r\n&quot;:
+            cursor.advance()
+        elif ch == &quot;#&quot;:
+            while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+                cursor.advance()
+        else:
+            return
+
+
+def tokenize(source):
+    cursor = Cursor(source)
+    tokens = []
+    while True:
+        skip_space_and_comments(cursor)
+        if cursor.at_end():
+            tokens.append(Token(&quot;EOF&quot;, &quot;&quot;, None, cursor.line, cursor.column))
+            return tokens
+        ch = cursor.peek()
+        if ch.isdigit():
+            tokens.append(read_number(cursor))
+        elif ch == &#x27;&quot;&#x27;:
+            tokens.append(read_string(cursor))
+        elif ch.isalpha() or ch == &quot;_&quot;:
+            tokens.append(read_name(cursor))
+        else:
+            tokens.append(read_operator(cursor))
+
+@dataclass
+class Number:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class String:
+    value: str
+    line: int = 0
+
+
+@dataclass
+class Literal:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Name:
+    name: str
+    line: int = 0
+
+
+@dataclass
+class Unary:
+    op: str
+    operand: object
+    line: int = 0
+
+
+@dataclass
+class Binary:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Logical:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Call:
+    callee: object
+    args: list
+    line: int = 0
+
+
+@dataclass
+class Let:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Assign:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Print:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class ExprStmt:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Block:
+    body: list
+    line: int = 0
+
+
+@dataclass
+class If:
+    test: object
+    then: object
+    otherwise: object
+    line: int = 0
+
+
+@dataclass
+class While:
+    test: object
+    body: object
+    line: int = 0
+
+
+@dataclass
+class Function:
+    name: str
+    params: list
+    body: list
+    line: int = 0
+
+
+@dataclass
+class Return:
+    value: object
+    line: int = 0
+
+class Parser:
+    def __init__(self, tokens):
+        self.tokens, self.pos = tokens, 0
+
+    def peek(self):
+        return self.tokens[self.pos]
+
+    def at(self, kind, text=None):
+        tok = self.peek()
+        return tok.kind == kind and (text is None or tok.text == text)
+
+    def match(self, kind, text=None):
+        if self.at(kind, text):
+            tok = self.peek()
+            self.pos += 1
+            return tok
+        return None
+
+    def expect(self, kind, text=None, what=None):
+        tok = self.match(kind, text)
+        if tok is None:
+            got = self.peek()
+            shown = &quot;end of input&quot; if got.kind == &quot;EOF&quot; else repr(got.text)
+            raise ParseError(f&quot;expected {what or text or kind.lower()}, got {shown}&quot;, got.line, got.column)
+        return tok
+
+    # --- expressions, lowest precedence first ---
+    def expression(self):
+        return self.logic_or()
+
+    def logic_or(self):
+        node = self.logic_and()
+        while self.at(&quot;OR&quot;):
+            line = self.match(&quot;OR&quot;).line
+            node = Logical(&quot;or&quot;, node, self.logic_and(), line)
+        return node
+
+    def logic_and(self):
+        node = self.equality()
+        while self.at(&quot;AND&quot;):
+            line = self.match(&quot;AND&quot;).line
+            node = Logical(&quot;and&quot;, node, self.equality(), line)
+        return node
+
+    def binary(self, operators, operand):
+        node = operand()
+        while self.peek().kind == &quot;OP&quot; and self.peek().text in operators:
+            tok = self.match(&quot;OP&quot;)
+            node = Binary(tok.text, node, operand(), tok.line)
+        return node
+
+    def equality(self):
+        return self.binary({&quot;==&quot;, &quot;!=&quot;}, self.comparison)
+
+    def comparison(self):
+        return self.binary({&quot;&lt;&quot;, &quot;&lt;=&quot;, &quot;&gt;&quot;, &quot;&gt;=&quot;}, self.term)
+
+    def term(self):
+        return self.binary({&quot;+&quot;, &quot;-&quot;}, self.factor)
+
+    def factor(self):
+        return self.binary({&quot;*&quot;, &quot;/&quot;, &quot;%&quot;}, self.unary)
+
+    def unary(self):
+        if self.at(&quot;OP&quot;, &quot;-&quot;):
+            line = self.match(&quot;OP&quot;).line
+            return Unary(&quot;-&quot;, self.unary(), line)
+        if self.at(&quot;NOT&quot;):
+            line = self.match(&quot;NOT&quot;).line
+            return Unary(&quot;not&quot;, self.unary(), line)
+        return self.call()
+
+    def call(self):
+        node = self.primary()
+        while self.at(&quot;OP&quot;, &quot;(&quot;):
+            line = self.match(&quot;OP&quot;).line
+            args = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                args.append(self.expression())
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    args.append(self.expression())
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            node = Call(node, args, line)
+        return node
+
+    def primary(self):
+        tok = self.peek()
+        if self.match(&quot;NUMBER&quot;):
+            return Number(tok.value, tok.line)
+        if self.match(&quot;STRING&quot;):
+            return String(tok.value, tok.line)
+        if tok.kind in (&quot;TRUE&quot;, &quot;FALSE&quot;, &quot;NIL&quot;):
+            self.pos += 1
+            return Literal(tok.value, tok.line)
+        if self.match(&quot;NAME&quot;):
+            return Name(tok.text, tok.line)
+        if self.match(&quot;OP&quot;, &quot;(&quot;):
+            node = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return node
+        shown = &quot;end of input&quot; if tok.kind == &quot;EOF&quot; else repr(tok.text)
+        raise ParseError(f&quot;expected an expression, got {shown}&quot;, tok.line, tok.column)
+
+    # --- statements ---
+    def statement(self):
+        tok = self.peek()
+        if self.match(&quot;LET&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;=&quot;)
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Let(name, value, tok.line)
+        if self.match(&quot;PRINT&quot;):
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Print(value, tok.line)
+        if self.at(&quot;OP&quot;, &quot;{&quot;):
+            return Block(self.block(), tok.line)
+        if self.match(&quot;IF&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            then = self.statement()
+            otherwise = self.statement() if self.match(&quot;ELSE&quot;) else None
+            return If(test, then, otherwise, tok.line)
+        if self.match(&quot;WHILE&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return While(test, self.statement(), tok.line)
+        if self.match(&quot;FN&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a function name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            params = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return Function(name, params, self.block(), tok.line)
+        if self.match(&quot;RETURN&quot;):
+            value = None if self.at(&quot;OP&quot;, &quot;;&quot;) else self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Return(value, tok.line)
+        if tok.kind == &quot;NAME&quot; and self.tokens[self.pos + 1].kind == &quot;OP&quot; and self.tokens[self.pos + 1].text == &quot;=&quot;:
+            self.pos += 2
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Assign(tok.text, value, tok.line)
+        value = self.expression()
+        self.expect(&quot;OP&quot;, &quot;;&quot;)
+        return ExprStmt(value, tok.line)
+
+    def block(self):
+        self.expect(&quot;OP&quot;, &quot;{&quot;)
+        body = []
+        while not self.at(&quot;OP&quot;, &quot;}&quot;):
+            if self.at(&quot;EOF&quot;):
+                tok = self.peek()
+                raise ParseError(&quot;expected &#x27;}&#x27;, got end of input&quot;, tok.line, tok.column)
+            body.append(self.statement())
+        self.expect(&quot;OP&quot;, &quot;}&quot;)
+        return body
+
+    def program(self):
+        body = []
+        while not self.at(&quot;EOF&quot;):
+            body.append(self.statement())
+        return body
+
+
+def parse(source):
+    return Parser(tokenize(source)).program()
+
+class Environment:
+    def __init__(self, parent=None):
+        self.values, self.parent = {}, parent
+
+    def define(self, name, value):
+        self.values[name] = value
+
+    def find(self, name):
+        env = self
+        while env is not None:
+            if name in env.values:
+                return env
+            env = env.parent
+        return None
+
+    def get(self, name, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;undefined name {name!r}&quot;, line)
+        return env.values[name]
+
+    def assign(self, name, value, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;cannot assign to undefined name {name!r}&quot;, line)
+        env.values[name] = value
+
+
+class ReturnSignal(Exception):
+    def __init__(self, value):
+        self.value = value
+
+
+class TinyFunction:
+    def __init__(self, decl, closure):
+        self.decl, self.closure = decl, closure
+
+    def __repr__(self):
+        return f&quot;&lt;fn {self.decl.name}&gt;&quot;
+
+
+class Builtin:
+    def __init__(self, name, arity, func):
+        self.name, self.arity, self.func = name, arity, func
+
+    def __repr__(self):
+        return f&quot;&lt;builtin {self.name}&gt;&quot;
+
+def truthy(value):
+    return value is not None and value is not False
+
+
+def show(value):
+    if value is None:
+        return &quot;nil&quot;
+    if value is True:
+        return &quot;true&quot;
+    if value is False:
+        return &quot;false&quot;
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value)) if abs(value) &lt; 1e16 else str(value)
+    return str(value)
+
+
+def type_name(value):
+    if value is None:
+        return &quot;nil&quot;
+    if isinstance(value, bool):
+        return &quot;bool&quot;
+    if isinstance(value, (int, float)):
+        return &quot;number&quot;
+    if isinstance(value, str):
+        return &quot;string&quot;
+    return &quot;function&quot;
+
+
+def is_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+class Interpreter:
+    def __init__(self, output=None, max_depth=100):
+        self.output = [] if output is None else output
+        self.globals = Environment()
+        self.max_depth, self.depth = max_depth, 0
+        self.steps = 0
+        for name, arity, func in [
+            (&quot;len&quot;, 1, self._len), (&quot;str&quot;, 1, lambda v: show(v)), (&quot;type&quot;, 1, type_name),
+        ]:
+            self.globals.define(name, Builtin(name, arity, func))
+
+    @staticmethod
+    def _len(value):
+        if not isinstance(value, str):
+            raise TinyRuntimeError(f&quot;len() needs a string, not {type_name(value)}&quot;)
+        return len(value)
+
+    # --- expressions ---
+    def evaluate(self, node, env):
+        self.steps += 1
+        if isinstance(node, (Number, String, Literal)):
+            return node.value
+        if isinstance(node, Name):
+            return env.get(node.name, node.line)
+        if isinstance(node, Unary):
+            value = self.evaluate(node.operand, env)
+            if node.op == &quot;-&quot;:
+                if not is_number(value):
+                    raise TinyRuntimeError(f&quot;cannot negate {type_name(value)}&quot;, node.line)
+                return -value
+            return not truthy(value)
+        if isinstance(node, Logical):
+            left = self.evaluate(node.left, env)
+            if node.op == &quot;or&quot;:
+                return left if truthy(left) else self.evaluate(node.right, env)
+            return left if not truthy(left) else self.evaluate(node.right, env)
+        if isinstance(node, Binary):
+            return self.binary(node, self.evaluate(node.left, env), self.evaluate(node.right, env))
+        if isinstance(node, Call):
+            return self.call(node, env)
+        raise TinyRuntimeError(f&quot;cannot evaluate {type(node).__name__}&quot;, getattr(node, &quot;line&quot;, None))
+
+    def binary(self, node, left, right):
+        op = node.op
+        if op == &quot;==&quot;:
+            return type_name(left) == type_name(right) and left == right
+        if op == &quot;!=&quot;:
+            return not (type_name(left) == type_name(right) and left == right)
+        if op == &quot;+&quot; and isinstance(left, str) and isinstance(right, str):
+            return left + right
+        if not (is_number(left) and is_number(right)):
+            raise TinyRuntimeError(
+                f&quot;cannot use {op} with {type_name(left)} and {type_name(right)}&quot;, node.line)
+        if op in (&quot;/&quot;, &quot;%&quot;) and right == 0:
+            raise TinyRuntimeError(&quot;division by zero&quot;, node.line)
+        if op == &quot;/&quot;:
+            result = left / right
+            return int(result) if isinstance(left, int) and isinstance(right, int) and result.is_integer() else result
+        return {&quot;+&quot;: lambda: left + right, &quot;-&quot;: lambda: left - right, &quot;*&quot;: lambda: left * right,
+                &quot;%&quot;: lambda: left % right, &quot;&lt;&quot;: lambda: left &lt; right, &quot;&lt;=&quot;: lambda: left &lt;= right,
+                &quot;&gt;&quot;: lambda: left &gt; right, &quot;&gt;=&quot;: lambda: left &gt;= right}[op]()
+
+    def call(self, node, env):
+        callee = self.evaluate(node.callee, env)
+        args = [self.evaluate(a, env) for a in node.args]
+        if isinstance(callee, Builtin):
+            if len(args) != callee.arity:
+                raise TinyRuntimeError(f&quot;{callee.name}() takes {callee.arity} argument(s), got {len(args)}&quot;, node.line)
+            try:
+                return callee.func(*args)
+            except TinyRuntimeError as e:
+                raise TinyRuntimeError(e.message, node.line) from None
+        if not isinstance(callee, TinyFunction):
+            raise TinyRuntimeError(f&quot;cannot call {type_name(callee)}&quot;, node.line)
+        decl = callee.decl
+        if len(args) != len(decl.params):
+            raise TinyRuntimeError(f&quot;{decl.name}() takes {len(decl.params)} argument(s), got {len(args)}&quot;, node.line)
+        if self.depth &gt;= self.max_depth:
+            raise TinyRuntimeError(&quot;too much recursion&quot;, node.line)
+        local = Environment(callee.closure)
+        for name, value in zip(decl.params, args):
+            local.define(name, value)
+        self.depth += 1
+        try:
+            self.run_block(decl.body, local)
+        except ReturnSignal as signal:
+            return signal.value
+        finally:
+            self.depth -= 1
+        return None
+
+    # --- statements ---
+    def execute(self, node, env):
+        self.steps += 1
+        if isinstance(node, Let):
+            env.define(node.name, self.evaluate(node.value, env))
+        elif isinstance(node, Assign):
+            env.assign(node.name, self.evaluate(node.value, env), node.line)
+        elif isinstance(node, Print):
+            self.output.append(show(self.evaluate(node.value, env)))
+        elif isinstance(node, ExprStmt):
+            self.evaluate(node.value, env)
+        elif isinstance(node, Block):
+            self.run_block(node.body, Environment(env))
+        elif isinstance(node, If):
+            if truthy(self.evaluate(node.test, env)):
+                self.execute(node.then, env)
+            elif node.otherwise is not None:
+                self.execute(node.otherwise, env)
+        elif isinstance(node, While):
+            while truthy(self.evaluate(node.test, env)):
+                self.execute(node.body, env)
+        elif isinstance(node, Function):
+            env.define(node.name, TinyFunction(node, env))
+        elif isinstance(node, Return):
+            raise ReturnSignal(None if node.value is None else self.evaluate(node.value, env))
+        else:
+            raise TinyRuntimeError(f&quot;cannot execute {type(node).__name__}&quot;, getattr(node, &quot;line&quot;, None))
+
+    def run_block(self, statements, env):
+        for stmt in statements:
+            self.execute(stmt, env)
+
+    def run(self, program):
+        try:
+            self.run_block(program, self.globals)
+        except ReturnSignal:
+            raise TinyRuntimeError(&quot;return outside a function&quot;) from None
+        return self.output
+
+
+def run_source(source):
+    interpreter = Interpreter()
+    interpreter.run(parse(source))
+    return interpreter.output</textarea><template class="pc-src pc-hint">Count the depth with <code>self.depth += 1</code> before running the body and <code>self.depth -= 1</code> in a <code>finally</code>, so an error or a return still unwinds it. Catch <code>ReturnSignal</code> around <code>self.run_block(decl.body, local)</code>.</template></div>
+<h2 id="checkpoint">Checkpoint</h2>
+<p>The whole interpreter, running Monday&rsquo;s example program:</p>
+<div class="pc pc-example" data-kind="example" data-id="w069d4-e1"><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+
+
+KEYWORDS = {&quot;let&quot;, &quot;fn&quot;, &quot;return&quot;, &quot;if&quot;, &quot;else&quot;, &quot;while&quot;, &quot;print&quot;, &quot;true&quot;, &quot;false&quot;, &quot;nil&quot;, &quot;and&quot;, &quot;or&quot;, &quot;not&quot;}
+
+
+TWO_CHAR = {&quot;==&quot;, &quot;!=&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;}
+
+
+ONE_CHAR = set(&quot;+-*/%&lt;&gt;=(){},;&quot;)
+
+
+def read_name(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isalnum() or cursor.peek() == &quot;_&quot;:
+        text += cursor.advance()
+    if text in KEYWORDS:
+        value = {&quot;true&quot;: True, &quot;false&quot;: False, &quot;nil&quot;: None}.get(text)
+        return Token(text.upper(), text, value, line, column)
+    return Token(&quot;NAME&quot;, text, text, line, column)
+
+
+def read_operator(cursor):
+    line, column = cursor.line, cursor.column
+    pair = cursor.peek() + cursor.peek(1)
+    if pair in TWO_CHAR:
+        cursor.advance()
+        cursor.advance()
+        return Token(&quot;OP&quot;, pair, pair, line, column)
+    ch = cursor.peek()
+    if ch in ONE_CHAR:
+        cursor.advance()
+        return Token(&quot;OP&quot;, ch, ch, line, column)
+    raise LexError(f&quot;unexpected character {ch!r}&quot;, line, column)
+
+
+def skip_space_and_comments(cursor):
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch in &quot; \t\r\n&quot;:
+            cursor.advance()
+        elif ch == &quot;#&quot;:
+            while not cursor.at_end() and cursor.peek() != &quot;\n&quot;:
+                cursor.advance()
+        else:
+            return
+
+
+def tokenize(source):
+    cursor = Cursor(source)
+    tokens = []
+    while True:
+        skip_space_and_comments(cursor)
+        if cursor.at_end():
+            tokens.append(Token(&quot;EOF&quot;, &quot;&quot;, None, cursor.line, cursor.column))
+            return tokens
+        ch = cursor.peek()
+        if ch.isdigit():
+            tokens.append(read_number(cursor))
+        elif ch == &#x27;&quot;&#x27;:
+            tokens.append(read_string(cursor))
+        elif ch.isalpha() or ch == &quot;_&quot;:
+            tokens.append(read_name(cursor))
+        else:
+            tokens.append(read_operator(cursor))
+
+@dataclass
+class Number:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class String:
+    value: str
+    line: int = 0
+
+
+@dataclass
+class Literal:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Name:
+    name: str
+    line: int = 0
+
+
+@dataclass
+class Unary:
+    op: str
+    operand: object
+    line: int = 0
+
+
+@dataclass
+class Binary:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Logical:
+    op: str
+    left: object
+    right: object
+    line: int = 0
+
+
+@dataclass
+class Call:
+    callee: object
+    args: list
+    line: int = 0
+
+
+@dataclass
+class Let:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Assign:
+    name: str
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Print:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class ExprStmt:
+    value: object
+    line: int = 0
+
+
+@dataclass
+class Block:
+    body: list
+    line: int = 0
+
+
+@dataclass
+class If:
+    test: object
+    then: object
+    otherwise: object
+    line: int = 0
+
+
+@dataclass
+class While:
+    test: object
+    body: object
+    line: int = 0
+
+
+@dataclass
+class Function:
+    name: str
+    params: list
+    body: list
+    line: int = 0
+
+
+@dataclass
+class Return:
+    value: object
+    line: int = 0
+
+class Parser:
+    def __init__(self, tokens):
+        self.tokens, self.pos = tokens, 0
+
+    def peek(self):
+        return self.tokens[self.pos]
+
+    def at(self, kind, text=None):
+        tok = self.peek()
+        return tok.kind == kind and (text is None or tok.text == text)
+
+    def match(self, kind, text=None):
+        if self.at(kind, text):
+            tok = self.peek()
+            self.pos += 1
+            return tok
+        return None
+
+    def expect(self, kind, text=None, what=None):
+        tok = self.match(kind, text)
+        if tok is None:
+            got = self.peek()
+            shown = &quot;end of input&quot; if got.kind == &quot;EOF&quot; else repr(got.text)
+            raise ParseError(f&quot;expected {what or text or kind.lower()}, got {shown}&quot;, got.line, got.column)
+        return tok
+
+    # --- expressions, lowest precedence first ---
+    def expression(self):
+        return self.logic_or()
+
+    def logic_or(self):
+        node = self.logic_and()
+        while self.at(&quot;OR&quot;):
+            line = self.match(&quot;OR&quot;).line
+            node = Logical(&quot;or&quot;, node, self.logic_and(), line)
+        return node
+
+    def logic_and(self):
+        node = self.equality()
+        while self.at(&quot;AND&quot;):
+            line = self.match(&quot;AND&quot;).line
+            node = Logical(&quot;and&quot;, node, self.equality(), line)
+        return node
+
+    def binary(self, operators, operand):
+        node = operand()
+        while self.peek().kind == &quot;OP&quot; and self.peek().text in operators:
+            tok = self.match(&quot;OP&quot;)
+            node = Binary(tok.text, node, operand(), tok.line)
+        return node
+
+    def equality(self):
+        return self.binary({&quot;==&quot;, &quot;!=&quot;}, self.comparison)
+
+    def comparison(self):
+        return self.binary({&quot;&lt;&quot;, &quot;&lt;=&quot;, &quot;&gt;&quot;, &quot;&gt;=&quot;}, self.term)
+
+    def term(self):
+        return self.binary({&quot;+&quot;, &quot;-&quot;}, self.factor)
+
+    def factor(self):
+        return self.binary({&quot;*&quot;, &quot;/&quot;, &quot;%&quot;}, self.unary)
+
+    def unary(self):
+        if self.at(&quot;OP&quot;, &quot;-&quot;):
+            line = self.match(&quot;OP&quot;).line
+            return Unary(&quot;-&quot;, self.unary(), line)
+        if self.at(&quot;NOT&quot;):
+            line = self.match(&quot;NOT&quot;).line
+            return Unary(&quot;not&quot;, self.unary(), line)
+        return self.call()
+
+    def call(self):
+        node = self.primary()
+        while self.at(&quot;OP&quot;, &quot;(&quot;):
+            line = self.match(&quot;OP&quot;).line
+            args = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                args.append(self.expression())
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    args.append(self.expression())
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            node = Call(node, args, line)
+        return node
+
+    def primary(self):
+        tok = self.peek()
+        if self.match(&quot;NUMBER&quot;):
+            return Number(tok.value, tok.line)
+        if self.match(&quot;STRING&quot;):
+            return String(tok.value, tok.line)
+        if tok.kind in (&quot;TRUE&quot;, &quot;FALSE&quot;, &quot;NIL&quot;):
+            self.pos += 1
+            return Literal(tok.value, tok.line)
+        if self.match(&quot;NAME&quot;):
+            return Name(tok.text, tok.line)
+        if self.match(&quot;OP&quot;, &quot;(&quot;):
+            node = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return node
+        shown = &quot;end of input&quot; if tok.kind == &quot;EOF&quot; else repr(tok.text)
+        raise ParseError(f&quot;expected an expression, got {shown}&quot;, tok.line, tok.column)
+
+    # --- statements ---
+    def statement(self):
+        tok = self.peek()
+        if self.match(&quot;LET&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;=&quot;)
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Let(name, value, tok.line)
+        if self.match(&quot;PRINT&quot;):
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Print(value, tok.line)
+        if self.at(&quot;OP&quot;, &quot;{&quot;):
+            return Block(self.block(), tok.line)
+        if self.match(&quot;IF&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            then = self.statement()
+            otherwise = self.statement() if self.match(&quot;ELSE&quot;) else None
+            return If(test, then, otherwise, tok.line)
+        if self.match(&quot;WHILE&quot;):
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            test = self.expression()
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return While(test, self.statement(), tok.line)
+        if self.match(&quot;FN&quot;):
+            name = self.expect(&quot;NAME&quot;, what=&quot;a function name&quot;).text
+            self.expect(&quot;OP&quot;, &quot;(&quot;)
+            params = []
+            if not self.at(&quot;OP&quot;, &quot;)&quot;):
+                params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+                while self.match(&quot;OP&quot;, &quot;,&quot;):
+                    params.append(self.expect(&quot;NAME&quot;, what=&quot;a parameter name&quot;).text)
+            self.expect(&quot;OP&quot;, &quot;)&quot;)
+            return Function(name, params, self.block(), tok.line)
+        if self.match(&quot;RETURN&quot;):
+            value = None if self.at(&quot;OP&quot;, &quot;;&quot;) else self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Return(value, tok.line)
+        if tok.kind == &quot;NAME&quot; and self.tokens[self.pos + 1].kind == &quot;OP&quot; and self.tokens[self.pos + 1].text == &quot;=&quot;:
+            self.pos += 2
+            value = self.expression()
+            self.expect(&quot;OP&quot;, &quot;;&quot;)
+            return Assign(tok.text, value, tok.line)
+        value = self.expression()
+        self.expect(&quot;OP&quot;, &quot;;&quot;)
+        return ExprStmt(value, tok.line)
+
+    def block(self):
+        self.expect(&quot;OP&quot;, &quot;{&quot;)
+        body = []
+        while not self.at(&quot;OP&quot;, &quot;}&quot;):
+            if self.at(&quot;EOF&quot;):
+                tok = self.peek()
+                raise ParseError(&quot;expected &#x27;}&#x27;, got end of input&quot;, tok.line, tok.column)
+            body.append(self.statement())
+        self.expect(&quot;OP&quot;, &quot;}&quot;)
+        return body
+
+    def program(self):
+        body = []
+        while not self.at(&quot;EOF&quot;):
+            body.append(self.statement())
+        return body
+
+
+def parse(source):
+    return Parser(tokenize(source)).program()
+
+class Environment:
+    def __init__(self, parent=None):
+        self.values, self.parent = {}, parent
+
+    def define(self, name, value):
+        self.values[name] = value
+
+    def find(self, name):
+        env = self
+        while env is not None:
+            if name in env.values:
+                return env
+            env = env.parent
+        return None
+
+    def get(self, name, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;undefined name {name!r}&quot;, line)
+        return env.values[name]
+
+    def assign(self, name, value, line=None):
+        env = self.find(name)
+        if env is None:
+            raise TinyRuntimeError(f&quot;cannot assign to undefined name {name!r}&quot;, line)
+        env.values[name] = value
+
+
+class ReturnSignal(Exception):
+    def __init__(self, value):
+        self.value = value
+
+
+class TinyFunction:
+    def __init__(self, decl, closure):
+        self.decl, self.closure = decl, closure
+
+    def __repr__(self):
+        return f&quot;&lt;fn {self.decl.name}&gt;&quot;
+
+
+class Builtin:
+    def __init__(self, name, arity, func):
+        self.name, self.arity, self.func = name, arity, func
+
+    def __repr__(self):
+        return f&quot;&lt;builtin {self.name}&gt;&quot;
+
+def truthy(value):
+    return value is not None and value is not False
+
+
+def show(value):
+    if value is None:
+        return &quot;nil&quot;
+    if value is True:
+        return &quot;true&quot;
+    if value is False:
+        return &quot;false&quot;
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value)) if abs(value) &lt; 1e16 else str(value)
+    return str(value)
+
+
+def type_name(value):
+    if value is None:
+        return &quot;nil&quot;
+    if isinstance(value, bool):
+        return &quot;bool&quot;
+    if isinstance(value, (int, float)):
+        return &quot;number&quot;
+    if isinstance(value, str):
+        return &quot;string&quot;
+    return &quot;function&quot;
+
+
+def is_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+class Interpreter:
+    def __init__(self, output=None, max_depth=100):
+        self.output = [] if output is None else output
+        self.globals = Environment()
+        self.max_depth, self.depth = max_depth, 0
+        self.steps = 0
+        for name, arity, func in [
+            (&quot;len&quot;, 1, self._len), (&quot;str&quot;, 1, lambda v: show(v)), (&quot;type&quot;, 1, type_name),
+        ]:
+            self.globals.define(name, Builtin(name, arity, func))
+
+    @staticmethod
+    def _len(value):
+        if not isinstance(value, str):
+            raise TinyRuntimeError(f&quot;len() needs a string, not {type_name(value)}&quot;)
+        return len(value)
+
+    # --- expressions ---
+    def evaluate(self, node, env):
+        self.steps += 1
+        if isinstance(node, (Number, String, Literal)):
+            return node.value
+        if isinstance(node, Name):
+            return env.get(node.name, node.line)
+        if isinstance(node, Unary):
+            value = self.evaluate(node.operand, env)
+            if node.op == &quot;-&quot;:
+                if not is_number(value):
+                    raise TinyRuntimeError(f&quot;cannot negate {type_name(value)}&quot;, node.line)
+                return -value
+            return not truthy(value)
+        if isinstance(node, Logical):
+            left = self.evaluate(node.left, env)
+            if node.op == &quot;or&quot;:
+                return left if truthy(left) else self.evaluate(node.right, env)
+            return left if not truthy(left) else self.evaluate(node.right, env)
+        if isinstance(node, Binary):
+            return self.binary(node, self.evaluate(node.left, env), self.evaluate(node.right, env))
+        if isinstance(node, Call):
+            return self.call(node, env)
+        raise TinyRuntimeError(f&quot;cannot evaluate {type(node).__name__}&quot;, getattr(node, &quot;line&quot;, None))
+
+    def binary(self, node, left, right):
+        op = node.op
+        if op == &quot;==&quot;:
+            return type_name(left) == type_name(right) and left == right
+        if op == &quot;!=&quot;:
+            return not (type_name(left) == type_name(right) and left == right)
+        if op == &quot;+&quot; and isinstance(left, str) and isinstance(right, str):
+            return left + right
+        if not (is_number(left) and is_number(right)):
+            raise TinyRuntimeError(
+                f&quot;cannot use {op} with {type_name(left)} and {type_name(right)}&quot;, node.line)
+        if op in (&quot;/&quot;, &quot;%&quot;) and right == 0:
+            raise TinyRuntimeError(&quot;division by zero&quot;, node.line)
+        if op == &quot;/&quot;:
+            result = left / right
+            return int(result) if isinstance(left, int) and isinstance(right, int) and result.is_integer() else result
+        return {&quot;+&quot;: lambda: left + right, &quot;-&quot;: lambda: left - right, &quot;*&quot;: lambda: left * right,
+                &quot;%&quot;: lambda: left % right, &quot;&lt;&quot;: lambda: left &lt; right, &quot;&lt;=&quot;: lambda: left &lt;= right,
+                &quot;&gt;&quot;: lambda: left &gt; right, &quot;&gt;=&quot;: lambda: left &gt;= right}[op]()
+
+    def call(self, node, env):
+        callee = self.evaluate(node.callee, env)
+        args = [self.evaluate(a, env) for a in node.args]
+        if isinstance(callee, Builtin):
+            if len(args) != callee.arity:
+                raise TinyRuntimeError(f&quot;{callee.name}() takes {callee.arity} argument(s), got {len(args)}&quot;, node.line)
+            try:
+                return callee.func(*args)
+            except TinyRuntimeError as e:
+                raise TinyRuntimeError(e.message, node.line) from None
+        if not isinstance(callee, TinyFunction):
+            raise TinyRuntimeError(f&quot;cannot call {type_name(callee)}&quot;, node.line)
+        decl = callee.decl
+        if len(args) != len(decl.params):
+            raise TinyRuntimeError(f&quot;{decl.name}() takes {len(decl.params)} argument(s), got {len(args)}&quot;, node.line)
+        if self.depth &gt;= self.max_depth:
+            raise TinyRuntimeError(&quot;too much recursion&quot;, node.line)
+        local = Environment(callee.closure)
+        for name, value in zip(decl.params, args):
+            local.define(name, value)
+        self.depth += 1
+        try:
+            self.run_block(decl.body, local)
+        except ReturnSignal as signal:
+            return signal.value
+        finally:
+            self.depth -= 1
+        return None
+
+    # --- statements ---
+    def execute(self, node, env):
+        self.steps += 1
+        if isinstance(node, Let):
+            env.define(node.name, self.evaluate(node.value, env))
+        elif isinstance(node, Assign):
+            env.assign(node.name, self.evaluate(node.value, env), node.line)
+        elif isinstance(node, Print):
+            self.output.append(show(self.evaluate(node.value, env)))
+        elif isinstance(node, ExprStmt):
+            self.evaluate(node.value, env)
+        elif isinstance(node, Block):
+            self.run_block(node.body, Environment(env))
+        elif isinstance(node, If):
+            if truthy(self.evaluate(node.test, env)):
+                self.execute(node.then, env)
+            elif node.otherwise is not None:
+                self.execute(node.otherwise, env)
+        elif isinstance(node, While):
+            while truthy(self.evaluate(node.test, env)):
+                self.execute(node.body, env)
+        elif isinstance(node, Function):
+            env.define(node.name, TinyFunction(node, env))
+        elif isinstance(node, Return):
+            raise ReturnSignal(None if node.value is None else self.evaluate(node.value, env))
+        else:
+            raise TinyRuntimeError(f&quot;cannot execute {type(node).__name__}&quot;, getattr(node, &quot;line&quot;, None))
+
+    def run_block(self, statements, env):
+        for stmt in statements:
+            self.execute(stmt, env)
+
+    def run(self, program):
+        try:
+            self.run_block(program, self.globals)
+        except ReturnSignal:
+            raise TinyRuntimeError(&quot;return outside a function&quot;) from None
+        return self.output
+
+
+def run_source(source):
+    interpreter = Interpreter()
+    interpreter.run(parse(source))
+    return interpreter.output
+
+def show_error(source, error):
+    if error.line is None:
+        return str(error)
+    text = source.split(&quot;\n&quot;)[error.line - 1]
+    if error.column is None:
+        return f&quot;{error}\n    {text}&quot;
+    return f&quot;{error}\n    {text}\n    {&#x27; &#x27; * (error.column - 1)}^&quot;
+
+program = &quot;&quot;&quot;
+fn make_counter() {
+    let count = 0;
+    fn step() {
+        count = count + 1;
+        return count;
+    }
+    return step;
+}
+let next = make_counter();
+next();
+next();
+print next();
+fn fib(n) {
+    if (n &lt; 2) return n;
+    return fib(n - 1) + fib(n - 2);
+}
+print &quot;fib(15) is &quot; + str(fib(15));
+let i = 0;
+while (i &lt; 3) {
+    print i * i;
+    i = i + 1;
+}
+&quot;&quot;&quot;
+for line in run_source(program):
+    print(line)
+
+broken = &quot;let total = 0;\nprint total + \&quot;one\&quot;;&quot;
+try:
+    run_source(broken)
+except TinyError as e:
+    print(show_error(broken, e))</textarea></div>
+<aside class="callout c-think"><div class="callout-t">Closures, from the inside</div><p>Week 60 explained closures from the outside: a nested function remembers variables from the function around it. Now you&rsquo;ve built one. The whole trick is a single line: <code>TinyFunction(node, env)</code> stores the environment that was current when <code>fn</code> ran, and every call makes its new scope a child of <strong>that</strong> environment, not of the caller&rsquo;s. So <code>step</code> finds <code>count</code> in the environment of the <code>make_counter</code> call that created it, even after that call has returned, and each counter has its own <code>count</code> because each call to <code>make_counter</code> made a new environment. Python&rsquo;s cells and <code>nonlocal</code> (Week 60) are a faster version of the same idea.</p></aside>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w069d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What is an environment in the interpreter?", "answer": 1, "explain": "Lookups walk outwards.", "options": ["The operating system", "A scope&rsquo;s variables, linked to the scope around it", "The token list", "The output"]}, {"type": "mc", "q": "Where does assign change a variable?", "answer": 1, "explain": "define creates in the current scope.", "options": ["Always in the current scope", "In the nearest scope where it was defined", "In the global scope", "Nowhere"]}, {"type": "mc", "q": "Which values are false in Tiny?", "answer": 1, "explain": "Unlike Python, 0 and the empty string are true.", "options": ["0, the empty string and nil", "Only nil and false", "Only false", "Everything empty"]}, {"type": "mc", "q": "What does nil or 5 evaluate to?", "answer": 1, "explain": "or returns an operand, as in Python.", "options": ["true", "5", "nil", "An error"]}, {"type": "mc", "q": "Why is 1 == true false in Tiny?", "answer": 1, "explain": "Python&rsquo;s True == 1 would be true.", "options": ["A bug", "Equality compares type names as well as values", "true is 0", "Comparisons are disallowed"]}, {"type": "mc", "q": "Why does a block get a new environment?", "answer": 1, "explain": "Block scope.", "options": ["Speed", "So variables declared inside it disappear at its end", "For printing", "It doesn&rsquo;t"]}, {"type": "mc", "q": "What makes a Tiny function a closure?", "answer": 1, "explain": "Not the caller&rsquo;s environment.", "options": ["Its name", "It stores the environment it was defined in, and calls run in a child of that", "It has parameters", "It returns a value"]}, {"type": "mc", "q": "Why is return implemented with an exception?", "answer": 1, "explain": "ReturnSignal isn&rsquo;t a TinyError.", "options": ["It&rsquo;s an error", "It must unwind through any nested blocks and loops to the call", "Speed", "Python requires it"]}, {"type": "mc", "q": "Why does the interpreter limit recursion depth itself?", "answer": 1, "explain": "Each Tiny call uses several Python frames.", "options": ["For fun", "So deep Tiny recursion gives a Tiny error instead of crashing Python with RecursionError", "Speed", "Closures need it"]}, {"type": "output", "q": "What does this print?", "answer": "2 1", "explain": "The inner scope&rsquo;s x shadows the outer one.", "code": "class Env:\n    def __init__(self, parent=None):\n        self.values, self.parent = {}, parent\nouter = Env()\nouter.values[\"x\"] = 1\ninner = Env(outer)\ninner.values[\"x\"] = 2\nprint(inner.values[\"x\"], inner.parent.values[\"x\"])"}]</script></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Write a Tiny program of your own that uses a closure in a way the counter doesn&rsquo;t, such as a function that returns an &ldquo;adder&rdquo; (<code>make_adder(5)</code> returning a function that adds 5), and run it with today&rsquo;s interpreter. Tomorrow: testing the interpreter properly, and finding out where it spends its time.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w069d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w069d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w069d4", "week": 69, "day": 4, "title": "Project: evaluator", "exercises": [{"id": "w069d4-step16", "title": "Step 16: environments", "points": 15}, {"id": "w069d4-step17", "title": "Step 17: values and truth", "points": 10}, {"id": "w069d4-step18", "title": "Step 18: evaluating expressions", "points": 20}, {"id": "w069d4-step19", "title": "Step 19: running statements", "points": 20}, {"id": "w069d4-step20", "title": "Step 20: functions and closures", "points": 20}], "points": 85}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
