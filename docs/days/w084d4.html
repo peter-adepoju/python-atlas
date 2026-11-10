@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="97b2d34bb1">
+<title>Week 84 Day 4: A neural network from scratch | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=97b2d34bb1">
+<link rel="stylesheet" href="../assets/css/site.css?v=97b2d34bb1">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=97b2d34bb1"></script>
+<script src="../assets/vendor/codemirror.js?v=97b2d34bb1" defer></script>
+<meta name="description" content="Behind image recognition, speech recognition and language models is one idea scaled up enormously: the neural network, layers of simple units that each...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w084d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 84 Day 4: A neural network from scratch">
+<meta property="og:description" content="Behind image recognition, speech recognition and language models is one idea scaled up enormously: the neural network, layers of simple units that each...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w084d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-84">Week 84: Python for machine learning</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#a-neuron-and-what-it-can-t-do" data-sec="a-neuron-and-what-it-can-t-do">A neuron, and what it can’t do</a></li><li><a href="#layers-and-the-forward-pass" data-sec="layers-and-the-forward-pass">Layers and the forward pass</a></li><li><a href="#cross-entropy" data-sec="cross-entropy">Cross-entropy</a></li><li><a href="#backpropagation" data-sec="backpropagation">Backpropagation</a></li><li><a href="#training" data-sec="training">Training</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w084d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-84">Week 84: Python for machine learning</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 84, Day 4</span></p>
+      <h1>A neural network from scratch</h1>
+      <div class="day-intro"><p>Behind image recognition, speech recognition and language models is one idea scaled up enormously: the <strong>neural network</strong>, layers of simple units that each compute a weighted sum and bend it with a non-linear function, trained by gradient descent. Libraries hide the mechanics; today you build them yourself with NumPy, so nothing about tomorrow&rsquo;s PyTorch is magic. You&rsquo;ll start from a single neuron (which is logistic regression) and see the problem it can&rsquo;t solve, stack neurons into layers, run the <strong>forward pass</strong> with matrix multiplication, measure the error with <strong>cross-entropy</strong>, work out every gradient with the <strong>chain rule</strong> (backpropagation) and check them numerically, then train a network that learns XOR and the curved boundary of the two-moons data set, where a linear model can&rsquo;t.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Compute a neuron and a layer with weights, biases and activation functions</li><li>Run a two-layer network&rsquo;s forward pass with matrix shapes that line up</li><li>Measure classification error with binary cross-entropy</li><li>Derive and implement backpropagation, and check it with numerical gradients</li><li>Train with gradient descent and mini-batches, and recognise the effect of initialisation</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h 5 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="A neuron, and what it can&#x27;t do: 15 min"></span><span class="plan-seg s0" style="flex:20" title="Layers and the forward pass: 20 min"></span><span class="plan-seg s1" style="flex:10" title="Cross-entropy: 10 min"></span><span class="plan-seg s0" style="flex:25" title="Backpropagation: 25 min"></span><span class="plan-seg s1" style="flex:15" title="Training: 15 min"></span><span class="plan-seg s0" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s1" style="flex:30" title="Quiz and daily challenge: 30 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">8 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">A neuron, and what it can&rsquo;t do</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">Layers and the forward pass</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:45</span><span class="plan-what">Cross-entropy</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Backpropagation</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Training</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">30 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w084d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w084d4.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w084d4-p1"><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+x = np.array([2.0, -1.0])           # two inputs
+w = np.array([0.8, 0.5])            # their weights
+b = -0.6                            # the bias
+z = x @ w + b
+print(round(float(z), 2), round(float(sigmoid(z)), 3))
+print(sigmoid(np.array([-5.0, 0.0, 5.0])).round(3).tolist())</textarea></div>
+<p>A <strong>neuron</strong> multiplies each input by a weight, adds them up with a bias, and passes the total <code>z</code> through an <strong>activation function</strong>. The <strong>sigmoid</strong> squeezes any number into the range 0 to 1, so the output can be read as a probability. That&rsquo;s exactly logistic regression from Day 2: one neuron.</p>
+<h2 id="a-neuron-and-what-it-can-t-do">A neuron, and what it can&rsquo;t do</h2>
+<p>A single neuron&rsquo;s decision is &ldquo;is <code>w·x + b</code> above 0?&rdquo;, which divides the inputs with a <strong>straight line</strong> (a flat plane in more dimensions). Many problems aren&rsquo;t like that. The classic example is <strong>XOR</strong>: output 1 when exactly one of two inputs is 1. The points <code>(0, 1)</code> and <code>(1, 0)</code> must be on one side, <code>(0, 0)</code> and <code>(1, 1)</code> on the other, and no straight line does it. (Showing this limit, in 1969, held the field back for years.)</p>
+<p>The fix is to put neurons in <strong>layers</strong>. A <strong>hidden layer</strong> of several neurons each draws its own line; a neuron after them combines those lines into a bent boundary. But only if each hidden neuron has a <strong>non-linear</strong> activation: without one, a layer of weighted sums followed by another weighted sum is still just one weighted sum, still a straight line. The most common hidden activation is <strong>ReLU</strong>, <code>max(0, z)</code>: zero for negative totals, unchanged for positive ones.</p>
+<div class="pc pc-example" data-kind="example" data-id="w084d4-e2"><textarea class="pc-src pc-code" hidden>import numpy as np
+
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=float)
+xor = np.array([0, 1, 1, 0])
+relu = lambda z: np.maximum(z, 0)
+
+# Two hidden neurons, chosen by hand: h1 fires for &quot;at least one&quot;, h2 for &quot;both&quot;.
+W1 = np.array([[1.0, 1.0], [1.0, 1.0]])
+b1 = np.array([0.0, -1.0])
+h = relu(X @ W1 + b1)
+print(h.tolist())
+out = h @ np.array([1.0, -2.0])     # &quot;at least one&quot; minus twice &quot;both&quot;
+print(out.tolist(), (out &gt; 0.5).astype(int).tolist() == xor.tolist())</textarea></div>
+<p>Hand-picked weights solve XOR with two hidden neurons. Training finds such weights by itself.</p>
+<h2 id="layers-and-the-forward-pass">Layers and the forward pass</h2>
+<p>With a batch of examples <code>X</code> (shape <code>(n, inputs)</code>), a whole layer is one matrix multiplication: weights <code>W1</code> of shape <code>(inputs, hidden)</code> and a bias <code>b1</code> of shape <code>(hidden,)</code> give <code>Z1 = X @ W1 + b1</code>, shape <code>(n, hidden)</code>, and <code>H = relu(Z1)</code>. The output layer does the same with <code>W2</code> of shape <code>(hidden, 1)</code>: <code>Z2 = H @ W2 + b2</code>, and <code>p = sigmoid(Z2)</code>, one probability per example. Running the input through to the output is the <strong>forward pass</strong>. Keep the intermediate arrays (<code>Z1</code>, <code>H</code>, <code>p</code>): the backward pass needs them.</p>
+<p>Shapes are the main source of bugs. Read each multiplication as <code>(n, a) @ (a, b) → (n, b)</code>: the inner sizes must match.</p>
+<p>Initial weights must be <strong>random</strong> and fairly small (here a normal distribution scaled by <code>1/√inputs</code>). If every weight starts equal, every hidden neuron computes the same thing, gets the same gradient and stays identical forever; the randomness <strong>breaks the symmetry</strong>. Seed the generator so runs can be repeated.</p>
+<div class="pc pc-example" data-kind="example" data-id="w084d4-e3"><textarea class="pc-src pc-code" hidden>import numpy as np
+
+rng = np.random.default_rng(0)
+n_in, n_hidden = 2, 4
+params = {&quot;W1&quot;: rng.normal(0, 1 / np.sqrt(n_in), (n_in, n_hidden)), &quot;b1&quot;: np.zeros(n_hidden),
+          &quot;W2&quot;: rng.normal(0, 1 / np.sqrt(n_hidden), (n_hidden, 1)), &quot;b2&quot;: np.zeros(1)}
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=float)
+Z1 = X @ params[&quot;W1&quot;] + params[&quot;b1&quot;]
+H = np.maximum(Z1, 0)
+Z2 = H @ params[&quot;W2&quot;] + params[&quot;b2&quot;]
+p = 1 / (1 + np.exp(-Z2.ravel()))
+print(Z1.shape, H.shape, Z2.shape, p.shape)
+print(sum(v.size for v in params.values()), &quot;parameters&quot;)</textarea></div>
+<h2 id="cross-entropy">Cross-entropy</h2>
+<p>To train a classifier that outputs probabilities, the loss should punish confident mistakes hard. <strong>Binary cross-entropy</strong> does: <code>loss = −mean(y·log p + (1 − y)·log(1 − p))</code>. Predicting 0.9 for a true 1 costs <code>−log 0.9 ≈ 0.105</code>; predicting 0.01 costs <code>−log 0.01 ≈ 4.6</code>. A model that always says 0.5 scores <code>log 2 ≈ 0.693</code>, which is the number to beat. Clip <code>p</code> slightly away from 0 and 1 before taking logs, so a perfectly confident wrong answer gives a large number instead of infinity.</p>
+<div class="pc pc-example" data-kind="example" data-id="w084d4-e4"><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def bce(y, p, eps=1e-12):
+    p = np.clip(p, eps, 1 - eps)
+    return float(-(y * np.log(p) + (1 - y) * np.log(1 - p)).mean())
+
+y = np.array([1, 0, 1, 0])
+print(round(bce(y, np.array([0.9, 0.1, 0.8, 0.3])), 3))
+print(round(bce(y, np.full(4, 0.5)), 3))
+print(round(bce(y, np.array([0.01, 0.1, 0.8, 0.3])), 3))
+print(round(bce(np.array([1]), np.array([0.0])), 1))</textarea></div>
+<h2 id="backpropagation">Backpropagation</h2>
+<p>Gradient descent needs the gradient of the loss with respect to <strong>every</strong> weight. The network is a chain of simple steps, so the <strong>chain rule</strong> gives them, working backwards from the loss (hence <strong>backpropagation</strong>). For sigmoid output with cross-entropy, the first step is remarkably simple, and the rest follow:</p>
+<pre><code>dZ2 = (p − y) / n                 shape (n, 1)
+dW2 = H.T @ dZ2                   shape (hidden, 1)      db2 = dZ2.sum(axis=0)
+dH  = dZ2 @ W2.T                  shape (n, hidden)
+dZ1 = dH * (Z1 &gt; 0)               ReLU passes gradient only where it was active
+dW1 = X.T @ dZ1                   shape (inputs, hidden) db1 = dZ1.sum(axis=0)
+</code></pre>
+<p>Each gradient has the same shape as the thing it&rsquo;s the gradient of, which is a good check. A better one is a <strong>numerical gradient</strong>: nudge one weight up by a tiny <code>h</code>, then down, and see how the loss changes, <code>(loss(w + h) − loss(w − h)) / 2h</code>. It&rsquo;s far too slow for training (two forward passes per weight), but if it agrees with your backpropagation on a small network, your formulas are right.</p>
+<div class="pc pc-example" data-kind="example" data-id="w084d4-e5"><textarea class="pc-src pc-code" hidden>import numpy as np
+
+rng = np.random.default_rng(1)
+X = rng.normal(size=(5, 3)); y = np.array([1, 0, 1, 1, 0])
+w = rng.normal(size=3)
+
+def loss(w):
+    p = 1 / (1 + np.exp(-(X @ w)))
+    return -(y * np.log(p) + (1 - y) * np.log(1 - p)).mean()
+
+p = 1 / (1 + np.exp(-(X @ w)))
+analytic = X.T @ ((p - y) / len(y))
+h = 1e-5
+numeric = np.array([(loss(w + h * e) - loss(w - h * e)) / (2 * h) for e in np.eye(3)])
+print(analytic.round(6).tolist())
+print(numeric.round(6).tolist())
+print(float(np.abs(analytic - numeric).max()) &lt; 1e-8)</textarea></div>
+<h2 id="training">Training</h2>
+<p>Training repeats four steps: <strong>forward</strong> (predictions), <strong>loss</strong> (how wrong), <strong>backward</strong> (gradients), <strong>update</strong> (<code>W -= rate × dW</code> for every parameter). One pass through the training data is an <strong>epoch</strong>. With large data sets, each update uses a small random <strong>mini-batch</strong> of examples instead of all of them: each step is noisier but far cheaper, and the noise often helps. Shuffle the order every epoch.</p>
+<p>Watch the loss as you train: it should fall. If it rises or jumps about, the learning rate is too high. If it gets stuck high, the network may be too small, the rate too low, or (with ReLU) some hidden neurons may have &ldquo;died&rdquo;, stuck at zero for every example, which is one reason to try more than one seed.</p>
+<div class="pc pc-example" data-kind="example" data-id="w084d4-e6"><textarea class="pc-src pc-code" hidden>import numpy as np
+
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=float)
+y = np.array([0, 1, 1, 0], dtype=float)
+rng = np.random.default_rng(0)
+W1, b1 = rng.normal(0, 1, (2, 4)), np.zeros(4)
+W2, b2 = rng.normal(0, 0.5, (4, 1)), np.zeros(1)
+for epoch in range(2001):
+    Z1 = X @ W1 + b1; H = np.maximum(Z1, 0)
+    p = (1 / (1 + np.exp(-(H @ W2 + b2)))).ravel()
+    if epoch % 500 == 0:
+        loss = -(y * np.log(p + 1e-12) + (1 - y) * np.log(1 - p + 1e-12)).mean()
+        print(epoch, round(float(loss), 4), (p &gt;= 0.5).astype(int).tolist())
+    dZ2 = ((p - y) / 4)[:, None]
+    dW2, db2 = H.T @ dZ2, dZ2.sum(axis=0)
+    dZ1 = (dZ2 @ W2.T) * (Z1 &gt; 0)
+    dW1, db1 = X.T @ dZ1, dZ1.sum(axis=0)
+    W1 -= 0.5 * dW1; b1 -= 0.5 * db1; W2 -= 0.5 * dW2; b2 -= 0.5 * db2</textarea></div>
+<p>It learns XOR, which no single neuron can.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A neuron computes <code>activation(x·w + b)</code>; one sigmoid neuron is logistic regression and can only draw a straight boundary, so it can&rsquo;t learn XOR. Hidden layers with a non-linear activation (ReLU, <code>max(0, z)</code>) can bend the boundary. A layer is a matrix multiplication: <code>(n, inputs) @ (inputs, hidden)</code>, plus a bias; the forward pass runs input to output and keeps the intermediate arrays. Initialise weights randomly (and seeded) to break symmetry. Binary cross-entropy, <code>−mean(y log p + (1 − y) log(1 − p))</code>, punishes confident mistakes; 0.693 is the &ldquo;always 0.5&rdquo; score; clip before taking logs. Backpropagation applies the chain rule backwards: <code>dZ2 = (p − y)/n</code>, <code>dW2 = H.T @ dZ2</code>, <code>dZ1 = (dZ2 @ W2.T) * (Z1 &gt; 0)</code>, <code>dW1 = X.T @ dZ1</code>; every gradient has its parameter&rsquo;s shape; check with central-difference numerical gradients. Train by repeating forward, loss, backward, update, over epochs and shuffled mini-batches, watching the loss fall.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d4-activations" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Activations and their slopes</div><div class="pc-prompt"><p>Write <code>sigmoid(z)</code> that never overflows (clip <code>z</code> to the range −500 to 500 first), <code>sigmoid_slope(z)</code> (its derivative, <code>s × (1 − s)</code>), <code>relu(z)</code> and <code>relu_slope(z)</code> (1 where <code>z &gt; 0</code>, else 0, as floats). All take and return NumPy arrays.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def sigmoid(z):
+    ___
+
+def sigmoid_slope(z):
+    ___
+
+def relu(z):
+    ___
+
+def relu_slope(z):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import warnings
+import numpy as np
+
+def test_activations():
+    &quot;values and slopes&quot;
+    z = np.array([-2.0, 0.0, 3.0])
+    assert sigmoid(z).round(4).tolist() == [0.1192, 0.5, 0.9526]
+    assert sigmoid_slope(np.array([0.0])).tolist() == [0.25]
+    assert relu(z).tolist() == [0.0, 0.0, 3.0] and relu_slope(z).tolist() == [0.0, 0.0, 1.0]
+    with warnings.catch_warnings():
+        warnings.simplefilter(&quot;error&quot;)
+        low, high = sigmoid(np.array([-1000.0, 1000.0])).tolist()
+        assert low &lt; 1e-200 and high == 1.0, &quot;no overflow&quot;
+    h = 1e-6
+    numeric = (sigmoid(np.array([0.7]) + h) - sigmoid(np.array([0.7]) - h)) / (2 * h)
+    assert abs(float(numeric[0]) - float(sigmoid_slope(np.array([0.7]))[0])) &lt; 1e-8</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
+
+def sigmoid_slope(z):
+    s = sigmoid(z)
+    return s * (1 - s)
+
+def relu(z):
+    return np.maximum(z, 0)
+
+def relu_slope(z):
+    return (np.asarray(z) &gt; 0).astype(float)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d4-forward" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The forward pass</div><div class="pc-prompt"><p>Write <code>init(n_in, n_hidden, rng)</code>: a dict with <code>W1</code> drawn as <code>rng.normal(0, 1, (n_in, n_hidden))</code>, then <code>W2</code> as <code>rng.normal(0, 1, (n_hidden, 1)) / np.sqrt(n_hidden)</code> (in that order), and zero biases <code>b1</code> (shape <code>(n_hidden,)</code>) and <code>b2</code> (shape <code>(1,)</code>). Then <code>forward(params, X)</code>: return <code>(p, cache)</code>, where <code>p</code> is the one-dimensional array of output probabilities (ReLU hidden layer, sigmoid output) and <code>cache</code> is a dict holding <code>Z1</code>, <code>H</code> and <code>p</code>.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
+
+def init(n_in, n_hidden, rng):
+    ___
+
+def forward(params, X):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import numpy as np
+
+def test_forward():
+    &quot;shapes line up&quot;
+    params = init(3, 5, np.random.default_rng(0))
+    assert params[&quot;W1&quot;].shape == (3, 5) and params[&quot;W2&quot;].shape == (5, 1)
+    assert params[&quot;b1&quot;].shape == (5,) and params[&quot;b2&quot;].shape == (1,) and not params[&quot;b1&quot;].any()
+    rng = np.random.default_rng(0)
+    assert np.allclose(params[&quot;W1&quot;], rng.normal(0, 1, (3, 5))), &quot;draw W1 first, as described&quot;
+    X = np.ones((4, 3))
+    p, cache = forward(params, X)
+    assert p.shape == (4,) and cache[&quot;Z1&quot;].shape == (4, 5) and cache[&quot;H&quot;].shape == (4, 5)
+    assert (cache[&quot;H&quot;] &gt;= 0).all() and ((p &gt; 0) &amp; (p &lt; 1)).all()
+    by_hand = 1 / (1 + np.exp(-(np.maximum(X @ params[&quot;W1&quot;], 0) @ params[&quot;W2&quot;]).ravel()))
+    assert np.allclose(p, by_hand)</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
+
+def init(n_in, n_hidden, rng):
+    W1 = rng.normal(0, 1, (n_in, n_hidden))
+    W2 = rng.normal(0, 1, (n_hidden, 1)) / np.sqrt(n_hidden)
+    return {&quot;W1&quot;: W1, &quot;b1&quot;: np.zeros(n_hidden), &quot;W2&quot;: W2, &quot;b2&quot;: np.zeros(1)}
+
+def forward(params, X):
+    Z1 = X @ params[&quot;W1&quot;] + params[&quot;b1&quot;]
+    H = np.maximum(Z1, 0)
+    p = sigmoid(H @ params[&quot;W2&quot;] + params[&quot;b2&quot;]).ravel()
+    return p, {&quot;Z1&quot;: Z1, &quot;H&quot;: H, &quot;p&quot;: p}</textarea><template class="pc-src pc-hint"><code>(n, n_in) @ (n_in, n_hidden)</code> gives <code>(n, n_hidden)</code>; then <code>(n, n_hidden) @ (n_hidden, 1)</code> gives <code>(n, 1)</code>, which <code>.ravel()</code> flattens.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d4-loss" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Cross-entropy</div><div class="pc-prompt"><p>Write <code>bce(y, p, eps=1e-12)</code>: binary cross-entropy as a float, clipping <code>p</code> to <code>[eps, 1 − eps]</code> first. Then <code>accuracy(y, p)</code>: the fraction of examples where <code>p &gt;= 0.5</code> matches the label, and <code>beats_coin(y, p)</code>: <code>True</code> if the loss is below that of always predicting 0.5.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def bce(y, p, eps=1e-12):
+    ___
+
+def accuracy(y, p):
+    ___
+
+def beats_coin(y, p):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import numpy as np
+
+def test_loss():
+    &quot;confident mistakes cost most&quot;
+    y = np.array([1, 0, 1, 0])
+    assert round(bce(y, np.array([0.9, 0.1, 0.8, 0.3])), 3) == 0.198
+    assert round(bce(y, np.full(4, 0.5)), 3) == 0.693
+    assert round(bce(np.array([1]), np.array([0.0])), 1) == 27.6, &quot;clipped, not infinite&quot;
+    assert accuracy(y, np.array([0.9, 0.6, 0.8, 0.3])) == 0.75
+    assert beats_coin(y, np.array([0.9, 0.1, 0.8, 0.3])) and not beats_coin(y, np.array([0.4, 0.6, 0.4, 0.6]))</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def bce(y, p, eps=1e-12):
+    y = np.asarray(y, dtype=float)
+    p = np.clip(np.asarray(p, dtype=float), eps, 1 - eps)
+    return float(-(y * np.log(p) + (1 - y) * np.log(1 - p)).mean())
+
+def accuracy(y, p):
+    return float(((np.asarray(p) &gt;= 0.5).astype(int) == np.asarray(y)).mean())
+
+def beats_coin(y, p):
+    return bce(y, p) &lt; bce(y, np.full(len(y), 0.5))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d4-numerical" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Checking gradients numerically</div><div class="pc-prompt"><p>Write <code>numerical_gradient(f, w, h=1e-5)</code>: for a function <code>f</code> of an array <code>w</code> returning a number, the array of central differences <code>(f(w + h) − f(w − h)) / 2h</code>, nudging <strong>one element at a time</strong> (put each element back afterwards). Then <code>relative_error(a, b)</code>: <code>max|a − b| / max(max|a| + max|b|, 1e-12)</code>, which should be tiny (below <code>1e-6</code>) when two gradients agree.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def numerical_gradient(f, w, h=1e-5):
+    ___
+
+def relative_error(a, b):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import numpy as np
+
+def test_numerical():
+    &quot;nudge, measure, restore&quot;
+    w = np.array([[1.0, 2.0], [3.0, -1.0]])
+    g = numerical_gradient(lambda a: float((a ** 2).sum()), w)
+    assert g.shape == w.shape and np.allclose(g, 2 * w, atol=1e-6)
+    assert w.tolist() == [[1.0, 2.0], [3.0, -1.0]], &quot;put every element back&quot;
+    g = numerical_gradient(lambda a: float(np.sin(a).sum()), np.array([0.0, 1.0]))
+    assert np.allclose(g, np.cos([0.0, 1.0]), atol=1e-8)
+    assert relative_error(np.array([1.0, 2.0]), np.array([1.0, 2.0000001])) &lt; 1e-6
+    assert relative_error(np.array([1.0]), np.array([2.0])) &gt; 0.3</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def numerical_gradient(f, w, h=1e-5):
+    grad = np.zeros_like(w, dtype=float)
+    for idx in np.ndindex(w.shape):
+        old = w[idx]
+        w[idx] = old + h
+        up = f(w)
+        w[idx] = old - h
+        down = f(w)
+        w[idx] = old
+        grad[idx] = (up - down) / (2 * h)
+    return grad
+
+def relative_error(a, b):
+    return float(np.abs(a - b).max() / max(np.abs(a).max() + np.abs(b).max(), 1e-12))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d4-backward" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Backpropagation</div><div class="pc-prompt"><p>Using the given <code>forward</code>, write <code>backward(params, cache, X, y)</code>: the gradients of the mean binary cross-entropy with respect to <code>W1</code>, <code>b1</code>, <code>W2</code> and <code>b2</code>, as a dict of arrays with the same shapes as the parameters (follow the formulas in the lesson).</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
+
+def forward(params, X):
+    Z1 = X @ params[&quot;W1&quot;] + params[&quot;b1&quot;]
+    H = np.maximum(Z1, 0)
+    p = sigmoid(H @ params[&quot;W2&quot;] + params[&quot;b2&quot;]).ravel()
+    return p, {&quot;Z1&quot;: Z1, &quot;H&quot;: H, &quot;p&quot;: p}
+
+def backward(params, cache, X, y):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import numpy as np
+
+def _bce(params, X, y):
+    p = np.clip(forward(params, X)[0], 1e-12, 1 - 1e-12)
+    return float(-(y * np.log(p) + (1 - y) * np.log(1 - p)).mean())
+
+def test_backward():
+    &quot;agrees with numerical gradients&quot;
+    rng = np.random.default_rng(3)
+    params = {&quot;W1&quot;: rng.normal(size=(3, 4)), &quot;b1&quot;: rng.normal(size=4) * 0.1,
+              &quot;W2&quot;: rng.normal(size=(4, 1)), &quot;b2&quot;: np.array([0.1])}
+    X = rng.normal(size=(6, 3))
+    y = np.array([1, 0, 1, 1, 0, 0], dtype=float)
+    grads = backward(params, forward(params, X)[1], X, y)
+    for name in params:
+        assert grads[name].shape == params[name].shape, name
+        numeric = np.zeros_like(params[name])
+        for idx in np.ndindex(params[name].shape):
+            old = params[name][idx]
+            params[name][idx] = old + 1e-5; up = _bce(params, X, y)
+            params[name][idx] = old - 1e-5; down = _bce(params, X, y)
+            params[name][idx] = old
+            numeric[idx] = (up - down) / 2e-5
+        err = np.abs(numeric - grads[name]).max() / (np.abs(numeric).max() + np.abs(grads[name]).max())
+        assert err &lt; 1e-6, f&quot;{name} disagrees: {err}&quot;</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
+
+def forward(params, X):
+    Z1 = X @ params[&quot;W1&quot;] + params[&quot;b1&quot;]
+    H = np.maximum(Z1, 0)
+    p = sigmoid(H @ params[&quot;W2&quot;] + params[&quot;b2&quot;]).ravel()
+    return p, {&quot;Z1&quot;: Z1, &quot;H&quot;: H, &quot;p&quot;: p}
+
+def backward(params, cache, X, y):
+    n = len(y)
+    dZ2 = ((cache[&quot;p&quot;] - y) / n)[:, None]
+    dW2 = cache[&quot;H&quot;].T @ dZ2
+    db2 = dZ2.sum(axis=0)
+    dZ1 = (dZ2 @ params[&quot;W2&quot;].T) * (cache[&quot;Z1&quot;] &gt; 0)
+    return {&quot;W1&quot;: X.T @ dZ1, &quot;b1&quot;: dZ1.sum(axis=0), &quot;W2&quot;: dW2, &quot;b2&quot;: db2}</textarea><template class="pc-src pc-hint">Start with <code>dZ2 = ((p - y) / n)[:, None]</code>, shape <code>(n, 1)</code>. Each weight gradient is &ldquo;the layer&rsquo;s input, transposed, times the gradient of its output&rdquo;.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d4-train" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Training on XOR</div><div class="pc-prompt"><p>Using the given <code>init</code>, <code>forward</code> and <code>backward</code>, write <code>step(params, grads, rate)</code>: a <strong>new</strong> dict of parameters, each moved by <code>−rate × gradient</code> (don&rsquo;t change <code>params</code>). Then <code>train_xor(seed, epochs=2000, rate=0.5, hidden=4)</code>: initialise with <code>np.random.default_rng(seed)</code>, train on the four XOR examples with full-batch gradient descent, and return <code>(params, losses)</code>, where <code>losses</code> holds the cross-entropy before each step.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
+
+def init(n_in, n_hidden, rng):
+    W1 = rng.normal(0, 1, (n_in, n_hidden))
+    W2 = rng.normal(0, 1, (n_hidden, 1)) / np.sqrt(n_hidden)
+    return {&quot;W1&quot;: W1, &quot;b1&quot;: np.zeros(n_hidden), &quot;W2&quot;: W2, &quot;b2&quot;: np.zeros(1)}
+
+def forward(params, X):
+    Z1 = X @ params[&quot;W1&quot;] + params[&quot;b1&quot;]
+    H = np.maximum(Z1, 0)
+    p = sigmoid(H @ params[&quot;W2&quot;] + params[&quot;b2&quot;]).ravel()
+    return p, {&quot;Z1&quot;: Z1, &quot;H&quot;: H, &quot;p&quot;: p}
+
+def backward(params, cache, X, y):
+    dZ2 = ((cache[&quot;p&quot;] - y) / len(y))[:, None]
+    dZ1 = (dZ2 @ params[&quot;W2&quot;].T) * (cache[&quot;Z1&quot;] &gt; 0)
+    return {&quot;W1&quot;: X.T @ dZ1, &quot;b1&quot;: dZ1.sum(axis=0), &quot;W2&quot;: cache[&quot;H&quot;].T @ dZ2, &quot;b2&quot;: dZ2.sum(axis=0)}
+
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=float)
+Y = np.array([0, 1, 1, 0], dtype=float)
+
+def bce(y, p):
+    p = np.clip(p, 1e-12, 1 - 1e-12)
+    return float(-(y * np.log(p) + (1 - y) * np.log(1 - p)).mean())
+
+def step(params, grads, rate):
+    ___
+
+def train_xor(seed, epochs=2000, rate=0.5, hidden=4):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import numpy as np
+
+def test_train():
+    &quot;a network learns what a neuron can&#x27;t&quot;
+    params = init(2, 4, np.random.default_rng(0))
+    before = {k: v.copy() for k, v in params.items()}
+    new = step(params, {k: np.ones_like(v) for k, v in params.items()}, 0.1)
+    assert all(np.array_equal(params[k], before[k]) for k in params), &quot;don&#x27;t change params&quot;
+    assert np.allclose(new[&quot;W1&quot;], before[&quot;W1&quot;] - 0.1)
+    solved = 0
+    for seed in range(6):
+        trained, losses = train_xor(seed)
+        assert len(losses) == 2000 and losses[-1] &lt; losses[0]
+        p = forward(trained, X)[0]
+        solved += (p &gt;= 0.5).astype(int).tolist() == [0, 1, 1, 0]
+    assert solved &gt;= 4, f&quot;only {solved} of 6 seeds learned XOR&quot;</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
+
+def init(n_in, n_hidden, rng):
+    W1 = rng.normal(0, 1, (n_in, n_hidden))
+    W2 = rng.normal(0, 1, (n_hidden, 1)) / np.sqrt(n_hidden)
+    return {&quot;W1&quot;: W1, &quot;b1&quot;: np.zeros(n_hidden), &quot;W2&quot;: W2, &quot;b2&quot;: np.zeros(1)}
+
+def forward(params, X):
+    Z1 = X @ params[&quot;W1&quot;] + params[&quot;b1&quot;]
+    H = np.maximum(Z1, 0)
+    p = sigmoid(H @ params[&quot;W2&quot;] + params[&quot;b2&quot;]).ravel()
+    return p, {&quot;Z1&quot;: Z1, &quot;H&quot;: H, &quot;p&quot;: p}
+
+def backward(params, cache, X, y):
+    dZ2 = ((cache[&quot;p&quot;] - y) / len(y))[:, None]
+    dZ1 = (dZ2 @ params[&quot;W2&quot;].T) * (cache[&quot;Z1&quot;] &gt; 0)
+    return {&quot;W1&quot;: X.T @ dZ1, &quot;b1&quot;: dZ1.sum(axis=0), &quot;W2&quot;: cache[&quot;H&quot;].T @ dZ2, &quot;b2&quot;: dZ2.sum(axis=0)}
+
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=float)
+Y = np.array([0, 1, 1, 0], dtype=float)
+
+def bce(y, p):
+    p = np.clip(p, 1e-12, 1 - 1e-12)
+    return float(-(y * np.log(p) + (1 - y) * np.log(1 - p)).mean())
+
+def step(params, grads, rate):
+    return {k: params[k] - rate * grads[k] for k in params}
+
+def train_xor(seed, epochs=2000, rate=0.5, hidden=4):
+    params = init(2, hidden, np.random.default_rng(seed))
+    losses = []
+    for _ in range(epochs):
+        p, cache = forward(params, X)
+        losses.append(bce(Y, p))
+        params = step(params, backward(params, cache, X, Y), rate)
+    return params, losses</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w084d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Overflow in the sigmoid</div><div class="pc-prompt"><p>For very negative inputs, <code>np.exp(-z)</code> overflows and NumPy prints a <code>RuntimeWarning</code> before the answer. Clip <code>z</code> first so the program prints only <code>[0.0, 0.5, 1.0]</code>.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+print(sigmoid(np.array([-1000.0, 0.0, 1000.0])).round(3).tolist())</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;no warning&quot;
+    expect_output(&quot;[0.0, 0.5, 1.0]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
+
+print(sigmoid(np.array([-1000.0, 0.0, 1000.0])).round(3).tolist())</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w084d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Shapes that don&rsquo;t line up</div><div class="pc-prompt"><p><code>W1</code> was made with its dimensions the wrong way round, so <code>X @ W1</code> crashes with <code>ValueError: matmul: Input operand 1 has a mismatch</code>. Give <code>W1</code> the shape <code>(inputs, hidden)</code> so it prints <code>(4, 3)</code>.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+rng = np.random.default_rng(0)
+X = np.ones((4, 2))            # 4 examples, 2 inputs
+W1 = rng.normal(size=(3, 2))   # meant for 3 hidden neurons
+print((X @ W1).shape)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;(n, inputs) @ (inputs, hidden)&quot;
+    expect_output(&quot;(4, 3)&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+rng = np.random.default_rng(0)
+X = np.ones((4, 2))            # 4 examples, 2 inputs
+W1 = rng.normal(size=(2, 3))   # meant for 3 hidden neurons
+print((X @ W1).shape)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w084d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Identical neurons</div><div class="pc-prompt"><p>Every weight starts at the same value, so every hidden neuron computes the same thing and gets the same update: they stay identical forever, and the network can&rsquo;t learn XOR (it prints <code>[0.5, 0.5, 0.5, 0.5]</code>). Initialise <code>W1</code> and <code>W2</code> randomly with <code>rng.normal(0, 1, shape)</code> and <code>rng.normal(0, 0.5, shape)</code> (in that order) so it prints <code>[0, 1, 1, 0]</code>.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=float)
+y = np.array([0, 1, 1, 0], dtype=float)
+rng = np.random.default_rng(0)
+W1, b1 = np.full((2, 4), 0.5), np.zeros(4)
+W2, b2 = np.full((4, 1), 0.5), np.zeros(1)
+for _ in range(2000):
+    Z1 = X @ W1 + b1; H = np.maximum(Z1, 0)
+    p = (1 / (1 + np.exp(-(H @ W2 + b2)))).ravel()
+    dZ2 = ((p - y) / 4)[:, None]
+    dZ1 = (dZ2 @ W2.T) * (Z1 &gt; 0)
+    W1 -= 0.5 * X.T @ dZ1; b1 -= 0.5 * dZ1.sum(axis=0)
+    W2 -= 0.5 * H.T @ dZ2; b2 -= 0.5 * dZ2.sum(axis=0)
+p = (1 / (1 + np.exp(-(np.maximum(X @ W1 + b1, 0) @ W2 + b2)))).ravel()
+print([round(float(v), 1) for v in p] if np.allclose(p, 0.5, atol=0.05) else (p &gt;= 0.5).astype(int).tolist())</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;break the symmetry&quot;
+    expect_output(&quot;[0, 1, 1, 0]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=float)
+y = np.array([0, 1, 1, 0], dtype=float)
+rng = np.random.default_rng(0)
+W1, b1 = rng.normal(0, 1, (2, 4)), np.zeros(4)
+W2, b2 = rng.normal(0, 0.5, (4, 1)), np.zeros(1)
+for _ in range(2000):
+    Z1 = X @ W1 + b1; H = np.maximum(Z1, 0)
+    p = (1 / (1 + np.exp(-(H @ W2 + b2)))).ravel()
+    dZ2 = ((p - y) / 4)[:, None]
+    dZ1 = (dZ2 @ W2.T) * (Z1 &gt; 0)
+    W1 -= 0.5 * X.T @ dZ1; b1 -= 0.5 * dZ1.sum(axis=0)
+    W2 -= 0.5 * H.T @ dZ2; b2 -= 0.5 * dZ2.sum(axis=0)
+p = (1 / (1 + np.exp(-(np.maximum(X @ W1 + b1, 0) @ W2 + b2)))).ravel()
+print([round(float(v), 1) for v in p] if np.allclose(p, 0.5, atol=0.05) else (p &gt;= 0.5).astype(int).tolist())</textarea></div>
+<div class="parsons" data-id="w084d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">One training step</div><div class="pc-prompt"><p>Arrange one step of training: forward pass, loss, backward pass, then the update. One line is a trap.</p></div><script type="application/json">{"lines": ["for epoch in range(epochs):", "    p, cache = forward(params, X)", "    losses.append(bce(y, p))", "    grads = backward(params, cache, X, y)", "    for name in params:", "        params[name] = params[name] - rate * grads[name]"], "distractors": ["        params[name] = params[name] + rate * grads[name]"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the shape of X @ W1 for X of shape (32, 10) and W1 of shape (10, 64), as a tuple
+q = ___   # how many parameters (weights and biases) a layer from 10 inputs to 64 neurons has
+r = ___   # relu applied to -3.0
+s = ___   # the cross-entropy, to 3 places, of always predicting 0.5
+t = ___   # True or False: a network with no non-linear activations can learn XOR</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == (32, 64) and q == 704 and r == 0.0, &quot;p, q and r&quot;
+    assert s == 0.693 and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = (32, 64)
+q = 704
+r = 0.0
+s = 0.693
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w084d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What is a single sigmoid neuron equivalent to?", "answer": 1, "explain": "A weighted sum turned into a probability.", "options": ["k-nearest neighbours", "Logistic regression", "A decision tree", "Linear regression"]}, {"type": "mc", "q": "Why can&rsquo;t one neuron learn XOR?", "answer": 1, "explain": "Hidden layers bend the boundary.", "options": ["Too few weights", "Its boundary is a straight line, and XOR&rsquo;s classes can&rsquo;t be split by one", "It&rsquo;s too slow", "It can"]}, {"type": "mc", "q": "Why do hidden layers need a non-linear activation?", "answer": 1, "explain": "ReLU is the usual choice.", "options": ["Speed", "Without one, stacked layers collapse into a single linear function", "To avoid overflow", "They don&rsquo;t"]}, {"type": "mc", "q": "Why initialise weights randomly?", "answer": 1, "explain": "Randomness breaks the symmetry.", "options": ["Tradition", "Equal weights make every hidden neuron identical forever", "It&rsquo;s faster", "To avoid overflow"]}, {"type": "mc", "q": "What does cross-entropy punish most?", "answer": 1, "explain": "-log of a small probability is large.", "options": ["Slow models", "Confident wrong predictions", "Correct predictions", "Large weights"]}, {"type": "mc", "q": "What is backpropagation?", "answer": 1, "explain": "Then gradient descent uses the gradients.", "options": ["Running the network backwards to make inputs", "Applying the chain rule from the loss backwards to get every gradient", "A kind of activation", "Shuffling data"]}, {"type": "mc", "q": "How do you check backpropagation code?", "answer": 1, "explain": "Central differences on a small network.", "options": ["Trust it", "Compare it with numerical gradients from nudging each weight", "Train longer", "Use more data"]}, {"type": "mc", "q": "What&rsquo;s a mini-batch?", "answer": 1, "explain": "Cheaper, noisier steps.", "options": ["A small network", "A random subset of examples used for one update", "A short epoch", "A layer"]}, {"type": "mc", "q": "The loss jumps up and down and grows. What&rsquo;s the likely fix?", "answer": 1, "explain": "Too large a rate overshoots.", "options": ["More epochs", "A smaller learning rate", "A bigger network", "No bias"]}, {"type": "output", "q": "What does this print?", "answer": "20 (7, 5)", "explain": "15 weights and 5 biases; 7 examples by 5 neurons.", "code": "import numpy as np\nW = np.zeros((3, 5))\nb = np.zeros(5)\nprint(W.size + b.size, (np.ones((7, 3)) @ W + b).shape)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w084d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: an MLP class</div><div class="pc-prompt"><p>Write a class <code>MLP(n_in, n_hidden=16, rate=0.5, seed=0)</code> wrapping today&rsquo;s functions (given) in the scikit-learn style. It creates <code>self.rng = np.random.default_rng(seed)</code> and initialises its parameters from it, and keeps <code>self.history = []</code>. <code>fit(X, y, epochs=500, batch_size=None)</code> trains for <code>epochs</code> epochs: with no <code>batch_size</code>, one full-batch step per epoch; otherwise, each epoch visits the examples in the order <code>self.rng.permutation(len(X))</code>, in consecutive batches of <code>batch_size</code> (the last may be smaller), one step per batch. After each epoch it appends the cross-entropy on <strong>all</strong> of <code>X</code> to <code>history</code>. It returns <code>self</code>. <code>predict_proba(X)</code>, <code>predict(X)</code> (1 where the probability is at least 0.5) and <code>score(X, y)</code> (accuracy) work as in scikit-learn. On the two-moons data, it should beat logistic regression clearly.</p></div><textarea class="pc-src pc-code" hidden>import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
+
+def init(n_in, n_hidden, rng):
+    W1 = rng.normal(0, 1, (n_in, n_hidden))
+    W2 = rng.normal(0, 1, (n_hidden, 1)) / np.sqrt(n_hidden)
+    return {&quot;W1&quot;: W1, &quot;b1&quot;: np.zeros(n_hidden), &quot;W2&quot;: W2, &quot;b2&quot;: np.zeros(1)}
+
+def forward(params, X):
+    Z1 = X @ params[&quot;W1&quot;] + params[&quot;b1&quot;]
+    H = np.maximum(Z1, 0)
+    p = sigmoid(H @ params[&quot;W2&quot;] + params[&quot;b2&quot;]).ravel()
+    return p, {&quot;Z1&quot;: Z1, &quot;H&quot;: H, &quot;p&quot;: p}
+
+def backward(params, cache, X, y):
+    dZ2 = ((cache[&quot;p&quot;] - y) / len(y))[:, None]
+    dZ1 = (dZ2 @ params[&quot;W2&quot;].T) * (cache[&quot;Z1&quot;] &gt; 0)
+    return {&quot;W1&quot;: X.T @ dZ1, &quot;b1&quot;: dZ1.sum(axis=0), &quot;W2&quot;: cache[&quot;H&quot;].T @ dZ2, &quot;b2&quot;: dZ2.sum(axis=0)}
+
+def bce(y, p):
+    p = np.clip(p, 1e-12, 1 - 1e-12)
+    return float(-(y * np.log(p) + (1 - y) * np.log(1 - p)).mean())
+
+class MLP:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import numpy as np
+from sklearn.datasets import make_moons
+from sklearn.linear_model import LogisticRegression
+
+def _moons():
+    X, y = make_moons(300, noise=0.2, random_state=0)
+    return X[:200], y[:200], X[200:], y[200:]
+
+def test_full_batch():
+    &quot;curved boundaries&quot;
+    X_train, y_train, X_test, y_test = _moons()
+    model = MLP(2, 16, 0.5, seed=0).fit(X_train, y_train, epochs=1000)
+    assert isinstance(model, MLP) and len(model.history) == 1000
+    assert model.history[-1] &lt; model.history[0] / 4
+    linear = LogisticRegression().fit(X_train, y_train).score(X_test, y_test)
+    assert model.score(X_train, y_train) &gt;= 0.95 and model.score(X_test, y_test) &gt;= linear + 0.05
+    assert model.predict(X_test[:5]).tolist() == (model.predict_proba(X_test[:5]) &gt;= 0.5).astype(int).tolist()
+
+def test_mini_batches():
+    &quot;shuffled batches&quot;
+    X_train, y_train, X_test, y_test = _moons()
+    model = MLP(2, 16, 0.1, seed=1).fit(X_train, y_train, epochs=200, batch_size=20)
+    assert len(model.history) == 200 and model.score(X_test, y_test) &gt;= 0.9
+    again = MLP(2, 16, 0.1, seed=1).fit(X_train, y_train, epochs=5, batch_size=20)
+    first = MLP(2, 16, 0.1, seed=1).fit(X_train, y_train, epochs=5, batch_size=20)
+    assert again.history == first.history, &quot;the same seed gives the same training&quot;
+    xor = MLP(2, 4, 0.5, seed=0).fit(np.array([[0, 0], [0, 1], [1, 0], [1, 1]]), np.array([0, 1, 1, 0]), epochs=2000)
+    assert xor.predict(np.array([[0, 0], [0, 1], [1, 0], [1, 1]])).tolist() == [0, 1, 1, 0]</textarea><textarea class="pc-src pc-solution" hidden>import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-np.clip(z, -500, 500)))
+
+def init(n_in, n_hidden, rng):
+    W1 = rng.normal(0, 1, (n_in, n_hidden))
+    W2 = rng.normal(0, 1, (n_hidden, 1)) / np.sqrt(n_hidden)
+    return {&quot;W1&quot;: W1, &quot;b1&quot;: np.zeros(n_hidden), &quot;W2&quot;: W2, &quot;b2&quot;: np.zeros(1)}
+
+def forward(params, X):
+    Z1 = X @ params[&quot;W1&quot;] + params[&quot;b1&quot;]
+    H = np.maximum(Z1, 0)
+    p = sigmoid(H @ params[&quot;W2&quot;] + params[&quot;b2&quot;]).ravel()
+    return p, {&quot;Z1&quot;: Z1, &quot;H&quot;: H, &quot;p&quot;: p}
+
+def backward(params, cache, X, y):
+    dZ2 = ((cache[&quot;p&quot;] - y) / len(y))[:, None]
+    dZ1 = (dZ2 @ params[&quot;W2&quot;].T) * (cache[&quot;Z1&quot;] &gt; 0)
+    return {&quot;W1&quot;: X.T @ dZ1, &quot;b1&quot;: dZ1.sum(axis=0), &quot;W2&quot;: cache[&quot;H&quot;].T @ dZ2, &quot;b2&quot;: dZ2.sum(axis=0)}
+
+def bce(y, p):
+    p = np.clip(p, 1e-12, 1 - 1e-12)
+    return float(-(y * np.log(p) + (1 - y) * np.log(1 - p)).mean())
+
+class MLP:
+    def __init__(self, n_in, n_hidden=16, rate=0.5, seed=0):
+        self.rng = np.random.default_rng(seed)
+        self.rate = rate
+        self.params = init(n_in, n_hidden, self.rng)
+        self.history = []
+
+    def _step(self, X, y):
+        p, cache = forward(self.params, X)
+        grads = backward(self.params, cache, X, y)
+        self.params = {k: v - self.rate * grads[k] for k, v in self.params.items()}
+
+    def fit(self, X, y, epochs=500, batch_size=None):
+        X, y = np.asarray(X, dtype=float), np.asarray(y, dtype=float)
+        for _ in range(epochs):
+            if batch_size is None:
+                self._step(X, y)
+            else:
+                order = self.rng.permutation(len(X))
+                for start in range(0, len(X), batch_size):
+                    idx = order[start:start + batch_size]
+                    self._step(X[idx], y[idx])
+            self.history.append(bce(y, self.predict_proba(X)))
+        return self
+
+    def predict_proba(self, X):
+        return forward(self.params, np.asarray(X, dtype=float))[0]
+
+    def predict(self, X):
+        return (self.predict_proba(X) &gt;= 0.5).astype(int)
+
+    def score(self, X, y):
+        return float((self.predict(X) == np.asarray(y)).mean())</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Take your <code>MLP</code> and change one thing at a time on the moons data: 2 hidden neurons instead of 16, a learning rate of 5, then 0.001, and three different seeds. Note the final loss and test accuracy for each. Which change hurts most, and why? Tomorrow is <strong>PyTorch: a first look</strong>: the same ideas with automatic gradients, so you never write <code>backward</code> by hand again.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w084d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w084d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w084d4", "week": 84, "day": 4, "title": "A neural network from scratch", "exercises": [{"id": "w084d4-activations", "title": "Activations and their slopes", "points": 10}, {"id": "w084d4-forward", "title": "The forward pass", "points": 15}, {"id": "w084d4-loss", "title": "Cross-entropy", "points": 10}, {"id": "w084d4-numerical", "title": "Checking gradients numerically", "points": 15}, {"id": "w084d4-backward", "title": "Backpropagation", "points": 15}, {"id": "w084d4-train", "title": "Training on XOR", "points": 10}, {"id": "w084d4-bug1", "title": "Overflow in the sigmoid", "points": 10}, {"id": "w084d4-bug2", "title": "Shapes that don't line up", "points": 10}, {"id": "w084d4-bug3", "title": "Identical neurons", "points": 10}, {"id": "w084d4-trace", "title": "Predict them", "points": 10}, {"id": "w084d4-challenge", "title": "Challenge: an MLP class", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=97b2d34bb1"></script>
+</body>
+</html>
