@@ -1,7 +1,7 @@
 // Venn figure: two sets drawn as overlapping circles, with every element in its region.
 // Pick an operation to light up the regions it keeps.
-import { h } from "../site.js?v=7343aa5d1b";
-import { py } from "../runtime.js?v=7343aa5d1b";
+import { h } from "../site.js?v=db5173407e";
+import { py } from "../runtime.js?v=db5173407e";
 
 const OPS = [
   ["a | b", "union: in either", [1, 1, 1]],

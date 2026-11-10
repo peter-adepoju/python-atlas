@@ -1,6 +1,6 @@
 // Binary search: step through the search for a target in a sorted list, with lo, mid and hi
 // marked and the part still in play highlighted. Compare with linear search's count.
-import { h } from "../site.js?v=7343aa5d1b";
+import { h } from "../site.js?v=db5173407e";
 
 export default function bsearch(el, { values = [2, 5, 8, 12, 16, 23, 38, 41, 56, 72, 85, 91], target = 23 } = {}) {
   let t = target, frames = [], k = 0;

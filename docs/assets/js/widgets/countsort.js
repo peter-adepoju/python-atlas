@@ -1,6 +1,6 @@
 // Counting sort: tally each value into a box, then read the boxes out in order. No item is ever
 // compared with another.
-import { h } from "../site.js?v=7343aa5d1b";
+import { h } from "../site.js?v=db5173407e";
 
 export default function countsort(el, { values = [3, 1, 4, 1, 5, 2, 0, 4, 1, 3], max = 5 } = {}) {
   const frames = [];

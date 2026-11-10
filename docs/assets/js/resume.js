@@ -1,7 +1,7 @@
 // Where to continue: the first lesson that's ready and not yet complete. The home page button,
 // the "Continue learning" menu item and the course map all use this, so they always agree.
-import { SITE } from "./site.js?v=7343aa5d1b";
-import { progress } from "./progress.js?v=7343aa5d1b";
+import { SITE } from "./site.js?v=db5173407e";
+import { progress } from "./progress.js?v=db5173407e";
 
 let coursePromise = null;
 export function loadCourse() {

@@ -1,6 +1,6 @@
 // Type anything: Python tells you its type, how it prints, and how much memory it takes.
-import { h } from "../site.js?v=7343aa5d1b";
-import { py } from "../runtime.js?v=7343aa5d1b";
+import { h } from "../site.js?v=db5173407e";
+import { py } from "../runtime.js?v=db5173407e";
 
 const ABOUT = {
   int: "a whole number. Python ints have no size limit: try 2 ** 200.",

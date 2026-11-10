@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="db5173407e">
+<title>Week 75 Day 4: ORMs and SQLAlchemy | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=db5173407e">
+<link rel="stylesheet" href="../assets/css/site.css?v=db5173407e">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=db5173407e"></script>
+<script src="../assets/vendor/codemirror.js?v=db5173407e" defer></script>
+<meta name="description" content="Writing SQL by hand for every insert, update and lookup gets repetitive, and turning rows into objects and back again is the same few lines over and over....">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w075d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 75 Day 4: ORMs and SQLAlchemy">
+<meta property="og:description" content="Writing SQL by hand for every insert, update and lookup gets repetitive, and turning rows into objects and back again is the same few lines over and over....">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w075d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-75">Week 75: Databases</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#what-an-orm-does" data-sec="what-an-orm-does">What an ORM does</a></li><li><a href="#classes-as-tables" data-sec="classes-as-tables">Classes as tables</a></li><li><a href="#sessions-identity-and-laziness" data-sec="sessions-identity-and-laziness">Sessions, identity and laziness</a></li><li><a href="#sqlalchemy" data-sec="sqlalchemy">SQLAlchemy</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#on-your-own-computer" data-sec="on-your-own-computer">On your own computer</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w075d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-75">Week 75: Databases</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 75, Day 4</span></p>
+      <h1>ORMs and SQLAlchemy</h1>
+      <div class="day-intro"><p>Writing SQL by hand for every insert, update and lookup gets repetitive, and turning rows into objects and back again is the same few lines over and over. An object-relational mapper (ORM) does that work: you describe tables as Python classes, and it writes the SQL. SQLAlchemy is Python&rsquo;s most widely used ORM, and Django has its own. Today you&rsquo;ll build a small ORM of your own on sqlite3, using the descriptors and class hooks from Week 63, to see exactly what a real one does for you: mapping classes to tables, saving and loading objects, an identity map, lazy relationships, and query objects. Along the way you&rsquo;ll meet the ORM&rsquo;s most famous trap, the N+1 query problem, and measure it.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain what an ORM maps, and what it costs, compared with writing SQL</li><li>Map classes to tables with descriptors, and save and load objects</li><li>Keep one object per row with an identity map, and save only what changed</li><li>Spot and fix the N+1 query problem, counting the queries a program really sends</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="What an ORM does: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Classes as tables: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Sessions, identity and laziness: 20 min"></span><span class="plan-seg s0" style="flex:15" title="SQLAlchemy: 15 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">What an ORM does</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Classes as tables</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Sessions, identity and laziness</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">SQLAlchemy</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:30</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w075d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w075d4.ipynb" download>download it</a>. Exercises today are worth 135 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w075d4-p1"><textarea class="pc-src pc-code" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.executescript(&quot;&quot;&quot;
+CREATE TABLE authors (id INTEGER PRIMARY KEY, name TEXT);
+CREATE TABLE books (id INTEGER PRIMARY KEY, author_id INTEGER, title TEXT);
+INSERT INTO authors VALUES (1, &#x27;Austen&#x27;), (2, &#x27;Dickens&#x27;), (3, &#x27;Eliot&#x27;);
+INSERT INTO books VALUES (1, 1, &#x27;Emma&#x27;), (2, 1, &#x27;Persuasion&#x27;), (3, 2, &#x27;Bleak House&#x27;), (4, 3, &#x27;Middlemarch&#x27;);
+&quot;&quot;&quot;)
+sent = []
+conn.set_trace_callback(sent.append)
+
+for author_id, name in conn.execute(&quot;SELECT id, name FROM authors&quot;).fetchall():
+    titles = [t for (t,) in conn.execute(&quot;SELECT title FROM books WHERE author_id = ?&quot;, (author_id,))]
+    print(name, titles)
+print(len(sent), &quot;queries&quot;)</textarea></div>
+<p>One query for the authors, then <strong>one more per author</strong> for their books: with three authors that&rsquo;s four queries; with a thousand it&rsquo;s a thousand and one, each a trip to the database. This is the <strong>N+1 problem</strong>, and it&rsquo;s the easiest mistake to make with an ORM, because there the second query hides behind an innocent-looking <code>author.books</code>. <code>set_trace_callback</code> shows every statement a connection really sends: your best tool for catching it.</p>
+<h2 id="what-an-orm-does">What an ORM does</h2>
+<p>An <strong>object-relational mapper</strong> connects two worlds: tables, rows and foreign keys on one side; classes, objects and references on the other. It typically gives you:</p>
+<ul>
+<li><strong>Mapping</strong>: a class per table, an attribute per column, an object per row. The ORM can create the tables from the classes.</li>
+<li><strong>Persistence</strong>: <code>session.add(book)</code> and <code>session.commit()</code> write the right <code>INSERT</code> or <code>UPDATE</code>; <code>session.get(Book, 4)</code> loads one.</li>
+<li><strong>An identity map</strong>: within a session, a row is loaded into <strong>one</strong> object, so two lookups of book 4 give the same Python object.</li>
+<li><strong>A unit of work</strong>: the session tracks which objects are new, changed or deleted, and writes them all in one transaction at commit.</li>
+<li><strong>Relationships</strong>: <code>book.author</code> and <code>author.books</code> follow foreign keys, loading related rows <strong>lazily</strong> (when first used) or <strong>eagerly</strong> (in the same query, with a join).</li>
+<li><strong>Queries in Python</strong>: <code>select(Book).where(Book.year &gt; 1850).order_by(Book.title)</code>, built from objects and turned into SQL with parameters.</li>
+</ul>
+<p>What it costs: another layer to learn, SQL you didn&rsquo;t write (sometimes inefficient, as in the warm-up), and queries that are harder to see in the code. Good practice is to use the ORM for everyday work, to <strong>look at the SQL it sends</strong> (SQLAlchemy&rsquo;s <code>echo=True</code>), and to write SQL by hand for complex reports, where it&rsquo;s clearer.</p>
+<h2 id="classes-as-tables">Classes as tables</h2>
+<p>At the heart of an ORM is a <strong>class per table</strong>, with a <strong>descriptor</strong> (Week 63) per column. A field descriptor knows its column&rsquo;s name and type; the base class&rsquo;s <code>__init_subclass__</code> collects the fields of each model class; and from those the ORM can write <code>CREATE TABLE</code>, <code>INSERT</code> and <code>SELECT</code> statements, always with parameters for the values and the class&rsquo;s own field names (never user input) for the identifiers.</p>
+<div class="pc pc-example" data-kind="example" data-id="w075d4-e2"><textarea class="pc-src pc-code" hidden>import sqlite3
+
+TYPES = {int: &quot;INTEGER&quot;, str: &quot;TEXT&quot;, float: &quot;REAL&quot;}
+
+class Field:
+    def __init__(self, kind, required=True):
+        self.kind, self.required = kind, required
+    def __set_name__(self, owner, name):
+        self.name = name
+    def __get__(self, obj, owner=None):
+        return self if obj is None else obj.__dict__.get(self.name)
+    def __set__(self, obj, value):
+        if value is not None and not isinstance(value, self.kind):
+            raise TypeError(f&quot;{self.name} must be {self.kind.__name__}&quot;)
+        obj.__dict__[self.name] = value
+
+class Model:
+    def __init_subclass__(cls, table, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.table = table
+        cls.fields = [v for v in vars(cls).values() if isinstance(v, Field)]
+
+    def __init__(self, id=None, **values):
+        self.id = id
+        for f in self.fields:
+            setattr(self, f.name, values.get(f.name))
+
+    @classmethod
+    def create_sql(cls):
+        columns = [&quot;id INTEGER PRIMARY KEY&quot;] + [f&quot;{f.name} {TYPES[f.kind]}{&#x27; NOT NULL&#x27; if f.required else &#x27;&#x27;}&quot; for f in cls.fields]
+        return f&quot;CREATE TABLE {cls.table} ({&#x27;, &#x27;.join(columns)})&quot;
+
+    def save(self, conn):
+        names = [f.name for f in self.fields]
+        values = [getattr(self, n) for n in names]
+        with conn:
+            if self.id is None:
+                cur = conn.execute(f&quot;INSERT INTO {self.table} ({&#x27;, &#x27;.join(names)}) VALUES ({&#x27;, &#x27;.join(&#x27;?&#x27; * len(names))})&quot;, values)
+                self.id = cur.lastrowid
+            else:
+                conn.execute(f&quot;UPDATE {self.table} SET {&#x27;, &#x27;.join(n + &#x27; = ?&#x27; for n in names)} WHERE id = ?&quot;, values + [self.id])
+
+class Book(Model, table=&quot;books&quot;):
+    title = Field(str)
+    year = Field(int)
+    rating = Field(float, required=False)
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+print(Book.create_sql())
+conn.execute(Book.create_sql())
+emma = Book(title=&quot;Emma&quot;, year=1815)
+emma.save(conn)
+emma.rating = 4.5
+emma.save(conn)
+print(emma.id, conn.execute(&quot;SELECT * FROM books&quot;).fetchall())</textarea></div>
+<h2 id="sessions-identity-and-laziness">Sessions, identity and laziness</h2>
+<p>Real ORMs add a <strong>session</strong> between your objects and the connection:</p>
+<ul>
+<li><strong>Identity map.</strong> The session keeps a dict from <code>(class, id)</code> to the loaded object. Loading the same row again returns the <strong>same object</strong>, so changes made through one reference are seen through every other, and the session knows which object to save.</li>
+<li><strong>Change tracking.</strong> The session (or the objects themselves) records which attributes changed since loading, so it can <code>UPDATE</code> only those, and skip unchanged objects entirely.</li>
+<li><strong>Lazy loading.</strong> <code>book.author</code> isn&rsquo;t loaded until it&rsquo;s used, and then it&rsquo;s one query (or none, if the identity map already has that author). That&rsquo;s efficient when you need related objects occasionally, and the cause of N+1 when you need them in a loop.</li>
+<li><strong>Eager loading.</strong> When you know you&rsquo;ll need them, load related objects <strong>with</strong> the main query: a join (<code>joinedload</code> in SQLAlchemy), or one extra query for all of them at once (<code>selectinload</code>: <code>SELECT ... WHERE author_id IN (?, ?, ?)</code>). Two queries instead of N+1.</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w075d4-e3"><textarea class="pc-src pc-code" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.executescript(&quot;&quot;&quot;
+CREATE TABLE authors (id INTEGER PRIMARY KEY, name TEXT);
+CREATE TABLE books (id INTEGER PRIMARY KEY, author_id INTEGER, title TEXT);
+INSERT INTO authors VALUES (1, &#x27;Austen&#x27;), (2, &#x27;Dickens&#x27;), (3, &#x27;Eliot&#x27;);
+INSERT INTO books VALUES (1, 1, &#x27;Emma&#x27;), (2, 1, &#x27;Persuasion&#x27;), (3, 2, &#x27;Bleak House&#x27;), (4, 3, &#x27;Middlemarch&#x27;);
+&quot;&quot;&quot;)
+sent = []
+conn.set_trace_callback(sent.append)
+
+authors = conn.execute(&quot;SELECT id, name FROM authors ORDER BY id&quot;).fetchall()
+ids = [a[0] for a in authors]
+books = {}
+for author_id, title in conn.execute(f&quot;SELECT author_id, title FROM books WHERE author_id IN ({&#x27;, &#x27;.join(&#x27;?&#x27; * len(ids))}) ORDER BY id&quot;, ids):
+    books.setdefault(author_id, []).append(title)
+for author_id, name in authors:
+    print(name, books.get(author_id, []))
+print(len(sent), &quot;queries, however many authors there are&quot;)</textarea></div>
+<h2 id="sqlalchemy">SQLAlchemy</h2>
+<p>SQLAlchemy has two layers: <strong>Core</strong>, a Python way of building SQL expressions, and the <strong>ORM</strong> on top. In its 2.0 style, models are classes with typed attributes:</p>
+<pre><code class="language-python">from sqlalchemy import ForeignKey, String, create_engine, select
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, relationship, selectinload
+
+class Base(DeclarativeBase):
+    pass
+
+class Author(Base):
+    __tablename__ = &quot;authors&quot;
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    books: Mapped[list[&quot;Book&quot;]] = relationship(back_populates=&quot;author&quot;)
+
+class Book(Base):
+    __tablename__ = &quot;books&quot;
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str]
+    year: Mapped[int]
+    author_id: Mapped[int] = mapped_column(ForeignKey(&quot;authors.id&quot;))
+    author: Mapped[Author] = relationship(back_populates=&quot;books&quot;)
+
+engine = create_engine(&quot;sqlite:///library.db&quot;, echo=True)      # echo prints every SQL statement
+Base.metadata.create_all(engine)
+
+with Session(engine) as session:
+    austen = Author(name=&quot;Austen&quot;, books=[Book(title=&quot;Emma&quot;, year=1815)])
+    session.add(austen)
+    session.commit()
+    query = select(Author).options(selectinload(Author.books)).where(Author.name.like(&quot;A%&quot;))
+    for author in session.scalars(query):
+        print(author.name, [b.title for b in author.books])     # no N+1: books were loaded with the authors
+</code></pre>
+<p><code>Author.name.like("A%")</code> isn&rsquo;t a boolean: SQLAlchemy&rsquo;s column objects overload operators (<code>==</code>, <code>&lt;</code>, <code>&amp;</code>, <code>|</code>) to build <strong>expression objects</strong> that become SQL with parameters. Schema changes over time are handled by <strong>Alembic</strong>, SQLAlchemy&rsquo;s migration tool, which generates numbered migration scripts like yesterday&rsquo;s challenge.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>An ORM maps classes to tables, attributes to columns and objects to rows; it saves and loads objects, keeps an identity map (one object per row in a session), tracks changes as a unit of work, follows relationships lazily or eagerly, and builds queries from Python expressions. Under the hood: descriptors for columns, class hooks to collect them, parameters for values and fixed names for identifiers. Lazy relationships in a loop cause the N+1 problem; load related rows eagerly with a join or one IN query, and watch the SQL that&rsquo;s sent (set_trace_callback, or echo=True). SQLAlchemy 2.0 declares models with Mapped and mapped_column, queries with select(), and migrates with Alembic.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d4-schema" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A table from a class</div><div class="pc-prompt"><p>Write <code>Field(kind, required=True, unique=False)</code> (a descriptor that type-checks values on assignment, raising <code>TypeError</code>, and stores them in the instance&rsquo;s <code>__dict__</code>) and <code>Model</code>, whose <code>__init_subclass__(cls, table)</code> records <code>cls.table</code> and the class&rsquo;s fields <strong>in definition order</strong> in <code>cls.fields</code>. Then <code>create_sql(model)</code>: <code>CREATE TABLE table (id INTEGER PRIMARY KEY, name TYPE [NOT NULL] [UNIQUE], ...)</code> with <code>int</code> as <code>INTEGER</code>, <code>str</code> as <code>TEXT</code>, <code>float</code> as <code>REAL</code> and <code>bool</code> as <code>INTEGER</code>. Field names must be plain identifiers (<code>ValueError</code> otherwise, checked in <code>__set_name__</code>).</p></div><textarea class="pc-src pc-code" hidden>import re
+
+TYPES = {int: &quot;INTEGER&quot;, str: &quot;TEXT&quot;, float: &quot;REAL&quot;, bool: &quot;INTEGER&quot;}
+
+class Field:
+    ___
+
+class Model:
+    ___
+
+def create_sql(model):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_schema():
+    &quot;classes to tables&quot;
+    import sqlite3
+    class Book(Model, table=&quot;books&quot;):
+        title = Field(str)
+        isbn = Field(str, unique=True)
+        year = Field(int)
+        rating = Field(float, required=False)
+        lent = Field(bool)
+    assert Book.table == &quot;books&quot; and [f.name for f in Book.fields] == [&quot;title&quot;, &quot;isbn&quot;, &quot;year&quot;, &quot;rating&quot;, &quot;lent&quot;]
+    assert create_sql(Book) == &quot;CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT NOT NULL, isbn TEXT NOT NULL UNIQUE, year INTEGER NOT NULL, rating REAL, lent INTEGER NOT NULL)&quot;
+    sqlite3.connect(&quot;:memory:&quot;).execute(create_sql(Book))
+    b = Book()
+    b.year = 1815
+    try:
+        b.year = &quot;1815&quot;
+        assert False
+    except TypeError:
+        pass
+    assert b.year == 1815 and Book.year.name == &quot;year&quot;</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+TYPES = {int: &quot;INTEGER&quot;, str: &quot;TEXT&quot;, float: &quot;REAL&quot;, bool: &quot;INTEGER&quot;}
+
+class Field:
+    def __init__(self, kind, required=True, unique=False):
+        self.kind, self.required, self.unique = kind, required, unique
+
+    def __set_name__(self, owner, name):
+        if not re.fullmatch(r&quot;[A-Za-z_][A-Za-z0-9_]*&quot;, name):
+            raise ValueError(name)
+        self.name = name
+
+    def __get__(self, obj, owner=None):
+        return self if obj is None else obj.__dict__.get(self.name)
+
+    def __set__(self, obj, value):
+        if value is not None and not isinstance(value, self.kind):
+            raise TypeError(f&quot;{self.name} must be {self.kind.__name__}&quot;)
+        obj.__dict__[self.name] = value
+
+class Model:
+    def __init_subclass__(cls, table=None, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.table = table
+        cls.fields = [v for v in vars(cls).values() if isinstance(v, Field)]
+
+def create_sql(model):
+    columns = [&quot;id INTEGER PRIMARY KEY&quot;]
+    for f in model.fields:
+        column = f&quot;{f.name} {TYPES[f.kind]}&quot;
+        if f.required:
+            column += &quot; NOT NULL&quot;
+        if f.unique:
+            column += &quot; UNIQUE&quot;
+        columns.append(column)
+    return f&quot;CREATE TABLE {model.table} ({&#x27;, &#x27;.join(columns)})&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d4-crud" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Saving and loading</div><div class="pc-prompt"><p>Using the given <code>Field</code> and <code>Model</code>, add class methods and methods to <code>Model</code>: <code>obj.save(conn)</code> (an <code>INSERT</code> setting <code>obj.id</code> if it has none, otherwise an <code>UPDATE</code> of every field by id; committed), <code>Model.get(conn, id)</code> (an instance, or <code>None</code>), <code>Model.find(conn, **equals)</code> (instances matching every <code>field=value</code> given, by id; unknown field names raise <code>ValueError</code>), and <code>obj.delete(conn)</code> (deleting the row and setting <code>obj.id</code> to <code>None</code>). Values are always parameters.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+class Field:
+    def __init__(self, kind):
+        self.kind = kind
+    def __set_name__(self, owner, name):
+        self.name = name
+    def __get__(self, obj, owner=None):
+        return self if obj is None else obj.__dict__.get(self.name)
+    def __set__(self, obj, value):
+        if value is not None and not isinstance(value, self.kind):
+            raise TypeError(self.name)
+        obj.__dict__[self.name] = value
+
+class Model:
+    def __init_subclass__(cls, table=None, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.table = table
+        cls.fields = [v for v in vars(cls).values() if isinstance(v, Field)]
+
+    def __init__(self, id=None, **values):
+        self.id = id
+        for f in self.fields:
+            setattr(self, f.name, values.get(f.name))
+
+    def save(self, conn):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_crud():
+    &quot;insert, update, get, find and delete&quot;
+    import sqlite3
+    class Book(Model, table=&quot;books&quot;):
+        title = Field(str)
+        year = Field(int)
+    conn = sqlite3.connect(&quot;:memory:&quot;)
+    conn.execute(&quot;CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT, year INTEGER)&quot;)
+    emma, persuasion = Book(title=&quot;Emma&quot;, year=1815), Book(title=&quot;Persuasion&quot;, year=1817)
+    emma.save(conn)
+    persuasion.save(conn)
+    assert (emma.id, persuasion.id) == (1, 2) and not conn.in_transaction
+    emma.year = 1816
+    emma.save(conn)
+    loaded = Book.get(conn, 1)
+    assert (loaded.id, loaded.title, loaded.year) == (1, &quot;Emma&quot;, 1816) and Book.get(conn, 9) is None
+    assert [b.title for b in Book.find(conn, year=1817)] == [&quot;Persuasion&quot;] and len(Book.find(conn)) == 2
+    assert Book.find(conn, title=&quot;x&#x27; OR &#x27;1&#x27;=&#x27;1&quot;) == []
+    try:
+        Book.find(conn, author=&quot;x&quot;)
+        assert False
+    except ValueError:
+        pass
+    persuasion.delete(conn)
+    assert persuasion.id is None and [b.id for b in Book.find(conn)] == [1]</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+class Field:
+    def __init__(self, kind):
+        self.kind = kind
+    def __set_name__(self, owner, name):
+        self.name = name
+    def __get__(self, obj, owner=None):
+        return self if obj is None else obj.__dict__.get(self.name)
+    def __set__(self, obj, value):
+        if value is not None and not isinstance(value, self.kind):
+            raise TypeError(self.name)
+        obj.__dict__[self.name] = value
+
+class Model:
+    def __init_subclass__(cls, table=None, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.table = table
+        cls.fields = [v for v in vars(cls).values() if isinstance(v, Field)]
+
+    def __init__(self, id=None, **values):
+        self.id = id
+        for f in self.fields:
+            setattr(self, f.name, values.get(f.name))
+
+    @classmethod
+    def _names(cls):
+        return [f.name for f in cls.fields]
+
+    def save(self, conn):
+        names = self._names()
+        values = [getattr(self, n) for n in names]
+        with conn:
+            if self.id is None:
+                sql = f&quot;INSERT INTO {self.table} ({&#x27;, &#x27;.join(names)}) VALUES ({&#x27;, &#x27;.join(&#x27;?&#x27; for _ in names)})&quot;
+                self.id = conn.execute(sql, values).lastrowid
+            else:
+                sql = f&quot;UPDATE {self.table} SET {&#x27;, &#x27;.join(n + &#x27; = ?&#x27; for n in names)} WHERE id = ?&quot;
+                conn.execute(sql, values + [self.id])
+
+    @classmethod
+    def _from_row(cls, row):
+        return cls(id=row[0], **dict(zip(cls._names(), row[1:])))
+
+    @classmethod
+    def get(cls, conn, id):
+        row = conn.execute(f&quot;SELECT id, {&#x27;, &#x27;.join(cls._names())} FROM {cls.table} WHERE id = ?&quot;, (id,)).fetchone()
+        return None if row is None else cls._from_row(row)
+
+    @classmethod
+    def find(cls, conn, **equals):
+        names = cls._names()
+        for key in equals:
+            if key not in names and key != &quot;id&quot;:
+                raise ValueError(f&quot;no field {key!r}&quot;)
+        sql = f&quot;SELECT id, {&#x27;, &#x27;.join(names)} FROM {cls.table}&quot;
+        if equals:
+            sql += &quot; WHERE &quot; + &quot; AND &quot;.join(f&quot;{k} = ?&quot; for k in equals)
+        sql += &quot; ORDER BY id&quot;
+        return [cls._from_row(r) for r in conn.execute(sql, list(equals.values()))]
+
+    def delete(self, conn):
+        with conn:
+            conn.execute(f&quot;DELETE FROM {self.table} WHERE id = ?&quot;, (self.id,))
+        self.id = None</textarea><template class="pc-src pc-hint">Build the column list from <code>[f.name for f in cls.fields]</code> (names you control) and pass values as a list of parameters. For <code>find</code>, check each key against those names before using it in the SQL. To make an instance from a row, <code>cls(id=row[0], **dict(zip(names, row[1:])))</code>.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d4-nplus1" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Counting the queries</div><div class="pc-prompt"><p>Write <code>count_queries(conn, func)</code>: run <code>func()</code> while recording every statement the connection sends (with <code>conn.set_trace_callback</code>), and return <code>(result, statements)</code>, removing the callback afterwards even if <code>func</code> raises. Then <code>books_by_author(conn)</code>: a dict of author name to the list of their book titles (in book id order; authors with no books get <code>[]</code>), using <strong>at most two</strong> queries however many authors there are.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+def count_queries(conn, func):
+    ___
+
+def books_by_author(conn):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_queries():
+    &quot;no N+1&quot;
+    import sqlite3
+    conn = sqlite3.connect(&quot;:memory:&quot;)
+    conn.executescript(&quot;&quot;&quot;
+    CREATE TABLE authors (id INTEGER PRIMARY KEY, name TEXT);
+    CREATE TABLE books (id INTEGER PRIMARY KEY, author_id INTEGER, title TEXT);
+    INSERT INTO authors VALUES (1, &#x27;Austen&#x27;), (2, &#x27;Dickens&#x27;), (3, &#x27;Eliot&#x27;), (4, &#x27;Woolf&#x27;);
+    INSERT INTO books VALUES (1, 1, &#x27;Emma&#x27;), (2, 2, &#x27;Bleak House&#x27;), (3, 1, &#x27;Persuasion&#x27;), (4, 3, &#x27;Middlemarch&#x27;);
+    &quot;&quot;&quot;)
+    result, statements = count_queries(conn, lambda: books_by_author(conn))
+    assert result == {&quot;Austen&quot;: [&quot;Emma&quot;, &quot;Persuasion&quot;], &quot;Dickens&quot;: [&quot;Bleak House&quot;], &quot;Eliot&quot;: [&quot;Middlemarch&quot;], &quot;Woolf&quot;: []}
+    assert len(statements) &lt;= 2, statements
+    conn.executemany(&quot;INSERT INTO authors (name) VALUES (?)&quot;, [(f&quot;A{i}&quot;,) for i in range(50)])
+    _, statements = count_queries(conn, lambda: books_by_author(conn))
+    assert len(statements) &lt;= 2
+    conn.execute(&quot;SELECT 1&quot;)
+    try:
+        count_queries(conn, lambda: 1 / 0)
+    except ZeroDivisionError:
+        pass
+    _, after = count_queries(conn, lambda: None)
+    assert after == []</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+def count_queries(conn, func):
+    sent = []
+    conn.set_trace_callback(sent.append)
+    try:
+        result = func()
+    finally:
+        conn.set_trace_callback(None)
+    return result, sent
+
+def books_by_author(conn):
+    result = {}
+    rows = conn.execute(&quot;&quot;&quot;
+        SELECT a.name, b.title FROM authors a LEFT JOIN books b ON b.author_id = a.id
+        ORDER BY a.id, b.id
+    &quot;&quot;&quot;).fetchall()
+    for name, title in rows:
+        result.setdefault(name, [])
+        if title is not None:
+            result[name].append(title)
+    return result</textarea><template class="pc-src pc-hint">One query for the authors, one for all the books (or a single <code>LEFT JOIN</code>); group the books in Python. In <code>count_queries</code>, use <code>try</code>/<code>finally</code> around <code>func()</code> to call <code>conn.set_trace_callback(None)</code>.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d4-identity" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">An identity map</div><div class="pc-prompt"><p>Write a <code>Session(conn)</code> for the given <code>Book</code> model: <code>session.get(Book, id)</code> loads a row once and returns the <strong>same</strong> object for later calls with the same class and id (or <code>None</code> if there&rsquo;s no row, not cached); <code>session.dirty()</code> lists the loaded objects (in load order) whose field values differ from what was loaded; and <code>session.commit()</code> writes an <code>UPDATE</code> (of only the changed fields) for each dirty object in one transaction, after which nothing is dirty. Keep, for each loaded object, a copy of its values as loaded.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+class Book:
+    table, fields = &quot;books&quot;, [&quot;title&quot;, &quot;year&quot;]
+    def __init__(self, id, title, year):
+        self.id, self.title, self.year = id, title, year
+
+class Session:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_identity():
+    &quot;one object per row, and only changed rows written&quot;
+    import sqlite3
+    conn = sqlite3.connect(&quot;:memory:&quot;)
+    conn.executescript(&quot;CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT, year INTEGER); INSERT INTO books VALUES (1, &#x27;Emma&#x27;, 1815), (2, &#x27;Persuasion&#x27;, 1817);&quot;)
+    s = Session(conn)
+    a, b = s.get(Book, 1), s.get(Book, 1)
+    assert a is b and a.title == &quot;Emma&quot; and s.get(Book, 9) is None
+    p = s.get(Book, 2)
+    assert s.dirty() == []
+    a.year = 1816
+    assert s.dirty() == [a]
+    sent = []
+    conn.set_trace_callback(sent.append)
+    s.commit()
+    conn.set_trace_callback(None)
+    updates = [q for q in sent if q.startswith(&quot;UPDATE&quot;)]
+    assert len(updates) == 1 and &quot;year&quot; in updates[0] and &quot;title&quot; not in updates[0], sent
+    assert conn.execute(&quot;SELECT year FROM books WHERE id = 1&quot;).fetchone() == (1816,) and s.dirty() == []
+    assert Session(conn).get(Book, 1) is not a</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+class Book:
+    table, fields = &quot;books&quot;, [&quot;title&quot;, &quot;year&quot;]
+    def __init__(self, id, title, year):
+        self.id, self.title, self.year = id, title, year
+
+class Session:
+    def __init__(self, conn):
+        self.conn = conn
+        self.identity = {}
+        self.loaded = {}
+
+    def get(self, cls, id):
+        key = (cls, id)
+        if key in self.identity:
+            return self.identity[key]
+        row = self.conn.execute(f&quot;SELECT {&#x27;, &#x27;.join(cls.fields)} FROM {cls.table} WHERE id = ?&quot;, (id,)).fetchone()
+        if row is None:
+            return None
+        obj = cls(id, *row)
+        self.identity[key] = obj
+        self.loaded[key] = dict(zip(cls.fields, row))
+        return obj
+
+    def _changes(self, key, obj):
+        before = self.loaded[key]
+        return {f: getattr(obj, f) for f in type(obj).fields if getattr(obj, f) != before[f]}
+
+    def dirty(self):
+        return [obj for key, obj in self.identity.items() if self._changes(key, obj)]
+
+    def commit(self):
+        with self.conn:
+            for key, obj in self.identity.items():
+                changes = self._changes(key, obj)
+                if changes:
+                    sets = &quot;, &quot;.join(f&quot;{f} = ?&quot; for f in changes)
+                    self.conn.execute(f&quot;UPDATE {type(obj).table} SET {sets} WHERE id = ?&quot;, [*changes.values(), obj.id])
+                    self.loaded[key].update(changes)</textarea><template class="pc-src pc-hint">Keep <code>self.identity = {}</code> (from <code>(cls, id)</code> to object) and <code>self.loaded = {}</code> (from <code>id(obj)</code> to a dict of the field values when loaded). In <code>commit</code>, compare each object&rsquo;s current values with its saved copy, update the changed columns, then refresh the saved copy.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d4-expressions" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Queries from Python expressions</div><div class="pc-prompt"><p>Build the core of an expression language like SQLAlchemy&rsquo;s. <code>Column(name)</code> objects overload <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code> and <code>&gt;=</code> to return a <code>Condition</code>, and have a <code>.like(pattern)</code> method. A <code>Condition</code> has <code>.sql</code> (text with <code>?</code> placeholders) and <code>.params</code> (a list), and combines with <code>&amp;</code> (AND) and <code>|</code> (OR), bracketed: <code>(A) AND (B)</code>. Comparing with <code>None</code> using <code>==</code> or <code>!=</code> gives <code>name IS NULL</code> / <code>name IS NOT NULL</code> with no parameter. Then <code>select(table, *columns)</code> returns a query object with <code>.where(condition)</code> (several calls are ANDed), <code>.order_by(column, descending=False)</code>, and <code>.compile()</code> giving <code>(sql, params)</code>.</p></div><textarea class="pc-src pc-code" hidden>class Condition:
+    ___
+
+class Column:
+    ___
+
+class Select:
+    ___
+
+def select(table, *columns):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_expressions():
+    &quot;operator overloading builds SQL&quot;
+    import sqlite3
+    title, year, rating = Column(&quot;title&quot;), Column(&quot;year&quot;), Column(&quot;rating&quot;)
+    c = (year &gt; 1810) &amp; ((title.like(&quot;%e%&quot;)) | (rating == None))
+    assert c.sql == &quot;(year &gt; ?) AND ((title LIKE ?) OR (rating IS NULL))&quot; and c.params == [1810, &quot;%e%&quot;]
+    q = select(&quot;books&quot;, title, year).where(year &gt;= 1815).where(rating != None).order_by(year, descending=True)
+    assert q.compile() == (&quot;SELECT title, year FROM books WHERE (year &gt;= ?) AND (rating IS NOT NULL) ORDER BY year DESC&quot;, [1815])
+    conn = sqlite3.connect(&quot;:memory:&quot;)
+    conn.executescript(&quot;CREATE TABLE books (title TEXT, year INTEGER, rating REAL); INSERT INTO books VALUES (&#x27;Emma&#x27;, 1815, 4.5), (&#x27;Persuasion&#x27;, 1817, NULL), (&#x27;Pamela&#x27;, 1740, 3.0);&quot;)
+    assert conn.execute(*q.compile()).fetchall() == [(&quot;Emma&quot;, 1815)]
+    q2 = select(&quot;books&quot;, title).where((year &lt; 1800) | (title == &quot;Persuasion&quot;)).order_by(title)
+    assert conn.execute(*q2.compile()).fetchall() == [(&quot;Pamela&quot;,), (&quot;Persuasion&quot;,)]
+    assert select(&quot;books&quot;, title).compile() == (&quot;SELECT title FROM books&quot;, [])</textarea><textarea class="pc-src pc-solution" hidden>class Condition:
+    def __init__(self, sql, params):
+        self.sql, self.params = sql, list(params)
+
+    def __and__(self, other):
+        return Condition(f&quot;({self.sql}) AND ({other.sql})&quot;, self.params + other.params)
+
+    def __or__(self, other):
+        return Condition(f&quot;({self.sql}) OR ({other.sql})&quot;, self.params + other.params)
+
+class Column:
+    def __init__(self, name):
+        self.name = name
+
+    def _compare(self, op, other):
+        return Condition(f&quot;{self.name} {op} ?&quot;, [other])
+
+    def __eq__(self, other):
+        return Condition(f&quot;{self.name} IS NULL&quot;, []) if other is None else self._compare(&quot;=&quot;, other)
+
+    def __ne__(self, other):
+        return Condition(f&quot;{self.name} IS NOT NULL&quot;, []) if other is None else self._compare(&quot;&lt;&gt;&quot;, other)
+
+    def __lt__(self, other):
+        return self._compare(&quot;&lt;&quot;, other)
+
+    def __le__(self, other):
+        return self._compare(&quot;&lt;=&quot;, other)
+
+    def __gt__(self, other):
+        return self._compare(&quot;&gt;&quot;, other)
+
+    def __ge__(self, other):
+        return self._compare(&quot;&gt;=&quot;, other)
+
+    def like(self, pattern):
+        return self._compare(&quot;LIKE&quot;, pattern)
+
+class Select:
+    def __init__(self, table, columns):
+        self.table, self.columns = table, columns
+        self.conditions, self.ordering = [], []
+
+    def where(self, condition):
+        self.conditions.append(condition)
+        return self
+
+    def order_by(self, column, descending=False):
+        self.ordering.append(column.name + (&quot; DESC&quot; if descending else &quot;&quot;))
+        return self
+
+    def compile(self):
+        sql = f&quot;SELECT {&#x27;, &#x27;.join(c.name for c in self.columns)} FROM {self.table}&quot;
+        params = []
+        if self.conditions:
+            sql += &quot; WHERE &quot; + &quot; AND &quot;.join(f&quot;({c.sql})&quot; for c in self.conditions)
+            for c in self.conditions:
+                params += c.params
+        if self.ordering:
+            sql += &quot; ORDER BY &quot; + &quot;, &quot;.join(self.ordering)
+        return sql, params
+
+def select(table, *columns):
+    return Select(table, list(columns))</textarea><template class="pc-src pc-hint"><code>Column.__eq__(self, other)</code> returns <code>Condition(f"{self.name} = ?", [other])</code> (or the <code>IS NULL</code> form). <code>Condition.__and__(self, other)</code> returns <code>Condition(f"({self.sql}) AND ({other.sql})", self.params + other.params)</code>. Note that defining <code>__eq__</code> on Column removes its default <code>__hash__</code>; that&rsquo;s fine here.</template></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w075d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A query per author</div><div class="pc-prompt"><p>The loop sends one query <strong>per author</strong> for their books (N+1), so with these four authors the program sends five queries and prints <code>queries: 5</code>. Load all the books in one query and group them in Python, so it prints <code>queries: 2</code>, with the same results.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.executescript(&quot;&quot;&quot;
+CREATE TABLE authors (id INTEGER PRIMARY KEY, name TEXT);
+CREATE TABLE books (id INTEGER PRIMARY KEY, author_id INTEGER, title TEXT);
+INSERT INTO authors VALUES (1, &#x27;Austen&#x27;), (2, &#x27;Dickens&#x27;), (3, &#x27;Eliot&#x27;), (4, &#x27;Woolf&#x27;);
+INSERT INTO books VALUES (1, 1, &#x27;Emma&#x27;), (2, 2, &#x27;Bleak House&#x27;), (3, 1, &#x27;Persuasion&#x27;), (4, 3, &#x27;Middlemarch&#x27;);
+&quot;&quot;&quot;)
+sent = []
+conn.set_trace_callback(sent.append)
+
+result = {}
+for author_id, name in conn.execute(&quot;SELECT id, name FROM authors ORDER BY id&quot;).fetchall():
+    result[name] = [t for (t,) in conn.execute(&quot;SELECT title FROM books WHERE author_id = ? ORDER BY id&quot;, (author_id,))]
+
+conn.set_trace_callback(None)
+print(result)
+print(&quot;queries:&quot;, len(sent))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;two queries&quot;
+    expect_output(&quot;{&#x27;Austen&#x27;: [&#x27;Emma&#x27;, &#x27;Persuasion&#x27;], &#x27;Dickens&#x27;: [&#x27;Bleak House&#x27;], &#x27;Eliot&#x27;: [&#x27;Middlemarch&#x27;], &#x27;Woolf&#x27;: []}\nqueries: 2&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.executescript(&quot;&quot;&quot;
+CREATE TABLE authors (id INTEGER PRIMARY KEY, name TEXT);
+CREATE TABLE books (id INTEGER PRIMARY KEY, author_id INTEGER, title TEXT);
+INSERT INTO authors VALUES (1, &#x27;Austen&#x27;), (2, &#x27;Dickens&#x27;), (3, &#x27;Eliot&#x27;), (4, &#x27;Woolf&#x27;);
+INSERT INTO books VALUES (1, 1, &#x27;Emma&#x27;), (2, 2, &#x27;Bleak House&#x27;), (3, 1, &#x27;Persuasion&#x27;), (4, 3, &#x27;Middlemarch&#x27;);
+&quot;&quot;&quot;)
+sent = []
+conn.set_trace_callback(sent.append)
+
+authors = conn.execute(&quot;SELECT id, name FROM authors ORDER BY id&quot;).fetchall()
+by_author = {}
+for author_id, title in conn.execute(&quot;SELECT author_id, title FROM books ORDER BY id&quot;):
+    by_author.setdefault(author_id, []).append(title)
+result = {name: by_author.get(author_id, []) for author_id, name in authors}
+
+conn.set_trace_callback(None)
+print(result)
+print(&quot;queries:&quot;, len(sent))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w075d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">An update for every row</div><div class="pc-prompt"><p><code>save</code> builds its <code>UPDATE</code> without a <code>WHERE</code> clause, so changing one book&rsquo;s year changes <strong>every</strong> book&rsquo;s, and this prints <code>[(1, 'Emma', 1816), (2, 'Persuasion', 1816)]</code>. Update only the object&rsquo;s own row, so it prints <code>[(1, 'Emma', 1816), (2, 'Persuasion', 1817)]</code>.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.executescript(&quot;CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT, year INTEGER); INSERT INTO books VALUES (1, &#x27;Emma&#x27;, 1815), (2, &#x27;Persuasion&#x27;, 1817);&quot;)
+
+def save(conn, book_id, title, year):
+    with conn:
+        conn.execute(&quot;UPDATE books SET title = ?, year = ?&quot;, (title, year))
+
+save(conn, 1, &quot;Emma&quot;, 1816)
+print(conn.execute(&quot;SELECT * FROM books ORDER BY id&quot;).fetchall())</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;only one row&quot;
+    expect_output(&quot;[(1, &#x27;Emma&#x27;, 1816), (2, &#x27;Persuasion&#x27;, 1817)]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.executescript(&quot;CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT, year INTEGER); INSERT INTO books VALUES (1, &#x27;Emma&#x27;, 1815), (2, &#x27;Persuasion&#x27;, 1817);&quot;)
+
+def save(conn, book_id, title, year):
+    with conn:
+        conn.execute(&quot;UPDATE books SET title = ?, year = ? WHERE id = ?&quot;, (title, year, book_id))
+
+save(conn, 1, &quot;Emma&quot;, 1816)
+print(conn.execute(&quot;SELECT * FROM books ORDER BY id&quot;).fetchall())</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w075d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">An identity map that mixed up tables</div><div class="pc-prompt"><p>The cache is keyed by the row&rsquo;s id alone, so after loading author 1, asking for <strong>book</strong> 1 returns the author, and this prints <code>Author Austen</code>. Key the cache by the class <strong>and</strong> the id, so it prints <code>Book Emma</code>.</p></div><textarea class="pc-src pc-code" hidden>class Author:
+    def __init__(self, name):
+        self.name = name
+
+class Book:
+    def __init__(self, name):
+        self.name = name
+
+rows = {(Author, 1): &quot;Austen&quot;, (Book, 1): &quot;Emma&quot;}
+cache = {}
+
+def get(cls, id):
+    if id not in cache:
+        cache[id] = cls(rows[(cls, id)])
+    return cache[id]
+
+get(Author, 1)
+found = get(Book, 1)
+print(type(found).__name__, found.name)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;class and id&quot;
+    expect_output(&quot;Book Emma&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Author:
+    def __init__(self, name):
+        self.name = name
+
+class Book:
+    def __init__(self, name):
+        self.name = name
+
+rows = {(Author, 1): &quot;Austen&quot;, (Book, 1): &quot;Emma&quot;}
+cache = {}
+
+def get(cls, id):
+    if (cls, id) not in cache:
+        cache[(cls, id)] = cls(rows[(cls, id)])
+    return cache[(cls, id)]
+
+get(Author, 1)
+found = get(Book, 1)
+print(type(found).__name__, found.name)</textarea></div>
+<div class="parsons" data-id="w075d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A SQLAlchemy model</div><div class="pc-prompt"><p>Arrange the lines of a SQLAlchemy 2.0 model for a table of books with a title and a year. One line is a trap.</p></div><script type="application/json">{"lines": ["from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column", "class Base(DeclarativeBase):", "    pass", "class Book(Base):", "    __tablename__ = \"books\"", "    id: Mapped[int] = mapped_column(primary_key=True)", "    title: Mapped[str]", "    year: Mapped[int]"], "distractors": ["    title = \"TEXT NOT NULL\""]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # queries to list 100 authors and lazily load each one&#x27;s books in a loop
+q = ___   # the same, loading all the books with one IN query
+r = ___   # True or False: in a session with an identity map, two gets of the same row return the same object
+s = ___   # the SQLAlchemy create_engine argument that prints every SQL statement
+t = ___   # SQLAlchemy&#x27;s migration tool</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 101 and q == 2 and r is True, &quot;p, q and r&quot;
+    assert s in (&quot;echo&quot;, &quot;echo=True&quot;) and t == &quot;Alembic&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 101
+q = 2
+r = True
+s = &quot;echo&quot;
+t = &quot;Alembic&quot;</textarea></div>
+<h2 id="on-your-own-computer">On your own computer</h2>
+<p>Install SQLAlchemy and run the model from today&rsquo;s lesson, with <code>echo=True</code>, and read the SQL it sends:</p>
+<pre><code class="language-bash">pip install sqlalchemy
+</code></pre>
+<p>Then try removing <code>.options(selectinload(Author.books))</code> and adding a few more authors: you&rsquo;ll see the N+1 queries appear in the log, one <code>SELECT ... FROM books WHERE ? = books.author_id</code> per author. For Django projects, the equivalent is <code>prefetch_related("books")</code>, and the <code>django-debug-toolbar</code> shows every query a page sends.</p>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w075d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does an ORM map?", "answer": 1, "explain": "And references to foreign keys.", "options": ["Files to folders", "Classes to tables, attributes to columns, objects to rows", "Functions to queries only", "Indexes to keys"]}, {"type": "mc", "q": "What is the N+1 problem?", "answer": 1, "explain": "Lazy loading in a loop.", "options": ["An off-by-one error", "One query for N objects, then one more query per object for related data", "N joins", "N+1 tables"]}, {"type": "mc", "q": "How do you avoid N+1?", "answer": 1, "explain": "selectinload or joinedload in SQLAlchemy.", "options": ["Add an index", "Load related rows eagerly: a join, or one IN query for all of them", "Use more threads", "Cache every query"]}, {"type": "mc", "q": "What does an identity map guarantee?", "answer": 1, "explain": "Two gets return the same object.", "options": ["Unique column names", "One object per row within a session", "Faster queries", "Encryption"]}, {"type": "mc", "q": "What does a unit of work do?", "answer": 1, "explain": "session.commit().", "options": ["Times queries", "Tracks new, changed and deleted objects and writes them in one transaction at commit", "Runs migrations", "Opens connections"]}, {"type": "mc", "q": "How does an ORM safely put field names into SQL?", "answer": 1, "explain": "Names can&rsquo;t be parameters.", "options": ["From user input", "From the model class&rsquo;s own fields, never from input; values are parameters", "It can&rsquo;t", "By escaping quotes"]}, {"type": "mc", "q": "In SQLAlchemy, what is Book.year &gt; 1850?", "answer": 1, "explain": "Columns overload comparison operators.", "options": ["True or False", "An expression object that becomes SQL with a parameter", "An error", "A list"]}, {"type": "mc", "q": "How can you see the SQL a program really sends with sqlite3?", "answer": 1, "explain": "SQLAlchemy has echo=True.", "options": ["You can&rsquo;t", "conn.set_trace_callback(print)", "conn.debug = True", "PRAGMA log"]}, {"type": "mc", "q": "When is hand-written SQL often better than the ORM?", "answer": 1, "explain": "Use each where it&rsquo;s clearer.", "options": ["Never", "For complex reports and bulk operations, where the SQL is clearer and faster", "For inserts", "For every query"]}, {"type": "output", "q": "What does this print?", "answer": "True CREATE TABLE t (x)", "explain": "The callback sees every statement, with parameters filled in for display.", "code": "import sqlite3\nconn = sqlite3.connect(\":memory:\")\nsent = []\nconn.set_trace_callback(sent.append)\nconn.execute(\"CREATE TABLE t (x)\")\nconn.executemany(\"INSERT INTO t VALUES (?)\", [(1,), (2,)])\nprint(len(sent) >= 2, sent[0])"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: lazy query sets</div><div class="pc-prompt"><p>Write <code>QuerySet(conn, table, columns)</code>, a lazy, chainable query in the style of Django&rsquo;s ORM: <code>filter(**conditions)</code> (with lookups as in Day 1&rsquo;s builder: <code>field</code>, <code>field__lt</code>, <code>__le</code>, <code>__gt</code>, <code>__ge</code>, <code>__ne</code>, <code>__like</code>, <code>__in</code>) and <code>order_by(*fields)</code> (with <code>-</code> for descending) each return a <strong>new</strong> query set and run nothing; iterating runs the query <strong>once</strong> and caches the rows (as dicts), so iterating again sends no query; <code>count()</code> sends a <code>SELECT count(*)</code> (or uses the cache if the query has already run); <code>first()</code> returns the first row (with <code>LIMIT 1</code> if not yet cached) or <code>None</code>; and <code>[i]</code> indexing uses the cache (running the query first if needed). Field names must be among <code>columns</code> (<code>ValueError</code> otherwise).</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+OPS = {&quot;&quot;: &quot;=&quot;, &quot;lt&quot;: &quot;&lt;&quot;, &quot;le&quot;: &quot;&lt;=&quot;, &quot;gt&quot;: &quot;&gt;&quot;, &quot;ge&quot;: &quot;&gt;=&quot;, &quot;ne&quot;: &quot;&lt;&gt;&quot;, &quot;like&quot;: &quot;LIKE&quot;}
+
+class QuerySet:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_querysets():
+    &quot;lazy, chainable and cached&quot;
+    import sqlite3
+    conn = sqlite3.connect(&quot;:memory:&quot;)
+    conn.executescript(&quot;CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT, year INTEGER); INSERT INTO books (title, year) VALUES (&#x27;Emma&#x27;, 1815), (&#x27;Persuasion&#x27;, 1817), (&#x27;Pamela&#x27;, 1740), (&#x27;Middlemarch&#x27;, 1871);&quot;)
+    sent = []
+    conn.set_trace_callback(sent.append)
+    books = QuerySet(conn, &quot;books&quot;, [&quot;id&quot;, &quot;title&quot;, &quot;year&quot;])
+    recent = books.filter(year__gt=1800).order_by(&quot;-year&quot;)
+    assert sent == [], &quot;building a query set runs nothing&quot;
+    assert [b[&quot;title&quot;] for b in recent] == [&quot;Middlemarch&quot;, &quot;Persuasion&quot;, &quot;Emma&quot;] and len(sent) == 1
+    assert [b[&quot;year&quot;] for b in recent] == [1871, 1817, 1815] and len(sent) == 1, &quot;the second loop uses the cache&quot;
+    assert recent.count() == 3 and len(sent) == 1
+    fresh = books.filter(title__like=&quot;P%&quot;)
+    assert fresh.count() == 2 and len(sent) == 2 and &quot;count(*)&quot; in sent[-1]
+    assert fresh.order_by(&quot;title&quot;).first() == {&quot;id&quot;: 3, &quot;title&quot;: &quot;Pamela&quot;, &quot;year&quot;: 1740} and &quot;LIMIT 1&quot; in sent[-1]
+    assert books.filter(id__in=[2, 4]).order_by(&quot;id&quot;)[1][&quot;title&quot;] == &quot;Middlemarch&quot;
+    assert books.filter(year=1700).first() is None
+    assert books.filter(year__gt=1800) is not books and [b[&quot;id&quot;] for b in books.order_by(&quot;id&quot;)] == [1, 2, 3, 4]
+    try:
+        books.filter(author=&quot;x&quot;)
+        assert False
+    except ValueError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+OPS = {&quot;&quot;: &quot;=&quot;, &quot;lt&quot;: &quot;&lt;&quot;, &quot;le&quot;: &quot;&lt;=&quot;, &quot;gt&quot;: &quot;&gt;&quot;, &quot;ge&quot;: &quot;&gt;=&quot;, &quot;ne&quot;: &quot;&lt;&gt;&quot;, &quot;like&quot;: &quot;LIKE&quot;}
+
+class QuerySet:
+    def __init__(self, conn, table, columns, conditions=(), ordering=()):
+        self.conn, self.table, self.columns = conn, table, list(columns)
+        self.conditions, self.ordering = tuple(conditions), tuple(ordering)
+        self._cache = None
+
+    def _check(self, name):
+        if name not in self.columns:
+            raise ValueError(f&quot;no column {name!r}&quot;)
+        return name
+
+    def filter(self, **conditions):
+        new = []
+        for key, value in conditions.items():
+            field, _, op = key.partition(&quot;__&quot;)
+            self._check(field)
+            if op != &quot;in&quot; and op not in OPS:
+                raise ValueError(f&quot;unknown lookup {op!r}&quot;)
+            new.append((field, op, value))
+        return QuerySet(self.conn, self.table, self.columns, self.conditions + tuple(new), self.ordering)
+
+    def order_by(self, *fields):
+        ordering = tuple((self._check(f.lstrip(&quot;-&quot;)), f.startswith(&quot;-&quot;)) for f in fields)
+        return QuerySet(self.conn, self.table, self.columns, self.conditions, self.ordering + ordering)
+
+    def _sql(self, select_part, limit=None):
+        sql, params = f&quot;SELECT {select_part} FROM {self.table}&quot;, []
+        parts = []
+        for field, op, value in self.conditions:
+            if op == &quot;in&quot;:
+                values = list(value)
+                parts.append(f&quot;{field} IN ({&#x27;, &#x27;.join(&#x27;?&#x27; for _ in values)})&quot;)
+                params += values
+            else:
+                parts.append(f&quot;{field} {OPS[op]} ?&quot;)
+                params.append(value)
+        if parts:
+            sql += &quot; WHERE &quot; + &quot; AND &quot;.join(parts)
+        if self.ordering and select_part != &quot;count(*)&quot;:
+            sql += &quot; ORDER BY &quot; + &quot;, &quot;.join(f + (&quot; DESC&quot; if desc else &quot;&quot;) for f, desc in self.ordering)
+        if limit is not None:
+            sql += f&quot; LIMIT {int(limit)}&quot;
+        return sql, params
+
+    def _rows(self):
+        if self._cache is None:
+            cur = self.conn.execute(*self._sql(&quot;, &quot;.join(self.columns)))
+            self._cache = [dict(zip(self.columns, row)) for row in cur]
+        return self._cache
+
+    def __iter__(self):
+        return iter(self._rows())
+
+    def __getitem__(self, index):
+        return self._rows()[index]
+
+    def count(self):
+        if self._cache is not None:
+            return len(self._cache)
+        return self.conn.execute(*self._sql(&quot;count(*)&quot;)).fetchone()[0]
+
+    def first(self):
+        if self._cache is not None:
+            return self._cache[0] if self._cache else None
+        row = self.conn.execute(*self._sql(&quot;, &quot;.join(self.columns), limit=1)).fetchone()
+        return None if row is None else dict(zip(self.columns, row))</textarea><template class="pc-src pc-hint">Store the conditions and ordering as tuples, and make <code>filter</code> and <code>order_by</code> return <code>QuerySet(..., conditions=self.conditions + new)</code> copies. Write one <code>_sql(select_part, limit=None)</code> method that builds the text and parameters, used by iteration (<code>SELECT columns</code>), <code>count</code> (<code>SELECT count(*)</code>) and <code>first</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>If you have SQLAlchemy on your own computer, rebuild today&rsquo;s bookshop in it and watch the SQL with <code>echo=True</code>. Tomorrow: <strong>transactions and indexes</strong>: what the database promises when several things happen at once, and how it finds one row among millions without reading them all.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w075d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w075d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w075d4", "week": 75, "day": 4, "title": "ORMs and SQLAlchemy", "exercises": [{"id": "w075d4-schema", "title": "A table from a class", "points": 10}, {"id": "w075d4-crud", "title": "Saving and loading", "points": 15}, {"id": "w075d4-nplus1", "title": "Counting the queries", "points": 15}, {"id": "w075d4-identity", "title": "An identity map", "points": 15}, {"id": "w075d4-expressions", "title": "Queries from Python expressions", "points": 15}, {"id": "w075d4-bug1", "title": "A query per author", "points": 10}, {"id": "w075d4-bug2", "title": "An update for every row", "points": 10}, {"id": "w075d4-bug3", "title": "An identity map that mixed up tables", "points": 10}, {"id": "w075d4-trace", "title": "Predict them", "points": 10}, {"id": "w075d4-challenge", "title": "Challenge: lazy query sets", "points": 25}], "points": 135}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=db5173407e"></script>
+</body>
+</html>

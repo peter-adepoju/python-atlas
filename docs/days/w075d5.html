@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="db5173407e">
+<title>Week 75 Day 5: Transactions and indexes | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=db5173407e">
+<link rel="stylesheet" href="../assets/css/site.css?v=db5173407e">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=db5173407e"></script>
+<script src="../assets/vendor/codemirror.js?v=db5173407e" defer></script>
+<meta name="description" content="Two promises make databases worth using. The first is about correctness when things go wrong or happen at once: a transaction’s changes happen completely or...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w075d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 75 Day 5: Transactions and indexes">
+<meta property="og:description" content="Two promises make databases worth using. The first is about correctness when things go wrong or happen at once: a transaction’s changes happen completely or...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w075d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-75">Week 75: Databases</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#acid-and-isolation" data-sec="acid-and-isolation">ACID and isolation</a></li><li><a href="#lost-updates-and-how-to-prevent-them" data-sec="lost-updates-and-how-to-prevent-them">Lost updates, and how to prevent them</a></li><li><a href="#indexes" data-sec="indexes">Indexes</a></li><li><a href="#choosing-indexes" data-sec="choosing-indexes">Choosing indexes</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#on-your-own-computer" data-sec="on-your-own-computer">On your own computer</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w075d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-75">Week 75: Databases</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 75, Day 5</span></p>
+      <h1>Transactions and indexes</h1>
+      <div class="day-intro"><p>Two promises make databases worth using. The first is about correctness when things go wrong or happen at once: a transaction&rsquo;s changes happen completely or not at all, and two people updating the same row can&rsquo;t silently overwrite each other. The second is about speed: finding one customer among ten million without reading all ten million. Today is both. ACID and what isolation really means, the lost update and how to prevent it, savepoints for partial rollback, and then indexes: how they work, how to read a query plan, which indexes a query can use, and what they cost.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain ACID, isolation and the anomalies it prevents, and SQLite&rsquo;s locking</li><li>Prevent lost updates with atomic statements and optimistic locking, and use savepoints</li><li>Read EXPLAIN QUERY PLAN to see whether a query scans or uses an index</li><li>Choose indexes, including composite and covering ones, and know their costs</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="ACID and isolation: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Lost updates, and how to prevent them: 20 min"></span><span class="plan-seg s1" style="flex:25" title="Indexes: 25 min"></span><span class="plan-seg s0" style="flex:15" title="Choosing indexes: 15 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">ACID and isolation</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Lost updates, and how to prevent them</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Indexes</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Choosing indexes</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:30</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w075d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w075d5.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w075d5-p1"><textarea class="pc-src pc-code" hidden>import sqlite3, os
+
+if os.path.exists(&quot;bank.db&quot;):
+    os.remove(&quot;bank.db&quot;)
+setup = sqlite3.connect(&quot;bank.db&quot;)
+with setup:
+    setup.execute(&quot;CREATE TABLE accounts (name TEXT PRIMARY KEY, balance INTEGER)&quot;)
+    setup.execute(&quot;INSERT INTO accounts VALUES (&#x27;shop&#x27;, 100)&quot;)
+
+till_a, till_b = sqlite3.connect(&quot;bank.db&quot;), sqlite3.connect(&quot;bank.db&quot;)
+
+a = till_a.execute(&quot;SELECT balance FROM accounts WHERE name = &#x27;shop&#x27;&quot;).fetchone()[0]
+b = till_b.execute(&quot;SELECT balance FROM accounts WHERE name = &#x27;shop&#x27;&quot;).fetchone()[0]
+with till_a:
+    till_a.execute(&quot;UPDATE accounts SET balance = ? WHERE name = &#x27;shop&#x27;&quot;, (a + 30,))
+with till_b:
+    till_b.execute(&quot;UPDATE accounts SET balance = ? WHERE name = &#x27;shop&#x27;&quot;, (b + 50,))
+
+print(setup.execute(&quot;SELECT balance FROM accounts&quot;).fetchone()[0])</textarea></div>
+<p>Two tills each took a payment: 30 and 50. The balance should be 180, but it&rsquo;s 150. Both read 100, both computed a new balance in Python, and the second write overwrote the first. This is the <strong>lost update</strong>, and no error was raised: each statement was perfectly valid. Preventing it is the job of today&rsquo;s first half.</p>
+<h2 id="acid-and-isolation">ACID and isolation</h2>
+<p>A transaction (yesterday&rsquo;s <code>with conn:</code>) promises four things, known as <strong>ACID</strong>:</p>
+<ul>
+<li><strong>Atomicity</strong>: all of its changes happen, or none do.</li>
+<li><strong>Consistency</strong>: it takes the database from one valid state to another; constraints (<code>NOT NULL</code>, <code>CHECK</code>, foreign keys) hold at the end.</li>
+<li><strong>Isolation</strong>: transactions running at the same time don&rsquo;t see each other&rsquo;s unfinished work, and the result is as if they&rsquo;d run in <strong>some</strong> order.</li>
+<li><strong>Durability</strong>: once committed, changes survive a crash or power cut (they&rsquo;re on disk).</li>
+</ul>
+<p>Isolation is the subtle one. Without it, concurrent transactions suffer <strong>anomalies</strong>: a <strong>dirty read</strong> (seeing another transaction&rsquo;s uncommitted change, which may be rolled back), a <strong>non-repeatable read</strong> (reading a row twice in one transaction and getting different values), a <strong>phantom</strong> (re-running a query and finding new rows), and the <strong>lost update</strong>. Databases offer <strong>isolation levels</strong> that trade protection for concurrency: <code>READ COMMITTED</code> (PostgreSQL&rsquo;s default) prevents dirty reads; <code>REPEATABLE READ</code> and <code>SERIALIZABLE</code> prevent more, at the cost of transactions sometimes failing and needing a retry.</p>
+<p><strong>SQLite</strong> is simpler: one writer at a time. A transaction that writes takes a lock on the whole database file; other connections can keep reading (in <strong>WAL</strong> mode, <code>PRAGMA journal_mode = WAL</code>, even while it writes), but a second writer must wait, and gets <code>database is locked</code> if it waits longer than its <strong>timeout</strong> (<code>sqlite3.connect(path, timeout=5)</code>). So SQLite transactions are serializable. That&rsquo;s why the warm-up still lost an update: its reads happened <strong>outside</strong> any transaction, and the computation happened in Python, between them.</p>
+<h2 id="lost-updates-and-how-to-prevent-them">Lost updates, and how to prevent them</h2>
+<p>Three ways to stop the warm-up&rsquo;s lost update, from simplest to most general:</p>
+<ol>
+<li><strong>Let the database do the arithmetic</strong>, in one statement: <code>UPDATE accounts SET balance = balance + ? WHERE name = ?</code>. The read and the write happen together, inside the database, so nothing can come between them. Add conditions to the same statement to enforce rules: <code>... SET balance = balance - ? WHERE name = ? AND balance &gt;= ?</code>, then check <code>rowcount</code> to see whether it happened.</li>
+<li><strong>Lock while you work.</strong> Start the transaction <strong>before</strong> reading, as a writer: in SQLite, <code>BEGIN IMMEDIATE</code> takes the write lock at once, so no one else can write until you commit; in other databases, <code>SELECT ... FOR UPDATE</code> locks the rows you read.</li>
+<li><strong>Optimistic locking</strong>: give each row a <code>version</code> number. Read the row and its version; when writing, <code>UPDATE ... SET ..., version = version + 1 WHERE id = ? AND version = ?</code>. If someone else changed it meanwhile, the version won&rsquo;t match, <code>rowcount</code> is 0, and you know to reload and try again (or tell the user). No locks are held while the user thinks, which suits web applications.</li>
+</ol>
+<p><strong>Savepoints</strong> give a transaction checkpoints you can roll back to without abandoning the whole thing: <code>SAVEPOINT name</code>, then either <code>RELEASE name</code> (keep the work since then) or <code>ROLLBACK TO name</code> (undo it, and carry on). Importing a thousand rows where a few are bad: wrap each row in a savepoint, roll back just the bad ones, and commit the rest together.</p>
+<div class="pc pc-example" data-kind="example" data-id="w075d5-e2"><textarea class="pc-src pc-code" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.executescript(&quot;CREATE TABLE docs (id INTEGER PRIMARY KEY, title TEXT, version INTEGER NOT NULL DEFAULT 1); INSERT INTO docs (title) VALUES (&#x27;Draft&#x27;);&quot;)
+
+def rename(conn, doc_id, new_title, seen_version):
+    with conn:
+        cur = conn.execute(&quot;UPDATE docs SET title = ?, version = version + 1 WHERE id = ? AND version = ?&quot;,
+                           (new_title, doc_id, seen_version))
+    return cur.rowcount == 1
+
+title, version = conn.execute(&quot;SELECT title, version FROM docs WHERE id = 1&quot;).fetchone()
+print(rename(conn, 1, &quot;Plan&quot;, version))         # first editor wins
+print(rename(conn, 1, &quot;Notes&quot;, version))        # second editor&#x27;s version is stale: refused
+print(conn.execute(&quot;SELECT title, version FROM docs&quot;).fetchone())</textarea></div>
+<h2 id="indexes">Indexes</h2>
+<p>Without help, finding the customers in Leeds means a <strong>full table scan</strong>: reading every row and checking it. That&rsquo;s fine for a thousand rows, and hopeless for a hundred million. An <strong>index</strong> is a separate, sorted structure (a <strong>B-tree</strong>, a balanced tree of sorted keys with pointers to the rows) that lets the database jump to matching rows in about log(n) steps, like a book&rsquo;s index:</p>
+<pre><code class="language-sql">CREATE INDEX customers_city ON customers (city);
+</code></pre>
+<ul>
+<li>An index on <code>city</code> helps <code>WHERE city = 'Leeds'</code>, range conditions such as <code>WHERE joined &gt; '2025-01-01'</code> (on an index of <code>joined</code>), <code>ORDER BY city</code> (the rows are already sorted), and joins on that column.</li>
+<li>Primary keys and <code>UNIQUE</code> columns are indexed automatically. <strong>Foreign key columns are not</strong>, in SQLite and PostgreSQL, though they&rsquo;re joined on constantly: index them.</li>
+<li><strong><code>EXPLAIN QUERY PLAN</code></strong> before a query shows how SQLite will run it: <code>SCAN customers</code> (reading the whole table) or <code>SEARCH customers USING INDEX customers_city (city=?)</code>. Other databases have <code>EXPLAIN</code> (and <code>EXPLAIN ANALYZE</code>, which runs the query and reports real timings).</li>
+</ul>
+<p>An index can&rsquo;t be used when the query hides the column inside an expression: <code>WHERE lower(email) = ?</code> can&rsquo;t use an index on <code>email</code>, because the index is sorted by <code>email</code>, not <code>lower(email)</code>. Store the value normalised, or create an <strong>expression index</strong>: <code>CREATE INDEX users_email ON users (lower(email))</code>. Similarly, <code>LIKE '%term'</code> (a leading wildcard) can&rsquo;t use an ordinary index.</p>
+<div class="pc pc-example" data-kind="example" data-id="w075d5-e3"><textarea class="pc-src pc-code" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.execute(&quot;CREATE TABLE customers (id INTEGER PRIMARY KEY, name TEXT, city TEXT, joined TEXT)&quot;)
+conn.executemany(&quot;INSERT INTO customers (name, city, joined) VALUES (?, ?, ?)&quot;,
+                 [(f&quot;c{i}&quot;, [&quot;Leeds&quot;, &quot;London&quot;, &quot;Bristol&quot;][i % 3], f&quot;2025-{i % 12 + 1:02d}-01&quot;) for i in range(3000)])
+
+def plan(sql):
+    return [row[3] for row in conn.execute(&quot;EXPLAIN QUERY PLAN &quot; + sql)]
+
+query = &quot;SELECT name FROM customers WHERE city = &#x27;Leeds&#x27;&quot;
+print(plan(query))
+conn.execute(&quot;CREATE INDEX customers_city ON customers (city)&quot;)
+print(plan(query))
+print(plan(&quot;SELECT name FROM customers WHERE lower(city) = &#x27;leeds&#x27;&quot;))
+print(plan(&quot;SELECT name FROM customers WHERE id = 42&quot;))</textarea></div>
+<h2 id="choosing-indexes">Choosing indexes</h2>
+<p><strong>Composite indexes</strong> cover several columns, sorted by the first, then the second within it, and so on, like a phone book sorted by surname then first name. That gives the <strong>leftmost-prefix rule</strong>: an index on <code>(category, price)</code> helps queries on <code>category</code>, or on <code>category</code> <strong>and</strong> <code>price</code>, or <code>category = ? ORDER BY price</code>; but <strong>not</strong> a query on <code>price</code> alone, just as a phone book doesn&rsquo;t help you find everyone called &ldquo;Ada&rdquo;. Put <strong>equality</strong> columns first and a <strong>range</strong> or sort column last: <code>WHERE category = ? AND price &lt; ?</code> uses both columns of <code>(category, price)</code>, but only the first of <code>(price, category)</code>.</p>
+<p>A <strong>covering index</strong> contains every column a query needs, so the database never visits the table itself: <code>SELECT price FROM products WHERE category = ?</code> is answered from <code>(category, price)</code> alone (<code>USING COVERING INDEX</code> in the plan).</p>
+<p>Indexes aren&rsquo;t free:</p>
+<ul>
+<li>every <code>INSERT</code>, <code>UPDATE</code> and <code>DELETE</code> must update every index on the table, so writes slow down;</li>
+<li>they take disk space and memory;</li>
+<li>an index on a column with few distinct values (a yes/no flag) barely helps, because each value matches a large part of the table.</li>
+</ul>
+<p>So index for the queries you actually run, especially the frequent and slow ones; check with <code>EXPLAIN QUERY PLAN</code> that they&rsquo;re used; and drop the ones that aren&rsquo;t. <code>ANALYZE</code> gathers statistics that help SQLite&rsquo;s planner choose between indexes.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>ACID: atomic, consistent, isolated, durable. Isolation prevents dirty reads, non-repeatable reads, phantoms and lost updates to varying degrees; SQLite allows one writer at a time (WAL lets readers continue), and a waiting writer times out with &ldquo;database is locked&rdquo;. Prevent lost updates by doing the arithmetic in one UPDATE (with conditions, checking rowcount), by locking first (BEGIN IMMEDIATE, SELECT &hellip; FOR UPDATE), or optimistically with a version column. Savepoints roll back part of a transaction. Indexes are sorted B-trees that turn scans into searches; check with EXPLAIN QUERY PLAN; expressions on a column and leading-wildcard LIKE can&rsquo;t use a plain index. Composite indexes follow the leftmost-prefix rule (equality columns first, then a range or sort column); covering indexes answer queries alone. Indexes slow writes and take space, so index for real, frequent queries, including foreign keys.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d5-plans" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Reading query plans</div><div class="pc-prompt"><p>Write <code>plan(conn, sql, params=())</code>: the list of detail strings from <code>EXPLAIN QUERY PLAN</code> (the last column of each row). Then <code>index_used(conn, sql, params=())</code>: the name of the first index the plan uses (from text such as <code>USING INDEX name</code> or <code>USING COVERING INDEX name</code>), <code>"primary key"</code> if it searches by the integer primary key, or <code>None</code> if it only scans. (The wording differs a little between SQLite versions, so match the key words with a regular expression rather than whole strings.)</p></div><textarea class="pc-src pc-code" hidden>import re, sqlite3
+
+def plan(conn, sql, params=()):
+    ___
+
+def index_used(conn, sql, params=()):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_plans():
+    &quot;SCAN or SEARCH&quot;
+    import sqlite3
+    conn = sqlite3.connect(&quot;:memory:&quot;)
+    conn.executescript(&quot;CREATE TABLE p (id INTEGER PRIMARY KEY, category TEXT, price REAL, name TEXT); CREATE INDEX p_category ON p (category);&quot;)
+    assert index_used(conn, &quot;SELECT * FROM p WHERE name = ?&quot;, (&quot;Tea&quot;,)) is None
+    assert index_used(conn, &quot;SELECT * FROM p WHERE category = ?&quot;, (&quot;food&quot;,)) == &quot;p_category&quot;
+    assert index_used(conn, &quot;SELECT * FROM p WHERE id = 3&quot;) == &quot;primary key&quot;
+    details = plan(conn, &quot;SELECT * FROM p WHERE name = &#x27;x&#x27;&quot;)
+    assert len(details) == 1 and details[0].startswith(&quot;SCAN&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import re, sqlite3
+
+def plan(conn, sql, params=()):
+    return [row[-1] for row in conn.execute(&quot;EXPLAIN QUERY PLAN &quot; + sql, params)]
+
+def index_used(conn, sql, params=()):
+    for detail in plan(conn, sql, params):
+        m = re.search(r&quot;USING (?:COVERING )?INDEX (\w+)&quot;, detail)
+        if m:
+            return m.group(1)
+        if &quot;PRIMARY KEY&quot; in detail:
+            return &quot;primary key&quot;
+    return None</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d5-indexes" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Indexes for a workload</div><div class="pc-prompt"><p>The shop&rsquo;s three slowest queries are in <code>QUERIES</code>. Write <code>INDEXES</code>: a list of <code>CREATE INDEX</code> statements (at most <strong>three</strong>) such that every query uses an index (no plain scans), and the third is answered by a <strong>covering</strong> index. Name each index after its table and columns, such as <code>orders_customer_id</code>.</p></div><textarea class="pc-src pc-code" hidden>QUERIES = [
+    &quot;SELECT id, placed FROM orders WHERE customer_id = ?&quot;,
+    &quot;SELECT * FROM order_items WHERE product_id = ?&quot;,
+    &quot;SELECT price FROM products WHERE category = ? ORDER BY price&quot;,
+]
+INDEXES = [
+    ___
+]</textarea><textarea class="pc-src pc-tests" hidden>def test_workload():
+    &quot;every query searches an index&quot;
+    import sqlite3
+    conn = sqlite3.connect(&quot;:memory:&quot;)
+    conn.executescript(&quot;&quot;&quot;
+    CREATE TABLE customers (id INTEGER PRIMARY KEY, name TEXT);
+    CREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT, category TEXT, price REAL);
+    CREATE TABLE orders (id INTEGER PRIMARY KEY, customer_id INTEGER, placed TEXT);
+    CREATE TABLE order_items (order_id INTEGER, product_id INTEGER, qty INTEGER, PRIMARY KEY (order_id, product_id));
+    &quot;&quot;&quot;)
+    assert len(INDEXES) &lt;= 3
+    for statement in INDEXES:
+        conn.execute(statement)
+    for sql in QUERIES:
+        details = [r[-1] for r in conn.execute(&quot;EXPLAIN QUERY PLAN &quot; + sql, (1,))]
+        assert any(&quot;INDEX&quot; in d for d in details), (sql, details)
+        assert not any(&quot;TEMP B-TREE&quot; in d for d in details), (&quot;sorting without the index&quot;, sql, details)
+    third = [r[-1] for r in conn.execute(&quot;EXPLAIN QUERY PLAN &quot; + QUERIES[2], (&quot;food&quot;,))]
+    assert any(&quot;COVERING INDEX&quot; in d for d in third), third</textarea><textarea class="pc-src pc-solution" hidden>QUERIES = [
+    &quot;SELECT id, placed FROM orders WHERE customer_id = ?&quot;,
+    &quot;SELECT * FROM order_items WHERE product_id = ?&quot;,
+    &quot;SELECT price FROM products WHERE category = ? ORDER BY price&quot;,
+]
+INDEXES = [
+    &quot;CREATE INDEX orders_customer_id ON orders (customer_id)&quot;,
+    &quot;CREATE INDEX order_items_product_id ON order_items (product_id)&quot;,
+    &quot;CREATE INDEX products_category_price ON products (category, price)&quot;,
+]</textarea><template class="pc-src pc-hint"><code>order_items</code> has a primary key on <code>(order_id, product_id)</code>, which doesn&rsquo;t help a search by <code>product_id</code> alone (the leftmost-prefix rule). For the third query, <code>(category, price)</code> serves the filter, the sort <strong>and</strong> the selected column.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d5-prefix" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">The leftmost-prefix rule</div><div class="pc-prompt"><p>Write <code>usable_columns(index, equal, ranged=None)</code>: given an index&rsquo;s columns (a list, in order), the set of columns a query compares with <code>=</code>, and optionally one column it compares with a range (<code>&lt;</code>, <code>&gt;</code>, <code>BETWEEN</code>), return how many of the index&rsquo;s leading columns the query can use: walk the index&rsquo;s columns in order, counting each one in <code>equal</code>; then, at the first column not in <code>equal</code>, count it too if it&rsquo;s the <code>ranged</code> column, and stop. Then <code>best_index(indexes, equal, ranged=None)</code>: the name of the index (from a dict of name to columns) that can use the most columns (ties to the name first alphabetically), or <code>None</code> if none can use any.</p></div><textarea class="pc-src pc-code" hidden>def usable_columns(index, equal, ranged=None):
+    ___
+
+def best_index(indexes, equal, ranged=None):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_prefix():
+    &quot;phone-book order&quot;
+    assert usable_columns([&quot;category&quot;, &quot;price&quot;], {&quot;category&quot;}, &quot;price&quot;) == 2
+    assert usable_columns([&quot;price&quot;, &quot;category&quot;], {&quot;category&quot;}, &quot;price&quot;) == 1
+    assert usable_columns([&quot;category&quot;, &quot;price&quot;], {&quot;price&quot;}) == 0
+    assert usable_columns([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;], {&quot;a&quot;, &quot;c&quot;}) == 1 and usable_columns([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;], {&quot;a&quot;, &quot;b&quot;, &quot;c&quot;}) == 3
+    assert usable_columns([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;], {&quot;a&quot;}, &quot;b&quot;) == 2
+    indexes = {&quot;by_cat&quot;: [&quot;category&quot;], &quot;by_cat_price&quot;: [&quot;category&quot;, &quot;price&quot;], &quot;by_price&quot;: [&quot;price&quot;]}
+    assert best_index(indexes, {&quot;category&quot;}, &quot;price&quot;) == &quot;by_cat_price&quot;
+    assert best_index(indexes, {&quot;category&quot;}) == &quot;by_cat&quot; and best_index(indexes, set(), &quot;price&quot;) == &quot;by_price&quot;
+    assert best_index(indexes, {&quot;name&quot;}) is None</textarea><textarea class="pc-src pc-solution" hidden>def usable_columns(index, equal, ranged=None):
+    used = 0
+    for column in index:
+        if column in equal:
+            used += 1
+            continue
+        if column == ranged:
+            used += 1
+        break
+    return used
+
+def best_index(indexes, equal, ranged=None):
+    scored = [(usable_columns(cols, equal, ranged), name) for name, cols in indexes.items()]
+    scored = [(n, name) for n, name in scored if n &gt; 0]
+    if not scored:
+        return None
+    return min(scored, key=lambda s: (-s[0], s[1]))[1]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d5-atomic" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Withdrawals that can&rsquo;t be lost</div><div class="pc-prompt"><p>Write <code>withdraw(conn, name, amount)</code>: in <strong>one</strong> <code>UPDATE</code> statement, take <code>amount</code> from the account only if it has enough (the condition is in the same statement&rsquo;s <code>WHERE</code>), commit, and return <code>True</code> if it happened, <code>False</code> if there wasn&rsquo;t enough money; raise <code>KeyError</code> if there&rsquo;s no such account (check only when the update changed nothing). Two &ldquo;tills&rdquo; each holding their own connection must never lose an update or overdraw the account.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+def withdraw(conn, name, amount):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_atomic():
+    &quot;the database does the arithmetic&quot;
+    import sqlite3, os
+    if os.path.exists(&quot;till.db&quot;):
+        os.remove(&quot;till.db&quot;)
+    setup = sqlite3.connect(&quot;till.db&quot;)
+    with setup:
+        setup.execute(&quot;CREATE TABLE accounts (name TEXT PRIMARY KEY, balance INTEGER NOT NULL)&quot;)
+        setup.execute(&quot;INSERT INTO accounts VALUES (&#x27;shop&#x27;, 100)&quot;)
+    a, b = sqlite3.connect(&quot;till.db&quot;), sqlite3.connect(&quot;till.db&quot;)
+    assert withdraw(a, &quot;shop&quot;, 30) is True and withdraw(b, &quot;shop&quot;, 50) is True
+    assert withdraw(a, &quot;shop&quot;, 30) is False and withdraw(b, &quot;shop&quot;, 20) is True
+    assert setup.execute(&quot;SELECT balance FROM accounts&quot;).fetchone() == (0,)
+    try:
+        withdraw(a, &quot;nobody&quot;, 1)
+        assert False
+    except KeyError:
+        pass
+    body = source.split(&quot;def withdraw&quot;)[1]
+    assert body.count(&quot;execute(&quot;) &lt;= 2 and &quot;SELECT balance&quot; not in body, &quot;do the check and the change in one UPDATE&quot;</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+def withdraw(conn, name, amount):
+    with conn:
+        cur = conn.execute(&quot;UPDATE accounts SET balance = balance - ? WHERE name = ? AND balance &gt;= ?&quot;,
+                           (amount, name, amount))
+    if cur.rowcount == 1:
+        return True
+    if conn.execute(&quot;SELECT 1 FROM accounts WHERE name = ?&quot;, (name,)).fetchone() is None:
+        raise KeyError(name)
+    return False</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d5-optimistic" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Optimistic locking</div><div class="pc-prompt"><p>A wiki keeps pages in <code>pages (id INTEGER PRIMARY KEY, title TEXT, body TEXT, version INTEGER NOT NULL)</code>. Write <code>load(conn, page_id)</code>: <code>(title, body, version)</code>. Then <code>save(conn, page_id, title, body, seen_version)</code>: update the page only if its version is still <code>seen_version</code>, incrementing the version, and return the new version; if someone saved in between, raise <code>Conflict</code> (given) with the page&rsquo;s current version as its <code>current</code> attribute. Finally <code>save_with_merge(conn, page_id, edit)</code>: load, apply <code>edit(title, body)</code> (returning the new title and body), save, and on a conflict start again from a fresh load, up to 3 attempts in all (then let the <code>Conflict</code> propagate).</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+class Conflict(Exception):
+    def __init__(self, current):
+        super().__init__(f&quot;page changed; it&#x27;s now at version {current}&quot;)
+        self.current = current
+
+def load(conn, page_id):
+    ___
+
+def save(conn, page_id, title, body, seen_version):
+    ___
+
+def save_with_merge(conn, page_id, edit):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_optimistic():
+    &quot;versions instead of locks&quot;
+    import sqlite3
+    conn = sqlite3.connect(&quot;:memory:&quot;)
+    conn.executescript(&quot;CREATE TABLE pages (id INTEGER PRIMARY KEY, title TEXT, body TEXT, version INTEGER NOT NULL); INSERT INTO pages VALUES (1, &#x27;Tea&#x27;, &#x27;Hot.&#x27;, 1);&quot;)
+    title, body, v = load(conn, 1)
+    assert save(conn, 1, title, body + &quot; Lovely.&quot;, v) == 2
+    try:
+        save(conn, 1, &quot;Coffee&quot;, body, v)
+        assert False
+    except Conflict as e:
+        assert e.current == 2
+    assert load(conn, 1) == (&quot;Tea&quot;, &quot;Hot. Lovely.&quot;, 2)
+    calls = []
+    def sneaky_edit(title, body):
+        calls.append(body)
+        if len(calls) == 1:
+            with conn:
+                conn.execute(&quot;UPDATE pages SET body = body || &#x27; Strong.&#x27;, version = version + 1 WHERE id = 1&quot;)
+        return title, body + &quot; With milk.&quot;
+    assert save_with_merge(conn, 1, sneaky_edit) == 4
+    assert load(conn, 1)[1] == &quot;Hot. Lovely. Strong. With milk.&quot; and len(calls) == 2
+    def always_raced(title, body):
+        with conn:
+            conn.execute(&quot;UPDATE pages SET version = version + 1 WHERE id = 1&quot;)
+        return title, body
+    try:
+        save_with_merge(conn, 1, always_raced)
+        assert False
+    except Conflict:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+class Conflict(Exception):
+    def __init__(self, current):
+        super().__init__(f&quot;page changed; it&#x27;s now at version {current}&quot;)
+        self.current = current
+
+def load(conn, page_id):
+    row = conn.execute(&quot;SELECT title, body, version FROM pages WHERE id = ?&quot;, (page_id,)).fetchone()
+    if row is None:
+        raise KeyError(page_id)
+    return row
+
+def save(conn, page_id, title, body, seen_version):
+    with conn:
+        cur = conn.execute(&quot;UPDATE pages SET title = ?, body = ?, version = version + 1 WHERE id = ? AND version = ?&quot;,
+                           (title, body, page_id, seen_version))
+    if cur.rowcount != 1:
+        raise Conflict(load(conn, page_id)[2])
+    return seen_version + 1
+
+def save_with_merge(conn, page_id, edit):
+    for attempt in range(3):
+        title, body, version = load(conn, page_id)
+        new_title, new_body = edit(title, body)
+        try:
+            return save(conn, page_id, new_title, new_body, version)
+        except Conflict:
+            if attempt == 2:
+                raise</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d5-savepoints" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Keeping the good rows</div><div class="pc-prompt"><p>Write <code>import_people(conn, people)</code>: insert every person (a dict with <code>"email"</code> and <code>"age"</code>) into <code>people (email TEXT PRIMARY KEY, age INTEGER NOT NULL CHECK (age &gt;= 0))</code> inside <strong>one</strong> transaction, but give each row its own <strong>savepoint</strong>, so a row that breaks a constraint is rolled back on its own while the others are kept. Commit at the end, and return <code>(added, rejected)</code>: the number added and the list of rejected emails, in order. Begin the transaction explicitly with <code>BEGIN</code>.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+def import_people(conn, people):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_savepoints():
+    &quot;partial rollback&quot;
+    import sqlite3
+    conn = sqlite3.connect(&quot;:memory:&quot;)
+    conn.execute(&quot;CREATE TABLE people (email TEXT PRIMARY KEY, age INTEGER NOT NULL CHECK (age &gt;= 0))&quot;)
+    people = [{&quot;email&quot;: &quot;ada@x&quot;, &quot;age&quot;: 36}, {&quot;email&quot;: &quot;bob@x&quot;, &quot;age&quot;: -1}, {&quot;email&quot;: &quot;ada@x&quot;, &quot;age&quot;: 40},
+              {&quot;email&quot;: &quot;cy@x&quot;, &quot;age&quot;: None}, {&quot;email&quot;: &quot;di@x&quot;, &quot;age&quot;: 28}]
+    assert import_people(conn, people) == (2, [&quot;bob@x&quot;, &quot;ada@x&quot;, &quot;cy@x&quot;])
+    assert conn.execute(&quot;SELECT * FROM people ORDER BY email&quot;).fetchall() == [(&quot;ada@x&quot;, 36), (&quot;di@x&quot;, 28)]
+    assert not conn.in_transaction
+    assert &quot;SAVEPOINT&quot; in source.upper() and &quot;ROLLBACK TO&quot; in source.upper()</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+def import_people(conn, people):
+    added, rejected = 0, []
+    conn.execute(&quot;BEGIN&quot;)
+    try:
+        for person in people:
+            conn.execute(&quot;SAVEPOINT row&quot;)
+            try:
+                conn.execute(&quot;INSERT INTO people (email, age) VALUES (?, ?)&quot;, (person[&quot;email&quot;], person[&quot;age&quot;]))
+            except sqlite3.IntegrityError:
+                conn.execute(&quot;ROLLBACK TO row&quot;)
+                rejected.append(person[&quot;email&quot;])
+            else:
+                added += 1
+            conn.execute(&quot;RELEASE row&quot;)
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    return added, rejected</textarea><template class="pc-src pc-hint">After <code>conn.execute("BEGIN")</code>, for each person: <code>SAVEPOINT row</code>, the insert, then <code>RELEASE row</code>; on <code>sqlite3.IntegrityError</code>, <code>ROLLBACK TO row</code> and then <code>RELEASE row</code> (rolling back to a savepoint keeps it, so release it too). Finish with <code>conn.commit()</code>.</template></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w075d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Two tills, one lost payment</div><div class="pc-prompt"><p>Each till reads the balance, adds its payment in Python, and writes the result back, so the second write overwrites the first and this prints <code>150</code>. Make each payment a single <code>UPDATE</code> that adds to the stored balance, so it prints <code>180</code>.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3, os
+
+if os.path.exists(&quot;tills.db&quot;):
+    os.remove(&quot;tills.db&quot;)
+setup = sqlite3.connect(&quot;tills.db&quot;)
+with setup:
+    setup.execute(&quot;CREATE TABLE accounts (name TEXT PRIMARY KEY, balance INTEGER)&quot;)
+    setup.execute(&quot;INSERT INTO accounts VALUES (&#x27;shop&#x27;, 100)&quot;)
+till_a, till_b = sqlite3.connect(&quot;tills.db&quot;), sqlite3.connect(&quot;tills.db&quot;)
+
+a = till_a.execute(&quot;SELECT balance FROM accounts WHERE name = &#x27;shop&#x27;&quot;).fetchone()[0]
+b = till_b.execute(&quot;SELECT balance FROM accounts WHERE name = &#x27;shop&#x27;&quot;).fetchone()[0]
+with till_a:
+    till_a.execute(&quot;UPDATE accounts SET balance = ? WHERE name = &#x27;shop&#x27;&quot;, (a + 30,))
+with till_b:
+    till_b.execute(&quot;UPDATE accounts SET balance = ? WHERE name = &#x27;shop&#x27;&quot;, (b + 50,))
+print(setup.execute(&quot;SELECT balance FROM accounts&quot;).fetchone()[0])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;no lost update&quot;
+    expect_output(&quot;180&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3, os
+
+if os.path.exists(&quot;tills.db&quot;):
+    os.remove(&quot;tills.db&quot;)
+setup = sqlite3.connect(&quot;tills.db&quot;)
+with setup:
+    setup.execute(&quot;CREATE TABLE accounts (name TEXT PRIMARY KEY, balance INTEGER)&quot;)
+    setup.execute(&quot;INSERT INTO accounts VALUES (&#x27;shop&#x27;, 100)&quot;)
+till_a, till_b = sqlite3.connect(&quot;tills.db&quot;), sqlite3.connect(&quot;tills.db&quot;)
+
+with till_a:
+    till_a.execute(&quot;UPDATE accounts SET balance = balance + ? WHERE name = &#x27;shop&#x27;&quot;, (30,))
+with till_b:
+    till_b.execute(&quot;UPDATE accounts SET balance = balance + ? WHERE name = &#x27;shop&#x27;&quot;, (50,))
+print(setup.execute(&quot;SELECT balance FROM accounts&quot;).fetchone()[0])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w075d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A composite index in the wrong order</div><div class="pc-prompt"><p>The index is on <code>(price, category)</code>, but the query filters on <code>category</code> alone, so by the leftmost-prefix rule it can&rsquo;t use the index, and this prints <code>scan</code>. Create the index with the columns the other way round, so it prints <code>index</code>.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.execute(&quot;CREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT, category TEXT, price REAL)&quot;)
+conn.execute(&quot;CREATE INDEX products_price_category ON products (price, category)&quot;)
+details = [r[-1] for r in conn.execute(&quot;EXPLAIN QUERY PLAN SELECT name FROM products WHERE category = ? ORDER BY price&quot;, (&quot;food&quot;,))]
+print(&quot;index&quot; if any(&quot;INDEX&quot; in d and d.startswith(&quot;SEARCH&quot;) for d in details) else &quot;scan&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;equality first&quot;
+    expect_output(&quot;index&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.execute(&quot;CREATE TABLE products (id INTEGER PRIMARY KEY, name TEXT, category TEXT, price REAL)&quot;)
+conn.execute(&quot;CREATE INDEX products_category_price ON products (category, price)&quot;)
+details = [r[-1] for r in conn.execute(&quot;EXPLAIN QUERY PLAN SELECT name FROM products WHERE category = ? ORDER BY price&quot;, (&quot;food&quot;,))]
+print(&quot;index&quot; if any(&quot;INDEX&quot; in d and d.startswith(&quot;SEARCH&quot;) for d in details) else &quot;scan&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w075d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">An index hidden by a function</div><div class="pc-prompt"><p>Logins look users up with <code>lower(email) = ?</code>, and the index is on <code>email</code> itself, so the planner can&rsquo;t use it and this prints <code>scan</code>. Index the <strong>expression</strong> <code>lower(email)</code> instead, so it prints <code>index</code>.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.execute(&quot;CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT)&quot;)
+conn.execute(&quot;CREATE INDEX users_email ON users (email)&quot;)
+details = [r[-1] for r in conn.execute(&quot;EXPLAIN QUERY PLAN SELECT id FROM users WHERE lower(email) = ?&quot;, (&quot;ada@x&quot;,))]
+print(&quot;index&quot; if any(&quot;INDEX&quot; in d for d in details) else &quot;scan&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;an expression index&quot;
+    expect_output(&quot;index&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.execute(&quot;CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT)&quot;)
+conn.execute(&quot;CREATE INDEX users_email_lower ON users (lower(email))&quot;)
+details = [r[-1] for r in conn.execute(&quot;EXPLAIN QUERY PLAN SELECT id FROM users WHERE lower(email) = ?&quot;, (&quot;ada@x&quot;,))]
+print(&quot;index&quot; if any(&quot;INDEX&quot; in d for d in details) else &quot;scan&quot;)</textarea></div>
+<div class="parsons" data-id="w075d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A savepoint around a risky step</div><div class="pc-prompt"><p>Arrange the lines that try one insert inside a larger transaction, rolling back just that insert if it breaks a constraint. One line is a trap.</p></div><script type="application/json">{"lines": ["conn.execute(\"SAVEPOINT step\")", "try:", "    conn.execute(\"INSERT INTO people VALUES (?, ?)\", (email, age))", "except sqlite3.IntegrityError:", "    conn.execute(\"ROLLBACK TO step\")", "conn.execute(\"RELEASE step\")"], "distractors": ["    conn.rollback()"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the ACID property that means &quot;all of its changes happen, or none do&quot;
+q = ___   # True or False: an index on (category, price) helps WHERE price &lt; 5 on its own
+r = ___   # what the warm-up&#x27;s balance would be with UPDATE ... SET balance = balance + ? for both payments
+s = ___   # the plan word for reading every row of a table: &quot;SCAN&quot; or &quot;SEARCH&quot;
+t = ___   # True or False: every extra index makes INSERTs slower</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;atomicity&quot; and q is False and r == 180, &quot;p, q and r&quot;
+    assert s == &quot;SCAN&quot; and t is True, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;atomicity&quot;
+q = False
+r = 180
+s = &quot;SCAN&quot;
+t = True</textarea></div>
+<h2 id="on-your-own-computer">On your own computer</h2>
+<p>Feel the difference an index makes on a big table, with Python&rsquo;s <code>timeit</code>:</p>
+<pre><code class="language-python">import sqlite3, random, timeit
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.execute(&quot;CREATE TABLE t (id INTEGER PRIMARY KEY, email TEXT)&quot;)
+conn.executemany(&quot;INSERT INTO t (email) VALUES (?)&quot;, ((f&quot;user{i}@example.com&quot;,) for i in range(1_000_000)))
+look = lambda: conn.execute(&quot;SELECT id FROM t WHERE email = ?&quot;, (f&quot;user{random.randrange(1_000_000)}@example.com&quot;,)).fetchone()
+print(&quot;scan:&quot;, timeit.timeit(look, number=20) / 20)
+conn.execute(&quot;CREATE INDEX t_email ON t (email)&quot;)
+print(&quot;index:&quot;, timeit.timeit(look, number=20) / 20)
+</code></pre>
+<p>Expect the indexed lookup to be thousands of times faster. Then time the <code>executemany</code> with the index already in place: inserts get slower.</p>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w075d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does atomicity promise?", "answer": 1, "explain": "A crash half-way leaves nothing half-done.", "options": ["Fast transactions", "All of a transaction&rsquo;s changes happen, or none do", "Encryption", "One user at a time"]}, {"type": "mc", "q": "What is a lost update?", "answer": 1, "explain": "The warm-up lost a payment this way.", "options": ["A failed commit", "Two transactions read a value, both write a new one, and the first write is overwritten", "A deleted row", "A rollback"]}, {"type": "mc", "q": "Which statement prevents a lost update on a balance?", "answer": 1, "explain": "The read and write happen together, in the database.", "options": ["SELECT then UPDATE with the new value", "UPDATE accounts SET balance = balance + ? WHERE name = ?", "Two transactions", "An index"]}, {"type": "mc", "q": "How does optimistic locking detect a conflict?", "answer": 1, "explain": "rowcount 0 means someone else saved first.", "options": ["A lock", "The UPDATE requires the version you read; if it changed, no row matches", "A timeout", "It can&rsquo;t"]}, {"type": "mc", "q": "What does ROLLBACK TO a savepoint do?", "answer": 1, "explain": "Then release it, or carry on.", "options": ["Ends the transaction", "Undoes the work since the savepoint, keeping the transaction going", "Commits", "Deletes the savepoint only"]}, {"type": "mc", "q": "How many writers can SQLite have at once?", "answer": 1, "explain": "Others wait, up to their timeout.", "options": ["Unlimited", "One", "One per table", "Two"]}, {"type": "mc", "q": "What does an index turn a full scan into?", "answer": 1, "explain": "Like a book&rsquo;s index.", "options": ["A join", "A search through a sorted B-tree, about log n steps", "A transaction", "A copy"]}, {"type": "mc", "q": "Which query can use an index on (category, price)?", "answer": 1, "explain": "The leftmost-prefix rule.", "options": ["WHERE price &lt; 5", "WHERE category = ? AND price &lt; 5", "WHERE name = ?", "WHERE lower(category) = ?"]}, {"type": "mc", "q": "Why can&rsquo;t WHERE lower(email) = ? use an index on email?", "answer": 1, "explain": "Or store emails already lower-cased.", "options": ["lower is slow", "The index is sorted by email, not lower(email); index the expression instead", "Strings can&rsquo;t be indexed", "It can"]}, {"type": "output", "q": "What does this print?", "answer": "True", "explain": "The index holds both columns the query needs.", "code": "import sqlite3\nconn = sqlite3.connect(\":memory:\")\nconn.execute(\"CREATE TABLE t (a, b)\")\nconn.execute(\"CREATE INDEX t_ab ON t (a, b)\")\nplan = conn.execute(\"EXPLAIN QUERY PLAN SELECT b FROM t WHERE a = 1\").fetchone()[-1]\nprint(\"COVERING\" in plan)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: an index adviser</div><div class="pc-prompt"><p>Write <code>advise(workload, existing)</code>. <code>workload</code> is a list of queries described as dicts: <code>"table"</code>, <code>"equal"</code> (a list of columns compared with <code>=</code>), optionally <code>"range"</code> (one column compared with a range) and <code>"order"</code> (a list of columns sorted by), and <code>"per_day"</code> (how often it runs). <code>existing</code> maps index names to <code>(table, columns)</code>. For each query, the <strong>ideal</strong> index is its equality columns (sorted alphabetically, since their order doesn&rsquo;t matter), followed by its range column if it has one, <strong>otherwise</strong> its order columns. A query is <strong>already served</strong> if some existing index (or one already recommended) on that table <strong>starts with</strong> its ideal columns. Recommend one index per distinct (table, ideal columns) not already served, named <code>TABLE_COL1_COL2...</code>, and return a list of <code>(name, table, columns, per_day)</code>, where <code>per_day</code> is the total of every query that index would serve, most-used first (ties by name). Recommend nothing for a query with no equality, range or order columns. Process the workload by total use (most-used ideal index first), so a wider recommendation can serve a narrower query that comes later.</p></div><textarea class="pc-src pc-code" hidden>def advise(workload, existing):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_adviser():
+    &quot;turning a workload into indexes&quot;
+    workload = [
+        {&quot;table&quot;: &quot;orders&quot;, &quot;equal&quot;: [&quot;customer_id&quot;], &quot;per_day&quot;: 5000},
+        {&quot;table&quot;: &quot;orders&quot;, &quot;equal&quot;: [&quot;status&quot;, &quot;customer_id&quot;], &quot;order&quot;: [&quot;placed&quot;], &quot;per_day&quot;: 800},
+        {&quot;table&quot;: &quot;products&quot;, &quot;equal&quot;: [&quot;category&quot;], &quot;range&quot;: &quot;price&quot;, &quot;per_day&quot;: 3000},
+        {&quot;table&quot;: &quot;products&quot;, &quot;equal&quot;: [&quot;category&quot;], &quot;per_day&quot;: 1000},
+        {&quot;table&quot;: &quot;customers&quot;, &quot;equal&quot;: [&quot;email&quot;], &quot;per_day&quot;: 9000},
+        {&quot;table&quot;: &quot;customers&quot;, &quot;equal&quot;: [], &quot;per_day&quot;: 10},
+        {&quot;table&quot;: &quot;order_items&quot;, &quot;equal&quot;: [&quot;order_id&quot;], &quot;per_day&quot;: 4000},
+    ]
+    existing = {&quot;customers_email&quot;: (&quot;customers&quot;, [&quot;email&quot;]), &quot;order_items_pk&quot;: (&quot;order_items&quot;, [&quot;order_id&quot;, &quot;product_id&quot;])}
+    assert advise(workload, existing) == [
+        (&quot;orders_customer_id&quot;, &quot;orders&quot;, [&quot;customer_id&quot;], 5000),
+        (&quot;products_category_price&quot;, &quot;products&quot;, [&quot;category&quot;, &quot;price&quot;], 4000),
+        (&quot;orders_customer_id_status_placed&quot;, &quot;orders&quot;, [&quot;customer_id&quot;, &quot;status&quot;, &quot;placed&quot;], 800),
+    ]
+    assert advise([], {}) == []</textarea><textarea class="pc-src pc-solution" hidden>def advise(workload, existing):
+    groups = {}
+    for q in workload:
+        ideal = sorted(q.get(&quot;equal&quot;, []))
+        ideal += [q[&quot;range&quot;]] if q.get(&quot;range&quot;) else list(q.get(&quot;order&quot;, []))
+        if ideal:
+            key = (q[&quot;table&quot;], tuple(ideal))
+            groups[key] = groups.get(key, 0) + q[&quot;per_day&quot;]
+    known = [(table, list(cols), None) for table, cols in existing.values()]
+    recommended = {}
+    for (table, ideal), use in sorted(groups.items(), key=lambda kv: (-kv[1], kv[0])):
+        ideal = list(ideal)
+        server = next((name for t, cols, name in known if t == table and cols[:len(ideal)] == ideal), False)
+        if server is False:
+            name = f&quot;{table}_{&#x27;_&#x27;.join(ideal)}&quot;
+            recommended[name] = [table, ideal, use]
+            known.append((table, ideal, name))
+        elif server is not None:
+            recommended[server][2] += use
+    result = [(name, table, cols, use) for name, (table, cols, use) in recommended.items()]
+    return sorted(result, key=lambda r: (-r[3], r[0]))</textarea><template class="pc-src pc-hint">First group the queries by <code>(table, ideal columns)</code> and add up their use. Then go through the groups, most-used first, and for each check whether any existing or already-recommended index on that table has the ideal columns as a prefix (<code>cols[:len(ideal)] == ideal</code>). Recommended indexes serve later groups too, so add their use to the recommendation that serves them, then sort the result at the end.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Run <code>EXPLAIN QUERY PLAN</code> on the queries you wrote on Days 1 and 2, against the shop database, and decide which indexes they&rsquo;d need on a big table. Tomorrow&rsquo;s Forge puts the week together: a library loans system with its schema, queries, transactions, indexes and migrations.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w075d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w075d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w075d5", "week": 75, "day": 5, "title": "Transactions and indexes", "exercises": [{"id": "w075d5-plans", "title": "Reading query plans", "points": 10}, {"id": "w075d5-indexes", "title": "Indexes for a workload", "points": 15}, {"id": "w075d5-prefix", "title": "The leftmost-prefix rule", "points": 10}, {"id": "w075d5-atomic", "title": "Withdrawals that can't be lost", "points": 10}, {"id": "w075d5-optimistic", "title": "Optimistic locking", "points": 15}, {"id": "w075d5-savepoints", "title": "Keeping the good rows", "points": 15}, {"id": "w075d5-bug1", "title": "Two tills, one lost payment", "points": 10}, {"id": "w075d5-bug2", "title": "A composite index in the wrong order", "points": 10}, {"id": "w075d5-bug3", "title": "An index hidden by a function", "points": 10}, {"id": "w075d5-trace", "title": "Predict them", "points": 10}, {"id": "w075d5-challenge", "title": "Challenge: an index adviser", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=db5173407e"></script>
+</body>
+</html>
