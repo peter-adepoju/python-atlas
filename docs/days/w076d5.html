@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="db5173407e">
+<title>Week 76 Day 5: Your own HTTP server | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=db5173407e">
+<link rel="stylesheet" href="../assets/css/site.css?v=db5173407e">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=db5173407e"></script>
+<script src="../assets/vendor/codemirror.js?v=db5173407e" defer></script>
+<meta name="description" content="You’ve now seen every layer an HTTP server stands on: sockets that deliver bytes, framing to find where a request ends, and the request and response formats...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w076d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 76 Day 5: Your own HTTP server">
+<meta property="og:description" content="You’ve now seen every layer an HTTP server stands on: sockets that deliver bytes, framing to find where a request ends, and the request and response formats...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w076d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-76">Week 76: Networking and HTTP</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#a-server-in-four-steps" data-sec="a-server-in-four-steps">A server in four steps</a></li><li><a href="#routing" data-sec="routing">Routing</a></li><li><a href="#wsgi" data-sec="wsgi">WSGI</a></li><li><a href="#the-real-servers" data-sec="the-real-servers">The real servers</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w076d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-76">Week 76: Networking and HTTP</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 76, Day 5</span></p>
+      <h1>Your own HTTP server</h1>
+      <div class="day-intro"><p>You&rsquo;ve now seen every layer an HTTP server stands on: sockets that deliver bytes, framing to find where a request ends, and the request and response formats themselves. Today you&rsquo;ll put them together into a working server: read a request from a connection, route it to the right handler, and write the response back. Along the way you&rsquo;ll meet WSGI, the standard interface between Python web servers and web applications, which every Python framework (Flask and Django among them) speaks, so tomorrow&rsquo;s Forge, and next week&rsquo;s frameworks, will plug straight into what you build today.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Route requests by method and path, with path parameters, 404s and 405s</li><li>Explain WSGI (environ, start_response and an iterable body) and write WSGI applications</li><li>Serve files safely, without letting a path escape the folder, and add middleware</li><li>Run a request and response loop over a connection, with keep-alive</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="A server in four steps: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Routing: 25 min"></span><span class="plan-seg s1" style="flex:25" title="WSGI: 25 min"></span><span class="plan-seg s0" style="flex:10" title="The real servers: 10 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">A server in four steps</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Routing</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">WSGI</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">The real servers</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:30</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w076d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w076d5.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<div class="filebox"><div class="filebox-head">The file used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>netsim.py</code></summary><pre class="pc-filetext">&quot;&quot;&quot;Pretend TCP connections that run in the page, for practising sockets (Week 76).
+
+a, b = socketpair()          two connected ends: bytes sent on one arrive at the other
+a.send(data) -&gt; int          sends SOME of data (perhaps not all), returning how many bytes
+a.sendall(data)              (not provided: that&#x27;s an exercise)
+b.recv(n) -&gt; bytes           returns between 1 and n bytes, or b&quot;&quot; once the other end has
+                             closed and everything has been read
+a.shutdown()                 says &quot;I&#x27;ve finished sending&quot; (like sock.shutdown(socket.SHUT_WR)):
+                             the other end&#x27;s recv then returns b&quot;&quot;, but this end can still recv
+a.close()                    closes this end completely
+
+Like real TCP, the connection is a stream of bytes with no message boundaries: one send can
+arrive as several recvs, and several sends as one. With chunk=k, sends and recvs move at most
+k bytes at a time (chosen with a seeded random generator, so runs repeat exactly).
+&quot;&quot;&quot;
+import random
+from collections import deque
+
+
+class _Channel:
+    def __init__(self):
+        self.data = deque()
+        self.closed = False
+
+
+class FakeSocket:
+    def __init__(self, inbox, outbox, chunk, rng, name):
+        self._inbox, self._outbox = inbox, outbox
+        self._chunk, self._rng, self.name = chunk, rng, name
+        self.closed = False
+        self.sent = 0
+
+    def _size(self, n):
+        if self._chunk is None:
+            return n
+        return max(1, min(n, self._rng.randint(1, self._chunk)))
+
+    def send(self, data):
+        if self.closed:
+            raise OSError(&quot;send on a closed socket&quot;)
+        if self._outbox.closed:
+            raise BrokenPipeError(&quot;the other end has closed&quot;)
+        data = bytes(data)
+        if not data:
+            return 0
+        n = self._size(len(data))
+        self._outbox.data.extend(data[:n])
+        self.sent += n
+        return n
+
+    def recv(self, bufsize):
+        if self.closed:
+            raise OSError(&quot;recv on a closed socket&quot;)
+        if bufsize &lt; 1:
+            raise ValueError(&quot;bufsize must be positive&quot;)
+        if not self._inbox.data:
+            if self._inbox.closed:
+                return b&quot;&quot;
+            raise BlockingIOError(&quot;no data yet: in a real program this would wait&quot;)
+        n = self._size(min(bufsize, len(self._inbox.data)))
+        return bytes(self._inbox.data.popleft() for _ in range(n))
+
+    def shutdown(self):
+        &quot;&quot;&quot;Finish sending: the other end reads b&quot;&quot; after the data already sent.&quot;&quot;&quot;
+        self._outbox.closed = True
+
+    def close(self):
+        if not self.closed:
+            self.closed = True
+            self._outbox.closed = True
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+
+    def __repr__(self):
+        return f&quot;&lt;FakeSocket {self.name}{&#x27; closed&#x27; if self.closed else &#x27;&#x27;}&gt;&quot;
+
+
+def socketpair(chunk=None, seed=0):
+    &quot;&quot;&quot;Two connected FakeSockets. chunk limits how many bytes one send or recv moves.&quot;&quot;&quot;
+    rng = random.Random(seed)
+    a_to_b, b_to_a = _Channel(), _Channel()
+    return FakeSocket(b_to_a, a_to_b, chunk, rng, &quot;a&quot;), FakeSocket(a_to_b, b_to_a, chunk, rng, &quot;b&quot;)
+</pre></details><script type="application/json" class="page-files">{"netsim.py": "\"\"\"Pretend TCP connections that run in the page, for practising sockets (Week 76).\n\na, b = socketpair()          two connected ends: bytes sent on one arrive at the other\na.send(data) -> int          sends SOME of data (perhaps not all), returning how many bytes\na.sendall(data)              (not provided: that's an exercise)\nb.recv(n) -> bytes           returns between 1 and n bytes, or b\"\" once the other end has\n                             closed and everything has been read\na.shutdown()                 says \"I've finished sending\" (like sock.shutdown(socket.SHUT_WR)):\n                             the other end's recv then returns b\"\", but this end can still recv\na.close()                    closes this end completely\n\nLike real TCP, the connection is a stream of bytes with no message boundaries: one send can\narrive as several recvs, and several sends as one. With chunk=k, sends and recvs move at most\nk bytes at a time (chosen with a seeded random generator, so runs repeat exactly).\n\"\"\"\nimport random\nfrom collections import deque\n\n\nclass _Channel:\n    def __init__(self):\n        self.data = deque()\n        self.closed = False\n\n\nclass FakeSocket:\n    def __init__(self, inbox, outbox, chunk, rng, name):\n        self._inbox, self._outbox = inbox, outbox\n        self._chunk, self._rng, self.name = chunk, rng, name\n        self.closed = False\n        self.sent = 0\n\n    def _size(self, n):\n        if self._chunk is None:\n            return n\n        return max(1, min(n, self._rng.randint(1, self._chunk)))\n\n    def send(self, data):\n        if self.closed:\n            raise OSError(\"send on a closed socket\")\n        if self._outbox.closed:\n            raise BrokenPipeError(\"the other end has closed\")\n        data = bytes(data)\n        if not data:\n            return 0\n        n = self._size(len(data))\n        self._outbox.data.extend(data[:n])\n        self.sent += n\n        return n\n\n    def recv(self, bufsize):\n        if self.closed:\n            raise OSError(\"recv on a closed socket\")\n        if bufsize < 1:\n            raise ValueError(\"bufsize must be positive\")\n        if not self._inbox.data:\n            if self._inbox.closed:\n                return b\"\"\n            raise BlockingIOError(\"no data yet: in a real program this would wait\")\n        n = self._size(min(bufsize, len(self._inbox.data)))\n        return bytes(self._inbox.data.popleft() for _ in range(n))\n\n    def shutdown(self):\n        \"\"\"Finish sending: the other end reads b\"\" after the data already sent.\"\"\"\n        self._outbox.closed = True\n\n    def close(self):\n        if not self.closed:\n            self.closed = True\n            self._outbox.closed = True\n\n    def __enter__(self):\n        return self\n\n    def __exit__(self, *exc):\n        self.close()\n\n    def __repr__(self):\n        return f\"<FakeSocket {self.name}{' closed' if self.closed else ''}>\"\n\n\ndef socketpair(chunk=None, seed=0):\n    \"\"\"Two connected FakeSockets. chunk limits how many bytes one send or recv moves.\"\"\"\n    rng = random.Random(seed)\n    a_to_b, b_to_a = _Channel(), _Channel()\n    return FakeSocket(b_to_a, a_to_b, chunk, rng, \"a\"), FakeSocket(a_to_b, b_to_a, chunk, rng, \"b\")\n"}</script></div>
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w076d5-p1"><textarea class="pc-src pc-code" hidden>import json
+
+def handle(method, path):
+    if path == &quot;/hello&quot; and method == &quot;GET&quot;:
+        return 200, {&quot;Content-Type&quot;: &quot;text/plain&quot;}, b&quot;Hello!&quot;
+    if path == &quot;/hello&quot;:
+        return 405, {&quot;Allow&quot;: &quot;GET&quot;}, b&quot;&quot;
+    return 404, {&quot;Content-Type&quot;: &quot;application/json&quot;}, json.dumps({&quot;error&quot;: &quot;not found&quot;}).encode()
+
+for method, path in [(&quot;GET&quot;, &quot;/hello&quot;), (&quot;POST&quot;, &quot;/hello&quot;), (&quot;GET&quot;, &quot;/nope&quot;)]:
+    status, headers, body = handle(method, path)
+    print(method, path, &quot;-&gt;&quot;, status, headers, body)</textarea></div>
+<p>At heart, a web application is a <strong>function from a request to a response</strong>. Everything else in a server (sockets, parsing, threads, TLS) exists to call that function for each request that arrives and send back what it returns. Keeping that function separate from the machinery is what lets the same application run on a laptop, in a test, and on a production server.</p>
+<h2 id="a-server-in-four-steps">A server in four steps</h2>
+<p>For each connection, an HTTP server repeats:</p>
+<ol>
+<li><strong>Read a request</strong> from the socket: bytes up to the blank line (<code>\r\n\r\n</code>), then <code>Content-Length</code> bytes of body (Day 2), buffering whatever <code>recv</code> returns (Day 4).</li>
+<li><strong>Route</strong> it: find the handler for this method and path.</li>
+<li><strong>Call the handler</strong>, which returns a status, headers and a body.</li>
+<li><strong>Write the response</strong>, with a <code>Content-Length</code>, using <code>sendall</code>; then, if the connection is kept alive, go back to step 1 for the next request; otherwise close.</li>
+</ol>
+<p>Servers also have to be robust in ways a tidy example isn&rsquo;t: a request too large to accept (<code>413</code>), a client that sends half a request and stops (a timeout), a handler that raises (a <code>500</code>, with the details logged rather than shown to the user), and many clients at once.</p>
+<h2 id="routing">Routing</h2>
+<p>A <strong>router</strong> maps <code>(method, path)</code> to a handler. Real paths carry data: <code>/books/42</code> means book 42, so routes are <strong>patterns</strong> with <strong>parameters</strong>: <code>/books/&lt;int:book_id&gt;</code> matches <code>/books/42</code> and passes <code>book_id=42</code>.</p>
+<ul>
+<li>Compile each pattern to a regular expression once: <code>&lt;int:name&gt;</code> becomes <code>(?P&lt;name&gt;\d+)</code>, <code>&lt;name&gt;</code> becomes <code>(?P&lt;name&gt;[^/]+)</code> (any characters except <code>/</code>), and everything else is matched literally.</li>
+<li>If no pattern matches the path, answer <strong><code>404 Not Found</code></strong>. If the path matches but not with this method, answer <strong><code>405 Method Not Allowed</code></strong> with an <strong><code>Allow</code></strong> header listing the methods that would work: that&rsquo;s the difference between &ldquo;no such thing&rdquo; and &ldquo;you can&rsquo;t do that to it&rdquo;.</li>
+<li>Order matters when patterns overlap: <code>/books/new</code> must be tried before <code>/books/&lt;name&gt;</code>, or the literal route can never match.</li>
+</ul>
+<p>Frameworks register routes with decorators, which you know how to build (Week 60): <code>@app.route("/books/&lt;int:book_id&gt;", methods=["GET"])</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w076d5-e2"><textarea class="pc-src pc-code" hidden>import re
+
+class Router:
+    def __init__(self):
+        self.routes = []
+
+    def add(self, method, pattern, handler):
+        def group(m):
+            kind, name = m.groups()
+            return rf&quot;(?P&lt;{name}&gt;\d+)&quot; if kind == &quot;int&quot; else rf&quot;(?P&lt;{name}&gt;[^/]+)&quot;
+        regex = re.sub(r&quot;&lt;(?:(int):)?(\w+)&gt;&quot;, group, pattern)
+        self.routes.append((method, re.compile(f&quot;^{regex}$&quot;), handler))
+
+    def route(self, method, path):
+        allowed = []
+        for m, regex, handler in self.routes:
+            match = regex.match(path)
+            if match:
+                if m == method:
+                    params = {k: int(v) if v.isdigit() else v for k, v in match.groupdict().items()}
+                    return 200, handler, params
+                allowed.append(m)
+        return (405, sorted(allowed), {}) if allowed else (404, None, {})
+
+router = Router()
+router.add(&quot;GET&quot;, &quot;/books&quot;, lambda: &quot;all books&quot;)
+router.add(&quot;GET&quot;, &quot;/books/&lt;int:book_id&gt;&quot;, lambda book_id: f&quot;book {book_id}&quot;)
+router.add(&quot;DELETE&quot;, &quot;/books/&lt;int:book_id&gt;&quot;, lambda book_id: f&quot;deleted {book_id}&quot;)
+for method, path in [(&quot;GET&quot;, &quot;/books/42&quot;), (&quot;PUT&quot;, &quot;/books/42&quot;), (&quot;GET&quot;, &quot;/authors&quot;)]:
+    status, handler, params = router.route(method, path)
+    print(method, path, status, handler(**params) if status == 200 else handler)</textarea></div>
+<h2 id="wsgi">WSGI</h2>
+<p>If every framework talked to every server in its own way, you couldn&rsquo;t run Django on a server written for Flask. <strong>WSGI</strong> (the Web Server Gateway Interface, PEP 3333) is the agreement between them. A WSGI <strong>application</strong> is any callable:</p>
+<pre><code class="language-python">def app(environ, start_response):
+    start_response(&quot;200 OK&quot;, [(&quot;Content-Type&quot;, &quot;text/plain; charset=utf-8&quot;)])
+    return [b&quot;Hello from WSGI\n&quot;]
+</code></pre>
+<ul>
+<li><strong><code>environ</code></strong> is a dict describing the request: <code>REQUEST_METHOD</code>, <code>PATH_INFO</code> (the path), <code>QUERY_STRING</code>, <code>CONTENT_TYPE</code>, <code>CONTENT_LENGTH</code>, each request header as <code>HTTP_NAME</code> (upper case, <code>-</code> replaced by <code>_</code>: <code>HTTP_USER_AGENT</code>), <code>SERVER_NAME</code> and <code>SERVER_PORT</code>, <code>wsgi.url_scheme</code> (<code>http</code> or <code>https</code>), and <strong><code>wsgi.input</code></strong>, a file-like object to read the body from.</li>
+<li><strong><code>start_response(status, headers)</code></strong> is called once with the status line text (<code>"404 Not Found"</code>, code <strong>and</strong> reason) and a list of <code>(name, value)</code> header pairs.</li>
+<li>The application <strong>returns an iterable of bytes</strong> (a list with one item is fine): the body. Not a string; bytes.</li>
+</ul>
+<p>The server builds <code>environ</code>, calls the application, and writes what it gets back. <strong>Middleware</strong> is a WSGI application that wraps another, adding behaviour on the way in or out: logging every request, adding security headers, compressing responses, checking authentication. Because both sides have the same interface, middleware stacks like decorators.</p>
+<p>The standard library&rsquo;s <code>wsgiref</code> has the pieces: <code>wsgiref.util.setup_testing_defaults(environ)</code> fills in a test environ, <code>wsgiref.validate.validator(app)</code> checks an application follows the rules, and <code>wsgiref.simple_server</code> is a small real server. (For <code>async</code> applications there&rsquo;s an equivalent interface, <strong>ASGI</strong>, which FastAPI uses: next week.)</p>
+<div class="pc pc-example" data-kind="example" data-id="w076d5-e3"><textarea class="pc-src pc-code" hidden>import io, json
+from wsgiref.util import setup_testing_defaults
+from wsgiref.validate import validator
+
+def app(environ, start_response):
+    if environ[&quot;PATH_INFO&quot;] == &quot;/echo&quot; and environ[&quot;REQUEST_METHOD&quot;] == &quot;POST&quot;:
+        length = int(environ.get(&quot;CONTENT_LENGTH&quot;) or 0)
+        data = json.loads(environ[&quot;wsgi.input&quot;].read(length))
+        body = json.dumps({&quot;you sent&quot;: data, &quot;agent&quot;: environ.get(&quot;HTTP_USER_AGENT&quot;)}).encode()
+        start_response(&quot;200 OK&quot;, [(&quot;Content-Type&quot;, &quot;application/json&quot;), (&quot;Content-Length&quot;, str(len(body)))])
+        return [body]
+    start_response(&quot;404 Not Found&quot;, [(&quot;Content-Type&quot;, &quot;text/plain&quot;)])
+    return [b&quot;not found&quot;]
+
+body = b&#x27;{&quot;n&quot;: 7}&#x27;
+environ = {&quot;REQUEST_METHOD&quot;: &quot;POST&quot;, &quot;SCRIPT_NAME&quot;: &quot;&quot;, &quot;PATH_INFO&quot;: &quot;/echo&quot;, &quot;QUERY_STRING&quot;: &quot;&quot;, &quot;CONTENT_LENGTH&quot;: str(len(body)),
+           &quot;CONTENT_TYPE&quot;: &quot;application/json&quot;, &quot;HTTP_USER_AGENT&quot;: &quot;atlas/1.0&quot;, &quot;wsgi.input&quot;: io.BytesIO(body)}
+setup_testing_defaults(environ)
+captured = {}
+def start_response(status, headers, exc_info=None):
+    captured[&quot;status&quot;], captured[&quot;headers&quot;] = status, headers
+    return lambda data: None
+result = validator(app)(environ, start_response)
+print(captured[&quot;status&quot;], b&quot;&quot;.join(result))
+result.close()</textarea></div>
+<h2 id="the-real-servers">The real servers</h2>
+<p>On your own computer, Python can serve straight away:</p>
+<pre><code class="language-bash">python -m http.server 8000
+</code></pre>
+<p>serves the current folder&rsquo;s files at <code>http://127.0.0.1:8000/</code> (for development only). To run a WSGI application:</p>
+<pre><code class="language-python">from wsgiref.simple_server import make_server
+
+with make_server(&quot;127.0.0.1&quot;, 8000, app) as server:
+    server.serve_forever()
+</code></pre>
+<p>For production, a WSGI application runs under a server built for it, such as <strong>Gunicorn</strong> (<code>gunicorn myapp:app --workers 4</code>), usually behind a <strong>reverse proxy</strong> such as nginx that handles TLS, static files and slow clients (Week 77). <code>http.server.BaseHTTPRequestHandler</code> also lets you write handlers directly (<code>do_GET</code>, <code>do_POST</code>), which is fine for small tools.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A server reads a request (head to the blank line, then Content-Length bytes), routes it, calls the handler, and writes the response with sendall, repeating while the connection is kept alive; it must also handle oversized requests, slow clients and handler errors (500, logged). Routers compile path patterns with parameters into regular expressions; no match is 404, a match with the wrong method is 405 with Allow; put literal routes before overlapping patterns. WSGI applications take environ (REQUEST_METHOD, PATH_INFO, QUERY_STRING, CONTENT_LENGTH, HTTP_* headers, wsgi.input) and start_response(status line, header pairs), and return an iterable of bytes; middleware wraps applications. wsgiref has testing defaults, a validator and a simple server; production uses servers like Gunicorn behind a reverse proxy.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d5-router" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A router with parameters</div><div class="pc-prompt"><p>Write a class <code>Router</code> with <code>add(method, pattern, handler)</code> and <code>match(method, path)</code>. Patterns may contain <code>&lt;name&gt;</code> (one path segment, any characters but <code>/</code>), <code>&lt;int:name&gt;</code> (digits, passed as an <code>int</code>) and <code>&lt;path:name&gt;</code> (the rest of the path, slashes included); everything else matches literally (escape it with <code>re.escape</code>). <code>match</code> returns <code>(handler, params)</code> for the <strong>first</strong> route (in the order added) whose pattern and method both match; if some route&rsquo;s pattern matches but none with this method, raise <code>MethodNotAllowed</code> (given) with the sorted list of allowed methods as its <code>allowed</code> attribute; if no pattern matches, raise <code>NotFound</code>. A trailing slash on the path is ignored (except for <code>/</code> itself). Also a decorator method <code>route(pattern, methods=("GET",))</code> that registers the function for each method and returns it unchanged.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+class NotFound(Exception):
+    pass
+
+class MethodNotAllowed(Exception):
+    def __init__(self, allowed):
+        super().__init__(&quot;, &quot;.join(allowed))
+        self.allowed = allowed
+
+class Router:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_router():
+    &quot;patterns, parameters, 404 and 405&quot;
+    r = Router()
+    @r.route(&quot;/books&quot;)
+    def books():
+        return &quot;all&quot;
+    @r.route(&quot;/books/new&quot;)
+    def new_form():
+        return &quot;form&quot;
+    @r.route(&quot;/books/&lt;int:book_id&gt;&quot;, methods=(&quot;GET&quot;, &quot;DELETE&quot;))
+    def book(book_id):
+        return book_id
+    r.add(&quot;GET&quot;, &quot;/users/&lt;name&gt;&quot;, lambda name: name)
+    r.add(&quot;GET&quot;, &quot;/files/&lt;path:rest&gt;&quot;, lambda rest: rest)
+    r.add(&quot;GET&quot;, &quot;/c++/&lt;name&gt;&quot;, lambda name: name)
+    assert r.match(&quot;GET&quot;, &quot;/books&quot;) == (books, {}) and r.match(&quot;GET&quot;, &quot;/books/&quot;) == (books, {})
+    assert r.match(&quot;GET&quot;, &quot;/books/new&quot;) == (new_form, {}) and r.match(&quot;DELETE&quot;, &quot;/books/42&quot;) == (book, {&quot;book_id&quot;: 42})
+    assert r.match(&quot;GET&quot;, &quot;/users/ada&quot;)[1] == {&quot;name&quot;: &quot;ada&quot;} and r.match(&quot;GET&quot;, &quot;/files/a/b/c.txt&quot;)[1] == {&quot;rest&quot;: &quot;a/b/c.txt&quot;}
+    assert r.match(&quot;GET&quot;, &quot;/c++/x&quot;)[1] == {&quot;name&quot;: &quot;x&quot;}
+    try:
+        r.match(&quot;PUT&quot;, &quot;/books/42&quot;)
+        assert False
+    except MethodNotAllowed as e:
+        assert e.allowed == [&quot;DELETE&quot;, &quot;GET&quot;]
+    for path in [&quot;/books/abc/def&quot;, &quot;/authors&quot;, &quot;/users/a/b&quot;, &quot;/books/x1&quot;]:
+        try:
+            r.match(&quot;GET&quot;, path)
+            assert False, path
+        except NotFound:
+            pass</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+class NotFound(Exception):
+    pass
+
+class MethodNotAllowed(Exception):
+    def __init__(self, allowed):
+        super().__init__(&quot;, &quot;.join(allowed))
+        self.allowed = allowed
+
+class Router:
+    def __init__(self):
+        self.routes = []
+
+    def add(self, method, pattern, handler):
+        regex, ints = &quot;&quot;, set()
+        for piece in re.split(r&quot;(&lt;[^&gt;]+&gt;)&quot;, pattern):
+            m = re.fullmatch(r&quot;&lt;(?:(int|path):)?(\w+)&gt;&quot;, piece)
+            if m:
+                kind, name = m.groups()
+                if kind == &quot;int&quot;:
+                    regex += rf&quot;(?P&lt;{name}&gt;\d+)&quot;
+                    ints.add(name)
+                elif kind == &quot;path&quot;:
+                    regex += rf&quot;(?P&lt;{name}&gt;.+)&quot;
+                else:
+                    regex += rf&quot;(?P&lt;{name}&gt;[^/]+)&quot;
+            else:
+                regex += re.escape(piece)
+        self.routes.append((method.upper(), re.compile(regex), ints, handler))
+
+    def route(self, pattern, methods=(&quot;GET&quot;,)):
+        def decorate(func):
+            for method in methods:
+                self.add(method, pattern, func)
+            return func
+        return decorate
+
+    def match(self, method, path):
+        if len(path) &gt; 1:
+            path = path.rstrip(&quot;/&quot;)
+        allowed = set()
+        for m, regex, ints, handler in self.routes:
+            found = regex.fullmatch(path)
+            if not found:
+                continue
+            if m == method.upper():
+                params = {k: int(v) if k in ints else v for k, v in found.groupdict().items()}
+                return handler, params
+            allowed.add(m)
+        if allowed:
+            raise MethodNotAllowed(sorted(allowed))
+        raise NotFound(path)</textarea><template class="pc-src pc-hint">Build each regex piece by piece: split the pattern with <code>re.split(r"(&lt;[^&gt;]+&gt;)", pattern)</code>, escape the literal pieces, and turn each <code>&lt;...&gt;</code> into its named group. Keep a list of <code>(method, regex, converters, handler)</code>.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d5-environ" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">From request to environ</div><div class="pc-prompt"><p>Write <code>make_environ(raw, scheme="http")</code>: parse a raw request (bytes) and build a WSGI <code>environ</code>: <code>REQUEST_METHOD</code>, <code>PATH_INFO</code> (the path, with percent-encoding decoded by <code>urllib.parse.unquote</code>), <code>QUERY_STRING</code> (as sent, or <code>""</code>), <code>SERVER_PROTOCOL</code>, <code>SERVER_NAME</code> and <code>SERVER_PORT</code> (from the <code>Host</code> header, the port as a string, defaulting to 80 or 443 by scheme), <code>CONTENT_TYPE</code> and <code>CONTENT_LENGTH</code> (only if the request has them), <code>HTTP_...</code> for every other header (repeated ones joined with <code>,</code>), <code>wsgi.input</code> (a <code>BytesIO</code> of the body), <code>wsgi.url_scheme</code>, <code>wsgi.version</code> <code>(1, 0)</code>, <code>wsgi.errors</code> (a <code>StringIO</code>), <code>SCRIPT_NAME</code> <code>""</code>, and <code>wsgi.multithread</code>, <code>wsgi.multiprocess</code> and <code>wsgi.run_once</code> all <code>False</code>.</p></div><textarea class="pc-src pc-code" hidden>import io
+from urllib.parse import unquote
+
+def make_environ(raw, scheme=&quot;http&quot;):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_environ():
+    &quot;the WSGI environ&quot;
+    from wsgiref.validate import validator
+    raw = (b&quot;POST /caf%C3%A9/menu?lang=en&amp;x=1 HTTP/1.1\r\nHost: shop.example.com:8080\r\nUser-Agent: atlas\r\n&quot;
+           b&quot;Content-Type: application/json\r\nContent-Length: 7\r\nX-Tag: a\r\nX-Tag: b\r\n\r\n{\&quot;a\&quot;:1}&quot;)
+    env = make_environ(raw)
+    assert (env[&quot;REQUEST_METHOD&quot;], env[&quot;PATH_INFO&quot;], env[&quot;QUERY_STRING&quot;]) == (&quot;POST&quot;, &quot;/café/menu&quot;, &quot;lang=en&amp;x=1&quot;)
+    assert (env[&quot;SERVER_NAME&quot;], env[&quot;SERVER_PORT&quot;], env[&quot;SERVER_PROTOCOL&quot;]) == (&quot;shop.example.com&quot;, &quot;8080&quot;, &quot;HTTP/1.1&quot;)
+    assert env[&quot;CONTENT_LENGTH&quot;] == &quot;7&quot; and env[&quot;CONTENT_TYPE&quot;] == &quot;application/json&quot; and &quot;HTTP_CONTENT_TYPE&quot; not in env
+    assert env[&quot;HTTP_USER_AGENT&quot;] == &quot;atlas&quot; and env[&quot;HTTP_X_TAG&quot;] == &quot;a,b&quot; and env[&quot;wsgi.input&quot;].read() == b&#x27;{&quot;a&quot;:1}&#x27;
+    env2 = make_environ(b&quot;GET / HTTP/1.1\r\nHost: a.com\r\n\r\n&quot;, scheme=&quot;https&quot;)
+    assert env2[&quot;SERVER_PORT&quot;] == &quot;443&quot; and env2[&quot;QUERY_STRING&quot;] == &quot;&quot; and &quot;CONTENT_LENGTH&quot; not in env2
+    def app(environ, start_response):
+        start_response(&quot;200 OK&quot;, [(&quot;Content-Type&quot;, &quot;text/plain&quot;)])
+        return [b&quot;ok&quot;]
+    result = validator(app)(env2, lambda status, headers, exc_info=None: (lambda data: None))
+    result.close()</textarea><textarea class="pc-src pc-solution" hidden>import io
+from urllib.parse import unquote
+
+def make_environ(raw, scheme=&quot;http&quot;):
+    head, _, rest = raw.partition(b&quot;\r\n\r\n&quot;)
+    lines = head.decode(&quot;latin-1&quot;).split(&quot;\r\n&quot;)
+    method, target, protocol = lines[0].split(&quot; &quot;)
+    path, _, query = target.partition(&quot;?&quot;)
+    headers = {}
+    for line in lines[1:]:
+        name, _, value = line.partition(&quot;:&quot;)
+        key = name.strip().upper().replace(&quot;-&quot;, &quot;_&quot;)
+        value = value.strip()
+        headers[key] = f&quot;{headers[key]},{value}&quot; if key in headers else value
+    host, _, port = headers.get(&quot;HOST&quot;, &quot;&quot;).partition(&quot;:&quot;)
+    environ = {
+        &quot;REQUEST_METHOD&quot;: method,
+        &quot;SCRIPT_NAME&quot;: &quot;&quot;,
+        &quot;PATH_INFO&quot;: unquote(path),
+        &quot;QUERY_STRING&quot;: query,
+        &quot;SERVER_PROTOCOL&quot;: protocol,
+        &quot;SERVER_NAME&quot;: host,
+        &quot;SERVER_PORT&quot;: port or (&quot;443&quot; if scheme == &quot;https&quot; else &quot;80&quot;),
+        &quot;wsgi.version&quot;: (1, 0),
+        &quot;wsgi.url_scheme&quot;: scheme,
+        &quot;wsgi.errors&quot;: io.StringIO(),
+        &quot;wsgi.multithread&quot;: False,
+        &quot;wsgi.multiprocess&quot;: False,
+        &quot;wsgi.run_once&quot;: False,
+    }
+    length = int(headers.get(&quot;CONTENT_LENGTH&quot;, &quot;0&quot;) or 0)
+    environ[&quot;wsgi.input&quot;] = io.BytesIO(rest[:length])
+    for key, value in headers.items():
+        if key in (&quot;CONTENT_TYPE&quot;, &quot;CONTENT_LENGTH&quot;):
+            environ[key] = value
+        else:
+            environ[f&quot;HTTP_{key}&quot;] = value
+    return environ</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d5-callapp" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Calling a WSGI application</div><div class="pc-prompt"><p>Write <code>call_app(app, environ)</code>: call a WSGI application the way a server does, and return <code>(status, headers, body)</code>: the status line text, the list of header pairs, and the body bytes joined from the returned iterable. Pass a <code>start_response</code> that records its arguments and returns a <code>write</code> function (the old, rarely used way to send body data, which you should also collect, <strong>before</strong> the iterable&rsquo;s data). If the returned iterable has a <code>close</code> method, call it at the end, even if iterating raised. If <code>start_response</code> was never called, raise <code>RuntimeError</code>.</p></div><textarea class="pc-src pc-code" hidden>def call_app(app, environ):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_callapp():
+    &quot;the server&#x27;s side of WSGI&quot;
+    import io
+    def hello(environ, start_response):
+        start_response(&quot;200 OK&quot;, [(&quot;Content-Type&quot;, &quot;text/plain&quot;)])
+        return [b&quot;Hello, &quot;, environ[&quot;PATH_INFO&quot;][1:].encode(), b&quot;!&quot;]
+    assert call_app(hello, {&quot;PATH_INFO&quot;: &quot;/Ada&quot;}) == (&quot;200 OK&quot;, [(&quot;Content-Type&quot;, &quot;text/plain&quot;)], b&quot;Hello, Ada!&quot;)
+    closed = []
+    class Body:
+        def __iter__(self):
+            yield b&quot;one &quot;
+            yield b&quot;two&quot;
+        def close(self):
+            closed.append(True)
+    def streaming(environ, start_response):
+        write = start_response(&quot;201 Created&quot;, [])
+        write(b&quot;first: &quot;)
+        return Body()
+    assert call_app(streaming, {}) == (&quot;201 Created&quot;, [], b&quot;first: one two&quot;) and closed == [True]
+    def broken(environ, start_response):
+        return [b&quot;no status&quot;]
+    try:
+        call_app(broken, {})
+        assert False
+    except RuntimeError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>def call_app(app, environ):
+    captured = {}
+    written = []
+
+    def start_response(status, headers, exc_info=None):
+        captured[&quot;status&quot;], captured[&quot;headers&quot;] = status, list(headers)
+        return written.append
+
+    result = app(environ, start_response)
+    try:
+        chunks = [bytes(chunk) for chunk in result]
+    finally:
+        if hasattr(result, &quot;close&quot;):
+            result.close()
+    if &quot;status&quot; not in captured:
+        raise RuntimeError(&quot;the application never called start_response&quot;)
+    return captured[&quot;status&quot;], captured[&quot;headers&quot;], b&quot;&quot;.join(written) + b&quot;&quot;.join(chunks)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d5-app" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A JSON application</div><div class="pc-prompt"><p>Write a WSGI application <code>books_app</code> (using <code>BOOKS</code>, a module-level dict of id to book, which the app may change) with these routes: <code>GET /books</code> (all books, as a JSON list, by id), <code>GET /books/&lt;id&gt;</code> (one book, or <code>404</code> with <code>{"error": "not found"}</code>), <code>POST /books</code> (a JSON body with <code>title</code> and <code>author</code>, both non-empty strings; <code>201</code> with the new book, ids counting up from the largest, and a <code>Location: /books/ID</code> header; <code>400</code> with <code>{"error": "invalid JSON"}</code> for a bad body, <code>422</code> with <code>{"error": "title and author are required"}</code> for missing fields) and <code>DELETE /books/&lt;id&gt;</code> (<code>204</code> with no body, or <code>404</code>). Any other method on a known path is <code>405</code> with an <code>Allow</code> header (methods sorted, comma-separated); any other path <code>404</code>. Every response with a body is JSON with <code>Content-Type: application/json</code> and a <code>Content-Length</code>.</p></div><textarea class="pc-src pc-code" hidden>import json, re
+
+BOOKS = {1: {&quot;id&quot;: 1, &quot;title&quot;: &quot;Emma&quot;, &quot;author&quot;: &quot;Austen&quot;}, 2: {&quot;id&quot;: 2, &quot;title&quot;: &quot;Dune&quot;, &quot;author&quot;: &quot;Herbert&quot;}}
+
+def books_app(environ, start_response):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_app():
+    &quot;routes, statuses and JSON&quot;
+    import io, json
+    from wsgiref.util import setup_testing_defaults
+    def call(method, path, body=b&quot;&quot;):
+        env = {&quot;REQUEST_METHOD&quot;: method, &quot;PATH_INFO&quot;: path, &quot;CONTENT_LENGTH&quot;: str(len(body)), &quot;wsgi.input&quot;: io.BytesIO(body)}
+        setup_testing_defaults(env)
+        got = {}
+        def start_response(status, headers, exc_info=None):
+            got[&quot;status&quot;], got[&quot;headers&quot;] = status, dict(headers)
+        out = b&quot;&quot;.join(books_app(env, start_response))
+        return got[&quot;status&quot;], got[&quot;headers&quot;], out
+    status, headers, out = call(&quot;GET&quot;, &quot;/books&quot;)
+    assert status == &quot;200 OK&quot; and headers[&quot;Content-Type&quot;] == &quot;application/json&quot; and [b[&quot;id&quot;] for b in json.loads(out)] == [1, 2]
+    assert headers[&quot;Content-Length&quot;] == str(len(out))
+    assert json.loads(call(&quot;GET&quot;, &quot;/books/2&quot;)[2])[&quot;title&quot;] == &quot;Dune&quot; and call(&quot;GET&quot;, &quot;/books/9&quot;)[0] == &quot;404 Not Found&quot;
+    status, headers, out = call(&quot;POST&quot;, &quot;/books&quot;, b&#x27;{&quot;title&quot;: &quot;Ivanhoe&quot;, &quot;author&quot;: &quot;Scott&quot;}&#x27;)
+    assert status == &quot;201 Created&quot; and headers[&quot;Location&quot;] == &quot;/books/3&quot; and json.loads(out)[&quot;id&quot;] == 3
+    assert call(&quot;POST&quot;, &quot;/books&quot;, b&quot;{nope&quot;)[0] == &quot;400 Bad Request&quot; and call(&quot;POST&quot;, &quot;/books&quot;, b&#x27;{&quot;title&quot;: &quot;&quot;}&#x27;)[0].startswith(&quot;422&quot;)
+    status, headers, out = call(&quot;DELETE&quot;, &quot;/books/1&quot;)
+    assert status == &quot;204 No Content&quot; and out == b&quot;&quot; and call(&quot;DELETE&quot;, &quot;/books/1&quot;)[0] == &quot;404 Not Found&quot;
+    status, headers, _ = call(&quot;PUT&quot;, &quot;/books/2&quot;)
+    assert status == &quot;405 Method Not Allowed&quot; and headers[&quot;Allow&quot;] == &quot;DELETE, GET&quot;
+    assert call(&quot;GET&quot;, &quot;/authors&quot;)[0] == &quot;404 Not Found&quot;</textarea><textarea class="pc-src pc-solution" hidden>import json, re
+from http import HTTPStatus
+
+BOOKS = {1: {&quot;id&quot;: 1, &quot;title&quot;: &quot;Emma&quot;, &quot;author&quot;: &quot;Austen&quot;}, 2: {&quot;id&quot;: 2, &quot;title&quot;: &quot;Dune&quot;, &quot;author&quot;: &quot;Herbert&quot;}}
+
+def reply(start_response, status, data=None, extra=None):
+    headers = list((extra or {}).items())
+    body = b&quot;&quot;
+    if data is not None:
+        body = json.dumps(data).encode(&quot;utf-8&quot;)
+        headers += [(&quot;Content-Type&quot;, &quot;application/json&quot;), (&quot;Content-Length&quot;, str(len(body)))]
+    start_response(f&quot;{status} {HTTPStatus(status).phrase}&quot;, headers)
+    return [body] if body else []
+
+def books_app(environ, start_response):
+    method, path = environ[&quot;REQUEST_METHOD&quot;], environ[&quot;PATH_INFO&quot;].rstrip(&quot;/&quot;) or &quot;/&quot;
+    if path == &quot;/books&quot;:
+        if method == &quot;GET&quot;:
+            return reply(start_response, 200, [BOOKS[k] for k in sorted(BOOKS)])
+        if method == &quot;POST&quot;:
+            length = int(environ.get(&quot;CONTENT_LENGTH&quot;) or 0)
+            try:
+                data = json.loads(environ[&quot;wsgi.input&quot;].read(length) or b&quot;null&quot;)
+            except ValueError:
+                return reply(start_response, 400, {&quot;error&quot;: &quot;invalid JSON&quot;})
+            if not isinstance(data, dict) or not all(isinstance(data.get(f), str) and data[f].strip() for f in (&quot;title&quot;, &quot;author&quot;)):
+                return reply(start_response, 422, {&quot;error&quot;: &quot;title and author are required&quot;})
+            new_id = max(BOOKS, default=0) + 1
+            BOOKS[new_id] = {&quot;id&quot;: new_id, &quot;title&quot;: data[&quot;title&quot;], &quot;author&quot;: data[&quot;author&quot;]}
+            return reply(start_response, 201, BOOKS[new_id], {&quot;Location&quot;: f&quot;/books/{new_id}&quot;})
+        return reply(start_response, 405, {&quot;error&quot;: &quot;method not allowed&quot;}, {&quot;Allow&quot;: &quot;GET, POST&quot;})
+    m = re.fullmatch(r&quot;/books/(\d+)&quot;, path)
+    if m:
+        book_id = int(m.group(1))
+        if method == &quot;GET&quot;:
+            if book_id in BOOKS:
+                return reply(start_response, 200, BOOKS[book_id])
+            return reply(start_response, 404, {&quot;error&quot;: &quot;not found&quot;})
+        if method == &quot;DELETE&quot;:
+            if BOOKS.pop(book_id, None) is None:
+                return reply(start_response, 404, {&quot;error&quot;: &quot;not found&quot;})
+            return reply(start_response, 204)
+        return reply(start_response, 405, {&quot;error&quot;: &quot;method not allowed&quot;}, {&quot;Allow&quot;: &quot;DELETE, GET&quot;})
+    return reply(start_response, 404, {&quot;error&quot;: &quot;not found&quot;})</textarea><template class="pc-src pc-hint">A helper <code>reply(start_response, status, data=None, extra=None)</code> that builds the status line with <code>HTTPStatus(status).phrase</code>, encodes <code>data</code> as JSON (if not <code>None</code>) and sets the two headers keeps each route to a line or two.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d5-static" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Serving files safely</div><div class="pc-prompt"><p>Write <code>resolve(root, url_path)</code>: the file inside the folder <code>root</code> (a <code>pathlib.Path</code>) that a URL path names, or <code>None</code> if it would escape <code>root</code> or doesn&rsquo;t exist as a file. Decode percent-encoding first (so <code>%2e%2e</code> is caught), refuse anything containing a NUL character, serve <code>index.html</code> for a folder, and check the resolved path is inside the resolved root with <code>Path.is_relative_to</code>. Then <code>content_type(path)</code>: from <code>mimetypes.guess_type</code>, defaulting to <code>application/octet-stream</code>, with <code>; charset=utf-8</code> added to <code>text/...</code> types.</p></div><textarea class="pc-src pc-code" hidden>import mimetypes
+from pathlib import Path
+from urllib.parse import unquote
+
+def resolve(root, url_path):
+    ___
+
+def content_type(path):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_static():
+    &quot;no escaping the folder&quot;
+    import os
+    from pathlib import Path
+    root = Path(&quot;site&quot;)
+    (root / &quot;css&quot;).mkdir(parents=True, exist_ok=True)
+    (root / &quot;index.html&quot;).write_text(&quot;&lt;h1&gt;home&lt;/h1&gt;&quot;)
+    (root / &quot;css&quot; / &quot;main.css&quot;).write_text(&quot;body{}&quot;)
+    Path(&quot;secret.txt&quot;).write_text(&quot;keep out&quot;)
+    assert resolve(root, &quot;/&quot;) == (root / &quot;index.html&quot;).resolve() and resolve(root, &quot;/css/main.css&quot;) == (root / &quot;css&quot; / &quot;main.css&quot;).resolve()
+    for bad in [&quot;/../secret.txt&quot;, &quot;/css/../../secret.txt&quot;, &quot;/%2e%2e/secret.txt&quot;, &quot;/nope.html&quot;, &quot;/css&quot;, &quot;/a%00b&quot;]:
+        assert resolve(root, bad) is None, bad
+    assert content_type(Path(&quot;a.css&quot;)) == &quot;text/css; charset=utf-8&quot; and content_type(Path(&quot;a.png&quot;)) == &quot;image/png&quot;
+    assert content_type(Path(&quot;x.unknownthing&quot;)) == &quot;application/octet-stream&quot;</textarea><textarea class="pc-src pc-solution" hidden>import mimetypes
+from pathlib import Path
+from urllib.parse import unquote
+
+def resolve(root, url_path):
+    path = unquote(url_path)
+    if &quot;\x00&quot; in path:
+        return None
+    base = root.resolve()
+    target = (base / path.lstrip(&quot;/&quot;)).resolve()
+    if not target.is_relative_to(base):
+        return None
+    if target.is_dir():
+        target = target / &quot;index.html&quot;
+    return target if target.is_file() else None
+
+def content_type(path):
+    kind, _ = mimetypes.guess_type(path.name)
+    if kind is None:
+        return &quot;application/octet-stream&quot;
+    return f&quot;{kind}; charset=utf-8&quot; if kind.startswith(&quot;text/&quot;) else kind</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d5-middleware" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Middleware</div><div class="pc-prompt"><p>Write two WSGI middleware functions. <code>log_requests(app, log)</code> returns an application that calls <code>app</code> and appends <code>"METHOD PATH STATUS"</code> (the status code only, such as <code>GET /books 200</code>) to the list <code>log</code> once the response has started. <code>security_headers(app)</code> returns an application that adds <code>X-Content-Type-Options: nosniff</code> and <code>X-Frame-Options: DENY</code> to every response&rsquo;s headers, unless the app already set them (in any case). They must compose: <code>log_requests(security_headers(app), log)</code>.</p></div><textarea class="pc-src pc-code" hidden>def log_requests(app, log):
+    ___
+
+def security_headers(app):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_middleware():
+    &quot;wrapping applications&quot;
+    def app(environ, start_response):
+        if environ[&quot;PATH_INFO&quot;] == &quot;/frame&quot;:
+            start_response(&quot;200 OK&quot;, [(&quot;x-frame-options&quot;, &quot;SAMEORIGIN&quot;)])
+        else:
+            start_response(&quot;404 Not Found&quot;, [(&quot;Content-Type&quot;, &quot;text/plain&quot;)])
+        return [b&quot;body&quot;]
+    log = []
+    wrapped = log_requests(security_headers(app), log)
+    seen = {}
+    def start_response(status, headers, exc_info=None):
+        seen[&quot;status&quot;], seen[&quot;headers&quot;] = status, headers
+    assert b&quot;&quot;.join(wrapped({&quot;REQUEST_METHOD&quot;: &quot;GET&quot;, &quot;PATH_INFO&quot;: &quot;/x&quot;}, start_response)) == b&quot;body&quot;
+    names = [h[0].lower() for h in seen[&quot;headers&quot;]]
+    assert &quot;x-content-type-options&quot; in names and &quot;x-frame-options&quot; in names and log == [&quot;GET /x 404&quot;]
+    wrapped({&quot;REQUEST_METHOD&quot;: &quot;POST&quot;, &quot;PATH_INFO&quot;: &quot;/frame&quot;}, start_response)
+    assert [h for h in seen[&quot;headers&quot;] if h[0].lower() == &quot;x-frame-options&quot;] == [(&quot;x-frame-options&quot;, &quot;SAMEORIGIN&quot;)]
+    assert log == [&quot;GET /x 404&quot;, &quot;POST /frame 200&quot;]</textarea><textarea class="pc-src pc-solution" hidden>def log_requests(app, log):
+    def wrapped(environ, start_response):
+        def recording_start(status, headers, exc_info=None):
+            log.append(f&quot;{environ[&#x27;REQUEST_METHOD&#x27;]} {environ[&#x27;PATH_INFO&#x27;]} {status.split()[0]}&quot;)
+            return start_response(status, headers, exc_info) if exc_info else start_response(status, headers)
+        return app(environ, recording_start)
+    return wrapped
+
+def security_headers(app):
+    extra = [(&quot;X-Content-Type-Options&quot;, &quot;nosniff&quot;), (&quot;X-Frame-Options&quot;, &quot;DENY&quot;)]
+    def wrapped(environ, start_response):
+        def adding_start(status, headers, exc_info=None):
+            present = {name.lower() for name, _ in headers}
+            headers = list(headers) + [h for h in extra if h[0].lower() not in present]
+            return start_response(status, headers, exc_info) if exc_info else start_response(status, headers)
+        return app(environ, adding_start)
+    return wrapped</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w076d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A body that was a string</div><div class="pc-prompt"><p>A WSGI application must return an iterable of <strong>bytes</strong>, but this one returns a <code>str</code>, which iterates as single characters, and joining them as bytes fails with <code>TypeError</code>. Return a list with one encoded bytes object, so this prints <code>200 OK b'Hello, Ada!'</code>.</p></div><textarea class="pc-src pc-code" hidden>def app(environ, start_response):
+    start_response(&quot;200 OK&quot;, [(&quot;Content-Type&quot;, &quot;text/plain; charset=utf-8&quot;)])
+    return &quot;Hello, Ada!&quot;
+
+got = []
+body = b&quot;&quot;.join(app({}, lambda status, headers: got.append(status)))
+print(got[0], body)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;an iterable of bytes&quot;
+    expect_output(&quot;200 OK b&#x27;Hello, Ada!&#x27;&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def app(environ, start_response):
+    start_response(&quot;200 OK&quot;, [(&quot;Content-Type&quot;, &quot;text/plain; charset=utf-8&quot;)])
+    return [&quot;Hello, Ada!&quot;.encode(&quot;utf-8&quot;)]
+
+got = []
+body = b&quot;&quot;.join(app({}, lambda status, headers: got.append(status)))
+print(got[0], body)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w076d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A route that could never match</div><div class="pc-prompt"><p><code>/books/&lt;name&gt;</code> was registered before <code>/books/new</code>, and the first matching route wins, so <code>/books/new</code> goes to the book handler and this prints <code>book called new</code>. Register the literal route first, so it prints <code>the new-book form</code>.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+routes = []
+def add(pattern, handler):
+    regex = re.sub(r&quot;&lt;(\w+)&gt;&quot;, r&quot;(?P&lt;\1&gt;[^/]+)&quot;, pattern)
+    routes.append((re.compile(f&quot;^{regex}$&quot;), handler))
+
+add(&quot;/books/&lt;name&gt;&quot;, lambda name: f&quot;book called {name}&quot;)
+add(&quot;/books/new&quot;, lambda: &quot;the new-book form&quot;)
+
+def dispatch(path):
+    for regex, handler in routes:
+        m = regex.match(path)
+        if m:
+            return handler(**m.groupdict())
+
+print(dispatch(&quot;/books/new&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;literal routes first&quot;
+    expect_output(&quot;the new-book form&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+routes = []
+def add(pattern, handler):
+    regex = re.sub(r&quot;&lt;(\w+)&gt;&quot;, r&quot;(?P&lt;\1&gt;[^/]+)&quot;, pattern)
+    routes.append((re.compile(f&quot;^{regex}$&quot;), handler))
+
+add(&quot;/books/new&quot;, lambda: &quot;the new-book form&quot;)
+add(&quot;/books/&lt;name&gt;&quot;, lambda name: f&quot;book called {name}&quot;)
+
+def dispatch(path):
+    for regex, handler in routes:
+        m = regex.match(path)
+        if m:
+            return handler(**m.groupdict())
+
+print(dispatch(&quot;/books/new&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w076d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A path that escaped</div><div class="pc-prompt"><p>The file server joins the URL path onto its folder and checks only that the result <strong>starts with</strong> the folder&rsquo;s name as text, so <code>/../site-private/key.txt</code> (a folder whose name merely begins with <code>site</code>) passes the check and this prints <code>served: shh</code>. Compare resolved paths with <code>is_relative_to</code>, so it prints <code>refused</code>.</p></div><textarea class="pc-src pc-code" hidden>from pathlib import Path
+
+Path(&quot;site&quot;).mkdir(exist_ok=True)
+Path(&quot;site-private&quot;).mkdir(exist_ok=True)
+Path(&quot;site-private/key.txt&quot;).write_text(&quot;shh&quot;)
+
+def serve(url_path):
+    root = Path(&quot;site&quot;).resolve()
+    target = (root / url_path.lstrip(&quot;/&quot;)).resolve()
+    if str(target).startswith(str(root)) and target.is_file():
+        return &quot;served: &quot; + target.read_text()
+    return &quot;refused&quot;
+
+print(serve(&quot;/../site-private/key.txt&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a real containment check&quot;
+    expect_output(&quot;refused&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from pathlib import Path
+
+Path(&quot;site&quot;).mkdir(exist_ok=True)
+Path(&quot;site-private&quot;).mkdir(exist_ok=True)
+Path(&quot;site-private/key.txt&quot;).write_text(&quot;shh&quot;)
+
+def serve(url_path):
+    root = Path(&quot;site&quot;).resolve()
+    target = (root / url_path.lstrip(&quot;/&quot;)).resolve()
+    if target.is_relative_to(root) and target.is_file():
+        return &quot;served: &quot; + target.read_text()
+    return &quot;refused&quot;
+
+print(serve(&quot;/../site-private/key.txt&quot;))</textarea></div>
+<div class="parsons" data-id="w076d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A WSGI application</div><div class="pc-prompt"><p>Arrange the lines of a WSGI application that greets the name in the query string. One line is a trap.</p></div><script type="application/json">{"lines": ["from urllib.parse import parse_qs", "def app(environ, start_response):", "    name = parse_qs(environ[\"QUERY_STRING\"]).get(\"name\", [\"world\"])[0]", "    body = f\"Hello, {name}!\".encode(\"utf-8\")", "    start_response(\"200 OK\", [(\"Content-Type\", \"text/plain; charset=utf-8\"), (\"Content-Length\", str(len(body)))])", "    return [body]"], "distractors": ["    return f\"Hello, {name}!\""]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the status for a path that exists but doesn&#x27;t accept this method
+q = ___   # the header that 405 response should carry
+r = ___   # the environ key holding the request&#x27;s User-Agent header
+s = ___   # True or False: a WSGI application may return a str
+t = ___   # the regular expression group &quot;&lt;int:book_id&gt;&quot; becomes, as a string</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 405 and q == &quot;Allow&quot; and r == &quot;HTTP_USER_AGENT&quot;, &quot;p, q and r&quot;
+    assert s is False and t in (r&quot;(?P&lt;book_id&gt;\d+)&quot;, &quot;(?P&lt;book_id&gt;\\d+)&quot;), &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 405
+q = &quot;Allow&quot;
+r = &quot;HTTP_USER_AGENT&quot;
+s = False
+t = r&quot;(?P&lt;book_id&gt;\d+)&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w076d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What is a web application, at heart?", "answer": 1, "explain": "The server calls it for each request.", "options": ["A socket", "A function from a request to a response", "A database", "A thread"]}, {"type": "mc", "q": "What&rsquo;s the difference between 404 and 405 from a router?", "answer": 1, "explain": "405 lists the methods in Allow.", "options": ["None", "404: no route matches the path; 405: a route matches, but not with this method", "405 is a server error", "404 is for files only"]}, {"type": "mc", "q": "Why must /books/new be registered before /books/<name>?", "answer": 1, "explain": "Literal routes first.", "options": ["Alphabetical order", "The first matching route wins, and the pattern would also match &lsquo;new&rsquo;", "It&rsquo;s shorter", "It doesn&rsquo;t matter"]}, {"type": "mc", "q": "What does a WSGI application receive?", "answer": 1, "explain": "PEP 3333.", "options": ["A request object", "environ (a dict) and start_response (a function)", "A socket", "A string"]}, {"type": "mc", "q": "What must a WSGI application return?", "answer": 1, "explain": "A list with one bytes object is fine.", "options": ["A str", "An iterable of bytes", "A dict", "A status code"]}, {"type": "mc", "q": "Where is a request header like Accept-Language in environ?", "answer": 1, "explain": "Upper case, - to <em>, with HTTP</em> in front.", "options": ["environ[&lsquo;Accept-Language&rsquo;]", "environ[&lsquo;HTTP_ACCEPT_LANGUAGE&rsquo;]", "environ[&lsquo;headers&rsquo;]", "It isn&rsquo;t"]}, {"type": "mc", "q": "What is middleware?", "answer": 1, "explain": "Logging, security headers, compression.", "options": ["A database", "An application that wraps another, adding behaviour on the way in or out", "A server", "A router"]}, {"type": "mc", "q": "How should a file server check a path stays in its folder?", "answer": 1, "explain": "Text checks miss encodings and similar names.", "options": ["Look for &lsquo;..&rsquo; in the text", "Resolve the path and check it&rsquo;s relative to the resolved root", "Check it starts with the folder name", "It can&rsquo;t"]}, {"type": "mc", "q": "What runs WSGI applications in production?", "answer": 1, "explain": "http.server is for development.", "options": ["python -m http.server", "A server such as Gunicorn, usually behind a reverse proxy like nginx", "wsgiref only", "The browser"]}, {"type": "output", "q": "What does this print?", "answer": "{'book_id': '42'} None", "explain": "Convert to int yourself.", "code": "import re\nregex = re.compile(r\"/books/(?P<book_id>\\d+)\")\nm = regex.fullmatch(\"/books/42\")\nprint(m.groupdict(), regex.fullmatch(\"/books/x\"))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: serving a connection</div><div class="pc-prompt"><p>Write <code>serve_connection(sock, app, max_body=1_000_000)</code>: serve HTTP/1.1 requests arriving on one socket (a <code>netsim</code> socket in the checks) to a WSGI application, one after another, until the client closes the connection or sends <code>Connection: close</code>. For each request: read the head (to the blank line) and its <code>Content-Length</code> body, buffering across <code>recv</code>s (and keeping any extra bytes for the next request); build the environ with <code>make_environ</code> (given); call the app with <code>call_app</code> (given); and send <code>HTTP/1.1 STATUS</code> plus the app&rsquo;s headers, adding <code>Content-Length</code> if the app didn&rsquo;t, plus <code>Connection: close</code> on the last response when the client asked for it, then the body, all of it. A body over <code>max_body</code> gets <code>413 Payload Too Large</code> (without calling the app), and an app that raises gets a <code>500 Internal Server Error</code> with the body <code>internal error</code> (the server keeps serving). Return the number of requests answered.</p></div><textarea class="pc-src pc-code" hidden>import io
+from urllib.parse import unquote
+
+def make_environ(raw, scheme=&quot;http&quot;):
+    head, _, rest = raw.partition(b&quot;\r\n\r\n&quot;)
+    lines = head.decode(&quot;latin-1&quot;).split(&quot;\r\n&quot;)
+    method, target, protocol = lines[0].split(&quot; &quot;)
+    path, _, query = target.partition(&quot;?&quot;)
+    environ = {&quot;REQUEST_METHOD&quot;: method, &quot;SCRIPT_NAME&quot;: &quot;&quot;, &quot;PATH_INFO&quot;: unquote(path), &quot;QUERY_STRING&quot;: query,
+               &quot;SERVER_PROTOCOL&quot;: protocol, &quot;SERVER_NAME&quot;: &quot;localhost&quot;, &quot;SERVER_PORT&quot;: &quot;80&quot;, &quot;wsgi.version&quot;: (1, 0),
+               &quot;wsgi.url_scheme&quot;: scheme, &quot;wsgi.errors&quot;: io.StringIO(), &quot;wsgi.multithread&quot;: False,
+               &quot;wsgi.multiprocess&quot;: False, &quot;wsgi.run_once&quot;: False}
+    headers = {}
+    for line in lines[1:]:
+        name, _, value = line.partition(&quot;:&quot;)
+        headers[name.strip().upper().replace(&quot;-&quot;, &quot;_&quot;)] = value.strip()
+    length = int(headers.get(&quot;CONTENT_LENGTH&quot;, &quot;0&quot;) or 0)
+    environ[&quot;wsgi.input&quot;] = io.BytesIO(rest[:length])
+    for key, value in headers.items():
+        environ[key if key in (&quot;CONTENT_TYPE&quot;, &quot;CONTENT_LENGTH&quot;) else f&quot;HTTP_{key}&quot;] = value
+    return environ
+
+def call_app(app, environ):
+    captured, written = {}, []
+    def start_response(status, headers, exc_info=None):
+        captured[&quot;status&quot;], captured[&quot;headers&quot;] = status, list(headers)
+        return written.append
+    result = app(environ, start_response)
+    try:
+        chunks = [bytes(c) for c in result]
+    finally:
+        if hasattr(result, &quot;close&quot;):
+            result.close()
+    return captured[&quot;status&quot;], captured[&quot;headers&quot;], b&quot;&quot;.join(written) + b&quot;&quot;.join(chunks)
+
+def serve_connection(sock, app, max_body=1_000_000):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_serve():
+    &quot;keep-alive, framing, errors and limits&quot;
+    from netsim import socketpair
+    def app(environ, start_response):
+        if environ[&quot;PATH_INFO&quot;] == &quot;/boom&quot;:
+            raise RuntimeError(&quot;bug&quot;)
+        length = int(environ.get(&quot;CONTENT_LENGTH&quot;) or 0)
+        data = environ[&quot;wsgi.input&quot;].read(length)
+        body = f&quot;{environ[&#x27;REQUEST_METHOD&#x27;]} {environ[&#x27;PATH_INFO&#x27;]} {len(data)}&quot;.encode()
+        start_response(&quot;200 OK&quot;, [(&quot;Content-Type&quot;, &quot;text/plain&quot;)])
+        return [body]
+    client, server = socketpair(chunk=7, seed=3)
+    requests = (b&quot;GET /a HTTP/1.1\r\nHost: x\r\n\r\n&quot;
+                b&quot;POST /b HTTP/1.1\r\nHost: x\r\nContent-Length: 5\r\n\r\nhello&quot;
+                b&quot;GET /boom HTTP/1.1\r\nHost: x\r\n\r\n&quot;
+                b&quot;POST /big HTTP/1.1\r\nHost: x\r\nContent-Length: 50\r\n\r\n&quot; + b&quot;x&quot; * 50 +
+                b&quot;GET /last HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\n&quot;
+                b&quot;GET /ignored HTTP/1.1\r\nHost: x\r\n\r\n&quot;)
+    while requests:
+        requests = requests[client.send(requests):]
+    assert serve_connection(server, app, max_body=20) == 5
+    replies = b&quot;&quot;
+    while True:
+        try:
+            chunk = client.recv(4096)
+        except BlockingIOError:
+            break
+        if not chunk:
+            break
+        replies += chunk
+    parts = replies.split(b&quot;HTTP/1.1 &quot;)[1:]
+    assert [p.split(b&quot;\r\n&quot;)[0] for p in parts] == [b&quot;200 OK&quot;, b&quot;200 OK&quot;, b&quot;500 Internal Server Error&quot;, b&quot;413 Payload Too Large&quot;, b&quot;200 OK&quot;]
+    assert parts[0].endswith(b&quot;\r\n\r\nGET /a 0&quot;) and parts[1].endswith(b&quot;POST /b 5&quot;) and parts[2].endswith(b&quot;internal error&quot;)
+    assert b&quot;Content-Length: 8&quot; in parts[0] and b&quot;Connection: close&quot; in parts[4]
+    c2, s2 = socketpair()
+    c2.send(b&quot;GET / HTTP/1.1\r\nHost: x\r\n\r\n&quot;)
+    c2.shutdown()
+    assert serve_connection(s2, app) == 1</textarea><textarea class="pc-src pc-solution" hidden>import io
+from urllib.parse import unquote
+from http import HTTPStatus
+
+def make_environ(raw, scheme=&quot;http&quot;):
+    head, _, rest = raw.partition(b&quot;\r\n\r\n&quot;)
+    lines = head.decode(&quot;latin-1&quot;).split(&quot;\r\n&quot;)
+    method, target, protocol = lines[0].split(&quot; &quot;)
+    path, _, query = target.partition(&quot;?&quot;)
+    environ = {&quot;REQUEST_METHOD&quot;: method, &quot;SCRIPT_NAME&quot;: &quot;&quot;, &quot;PATH_INFO&quot;: unquote(path), &quot;QUERY_STRING&quot;: query,
+               &quot;SERVER_PROTOCOL&quot;: protocol, &quot;SERVER_NAME&quot;: &quot;localhost&quot;, &quot;SERVER_PORT&quot;: &quot;80&quot;, &quot;wsgi.version&quot;: (1, 0),
+               &quot;wsgi.url_scheme&quot;: scheme, &quot;wsgi.errors&quot;: io.StringIO(), &quot;wsgi.multithread&quot;: False,
+               &quot;wsgi.multiprocess&quot;: False, &quot;wsgi.run_once&quot;: False}
+    headers = {}
+    for line in lines[1:]:
+        name, _, value = line.partition(&quot;:&quot;)
+        headers[name.strip().upper().replace(&quot;-&quot;, &quot;_&quot;)] = value.strip()
+    length = int(headers.get(&quot;CONTENT_LENGTH&quot;, &quot;0&quot;) or 0)
+    environ[&quot;wsgi.input&quot;] = io.BytesIO(rest[:length])
+    for key, value in headers.items():
+        environ[key if key in (&quot;CONTENT_TYPE&quot;, &quot;CONTENT_LENGTH&quot;) else f&quot;HTTP_{key}&quot;] = value
+    return environ
+
+def call_app(app, environ):
+    captured, written = {}, []
+    def start_response(status, headers, exc_info=None):
+        captured[&quot;status&quot;], captured[&quot;headers&quot;] = status, list(headers)
+        return written.append
+    result = app(environ, start_response)
+    try:
+        chunks = [bytes(c) for c in result]
+    finally:
+        if hasattr(result, &quot;close&quot;):
+            result.close()
+    return captured[&quot;status&quot;], captured[&quot;headers&quot;], b&quot;&quot;.join(written) + b&quot;&quot;.join(chunks)
+
+def _send_all(sock, data):
+    while data:
+        data = data[sock.send(data):]
+
+def _write(sock, status, headers, body, close):
+    headers = list(headers)
+    if not any(k.lower() == &quot;content-length&quot; for k, _ in headers):
+        headers.append((&quot;Content-Length&quot;, str(len(body))))
+    if close:
+        headers.append((&quot;Connection&quot;, &quot;close&quot;))
+    head = f&quot;HTTP/1.1 {status}\r\n&quot; + &quot;&quot;.join(f&quot;{k}: {v}\r\n&quot; for k, v in headers) + &quot;\r\n&quot;
+    _send_all(sock, head.encode(&quot;latin-1&quot;) + body)
+
+def serve_connection(sock, app, max_body=1_000_000):
+    buffer, served, ended = b&quot;&quot;, 0, False
+
+    def fill(enough):
+        nonlocal buffer, ended
+        while not enough() and not ended:
+            try:
+                chunk = sock.recv(4096)
+            except BlockingIOError:
+                chunk = b&quot;&quot;
+            if not chunk:
+                ended = True
+            buffer += chunk
+        return enough()
+
+    while True:
+        if not fill(lambda: b&quot;\r\n\r\n&quot; in buffer):
+            return served
+        head_end = buffer.index(b&quot;\r\n\r\n&quot;) + 4
+        head = buffer[:head_end].decode(&quot;latin-1&quot;)
+        fields = {}
+        for line in head.split(&quot;\r\n&quot;)[1:]:
+            name, _, value = line.partition(&quot;:&quot;)
+            if name:
+                fields[name.strip().lower()] = value.strip()
+        length = int(fields.get(&quot;content-length&quot;, &quot;0&quot;) or 0)
+        close = fields.get(&quot;connection&quot;, &quot;&quot;).lower() == &quot;close&quot;
+        if not fill(lambda: len(buffer) &gt;= head_end + length):
+            return served
+        raw, buffer = buffer[:head_end + length], buffer[head_end + length:]
+        if length &gt; max_body:
+            _write(sock, &quot;413 Payload Too Large&quot;, [(&quot;Content-Type&quot;, &quot;text/plain&quot;)], b&quot;too large&quot;, close)
+        else:
+            try:
+                status, headers, body = call_app(app, make_environ(raw))
+            except Exception:
+                status, headers, body = &quot;500 Internal Server Error&quot;, [(&quot;Content-Type&quot;, &quot;text/plain&quot;)], b&quot;internal error&quot;
+            _write(sock, status, headers, body, close)
+        served += 1
+        if close:
+            return served</textarea><template class="pc-src pc-hint">Keep a <code>buffer</code> of received bytes. A helper <code>fill(predicate)</code> calls <code>recv</code> until the predicate holds or the stream ends (in <code>netsim</code>, <code>recv</code> raises <code>BlockingIOError</code> when nothing more has been sent: treat that like the end). Find <code>b"\r\n\r\n"</code>, read <code>Content-Length</code> from the head, wait for that many bytes, cut the request off the buffer, and handle it. For a 413, still cut off the oversized body so the next request lines up.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, run <code>books_app</code> with <code>wsgiref.simple_server.make_server</code>, and call it with <code>curl</code> from yesterday and with your Day 3 client. Tomorrow&rsquo;s Forge builds the whole stack: a small web framework with routing, request and response objects, middleware and a test client.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w076d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w076d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w076d5", "week": 76, "day": 5, "title": "Your own HTTP server", "exercises": [{"id": "w076d5-router", "title": "A router with parameters", "points": 15}, {"id": "w076d5-environ", "title": "From request to environ", "points": 15}, {"id": "w076d5-callapp", "title": "Calling a WSGI application", "points": 10}, {"id": "w076d5-app", "title": "A JSON application", "points": 15}, {"id": "w076d5-static", "title": "Serving files safely", "points": 10}, {"id": "w076d5-middleware", "title": "Middleware", "points": 10}, {"id": "w076d5-bug1", "title": "A body that was a string", "points": 10}, {"id": "w076d5-bug2", "title": "A route that could never match", "points": 10}, {"id": "w076d5-bug3", "title": "A path that escaped", "points": 10}, {"id": "w076d5-trace", "title": "Predict them", "points": 10}, {"id": "w076d5-challenge", "title": "Challenge: serving a connection", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=db5173407e"></script>
+</body>
+</html>

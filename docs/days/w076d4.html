@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="db5173407e">
+<title>Week 76 Day 4: Sockets | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=db5173407e">
+<link rel="stylesheet" href="../assets/css/site.css?v=db5173407e">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=db5173407e"></script>
+<script src="../assets/vendor/codemirror.js?v=db5173407e" defer></script>
+<meta name="description" content="Every HTTP library, database driver and chat app sits on the same small interface: the socket. A socket is one end of a network connection, and its rules...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w076d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 76 Day 4: Sockets">
+<meta property="og:description" content="Every HTTP library, database driver and chat app sits on the same small interface: the socket. A socket is one end of a network connection, and its rules...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w076d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-76">Week 76: Networking and HTTP</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#sockets" data-sec="sockets">Sockets</a></li><li><a href="#a-stream-not-messages" data-sec="a-stream-not-messages">A stream, not messages</a></li><li><a href="#framing" data-sec="framing">Framing</a></li><li><a href="#servers" data-sec="servers">Servers</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#on-your-own-computer" data-sec="on-your-own-computer">On your own computer</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w076d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-76">Week 76: Networking and HTTP</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 76, Day 4</span></p>
+      <h1>Sockets</h1>
+      <div class="day-intro"><p>Every HTTP library, database driver and chat app sits on the same small interface: the socket. A socket is one end of a network connection, and its rules are few and strict: you send bytes, you receive bytes, and the connection is a stream with no idea where your messages begin and end. Today you&rsquo;ll learn that interface and its traps (partial sends, partial receives, split characters, a closed connection), then the framing techniques that turn a byte stream into messages: delimiters and length prefixes, with struct for binary headers. The browser can&rsquo;t open real connections, so netsim.py provides pretend ones that behave like TCP, chopping your data up just as a real network can.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Use the socket interface (send, recv, sendall, close) and explain the stream model</li><li>Handle partial sends and receives, end of stream, and characters split across reads</li><li>Frame messages with delimiters or length prefixes, and pack binary headers with struct</li><li>Write the core of a simple text-protocol server, and know the real socket server calls</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Sockets: 20 min"></span><span class="plan-seg s0" style="flex:20" title="A stream, not messages: 20 min"></span><span class="plan-seg s1" style="flex:25" title="Framing: 25 min"></span><span class="plan-seg s0" style="flex:15" title="Servers: 15 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Sockets</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">A stream, not messages</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Framing</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Servers</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:30</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w076d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w076d4.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<div class="filebox"><div class="filebox-head">The file used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>netsim.py</code></summary><pre class="pc-filetext">&quot;&quot;&quot;Pretend TCP connections that run in the page, for practising sockets (Week 76).
+
+a, b = socketpair()          two connected ends: bytes sent on one arrive at the other
+a.send(data) -&gt; int          sends SOME of data (perhaps not all), returning how many bytes
+a.sendall(data)              (not provided: that&#x27;s an exercise)
+b.recv(n) -&gt; bytes           returns between 1 and n bytes, or b&quot;&quot; once the other end has
+                             closed and everything has been read
+a.shutdown()                 says &quot;I&#x27;ve finished sending&quot; (like sock.shutdown(socket.SHUT_WR)):
+                             the other end&#x27;s recv then returns b&quot;&quot;, but this end can still recv
+a.close()                    closes this end completely
+
+Like real TCP, the connection is a stream of bytes with no message boundaries: one send can
+arrive as several recvs, and several sends as one. With chunk=k, sends and recvs move at most
+k bytes at a time (chosen with a seeded random generator, so runs repeat exactly).
+&quot;&quot;&quot;
+import random
+from collections import deque
+
+
+class _Channel:
+    def __init__(self):
+        self.data = deque()
+        self.closed = False
+
+
+class FakeSocket:
+    def __init__(self, inbox, outbox, chunk, rng, name):
+        self._inbox, self._outbox = inbox, outbox
+        self._chunk, self._rng, self.name = chunk, rng, name
+        self.closed = False
+        self.sent = 0
+
+    def _size(self, n):
+        if self._chunk is None:
+            return n
+        return max(1, min(n, self._rng.randint(1, self._chunk)))
+
+    def send(self, data):
+        if self.closed:
+            raise OSError(&quot;send on a closed socket&quot;)
+        if self._outbox.closed:
+            raise BrokenPipeError(&quot;the other end has closed&quot;)
+        data = bytes(data)
+        if not data:
+            return 0
+        n = self._size(len(data))
+        self._outbox.data.extend(data[:n])
+        self.sent += n
+        return n
+
+    def recv(self, bufsize):
+        if self.closed:
+            raise OSError(&quot;recv on a closed socket&quot;)
+        if bufsize &lt; 1:
+            raise ValueError(&quot;bufsize must be positive&quot;)
+        if not self._inbox.data:
+            if self._inbox.closed:
+                return b&quot;&quot;
+            raise BlockingIOError(&quot;no data yet: in a real program this would wait&quot;)
+        n = self._size(min(bufsize, len(self._inbox.data)))
+        return bytes(self._inbox.data.popleft() for _ in range(n))
+
+    def shutdown(self):
+        &quot;&quot;&quot;Finish sending: the other end reads b&quot;&quot; after the data already sent.&quot;&quot;&quot;
+        self._outbox.closed = True
+
+    def close(self):
+        if not self.closed:
+            self.closed = True
+            self._outbox.closed = True
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+
+    def __repr__(self):
+        return f&quot;&lt;FakeSocket {self.name}{&#x27; closed&#x27; if self.closed else &#x27;&#x27;}&gt;&quot;
+
+
+def socketpair(chunk=None, seed=0):
+    &quot;&quot;&quot;Two connected FakeSockets. chunk limits how many bytes one send or recv moves.&quot;&quot;&quot;
+    rng = random.Random(seed)
+    a_to_b, b_to_a = _Channel(), _Channel()
+    return FakeSocket(b_to_a, a_to_b, chunk, rng, &quot;a&quot;), FakeSocket(a_to_b, b_to_a, chunk, rng, &quot;b&quot;)
+</pre></details><script type="application/json" class="page-files">{"netsim.py": "\"\"\"Pretend TCP connections that run in the page, for practising sockets (Week 76).\n\na, b = socketpair()          two connected ends: bytes sent on one arrive at the other\na.send(data) -> int          sends SOME of data (perhaps not all), returning how many bytes\na.sendall(data)              (not provided: that's an exercise)\nb.recv(n) -> bytes           returns between 1 and n bytes, or b\"\" once the other end has\n                             closed and everything has been read\na.shutdown()                 says \"I've finished sending\" (like sock.shutdown(socket.SHUT_WR)):\n                             the other end's recv then returns b\"\", but this end can still recv\na.close()                    closes this end completely\n\nLike real TCP, the connection is a stream of bytes with no message boundaries: one send can\narrive as several recvs, and several sends as one. With chunk=k, sends and recvs move at most\nk bytes at a time (chosen with a seeded random generator, so runs repeat exactly).\n\"\"\"\nimport random\nfrom collections import deque\n\n\nclass _Channel:\n    def __init__(self):\n        self.data = deque()\n        self.closed = False\n\n\nclass FakeSocket:\n    def __init__(self, inbox, outbox, chunk, rng, name):\n        self._inbox, self._outbox = inbox, outbox\n        self._chunk, self._rng, self.name = chunk, rng, name\n        self.closed = False\n        self.sent = 0\n\n    def _size(self, n):\n        if self._chunk is None:\n            return n\n        return max(1, min(n, self._rng.randint(1, self._chunk)))\n\n    def send(self, data):\n        if self.closed:\n            raise OSError(\"send on a closed socket\")\n        if self._outbox.closed:\n            raise BrokenPipeError(\"the other end has closed\")\n        data = bytes(data)\n        if not data:\n            return 0\n        n = self._size(len(data))\n        self._outbox.data.extend(data[:n])\n        self.sent += n\n        return n\n\n    def recv(self, bufsize):\n        if self.closed:\n            raise OSError(\"recv on a closed socket\")\n        if bufsize < 1:\n            raise ValueError(\"bufsize must be positive\")\n        if not self._inbox.data:\n            if self._inbox.closed:\n                return b\"\"\n            raise BlockingIOError(\"no data yet: in a real program this would wait\")\n        n = self._size(min(bufsize, len(self._inbox.data)))\n        return bytes(self._inbox.data.popleft() for _ in range(n))\n\n    def shutdown(self):\n        \"\"\"Finish sending: the other end reads b\"\" after the data already sent.\"\"\"\n        self._outbox.closed = True\n\n    def close(self):\n        if not self.closed:\n            self.closed = True\n            self._outbox.closed = True\n\n    def __enter__(self):\n        return self\n\n    def __exit__(self, *exc):\n        self.close()\n\n    def __repr__(self):\n        return f\"<FakeSocket {self.name}{' closed' if self.closed else ''}>\"\n\n\ndef socketpair(chunk=None, seed=0):\n    \"\"\"Two connected FakeSockets. chunk limits how many bytes one send or recv moves.\"\"\"\n    rng = random.Random(seed)\n    a_to_b, b_to_a = _Channel(), _Channel()\n    return FakeSocket(b_to_a, a_to_b, chunk, rng, \"a\"), FakeSocket(a_to_b, b_to_a, chunk, rng, \"b\")\n"}</script></div>
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w076d4-p1"><textarea class="pc-src pc-code" hidden>from netsim import socketpair
+
+client, server = socketpair(chunk=5, seed=1)
+for message in [b&quot;HELLO\n&quot;, b&quot;ADD 2 3\n&quot;, b&quot;QUIT\n&quot;]:
+    sent = 0
+    while sent &lt; len(message):
+        sent += client.send(message[sent:])
+client.close()
+
+pieces = []
+while True:
+    data = server.recv(1024)
+    if not data:
+        break
+    pieces.append(data)
+print(pieces)
+print(b&quot;&quot;.join(pieces).split(b&quot;\n&quot;))</textarea></div>
+<p>Three messages went in; they came out as whatever pieces the &ldquo;network&rdquo; felt like, with the boundaries in the wrong places. That&rsquo;s not a fault in <code>netsim.py</code>: real TCP does exactly this, because it delivers a <strong>stream of bytes</strong>, not messages. Only after joining the pieces and splitting on the newlines that the protocol agreed to use do the messages reappear.</p>
+<h2 id="sockets">Sockets</h2>
+<p>A <strong>socket</strong> is your program&rsquo;s end of a network connection. With TCP, the life of a client socket is:</p>
+<pre><code class="language-python">import socket
+
+with socket.create_connection((&quot;example.com&quot;, 80), timeout=5) as sock:
+    sock.sendall(b&quot;GET / HTTP/1.1\r\nHost: example.com\r\nConnection: close\r\n\r\n&quot;)
+    reply = b&quot;&quot;
+    while chunk := sock.recv(4096):
+        reply += chunk
+print(reply.split(b&quot;\r\n&quot;)[0])
+</code></pre>
+<ul>
+<li><strong><code>create_connection((host, port), timeout)</code></strong> looks the name up and connects (the TCP handshake from Day 1).</li>
+<li><strong><code>send(data)</code></strong> hands bytes to the operating system to transmit, and returns <strong>how many it accepted</strong>, which may be fewer than you gave it. <strong><code>sendall(data)</code></strong> loops until everything is sent.</li>
+<li><strong><code>recv(n)</code></strong> returns <strong>up to</strong> <code>n</code> bytes: whatever has arrived, perhaps just one. It returns <strong><code>b""</code></strong> only when the other end has closed the connection and every byte has been read: that&rsquo;s how you know the stream has ended.</li>
+<li><strong><code>close()</code></strong> (or the <code>with</code> block) ends your side; a timeout makes <code>recv</code> raise <code>socket.timeout</code> (an <code>OSError</code>) instead of waiting forever.</li>
+</ul>
+<p>Sockets carry <strong>bytes</strong>. Text must be encoded before sending and decoded after receiving, with an agreed encoding (UTF-8).</p>
+<h2 id="a-stream-not-messages">A stream, not messages</h2>
+<p>Because TCP is a stream, three things are always true, and code that forgets them works on your laptop and fails in production, where the network is slower and busier:</p>
+<ol>
+<li><strong>One <code>send</code> can arrive as several <code>recv</code>s</strong>, and several sends can arrive as one. Never assume a <code>recv</code> returns one whole message.</li>
+<li><strong><code>send</code> may send only part.</strong> Use <code>sendall</code>, or loop on <code>send</code>&rsquo;s return value.</li>
+<li><strong>A multi-byte character can be split</strong> between two <code>recv</code>s: <code>"é"</code> is two bytes in UTF-8, and decoding each piece separately fails. Join the bytes first, or use an incremental decoder (<code>codecs.getincrementaldecoder("utf-8")()</code>), which keeps an unfinished character until the rest arrives.</li>
+</ol>
+<p><code>netsim.socketpair(chunk=k)</code> gives two connected ends whose <code>send</code> and <code>recv</code> move at most <code>k</code> bytes at a time, chosen at random (from a seed, so runs repeat), so your code meets these conditions every time it runs, not once in a thousand. Its <code>recv</code> raises <code>BlockingIOError</code> when no data has been sent yet, where a real socket would wait.</p>
+<h2 id="framing">Framing</h2>
+<p>To send <strong>messages</strong> over a stream, both ends must agree how to find where each one ends. Three common ways:</p>
+<ul>
+<li><strong>A delimiter</strong>: end each message with a byte that can&rsquo;t appear inside it, usually a newline. Text protocols (SMTP, Redis, IRC and HTTP&rsquo;s headers) work this way. The receiver keeps a <strong>buffer</strong>: append each <code>recv</code>&rsquo;s bytes, and while the buffer contains a newline, cut off one message.</li>
+<li><strong>A length prefix</strong>: send the message&rsquo;s length first, in a fixed number of bytes, then the message. The receiver reads exactly the header, decodes the length, then reads <strong>exactly</strong> that many bytes. Binary protocols (and HTTP&rsquo;s <code>Content-Length</code>) work this way, and the message can contain anything.</li>
+<li><strong>Closing the connection</strong>: the message ends when the stream does (<code>Connection: close</code> in HTTP). Simple, but one message per connection.</li>
+</ul>
+<p><strong><code>struct</code></strong> packs numbers into fixed-size bytes and back: <code>struct.pack("!I", 513)</code> gives the four bytes of 513 as an unsigned 32-bit integer in <strong>network byte order</strong> (<code>!</code>, big-endian), and <code>struct.unpack("!I", data)</code> reverses it. Format letters: <code>B</code> (1-byte unsigned), <code>H</code> (2 bytes), <code>I</code> (4), <code>Q</code> (8), lower case for signed; <code>s</code> for raw bytes.</p>
+<div class="pc pc-example" data-kind="example" data-id="w076d4-e2"><textarea class="pc-src pc-code" hidden>import json, struct
+from netsim import socketpair
+
+def send_message(sock, obj):
+    body = json.dumps(obj).encode(&quot;utf-8&quot;)
+    data = struct.pack(&quot;!I&quot;, len(body)) + body
+    while data:
+        data = data[sock.send(data):]
+
+def recv_exactly(sock, n):
+    buf = b&quot;&quot;
+    while len(buf) &lt; n:
+        chunk = sock.recv(n - len(buf))
+        if not chunk:
+            raise ConnectionError(&quot;closed in the middle of a message&quot;)
+        buf += chunk
+    return buf
+
+def recv_message(sock):
+    (length,) = struct.unpack(&quot;!I&quot;, recv_exactly(sock, 4))
+    return json.loads(recv_exactly(sock, length))
+
+a, b = socketpair(chunk=3, seed=7)
+send_message(a, {&quot;op&quot;: &quot;add&quot;, &quot;args&quot;: [2, 3]})
+send_message(a, {&quot;op&quot;: &quot;greet&quot;, &quot;name&quot;: &quot;Zoë&quot;})
+print(recv_message(b))
+print(recv_message(b))
+print(struct.pack(&quot;!I&quot;, 513), struct.unpack(&quot;!HB&quot;, b&quot;\x01\x02\x03&quot;))</textarea></div>
+<h2 id="servers">Servers</h2>
+<p>A TCP <strong>server</strong> waits for connections:</p>
+<pre><code class="language-python">import socket
+
+with socket.create_server((&quot;127.0.0.1&quot;, 8000)) as server:     # socket(), bind() and listen() in one call
+    while True:
+        conn, address = server.accept()                         # wait for a client, get a new socket for it
+        with conn:
+            data = conn.recv(1024)
+            conn.sendall(b&quot;you said: &quot; + data)
+</code></pre>
+<ul>
+<li><strong><code>bind((host, port))</code></strong> claims an address and port (<code>127.0.0.1</code> for this machine only; <code>0.0.0.0</code> for every network interface); <strong><code>listen()</code></strong> starts accepting; <strong><code>accept()</code></strong> waits for the next client and returns a <strong>new socket</strong> just for that conversation, while the listening socket keeps waiting for others.</li>
+<li>This loop serves <strong>one client at a time</strong>. Real servers handle many at once with threads, processes or an event loop (Weeks 66 and 67): <code>socketserver.ThreadingTCPServer</code>, or <code>asyncio.start_server</code> with its <code>reader.readline()</code> and <code>writer.write()</code>, which does the buffering for you.</li>
+<li><strong>UDP</strong> sockets (<code>socket.SOCK_DGRAM</code>) skip connections: <code>sendto(data, address)</code> sends one datagram, <code>recvfrom</code> receives one whole datagram (or nothing): message boundaries are kept, but delivery and order aren&rsquo;t guaranteed.</li>
+</ul>
+<p>Whatever the server, its core is a function from the bytes it reads to the bytes it writes, which is the part you&rsquo;ll write and test today.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A socket is one end of a connection: create_connection connects (with a timeout), send returns how many bytes it took (sendall sends them all), recv returns up to n bytes, b&rdquo;&rdquo; meaning the other end closed, and close ends it. TCP is a stream: sends and recvs don&rsquo;t line up, sends can be partial, and multi-byte characters can be split, so buffer bytes and decode after joining or incrementally. Frame messages with a delimiter (a buffer cut at newlines), a length prefix (read exactly the header, then exactly the body; struct packs numbers in network order with !), or by closing. Servers bind, listen and accept a new socket per client; real ones serve many at once with threads or asyncio. UDP sends whole datagrams without guarantees.</p></aside>
+<h2 id="practice">Practice</h2>
+<p>These exercises use <code>netsim.socketpair(chunk=k)</code>, whose sends and recvs move at most <code>k</code> bytes at a time. Your code must work whatever the chunk sizes are.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d4-sendall" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Sending everything</div><div class="pc-prompt"><p>Write <code>sendall(sock, data)</code>: call <code>sock.send</code> until every byte of <code>data</code> has been accepted, and return the total. Then <code>recv_all(sock)</code>: receive until the other end closes (<code>recv</code> returns <code>b""</code>), returning all the bytes.</p></div><textarea class="pc-src pc-code" hidden>def sendall(sock, data):
+    ___
+
+def recv_all(sock):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_sendall():
+    &quot;partial sends and reads&quot;
+    from netsim import socketpair
+    for chunk in (1, 3, 1000):
+        a, b = socketpair(chunk=chunk, seed=chunk)
+        data = bytes(range(256)) * 4
+        assert sendall(a, data) == len(data)
+        a.close()
+        assert recv_all(b) == data
+    a, b = socketpair()
+    assert sendall(a, b&quot;&quot;) == 0
+    a.close()
+    assert recv_all(b) == b&quot;&quot;</textarea><textarea class="pc-src pc-solution" hidden>def sendall(sock, data):
+    view = memoryview(data)
+    total = 0
+    while total &lt; len(data):
+        total += sock.send(view[total:])
+    return total
+
+def recv_all(sock):
+    parts = []
+    while True:
+        chunk = sock.recv(4096)
+        if not chunk:
+            return b&quot;&quot;.join(parts)
+        parts.append(chunk)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d4-exactly" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Exactly n bytes</div><div class="pc-prompt"><p>Write <code>recv_exactly(sock, n)</code>: return exactly <code>n</code> bytes, calling <code>recv</code> as often as needed (asking for no more than is still missing, so you never read part of the <strong>next</strong> message); raise <code>ConnectionError("connection closed after K of N bytes")</code> if the stream ends first. Then <code>read_header(sock)</code>: read a 6-byte header packed as <code>!BBI</code> (version, message type, body length) and return those three numbers as a tuple.</p></div><textarea class="pc-src pc-code" hidden>import struct
+
+def recv_exactly(sock, n):
+    ___
+
+def read_header(sock):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_exactly():
+    &quot;reading exactly as much as asked&quot;
+    import struct
+    from netsim import socketpair
+    a, b = socketpair(chunk=2, seed=3)
+    a.send(b&quot;x&quot;)
+    rest = struct.pack(&quot;!BBI&quot;, 1, 7, 70000) + b&quot;next&quot;
+    while rest:
+        rest = rest[a.send(rest):]
+    assert recv_exactly(b, 1) == b&quot;x&quot; and read_header(b) == (1, 7, 70000) and recv_exactly(b, 4) == b&quot;next&quot;
+    data = b&quot;ab&quot;
+    while data:
+        data = data[a.send(data):]
+    a.close()
+    try:
+        recv_exactly(b, 5)
+        assert False
+    except ConnectionError as e:
+        assert str(e) == &quot;connection closed after 2 of 5 bytes&quot;</textarea><textarea class="pc-src pc-solution" hidden>import struct
+
+def recv_exactly(sock, n):
+    buf = bytearray()
+    while len(buf) &lt; n:
+        chunk = sock.recv(n - len(buf))
+        if not chunk:
+            raise ConnectionError(f&quot;connection closed after {len(buf)} of {n} bytes&quot;)
+        buf += chunk
+    return bytes(buf)
+
+def read_header(sock):
+    return struct.unpack(&quot;!BBI&quot;, recv_exactly(sock, 6))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d4-framed" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Length-prefixed messages</div><div class="pc-prompt"><p>Write <code>send_json(sock, obj)</code>: encode <code>obj</code> as UTF-8 JSON and send it with a <strong>4-byte big-endian length prefix</strong>, all of it (loop on <code>send</code>). Then <code>recv_json(sock)</code>: read one message and decode it, returning <code>None</code> if the stream is cleanly closed <strong>before</strong> a new message starts, and raising <code>ConnectionError</code> if it closes part-way through one. Messages may be up to 10 MB; refuse a longer announced length with <code>ValueError</code> before reading the body.</p></div><textarea class="pc-src pc-code" hidden>import json, struct
+
+MAX = 10 * 1024 * 1024
+
+def send_json(sock, obj):
+    ___
+
+def recv_json(sock):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_framed():
+    &quot;framing a stream&quot;
+    import struct
+    from netsim import socketpair
+    a, b = socketpair(chunk=3, seed=11)
+    messages = [{&quot;op&quot;: &quot;greet&quot;, &quot;name&quot;: &quot;Zoë&quot;}, [1, 2, 3], &quot;π ≈ 3.14159&quot;, {}]
+    for m in messages:
+        send_json(a, m)
+    a.close()
+    assert [recv_json(b) for _ in messages] == messages and recv_json(b) is None
+    a, b = socketpair()
+    a.send(struct.pack(&quot;!I&quot;, 50) + b&#x27;{&quot;cut&#x27;)
+    a.close()
+    try:
+        recv_json(b)
+        assert False
+    except ConnectionError:
+        pass
+    a, b = socketpair()
+    a.send(struct.pack(&quot;!I&quot;, 11 * 1024 * 1024))
+    try:
+        recv_json(b)
+        assert False
+    except ValueError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import json, struct
+
+MAX = 10 * 1024 * 1024
+
+def _exactly(sock, n, start=b&quot;&quot;):
+    buf = bytearray(start)
+    while len(buf) &lt; n:
+        chunk = sock.recv(n - len(buf))
+        if not chunk:
+            raise ConnectionError(&quot;connection closed in the middle of a message&quot;)
+        buf += chunk
+    return bytes(buf)
+
+def send_json(sock, obj):
+    body = json.dumps(obj).encode(&quot;utf-8&quot;)
+    data = struct.pack(&quot;!I&quot;, len(body)) + body
+    while data:
+        data = data[sock.send(data):]
+
+def recv_json(sock):
+    first = sock.recv(1)
+    if not first:
+        return None
+    (length,) = struct.unpack(&quot;!I&quot;, _exactly(sock, 4, first))
+    if length &gt; MAX:
+        raise ValueError(f&quot;message of {length} bytes is too long&quot;)
+    return json.loads(_exactly(sock, length).decode(&quot;utf-8&quot;))</textarea><template class="pc-src pc-hint">For a clean close, read the first byte of the header with one <code>recv(1)</code>: if it&rsquo;s <code>b""</code>, return <code>None</code>; otherwise read the other three header bytes, then the body, both with a <code>recv_exactly</code> loop.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d4-lines" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A line reader</div><div class="pc-prompt"><p>Write a class <code>LineReader(sock)</code> for newline-delimited text: <code>readline()</code> returns the next line as a <code>str</code> <strong>without</strong> its <code>\n</code> (and without a <code>\r</code> before it), or <code>None</code> at the end of the stream. It keeps a buffer of bytes received but not yet returned, calls <code>recv(4096)</code> only when the buffer holds no complete line, decodes complete lines only (so characters split between reads are fine), and if the stream ends with an unfinished last line, returns it before <code>None</code>. Also <code>__iter__</code>, yielding lines until the end.</p></div><textarea class="pc-src pc-code" hidden>class LineReader:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_lines():
+    &quot;buffering and delimiters&quot;
+    from netsim import socketpair
+    a, b = socketpair(chunk=2, seed=5)
+    data = &quot;HELLO\r\nnaïve café\nlast line without newline&quot;.encode(&quot;utf-8&quot;)
+    while data:
+        data = data[a.send(data):]
+    a.close()
+    reader = LineReader(b)
+    assert reader.readline() == &quot;HELLO&quot; and reader.readline() == &quot;naïve café&quot;
+    assert list(reader) == [&quot;last line without newline&quot;] and reader.readline() is None
+    a, b = socketpair(chunk=100)
+    a.send(b&quot;one\ntwo\nthree\n&quot;)
+    a.close()
+    r = LineReader(b)
+    assert r.readline() == &quot;one&quot; and list(r) == [&quot;two&quot;, &quot;three&quot;]</textarea><textarea class="pc-src pc-solution" hidden>class LineReader:
+    def __init__(self, sock):
+        self.sock = sock
+        self.buffer = b&quot;&quot;
+        self.done = False
+
+    def readline(self):
+        while b&quot;\n&quot; not in self.buffer and not self.done:
+            chunk = self.sock.recv(4096)
+            if chunk:
+                self.buffer += chunk
+            else:
+                self.done = True
+        if b&quot;\n&quot; in self.buffer:
+            line, self.buffer = self.buffer.split(b&quot;\n&quot;, 1)
+        elif self.buffer:
+            line, self.buffer = self.buffer, b&quot;&quot;
+        else:
+            return None
+        return line.rstrip(b&quot;\r&quot;).decode(&quot;utf-8&quot;)
+
+    def __iter__(self):
+        while (line := self.readline()) is not None:
+            yield line</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d4-protocol" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A key-value protocol</div><div class="pc-prompt"><p>Write the core of a tiny text server. <code>respond(store, line)</code> handles one command line and returns the reply line: <code>SET key value</code> (the value is the rest of the line, possibly with spaces) stores it and replies <code>OK</code>; <code>GET key</code> replies <code>VALUE text</code> or <code>NOT FOUND</code>; <code>DEL key</code> replies <code>DELETED</code> or <code>NOT FOUND</code>; <code>KEYS</code> replies <code>KEYS</code> followed by the sorted keys separated by spaces (just <code>KEYS</code> if there are none); <code>QUIT</code> replies <code>BYE</code>. Commands are case-insensitive, keys aren&rsquo;t; anything else replies <code>ERROR unknown command</code> (or <code>ERROR usage: ...</code> for a known command with the wrong number of words, such as <code>ERROR usage: GET key</code>). Then <code>serve(sock, store)</code>: read lines from <code>sock</code>, send each reply followed by <code>\n</code> (all of it), and stop after replying to <code>QUIT</code> or at the end of the stream, closing the socket. Return the number of commands handled.</p></div><textarea class="pc-src pc-code" hidden>USAGE = {&quot;SET&quot;: &quot;SET key value&quot;, &quot;GET&quot;: &quot;GET key&quot;, &quot;DEL&quot;: &quot;DEL key&quot;, &quot;KEYS&quot;: &quot;KEYS&quot;, &quot;QUIT&quot;: &quot;QUIT&quot;}
+
+def respond(store, line):
+    ___
+
+def serve(sock, store):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_protocol():
+    &quot;commands and replies&quot;
+    store = {}
+    assert respond(store, &quot;SET greeting hello there&quot;) == &quot;OK&quot; and store == {&quot;greeting&quot;: &quot;hello there&quot;}
+    assert respond(store, &quot;get greeting&quot;) == &quot;VALUE hello there&quot; and respond(store, &quot;GET Greeting&quot;) == &quot;NOT FOUND&quot;
+    assert respond(store, &quot;KEYS&quot;) == &quot;KEYS greeting&quot; and respond(store, &quot;DEL greeting&quot;) == &quot;DELETED&quot; and respond(store, &quot;KEYS&quot;) == &quot;KEYS&quot;
+    assert respond(store, &quot;GET&quot;) == &quot;ERROR usage: GET key&quot; and respond(store, &quot;FLY away&quot;) == &quot;ERROR unknown command&quot;
+    from netsim import socketpair
+    client, server = socketpair(chunk=4, seed=2)
+    script = b&quot;SET a 1\nSET b two words\nGET b\nDEL a\nKEYS\nQUIT\nGET a\n&quot;
+    while script:
+        script = script[client.send(script):]
+    assert serve(server, {}) == 6 and server.closed
+    replies = b&quot;&quot;
+    while chunk := client.recv(100):
+        replies += chunk
+    assert replies.decode().split(&quot;\n&quot;) == [&quot;OK&quot;, &quot;OK&quot;, &quot;VALUE two words&quot;, &quot;DELETED&quot;, &quot;KEYS b&quot;, &quot;BYE&quot;, &quot;&quot;]</textarea><textarea class="pc-src pc-solution" hidden>USAGE = {&quot;SET&quot;: &quot;SET key value&quot;, &quot;GET&quot;: &quot;GET key&quot;, &quot;DEL&quot;: &quot;DEL key&quot;, &quot;KEYS&quot;: &quot;KEYS&quot;, &quot;QUIT&quot;: &quot;QUIT&quot;}
+WORDS = {&quot;SET&quot;: 3, &quot;GET&quot;: 2, &quot;DEL&quot;: 2, &quot;KEYS&quot;: 1, &quot;QUIT&quot;: 1}
+
+def respond(store, line):
+    parts = line.strip().split(&quot; &quot;, 2)
+    command = parts[0].upper()
+    if command not in WORDS:
+        return &quot;ERROR unknown command&quot;
+    if len(parts) != WORDS[command]:
+        return f&quot;ERROR usage: {USAGE[command]}&quot;
+    if command == &quot;SET&quot;:
+        store[parts[1]] = parts[2]
+        return &quot;OK&quot;
+    if command == &quot;GET&quot;:
+        return f&quot;VALUE {store[parts[1]]}&quot; if parts[1] in store else &quot;NOT FOUND&quot;
+    if command == &quot;DEL&quot;:
+        return &quot;DELETED&quot; if store.pop(parts[1], None) is not None else &quot;NOT FOUND&quot;
+    if command == &quot;KEYS&quot;:
+        return &quot; &quot;.join([&quot;KEYS&quot;] + sorted(store))
+    return &quot;BYE&quot;
+
+def serve(sock, store):
+    buffer, handled = b&quot;&quot;, 0
+    try:
+        while True:
+            while b&quot;\n&quot; not in buffer:
+                chunk = sock.recv(4096)
+                if not chunk:
+                    return handled
+                buffer += chunk
+            line, buffer = buffer.split(b&quot;\n&quot;, 1)
+            reply = respond(store, line.decode(&quot;utf-8&quot;).rstrip(&quot;\r&quot;))
+            handled += 1
+            data = (reply + &quot;\n&quot;).encode(&quot;utf-8&quot;)
+            while data:
+                data = data[sock.send(data):]
+            if reply == &quot;BYE&quot;:
+                return handled
+    finally:
+        sock.close()</textarea><template class="pc-src pc-hint">Split with <code>line.split(" ", 2)</code> to keep the value&rsquo;s spaces. In <code>serve</code>, a small line reader (as in the last exercise) does the buffering; keep sending each encoded reply until all its bytes have gone.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d4-packets" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A binary header</div><div class="pc-prompt"><p>A sensor sends readings as packets: a header packed as <code>!2sBHI</code> (the two bytes <code>b"AT"</code>, a version number, the sensor id, and the payload length), then the payload, then a 4-byte CRC-32 checksum (<code>zlib.crc32</code>) of header and payload together, also big-endian. Write <code>pack_reading(sensor_id, payload, version=1)</code> and <code>unpack_reading(data)</code>, which returns <code>(version, sensor_id, payload)</code> and raises <code>ValueError</code> for the wrong magic bytes, a length that doesn&rsquo;t match, or a bad checksum.</p></div><textarea class="pc-src pc-code" hidden>import struct, zlib
+
+HEADER = struct.Struct(&quot;!2sBHI&quot;)
+
+def pack_reading(sensor_id, payload, version=1):
+    ___
+
+def unpack_reading(data):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_packets():
+    &quot;struct and checksums&quot;
+    data = pack_reading(513, b&quot;21.5C&quot;)
+    assert len(data) == 9 + 5 + 4 and data[:2] == b&quot;AT&quot; and data[3:5] == b&quot;\x02\x01&quot;
+    assert unpack_reading(data) == (1, 513, b&quot;21.5C&quot;) and unpack_reading(pack_reading(7, b&quot;&quot;, version=3)) == (3, 7, b&quot;&quot;)
+    for bad in [b&quot;XX&quot; + data[2:], data[:-1], data[:10] + b&quot;9&quot; + data[11:]]:
+        try:
+            unpack_reading(bad)
+            assert False, bad
+        except ValueError:
+            pass</textarea><textarea class="pc-src pc-solution" hidden>import struct, zlib
+
+HEADER = struct.Struct(&quot;!2sBHI&quot;)
+
+def pack_reading(sensor_id, payload, version=1):
+    body = HEADER.pack(b&quot;AT&quot;, version, sensor_id, len(payload)) + payload
+    return body + struct.pack(&quot;!I&quot;, zlib.crc32(body))
+
+def unpack_reading(data):
+    if len(data) &lt; HEADER.size + 4:
+        raise ValueError(&quot;too short&quot;)
+    magic, version, sensor_id, length = HEADER.unpack(data[:HEADER.size])
+    if magic != b&quot;AT&quot;:
+        raise ValueError(&quot;not a reading&quot;)
+    if len(data) != HEADER.size + length + 4:
+        raise ValueError(&quot;wrong length&quot;)
+    body, (crc,) = data[:-4], struct.unpack(&quot;!I&quot;, data[-4:])
+    if zlib.crc32(body) != crc:
+        raise ValueError(&quot;bad checksum&quot;)
+    return version, sensor_id, data[HEADER.size:HEADER.size + length]</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w076d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">One recv, one message</div><div class="pc-prompt"><p>The receiver assumes one <code>recv</code> returns one whole message, so it prints the first piece it got, <code>b'HEL'</code>. Read until the newline that ends the message, so it prints <code>b'HELLO WORLD'</code>.</p></div><textarea class="pc-src pc-code" hidden>from netsim import socketpair
+
+a, b = socketpair(chunk=3, seed=4)
+data = b&quot;HELLO WORLD\n&quot;
+while data:
+    data = data[a.send(data):]
+
+message = b.recv(1024)
+print(message.rstrip(b&quot;\n&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a stream, not messages&quot;
+    expect_output(&quot;b&#x27;HELLO WORLD&#x27;&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from netsim import socketpair
+
+a, b = socketpair(chunk=3, seed=4)
+data = b&quot;HELLO WORLD\n&quot;
+while data:
+    data = data[a.send(data):]
+
+message = b&quot;&quot;
+while not message.endswith(b&quot;\n&quot;):
+    message += b.recv(1024)
+print(message.rstrip(b&quot;\n&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w076d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A character cut in half</div><div class="pc-prompt"><p>Each piece is decoded on its own, and one piece ends half-way through the two bytes of &ldquo;é&rdquo;, so decoding fails with <code>UnicodeDecodeError</code>. Join the bytes before decoding (or use an incremental decoder), so this prints <code>café crème</code>.</p></div><textarea class="pc-src pc-code" hidden>from netsim import socketpair
+
+a, b = socketpair(chunk=4, seed=0)
+data = &quot;café crème&quot;.encode(&quot;utf-8&quot;)
+while data:
+    data = data[a.send(data):]
+a.close()
+
+text = &quot;&quot;
+while chunk := b.recv(4):
+    text += chunk.decode(&quot;utf-8&quot;)
+print(text)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;decode whole characters&quot;
+    expect_output(&quot;café crème&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from netsim import socketpair
+
+a, b = socketpair(chunk=4, seed=0)
+data = &quot;café crème&quot;.encode(&quot;utf-8&quot;)
+while data:
+    data = data[a.send(data):]
+a.close()
+
+raw = b&quot;&quot;
+while chunk := b.recv(4):
+    raw += chunk
+print(raw.decode(&quot;utf-8&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w076d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A send that didn&rsquo;t send it all</div><div class="pc-prompt"><p><code>send</code> accepts only some of the bytes, and the code ignores its return value, so most of the message is never sent and this prints <code>b'hel'</code>. Keep sending the rest until everything has gone, so this prints <code>b'hello, world'</code>.</p></div><textarea class="pc-src pc-code" hidden>from netsim import socketpair
+
+a, b = socketpair(chunk=3, seed=12)
+a.send(b&quot;hello, world&quot;)
+a.close()
+
+received = b&quot;&quot;
+while chunk := b.recv(100):
+    received += chunk
+print(received)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;loop until sent&quot;
+    expect_output(&quot;b&#x27;hello, world&#x27;&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from netsim import socketpair
+
+a, b = socketpair(chunk=3, seed=12)
+data = b&quot;hello, world&quot;
+while data:
+    data = data[a.send(data):]
+a.close()
+
+received = b&quot;&quot;
+while chunk := b.recv(100):
+    received += chunk
+print(received)</textarea></div>
+<div class="parsons" data-id="w076d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">An echo server</div><div class="pc-prompt"><p>Arrange the lines of a real TCP echo server (for your own computer) that serves one client at a time, echoing each piece of data back until the client closes. One line is a trap.</p></div><script type="application/json">{"lines": ["import socket", "with socket.create_server((\"127.0.0.1\", 8000)) as server:", "    while True:", "        conn, address = server.accept()", "        with conn:", "            while data := conn.recv(4096):", "                conn.sendall(data)"], "distractors": ["                conn.send(data)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # what recv returns once the other end has closed and everything has been read
+q = ___   # struct.pack(&quot;!H&quot;, 258)
+r = ___   # True or False: three sends of 5 bytes are always received as three recvs of 5 bytes
+s = ___   # len(&quot;é&quot;.encode(&quot;utf-8&quot;))
+t = ___   # the socket method that waits for the next client and returns a new socket for it</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == b&quot;&quot; and q == b&quot;\x01\x02&quot; and r is False, &quot;p, q and r&quot;
+    assert s == 2 and t == &quot;accept&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = b&quot;&quot;
+q = b&quot;\x01\x02&quot;
+r = False
+s = 2
+t = &quot;accept&quot;</textarea></div>
+<h2 id="on-your-own-computer">On your own computer</h2>
+<p>Run the echo server from the puzzle in one terminal, and talk to it from another:</p>
+<pre><code class="language-bash">python -c &quot;import socket; s = socket.create_connection(('127.0.0.1', 8000)); s.sendall(b'hello'); print(s.recv(100))&quot;
+</code></pre>
+<p>Then try <code>nc 127.0.0.1 8000</code> (netcat, if you have it) and type lines by hand. Finally, rewrite the server with <code>asyncio.start_server</code>, whose <code>await reader.readline()</code> does today&rsquo;s line buffering for you, and connect several clients at once.</p>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w076d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does sock.recv(1024) return?", "answer": 1, "explain": "b&rsquo;&rsquo; only when the stream has ended.", "options": ["Exactly 1024 bytes", "Up to 1024 bytes: whatever has arrived", "One message", "A string"]}, {"type": "mc", "q": "What does send return?", "answer": 1, "explain": "sendall loops for you.", "options": ["Nothing", "How many bytes it accepted, which may be fewer than given", "True", "The reply"]}, {"type": "mc", "q": "How do you know the other end has closed?", "answer": 1, "explain": "After all data has been read.", "options": ["An exception", "recv returns b&rsquo;&lsquo;", "send returns 0 always", "A special byte"]}, {"type": "mc", "q": "Why does TCP need framing?", "answer": 1, "explain": "Delimiters or length prefixes mark the ends.", "options": ["It&rsquo;s encrypted", "It&rsquo;s a byte stream with no message boundaries", "Packets are big", "For speed"]}, {"type": "mc", "q": "How does a length-prefixed protocol read a message?", "answer": 1, "explain": "Never read past the message.", "options": ["recv once", "Read exactly the header, then exactly the length it gives", "Read until a newline", "Read until close"]}, {"type": "mc", "q": "Why can decoding each recv separately fail?", "answer": 1, "explain": "Join first, or use an incremental decoder.", "options": ["recv returns strings", "A multi-byte character can be split between two recvs", "UTF-8 is slow", "It can&rsquo;t"]}, {"type": "mc", "q": "What does ! mean in a struct format?", "answer": 1, "explain": "So both ends agree on byte order.", "options": ["Required", "Network byte order (big-endian)", "Signed", "Repeat"]}, {"type": "mc", "q": "What does accept() return?", "answer": 1, "explain": "The listening socket keeps waiting for others.", "options": ["The data", "A new socket for that client, and its address", "The listening socket", "True"]}, {"type": "mc", "q": "How does UDP differ from TCP?", "answer": 1, "explain": "Good for games, calls and DNS.", "options": ["It&rsquo;s encrypted", "It sends separate datagrams: boundaries kept, but no delivery or order guarantees", "It&rsquo;s always faster", "It needs a handshake"]}, {"type": "output", "q": "What does this print?", "answer": "(256, 7)", "explain": "A 4-byte and a 2-byte unsigned integer, big-endian.", "code": "import struct\nprint(struct.unpack(\"!IH\", b\"\\x00\\x00\\x01\\x00\\x00\\x07\"))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w076d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: remote procedure calls</div><div class="pc-prompt"><p>Build a small RPC protocol on length-prefixed JSON (4-byte big-endian length, then UTF-8 JSON). <code>RPCClient(sock)</code> has <code>send_call(method, *params)</code>, which sends <code>{"id": N, "method": ..., "params": [...]}</code> with ids counting from 1 and returns the id, and <code>results()</code>, which reads every reply waiting on the socket (until it would block or the stream ends; <code>netsim</code> raises <code>BlockingIOError</code> when nothing has arrived) and returns a dict of id to result, raising <code>RemoteError</code> (given) for a reply with an error. <code>serve_rpc(sock, functions)</code> reads calls until the end of the stream (the client signals it with <code>shutdown()</code>, a half-close), calls <code>functions[method](*params)</code>, and replies <code>{"id": N, "result": value}</code>, or <code>{"id": N, "error": "message"}</code> for an unknown method (<code>"no such method: NAME"</code>) or an exception (<code>"TypeName: text"</code>). Calls are processed in order; the checks send several, run the server, then read the replies.</p></div><textarea class="pc-src pc-code" hidden>import json, struct
+
+class RemoteError(Exception):
+    pass
+
+class RPCClient:
+    ___
+
+def serve_rpc(sock, functions):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_rpc():
+    &quot;calls, replies and errors over a stream&quot;
+    from netsim import socketpair
+    client_sock, server_sock = socketpair(chunk=5, seed=21)
+    client = RPCClient(client_sock)
+    ids = [client.send_call(&quot;add&quot;, 2, 3), client.send_call(&quot;upper&quot;, &quot;zoë&quot;), client.send_call(&quot;divide&quot;, 1, 0), client.send_call(&quot;fly&quot;)]
+    assert ids == [1, 2, 3, 4]
+    client_sock.shutdown()
+    handled = serve_rpc(server_sock, {&quot;add&quot;: lambda a, b: a + b, &quot;upper&quot;: str.upper, &quot;divide&quot;: lambda a, b: a / b})
+    assert handled == 4
+    try:
+        client.results()
+        assert False, &quot;the error replies should raise&quot;
+    except RemoteError as e:
+        assert str(e) in (&quot;3: ZeroDivisionError: division by zero&quot;, &quot;4: no such method: fly&quot;)
+    a, b = socketpair(chunk=3, seed=8)
+    c = RPCClient(a)
+    c.send_call(&quot;add&quot;, 1, 1)
+    c.send_call(&quot;add&quot;, 10, 20)
+    a.shutdown()
+    serve_rpc(b, {&quot;add&quot;: lambda x, y: x + y})
+    assert c.results() == {1: 2, 2: 30}</textarea><textarea class="pc-src pc-solution" hidden>import json, struct
+
+class RemoteError(Exception):
+    pass
+
+def _send(sock, obj):
+    body = json.dumps(obj).encode(&quot;utf-8&quot;)
+    data = struct.pack(&quot;!I&quot;, len(body)) + body
+    while data:
+        data = data[sock.send(data):]
+
+def _exactly(sock, n, start=b&quot;&quot;):
+    buf = bytearray(start)
+    while len(buf) &lt; n:
+        chunk = sock.recv(n - len(buf))
+        if not chunk:
+            raise ConnectionError(&quot;closed mid-message&quot;)
+        buf += chunk
+    return bytes(buf)
+
+def _recv(sock):
+    first = sock.recv(1)
+    if not first:
+        return None
+    (length,) = struct.unpack(&quot;!I&quot;, _exactly(sock, 4, first))
+    return json.loads(_exactly(sock, length))
+
+class RPCClient:
+    def __init__(self, sock):
+        self.sock = sock
+        self.next_id = 1
+
+    def send_call(self, method, *params):
+        call_id = self.next_id
+        self.next_id += 1
+        _send(self.sock, {&quot;id&quot;: call_id, &quot;method&quot;: method, &quot;params&quot;: list(params)})
+        return call_id
+
+    def results(self):
+        replies = {}
+        while True:
+            try:
+                message = _recv(self.sock)
+            except BlockingIOError:
+                break
+            if message is None:
+                break
+            replies[message[&quot;id&quot;]] = message
+        errors = [(i, r[&quot;error&quot;]) for i, r in sorted(replies.items()) if &quot;error&quot; in r]
+        if errors:
+            raise RemoteError(f&quot;{errors[0][0]}: {errors[0][1]}&quot;)
+        return {i: r[&quot;result&quot;] for i, r in replies.items()}
+
+def serve_rpc(sock, functions):
+    handled = 0
+    while True:
+        call = _recv(sock)
+        if call is None:
+            return handled
+        handled += 1
+        function = functions.get(call[&quot;method&quot;])
+        if function is None:
+            reply = {&quot;id&quot;: call[&quot;id&quot;], &quot;error&quot;: f&quot;no such method: {call[&#x27;method&#x27;]}&quot;}
+        else:
+            try:
+                reply = {&quot;id&quot;: call[&quot;id&quot;], &quot;result&quot;: function(*call[&quot;params&quot;])}
+            except Exception as e:
+                reply = {&quot;id&quot;: call[&quot;id&quot;], &quot;error&quot;: f&quot;{type(e).__name__}: {e}&quot;}
+        _send(sock, reply)</textarea><template class="pc-src pc-hint">The client finishes sending with <code>shutdown()</code> (a half-close, like <code>sock.shutdown(socket.SHUT_WR)</code>), so the server sees the end of the stream but can still reply. In <code>results</code>, read message after message, stopping on <code>BlockingIOError</code> (nothing more yet) or a clean end of stream; then raise for the first error reply, by id, formatted as <code>"ID: message"</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Count how many times today your code had to loop where you&rsquo;d have expected one call to be enough: every one is a bug that would only show up on a slow network. Tomorrow: <strong>your own HTTP server</strong>, built on exactly these pieces: reading a request from a stream, routing it, and writing a response.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w076d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w076d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w076d4", "week": 76, "day": 4, "title": "Sockets", "exercises": [{"id": "w076d4-sendall", "title": "Sending everything", "points": 10}, {"id": "w076d4-exactly", "title": "Exactly n bytes", "points": 10}, {"id": "w076d4-framed", "title": "Length-prefixed messages", "points": 15}, {"id": "w076d4-lines", "title": "A line reader", "points": 15}, {"id": "w076d4-protocol", "title": "A key-value protocol", "points": 15}, {"id": "w076d4-packets", "title": "A binary header", "points": 10}, {"id": "w076d4-bug1", "title": "One recv, one message", "points": 10}, {"id": "w076d4-bug2", "title": "A character cut in half", "points": 10}, {"id": "w076d4-bug3", "title": "A send that didn't send it all", "points": 10}, {"id": "w076d4-trace", "title": "Predict them", "points": 10}, {"id": "w076d4-challenge", "title": "Challenge: remote procedure calls", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=db5173407e"></script>
+</body>
+</html>
