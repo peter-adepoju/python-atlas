@@ -1,0 +1,1181 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="db5173407e">
+<title>Week 77 Day 3: REST design | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=db5173407e">
+<link rel="stylesheet" href="../assets/css/site.css?v=db5173407e">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=db5173407e"></script>
+<script src="../assets/vendor/codemirror.js?v=db5173407e" defer></script>
+<meta name="description" content="Flask and FastAPI will let you build any API you like, including a confusing one. REST is the set of conventions that make HTTP APIs predictable: resources...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w077d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 77 Day 3: REST design">
+<meta property="og:description" content="Flask and FastAPI will let you build any API you like, including a confusing one. REST is the set of conventions that make HTTP APIs predictable: resources...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w077d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-77">Week 77: Web backends</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#resources-and-methods" data-sec="resources-and-methods">Resources and methods</a></li><li><a href="#responses-and-errors" data-sec="responses-and-errors">Responses and errors</a></li><li><a href="#safe-retries-and-concurrent-updates" data-sec="safe-retries-and-concurrent-updates">Safe retries and concurrent updates</a></li><li><a href="#pagination-and-versions" data-sec="pagination-and-versions">Pagination and versions</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w077d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-77">Week 77: Web backends</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 77, Day 3</span></p>
+      <h1>REST design</h1>
+      <div class="day-intro"><p>Flask and FastAPI will let you build any API you like, including a confusing one. REST is the set of conventions that make HTTP APIs predictable: resources named by nouns, methods that mean what HTTP says they mean, status codes that tell the truth, and representations, errors, pagination and versions that work the same way across every endpoint. A well-designed API can be guessed: if GET /orders/7 exists, so does DELETE /orders/7. Today is the design side: naming, status codes, problem-details errors, safe retries with idempotency keys, conditional updates with ETags, opaque cursors, and changing an API without breaking its clients.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Name resources and map operations onto methods and status codes the REST way</li><li>Return consistent errors as problem details (RFC 9457)</li><li>Make retries safe with idempotency keys, and lost updates impossible with ETags and If-Match</li><li>Paginate with opaque cursors, and evolve an API without breaking its clients</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Resources and methods: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Responses and errors: 20 min"></span><span class="plan-seg s1" style="flex:25" title="Safe retries and concurrent updates: 25 min"></span><span class="plan-seg s0" style="flex:15" title="Pagination and versions: 15 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Resources and methods</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Responses and errors</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Safe retries and concurrent updates</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Pagination and versions</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:30</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w077d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w077d3.ipynb" download>download it</a>. Exercises today are worth 145 points.</p>
+    </header>
+    <div class="day-body">
+<div class="filebox"><div class="filebox-head">The file used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>miniflask.py</code></summary><pre class="pc-filetext">&quot;&quot;&quot;A small subset of Flask that runs in the page (Week 77).
+
+The names and behaviour follow Flask&#x27;s own, so code written against this module also runs with
+the real Flask (pip install flask): Flask, request, g, jsonify, abort, redirect, make_response,
+url_for, Blueprint, and app.test_client(). It&#x27;s a teaching copy, not the real thing: no templates,
+sessions, streaming or debugger.
+&quot;&quot;&quot;
+import io
+import json
+import re
+from contextvars import ContextVar
+from http import HTTPStatus
+from urllib.parse import parse_qs, urlencode, urlsplit
+
+_current = ContextVar(&quot;request&quot;)
+
+
+class HTTPException(Exception):
+    def __init__(self, code, description=None):
+        self.code = code
+        self.name = HTTPStatus(code).phrase
+        self.description = description or self.name
+        super().__init__(f&quot;{code} {self.name}: {self.description}&quot;)
+
+
+def abort(code, description=None):
+    raise HTTPException(code, description)
+
+
+class Headers:
+    &quot;&quot;&quot;Case-insensitive headers.&quot;&quot;&quot;
+    def __init__(self, items=()):
+        self._items = [(k, str(v)) for k, v in (items.items() if isinstance(items, dict) else items)]
+
+    def get(self, name, default=None):
+        for k, v in self._items:
+            if k.lower() == name.lower():
+                return v
+        return default
+
+    def __getitem__(self, name):
+        value = self.get(name)
+        if value is None:
+            raise KeyError(name)
+        return value
+
+    def __contains__(self, name):
+        return self.get(name) is not None
+
+    def __setitem__(self, name, value):
+        self._items = [(k, v) for k, v in self._items if k.lower() != name.lower()] + [(name, str(value))]
+
+    def items(self):
+        return list(self._items)
+
+
+class Args(dict):
+    &quot;&quot;&quot;Query or form values: .get(name) gives the first value; .getlist(name) all of them.&quot;&quot;&quot;
+    def __init__(self, pairs):
+        super().__init__()
+        self._lists = {}
+        for k, v in pairs:
+            self._lists.setdefault(k, []).append(v)
+            dict.setdefault(self, k, v)
+
+    def get(self, key, default=None, type=None):
+        if key not in self:
+            return default
+        value = self[key]
+        if type is not None:
+            try:
+                return type(value)
+            except (TypeError, ValueError):
+                return default
+        return value
+
+    def getlist(self, key):
+        return list(self._lists.get(key, []))
+
+
+class Request:
+    def __init__(self, environ):
+        self.environ = environ
+        self.method = environ[&quot;REQUEST_METHOD&quot;].upper()
+        self.path = environ.get(&quot;PATH_INFO&quot;, &quot;/&quot;) or &quot;/&quot;
+        self.args = Args(_pairs(environ.get(&quot;QUERY_STRING&quot;, &quot;&quot;)))
+        items = [(k[5:].replace(&quot;_&quot;, &quot;-&quot;).title(), v) for k, v in environ.items() if k.startswith(&quot;HTTP_&quot;)]
+        if environ.get(&quot;CONTENT_TYPE&quot;):
+            items.append((&quot;Content-Type&quot;, environ[&quot;CONTENT_TYPE&quot;]))
+        self.headers = Headers(items)
+        length = int(environ.get(&quot;CONTENT_LENGTH&quot;) or 0)
+        self.data = environ[&quot;wsgi.input&quot;].read(length) if length else b&quot;&quot;
+        self.content_type = environ.get(&quot;CONTENT_TYPE&quot;, &quot;&quot;)
+        self.form = Args(_pairs(self.data.decode(&quot;utf-8&quot;))) if self.content_type.startswith(&quot;application/x-www-form-urlencoded&quot;) else Args([])
+        self.view_args = {}
+        cookie = environ.get(&quot;HTTP_COOKIE&quot;, &quot;&quot;)
+        self.cookies = dict(p.strip().split(&quot;=&quot;, 1) for p in cookie.split(&quot;;&quot;) if &quot;=&quot; in p)
+
+    @property
+    def is_json(self):
+        return self.content_type.split(&quot;;&quot;)[0].strip() == &quot;application/json&quot;
+
+    def get_json(self, silent=False, force=False):
+        if not (self.is_json or force):
+            if silent:
+                return None
+            abort(415, &quot;expected a JSON body (Content-Type: application/json)&quot;)
+        try:
+            return json.loads(self.data or b&quot;null&quot;)
+        except ValueError:
+            if silent:
+                return None
+            abort(400, &quot;the body isn&#x27;t valid JSON&quot;)
+
+    @property
+    def json(self):
+        return self.get_json()
+
+
+def _pairs(text):
+    return [(k, v) for k, vs in parse_qs(text, keep_blank_values=True).items() for v in vs]
+
+
+class _Proxy:
+    def __init__(self, getter):
+        object.__setattr__(self, &quot;_getter&quot;, getter)
+
+    def __getattr__(self, name):
+        return getattr(self._getter(), name)
+
+    def __setattr__(self, name, value):
+        setattr(self._getter(), name, value)
+
+
+def _request():
+    try:
+        return _current.get()[0]
+    except LookupError:
+        raise RuntimeError(&quot;working outside of request context&quot;) from None
+
+
+def _g():
+    try:
+        return _current.get()[1]
+    except LookupError:
+        raise RuntimeError(&quot;working outside of request context&quot;) from None
+
+
+class _G:
+    def get(self, name, default=None):
+        return self.__dict__.get(name, default)
+
+
+request = _Proxy(_request)
+g = _Proxy(_g)
+
+
+class Response:
+    def __init__(self, response=b&quot;&quot;, status=200, headers=None, mimetype=None, content_type=None):
+        if isinstance(response, str):
+            response = response.encode(&quot;utf-8&quot;)
+        self.data = response
+        self.status_code = status
+        self.headers = Headers(headers or {})
+        if content_type or mimetype or &quot;Content-Type&quot; not in self.headers:
+            ctype = content_type or (f&quot;{mimetype}; charset=utf-8&quot; if mimetype and mimetype.startswith(&quot;text/&quot;) else mimetype) or &quot;text/html; charset=utf-8&quot;
+            self.headers[&quot;Content-Type&quot;] = ctype
+
+    @property
+    def status(self):
+        return f&quot;{self.status_code} {HTTPStatus(self.status_code).phrase}&quot;
+
+    @property
+    def text(self):
+        return self.data.decode(&quot;utf-8&quot;)
+
+    def get_json(self):
+        return json.loads(self.data)
+
+    @property
+    def json(self):
+        return self.get_json()
+
+    def set_cookie(self, key, value=&quot;&quot;, max_age=None, path=&quot;/&quot;, secure=False, httponly=False, samesite=None):
+        parts = [f&quot;{key}={value}&quot;]
+        if max_age is not None:
+            parts.append(f&quot;Max-Age={max_age}&quot;)
+        parts.append(f&quot;Path={path}&quot;)
+        if secure:
+            parts.append(&quot;Secure&quot;)
+        if httponly:
+            parts.append(&quot;HttpOnly&quot;)
+        if samesite:
+            parts.append(f&quot;SameSite={samesite}&quot;)
+        self.headers._items.append((&quot;Set-Cookie&quot;, &quot;; &quot;.join(parts)))
+
+
+def jsonify(*args, **kwargs):
+    data = args[0] if len(args) == 1 else (list(args) if args else kwargs)
+    return Response(json.dumps(data), headers={&quot;Content-Type&quot;: &quot;application/json&quot;})
+
+
+def redirect(location, code=302):
+    return Response(b&quot;&quot;, code, {&quot;Location&quot;: location})
+
+
+def make_response(*args):
+    rv = args[0] if len(args) == 1 else args
+    return _App._to_response(rv)
+
+
+def url_for(endpoint, **values):
+    return _current.get()[2].url_for(endpoint, **values)
+
+
+_CONVERTERS = {&quot;int&quot;: (r&quot;\d+&quot;, int), &quot;float&quot;: (r&quot;\d+(?:\.\d+)?&quot;, float), &quot;path&quot;: (r&quot;.+&quot;, str), &quot;string&quot;: (r&quot;[^/]+&quot;, str)}
+
+
+class _Rule:
+    def __init__(self, rule, endpoint, view, methods):
+        self.rule, self.endpoint, self.view = rule, endpoint, view
+        self.methods = {m.upper() for m in methods} | ({&quot;HEAD&quot;} if &quot;GET&quot; in {m.upper() for m in methods} else set())
+        regex, self.converters = &quot;&quot;, {}
+        for piece in re.split(r&quot;(&lt;[^&gt;]+&gt;)&quot;, rule):
+            m = re.fullmatch(r&quot;&lt;(?:(\w+):)?(\w+)&gt;&quot;, piece)
+            if m:
+                kind, name = m.group(1) or &quot;string&quot;, m.group(2)
+                pattern, convert = _CONVERTERS[kind]
+                regex += f&quot;(?P&lt;{name}&gt;{pattern})&quot;
+                self.converters[name] = convert
+            else:
+                regex += re.escape(piece)
+        self.regex = re.compile(regex)
+
+    def match(self, path):
+        m = self.regex.fullmatch(path)
+        if not m:
+            return None
+        return {k: self.converters[k](v) for k, v in m.groupdict().items()}
+
+    def build(self, values):
+        def fill(m):
+            return str(values.pop(m.group(2)))
+        path = re.sub(r&quot;&lt;(?:(\w+):)?(\w+)&gt;&quot;, fill, self.rule)
+        return path + (f&quot;?{urlencode(values)}&quot; if values else &quot;&quot;)
+
+
+class _Setup:
+    def route(self, rule, methods=(&quot;GET&quot;,), endpoint=None):
+        def decorate(view):
+            self._add(rule, endpoint or view.__name__, view, methods)
+            return view
+        return decorate
+
+    def get(self, rule, **kw):
+        return self.route(rule, methods=[&quot;GET&quot;], **kw)
+
+    def post(self, rule, **kw):
+        return self.route(rule, methods=[&quot;POST&quot;], **kw)
+
+    def put(self, rule, **kw):
+        return self.route(rule, methods=[&quot;PUT&quot;], **kw)
+
+    def patch(self, rule, **kw):
+        return self.route(rule, methods=[&quot;PATCH&quot;], **kw)
+
+    def delete(self, rule, **kw):
+        return self.route(rule, methods=[&quot;DELETE&quot;], **kw)
+
+
+class Blueprint(_Setup):
+    def __init__(self, name, import_name, url_prefix=&quot;&quot;):
+        self.name, self.url_prefix = name, url_prefix
+        self.deferred = []
+
+    def _add(self, rule, endpoint, view, methods):
+        self.deferred.append((rule, endpoint, view, methods))
+
+
+class _App(_Setup):
+    def __init__(self, import_name):
+        self.import_name = import_name
+        self.config = {&quot;TESTING&quot;: False}
+        self.rules = []
+        self.before_funcs, self.after_funcs, self.error_handlers = [], [], {}
+
+    def _add(self, rule, endpoint, view, methods):
+        self.rules.append(_Rule(rule, endpoint, view, methods))
+
+    def register_blueprint(self, bp, url_prefix=None):
+        prefix = url_prefix if url_prefix is not None else bp.url_prefix
+        for rule, endpoint, view, methods in bp.deferred:
+            self._add(prefix + rule, f&quot;{bp.name}.{endpoint}&quot;, view, methods)
+
+    def before_request(self, f):
+        self.before_funcs.append(f)
+        return f
+
+    def after_request(self, f):
+        self.after_funcs.append(f)
+        return f
+
+    def errorhandler(self, code):
+        def decorate(f):
+            self.error_handlers[code] = f
+            return f
+        return decorate
+
+    def url_for(self, endpoint, **values):
+        for r in self.rules:
+            if r.endpoint == endpoint:
+                return r.build(dict(values))
+        raise LookupError(f&quot;no endpoint {endpoint!r}&quot;)
+
+    @staticmethod
+    def _to_response(rv):
+        status, headers = None, None
+        if isinstance(rv, tuple):
+            if len(rv) == 3:
+                rv, status, headers = rv
+            elif isinstance(rv[1], (dict, list)):
+                rv, headers = rv
+            else:
+                rv, status = rv
+        if isinstance(rv, Response):
+            response = rv
+        elif isinstance(rv, (dict, list)):
+            response = jsonify(rv)
+        elif isinstance(rv, (str, bytes)):
+            response = Response(rv)
+        elif rv is None:
+            raise TypeError(&quot;the view function did not return a valid response&quot;)
+        else:
+            raise TypeError(f&quot;can&#x27;t turn {type(rv).__name__} into a response&quot;)
+        if status is not None:
+            response.status_code = status
+        for k, v in (headers.items() if isinstance(headers, dict) else headers or []):
+            response.headers[k] = v
+        return response
+
+    def _error(self, e):
+        handler = self.error_handlers.get(e.code)
+        if handler:
+            return self._to_response(handler(e))
+        body = f&quot;&lt;h1&gt;{e.code} {e.name}&lt;/h1&gt;&lt;p&gt;{e.description}&lt;/p&gt;&quot;
+        return Response(body, e.code)
+
+    def _dispatch(self, req):
+        path = req.path
+        allowed = set()
+        for r in self.rules:
+            values = r.match(path)
+            if values is None:
+                continue
+            if req.method in r.methods:
+                req.view_args = values
+                return r.view(**values)
+            allowed |= r.methods
+        if allowed:
+            raise _MethodNotAllowed(sorted(allowed | {&quot;OPTIONS&quot;}))
+        abort(404, &quot;The requested URL was not found on the server.&quot;)
+
+    def full_dispatch(self, environ):
+        req = Request(environ)
+        token = _current.set((req, _G(), self))
+        try:
+            try:
+                rv = None
+                for f in self.before_funcs:
+                    rv = f()
+                    if rv is not None:
+                        break
+                if rv is None:
+                    rv = self._dispatch(req)
+                response = self._to_response(rv)
+            except _MethodNotAllowed as e:
+                response = self._error(HTTPException(405))
+                response.headers[&quot;Allow&quot;] = &quot;, &quot;.join(e.allowed)
+            except HTTPException as e:
+                response = self._error(e)
+            except Exception as e:
+                if self.config.get(&quot;TESTING&quot;) and 500 not in self.error_handlers:
+                    raise
+                response = self._error(HTTPException(500)) if 500 not in self.error_handlers else self._to_response(self.error_handlers[500](e))
+                response.status_code = 500
+            for f in self.after_funcs:
+                response = f(response) or response
+            if req.method == &quot;HEAD&quot;:
+                response.headers[&quot;Content-Length&quot;] = len(response.data)
+                response.data = b&quot;&quot;
+            return response
+        finally:
+            _current.reset(token)
+
+    def __call__(self, environ, start_response):
+        response = self.full_dispatch(environ)
+        if &quot;Content-Length&quot; not in response.headers:
+            response.headers[&quot;Content-Length&quot;] = len(response.data)
+        start_response(response.status, response.headers.items())
+        return [response.data]
+
+    def test_client(self):
+        return _TestClient(self)
+
+
+class _MethodNotAllowed(Exception):
+    def __init__(self, allowed):
+        self.allowed = allowed
+
+
+class Flask(_App):
+    pass
+
+
+class _TestClient:
+    def __init__(self, app):
+        self.app = app
+        self.cookies = {}
+
+    def open(self, path, method=&quot;GET&quot;, json=None, data=None, headers=None, query_string=None):
+        url = urlsplit(path)
+        query = url.query
+        if query_string:
+            query = (query + &quot;&amp;&quot; if query else &quot;&quot;) + urlencode(query_string, doseq=True)
+        body, ctype = b&quot;&quot;, None
+        if json is not None:
+            import json as _json
+            body, ctype = _json.dumps(json).encode(&quot;utf-8&quot;), &quot;application/json&quot;
+        elif isinstance(data, dict):
+            body, ctype = urlencode(data, doseq=True).encode(&quot;utf-8&quot;), &quot;application/x-www-form-urlencoded&quot;
+        elif data is not None:
+            body = data.encode(&quot;utf-8&quot;) if isinstance(data, str) else data
+        environ = {&quot;REQUEST_METHOD&quot;: method.upper(), &quot;PATH_INFO&quot;: url.path or &quot;/&quot;, &quot;QUERY_STRING&quot;: query,
+                   &quot;SERVER_NAME&quot;: &quot;localhost&quot;, &quot;SERVER_PORT&quot;: &quot;80&quot;, &quot;wsgi.url_scheme&quot;: &quot;http&quot;,
+                   &quot;wsgi.input&quot;: io.BytesIO(body), &quot;CONTENT_LENGTH&quot;: str(len(body))}
+        headers = dict(headers or {})
+        if ctype and not any(k.lower() == &quot;content-type&quot; for k in headers):
+            environ[&quot;CONTENT_TYPE&quot;] = ctype
+        for k, v in headers.items():
+            if k.lower() == &quot;content-type&quot;:
+                environ[&quot;CONTENT_TYPE&quot;] = v
+            else:
+                environ[&quot;HTTP_&quot; + k.upper().replace(&quot;-&quot;, &quot;_&quot;)] = v
+        if self.cookies:
+            environ[&quot;HTTP_COOKIE&quot;] = &quot;; &quot;.join(f&quot;{k}={v}&quot; for k, v in self.cookies.items())
+        response = self.app.full_dispatch(environ)
+        for k, v in response.headers.items():
+            if k.lower() == &quot;set-cookie&quot;:
+                name, _, rest = v.partition(&quot;=&quot;)
+                self.cookies[name] = rest.split(&quot;;&quot;)[0]
+        return response
+
+    def get(self, path, **kw):
+        return self.open(path, &quot;GET&quot;, **kw)
+
+    def post(self, path, **kw):
+        return self.open(path, &quot;POST&quot;, **kw)
+
+    def put(self, path, **kw):
+        return self.open(path, &quot;PUT&quot;, **kw)
+
+    def patch(self, path, **kw):
+        return self.open(path, &quot;PATCH&quot;, **kw)
+
+    def delete(self, path, **kw):
+        return self.open(path, &quot;DELETE&quot;, **kw)
+</pre></details><script type="application/json" class="page-files">{"miniflask.py": "\"\"\"A small subset of Flask that runs in the page (Week 77).\n\nThe names and behaviour follow Flask's own, so code written against this module also runs with\nthe real Flask (pip install flask): Flask, request, g, jsonify, abort, redirect, make_response,\nurl_for, Blueprint, and app.test_client(). It's a teaching copy, not the real thing: no templates,\nsessions, streaming or debugger.\n\"\"\"\nimport io\nimport json\nimport re\nfrom contextvars import ContextVar\nfrom http import HTTPStatus\nfrom urllib.parse import parse_qs, urlencode, urlsplit\n\n_current = ContextVar(\"request\")\n\n\nclass HTTPException(Exception):\n    def __init__(self, code, description=None):\n        self.code = code\n        self.name = HTTPStatus(code).phrase\n        self.description = description or self.name\n        super().__init__(f\"{code} {self.name}: {self.description}\")\n\n\ndef abort(code, description=None):\n    raise HTTPException(code, description)\n\n\nclass Headers:\n    \"\"\"Case-insensitive headers.\"\"\"\n    def __init__(self, items=()):\n        self._items = [(k, str(v)) for k, v in (items.items() if isinstance(items, dict) else items)]\n\n    def get(self, name, default=None):\n        for k, v in self._items:\n            if k.lower() == name.lower():\n                return v\n        return default\n\n    def __getitem__(self, name):\n        value = self.get(name)\n        if value is None:\n            raise KeyError(name)\n        return value\n\n    def __contains__(self, name):\n        return self.get(name) is not None\n\n    def __setitem__(self, name, value):\n        self._items = [(k, v) for k, v in self._items if k.lower() != name.lower()] + [(name, str(value))]\n\n    def items(self):\n        return list(self._items)\n\n\nclass Args(dict):\n    \"\"\"Query or form values: .get(name) gives the first value; .getlist(name) all of them.\"\"\"\n    def __init__(self, pairs):\n        super().__init__()\n        self._lists = {}\n        for k, v in pairs:\n            self._lists.setdefault(k, []).append(v)\n            dict.setdefault(self, k, v)\n\n    def get(self, key, default=None, type=None):\n        if key not in self:\n            return default\n        value = self[key]\n        if type is not None:\n            try:\n                return type(value)\n            except (TypeError, ValueError):\n                return default\n        return value\n\n    def getlist(self, key):\n        return list(self._lists.get(key, []))\n\n\nclass Request:\n    def __init__(self, environ):\n        self.environ = environ\n        self.method = environ[\"REQUEST_METHOD\"].upper()\n        self.path = environ.get(\"PATH_INFO\", \"/\") or \"/\"\n        self.args = Args(_pairs(environ.get(\"QUERY_STRING\", \"\")))\n        items = [(k[5:].replace(\"_\", \"-\").title(), v) for k, v in environ.items() if k.startswith(\"HTTP_\")]\n        if environ.get(\"CONTENT_TYPE\"):\n            items.append((\"Content-Type\", environ[\"CONTENT_TYPE\"]))\n        self.headers = Headers(items)\n        length = int(environ.get(\"CONTENT_LENGTH\") or 0)\n        self.data = environ[\"wsgi.input\"].read(length) if length else b\"\"\n        self.content_type = environ.get(\"CONTENT_TYPE\", \"\")\n        self.form = Args(_pairs(self.data.decode(\"utf-8\"))) if self.content_type.startswith(\"application/x-www-form-urlencoded\") else Args([])\n        self.view_args = {}\n        cookie = environ.get(\"HTTP_COOKIE\", \"\")\n        self.cookies = dict(p.strip().split(\"=\", 1) for p in cookie.split(\";\") if \"=\" in p)\n\n    @property\n    def is_json(self):\n        return self.content_type.split(\";\")[0].strip() == \"application/json\"\n\n    def get_json(self, silent=False, force=False):\n        if not (self.is_json or force):\n            if silent:\n                return None\n            abort(415, \"expected a JSON body (Content-Type: application/json)\")\n        try:\n            return json.loads(self.data or b\"null\")\n        except ValueError:\n            if silent:\n                return None\n            abort(400, \"the body isn't valid JSON\")\n\n    @property\n    def json(self):\n        return self.get_json()\n\n\ndef _pairs(text):\n    return [(k, v) for k, vs in parse_qs(text, keep_blank_values=True).items() for v in vs]\n\n\nclass _Proxy:\n    def __init__(self, getter):\n        object.__setattr__(self, \"_getter\", getter)\n\n    def __getattr__(self, name):\n        return getattr(self._getter(), name)\n\n    def __setattr__(self, name, value):\n        setattr(self._getter(), name, value)\n\n\ndef _request():\n    try:\n        return _current.get()[0]\n    except LookupError:\n        raise RuntimeError(\"working outside of request context\") from None\n\n\ndef _g():\n    try:\n        return _current.get()[1]\n    except LookupError:\n        raise RuntimeError(\"working outside of request context\") from None\n\n\nclass _G:\n    def get(self, name, default=None):\n        return self.__dict__.get(name, default)\n\n\nrequest = _Proxy(_request)\ng = _Proxy(_g)\n\n\nclass Response:\n    def __init__(self, response=b\"\", status=200, headers=None, mimetype=None, content_type=None):\n        if isinstance(response, str):\n            response = response.encode(\"utf-8\")\n        self.data = response\n        self.status_code = status\n        self.headers = Headers(headers or {})\n        if content_type or mimetype or \"Content-Type\" not in self.headers:\n            ctype = content_type or (f\"{mimetype}; charset=utf-8\" if mimetype and mimetype.startswith(\"text/\") else mimetype) or \"text/html; charset=utf-8\"\n            self.headers[\"Content-Type\"] = ctype\n\n    @property\n    def status(self):\n        return f\"{self.status_code} {HTTPStatus(self.status_code).phrase}\"\n\n    @property\n    def text(self):\n        return self.data.decode(\"utf-8\")\n\n    def get_json(self):\n        return json.loads(self.data)\n\n    @property\n    def json(self):\n        return self.get_json()\n\n    def set_cookie(self, key, value=\"\", max_age=None, path=\"/\", secure=False, httponly=False, samesite=None):\n        parts = [f\"{key}={value}\"]\n        if max_age is not None:\n            parts.append(f\"Max-Age={max_age}\")\n        parts.append(f\"Path={path}\")\n        if secure:\n            parts.append(\"Secure\")\n        if httponly:\n            parts.append(\"HttpOnly\")\n        if samesite:\n            parts.append(f\"SameSite={samesite}\")\n        self.headers._items.append((\"Set-Cookie\", \"; \".join(parts)))\n\n\ndef jsonify(*args, **kwargs):\n    data = args[0] if len(args) == 1 else (list(args) if args else kwargs)\n    return Response(json.dumps(data), headers={\"Content-Type\": \"application/json\"})\n\n\ndef redirect(location, code=302):\n    return Response(b\"\", code, {\"Location\": location})\n\n\ndef make_response(*args):\n    rv = args[0] if len(args) == 1 else args\n    return _App._to_response(rv)\n\n\ndef url_for(endpoint, **values):\n    return _current.get()[2].url_for(endpoint, **values)\n\n\n_CONVERTERS = {\"int\": (r\"\\d+\", int), \"float\": (r\"\\d+(?:\\.\\d+)?\", float), \"path\": (r\".+\", str), \"string\": (r\"[^/]+\", str)}\n\n\nclass _Rule:\n    def __init__(self, rule, endpoint, view, methods):\n        self.rule, self.endpoint, self.view = rule, endpoint, view\n        self.methods = {m.upper() for m in methods} | ({\"HEAD\"} if \"GET\" in {m.upper() for m in methods} else set())\n        regex, self.converters = \"\", {}\n        for piece in re.split(r\"(<[^>]+>)\", rule):\n            m = re.fullmatch(r\"<(?:(\\w+):)?(\\w+)>\", piece)\n            if m:\n                kind, name = m.group(1) or \"string\", m.group(2)\n                pattern, convert = _CONVERTERS[kind]\n                regex += f\"(?P<{name}>{pattern})\"\n                self.converters[name] = convert\n            else:\n                regex += re.escape(piece)\n        self.regex = re.compile(regex)\n\n    def match(self, path):\n        m = self.regex.fullmatch(path)\n        if not m:\n            return None\n        return {k: self.converters[k](v) for k, v in m.groupdict().items()}\n\n    def build(self, values):\n        def fill(m):\n            return str(values.pop(m.group(2)))\n        path = re.sub(r\"<(?:(\\w+):)?(\\w+)>\", fill, self.rule)\n        return path + (f\"?{urlencode(values)}\" if values else \"\")\n\n\nclass _Setup:\n    def route(self, rule, methods=(\"GET\",), endpoint=None):\n        def decorate(view):\n            self._add(rule, endpoint or view.__name__, view, methods)\n            return view\n        return decorate\n\n    def get(self, rule, **kw):\n        return self.route(rule, methods=[\"GET\"], **kw)\n\n    def post(self, rule, **kw):\n        return self.route(rule, methods=[\"POST\"], **kw)\n\n    def put(self, rule, **kw):\n        return self.route(rule, methods=[\"PUT\"], **kw)\n\n    def patch(self, rule, **kw):\n        return self.route(rule, methods=[\"PATCH\"], **kw)\n\n    def delete(self, rule, **kw):\n        return self.route(rule, methods=[\"DELETE\"], **kw)\n\n\nclass Blueprint(_Setup):\n    def __init__(self, name, import_name, url_prefix=\"\"):\n        self.name, self.url_prefix = name, url_prefix\n        self.deferred = []\n\n    def _add(self, rule, endpoint, view, methods):\n        self.deferred.append((rule, endpoint, view, methods))\n\n\nclass _App(_Setup):\n    def __init__(self, import_name):\n        self.import_name = import_name\n        self.config = {\"TESTING\": False}\n        self.rules = []\n        self.before_funcs, self.after_funcs, self.error_handlers = [], [], {}\n\n    def _add(self, rule, endpoint, view, methods):\n        self.rules.append(_Rule(rule, endpoint, view, methods))\n\n    def register_blueprint(self, bp, url_prefix=None):\n        prefix = url_prefix if url_prefix is not None else bp.url_prefix\n        for rule, endpoint, view, methods in bp.deferred:\n            self._add(prefix + rule, f\"{bp.name}.{endpoint}\", view, methods)\n\n    def before_request(self, f):\n        self.before_funcs.append(f)\n        return f\n\n    def after_request(self, f):\n        self.after_funcs.append(f)\n        return f\n\n    def errorhandler(self, code):\n        def decorate(f):\n            self.error_handlers[code] = f\n            return f\n        return decorate\n\n    def url_for(self, endpoint, **values):\n        for r in self.rules:\n            if r.endpoint == endpoint:\n                return r.build(dict(values))\n        raise LookupError(f\"no endpoint {endpoint!r}\")\n\n    @staticmethod\n    def _to_response(rv):\n        status, headers = None, None\n        if isinstance(rv, tuple):\n            if len(rv) == 3:\n                rv, status, headers = rv\n            elif isinstance(rv[1], (dict, list)):\n                rv, headers = rv\n            else:\n                rv, status = rv\n        if isinstance(rv, Response):\n            response = rv\n        elif isinstance(rv, (dict, list)):\n            response = jsonify(rv)\n        elif isinstance(rv, (str, bytes)):\n            response = Response(rv)\n        elif rv is None:\n            raise TypeError(\"the view function did not return a valid response\")\n        else:\n            raise TypeError(f\"can't turn {type(rv).__name__} into a response\")\n        if status is not None:\n            response.status_code = status\n        for k, v in (headers.items() if isinstance(headers, dict) else headers or []):\n            response.headers[k] = v\n        return response\n\n    def _error(self, e):\n        handler = self.error_handlers.get(e.code)\n        if handler:\n            return self._to_response(handler(e))\n        body = f\"<h1>{e.code} {e.name}</h1><p>{e.description}</p>\"\n        return Response(body, e.code)\n\n    def _dispatch(self, req):\n        path = req.path\n        allowed = set()\n        for r in self.rules:\n            values = r.match(path)\n            if values is None:\n                continue\n            if req.method in r.methods:\n                req.view_args = values\n                return r.view(**values)\n            allowed |= r.methods\n        if allowed:\n            raise _MethodNotAllowed(sorted(allowed | {\"OPTIONS\"}))\n        abort(404, \"The requested URL was not found on the server.\")\n\n    def full_dispatch(self, environ):\n        req = Request(environ)\n        token = _current.set((req, _G(), self))\n        try:\n            try:\n                rv = None\n                for f in self.before_funcs:\n                    rv = f()\n                    if rv is not None:\n                        break\n                if rv is None:\n                    rv = self._dispatch(req)\n                response = self._to_response(rv)\n            except _MethodNotAllowed as e:\n                response = self._error(HTTPException(405))\n                response.headers[\"Allow\"] = \", \".join(e.allowed)\n            except HTTPException as e:\n                response = self._error(e)\n            except Exception as e:\n                if self.config.get(\"TESTING\") and 500 not in self.error_handlers:\n                    raise\n                response = self._error(HTTPException(500)) if 500 not in self.error_handlers else self._to_response(self.error_handlers[500](e))\n                response.status_code = 500\n            for f in self.after_funcs:\n                response = f(response) or response\n            if req.method == \"HEAD\":\n                response.headers[\"Content-Length\"] = len(response.data)\n                response.data = b\"\"\n            return response\n        finally:\n            _current.reset(token)\n\n    def __call__(self, environ, start_response):\n        response = self.full_dispatch(environ)\n        if \"Content-Length\" not in response.headers:\n            response.headers[\"Content-Length\"] = len(response.data)\n        start_response(response.status, response.headers.items())\n        return [response.data]\n\n    def test_client(self):\n        return _TestClient(self)\n\n\nclass _MethodNotAllowed(Exception):\n    def __init__(self, allowed):\n        self.allowed = allowed\n\n\nclass Flask(_App):\n    pass\n\n\nclass _TestClient:\n    def __init__(self, app):\n        self.app = app\n        self.cookies = {}\n\n    def open(self, path, method=\"GET\", json=None, data=None, headers=None, query_string=None):\n        url = urlsplit(path)\n        query = url.query\n        if query_string:\n            query = (query + \"&\" if query else \"\") + urlencode(query_string, doseq=True)\n        body, ctype = b\"\", None\n        if json is not None:\n            import json as _json\n            body, ctype = _json.dumps(json).encode(\"utf-8\"), \"application/json\"\n        elif isinstance(data, dict):\n            body, ctype = urlencode(data, doseq=True).encode(\"utf-8\"), \"application/x-www-form-urlencoded\"\n        elif data is not None:\n            body = data.encode(\"utf-8\") if isinstance(data, str) else data\n        environ = {\"REQUEST_METHOD\": method.upper(), \"PATH_INFO\": url.path or \"/\", \"QUERY_STRING\": query,\n                   \"SERVER_NAME\": \"localhost\", \"SERVER_PORT\": \"80\", \"wsgi.url_scheme\": \"http\",\n                   \"wsgi.input\": io.BytesIO(body), \"CONTENT_LENGTH\": str(len(body))}\n        headers = dict(headers or {})\n        if ctype and not any(k.lower() == \"content-type\" for k in headers):\n            environ[\"CONTENT_TYPE\"] = ctype\n        for k, v in headers.items():\n            if k.lower() == \"content-type\":\n                environ[\"CONTENT_TYPE\"] = v\n            else:\n                environ[\"HTTP_\" + k.upper().replace(\"-\", \"_\")] = v\n        if self.cookies:\n            environ[\"HTTP_COOKIE\"] = \"; \".join(f\"{k}={v}\" for k, v in self.cookies.items())\n        response = self.app.full_dispatch(environ)\n        for k, v in response.headers.items():\n            if k.lower() == \"set-cookie\":\n                name, _, rest = v.partition(\"=\")\n                self.cookies[name] = rest.split(\";\")[0]\n        return response\n\n    def get(self, path, **kw):\n        return self.open(path, \"GET\", **kw)\n\n    def post(self, path, **kw):\n        return self.open(path, \"POST\", **kw)\n\n    def put(self, path, **kw):\n        return self.open(path, \"PUT\", **kw)\n\n    def patch(self, path, **kw):\n        return self.open(path, \"PATCH\", **kw)\n\n    def delete(self, path, **kw):\n        return self.open(path, \"DELETE\", **kw)\n"}</script></div>
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w077d3-p1"><textarea class="pc-src pc-code" hidden>routes = [
+    (&quot;GET&quot;, &quot;/getAllOrders&quot;),
+    (&quot;POST&quot;, &quot;/createOrder&quot;),
+    (&quot;GET&quot;, &quot;/orders&quot;),
+    (&quot;POST&quot;, &quot;/orders&quot;),
+    (&quot;GET&quot;, &quot;/orders/7&quot;),
+    (&quot;PATCH&quot;, &quot;/orders/7&quot;),
+    (&quot;DELETE&quot;, &quot;/orders/7&quot;),
+    (&quot;POST&quot;, &quot;/orders/7/delete&quot;),
+]
+VERBS = (&quot;get&quot;, &quot;create&quot;, &quot;delete&quot;, &quot;update&quot;, &quot;add&quot;, &quot;remove&quot;)
+for method, path in routes:
+    verby = any(segment.lower().startswith(VERBS) for segment in path.strip(&quot;/&quot;).split(&quot;/&quot;))
+    print(f&quot;{method:&lt;7}{path:&lt;20}{&#x27;verb in the path&#x27; if verby else &#x27;ok&#x27;}&quot;)</textarea></div>
+<p>Half of these routes put the action in the URL, where it duplicates (or contradicts) the method: <code>POST /orders/7/delete</code> is a <code>DELETE</code> in disguise. In REST the URL names a <strong>thing</strong>, the method says what to do to it, and the whole API becomes guessable.</p>
+<h2 id="resources-and-methods">Resources and methods</h2>
+<p><strong>Resources</strong> are the nouns of an API: orders, customers, products. Each has a URL:</p>
+<ul>
+<li>a <strong>collection</strong>: <code>/orders</code>; an <strong>item</strong> in it: <code>/orders/7</code>; plural nouns, lower case, with hyphens between words (<code>/order-items</code>);</li>
+<li>related things <strong>nested one level</strong>: <code>/customers/12/orders</code> (Ada&rsquo;s orders); deeper nesting gets unwieldy, so link instead;</li>
+<li>no verbs, no file extensions (<code>.json</code>), no trailing slashes, and query strings for filtering, sorting and paging (<code>/orders?status=shipped&amp;sort=-placed</code>).</li>
+</ul>
+<p><strong>Methods</strong> map onto operations:</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Request</th>
+<th>Success</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>list</td>
+<td><code>GET /orders</code></td>
+<td><code>200</code> with the list</td>
+</tr>
+<tr>
+<td>read</td>
+<td><code>GET /orders/7</code></td>
+<td><code>200</code>; <code>404</code> if it doesn&rsquo;t exist</td>
+</tr>
+<tr>
+<td>create</td>
+<td><code>POST /orders</code></td>
+<td><code>201</code> with the new order and <code>Location: /orders/42</code></td>
+</tr>
+<tr>
+<td>replace</td>
+<td><code>PUT /orders/7</code></td>
+<td><code>200</code> (or <code>201</code> if it created it)</td>
+</tr>
+<tr>
+<td>update part</td>
+<td><code>PATCH /orders/7</code></td>
+<td><code>200</code> with the result</td>
+</tr>
+<tr>
+<td>delete</td>
+<td><code>DELETE /orders/7</code></td>
+<td><code>204</code>, no body</td>
+</tr>
+</tbody>
+</table>
+<p>Some actions aren&rsquo;t naturally create, read, update or delete: cancelling an order, sending an invoice. Model them as a <strong>resource of their own</strong> (<code>POST /orders/7/cancellation</code>, creating a cancellation) or as a state change (<code>PATCH /orders/7</code> with <code>{"status": "cancelled"}</code>), rather than a verb in the path.</p>
+<h2 id="responses-and-errors">Responses and errors</h2>
+<p><strong>Status codes must tell the truth.</strong> A <code>200</code> with <code>{"error": "not found"}</code> in the body breaks every client, cache and monitoring tool that trusts the status. Use the codes from Week 76 Day 2: <code>400</code> (malformed), <code>401</code> (who are you?), <code>403</code> (not allowed), <code>404</code>, <code>409</code> (conflicts with the current state, such as a duplicate), <code>412</code> (a precondition failed, below), <code>422</code> (well-formed but invalid), <code>429</code>, and <code>5xx</code> only for the server&rsquo;s own failures.</p>
+<p><strong>Consistent representations.</strong> One naming style for fields everywhere (<code>snake_case</code> or <code>camelCase</code>, never both), ISO 8601 dates and times with time zones (<code>2026-11-10T09:30:00Z</code>), money as integers in the smallest unit (or decimal strings) with a currency, and the same shape for a thing wherever it appears.</p>
+<p><strong>Errors as problem details.</strong> RFC 9457 standardises an error body with the media type <code>application/problem+json</code>:</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;https://api.example.com/problems/insufficient-stock&quot;,
+  &quot;title&quot;: &quot;Not enough stock&quot;,
+  &quot;status&quot;: 409,
+  &quot;detail&quot;: &quot;Only 2 left of product 7, but 5 were requested.&quot;,
+  &quot;instance&quot;: &quot;/orders/1042&quot;
+}
+</code></pre>
+<p><code>type</code> identifies the kind of problem (a URL that documents it; <code>about:blank</code> when there&rsquo;s nothing more than the status), <code>title</code> is a short summary of that kind, <code>detail</code> explains this occurrence, and extra fields (such as a list of validation <code>errors</code>) are allowed. Clients can handle every endpoint&rsquo;s errors with one piece of code.</p>
+<h2 id="safe-retries-and-concurrent-updates">Safe retries and concurrent updates</h2>
+<p><strong>Idempotency keys.</strong> A <code>POST</code> that timed out may or may not have worked (Week 76 Day 3). To make it safe to retry, the client sends a unique <strong><code>Idempotency-Key</code></strong> header (a random UUID) with each new operation; the server stores the response it gave for each key, and when the <strong>same key</strong> arrives again, it returns the <strong>stored response</strong> instead of doing the work twice. If the same key arrives with a <strong>different</strong> body, that&rsquo;s a client bug: refuse it (<code>422</code> or <code>409</code>). Keys expire after a day or so. Payment APIs work this way.</p>
+<p><strong>Conditional updates.</strong> Two people edit the same order: both read it, both change it, the second save silently overwrites the first (Week 75 Day 5&rsquo;s lost update, over HTTP). The fix is <strong>optimistic concurrency with ETags</strong>: every representation has an <code>ETag</code> (a version, often a hash of its content); a client updating it sends <strong><code>If-Match: "the-etag-it-read"</code></strong>; the server compares it with the current ETag and refuses with <strong><code>412 Precondition Failed</code></strong> if they differ (someone changed it meanwhile). Servers can require it, answering <code>428 Precondition Required</code> to updates without <code>If-Match</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w077d3-e2"><textarea class="pc-src pc-code" hidden>import hashlib, json
+
+def etag(resource):
+    return &#x27;&quot;&#x27; + hashlib.sha256(json.dumps(resource, sort_keys=True).encode()).hexdigest()[:12] + &#x27;&quot;&#x27;
+
+order = {&quot;id&quot;: 7, &quot;status&quot;: &quot;new&quot;, &quot;items&quot;: 2}
+seen_by_ada = seen_by_bob = etag(order)
+
+def update(changes, if_match):
+    global order
+    if if_match is None:
+        return 428, &quot;send If-Match&quot;
+    if if_match != etag(order):
+        return 412, &quot;it changed since you read it&quot;
+    order = {**order, **changes}
+    return 200, etag(order)
+
+print(update({&quot;status&quot;: &quot;paid&quot;}, seen_by_ada))
+print(update({&quot;items&quot;: 3}, seen_by_bob))
+print(update({&quot;items&quot;: 3}, None), order)</textarea></div>
+<h2 id="pagination-and-versions">Pagination and versions</h2>
+<p><strong>Pagination</strong> (Week 76 Day 3, from the client&rsquo;s side). Offer a <code>limit</code> (with a maximum) and either page numbers or, better for large or changing data, <strong>cursors</strong>: an <strong>opaque</strong> string the client hands back to get the next page. Encode the cursor (for instance, base64 of a small JSON object holding the last id seen) so clients can&rsquo;t depend on its insides, and <strong>validate</strong> it when it comes back: a tampered or malformed cursor is a <code>400</code>, not a crash. Return the next cursor (or <code>null</code>) in the body, or a <code>Link</code> header.</p>
+<p><strong>Evolving an API.</strong> Clients you can&rsquo;t update depend on every detail of your responses. <strong>Additive</strong> changes are safe: a new endpoint, a new optional parameter, a new field in a response (clients should ignore fields they don&rsquo;t know). <strong>Breaking</strong> changes are not: removing or renaming a field or endpoint, changing a type, making an optional parameter required, changing what a status code means. Make breaking changes in a new <strong>version</strong> (<code>/v2/orders</code>, or a version header) while keeping the old one running for a published deprecation period, announced with headers such as <code>Deprecation</code> and <code>Sunset</code>.</p>
+<p><strong>Describe it.</strong> An <strong>OpenAPI</strong> document (FastAPI writes one for you at <code>/openapi.json</code>) lists every endpoint, parameter, body and response, and drives documentation, client generators and contract tests.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>REST URLs name resources (plural nouns, lower case, nested one level), never actions; methods say what to do: GET to list or read, POST to create (201 and Location), PUT to replace, PATCH to change part, DELETE (204); awkward actions become resources or state changes. Status codes must be honest (no 200 with an error inside). Keep representations consistent (one field-naming style, ISO dates, money as integers). Return errors as problem details (application/problem+json with type, title, status, detail, instance). Idempotency-Key headers make POST retries safe by replaying the stored response; ETags with If-Match prevent lost updates (412, or 428 when it&rsquo;s missing). Paginate with limited, opaque, validated cursors. Additive changes are safe; breaking changes need a new version and a deprecation period; describe the API with OpenAPI.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d3-lint" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A REST route linter</div><div class="pc-prompt"><p>Write <code>lint(routes)</code>: <code>routes</code> is a list of <code>(method, path)</code> pairs. Return a sorted list of <code>(method, path, problem)</code> for: <code>"verb in path"</code> (a segment that starts with <code>get</code>, <code>create</code>, <code>update</code>, <code>delete</code>, <code>add</code>, <code>remove</code>, <code>fetch</code> or <code>set</code>, in any case); <code>"not lower case"</code> (a segment with a capital letter); <code>"use hyphens"</code> (a segment with <code>_</code>); <code>"trailing slash"</code>; <code>"file extension"</code> (a segment ending in <code>.json</code>, <code>.xml</code> or <code>.php</code>); <code>"too deeply nested"</code> (more than four segments, counting <code>{id}</code>-style parameters); and <code>"DELETE on a collection"</code> for a <code>DELETE</code> whose last segment isn&rsquo;t a <code>{parameter}</code>. A path can have several problems.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+VERBS = (&quot;get&quot;, &quot;create&quot;, &quot;update&quot;, &quot;delete&quot;, &quot;add&quot;, &quot;remove&quot;, &quot;fetch&quot;, &quot;set&quot;)
+
+def lint(routes):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_lint():
+    &quot;REST naming rules&quot;
+    routes = [(&quot;GET&quot;, &quot;/orders&quot;), (&quot;GET&quot;, &quot;/orders/{order_id}&quot;), (&quot;POST&quot;, &quot;/createOrder&quot;), (&quot;GET&quot;, &quot;/order_items/&quot;),
+              (&quot;DELETE&quot;, &quot;/orders&quot;), (&quot;GET&quot;, &quot;/report.json&quot;), (&quot;GET&quot;, &quot;/a/{b}/c/{d}/e&quot;), (&quot;GET&quot;, &quot;/customers/{id}/orders&quot;)]
+    assert lint(routes) == [
+        (&quot;DELETE&quot;, &quot;/orders&quot;, &quot;DELETE on a collection&quot;),
+        (&quot;GET&quot;, &quot;/a/{b}/c/{d}/e&quot;, &quot;too deeply nested&quot;),
+        (&quot;GET&quot;, &quot;/order_items/&quot;, &quot;trailing slash&quot;),
+        (&quot;GET&quot;, &quot;/order_items/&quot;, &quot;use hyphens&quot;),
+        (&quot;GET&quot;, &quot;/report.json&quot;, &quot;file extension&quot;),
+        (&quot;POST&quot;, &quot;/createOrder&quot;, &quot;not lower case&quot;),
+        (&quot;POST&quot;, &quot;/createOrder&quot;, &quot;verb in path&quot;),
+    ]</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+VERBS = (&quot;get&quot;, &quot;create&quot;, &quot;update&quot;, &quot;delete&quot;, &quot;add&quot;, &quot;remove&quot;, &quot;fetch&quot;, &quot;set&quot;)
+
+def lint(routes):
+    found = []
+    for method, path in routes:
+        segments = [s for s in path.strip(&quot;/&quot;).split(&quot;/&quot;) if s]
+        plain = [s for s in segments if not re.fullmatch(r&quot;\{\w+\}&quot;, s)]
+        if any(s.lower().startswith(VERBS) for s in plain):
+            found.append((method, path, &quot;verb in path&quot;))
+        if any(re.search(r&quot;[A-Z]&quot;, s) for s in plain):
+            found.append((method, path, &quot;not lower case&quot;))
+        if any(&quot;_&quot; in s for s in plain):
+            found.append((method, path, &quot;use hyphens&quot;))
+        if len(path) &gt; 1 and path.endswith(&quot;/&quot;):
+            found.append((method, path, &quot;trailing slash&quot;))
+        if any(s.endswith((&quot;.json&quot;, &quot;.xml&quot;, &quot;.php&quot;)) for s in plain):
+            found.append((method, path, &quot;file extension&quot;))
+        if len(segments) &gt; 4:
+            found.append((method, path, &quot;too deeply nested&quot;))
+        if method == &quot;DELETE&quot; and (not segments or not re.fullmatch(r&quot;\{\w+\}&quot;, segments[-1])):
+            found.append((method, path, &quot;DELETE on a collection&quot;))
+    return sorted(found)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d3-problems" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Problem details</div><div class="pc-prompt"><p>Write <code>problem(status, detail=None, type="about:blank", title=None, instance=None, **extra)</code>: a problem-details dict with <code>type</code>, <code>title</code> (the status&rsquo;s phrase from <code>HTTPStatus</code> if not given), <code>status</code>, and <code>detail</code> and <code>instance</code> only if given, plus any extra fields. Then <code>validation_problem(errors, instance=None)</code>: a <code>422</code> problem with the type <code>"https://api.example.com/problems/validation"</code>, the title <code>"Your request has invalid fields"</code>, the detail <code>"N field(s) are invalid"</code>, and <code>errors</code>: a list of <code>{"field": DOTTED.LOC, "message": MSG}</code> from FastAPI-style errors (the first <code>loc</code> entry, such as <code>body</code>, is left out). Finally <code>as_response(problem)</code>: <code>(status, headers, body_bytes)</code> with <code>Content-Type: application/problem+json</code>.</p></div><textarea class="pc-src pc-code" hidden>import json
+from http import HTTPStatus
+
+def problem(status, detail=None, type=&quot;about:blank&quot;, title=None, instance=None, **extra):
+    ___
+
+def validation_problem(errors, instance=None):
+    ___
+
+def as_response(problem_dict):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_problems():
+    &quot;RFC 9457&quot;
+    import json
+    assert problem(404, &quot;no order 7&quot;, instance=&quot;/orders/7&quot;) == {&quot;type&quot;: &quot;about:blank&quot;, &quot;title&quot;: &quot;Not Found&quot;, &quot;status&quot;: 404, &quot;detail&quot;: &quot;no order 7&quot;, &quot;instance&quot;: &quot;/orders/7&quot;}
+    assert problem(409, type=&quot;https://x/problems/stock&quot;, title=&quot;Not enough stock&quot;, available=2) == {&quot;type&quot;: &quot;https://x/problems/stock&quot;, &quot;title&quot;: &quot;Not enough stock&quot;, &quot;status&quot;: 409, &quot;available&quot;: 2}
+    errors = [{&quot;loc&quot;: [&quot;body&quot;, &quot;title&quot;], &quot;msg&quot;: &quot;Field required&quot;, &quot;type&quot;: &quot;missing&quot;}, {&quot;loc&quot;: [&quot;body&quot;, &quot;lines&quot;, 1, &quot;qty&quot;], &quot;msg&quot;: &quot;too small&quot;, &quot;type&quot;: &quot;x&quot;}]
+    p = validation_problem(errors, &quot;/orders&quot;)
+    assert p[&quot;status&quot;] == 422 and p[&quot;detail&quot;] == &quot;2 field(s) are invalid&quot; and p[&quot;errors&quot;] == [{&quot;field&quot;: &quot;title&quot;, &quot;message&quot;: &quot;Field required&quot;}, {&quot;field&quot;: &quot;lines.1.qty&quot;, &quot;message&quot;: &quot;too small&quot;}]
+    status, headers, body = as_response(p)
+    assert status == 422 and headers == {&quot;Content-Type&quot;: &quot;application/problem+json&quot;} and json.loads(body) == p</textarea><textarea class="pc-src pc-solution" hidden>import json
+from http import HTTPStatus
+
+def problem(status, detail=None, type=&quot;about:blank&quot;, title=None, instance=None, **extra):
+    out = {&quot;type&quot;: type, &quot;title&quot;: title or HTTPStatus(status).phrase, &quot;status&quot;: status}
+    if detail is not None:
+        out[&quot;detail&quot;] = detail
+    if instance is not None:
+        out[&quot;instance&quot;] = instance
+    out.update(extra)
+    return out
+
+def validation_problem(errors, instance=None):
+    fields = [{&quot;field&quot;: &quot;.&quot;.join(str(p) for p in e[&quot;loc&quot;][1:]), &quot;message&quot;: e[&quot;msg&quot;]} for e in errors]
+    return problem(422, f&quot;{len(errors)} field(s) are invalid&quot;, type=&quot;https://api.example.com/problems/validation&quot;,
+                   title=&quot;Your request has invalid fields&quot;, instance=instance, errors=fields)
+
+def as_response(problem_dict):
+    return problem_dict[&quot;status&quot;], {&quot;Content-Type&quot;: &quot;application/problem+json&quot;}, json.dumps(problem_dict).encode(&quot;utf-8&quot;)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d3-idempotency" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Idempotency keys</div><div class="pc-prompt"><p>Write a class <code>IdempotencyStore(clock, ttl=86400)</code> with <code>run(key, body, action)</code>: <code>body</code> is the request&rsquo;s body (bytes) and <code>action()</code> does the work and returns <code>(status, response_body)</code>. With <code>key</code> <code>None</code>, just call <code>action</code>. Otherwise, the first time a key is seen, call <code>action</code>, store <code>(fingerprint, status, response_body, time)</code> where the fingerprint is the SHA-256 hex digest of the body, and return the result with <code>replayed</code> <code>False</code>; when the same key comes back within <code>ttl</code> seconds with the <strong>same</strong> fingerprint, return the stored result <strong>without</strong> calling <code>action</code>, with <code>replayed</code> <code>True</code>; with a <strong>different</strong> body, return <code>(422, b'{"error": "key reused with a different body"}', False)</code> without calling <code>action</code>. Expired keys are forgotten. Return values are <code>(status, body, replayed)</code>. Don&rsquo;t store results with a <code>5xx</code> status (so the client can retry them).</p></div><textarea class="pc-src pc-code" hidden>import hashlib
+
+class IdempotencyStore:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_idempotency():
+    &quot;replaying instead of repeating&quot;
+    now = [0]
+    store = IdempotencyStore(lambda: now[0], ttl=100)
+    created = []
+    def create():
+        created.append(1)
+        return 201, b&#x27;{&quot;id&quot;: %d}&#x27; % len(created)
+    assert store.run(&quot;k1&quot;, b&#x27;{&quot;qty&quot;: 2}&#x27;, create) == (201, b&#x27;{&quot;id&quot;: 1}&#x27;, False)
+    assert store.run(&quot;k1&quot;, b&#x27;{&quot;qty&quot;: 2}&#x27;, create) == (201, b&#x27;{&quot;id&quot;: 1}&#x27;, True) and len(created) == 1
+    assert store.run(&quot;k1&quot;, b&#x27;{&quot;qty&quot;: 3}&#x27;, create)[0] == 422 and len(created) == 1
+    assert store.run(&quot;k2&quot;, b&#x27;{&quot;qty&quot;: 2}&#x27;, create) == (201, b&#x27;{&quot;id&quot;: 2}&#x27;, False)
+    assert store.run(None, b&quot;&quot;, create)[2] is False and len(created) == 3
+    now[0] = 101
+    assert store.run(&quot;k1&quot;, b&#x27;{&quot;qty&quot;: 2}&#x27;, create) == (201, b&#x27;{&quot;id&quot;: 4}&#x27;, False)
+    flaky = iter([(503, b&quot;busy&quot;), (201, b&quot;ok&quot;)])
+    assert store.run(&quot;k3&quot;, b&quot;x&quot;, lambda: next(flaky)) == (503, b&quot;busy&quot;, False)
+    assert store.run(&quot;k3&quot;, b&quot;x&quot;, lambda: next(flaky)) == (201, b&quot;ok&quot;, False)</textarea><textarea class="pc-src pc-solution" hidden>import hashlib
+
+class IdempotencyStore:
+    def __init__(self, clock, ttl=86400):
+        self.clock, self.ttl = clock, ttl
+        self.entries = {}
+
+    def run(self, key, body, action):
+        if key is None:
+            status, out = action()
+            return status, out, False
+        now = self.clock()
+        entry = self.entries.get(key)
+        if entry and now - entry[3] &gt; self.ttl:
+            del self.entries[key]
+            entry = None
+        fingerprint = hashlib.sha256(body).hexdigest()
+        if entry:
+            if entry[0] != fingerprint:
+                return 422, b&#x27;{&quot;error&quot;: &quot;key reused with a different body&quot;}&#x27;, False
+            return entry[1], entry[2], True
+        status, out = action()
+        if status &lt; 500:
+            self.entries[key] = (fingerprint, status, out, now)
+        return status, out, False</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d3-ifmatch" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Conditional updates</div><div class="pc-prompt"><p>Write <code>etag(resource)</code>: a quoted string holding the first 16 hex characters of the SHA-256 of the resource as JSON with sorted keys. Then a class <code>Documents</code> holding resources by id, with <code>get(doc_id, if_none_match=None)</code> returning <code>(status, etag, body)</code>: <code>404</code> (with <code>None</code>s) for a missing id, <code>304</code> (with the etag and a <code>None</code> body) if <code>if_none_match</code> equals the current etag, else <code>200</code>; and <code>update(doc_id, changes, if_match)</code> returning <code>(status, etag)</code>: <code>404</code> for a missing id, <code>428</code> if <code>if_match</code> is <code>None</code>, <code>412</code> (with the <strong>current</strong> etag) if it doesn&rsquo;t match, else apply the changes and return <code>200</code> with the new etag.</p></div><textarea class="pc-src pc-code" hidden>import hashlib, json
+
+def etag(resource):
+    ___
+
+class Documents:
+    def __init__(self, docs):
+        self.docs = docs
+
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_ifmatch():
+    &quot;If-Match and If-None-Match&quot;
+    docs = Documents({1: {&quot;title&quot;: &quot;Plan&quot;, &quot;body&quot;: &quot;v1&quot;}})
+    status, tag, body = docs.get(1)
+    assert status == 200 and body == {&quot;title&quot;: &quot;Plan&quot;, &quot;body&quot;: &quot;v1&quot;} and tag.startswith(&#x27;&quot;&#x27;) and len(tag) == 18
+    assert tag == etag({&quot;body&quot;: &quot;v1&quot;, &quot;title&quot;: &quot;Plan&quot;})
+    assert docs.get(1, if_none_match=tag) == (304, tag, None) and docs.get(2) == (404, None, None)
+    assert docs.update(1, {&quot;body&quot;: &quot;v2&quot;}, None)[0] == 428
+    status, new_tag = docs.update(1, {&quot;body&quot;: &quot;v2&quot;}, tag)
+    assert status == 200 and new_tag != tag
+    assert docs.update(1, {&quot;body&quot;: &quot;v3&quot;}, tag) == (412, new_tag) and docs.docs[1][&quot;body&quot;] == &quot;v2&quot;
+    assert docs.update(9, {}, tag)[0] == 404</textarea><textarea class="pc-src pc-solution" hidden>import hashlib, json
+
+def etag(resource):
+    digest = hashlib.sha256(json.dumps(resource, sort_keys=True).encode(&quot;utf-8&quot;)).hexdigest()
+    return f&#x27;&quot;{digest[:16]}&quot;&#x27;
+
+class Documents:
+    def __init__(self, docs):
+        self.docs = docs
+
+    def get(self, doc_id, if_none_match=None):
+        doc = self.docs.get(doc_id)
+        if doc is None:
+            return 404, None, None
+        tag = etag(doc)
+        if if_none_match == tag:
+            return 304, tag, None
+        return 200, tag, doc
+
+    def update(self, doc_id, changes, if_match):
+        doc = self.docs.get(doc_id)
+        if doc is None:
+            return 404, None
+        if if_match is None:
+            return 428, None
+        current = etag(doc)
+        if if_match != current:
+            return 412, current
+        self.docs[doc_id] = {**doc, **changes}
+        return 200, etag(self.docs[doc_id])</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d3-cursors" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Opaque cursors</div><div class="pc-prompt"><p>Write <code>encode_cursor(last_id)</code>: URL-safe base64 (without <code>=</code> padding) of the JSON <code>{"after": last_id}</code>. Then <code>decode_cursor(text)</code>: the <code>after</code> id, raising <code>ValueError("invalid cursor")</code> for anything that isn&rsquo;t valid base64, valid JSON, a dict with an integer <code>after</code> of at least 0. Finally <code>page(items, cursor=None, limit=10)</code>: items (dicts with increasing integer <code>id</code>s) after the cursor&rsquo;s id, at most <code>limit</code> of them, as <code>{"items": [...], "next": CURSOR or None}</code>.</p></div><textarea class="pc-src pc-code" hidden>import base64, json
+
+def encode_cursor(last_id):
+    ___
+
+def decode_cursor(text):
+    ___
+
+def page(items, cursor=None, limit=10):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cursors():
+    &quot;opaque and validated&quot;
+    c = encode_cursor(42)
+    assert &quot;=&quot; not in c and decode_cursor(c) == 42 and &quot;after&quot; not in c
+    for bad in [&quot;!!!&quot;, &quot;bm9wZQ&quot;, encode_cursor(42)[:-3], base64.urlsafe_b64encode(b&#x27;{&quot;after&quot;: -1}&#x27;).decode().rstrip(&quot;=&quot;), base64.urlsafe_b64encode(b&quot;[1]&quot;).decode()]:
+        try:
+            decode_cursor(bad)
+            assert False, bad
+        except ValueError as e:
+            assert str(e) == &quot;invalid cursor&quot;
+    items = [{&quot;id&quot;: i} for i in range(1, 8)]
+    first = page(items, limit=3)
+    assert [i[&quot;id&quot;] for i in first[&quot;items&quot;]] == [1, 2, 3] and decode_cursor(first[&quot;next&quot;]) == 3
+    second = page(items, first[&quot;next&quot;], limit=3)
+    third = page(items, second[&quot;next&quot;], limit=3)
+    assert [i[&quot;id&quot;] for i in third[&quot;items&quot;]] == [7] and third[&quot;next&quot;] is None</textarea><textarea class="pc-src pc-solution" hidden>import base64, json
+
+def encode_cursor(last_id):
+    raw = json.dumps({&quot;after&quot;: last_id}).encode(&quot;utf-8&quot;)
+    return base64.urlsafe_b64encode(raw).decode(&quot;ascii&quot;).rstrip(&quot;=&quot;)
+
+def decode_cursor(text):
+    try:
+        raw = base64.urlsafe_b64decode(text + &quot;=&quot; * (-len(text) % 4))
+        data = json.loads(raw.decode(&quot;utf-8&quot;))
+    except (ValueError, UnicodeDecodeError):
+        raise ValueError(&quot;invalid cursor&quot;) from None
+    if not isinstance(data, dict) or type(data.get(&quot;after&quot;)) is not int or data[&quot;after&quot;] &lt; 0:
+        raise ValueError(&quot;invalid cursor&quot;)
+    return data[&quot;after&quot;]
+
+def page(items, cursor=None, limit=10):
+    after = decode_cursor(cursor) if cursor else 0
+    later = [i for i in items if i[&quot;id&quot;] &gt; after]
+    chosen = later[:limit]
+    more = len(later) &gt; limit
+    return {&quot;items&quot;: chosen, &quot;next&quot;: encode_cursor(chosen[-1][&quot;id&quot;]) if more else None}</textarea><template class="pc-src pc-hint">Put padding back before decoding: <code>text + "=" * (-len(text) % 4)</code>. Catch <code>binascii.Error</code> (a <code>ValueError</code>), <code>UnicodeDecodeError</code> and <code>json.JSONDecodeError</code> (also a <code>ValueError</code>) together, and check <code>type(data["after"]) is int</code>, which leaves out booleans.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d3-compat" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Is this change breaking?</div><div class="pc-prompt"><p>An API&rsquo;s shape is described as a dict from <code>"METHOD /path"</code> to <code>{"params": {name: required_bool}, "response": {field: type_name}}</code>. Write <code>compare(old, new)</code>: a sorted list of <code>(kind, endpoint, description)</code> where <code>kind</code> is <code>"breaking"</code> or <code>"safe"</code>: a removed endpoint is breaking (<code>"endpoint removed"</code>), an added one safe (<code>"endpoint added"</code>); for endpoints in both, a removed response field is breaking (<code>"field F removed"</code>), a changed type breaking (<code>"field F changed from A to B"</code>), an added field safe (<code>"field F added"</code>); a new <strong>required</strong> parameter is breaking (<code>"required parameter P added"</code>), a new optional one safe (<code>"optional parameter P added"</code>), an optional parameter becoming required breaking (<code>"parameter P now required"</code>), and a removed parameter safe (<code>"parameter P removed"</code>). Then <code>needs_new_version(old, new)</code>.</p></div><textarea class="pc-src pc-code" hidden>def compare(old, new):
+    ___
+
+def needs_new_version(old, new):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_compat():
+    &quot;additive versus breaking changes&quot;
+    old = {
+        &quot;GET /orders&quot;: {&quot;params&quot;: {&quot;status&quot;: False}, &quot;response&quot;: {&quot;id&quot;: &quot;int&quot;, &quot;total&quot;: &quot;int&quot;, &quot;placed&quot;: &quot;str&quot;}},
+        &quot;GET /orders/{id}&quot;: {&quot;params&quot;: {}, &quot;response&quot;: {&quot;id&quot;: &quot;int&quot;}},
+        &quot;POST /orders&quot;: {&quot;params&quot;: {}, &quot;response&quot;: {&quot;id&quot;: &quot;int&quot;}},
+    }
+    new = {
+        &quot;GET /orders&quot;: {&quot;params&quot;: {&quot;status&quot;: True, &quot;limit&quot;: False}, &quot;response&quot;: {&quot;id&quot;: &quot;int&quot;, &quot;total&quot;: &quot;str&quot;, &quot;currency&quot;: &quot;str&quot;}},
+        &quot;GET /orders/{id}&quot;: {&quot;params&quot;: {&quot;expand&quot;: True}, &quot;response&quot;: {&quot;id&quot;: &quot;int&quot;}},
+        &quot;GET /customers&quot;: {&quot;params&quot;: {}, &quot;response&quot;: {&quot;id&quot;: &quot;int&quot;}},
+    }
+    assert compare(old, new) == [
+        (&quot;breaking&quot;, &quot;GET /orders&quot;, &quot;field placed removed&quot;),
+        (&quot;breaking&quot;, &quot;GET /orders&quot;, &quot;field total changed from int to str&quot;),
+        (&quot;breaking&quot;, &quot;GET /orders&quot;, &quot;parameter status now required&quot;),
+        (&quot;breaking&quot;, &quot;GET /orders/{id}&quot;, &quot;required parameter expand added&quot;),
+        (&quot;breaking&quot;, &quot;POST /orders&quot;, &quot;endpoint removed&quot;),
+        (&quot;safe&quot;, &quot;GET /customers&quot;, &quot;endpoint added&quot;),
+        (&quot;safe&quot;, &quot;GET /orders&quot;, &quot;field currency added&quot;),
+        (&quot;safe&quot;, &quot;GET /orders&quot;, &quot;optional parameter limit added&quot;),
+    ]
+    assert needs_new_version(old, new) and not needs_new_version(old, {**old, &quot;GET /x&quot;: {&quot;params&quot;: {}, &quot;response&quot;: {}}})</textarea><textarea class="pc-src pc-solution" hidden>def compare(old, new):
+    changes = []
+    for endpoint in old.keys() - new.keys():
+        changes.append((&quot;breaking&quot;, endpoint, &quot;endpoint removed&quot;))
+    for endpoint in new.keys() - old.keys():
+        changes.append((&quot;safe&quot;, endpoint, &quot;endpoint added&quot;))
+    for endpoint in old.keys() &amp; new.keys():
+        a, b = old[endpoint], new[endpoint]
+        for field, kind in a[&quot;response&quot;].items():
+            if field not in b[&quot;response&quot;]:
+                changes.append((&quot;breaking&quot;, endpoint, f&quot;field {field} removed&quot;))
+            elif b[&quot;response&quot;][field] != kind:
+                changes.append((&quot;breaking&quot;, endpoint, f&quot;field {field} changed from {kind} to {b[&#x27;response&#x27;][field]}&quot;))
+        for field in b[&quot;response&quot;].keys() - a[&quot;response&quot;].keys():
+            changes.append((&quot;safe&quot;, endpoint, f&quot;field {field} added&quot;))
+        for param, required in b[&quot;params&quot;].items():
+            if param not in a[&quot;params&quot;]:
+                changes.append((&quot;breaking&quot;, endpoint, f&quot;required parameter {param} added&quot;) if required
+                               else (&quot;safe&quot;, endpoint, f&quot;optional parameter {param} added&quot;))
+            elif required and not a[&quot;params&quot;][param]:
+                changes.append((&quot;breaking&quot;, endpoint, f&quot;parameter {param} now required&quot;))
+        for param in a[&quot;params&quot;].keys() - b[&quot;params&quot;].keys():
+            changes.append((&quot;safe&quot;, endpoint, f&quot;parameter {param} removed&quot;))
+    return sorted(changes)
+
+def needs_new_version(old, new):
+    return any(kind == &quot;breaking&quot; for kind, _, _ in compare(old, new))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w077d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">An error disguised as success</div><div class="pc-prompt"><p>The endpoint reports a missing order with status <code>200</code> and an error in the body, so the client&rsquo;s status check thinks it worked and this prints <code>200 ok?</code>. Return a real <code>404</code>, so it prints <code>404 no order 9</code>.</p></div><textarea class="pc-src pc-code" hidden>from miniflask import Flask
+
+app = Flask(__name__)
+ORDERS = {7: {&quot;id&quot;: 7}}
+
+@app.get(&quot;/orders/&lt;int:order_id&gt;&quot;)
+def get_order(order_id):
+    if order_id not in ORDERS:
+        return {&quot;error&quot;: f&quot;no order {order_id}&quot;}
+    return ORDERS[order_id]
+
+r = app.test_client().get(&quot;/orders/9&quot;)
+print(r.status_code, &quot;ok?&quot; if r.status_code == 200 else r.get_json()[&quot;error&quot;])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;honest status codes&quot;
+    expect_output(&quot;404 no order 9&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from miniflask import Flask
+
+app = Flask(__name__)
+ORDERS = {7: {&quot;id&quot;: 7}}
+
+@app.get(&quot;/orders/&lt;int:order_id&gt;&quot;)
+def get_order(order_id):
+    if order_id not in ORDERS:
+        return {&quot;error&quot;: f&quot;no order {order_id}&quot;}, 404
+    return ORDERS[order_id]
+
+r = app.test_client().get(&quot;/orders/9&quot;)
+print(r.status_code, &quot;ok?&quot; if r.status_code == 200 else r.get_json()[&quot;error&quot;])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w077d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A PUT that wasn&rsquo;t idempotent</div><div class="pc-prompt"><p><code>PUT</code> should <strong>replace</strong> the resource, so sending it twice leaves the same result, but this handler appends the tags, so the retry doubles them and this prints <code>['red', 'blue', 'red', 'blue']</code>. Replace instead, so it prints <code>['red', 'blue']</code>.</p></div><textarea class="pc-src pc-code" hidden>from miniflask import Flask, request
+
+app = Flask(__name__)
+PRODUCTS = {1: {&quot;tags&quot;: []}}
+
+@app.put(&quot;/products/&lt;int:pid&gt;/tags&quot;)
+def set_tags(pid):
+    PRODUCTS[pid][&quot;tags&quot;].extend(request.get_json())
+    return {&quot;tags&quot;: PRODUCTS[pid][&quot;tags&quot;]}
+
+client = app.test_client()
+client.put(&quot;/products/1/tags&quot;, json=[&quot;red&quot;, &quot;blue&quot;])
+print(client.put(&quot;/products/1/tags&quot;, json=[&quot;red&quot;, &quot;blue&quot;]).get_json()[&quot;tags&quot;])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;PUT replaces&quot;
+    expect_output(&quot;[&#x27;red&#x27;, &#x27;blue&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from miniflask import Flask, request
+
+app = Flask(__name__)
+PRODUCTS = {1: {&quot;tags&quot;: []}}
+
+@app.put(&quot;/products/&lt;int:pid&gt;/tags&quot;)
+def set_tags(pid):
+    PRODUCTS[pid][&quot;tags&quot;] = list(request.get_json())
+    return {&quot;tags&quot;: PRODUCTS[pid][&quot;tags&quot;]}
+
+client = app.test_client()
+client.put(&quot;/products/1/tags&quot;, json=[&quot;red&quot;, &quot;blue&quot;])
+print(client.put(&quot;/products/1/tags&quot;, json=[&quot;red&quot;, &quot;blue&quot;]).get_json()[&quot;tags&quot;])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w077d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A cursor that crashed the server</div><div class="pc-prompt"><p>The endpoint decodes whatever cursor the client sends without checking it, so a garbled one raises an exception and the server answers <code>500</code>: this prints <code>500</code>. Treat a bad cursor as the client&rsquo;s mistake, answering <code>400</code>, so this prints <code>400</code>.</p></div><textarea class="pc-src pc-code" hidden>import base64, json
+from miniflask import Flask, request
+
+app = Flask(__name__)
+
+@app.get(&quot;/items&quot;)
+def items():
+    after = 0
+    cursor = request.args.get(&quot;cursor&quot;)
+    if cursor:
+        after = json.loads(base64.urlsafe_b64decode(cursor + &quot;==&quot;))[&quot;after&quot;]
+    return {&quot;after&quot;: after}
+
+print(app.test_client().get(&quot;/items?cursor=garbled!&quot;).status_code)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;validate what the client sends&quot;
+    expect_output(&quot;400&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import base64, json
+from miniflask import Flask, request
+
+app = Flask(__name__)
+
+@app.get(&quot;/items&quot;)
+def items():
+    after = 0
+    cursor = request.args.get(&quot;cursor&quot;)
+    if cursor:
+        try:
+            after = int(json.loads(base64.urlsafe_b64decode(cursor + &quot;==&quot;))[&quot;after&quot;])
+        except (ValueError, KeyError, TypeError):
+            return {&quot;error&quot;: &quot;invalid cursor&quot;}, 400
+    return {&quot;after&quot;: after}
+
+print(app.test_client().get(&quot;/items?cursor=garbled!&quot;).status_code)</textarea></div>
+<div class="parsons" data-id="w077d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Routes for a resource</div><div class="pc-prompt"><p>Arrange the routes for a REST <code>invoices</code> resource, from listing to deleting, with sending an invoice modelled as a resource of its own. One line is a trap.</p></div><script type="application/json">{"lines": ["GET    /invoices                     list invoices (200)", "POST   /invoices                     create an invoice (201, Location)", "GET    /invoices/{invoice_id}        read one (200 or 404)", "PATCH  /invoices/{invoice_id}        change part of one (200)", "DELETE /invoices/{invoice_id}        delete one (204)", "POST   /invoices/{invoice_id}/sendings   send it, recording the sending (201)"], "distractors": ["GET    /invoices/{invoice_id}/send   send it (200)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the status for a successful DELETE with nothing to return
+q = ___   # the status when If-Match doesn&#x27;t match the current ETag
+r = ___   # the media type of an RFC 9457 error body
+s = ___   # &quot;breaking&quot; or &quot;safe&quot;: adding a new optional field to a response
+t = ___   # the header a client sends so a retried POST isn&#x27;t done twice</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 204 and q == 412 and r == &quot;application/problem+json&quot;, &quot;p, q and r&quot;
+    assert s == &quot;safe&quot; and t == &quot;Idempotency-Key&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 204
+q = 412
+r = &quot;application/problem+json&quot;
+s = &quot;safe&quot;
+t = &quot;Idempotency-Key&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w077d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Which is the REST-style route for deleting order 7?", "answer": 1, "explain": "The method says what to do.", "options": ["POST /orders/7/delete", "DELETE /orders/7", "GET /deleteOrder?id=7", "DELETE /orders?id=7"]}, {"type": "mc", "q": "What should a successful create return?", "answer": 1, "explain": "Location points at the new resource.", "options": ["200 with nothing", "201 with the new resource and a Location header", "204", "302"]}, {"type": "mc", "q": "How should an action like cancelling an order be modelled?", "answer": 1, "explain": "Keep URLs as nouns.", "options": ["A verb in the path", "As a resource (a cancellation) or a state change with PATCH", "A GET", "It can&rsquo;t be"]}, {"type": "mc", "q": "What&rsquo;s wrong with 200 and {&ldquo;error&rdquo;:&rdquo;not found&rdquo;}?", "answer": 1, "explain": "Status codes must tell the truth.", "options": ["Nothing", "Clients, caches and monitoring trust the status, which says it worked", "JSON can&rsquo;t hold errors", "It&rsquo;s too long"]}, {"type": "mc", "q": "What is RFC 9457?", "answer": 1, "explain": "type, title, status, detail, instance.", "options": ["A JSON parser", "Problem details: a standard JSON format for API errors", "HTTP/3", "OAuth"]}, {"type": "mc", "q": "What does an Idempotency-Key let the server do?", "answer": 1, "explain": "It makes POST retries safe.", "options": ["Encrypt the request", "Return the stored response for a repeated request instead of doing the work twice", "Skip validation", "Cache GETs"]}, {"type": "mc", "q": "What prevents two clients overwriting each other&rsquo;s changes?", "answer": 1, "explain": "Optimistic concurrency over HTTP.", "options": ["Longer timeouts", "ETags with If-Match, refusing stale updates with 412", "PUT instead of PATCH", "Cursors"]}, {"type": "mc", "q": "Why make cursors opaque and validate them?", "answer": 1, "explain": "Treat them as untrusted input.", "options": ["Speed", "Clients can&rsquo;t depend on their insides, and bad ones get a 400 instead of a crash", "To encrypt ids", "It&rsquo;s required"]}, {"type": "mc", "q": "Which change is breaking?", "answer": 2, "explain": "Renaming breaks every client that reads the old name.", "options": ["Adding an endpoint", "Adding an optional parameter", "Renaming a response field", "Adding a response field"]}, {"type": "output", "q": "What does this print?", "answer": "5", "explain": "Padding is restored before decoding.", "code": "import base64, json\nc = base64.urlsafe_b64encode(json.dumps({\"after\": 5}).encode()).decode().rstrip(\"=\")\nprint(json.loads(base64.urlsafe_b64decode(c + \"=\" * (-len(c) % 4)))[\"after\"])"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a well-behaved resource</div><div class="pc-prompt"><p>Write <code>create_app(clock=lambda: 0)</code>: a Flask (miniflask) app with an <code>orders</code> resource (orders have <code>id</code>, <code>item</code> (a non-empty string) and <code>qty</code> (an integer from 1 to 100)). Every error is a problem-details response (<code>Content-Type: application/problem+json</code>, with <code>type</code> <code>about:blank</code>, <code>title</code>, <code>status</code>, <code>detail</code> and <code>instance</code> set to the request&rsquo;s path). <code>GET /orders</code> lists them (by id). <code>POST /orders</code> creates one (<code>201</code>, <code>Location</code>, and an <code>ETag</code> header); invalid bodies get <code>422</code> (detail <code>"item must be a non-empty string and qty an integer from 1 to 100"</code>); and an <code>Idempotency-Key</code> header makes retries safe: the same key and body replay the stored response (with the same status, body and <code>Location</code>, and a header <code>Idempotent-Replayed: true</code>), while the same key with a different body gets <code>422</code> with detail <code>"Idempotency-Key reused with a different body"</code>. <code>GET /orders/&lt;id&gt;</code> returns the order with its <code>ETag</code>, or <code>304</code> for a matching <code>If-None-Match</code>. <code>PATCH /orders/&lt;id&gt;</code> requires <code>If-Match</code> (<code>428</code>, detail <code>"If-Match is required"</code>), refuses a stale one (<code>412</code>, detail <code>"the order has changed"</code>), validates the merged order (<code>422</code>), and returns it with its new <code>ETag</code>. Missing orders get <code>404</code> (detail <code>"no order N"</code>).</p></div><textarea class="pc-src pc-code" hidden>import hashlib, json
+from miniflask import Flask, request, url_for, Response
+
+def create_app(clock=lambda: 0):
+    app = Flask(__name__)
+    ___
+    return app</textarea><textarea class="pc-src pc-tests" hidden>def test_resource():
+    &quot;problem details, idempotency and conditional requests&quot;
+    import json
+    client = create_app().test_client()
+    r = client.post(&quot;/orders&quot;, json={&quot;item&quot;: &quot;tea&quot;, &quot;qty&quot;: 2}, headers={&quot;Idempotency-Key&quot;: &quot;k1&quot;})
+    assert r.status_code == 201 and r.headers[&quot;Location&quot;] == &quot;/orders/1&quot; and r.get_json() == {&quot;id&quot;: 1, &quot;item&quot;: &quot;tea&quot;, &quot;qty&quot;: 2}
+    tag = r.headers[&quot;ETag&quot;]
+    again = client.post(&quot;/orders&quot;, json={&quot;item&quot;: &quot;tea&quot;, &quot;qty&quot;: 2}, headers={&quot;Idempotency-Key&quot;: &quot;k1&quot;})
+    assert again.status_code == 201 and again.get_json()[&quot;id&quot;] == 1 and again.headers[&quot;Idempotent-Replayed&quot;] == &quot;true&quot;
+    assert len(client.get(&quot;/orders&quot;).get_json()) == 1
+    clash = client.post(&quot;/orders&quot;, json={&quot;item&quot;: &quot;jam&quot;, &quot;qty&quot;: 1}, headers={&quot;Idempotency-Key&quot;: &quot;k1&quot;})
+    assert clash.status_code == 422 and clash.get_json()[&quot;detail&quot;] == &quot;Idempotency-Key reused with a different body&quot;
+    assert clash.headers[&quot;Content-Type&quot;] == &quot;application/problem+json&quot; and clash.get_json()[&quot;instance&quot;] == &quot;/orders&quot;
+    bad = client.post(&quot;/orders&quot;, json={&quot;item&quot;: &quot;&quot;, &quot;qty&quot;: 500})
+    assert bad.status_code == 422 and bad.get_json()[&quot;title&quot;] in (&quot;Unprocessable Content&quot;, &quot;Unprocessable Entity&quot;)
+    assert client.get(&quot;/orders/1&quot;, headers={&quot;If-None-Match&quot;: tag}).status_code == 304
+    assert client.patch(&quot;/orders/1&quot;, json={&quot;qty&quot;: 3}).status_code == 428
+    r = client.patch(&quot;/orders/1&quot;, json={&quot;qty&quot;: 3}, headers={&quot;If-Match&quot;: tag})
+    assert r.status_code == 200 and r.get_json()[&quot;qty&quot;] == 3 and r.headers[&quot;ETag&quot;] != tag
+    stale = client.patch(&quot;/orders/1&quot;, json={&quot;qty&quot;: 4}, headers={&quot;If-Match&quot;: tag})
+    assert stale.status_code == 412 and stale.get_json()[&quot;detail&quot;] == &quot;the order has changed&quot;
+    assert client.patch(&quot;/orders/1&quot;, json={&quot;qty&quot;: 0}, headers={&quot;If-Match&quot;: r.headers[&quot;ETag&quot;]}).status_code == 422
+    missing = client.get(&quot;/orders/9&quot;)
+    assert missing.status_code == 404 and missing.get_json() == {&quot;type&quot;: &quot;about:blank&quot;, &quot;title&quot;: &quot;Not Found&quot;, &quot;status&quot;: 404, &quot;detail&quot;: &quot;no order 9&quot;, &quot;instance&quot;: &quot;/orders/9&quot;}</textarea><textarea class="pc-src pc-solution" hidden>import hashlib, json
+from miniflask import Flask, request, url_for, Response
+from http import HTTPStatus
+
+def create_app(clock=lambda: 0):
+    app = Flask(__name__)
+    orders, replays = {}, {}
+
+    def problem(status, detail):
+        body = {&quot;type&quot;: &quot;about:blank&quot;, &quot;title&quot;: HTTPStatus(status).phrase, &quot;status&quot;: status,
+                &quot;detail&quot;: detail, &quot;instance&quot;: request.path}
+        return Response(json.dumps(body), status, {&quot;Content-Type&quot;: &quot;application/problem+json&quot;})
+
+    def tag(order):
+        return &#x27;&quot;&#x27; + hashlib.sha256(json.dumps(order, sort_keys=True).encode()).hexdigest()[:16] + &#x27;&quot;&#x27;
+
+    def valid(order):
+        item, qty = order.get(&quot;item&quot;), order.get(&quot;qty&quot;)
+        return isinstance(item, str) and item.strip() and type(qty) is int and 1 &lt;= qty &lt;= 100
+
+    INVALID = &quot;item must be a non-empty string and qty an integer from 1 to 100&quot;
+
+    @app.get(&quot;/orders&quot;)
+    def list_orders():
+        return [orders[k] for k in sorted(orders)]
+
+    @app.post(&quot;/orders&quot;)
+    def create_order():
+        key = request.headers.get(&quot;Idempotency-Key&quot;)
+        fingerprint = hashlib.sha256(request.data).hexdigest()
+        if key and key in replays:
+            stored = replays[key]
+            if stored[0] != fingerprint:
+                return problem(422, &quot;Idempotency-Key reused with a different body&quot;)
+            return stored[2], stored[1], {**stored[3], &quot;Idempotent-Replayed&quot;: &quot;true&quot;}
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict) or not valid(data):
+            return problem(422, INVALID)
+        new_id = max(orders, default=0) + 1
+        orders[new_id] = {&quot;id&quot;: new_id, &quot;item&quot;: data[&quot;item&quot;], &quot;qty&quot;: data[&quot;qty&quot;]}
+        headers = {&quot;Location&quot;: url_for(&quot;get_order&quot;, order_id=new_id), &quot;ETag&quot;: tag(orders[new_id])}
+        if key:
+            replays[key] = (fingerprint, 201, dict(orders[new_id]), headers)
+        return orders[new_id], 201, headers
+
+    @app.get(&quot;/orders/&lt;int:order_id&gt;&quot;)
+    def get_order(order_id):
+        order = orders.get(order_id)
+        if order is None:
+            return problem(404, f&quot;no order {order_id}&quot;)
+        current = tag(order)
+        if request.headers.get(&quot;If-None-Match&quot;) == current:
+            return Response(b&quot;&quot;, 304, {&quot;ETag&quot;: current})
+        return order, 200, {&quot;ETag&quot;: current}
+
+    @app.patch(&quot;/orders/&lt;int:order_id&gt;&quot;)
+    def update_order(order_id):
+        order = orders.get(order_id)
+        if order is None:
+            return problem(404, f&quot;no order {order_id}&quot;)
+        if_match = request.headers.get(&quot;If-Match&quot;)
+        if if_match is None:
+            return problem(428, &quot;If-Match is required&quot;)
+        if if_match != tag(order):
+            return problem(412, &quot;the order has changed&quot;)
+        changes = request.get_json(silent=True)
+        merged = {**order, **(changes if isinstance(changes, dict) else {}), &quot;id&quot;: order_id}
+        if not valid(merged):
+            return problem(422, INVALID)
+        orders[order_id] = merged
+        return merged, 200, {&quot;ETag&quot;: tag(merged)}
+
+    return app</textarea><template class="pc-src pc-hint">Write <code>problem(status, detail)</code> returning <code>(json_text, status, {"Content-Type": "application/problem+json"})</code> with the instance from <code>request.path</code>, and <code>tag(order)</code> for ETags. Store idempotent results as <code>{key: (fingerprint, status, body_dict, headers)}</code>, with the fingerprint a hash of <code>request.data</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Look at the documentation of a public API you&rsquo;ve used (GitHub&rsquo;s or Stripe&rsquo;s are good examples) and find its idempotency, pagination and error conventions. Tomorrow: <strong>authentication</strong>: storing passwords safely, sessions and tokens, and deciding who may do what.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w077d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w077d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w077d3", "week": 77, "day": 3, "title": "REST design", "exercises": [{"id": "w077d3-lint", "title": "A REST route linter", "points": 15}, {"id": "w077d3-problems", "title": "Problem details", "points": 10}, {"id": "w077d3-idempotency", "title": "Idempotency keys", "points": 15}, {"id": "w077d3-ifmatch", "title": "Conditional updates", "points": 15}, {"id": "w077d3-cursors", "title": "Opaque cursors", "points": 10}, {"id": "w077d3-compat", "title": "Is this change breaking?", "points": 15}, {"id": "w077d3-bug1", "title": "An error disguised as success", "points": 10}, {"id": "w077d3-bug2", "title": "A PUT that wasn't idempotent", "points": 10}, {"id": "w077d3-bug3", "title": "A cursor that crashed the server", "points": 10}, {"id": "w077d3-trace", "title": "Predict them", "points": 10}, {"id": "w077d3-challenge", "title": "Challenge: a well-behaved resource", "points": 25}], "points": 145}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=db5173407e"></script>
+</body>
+</html>

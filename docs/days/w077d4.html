@@ -1,0 +1,1304 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="db5173407e">
+<title>Week 77 Day 4: Authentication | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=db5173407e">
+<link rel="stylesheet" href="../assets/css/site.css?v=db5173407e">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=db5173407e"></script>
+<script src="../assets/vendor/codemirror.js?v=db5173407e" defer></script>
+<meta name="description" content="Almost every backend has to answer two questions about each request: who is this (authentication), and are they allowed to do this (authorisation)? Getting...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w077d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 77 Day 4: Authentication">
+<meta property="og:description" content="Almost every backend has to answer two questions about each request: who is this (authentication), and are they allowed to do this (authorisation)? Getting...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w077d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-77">Week 77: Web backends</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#passwords" data-sec="passwords">Passwords</a></li><li><a href="#staying-logged-in" data-sec="staying-logged-in">Staying logged in</a></li><li><a href="#authorisation" data-sec="authorisation">Authorisation</a></li><li><a href="#logins-under-attack-and-oauth" data-sec="logins-under-attack-and-oauth">Logins under attack, and OAuth</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#on-your-own-computer" data-sec="on-your-own-computer">On your own computer</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w077d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-77">Week 77: Web backends</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 77, Day 4</span></p>
+      <h1>Authentication</h1>
+      <div class="day-intro"><p>Almost every backend has to answer two questions about each request: who is this (authentication), and are they allowed to do this (authorisation)? Getting either wrong is how data leaks. Today you&rsquo;ll build the pieces from the standard library and see exactly what the libraries you&rsquo;d normally use are doing: storing passwords so a stolen database doesn&rsquo;t reveal them, comparing secrets safely, keeping people logged in with signed session cookies or tokens (including the JSON Web Tokens most APIs use), deciding permissions, and slowing down people trying to guess passwords.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Store passwords with a slow, salted hash (PBKDF2), and verify them in constant time</li><li>Keep users logged in with signed session cookies or JWTs, checking signatures and expiry</li><li>Decide permissions with roles and ownership, and enforce them in every endpoint</li><li>Defend logins against guessing, and explain where OAuth and single sign-on fit</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Passwords: 25 min"></span><span class="plan-seg s0" style="flex:25" title="Staying logged in: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Authorisation: 20 min"></span><span class="plan-seg s0" style="flex:10" title="Logins under attack, and OAuth: 10 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Passwords</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Staying logged in</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:00</span><span class="plan-what">Authorisation</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Logins under attack, and OAuth</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:30</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w077d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w077d4.ipynb" download>download it</a>. Exercises today are worth 145 points.</p>
+    </header>
+    <div class="day-body">
+<div class="filebox"><div class="filebox-head">The file used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>miniflask.py</code></summary><pre class="pc-filetext">&quot;&quot;&quot;A small subset of Flask that runs in the page (Week 77).
+
+The names and behaviour follow Flask&#x27;s own, so code written against this module also runs with
+the real Flask (pip install flask): Flask, request, g, jsonify, abort, redirect, make_response,
+url_for, Blueprint, and app.test_client(). It&#x27;s a teaching copy, not the real thing: no templates,
+sessions, streaming or debugger.
+&quot;&quot;&quot;
+import io
+import json
+import re
+from contextvars import ContextVar
+from http import HTTPStatus
+from urllib.parse import parse_qs, urlencode, urlsplit
+
+_current = ContextVar(&quot;request&quot;)
+
+
+class HTTPException(Exception):
+    def __init__(self, code, description=None):
+        self.code = code
+        self.name = HTTPStatus(code).phrase
+        self.description = description or self.name
+        super().__init__(f&quot;{code} {self.name}: {self.description}&quot;)
+
+
+def abort(code, description=None):
+    raise HTTPException(code, description)
+
+
+class Headers:
+    &quot;&quot;&quot;Case-insensitive headers.&quot;&quot;&quot;
+    def __init__(self, items=()):
+        self._items = [(k, str(v)) for k, v in (items.items() if isinstance(items, dict) else items)]
+
+    def get(self, name, default=None):
+        for k, v in self._items:
+            if k.lower() == name.lower():
+                return v
+        return default
+
+    def __getitem__(self, name):
+        value = self.get(name)
+        if value is None:
+            raise KeyError(name)
+        return value
+
+    def __contains__(self, name):
+        return self.get(name) is not None
+
+    def __setitem__(self, name, value):
+        self._items = [(k, v) for k, v in self._items if k.lower() != name.lower()] + [(name, str(value))]
+
+    def items(self):
+        return list(self._items)
+
+
+class Args(dict):
+    &quot;&quot;&quot;Query or form values: .get(name) gives the first value; .getlist(name) all of them.&quot;&quot;&quot;
+    def __init__(self, pairs):
+        super().__init__()
+        self._lists = {}
+        for k, v in pairs:
+            self._lists.setdefault(k, []).append(v)
+            dict.setdefault(self, k, v)
+
+    def get(self, key, default=None, type=None):
+        if key not in self:
+            return default
+        value = self[key]
+        if type is not None:
+            try:
+                return type(value)
+            except (TypeError, ValueError):
+                return default
+        return value
+
+    def getlist(self, key):
+        return list(self._lists.get(key, []))
+
+
+class Request:
+    def __init__(self, environ):
+        self.environ = environ
+        self.method = environ[&quot;REQUEST_METHOD&quot;].upper()
+        self.path = environ.get(&quot;PATH_INFO&quot;, &quot;/&quot;) or &quot;/&quot;
+        self.args = Args(_pairs(environ.get(&quot;QUERY_STRING&quot;, &quot;&quot;)))
+        items = [(k[5:].replace(&quot;_&quot;, &quot;-&quot;).title(), v) for k, v in environ.items() if k.startswith(&quot;HTTP_&quot;)]
+        if environ.get(&quot;CONTENT_TYPE&quot;):
+            items.append((&quot;Content-Type&quot;, environ[&quot;CONTENT_TYPE&quot;]))
+        self.headers = Headers(items)
+        length = int(environ.get(&quot;CONTENT_LENGTH&quot;) or 0)
+        self.data = environ[&quot;wsgi.input&quot;].read(length) if length else b&quot;&quot;
+        self.content_type = environ.get(&quot;CONTENT_TYPE&quot;, &quot;&quot;)
+        self.form = Args(_pairs(self.data.decode(&quot;utf-8&quot;))) if self.content_type.startswith(&quot;application/x-www-form-urlencoded&quot;) else Args([])
+        self.view_args = {}
+        cookie = environ.get(&quot;HTTP_COOKIE&quot;, &quot;&quot;)
+        self.cookies = dict(p.strip().split(&quot;=&quot;, 1) for p in cookie.split(&quot;;&quot;) if &quot;=&quot; in p)
+
+    @property
+    def is_json(self):
+        return self.content_type.split(&quot;;&quot;)[0].strip() == &quot;application/json&quot;
+
+    def get_json(self, silent=False, force=False):
+        if not (self.is_json or force):
+            if silent:
+                return None
+            abort(415, &quot;expected a JSON body (Content-Type: application/json)&quot;)
+        try:
+            return json.loads(self.data or b&quot;null&quot;)
+        except ValueError:
+            if silent:
+                return None
+            abort(400, &quot;the body isn&#x27;t valid JSON&quot;)
+
+    @property
+    def json(self):
+        return self.get_json()
+
+
+def _pairs(text):
+    return [(k, v) for k, vs in parse_qs(text, keep_blank_values=True).items() for v in vs]
+
+
+class _Proxy:
+    def __init__(self, getter):
+        object.__setattr__(self, &quot;_getter&quot;, getter)
+
+    def __getattr__(self, name):
+        return getattr(self._getter(), name)
+
+    def __setattr__(self, name, value):
+        setattr(self._getter(), name, value)
+
+
+def _request():
+    try:
+        return _current.get()[0]
+    except LookupError:
+        raise RuntimeError(&quot;working outside of request context&quot;) from None
+
+
+def _g():
+    try:
+        return _current.get()[1]
+    except LookupError:
+        raise RuntimeError(&quot;working outside of request context&quot;) from None
+
+
+class _G:
+    def get(self, name, default=None):
+        return self.__dict__.get(name, default)
+
+
+request = _Proxy(_request)
+g = _Proxy(_g)
+
+
+class Response:
+    def __init__(self, response=b&quot;&quot;, status=200, headers=None, mimetype=None, content_type=None):
+        if isinstance(response, str):
+            response = response.encode(&quot;utf-8&quot;)
+        self.data = response
+        self.status_code = status
+        self.headers = Headers(headers or {})
+        if content_type or mimetype or &quot;Content-Type&quot; not in self.headers:
+            ctype = content_type or (f&quot;{mimetype}; charset=utf-8&quot; if mimetype and mimetype.startswith(&quot;text/&quot;) else mimetype) or &quot;text/html; charset=utf-8&quot;
+            self.headers[&quot;Content-Type&quot;] = ctype
+
+    @property
+    def status(self):
+        return f&quot;{self.status_code} {HTTPStatus(self.status_code).phrase}&quot;
+
+    @property
+    def text(self):
+        return self.data.decode(&quot;utf-8&quot;)
+
+    def get_json(self):
+        return json.loads(self.data)
+
+    @property
+    def json(self):
+        return self.get_json()
+
+    def set_cookie(self, key, value=&quot;&quot;, max_age=None, path=&quot;/&quot;, secure=False, httponly=False, samesite=None):
+        parts = [f&quot;{key}={value}&quot;]
+        if max_age is not None:
+            parts.append(f&quot;Max-Age={max_age}&quot;)
+        parts.append(f&quot;Path={path}&quot;)
+        if secure:
+            parts.append(&quot;Secure&quot;)
+        if httponly:
+            parts.append(&quot;HttpOnly&quot;)
+        if samesite:
+            parts.append(f&quot;SameSite={samesite}&quot;)
+        self.headers._items.append((&quot;Set-Cookie&quot;, &quot;; &quot;.join(parts)))
+
+
+def jsonify(*args, **kwargs):
+    data = args[0] if len(args) == 1 else (list(args) if args else kwargs)
+    return Response(json.dumps(data), headers={&quot;Content-Type&quot;: &quot;application/json&quot;})
+
+
+def redirect(location, code=302):
+    return Response(b&quot;&quot;, code, {&quot;Location&quot;: location})
+
+
+def make_response(*args):
+    rv = args[0] if len(args) == 1 else args
+    return _App._to_response(rv)
+
+
+def url_for(endpoint, **values):
+    return _current.get()[2].url_for(endpoint, **values)
+
+
+_CONVERTERS = {&quot;int&quot;: (r&quot;\d+&quot;, int), &quot;float&quot;: (r&quot;\d+(?:\.\d+)?&quot;, float), &quot;path&quot;: (r&quot;.+&quot;, str), &quot;string&quot;: (r&quot;[^/]+&quot;, str)}
+
+
+class _Rule:
+    def __init__(self, rule, endpoint, view, methods):
+        self.rule, self.endpoint, self.view = rule, endpoint, view
+        self.methods = {m.upper() for m in methods} | ({&quot;HEAD&quot;} if &quot;GET&quot; in {m.upper() for m in methods} else set())
+        regex, self.converters = &quot;&quot;, {}
+        for piece in re.split(r&quot;(&lt;[^&gt;]+&gt;)&quot;, rule):
+            m = re.fullmatch(r&quot;&lt;(?:(\w+):)?(\w+)&gt;&quot;, piece)
+            if m:
+                kind, name = m.group(1) or &quot;string&quot;, m.group(2)
+                pattern, convert = _CONVERTERS[kind]
+                regex += f&quot;(?P&lt;{name}&gt;{pattern})&quot;
+                self.converters[name] = convert
+            else:
+                regex += re.escape(piece)
+        self.regex = re.compile(regex)
+
+    def match(self, path):
+        m = self.regex.fullmatch(path)
+        if not m:
+            return None
+        return {k: self.converters[k](v) for k, v in m.groupdict().items()}
+
+    def build(self, values):
+        def fill(m):
+            return str(values.pop(m.group(2)))
+        path = re.sub(r&quot;&lt;(?:(\w+):)?(\w+)&gt;&quot;, fill, self.rule)
+        return path + (f&quot;?{urlencode(values)}&quot; if values else &quot;&quot;)
+
+
+class _Setup:
+    def route(self, rule, methods=(&quot;GET&quot;,), endpoint=None):
+        def decorate(view):
+            self._add(rule, endpoint or view.__name__, view, methods)
+            return view
+        return decorate
+
+    def get(self, rule, **kw):
+        return self.route(rule, methods=[&quot;GET&quot;], **kw)
+
+    def post(self, rule, **kw):
+        return self.route(rule, methods=[&quot;POST&quot;], **kw)
+
+    def put(self, rule, **kw):
+        return self.route(rule, methods=[&quot;PUT&quot;], **kw)
+
+    def patch(self, rule, **kw):
+        return self.route(rule, methods=[&quot;PATCH&quot;], **kw)
+
+    def delete(self, rule, **kw):
+        return self.route(rule, methods=[&quot;DELETE&quot;], **kw)
+
+
+class Blueprint(_Setup):
+    def __init__(self, name, import_name, url_prefix=&quot;&quot;):
+        self.name, self.url_prefix = name, url_prefix
+        self.deferred = []
+
+    def _add(self, rule, endpoint, view, methods):
+        self.deferred.append((rule, endpoint, view, methods))
+
+
+class _App(_Setup):
+    def __init__(self, import_name):
+        self.import_name = import_name
+        self.config = {&quot;TESTING&quot;: False}
+        self.rules = []
+        self.before_funcs, self.after_funcs, self.error_handlers = [], [], {}
+
+    def _add(self, rule, endpoint, view, methods):
+        self.rules.append(_Rule(rule, endpoint, view, methods))
+
+    def register_blueprint(self, bp, url_prefix=None):
+        prefix = url_prefix if url_prefix is not None else bp.url_prefix
+        for rule, endpoint, view, methods in bp.deferred:
+            self._add(prefix + rule, f&quot;{bp.name}.{endpoint}&quot;, view, methods)
+
+    def before_request(self, f):
+        self.before_funcs.append(f)
+        return f
+
+    def after_request(self, f):
+        self.after_funcs.append(f)
+        return f
+
+    def errorhandler(self, code):
+        def decorate(f):
+            self.error_handlers[code] = f
+            return f
+        return decorate
+
+    def url_for(self, endpoint, **values):
+        for r in self.rules:
+            if r.endpoint == endpoint:
+                return r.build(dict(values))
+        raise LookupError(f&quot;no endpoint {endpoint!r}&quot;)
+
+    @staticmethod
+    def _to_response(rv):
+        status, headers = None, None
+        if isinstance(rv, tuple):
+            if len(rv) == 3:
+                rv, status, headers = rv
+            elif isinstance(rv[1], (dict, list)):
+                rv, headers = rv
+            else:
+                rv, status = rv
+        if isinstance(rv, Response):
+            response = rv
+        elif isinstance(rv, (dict, list)):
+            response = jsonify(rv)
+        elif isinstance(rv, (str, bytes)):
+            response = Response(rv)
+        elif rv is None:
+            raise TypeError(&quot;the view function did not return a valid response&quot;)
+        else:
+            raise TypeError(f&quot;can&#x27;t turn {type(rv).__name__} into a response&quot;)
+        if status is not None:
+            response.status_code = status
+        for k, v in (headers.items() if isinstance(headers, dict) else headers or []):
+            response.headers[k] = v
+        return response
+
+    def _error(self, e):
+        handler = self.error_handlers.get(e.code)
+        if handler:
+            return self._to_response(handler(e))
+        body = f&quot;&lt;h1&gt;{e.code} {e.name}&lt;/h1&gt;&lt;p&gt;{e.description}&lt;/p&gt;&quot;
+        return Response(body, e.code)
+
+    def _dispatch(self, req):
+        path = req.path
+        allowed = set()
+        for r in self.rules:
+            values = r.match(path)
+            if values is None:
+                continue
+            if req.method in r.methods:
+                req.view_args = values
+                return r.view(**values)
+            allowed |= r.methods
+        if allowed:
+            raise _MethodNotAllowed(sorted(allowed | {&quot;OPTIONS&quot;}))
+        abort(404, &quot;The requested URL was not found on the server.&quot;)
+
+    def full_dispatch(self, environ):
+        req = Request(environ)
+        token = _current.set((req, _G(), self))
+        try:
+            try:
+                rv = None
+                for f in self.before_funcs:
+                    rv = f()
+                    if rv is not None:
+                        break
+                if rv is None:
+                    rv = self._dispatch(req)
+                response = self._to_response(rv)
+            except _MethodNotAllowed as e:
+                response = self._error(HTTPException(405))
+                response.headers[&quot;Allow&quot;] = &quot;, &quot;.join(e.allowed)
+            except HTTPException as e:
+                response = self._error(e)
+            except Exception as e:
+                if self.config.get(&quot;TESTING&quot;) and 500 not in self.error_handlers:
+                    raise
+                response = self._error(HTTPException(500)) if 500 not in self.error_handlers else self._to_response(self.error_handlers[500](e))
+                response.status_code = 500
+            for f in self.after_funcs:
+                response = f(response) or response
+            if req.method == &quot;HEAD&quot;:
+                response.headers[&quot;Content-Length&quot;] = len(response.data)
+                response.data = b&quot;&quot;
+            return response
+        finally:
+            _current.reset(token)
+
+    def __call__(self, environ, start_response):
+        response = self.full_dispatch(environ)
+        if &quot;Content-Length&quot; not in response.headers:
+            response.headers[&quot;Content-Length&quot;] = len(response.data)
+        start_response(response.status, response.headers.items())
+        return [response.data]
+
+    def test_client(self):
+        return _TestClient(self)
+
+
+class _MethodNotAllowed(Exception):
+    def __init__(self, allowed):
+        self.allowed = allowed
+
+
+class Flask(_App):
+    pass
+
+
+class _TestClient:
+    def __init__(self, app):
+        self.app = app
+        self.cookies = {}
+
+    def open(self, path, method=&quot;GET&quot;, json=None, data=None, headers=None, query_string=None):
+        url = urlsplit(path)
+        query = url.query
+        if query_string:
+            query = (query + &quot;&amp;&quot; if query else &quot;&quot;) + urlencode(query_string, doseq=True)
+        body, ctype = b&quot;&quot;, None
+        if json is not None:
+            import json as _json
+            body, ctype = _json.dumps(json).encode(&quot;utf-8&quot;), &quot;application/json&quot;
+        elif isinstance(data, dict):
+            body, ctype = urlencode(data, doseq=True).encode(&quot;utf-8&quot;), &quot;application/x-www-form-urlencoded&quot;
+        elif data is not None:
+            body = data.encode(&quot;utf-8&quot;) if isinstance(data, str) else data
+        environ = {&quot;REQUEST_METHOD&quot;: method.upper(), &quot;PATH_INFO&quot;: url.path or &quot;/&quot;, &quot;QUERY_STRING&quot;: query,
+                   &quot;SERVER_NAME&quot;: &quot;localhost&quot;, &quot;SERVER_PORT&quot;: &quot;80&quot;, &quot;wsgi.url_scheme&quot;: &quot;http&quot;,
+                   &quot;wsgi.input&quot;: io.BytesIO(body), &quot;CONTENT_LENGTH&quot;: str(len(body))}
+        headers = dict(headers or {})
+        if ctype and not any(k.lower() == &quot;content-type&quot; for k in headers):
+            environ[&quot;CONTENT_TYPE&quot;] = ctype
+        for k, v in headers.items():
+            if k.lower() == &quot;content-type&quot;:
+                environ[&quot;CONTENT_TYPE&quot;] = v
+            else:
+                environ[&quot;HTTP_&quot; + k.upper().replace(&quot;-&quot;, &quot;_&quot;)] = v
+        if self.cookies:
+            environ[&quot;HTTP_COOKIE&quot;] = &quot;; &quot;.join(f&quot;{k}={v}&quot; for k, v in self.cookies.items())
+        response = self.app.full_dispatch(environ)
+        for k, v in response.headers.items():
+            if k.lower() == &quot;set-cookie&quot;:
+                name, _, rest = v.partition(&quot;=&quot;)
+                self.cookies[name] = rest.split(&quot;;&quot;)[0]
+        return response
+
+    def get(self, path, **kw):
+        return self.open(path, &quot;GET&quot;, **kw)
+
+    def post(self, path, **kw):
+        return self.open(path, &quot;POST&quot;, **kw)
+
+    def put(self, path, **kw):
+        return self.open(path, &quot;PUT&quot;, **kw)
+
+    def patch(self, path, **kw):
+        return self.open(path, &quot;PATCH&quot;, **kw)
+
+    def delete(self, path, **kw):
+        return self.open(path, &quot;DELETE&quot;, **kw)
+</pre></details><script type="application/json" class="page-files">{"miniflask.py": "\"\"\"A small subset of Flask that runs in the page (Week 77).\n\nThe names and behaviour follow Flask's own, so code written against this module also runs with\nthe real Flask (pip install flask): Flask, request, g, jsonify, abort, redirect, make_response,\nurl_for, Blueprint, and app.test_client(). It's a teaching copy, not the real thing: no templates,\nsessions, streaming or debugger.\n\"\"\"\nimport io\nimport json\nimport re\nfrom contextvars import ContextVar\nfrom http import HTTPStatus\nfrom urllib.parse import parse_qs, urlencode, urlsplit\n\n_current = ContextVar(\"request\")\n\n\nclass HTTPException(Exception):\n    def __init__(self, code, description=None):\n        self.code = code\n        self.name = HTTPStatus(code).phrase\n        self.description = description or self.name\n        super().__init__(f\"{code} {self.name}: {self.description}\")\n\n\ndef abort(code, description=None):\n    raise HTTPException(code, description)\n\n\nclass Headers:\n    \"\"\"Case-insensitive headers.\"\"\"\n    def __init__(self, items=()):\n        self._items = [(k, str(v)) for k, v in (items.items() if isinstance(items, dict) else items)]\n\n    def get(self, name, default=None):\n        for k, v in self._items:\n            if k.lower() == name.lower():\n                return v\n        return default\n\n    def __getitem__(self, name):\n        value = self.get(name)\n        if value is None:\n            raise KeyError(name)\n        return value\n\n    def __contains__(self, name):\n        return self.get(name) is not None\n\n    def __setitem__(self, name, value):\n        self._items = [(k, v) for k, v in self._items if k.lower() != name.lower()] + [(name, str(value))]\n\n    def items(self):\n        return list(self._items)\n\n\nclass Args(dict):\n    \"\"\"Query or form values: .get(name) gives the first value; .getlist(name) all of them.\"\"\"\n    def __init__(self, pairs):\n        super().__init__()\n        self._lists = {}\n        for k, v in pairs:\n            self._lists.setdefault(k, []).append(v)\n            dict.setdefault(self, k, v)\n\n    def get(self, key, default=None, type=None):\n        if key not in self:\n            return default\n        value = self[key]\n        if type is not None:\n            try:\n                return type(value)\n            except (TypeError, ValueError):\n                return default\n        return value\n\n    def getlist(self, key):\n        return list(self._lists.get(key, []))\n\n\nclass Request:\n    def __init__(self, environ):\n        self.environ = environ\n        self.method = environ[\"REQUEST_METHOD\"].upper()\n        self.path = environ.get(\"PATH_INFO\", \"/\") or \"/\"\n        self.args = Args(_pairs(environ.get(\"QUERY_STRING\", \"\")))\n        items = [(k[5:].replace(\"_\", \"-\").title(), v) for k, v in environ.items() if k.startswith(\"HTTP_\")]\n        if environ.get(\"CONTENT_TYPE\"):\n            items.append((\"Content-Type\", environ[\"CONTENT_TYPE\"]))\n        self.headers = Headers(items)\n        length = int(environ.get(\"CONTENT_LENGTH\") or 0)\n        self.data = environ[\"wsgi.input\"].read(length) if length else b\"\"\n        self.content_type = environ.get(\"CONTENT_TYPE\", \"\")\n        self.form = Args(_pairs(self.data.decode(\"utf-8\"))) if self.content_type.startswith(\"application/x-www-form-urlencoded\") else Args([])\n        self.view_args = {}\n        cookie = environ.get(\"HTTP_COOKIE\", \"\")\n        self.cookies = dict(p.strip().split(\"=\", 1) for p in cookie.split(\";\") if \"=\" in p)\n\n    @property\n    def is_json(self):\n        return self.content_type.split(\";\")[0].strip() == \"application/json\"\n\n    def get_json(self, silent=False, force=False):\n        if not (self.is_json or force):\n            if silent:\n                return None\n            abort(415, \"expected a JSON body (Content-Type: application/json)\")\n        try:\n            return json.loads(self.data or b\"null\")\n        except ValueError:\n            if silent:\n                return None\n            abort(400, \"the body isn't valid JSON\")\n\n    @property\n    def json(self):\n        return self.get_json()\n\n\ndef _pairs(text):\n    return [(k, v) for k, vs in parse_qs(text, keep_blank_values=True).items() for v in vs]\n\n\nclass _Proxy:\n    def __init__(self, getter):\n        object.__setattr__(self, \"_getter\", getter)\n\n    def __getattr__(self, name):\n        return getattr(self._getter(), name)\n\n    def __setattr__(self, name, value):\n        setattr(self._getter(), name, value)\n\n\ndef _request():\n    try:\n        return _current.get()[0]\n    except LookupError:\n        raise RuntimeError(\"working outside of request context\") from None\n\n\ndef _g():\n    try:\n        return _current.get()[1]\n    except LookupError:\n        raise RuntimeError(\"working outside of request context\") from None\n\n\nclass _G:\n    def get(self, name, default=None):\n        return self.__dict__.get(name, default)\n\n\nrequest = _Proxy(_request)\ng = _Proxy(_g)\n\n\nclass Response:\n    def __init__(self, response=b\"\", status=200, headers=None, mimetype=None, content_type=None):\n        if isinstance(response, str):\n            response = response.encode(\"utf-8\")\n        self.data = response\n        self.status_code = status\n        self.headers = Headers(headers or {})\n        if content_type or mimetype or \"Content-Type\" not in self.headers:\n            ctype = content_type or (f\"{mimetype}; charset=utf-8\" if mimetype and mimetype.startswith(\"text/\") else mimetype) or \"text/html; charset=utf-8\"\n            self.headers[\"Content-Type\"] = ctype\n\n    @property\n    def status(self):\n        return f\"{self.status_code} {HTTPStatus(self.status_code).phrase}\"\n\n    @property\n    def text(self):\n        return self.data.decode(\"utf-8\")\n\n    def get_json(self):\n        return json.loads(self.data)\n\n    @property\n    def json(self):\n        return self.get_json()\n\n    def set_cookie(self, key, value=\"\", max_age=None, path=\"/\", secure=False, httponly=False, samesite=None):\n        parts = [f\"{key}={value}\"]\n        if max_age is not None:\n            parts.append(f\"Max-Age={max_age}\")\n        parts.append(f\"Path={path}\")\n        if secure:\n            parts.append(\"Secure\")\n        if httponly:\n            parts.append(\"HttpOnly\")\n        if samesite:\n            parts.append(f\"SameSite={samesite}\")\n        self.headers._items.append((\"Set-Cookie\", \"; \".join(parts)))\n\n\ndef jsonify(*args, **kwargs):\n    data = args[0] if len(args) == 1 else (list(args) if args else kwargs)\n    return Response(json.dumps(data), headers={\"Content-Type\": \"application/json\"})\n\n\ndef redirect(location, code=302):\n    return Response(b\"\", code, {\"Location\": location})\n\n\ndef make_response(*args):\n    rv = args[0] if len(args) == 1 else args\n    return _App._to_response(rv)\n\n\ndef url_for(endpoint, **values):\n    return _current.get()[2].url_for(endpoint, **values)\n\n\n_CONVERTERS = {\"int\": (r\"\\d+\", int), \"float\": (r\"\\d+(?:\\.\\d+)?\", float), \"path\": (r\".+\", str), \"string\": (r\"[^/]+\", str)}\n\n\nclass _Rule:\n    def __init__(self, rule, endpoint, view, methods):\n        self.rule, self.endpoint, self.view = rule, endpoint, view\n        self.methods = {m.upper() for m in methods} | ({\"HEAD\"} if \"GET\" in {m.upper() for m in methods} else set())\n        regex, self.converters = \"\", {}\n        for piece in re.split(r\"(<[^>]+>)\", rule):\n            m = re.fullmatch(r\"<(?:(\\w+):)?(\\w+)>\", piece)\n            if m:\n                kind, name = m.group(1) or \"string\", m.group(2)\n                pattern, convert = _CONVERTERS[kind]\n                regex += f\"(?P<{name}>{pattern})\"\n                self.converters[name] = convert\n            else:\n                regex += re.escape(piece)\n        self.regex = re.compile(regex)\n\n    def match(self, path):\n        m = self.regex.fullmatch(path)\n        if not m:\n            return None\n        return {k: self.converters[k](v) for k, v in m.groupdict().items()}\n\n    def build(self, values):\n        def fill(m):\n            return str(values.pop(m.group(2)))\n        path = re.sub(r\"<(?:(\\w+):)?(\\w+)>\", fill, self.rule)\n        return path + (f\"?{urlencode(values)}\" if values else \"\")\n\n\nclass _Setup:\n    def route(self, rule, methods=(\"GET\",), endpoint=None):\n        def decorate(view):\n            self._add(rule, endpoint or view.__name__, view, methods)\n            return view\n        return decorate\n\n    def get(self, rule, **kw):\n        return self.route(rule, methods=[\"GET\"], **kw)\n\n    def post(self, rule, **kw):\n        return self.route(rule, methods=[\"POST\"], **kw)\n\n    def put(self, rule, **kw):\n        return self.route(rule, methods=[\"PUT\"], **kw)\n\n    def patch(self, rule, **kw):\n        return self.route(rule, methods=[\"PATCH\"], **kw)\n\n    def delete(self, rule, **kw):\n        return self.route(rule, methods=[\"DELETE\"], **kw)\n\n\nclass Blueprint(_Setup):\n    def __init__(self, name, import_name, url_prefix=\"\"):\n        self.name, self.url_prefix = name, url_prefix\n        self.deferred = []\n\n    def _add(self, rule, endpoint, view, methods):\n        self.deferred.append((rule, endpoint, view, methods))\n\n\nclass _App(_Setup):\n    def __init__(self, import_name):\n        self.import_name = import_name\n        self.config = {\"TESTING\": False}\n        self.rules = []\n        self.before_funcs, self.after_funcs, self.error_handlers = [], [], {}\n\n    def _add(self, rule, endpoint, view, methods):\n        self.rules.append(_Rule(rule, endpoint, view, methods))\n\n    def register_blueprint(self, bp, url_prefix=None):\n        prefix = url_prefix if url_prefix is not None else bp.url_prefix\n        for rule, endpoint, view, methods in bp.deferred:\n            self._add(prefix + rule, f\"{bp.name}.{endpoint}\", view, methods)\n\n    def before_request(self, f):\n        self.before_funcs.append(f)\n        return f\n\n    def after_request(self, f):\n        self.after_funcs.append(f)\n        return f\n\n    def errorhandler(self, code):\n        def decorate(f):\n            self.error_handlers[code] = f\n            return f\n        return decorate\n\n    def url_for(self, endpoint, **values):\n        for r in self.rules:\n            if r.endpoint == endpoint:\n                return r.build(dict(values))\n        raise LookupError(f\"no endpoint {endpoint!r}\")\n\n    @staticmethod\n    def _to_response(rv):\n        status, headers = None, None\n        if isinstance(rv, tuple):\n            if len(rv) == 3:\n                rv, status, headers = rv\n            elif isinstance(rv[1], (dict, list)):\n                rv, headers = rv\n            else:\n                rv, status = rv\n        if isinstance(rv, Response):\n            response = rv\n        elif isinstance(rv, (dict, list)):\n            response = jsonify(rv)\n        elif isinstance(rv, (str, bytes)):\n            response = Response(rv)\n        elif rv is None:\n            raise TypeError(\"the view function did not return a valid response\")\n        else:\n            raise TypeError(f\"can't turn {type(rv).__name__} into a response\")\n        if status is not None:\n            response.status_code = status\n        for k, v in (headers.items() if isinstance(headers, dict) else headers or []):\n            response.headers[k] = v\n        return response\n\n    def _error(self, e):\n        handler = self.error_handlers.get(e.code)\n        if handler:\n            return self._to_response(handler(e))\n        body = f\"<h1>{e.code} {e.name}</h1><p>{e.description}</p>\"\n        return Response(body, e.code)\n\n    def _dispatch(self, req):\n        path = req.path\n        allowed = set()\n        for r in self.rules:\n            values = r.match(path)\n            if values is None:\n                continue\n            if req.method in r.methods:\n                req.view_args = values\n                return r.view(**values)\n            allowed |= r.methods\n        if allowed:\n            raise _MethodNotAllowed(sorted(allowed | {\"OPTIONS\"}))\n        abort(404, \"The requested URL was not found on the server.\")\n\n    def full_dispatch(self, environ):\n        req = Request(environ)\n        token = _current.set((req, _G(), self))\n        try:\n            try:\n                rv = None\n                for f in self.before_funcs:\n                    rv = f()\n                    if rv is not None:\n                        break\n                if rv is None:\n                    rv = self._dispatch(req)\n                response = self._to_response(rv)\n            except _MethodNotAllowed as e:\n                response = self._error(HTTPException(405))\n                response.headers[\"Allow\"] = \", \".join(e.allowed)\n            except HTTPException as e:\n                response = self._error(e)\n            except Exception as e:\n                if self.config.get(\"TESTING\") and 500 not in self.error_handlers:\n                    raise\n                response = self._error(HTTPException(500)) if 500 not in self.error_handlers else self._to_response(self.error_handlers[500](e))\n                response.status_code = 500\n            for f in self.after_funcs:\n                response = f(response) or response\n            if req.method == \"HEAD\":\n                response.headers[\"Content-Length\"] = len(response.data)\n                response.data = b\"\"\n            return response\n        finally:\n            _current.reset(token)\n\n    def __call__(self, environ, start_response):\n        response = self.full_dispatch(environ)\n        if \"Content-Length\" not in response.headers:\n            response.headers[\"Content-Length\"] = len(response.data)\n        start_response(response.status, response.headers.items())\n        return [response.data]\n\n    def test_client(self):\n        return _TestClient(self)\n\n\nclass _MethodNotAllowed(Exception):\n    def __init__(self, allowed):\n        self.allowed = allowed\n\n\nclass Flask(_App):\n    pass\n\n\nclass _TestClient:\n    def __init__(self, app):\n        self.app = app\n        self.cookies = {}\n\n    def open(self, path, method=\"GET\", json=None, data=None, headers=None, query_string=None):\n        url = urlsplit(path)\n        query = url.query\n        if query_string:\n            query = (query + \"&\" if query else \"\") + urlencode(query_string, doseq=True)\n        body, ctype = b\"\", None\n        if json is not None:\n            import json as _json\n            body, ctype = _json.dumps(json).encode(\"utf-8\"), \"application/json\"\n        elif isinstance(data, dict):\n            body, ctype = urlencode(data, doseq=True).encode(\"utf-8\"), \"application/x-www-form-urlencoded\"\n        elif data is not None:\n            body = data.encode(\"utf-8\") if isinstance(data, str) else data\n        environ = {\"REQUEST_METHOD\": method.upper(), \"PATH_INFO\": url.path or \"/\", \"QUERY_STRING\": query,\n                   \"SERVER_NAME\": \"localhost\", \"SERVER_PORT\": \"80\", \"wsgi.url_scheme\": \"http\",\n                   \"wsgi.input\": io.BytesIO(body), \"CONTENT_LENGTH\": str(len(body))}\n        headers = dict(headers or {})\n        if ctype and not any(k.lower() == \"content-type\" for k in headers):\n            environ[\"CONTENT_TYPE\"] = ctype\n        for k, v in headers.items():\n            if k.lower() == \"content-type\":\n                environ[\"CONTENT_TYPE\"] = v\n            else:\n                environ[\"HTTP_\" + k.upper().replace(\"-\", \"_\")] = v\n        if self.cookies:\n            environ[\"HTTP_COOKIE\"] = \"; \".join(f\"{k}={v}\" for k, v in self.cookies.items())\n        response = self.app.full_dispatch(environ)\n        for k, v in response.headers.items():\n            if k.lower() == \"set-cookie\":\n                name, _, rest = v.partition(\"=\")\n                self.cookies[name] = rest.split(\";\")[0]\n        return response\n\n    def get(self, path, **kw):\n        return self.open(path, \"GET\", **kw)\n\n    def post(self, path, **kw):\n        return self.open(path, \"POST\", **kw)\n\n    def put(self, path, **kw):\n        return self.open(path, \"PUT\", **kw)\n\n    def patch(self, path, **kw):\n        return self.open(path, \"PATCH\", **kw)\n\n    def delete(self, path, **kw):\n        return self.open(path, \"DELETE\", **kw)\n"}</script></div>
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w077d4-p1"><textarea class="pc-src pc-code" hidden>import hashlib
+
+users = {&quot;ada&quot;: &quot;letmein&quot;, &quot;bob&quot;: &quot;letmein&quot;, &quot;cy&quot;: &quot;Tr0ub4dor&amp;3&quot;}
+stored = {name: hashlib.sha256(pw.encode()).hexdigest() for name, pw in users.items()}
+print(stored[&quot;ada&quot;] == stored[&quot;bob&quot;])
+
+common = [&quot;123456&quot;, &quot;password&quot;, &quot;letmein&quot;, &quot;qwerty&quot;]
+lookup = {hashlib.sha256(pw.encode()).hexdigest(): pw for pw in common}
+print({name: lookup.get(h, &quot;?&quot;) for name, h in stored.items()})</textarea></div>
+<p>Hashing the passwords wasn&rsquo;t enough. Ada and Bob have the same hash, so cracking one cracks both, and anyone with the stolen table can hash a list of common passwords once and look every user up instantly. A fast hash like SHA-256 is designed for speed, which is exactly wrong for passwords: attackers can try billions a second. Password storage needs a <strong>salt</strong> and a deliberately <strong>slow</strong> hash.</p>
+<h2 id="passwords">Passwords</h2>
+<p><strong>Never store passwords</strong>, not even encrypted. Store a value from which the password can be <strong>checked</strong> but not recovered:</p>
+<ol>
+<li>Generate a random <strong>salt</strong> for each user (<code>secrets.token_bytes(16)</code>), so equal passwords get different hashes and precomputed tables are useless.</li>
+<li>Run a <strong>slow key-derivation function</strong>: <strong>PBKDF2</strong> (repeating HMAC hundreds of thousands of times), <strong>scrypt</strong>, or <strong>Argon2</strong> (the current recommendation, which also uses lots of memory, defeating specialised cracking hardware). <code>hashlib.pbkdf2_hmac</code> and <code>hashlib.scrypt</code> are in the standard library on most systems; <code>argon2-cffi</code> and <code>bcrypt</code> are popular packages.</li>
+<li>Store the algorithm, the cost settings, the salt and the result together, in one string such as <code>pbkdf2_sha256$600000$SALT$HASH</code>, so you can raise the cost later and re-hash each user&rsquo;s password when they next log in.</li>
+<li>To check a login, recompute with the stored salt and settings, and compare with <strong><code>hmac.compare_digest</code></strong>, which takes the same time however many characters match. A normal <code>==</code> stops at the first difference, and the timing can leak how close a guess is.</li>
+</ol>
+<p>PBKDF2 itself is short: for each block of output, compute <code>U1 = HMAC(password, salt + block_number)</code>, then <code>U2 = HMAC(password, U1)</code>, and so on, <code>iterations</code> times, XORing all the <code>U</code>s together. (This browser&rsquo;s Python has no <code>hashlib.pbkdf2_hmac</code>, so today you&rsquo;ll write it, with small iteration counts for speed; real systems use 600,000 or more.)</p>
+<p>Also: require reasonable length (at least 8 characters, preferably more) rather than complicated rules, check new passwords against lists of known-breached ones, and never log, email or display a password.</p>
+<div class="pc pc-example" data-kind="example" data-id="w077d4-e2"><textarea class="pc-src pc-code" hidden>import base64, hashlib, hmac, secrets
+
+def pbkdf2_sha256(password, salt, iterations, length=32):
+    out = b&quot;&quot;
+    block = 1
+    while len(out) &lt; length:
+        u = hmac.new(password, salt + block.to_bytes(4, &quot;big&quot;), hashlib.sha256).digest()
+        total = int.from_bytes(u, &quot;big&quot;)
+        for _ in range(iterations - 1):
+            u = hmac.new(password, u, hashlib.sha256).digest()
+            total ^= int.from_bytes(u, &quot;big&quot;)
+        out += total.to_bytes(32, &quot;big&quot;)
+        block += 1
+    return out[:length]
+
+print(pbkdf2_sha256(b&quot;passwd&quot;, b&quot;salt&quot;, 1, 16).hex())
+
+salt = secrets.token_bytes(16)
+stored = pbkdf2_sha256(b&quot;letmein&quot;, salt, 1000)
+attempt = pbkdf2_sha256(b&quot;letmein&quot;, salt, 1000)
+print(hmac.compare_digest(stored, attempt), base64.b64encode(salt).decode() != &quot;&quot;, len(stored))</textarea></div>
+<h2 id="staying-logged-in">Staying logged in</h2>
+<p>After a login, the server must recognise the user&rsquo;s later requests without asking for the password every time. Two common ways:</p>
+<p><strong>Sessions.</strong> The server creates a random <strong>session id</strong> (<code>secrets.token_urlsafe(32)</code>), stores <code>id -&gt; user</code> (in a database or cache), and sends the id in a cookie (<code>Set-Cookie: session=...; HttpOnly; Secure; SameSite=Lax</code>, Week 76 Day 2). Each request&rsquo;s cookie is looked up. Logging out deletes the stored session, which ends it at once. Alternatively, the session data itself can live in the cookie, <strong>signed</strong> with a server-side secret key (an HMAC of the data), so the browser can read but not change it: Flask&rsquo;s default sessions work this way.</p>
+<p><strong>Tokens.</strong> APIs usually send a token in the <code>Authorization: Bearer ...</code> header. A <strong>JSON Web Token</strong> (JWT) is three base64url parts joined by dots: a <strong>header</strong> (<code>{"alg": "HS256", "typ": "JWT"}</code>), a <strong>payload</strong> of claims (<code>{"sub": "42", "exp": 1767225600, "role": "admin"}</code>) and a <strong>signature</strong> (HMAC-SHA256 of the first two parts with a secret key). Anyone can <strong>read</strong> a JWT (it isn&rsquo;t encrypted, so put nothing secret in it); only the key holder can <strong>make</strong> one. Verifying means: recompute the signature and compare in constant time, insist on the algorithm you expect (never accept <code>"alg": "none"</code>, a classic attack), and check <code>exp</code> (expiry) and <code>nbf</code> (not before). Because they&rsquo;re checked without a database, JWTs can&rsquo;t easily be revoked before they expire, so keep them short-lived (minutes) and pair them with a longer-lived <strong>refresh token</strong> that the server does store.</p>
+<p>Either way: generate secrets with <code>secrets</code>, never <code>random</code>; keep keys out of code (Week 79); and set cookies <code>HttpOnly</code> and <code>Secure</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w077d4-e3"><textarea class="pc-src pc-code" hidden>import base64, hashlib, hmac, json
+
+def b64(data):
+    return base64.urlsafe_b64encode(data).rstrip(b&quot;=&quot;).decode()
+
+def jwt(payload, key):
+    header = b64(json.dumps({&quot;alg&quot;: &quot;HS256&quot;, &quot;typ&quot;: &quot;JWT&quot;}, separators=(&quot;,&quot;, &quot;:&quot;)).encode())
+    body = b64(json.dumps(payload, separators=(&quot;,&quot;, &quot;:&quot;)).encode())
+    signature = hmac.new(key, f&quot;{header}.{body}&quot;.encode(), hashlib.sha256).digest()
+    return f&quot;{header}.{body}.{b64(signature)}&quot;
+
+token = jwt({&quot;sub&quot;: &quot;42&quot;, &quot;role&quot;: &quot;reader&quot;, &quot;exp&quot;: 1767225600}, b&quot;server-secret-key&quot;)
+print(token[:40], &quot;...&quot;, token.count(&quot;.&quot;))
+payload_part = token.split(&quot;.&quot;)[1]
+print(json.loads(base64.urlsafe_b64decode(payload_part + &quot;=&quot; * (-len(payload_part) % 4))))</textarea></div>
+<h2 id="authorisation">Authorisation</h2>
+<p>Knowing who someone is doesn&rsquo;t say what they may do. Common models:</p>
+<ul>
+<li><strong>Roles</strong>: users have roles (<code>reader</code>, <code>editor</code>, <code>admin</code>), and each role grants <strong>permissions</strong> (<code>orders:read</code>, <code>orders:refund</code>). Check permissions, not roles, in code, so roles can change without touching every endpoint.</li>
+<li><strong>Ownership</strong>: many rules are about <strong>whose</strong> thing it is: you may edit <strong>your own</strong> order. These must be checked against the resource itself, on every request.</li>
+<li><strong>Deny by default</strong>: an endpoint with no explicit rule should be closed, not open.</li>
+</ul>
+<p>The most common real-world access bug (top of the OWASP list, Week 79) is <strong>broken object-level authorisation</strong>: checking that the user is logged in, but not that order 7 is <strong>theirs</strong>, so changing the number in the URL shows someone else&rsquo;s data. Answer <code>404</code> rather than <code>403</code> when revealing that something exists would itself leak information (yesterday&rsquo;s reading-list challenge did this).</p>
+<p>Enforce rules in one place where possible: a decorator or dependency that every protected endpoint uses (Week 60&rsquo;s decorators), with tests that try every endpoint as the wrong user.</p>
+<h2 id="logins-under-attack-and-oauth">Logins under attack, and OAuth</h2>
+<p><strong>Guessing.</strong> Attackers try common passwords against many accounts (<strong>password spraying</strong>), or leaked password lists against yours (<strong>credential stuffing</strong>). Defences: rate-limit login attempts per account and per address, lock or slow an account after repeated failures, offer <strong>multi-factor authentication</strong> (a time-based code or a security key), and give the <strong>same</strong> error message for &ldquo;no such user&rdquo; and &ldquo;wrong password&rdquo;, so attackers can&rsquo;t find out which accounts exist.</p>
+<p><strong>OAuth 2.0 and OpenID Connect.</strong> &ldquo;Sign in with &hellip;&rdquo; buttons let another service vouch for the user: your app redirects the user to the identity provider, which authenticates them and redirects back with a short-lived <strong>code</strong> that your server exchanges for tokens. You never see their password. For anything beyond a small project, use a well-reviewed library or service for this; it&rsquo;s easy to get subtly wrong.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Never store passwords: store a per-user random salt and a slow key-derivation result (PBKDF2, scrypt or Argon2) with its settings, and compare with hmac.compare_digest. Keep users logged in with random session ids in HttpOnly, Secure cookies (deleted on logout), cookies signed with an HMAC, or JWTs: base64url header, payload and HMAC signature, which anyone can read but only the key holder can make; verify the signature in constant time, insist on the expected algorithm (never none), and check exp and nbf; keep them short-lived with refresh tokens. Authorise with permissions granted by roles plus ownership checks on every object (broken object-level authorisation is the top API flaw), deny by default, and enforce in one place. Rate-limit and lock logins, offer MFA, give one error for unknown users and wrong passwords, and use OAuth/OpenID Connect libraries for third-party sign-in.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d4-pbkdf2" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">PBKDF2 by hand</div><div class="pc-prompt"><p>Write <code>pbkdf2_sha256(password, salt, iterations, length=32)</code> (both bytes): PBKDF2 with HMAC-SHA256, as described in the lesson: output blocks numbered from 1, each <code>U1 = HMAC(password, salt + block number as 4 big-endian bytes)</code>, then <code>Uj = HMAC(password, U(j-1))</code> up to <code>iterations</code>, XORed together; concatenate blocks and cut to <code>length</code>. Raise <code>ValueError</code> for fewer than 1 iteration. Its results must match the standard ones (the checks compare known answers).</p></div><textarea class="pc-src pc-code" hidden>import hashlib, hmac
+
+def pbkdf2_sha256(password, salt, iterations, length=32):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_pbkdf2():
+    &quot;matches the standard&quot;
+    assert pbkdf2_sha256(b&quot;passwd&quot;, b&quot;salt&quot;, 1, 64).hex() == &quot;55ac046e56e3089fec1691c22544b605f94185216dde0465e68b9d57c20dacbc49ca9cccf179b645991664b39d77ef317c71b845b1e30bd509112041d3a19783&quot;
+    assert pbkdf2_sha256(b&quot;correct horse&quot;, b&quot;NaCl-1234567890&quot;, 1000).hex() == &quot;606ffd49ce1f9bc147b2f3a1f63eb69ec385c3ad3a5be9493e673a328f860a5b&quot;
+    assert pbkdf2_sha256(b&quot;pw&quot;, b&quot;saltsalt&quot;, 2, 40).hex() == &quot;c73ec6e5a803119806c71b6adb7f1435d7a7030597c9b7223bb8541f7067be85e3813fcdf2f12e2f&quot;
+    try:
+        pbkdf2_sha256(b&quot;pw&quot;, b&quot;s&quot;, 0)
+        assert False
+    except ValueError:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import hashlib, hmac
+
+def pbkdf2_sha256(password, salt, iterations, length=32):
+    if iterations &lt; 1:
+        raise ValueError(&quot;iterations must be at least 1&quot;)
+    out, block = b&quot;&quot;, 1
+    while len(out) &lt; length:
+        u = hmac.new(password, salt + block.to_bytes(4, &quot;big&quot;), hashlib.sha256).digest()
+        total = bytearray(u)
+        for _ in range(iterations - 1):
+            u = hmac.new(password, u, hashlib.sha256).digest()
+            for i, byte in enumerate(u):
+                total[i] ^= byte
+        out += bytes(total)
+        block += 1
+    return out[:length]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d4-storage" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Storing and checking passwords</div><div class="pc-prompt"><p>Using <code>pbkdf2_sha256</code> (given), write <code>hash_password(password, iterations=1000, salt=None)</code>: a string <code>pbkdf2_sha256$ITERATIONS$SALT$HASH</code> with a fresh 16-byte random salt from <code>secrets</code> (unless one is given), and salt and hash in standard base64. Then <code>verify_password(password, stored)</code>: recompute with the stored settings and compare with <code>hmac.compare_digest</code>; a malformed string or another algorithm returns <code>False</code>, never raises. Finally <code>needs_rehash(stored, iterations)</code>: true if the stored iteration count is below <code>iterations</code>.</p></div><textarea class="pc-src pc-code" hidden>import base64, hashlib, hmac, secrets
+
+def pbkdf2_sha256(password, salt, iterations, length=32):
+    out, block = b&quot;&quot;, 1
+    while len(out) &lt; length:
+        u = hmac.new(password, salt + block.to_bytes(4, &quot;big&quot;), hashlib.sha256).digest()
+        total = int.from_bytes(u, &quot;big&quot;)
+        for _ in range(iterations - 1):
+            u = hmac.new(password, u, hashlib.sha256).digest()
+            total ^= int.from_bytes(u, &quot;big&quot;)
+        out += total.to_bytes(32, &quot;big&quot;)
+        block += 1
+    return out[:length]
+
+def hash_password(password, iterations=1000, salt=None):
+    ___
+
+def verify_password(password, stored):
+    ___
+
+def needs_rehash(stored, iterations):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_storage():
+    &quot;salted, slow, constant-time&quot;
+    a, b = hash_password(&quot;letmein&quot;), hash_password(&quot;letmein&quot;)
+    assert a != b and a.startswith(&quot;pbkdf2_sha256$1000$&quot;) and a.count(&quot;$&quot;) == 3
+    assert verify_password(&quot;letmein&quot;, a) and not verify_password(&quot;letmeout&quot;, a)
+    fixed = hash_password(&quot;pw&quot;, iterations=2, salt=b&quot;saltsalt&quot;)
+    assert fixed == &quot;pbkdf2_sha256$2$c2FsdHNhbHQ=$xz7G5agDEZgGxxtq238UNden&quot; + fixed.split(&quot;$&quot;)[3][24:] and verify_password(&quot;pw&quot;, fixed)
+    for bad in [&quot;nonsense&quot;, &quot;md5$1$x$y&quot;, &quot;pbkdf2_sha256$abc$x$y&quot;, &quot;pbkdf2_sha256$1000$!!$!!&quot;]:
+        assert verify_password(&quot;pw&quot;, bad) is False
+    assert needs_rehash(a, 600000) and not needs_rehash(a, 1000)
+    assert &quot;compare_digest&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>import base64, hashlib, hmac, secrets
+
+def pbkdf2_sha256(password, salt, iterations, length=32):
+    out, block = b&quot;&quot;, 1
+    while len(out) &lt; length:
+        u = hmac.new(password, salt + block.to_bytes(4, &quot;big&quot;), hashlib.sha256).digest()
+        total = int.from_bytes(u, &quot;big&quot;)
+        for _ in range(iterations - 1):
+            u = hmac.new(password, u, hashlib.sha256).digest()
+            total ^= int.from_bytes(u, &quot;big&quot;)
+        out += total.to_bytes(32, &quot;big&quot;)
+        block += 1
+    return out[:length]
+
+def hash_password(password, iterations=1000, salt=None):
+    salt = salt if salt is not None else secrets.token_bytes(16)
+    digest = pbkdf2_sha256(password.encode(&quot;utf-8&quot;), salt, iterations)
+    return f&quot;pbkdf2_sha256${iterations}${base64.b64encode(salt).decode()}${base64.b64encode(digest).decode()}&quot;
+
+def _parse(stored):
+    algorithm, iterations, salt, digest = stored.split(&quot;$&quot;)
+    if algorithm != &quot;pbkdf2_sha256&quot;:
+        raise ValueError(algorithm)
+    return int(iterations), base64.b64decode(salt, validate=True), base64.b64decode(digest, validate=True)
+
+def verify_password(password, stored):
+    try:
+        iterations, salt, digest = _parse(stored)
+    except (ValueError, TypeError):
+        return False
+    attempt = pbkdf2_sha256(password.encode(&quot;utf-8&quot;), salt, iterations, len(digest))
+    return hmac.compare_digest(attempt, digest)
+
+def needs_rehash(stored, iterations):
+    try:
+        return _parse(stored)[0] &lt; iterations
+    except (ValueError, TypeError):
+        return True</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d4-signed" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Signed cookies</div><div class="pc-prompt"><p>Write <code>sign(data, key, now)</code>: a cookie value for a dict <code>data</code>: the base64url (no padding) of the JSON <code>{"data": data, "at": now}</code>, a <code>.</code>, and the base64url of its HMAC-SHA256 with <code>key</code>. Then <code>unsign(value, key, now, max_age)</code>: the data if the signature is right (compared with <code>compare_digest</code>) and it was signed no more than <code>max_age</code> seconds ago; raise <code>ValueError("bad signature")</code> for a tampered or malformed value and <code>ValueError("expired")</code> for an old one.</p></div><textarea class="pc-src pc-code" hidden>import base64, hashlib, hmac, json
+
+def sign(data, key, now):
+    ___
+
+def unsign(value, key, now, max_age):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_signed():
+    &quot;readable but not forgeable&quot;
+    import base64, json
+    key = b&quot;k&quot; * 32
+    value = sign({&quot;user&quot;: 42, &quot;theme&quot;: &quot;dark&quot;}, key, now=1000)
+    assert unsign(value, key, now=1500, max_age=3600) == {&quot;user&quot;: 42, &quot;theme&quot;: &quot;dark&quot;}
+    body = value.split(&quot;.&quot;)[0]
+    assert json.loads(base64.urlsafe_b64decode(body + &quot;=&quot; * (-len(body) % 4)))[&quot;data&quot;][&quot;user&quot;] == 42
+    forged = base64.urlsafe_b64encode(json.dumps({&quot;data&quot;: {&quot;user&quot;: 1}, &quot;at&quot;: 1000}).encode()).decode().rstrip(&quot;=&quot;) + &quot;.&quot; + value.split(&quot;.&quot;)[1]
+    for bad in [forged, value + &quot;x&quot;, &quot;nonsense&quot;, value.replace(&quot;.&quot;, &quot;&quot;)]:
+        try:
+            unsign(bad, key, now=1500, max_age=3600)
+            assert False, bad
+        except ValueError as e:
+            assert str(e) == &quot;bad signature&quot;
+    try:
+        unsign(value, b&quot;other key&quot;, now=1500, max_age=3600)
+        assert False
+    except ValueError:
+        pass
+    try:
+        unsign(value, key, now=5000, max_age=3600)
+        assert False
+    except ValueError as e:
+        assert str(e) == &quot;expired&quot;</textarea><textarea class="pc-src pc-solution" hidden>import base64, hashlib, hmac, json
+
+def _b64(raw):
+    return base64.urlsafe_b64encode(raw).decode(&quot;ascii&quot;).rstrip(&quot;=&quot;)
+
+def _unb64(text):
+    return base64.urlsafe_b64decode(text + &quot;=&quot; * (-len(text) % 4))
+
+def sign(data, key, now):
+    body = _b64(json.dumps({&quot;data&quot;: data, &quot;at&quot;: now}, separators=(&quot;,&quot;, &quot;:&quot;)).encode(&quot;utf-8&quot;))
+    signature = _b64(hmac.new(key, body.encode(&quot;ascii&quot;), hashlib.sha256).digest())
+    return f&quot;{body}.{signature}&quot;
+
+def unsign(value, key, now, max_age):
+    body, dot, signature = value.partition(&quot;.&quot;)
+    if not dot:
+        raise ValueError(&quot;bad signature&quot;)
+    expected = _b64(hmac.new(key, body.encode(&quot;ascii&quot;), hashlib.sha256).digest())
+    if not hmac.compare_digest(expected, signature):
+        raise ValueError(&quot;bad signature&quot;)
+    payload = json.loads(_unb64(body))
+    if now - payload[&quot;at&quot;] &gt; max_age:
+        raise ValueError(&quot;expired&quot;)
+    return payload[&quot;data&quot;]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d4-jwt" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">JSON Web Tokens</div><div class="pc-prompt"><p>Write <code>encode_jwt(payload, key)</code>: a compact HS256 JWT (header <code>{"alg":"HS256","typ":"JWT"}</code>, compact JSON with <code>separators=(",", ":")</code>, base64url without padding). Then <code>decode_jwt(token, key, now, leeway=0)</code>: verify and return the payload, raising <code>InvalidToken</code> (given) with the message <code>"malformed"</code> (not three parts, or undecodable), <code>"algorithm not allowed"</code> (the header&rsquo;s <code>alg</code> isn&rsquo;t <code>HS256</code>, including <code>none</code>), <code>"bad signature"</code>, <code>"expired"</code> (when <code>now &gt; exp + leeway</code>) or <code>"not yet valid"</code> (when <code>now &lt; nbf - leeway</code>); <code>exp</code> and <code>nbf</code> are optional.</p></div><textarea class="pc-src pc-code" hidden>import base64, hashlib, hmac, json
+
+class InvalidToken(Exception):
+    pass
+
+def encode_jwt(payload, key):
+    ___
+
+def decode_jwt(token, key, now, leeway=0):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_jwt():
+    &quot;signatures, algorithms and times&quot;
+    import base64, json
+    key = b&quot;secret-key-for-tests&quot;
+    token = encode_jwt({&quot;sub&quot;: &quot;42&quot;, &quot;role&quot;: &quot;editor&quot;, &quot;exp&quot;: 2000, &quot;nbf&quot;: 1000}, key)
+    assert token.startswith(&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.&quot;) and token.count(&quot;.&quot;) == 2
+    assert decode_jwt(token, key, now=1500) == {&quot;sub&quot;: &quot;42&quot;, &quot;role&quot;: &quot;editor&quot;, &quot;exp&quot;: 2000, &quot;nbf&quot;: 1000}
+    def b64(d):
+        return base64.urlsafe_b64encode(json.dumps(d, separators=(&quot;,&quot;, &quot;:&quot;)).encode()).decode().rstrip(&quot;=&quot;)
+    none_alg = b64({&quot;alg&quot;: &quot;none&quot;, &quot;typ&quot;: &quot;JWT&quot;}) + &quot;.&quot; + b64({&quot;sub&quot;: &quot;1&quot;, &quot;role&quot;: &quot;admin&quot;}) + &quot;.&quot;
+    tampered = token.split(&quot;.&quot;)[0] + &quot;.&quot; + b64({&quot;sub&quot;: &quot;42&quot;, &quot;role&quot;: &quot;admin&quot;, &quot;exp&quot;: 2000, &quot;nbf&quot;: 1000}) + &quot;.&quot; + token.split(&quot;.&quot;)[2]
+    cases = [(none_alg, 1500, &quot;algorithm not allowed&quot;), (tampered, 1500, &quot;bad signature&quot;), (token, 2001, &quot;expired&quot;),
+             (token, 999, &quot;not yet valid&quot;), (&quot;a.b&quot;, 1500, &quot;malformed&quot;), (&quot;!!.!!.!!&quot;, 1500, &quot;malformed&quot;)]
+    for t, now, message in cases:
+        try:
+            decode_jwt(t, key, now)
+            assert False, message
+        except InvalidToken as e:
+            assert str(e) == message, (str(e), message)
+    assert decode_jwt(token, key, now=2005, leeway=10)[&quot;sub&quot;] == &quot;42&quot;
+    try:
+        decode_jwt(token, b&quot;other&quot;, now=1500)
+        assert False
+    except InvalidToken:
+        pass</textarea><textarea class="pc-src pc-solution" hidden>import base64, hashlib, hmac, json
+
+class InvalidToken(Exception):
+    pass
+
+def _b64(raw):
+    return base64.urlsafe_b64encode(raw).decode(&quot;ascii&quot;).rstrip(&quot;=&quot;)
+
+def _unb64(text):
+    return base64.urlsafe_b64decode(text + &quot;=&quot; * (-len(text) % 4))
+
+def _compact(obj):
+    return json.dumps(obj, separators=(&quot;,&quot;, &quot;:&quot;)).encode(&quot;utf-8&quot;)
+
+def encode_jwt(payload, key):
+    signing_input = f&quot;{_b64(_compact({&#x27;alg&#x27;: &#x27;HS256&#x27;, &#x27;typ&#x27;: &#x27;JWT&#x27;}))}.{_b64(_compact(payload))}&quot;
+    signature = hmac.new(key, signing_input.encode(&quot;ascii&quot;), hashlib.sha256).digest()
+    return f&quot;{signing_input}.{_b64(signature)}&quot;
+
+def decode_jwt(token, key, now, leeway=0):
+    parts = token.split(&quot;.&quot;)
+    if len(parts) != 3:
+        raise InvalidToken(&quot;malformed&quot;)
+    try:
+        header = json.loads(_unb64(parts[0]))
+        payload = json.loads(_unb64(parts[1]))
+        signature = _unb64(parts[2])
+    except (ValueError, UnicodeDecodeError):
+        raise InvalidToken(&quot;malformed&quot;) from None
+    if not isinstance(header, dict) or header.get(&quot;alg&quot;) != &quot;HS256&quot;:
+        raise InvalidToken(&quot;algorithm not allowed&quot;)
+    expected = hmac.new(key, f&quot;{parts[0]}.{parts[1]}&quot;.encode(&quot;ascii&quot;), hashlib.sha256).digest()
+    if not hmac.compare_digest(expected, signature):
+        raise InvalidToken(&quot;bad signature&quot;)
+    if &quot;exp&quot; in payload and now &gt; payload[&quot;exp&quot;] + leeway:
+        raise InvalidToken(&quot;expired&quot;)
+    if &quot;nbf&quot; in payload and now &lt; payload[&quot;nbf&quot;] - leeway:
+        raise InvalidToken(&quot;not yet valid&quot;)
+    return payload</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d4-permissions" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Roles, permissions and ownership</div><div class="pc-prompt"><p>Write <code>allowed(user, action, resource=None)</code>: <code>user</code> is a dict with <code>"id"</code> and <code>"roles"</code>; <code>ROLES</code> maps each role to a set of permissions such as <code>"orders:read"</code>. A user may do an action if any of their roles grants it, <strong>or</strong> if the permission is an <code>:own</code> variant (<code>"orders:edit:own"</code> grants <code>"orders:edit"</code>) and <code>resource["owner"] == user["id"]</code>. Unknown roles grant nothing (deny by default). Then a decorator <code>requires(action, load=None)</code> for miniflask views: it reads the user from <code>g.user</code> (answering <code>401</code> with <code>{"error": "log in first"}</code> if it&rsquo;s <code>None</code>), loads the resource with <code>load(**view_args)</code> if given, and answers <code>403</code> with <code>{"error": "not allowed"}</code> unless <code>allowed(...)</code>.</p></div><textarea class="pc-src pc-code" hidden>import functools
+from miniflask import Flask, g, request
+
+ROLES = {
+    &quot;reader&quot;: {&quot;orders:read:own&quot;},
+    &quot;clerk&quot;: {&quot;orders:read&quot;, &quot;orders:edit:own&quot;},
+    &quot;admin&quot;: {&quot;orders:read&quot;, &quot;orders:edit&quot;, &quot;orders:refund&quot;},
+}
+
+def allowed(user, action, resource=None):
+    ___
+
+def requires(action, load=None):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_permissions():
+    &quot;roles plus ownership&quot;
+    ada, bob, root = {&quot;id&quot;: 1, &quot;roles&quot;: [&quot;reader&quot;]}, {&quot;id&quot;: 2, &quot;roles&quot;: [&quot;clerk&quot;]}, {&quot;id&quot;: 3, &quot;roles&quot;: [&quot;admin&quot;, &quot;ghost&quot;]}
+    mine, theirs = {&quot;owner&quot;: 1}, {&quot;owner&quot;: 2}
+    assert allowed(ada, &quot;orders:read&quot;, mine) and not allowed(ada, &quot;orders:read&quot;, theirs) and not allowed(ada, &quot;orders:read&quot;)
+    assert allowed(bob, &quot;orders:read&quot;, mine) and allowed(bob, &quot;orders:edit&quot;, theirs) and not allowed(bob, &quot;orders:edit&quot;, mine)
+    assert allowed(root, &quot;orders:refund&quot;) and not allowed(root, &quot;orders:delete&quot;) and not allowed({&quot;id&quot;: 9, &quot;roles&quot;: [&quot;ghost&quot;]}, &quot;orders:read&quot;, mine)
+    from miniflask import Flask, g, request
+    app = Flask(__name__)
+    ORDERS = {7: {&quot;id&quot;: 7, &quot;owner&quot;: 1}}
+    USERS = {&quot;t1&quot;: ada, &quot;t2&quot;: bob}
+    @app.before_request
+    def who():
+        g.user = USERS.get(request.headers.get(&quot;X-Token&quot;))
+    @app.get(&quot;/orders/&lt;int:order_id&gt;&quot;)
+    @requires(&quot;orders:read&quot;, load=lambda order_id: ORDERS[order_id])
+    def read(order_id):
+        return ORDERS[order_id]
+    client = app.test_client()
+    assert client.get(&quot;/orders/7&quot;).status_code == 401
+    assert client.get(&quot;/orders/7&quot;, headers={&quot;X-Token&quot;: &quot;t1&quot;}).get_json() == {&quot;id&quot;: 7, &quot;owner&quot;: 1}
+    ORDERS[7][&quot;owner&quot;] = 5
+    r = client.get(&quot;/orders/7&quot;, headers={&quot;X-Token&quot;: &quot;t1&quot;})
+    assert r.status_code == 403 and r.get_json() == {&quot;error&quot;: &quot;not allowed&quot;}
+    assert client.get(&quot;/orders/7&quot;, headers={&quot;X-Token&quot;: &quot;t2&quot;}).status_code == 200</textarea><textarea class="pc-src pc-solution" hidden>import functools
+from miniflask import Flask, g, request
+
+ROLES = {
+    &quot;reader&quot;: {&quot;orders:read:own&quot;},
+    &quot;clerk&quot;: {&quot;orders:read&quot;, &quot;orders:edit:own&quot;},
+    &quot;admin&quot;: {&quot;orders:read&quot;, &quot;orders:edit&quot;, &quot;orders:refund&quot;},
+}
+
+def allowed(user, action, resource=None):
+    granted = set()
+    for role in user.get(&quot;roles&quot;, []):
+        granted |= ROLES.get(role, set())
+    if action in granted:
+        return True
+    return f&quot;{action}:own&quot; in granted and resource is not None and resource.get(&quot;owner&quot;) == user[&quot;id&quot;]
+
+def requires(action, load=None):
+    def decorate(view):
+        @functools.wraps(view)
+        def wrapper(**kwargs):
+            user = g.get(&quot;user&quot;)
+            if user is None:
+                return {&quot;error&quot;: &quot;log in first&quot;}, 401
+            resource = load(**kwargs) if load else None
+            if not allowed(user, action, resource):
+                return {&quot;error&quot;: &quot;not allowed&quot;}, 403
+            return view(**kwargs)
+        return wrapper
+    return decorate</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d4-guard" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Slowing down guessers</div><div class="pc-prompt"><p>Write a class <code>LoginGuard(clock, limit=5, window=900, lockout=900)</code> with <code>attempt(username, ok)</code>: record a login attempt (<code>ok</code> says whether the password was right) and return <code>"ok"</code>, <code>"wrong"</code> or <code>"locked"</code>. A user with <code>limit</code> failures within the last <code>window</code> seconds is locked for <code>lockout</code> seconds from the last of them: while locked, <strong>every</strong> attempt returns <code>"locked"</code> (even with the right password) and isn&rsquo;t counted. A success clears the user&rsquo;s failures. Usernames are case-insensitive. Also <code>message(result)</code>: the text to show: <code>"Signed in"</code>, or the same <code>"Wrong username or password"</code> for <code>"wrong"</code> (so attackers can&rsquo;t tell which was wrong), or <code>"Too many attempts; try again later"</code>.</p></div><textarea class="pc-src pc-code" hidden>class LoginGuard:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_guard():
+    &quot;lockout after repeated failures&quot;
+    now = [0]
+    guard = LoginGuard(lambda: now[0], limit=3, window=60, lockout=100)
+    assert guard.attempt(&quot;Ada&quot;, False) == &quot;wrong&quot;
+    now[0] = 10
+    assert guard.attempt(&quot;ada&quot;, True) == &quot;ok&quot;
+    for t in (20, 30, 40):
+        now[0] = t
+        result = guard.attempt(&quot;ADA&quot;, False)
+    assert result == &quot;wrong&quot; and guard.attempt(&quot;ada&quot;, True) == &quot;locked&quot;
+    now[0] = 139
+    assert guard.attempt(&quot;ada&quot;, True) == &quot;locked&quot;
+    now[0] = 141
+    assert guard.attempt(&quot;ada&quot;, True) == &quot;ok&quot;
+    for t in (200, 270, 340, 410):
+        now[0] = t
+        assert guard.attempt(&quot;bob&quot;, False) == &quot;wrong&quot;, &quot;failures outside the window don&#x27;t add up&quot;
+    assert guard.message(&quot;wrong&quot;) == &quot;Wrong username or password&quot; and guard.message(&quot;locked&quot;).startswith(&quot;Too many&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class LoginGuard:
+    def __init__(self, clock, limit=5, window=900, lockout=900):
+        self.clock, self.limit, self.window, self.lockout = clock, limit, window, lockout
+        self.failures, self.locked_until = {}, {}
+
+    def attempt(self, username, ok):
+        user = username.lower()
+        now = self.clock()
+        if now &lt; self.locked_until.get(user, float(&quot;-inf&quot;)):
+            return &quot;locked&quot;
+        if ok:
+            self.failures.pop(user, None)
+            return &quot;ok&quot;
+        recent = [t for t in self.failures.get(user, []) if now - t &lt; self.window] + [now]
+        self.failures[user] = recent
+        if len(recent) &gt;= self.limit:
+            self.locked_until[user] = now + self.lockout
+            self.failures[user] = []
+        return &quot;wrong&quot;
+
+    def message(self, result):
+        return {&quot;ok&quot;: &quot;Signed in&quot;, &quot;wrong&quot;: &quot;Wrong username or password&quot;,
+                &quot;locked&quot;: &quot;Too many attempts; try again later&quot;}[result]</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w077d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The same hash for the same password</div><div class="pc-prompt"><p>Passwords are hashed without a salt, so Ada and Bob, who chose the same password, get the same hash, and this prints <code>True</code>. Give each user a random 16-byte salt from <code>secrets</code> and hash the salt with the password (keeping the salt with the hash), so this prints <code>False</code> (and checking still works).</p></div><textarea class="pc-src pc-code" hidden>import hashlib, hmac, secrets
+
+def store(password):
+    return &quot;&quot;, hashlib.sha256(password.encode()).hexdigest()
+
+def check(password, salt, digest):
+    return hmac.compare_digest(hashlib.sha256(bytes.fromhex(salt) + password.encode()).hexdigest(), digest)
+
+ada, bob = store(&quot;letmein&quot;), store(&quot;letmein&quot;)
+print(ada[1] == bob[1])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;salted hashes&quot;
+    expect_output(&quot;False&quot;)
+    salt, digest = ns[&quot;store&quot;](&quot;pw&quot;)
+    assert ns[&quot;check&quot;](&quot;pw&quot;, salt, digest) and not ns[&quot;check&quot;](&quot;px&quot;, salt, digest) and len(bytes.fromhex(salt)) == 16</textarea><textarea class="pc-src pc-solution" hidden>import hashlib, hmac, secrets
+
+def store(password):
+    salt = secrets.token_bytes(16)
+    return salt.hex(), hashlib.sha256(salt + password.encode()).hexdigest()
+
+def check(password, salt, digest):
+    return hmac.compare_digest(hashlib.sha256(bytes.fromhex(salt) + password.encode()).hexdigest(), digest)
+
+ada, bob = store(&quot;letmein&quot;), store(&quot;letmein&quot;)
+print(ada[1] == bob[1])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w077d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A token that never expired</div><div class="pc-prompt"><p>The decoder checks the signature but never looks at <code>exp</code>, so a token that expired long ago is still accepted and this prints <code>accepted</code>. Refuse tokens whose <code>exp</code> has passed, so this prints <code>refused: expired</code>.</p></div><textarea class="pc-src pc-code" hidden>import base64, hashlib, hmac, json
+
+KEY = b&quot;k&quot;
+def b64(raw):
+    return base64.urlsafe_b64encode(raw).decode().rstrip(&quot;=&quot;)
+def unb64(text):
+    return base64.urlsafe_b64decode(text + &quot;=&quot; * (-len(text) % 4))
+
+def make(payload):
+    head = b64(b&#x27;{&quot;alg&quot;:&quot;HS256&quot;,&quot;typ&quot;:&quot;JWT&quot;}&#x27;) + &quot;.&quot; + b64(json.dumps(payload).encode())
+    return head + &quot;.&quot; + b64(hmac.new(KEY, head.encode(), hashlib.sha256).digest())
+
+def check(token, now):
+    h, p, s = token.split(&quot;.&quot;)
+    if not hmac.compare_digest(b64(hmac.new(KEY, f&quot;{h}.{p}&quot;.encode(), hashlib.sha256).digest()), s):
+        return &quot;refused: bad signature&quot;
+    payload = json.loads(unb64(p))
+    return &quot;accepted&quot;
+
+print(check(make({&quot;sub&quot;: &quot;1&quot;, &quot;exp&quot;: 1000}), now=5000))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;check exp&quot;
+    expect_output(&quot;refused: expired&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import base64, hashlib, hmac, json
+
+KEY = b&quot;k&quot;
+def b64(raw):
+    return base64.urlsafe_b64encode(raw).decode().rstrip(&quot;=&quot;)
+def unb64(text):
+    return base64.urlsafe_b64decode(text + &quot;=&quot; * (-len(text) % 4))
+
+def make(payload):
+    head = b64(b&#x27;{&quot;alg&quot;:&quot;HS256&quot;,&quot;typ&quot;:&quot;JWT&quot;}&#x27;) + &quot;.&quot; + b64(json.dumps(payload).encode())
+    return head + &quot;.&quot; + b64(hmac.new(KEY, head.encode(), hashlib.sha256).digest())
+
+def check(token, now):
+    h, p, s = token.split(&quot;.&quot;)
+    if not hmac.compare_digest(b64(hmac.new(KEY, f&quot;{h}.{p}&quot;.encode(), hashlib.sha256).digest()), s):
+        return &quot;refused: bad signature&quot;
+    payload = json.loads(unb64(p))
+    if &quot;exp&quot; in payload and now &gt; payload[&quot;exp&quot;]:
+        return &quot;refused: expired&quot;
+    return &quot;accepted&quot;
+
+print(check(make({&quot;sub&quot;: &quot;1&quot;, &quot;exp&quot;: 1000}), now=5000))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w077d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Someone else&rsquo;s order</div><div class="pc-prompt"><p>The endpoint checks that a user is logged in, but not that the order is <strong>theirs</strong>, so Bob can read Ada&rsquo;s order by changing the number in the URL, and this prints <code>200</code>. Answer <code>404</code> for an order that isn&rsquo;t the user&rsquo;s (so its existence isn&rsquo;t revealed either), so this prints <code>404</code>.</p></div><textarea class="pc-src pc-code" hidden>from miniflask import Flask, request, abort
+
+app = Flask(__name__)
+ORDERS = {7: {&quot;id&quot;: 7, &quot;owner&quot;: &quot;ada&quot;, &quot;total&quot;: 42}}
+TOKENS = {&quot;t-ada&quot;: &quot;ada&quot;, &quot;t-bob&quot;: &quot;bob&quot;}
+
+@app.get(&quot;/orders/&lt;int:order_id&gt;&quot;)
+def get_order(order_id):
+    user = TOKENS.get(request.headers.get(&quot;X-Token&quot;))
+    if user is None:
+        abort(401)
+    if order_id not in ORDERS:
+        abort(404)
+    return ORDERS[order_id]
+
+print(app.test_client().get(&quot;/orders/7&quot;, headers={&quot;X-Token&quot;: &quot;t-bob&quot;}).status_code)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;object-level authorisation&quot;
+    expect_output(&quot;404&quot;)
+    assert ns[&quot;app&quot;].test_client().get(&quot;/orders/7&quot;, headers={&quot;X-Token&quot;: &quot;t-ada&quot;}).status_code == 200</textarea><textarea class="pc-src pc-solution" hidden>from miniflask import Flask, request, abort
+
+app = Flask(__name__)
+ORDERS = {7: {&quot;id&quot;: 7, &quot;owner&quot;: &quot;ada&quot;, &quot;total&quot;: 42}}
+TOKENS = {&quot;t-ada&quot;: &quot;ada&quot;, &quot;t-bob&quot;: &quot;bob&quot;}
+
+@app.get(&quot;/orders/&lt;int:order_id&gt;&quot;)
+def get_order(order_id):
+    user = TOKENS.get(request.headers.get(&quot;X-Token&quot;))
+    if user is None:
+        abort(401)
+    order = ORDERS.get(order_id)
+    if order is None or order[&quot;owner&quot;] != user:
+        abort(404)
+    return order
+
+print(app.test_client().get(&quot;/orders/7&quot;, headers={&quot;X-Token&quot;: &quot;t-bob&quot;}).status_code)</textarea></div>
+<div class="parsons" data-id="w077d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A login endpoint</div><div class="pc-prompt"><p>Arrange the lines of a login endpoint that checks the password safely and gives one message for every kind of failure. One line is a trap.</p></div><script type="application/json">{"lines": ["@app.post(\"/login\")", "def login():", "    data = request.get_json(silent=True) or {}", "    user = USERS.get(str(data.get(\"email\", \"\")).lower())", "    if user is None or not verify_password(data.get(\"password\", \"\"), user[\"hash\"]):", "        return {\"error\": \"Wrong email or password\"}, 401", "    return {\"token\": encode_jwt({\"sub\": user[\"id\"], \"exp\": now() + 900}, KEY)}"], "distractors": ["        return {\"error\": \"No account with that email\"}, 404"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # True or False: the payload of a JWT is encrypted
+q = ___   # the module to use for session ids and salts: &quot;random&quot; or &quot;secrets&quot;
+r = ___   # the hmac function that compares secrets in constant time
+s = ___   # the status for &quot;you&#x27;re logged in, but you may not do this&quot;
+t = ___   # the JWT claim that holds its expiry time</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p is False and q == &quot;secrets&quot; and r == &quot;compare_digest&quot;, &quot;p, q and r&quot;
+    assert s == 403 and t == &quot;exp&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = False
+q = &quot;secrets&quot;
+r = &quot;compare_digest&quot;
+s = 403
+t = &quot;exp&quot;</textarea></div>
+<h2 id="on-your-own-computer">On your own computer</h2>
+<p>Use the well-tested versions of today&rsquo;s pieces:</p>
+<pre><code class="language-bash">pip install &quot;argon2-cffi&quot; pyjwt
+</code></pre>
+<pre><code class="language-python">from argon2 import PasswordHasher
+import jwt
+
+ph = PasswordHasher()
+stored = ph.hash(&quot;correct horse battery staple&quot;)       # salt and settings included
+ph.verify(stored, &quot;correct horse battery staple&quot;)      # raises if wrong
+
+token = jwt.encode({&quot;sub&quot;: &quot;42&quot;, &quot;exp&quot;: 1767225600}, &quot;server-secret&quot;, algorithm=&quot;HS256&quot;)
+print(jwt.decode(token, &quot;server-secret&quot;, algorithms=[&quot;HS256&quot;]))   # checks signature and exp
+</code></pre>
+<p><code>algorithms=["HS256"]</code> is what stops the <code>none</code> attack: always pass it. Flask&rsquo;s sessions, <code>flask-login</code>, and FastAPI&rsquo;s security utilities build on the same ideas.</p>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w077d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why add a salt to each password hash?", "answer": 1, "explain": "Store the salt with the hash.", "options": ["Speed", "Equal passwords get different hashes, and precomputed tables become useless", "To encrypt it", "To shorten it"]}, {"type": "mc", "q": "Why use a slow hash such as PBKDF2, scrypt or Argon2?", "answer": 1, "explain": "Fast hashes are the wrong tool.", "options": ["It&rsquo;s more accurate", "Each guess costs an attacker real time, so trying billions is infeasible", "It&rsquo;s shorter", "It&rsquo;s reversible"]}, {"type": "mc", "q": "Why compare hashes with hmac.compare_digest?", "answer": 1, "explain": "== stops at the first difference.", "options": ["It&rsquo;s faster", "It takes the same time however much matches, leaking nothing through timing", "It decrypts", "== doesn&rsquo;t work on bytes"]}, {"type": "mc", "q": "Who can read a JWT&rsquo;s payload?", "answer": 1, "explain": "Put nothing secret in it.", "options": ["Only the server", "Anyone who has the token: it&rsquo;s only signed, not encrypted", "Nobody", "Only the user"]}, {"type": "mc", "q": "Why must a JWT decoder insist on the expected algorithm?", "answer": 1, "explain": "algorithms=[&lsquo;HS256&rsquo;].", "options": ["Speed", "An attacker could send alg none, or switch algorithms, to skip the signature check", "Style", "It doesn&rsquo;t matter"]}, {"type": "mc", "q": "Why keep access tokens short-lived?", "answer": 1, "explain": "Pair them with refresh tokens.", "options": ["They get long", "They can&rsquo;t easily be revoked before they expire", "Clocks drift", "Browsers delete them"]}, {"type": "mc", "q": "What is broken object-level authorisation?", "answer": 1, "explain": "Change the id in the URL, see someone else&rsquo;s data.", "options": ["A crash", "Checking that a user is logged in but not that the object they asked for is theirs", "A bad password", "An expired token"]}, {"type": "mc", "q": "Why give the same error for an unknown email and a wrong password?", "answer": 1, "explain": "Enumeration helps guessing attacks.", "options": ["It&rsquo;s simpler", "So attackers can&rsquo;t find out which accounts exist", "Browsers require it", "To save space"]}, {"type": "mc", "q": "What does OAuth&rsquo;s &ldquo;sign in with &hellip;&rdquo; spare your app?", "answer": 1, "explain": "Use a library: details matter.", "options": ["Hosting", "Ever seeing or storing the user&rsquo;s password for that provider", "Authorisation", "HTTPS"]}, {"type": "output", "q": "What does this print?", "answer": "True False", "explain": "Same key and message, same signature.", "code": "import hmac, hashlib\na = hmac.new(b\"key\", b\"message\", hashlib.sha256).hexdigest()\nb = hmac.new(b\"key\", b\"message\", hashlib.sha256).hexdigest()\nc = hmac.new(b\"other\", b\"message\", hashlib.sha256).hexdigest()\nprint(hmac.compare_digest(a, b), hmac.compare_digest(a, c))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w077d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: an authenticated API</div><div class="pc-prompt"><p>Write <code>create_app(key, clock)</code> (miniflask) with an in-memory user store and these endpoints. <code>POST /register</code> takes <code>{"email", "password"}</code>: emails are lower-cased and must contain <code>@</code> (<code>422</code> otherwise), passwords at least 8 characters (<code>422</code>), duplicates <code>409</code>; it stores a hash from <code>hash_password</code> (given, with 200 iterations for speed) and answers <code>201</code> with <code>{"id": N, "email": ...}</code>, never the hash. <code>POST /login</code> checks the password with <code>verify_password</code> (given) and answers <code>200</code> with <code>{"token": JWT}</code> (from <code>encode_jwt</code>, given), whose payload has <code>sub</code> (the user id), <code>role</code> (<code>"admin"</code> for the first user registered, <code>"member"</code> otherwise) and <code>exp</code> (<code>clock() + 900</code>); any failure gets <code>401</code> with the one message <code>"wrong email or password"</code>. <code>GET /me</code> requires <code>Authorization: Bearer TOKEN</code> (decoded with <code>decode_jwt</code>, given; any problem is <code>401</code> with <code>{"error": "invalid token"}</code>) and returns <code>{"id", "email", "role"}</code>. <code>GET /admin/users</code> additionally requires the <code>admin</code> role (<code>403</code> with <code>{"error": "admins only"}</code>) and lists every user&rsquo;s <code>{"id", "email"}</code>.</p></div><textarea class="pc-src pc-code" hidden>import base64, hashlib, hmac, json, secrets
+from miniflask import Flask, request
+
+def _b64(raw):
+    return base64.urlsafe_b64encode(raw).decode().rstrip(&quot;=&quot;)
+
+def _unb64(text):
+    return base64.urlsafe_b64decode(text + &quot;=&quot; * (-len(text) % 4))
+
+def hash_password(password, iterations=200):
+    salt = secrets.token_bytes(16)
+    return f&quot;{iterations}${salt.hex()}${_slow(password.encode(), salt, iterations).hex()}&quot;
+
+def _slow(password, salt, iterations):
+    u = hmac.new(password, salt + b&quot;\x00\x00\x00\x01&quot;, hashlib.sha256).digest()
+    total = int.from_bytes(u, &quot;big&quot;)
+    for _ in range(iterations - 1):
+        u = hmac.new(password, u, hashlib.sha256).digest()
+        total ^= int.from_bytes(u, &quot;big&quot;)
+    return total.to_bytes(32, &quot;big&quot;)
+
+def verify_password(password, stored):
+    iterations, salt, digest = stored.split(&quot;$&quot;)
+    attempt = _slow(password.encode(), bytes.fromhex(salt), int(iterations))
+    return hmac.compare_digest(attempt.hex(), digest)
+
+def encode_jwt(payload, key):
+    head = _b64(b&#x27;{&quot;alg&quot;:&quot;HS256&quot;,&quot;typ&quot;:&quot;JWT&quot;}&#x27;) + &quot;.&quot; + _b64(json.dumps(payload, separators=(&quot;,&quot;, &quot;:&quot;)).encode())
+    return head + &quot;.&quot; + _b64(hmac.new(key, head.encode(), hashlib.sha256).digest())
+
+def decode_jwt(token, key, now):
+    h, p, s = token.split(&quot;.&quot;)
+    if json.loads(_unb64(h)).get(&quot;alg&quot;) != &quot;HS256&quot;:
+        raise ValueError(&quot;algorithm&quot;)
+    if not hmac.compare_digest(_b64(hmac.new(key, f&quot;{h}.{p}&quot;.encode(), hashlib.sha256).digest()), s):
+        raise ValueError(&quot;signature&quot;)
+    payload = json.loads(_unb64(p))
+    if now &gt; payload[&quot;exp&quot;]:
+        raise ValueError(&quot;expired&quot;)
+    return payload
+
+def create_app(key, clock):
+    app = Flask(__name__)
+    ___
+    return app</textarea><textarea class="pc-src pc-tests" hidden>def test_auth_api():
+    &quot;registration, login, tokens and roles&quot;
+    now = [1000]
+    client = create_app(b&quot;test-key&quot;, lambda: now[0]).test_client()
+    r = client.post(&quot;/register&quot;, json={&quot;email&quot;: &quot;Ada@Example.com&quot;, &quot;password&quot;: &quot;correct horse&quot;})
+    assert r.status_code == 201 and r.get_json() == {&quot;id&quot;: 1, &quot;email&quot;: &quot;ada@example.com&quot;}
+    assert client.post(&quot;/register&quot;, json={&quot;email&quot;: &quot;bob@example.com&quot;, &quot;password&quot;: &quot;hunter22&quot;}).status_code == 201
+    assert client.post(&quot;/register&quot;, json={&quot;email&quot;: &quot;ada@example.com&quot;, &quot;password&quot;: &quot;anything8&quot;}).status_code == 409
+    assert client.post(&quot;/register&quot;, json={&quot;email&quot;: &quot;cy&quot;, &quot;password&quot;: &quot;longenough&quot;}).status_code == 422
+    assert client.post(&quot;/register&quot;, json={&quot;email&quot;: &quot;cy@x&quot;, &quot;password&quot;: &quot;short&quot;}).status_code == 422
+    bad = [client.post(&quot;/login&quot;, json={&quot;email&quot;: &quot;ada@example.com&quot;, &quot;password&quot;: &quot;wrong!!!&quot;}),
+           client.post(&quot;/login&quot;, json={&quot;email&quot;: &quot;nobody@example.com&quot;, &quot;password&quot;: &quot;correct horse&quot;}),
+           client.post(&quot;/login&quot;, json={})]
+    assert all(r.status_code == 401 and r.get_json() == {&quot;error&quot;: &quot;wrong email or password&quot;} for r in bad)
+    ada = client.post(&quot;/login&quot;, json={&quot;email&quot;: &quot;ADA@example.com&quot;, &quot;password&quot;: &quot;correct horse&quot;}).get_json()[&quot;token&quot;]
+    bob = client.post(&quot;/login&quot;, json={&quot;email&quot;: &quot;bob@example.com&quot;, &quot;password&quot;: &quot;hunter22&quot;}).get_json()[&quot;token&quot;]
+    assert client.get(&quot;/me&quot;, headers={&quot;Authorization&quot;: f&quot;Bearer {ada}&quot;}).get_json() == {&quot;id&quot;: 1, &quot;email&quot;: &quot;ada@example.com&quot;, &quot;role&quot;: &quot;admin&quot;}
+    assert client.get(&quot;/admin/users&quot;, headers={&quot;Authorization&quot;: f&quot;Bearer {ada}&quot;}).get_json() == [{&quot;id&quot;: 1, &quot;email&quot;: &quot;ada@example.com&quot;}, {&quot;id&quot;: 2, &quot;email&quot;: &quot;bob@example.com&quot;}]
+    r = client.get(&quot;/admin/users&quot;, headers={&quot;Authorization&quot;: f&quot;Bearer {bob}&quot;})
+    assert r.status_code == 403 and r.get_json() == {&quot;error&quot;: &quot;admins only&quot;}
+    for headers in [{}, {&quot;Authorization&quot;: &quot;Bearer nonsense&quot;}, {&quot;Authorization&quot;: f&quot;Token {ada}&quot;}, {&quot;Authorization&quot;: f&quot;Bearer {ada[:-2]}xx&quot;}]:
+        r = client.get(&quot;/me&quot;, headers=headers)
+        assert r.status_code == 401 and r.get_json() == {&quot;error&quot;: &quot;invalid token&quot;}
+    now[0] = 1901
+    assert client.get(&quot;/me&quot;, headers={&quot;Authorization&quot;: f&quot;Bearer {ada}&quot;}).status_code == 401
+    assert &quot;hash&quot; not in str(r.get_json())</textarea><textarea class="pc-src pc-solution" hidden>import base64, hashlib, hmac, json, secrets
+from miniflask import Flask, request
+
+def _b64(raw):
+    return base64.urlsafe_b64encode(raw).decode().rstrip(&quot;=&quot;)
+
+def _unb64(text):
+    return base64.urlsafe_b64decode(text + &quot;=&quot; * (-len(text) % 4))
+
+def hash_password(password, iterations=200):
+    salt = secrets.token_bytes(16)
+    return f&quot;{iterations}${salt.hex()}${_slow(password.encode(), salt, iterations).hex()}&quot;
+
+def _slow(password, salt, iterations):
+    u = hmac.new(password, salt + b&quot;\x00\x00\x00\x01&quot;, hashlib.sha256).digest()
+    total = int.from_bytes(u, &quot;big&quot;)
+    for _ in range(iterations - 1):
+        u = hmac.new(password, u, hashlib.sha256).digest()
+        total ^= int.from_bytes(u, &quot;big&quot;)
+    return total.to_bytes(32, &quot;big&quot;)
+
+def verify_password(password, stored):
+    iterations, salt, digest = stored.split(&quot;$&quot;)
+    attempt = _slow(password.encode(), bytes.fromhex(salt), int(iterations))
+    return hmac.compare_digest(attempt.hex(), digest)
+
+def encode_jwt(payload, key):
+    head = _b64(b&#x27;{&quot;alg&quot;:&quot;HS256&quot;,&quot;typ&quot;:&quot;JWT&quot;}&#x27;) + &quot;.&quot; + _b64(json.dumps(payload, separators=(&quot;,&quot;, &quot;:&quot;)).encode())
+    return head + &quot;.&quot; + _b64(hmac.new(key, head.encode(), hashlib.sha256).digest())
+
+def decode_jwt(token, key, now):
+    h, p, s = token.split(&quot;.&quot;)
+    if json.loads(_unb64(h)).get(&quot;alg&quot;) != &quot;HS256&quot;:
+        raise ValueError(&quot;algorithm&quot;)
+    if not hmac.compare_digest(_b64(hmac.new(key, f&quot;{h}.{p}&quot;.encode(), hashlib.sha256).digest()), s):
+        raise ValueError(&quot;signature&quot;)
+    payload = json.loads(_unb64(p))
+    if now &gt; payload[&quot;exp&quot;]:
+        raise ValueError(&quot;expired&quot;)
+    return payload
+
+def create_app(key, clock):
+    app = Flask(__name__)
+    users = {}
+
+    def public(user_id):
+        return {&quot;id&quot;: user_id, &quot;email&quot;: users[user_id][&quot;email&quot;]}
+
+    def current_user():
+        scheme, _, token = request.headers.get(&quot;Authorization&quot;, &quot;&quot;).partition(&quot; &quot;)
+        if scheme != &quot;Bearer&quot; or not token:
+            return None
+        try:
+            payload = decode_jwt(token, key, clock())
+        except Exception:
+            return None
+        return payload[&quot;sub&quot;] if payload.get(&quot;sub&quot;) in users else None
+
+    @app.post(&quot;/register&quot;)
+    def register():
+        data = request.get_json(silent=True) or {}
+        email, password = str(data.get(&quot;email&quot;, &quot;&quot;)).strip().lower(), data.get(&quot;password&quot;, &quot;&quot;)
+        if &quot;@&quot; not in email or not isinstance(password, str) or len(password) &lt; 8:
+            return {&quot;error&quot;: &quot;an email and a password of at least 8 characters are needed&quot;}, 422
+        if any(u[&quot;email&quot;] == email for u in users.values()):
+            return {&quot;error&quot;: &quot;email already registered&quot;}, 409
+        user_id = len(users) + 1
+        users[user_id] = {&quot;email&quot;: email, &quot;hash&quot;: hash_password(password), &quot;role&quot;: &quot;admin&quot; if user_id == 1 else &quot;member&quot;}
+        return public(user_id), 201
+
+    @app.post(&quot;/login&quot;)
+    def login():
+        data = request.get_json(silent=True) or {}
+        email = str(data.get(&quot;email&quot;, &quot;&quot;)).strip().lower()
+        password = data.get(&quot;password&quot;, &quot;&quot;)
+        match = next((uid for uid, u in users.items() if u[&quot;email&quot;] == email), None)
+        if match is None or not isinstance(password, str) or not verify_password(password, users[match][&quot;hash&quot;]):
+            return {&quot;error&quot;: &quot;wrong email or password&quot;}, 401
+        token = encode_jwt({&quot;sub&quot;: match, &quot;role&quot;: users[match][&quot;role&quot;], &quot;exp&quot;: clock() + 900}, key)
+        return {&quot;token&quot;: token}
+
+    @app.get(&quot;/me&quot;)
+    def me():
+        user_id = current_user()
+        if user_id is None:
+            return {&quot;error&quot;: &quot;invalid token&quot;}, 401
+        return {**public(user_id), &quot;role&quot;: users[user_id][&quot;role&quot;]}
+
+    @app.get(&quot;/admin/users&quot;)
+    def all_users():
+        user_id = current_user()
+        if user_id is None:
+            return {&quot;error&quot;: &quot;invalid token&quot;}, 401
+        if users[user_id][&quot;role&quot;] != &quot;admin&quot;:
+            return {&quot;error&quot;: &quot;admins only&quot;}, 403
+        return [public(uid) for uid in sorted(users)]
+
+    return app</textarea><template class="pc-src pc-hint">Keep <code>users = {}</code> (id to a dict with <code>email</code>, <code>hash</code> and <code>role</code>) inside <code>create_app</code>. Write a helper <code>current_user()</code> that returns the user or <code>None</code>, catching <strong>every</strong> exception from splitting and decoding the token, and use it in both protected endpoints.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>List every place in your projects where a secret (a password, a token, a key) is created, stored, compared or sent, and check each against today&rsquo;s rules. Tomorrow: <strong>deployment</strong>: getting a backend running on a server, configured from its environment, behind HTTPS, with logs and health checks.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w077d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w077d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w077d4", "week": 77, "day": 4, "title": "Authentication", "exercises": [{"id": "w077d4-pbkdf2", "title": "PBKDF2 by hand", "points": 15}, {"id": "w077d4-storage", "title": "Storing and checking passwords", "points": 15}, {"id": "w077d4-signed", "title": "Signed cookies", "points": 15}, {"id": "w077d4-jwt", "title": "JSON Web Tokens", "points": 15}, {"id": "w077d4-permissions", "title": "Roles, permissions and ownership", "points": 10}, {"id": "w077d4-guard", "title": "Slowing down guessers", "points": 10}, {"id": "w077d4-bug1", "title": "The same hash for the same password", "points": 10}, {"id": "w077d4-bug2", "title": "A token that never expired", "points": 10}, {"id": "w077d4-bug3", "title": "Someone else's order", "points": 10}, {"id": "w077d4-trace", "title": "Predict them", "points": 10}, {"id": "w077d4-challenge", "title": "Challenge: an authenticated API", "points": 25}], "points": 145}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=db5173407e"></script>
+</body>
+</html>
