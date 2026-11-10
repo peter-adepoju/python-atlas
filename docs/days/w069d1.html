@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 69 Day 1: Project: an interpreter | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="Phase 5 ends the way the other phases did: with one complete program, built from scratch over a week. This time it’s an interpreter: a program that runs...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w069d1.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 69 Day 1: Project: an interpreter">
+<meta property="og:description" content="Phase 5 ends the way the other phases did: with one complete program, built from scratch over a week. This time it’s an interpreter: a program that runs...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w069d1.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-69">Week 69: Consolidation project</a>
+      <ol class="rail-toc"><li><a href="#the-brief" data-sec="the-brief">The brief</a></li><li><a href="#a-plan" data-sec="a-plan">A plan</a></li><li><a href="#step-1-the-error-family" data-sec="step-1-the-error-family">Step 1: the error family</a></li><li><a href="#step-2-showing-an-error" data-sec="step-2-showing-an-error">Step 2: showing an error</a></li><li><a href="#step-3-tokens-and-a-cursor" data-sec="step-3-tokens-and-a-cursor">Step 3: tokens and a cursor</a></li><li><a href="#step-4-numbers" data-sec="step-4-numbers">Step 4: numbers</a></li><li><a href="#step-5-strings" data-sec="step-5-strings">Step 5: strings</a></li><li><a href="#checkpoint" data-sec="checkpoint">Checkpoint</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w069d1.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-5">Phase 5: Advanced Python</a></li><li><a href="../map.html#week-69">Week 69: Consolidation project</a></li><li aria-current="page">Day 1 of 6</li></ol>
+      <p class="day-where"><span>Week 69, Day 1</span></p>
+      <h1>Project: an interpreter</h1>
+      <div class="day-intro"><p>Phase 5 ends the way the other phases did: with one complete program, built from scratch over a week. This time it&rsquo;s an <strong>interpreter</strong>: a program that runs programs. You&rsquo;ll build one for <strong>Tiny</strong>, a small language with numbers, strings, variables, <code>if</code>, <code>while</code>, functions and closures, and in doing so see from the inside what Python does with your code every day (Week 64 showed CPython&rsquo;s own pipeline). Today: the brief, the plan, the error family, positions, and the first two kinds of token, numbers and strings.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Read a language specification and plan an interpreter as a pipeline of stages</li><li>Design an error family that carries line and column positions</li><li>Show errors with the source line and a caret under the problem</li><li>Walk through source text with a cursor that tracks lines and columns</li><li>Read number and string tokens, including escapes and their errors</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 40 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:20" title="The brief: 20 min"></span><span class="plan-seg s1" style="flex:25" title="A plan: 25 min"></span><span class="plan-seg s0" style="flex:10" title="Step 1: the error family: 10 min"></span><span class="plan-seg s1" style="flex:15" title="Step 2: showing an error: 15 min"></span><span class="plan-seg s0" style="flex:20" title="Step 3: tokens and a cursor: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Step 4: numbers: 20 min"></span><span class="plan-seg s0" style="flex:30" title="Step 5: strings: 30 min"></span><span class="plan-seg s1" style="flex:20" title="Checkpoint and quiz: 20 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">The brief</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:20</span><span class="plan-what">A plan</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:45</span><span class="plan-what">Step 1: the error family</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Step 2: showing an error</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Step 3: tokens and a cursor</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Step 4: numbers</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Step 5: strings</span><span class="plan-min">30 min</span></li><li><span class="plan-at">2:20</span><span class="plan-what">Checkpoint and quiz</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w069d1.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w069d1.ipynb" download>download it</a>. Exercises today are worth 70 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="the-brief">The brief</h2>
+<p>You&rsquo;ll write an interpreter for <strong>Tiny</strong>, a small programming language. This is a complete Tiny program:</p>
+<pre><code class="language-text"># Tiny: comments start with #
+fn make_counter() {
+    let count = 0;
+    fn step() {
+        count = count + 1;
+        return count;
+    }
+    return step;
+}
+
+let next = make_counter();
+next();
+next();
+print next();                      # 3
+
+fn fib(n) {
+    if (n &lt; 2) return n;
+    return fib(n - 1) + fib(n - 2);
+}
+print &quot;fib(15) is &quot; + str(fib(15));
+
+let i = 0;
+while (i &lt; 3) {
+    print i * i;
+    i = i + 1;
+}
+</code></pre>
+<p>The language, in full:</p>
+<ul>
+<li><strong>Values</strong>: numbers (<code>42</code>, <code>3.5</code>), strings (<code>"text"</code>, with the escapes <code>\n</code>, <code>\t</code>, <code>\"</code> and <code>\\</code>), <code>true</code>, <code>false</code>, <code>nil</code>, and functions.</li>
+<li><strong>Expressions</strong>: arithmetic <code>+ - * / %</code> (with <code>+</code> also joining strings), comparisons <code>&lt; &lt;= &gt; &gt;= == !=</code>, <code>and</code>, <code>or</code> and <code>not</code> (short-circuiting, as in Python), unary minus, brackets, names, and calls <code>f(a, b)</code>.</li>
+<li><strong>Statements</strong>: <code>let name = expr;</code> (create a variable), <code>name = expr;</code> (change an existing one), <code>print expr;</code>, an expression followed by <code>;</code>, a block <code>{ ... }</code>, <code>if (test) statement else statement</code>, <code>while (test) statement</code>, <code>fn name(params) { ... }</code> and <code>return expr;</code>.</li>
+<li><strong>Scope</strong>: blocks and functions create new scopes; functions are <strong>closures</strong> that remember the scope they were defined in.</li>
+<li><strong>Truth</strong>: <code>nil</code> and <code>false</code> are false; everything else (including <code>0</code> and <code>""</code>) is true.</li>
+<li><strong>Built-ins</strong>: <code>len(string)</code>, <code>str(value)</code> and <code>type(value)</code>.</li>
+<li><strong>Errors</strong> report a line (and a column, when it&rsquo;s known): <code>line 2, column 11: unexpected character '@'</code>.</li>
+</ul>
+<h2 id="a-plan">A plan</h2>
+<p>An interpreter is a pipeline, just like CPython&rsquo;s (Week 64):</p>
+<pre><code class="language-text">source text --tokenise--&gt; tokens --parse--&gt; syntax tree --evaluate--&gt; output
+</code></pre>
+<ol>
+<li>The <strong>tokeniser</strong> (today and tomorrow) turns characters into <strong>tokens</strong>: <code>let x = 3.5;</code> becomes <code>LET</code>, <code>NAME x</code>, <code>OP =</code>, <code>NUMBER 3.5</code>, <code>OP ;</code>, <code>EOF</code>. It knows nothing about grammar.</li>
+<li>The <strong>parser</strong> (Wednesday) turns tokens into an <strong>abstract syntax tree</strong> of dataclasses, such as <code>Let("x", Number(3.5))</code>, using <strong>recursive descent</strong>: one method per grammar rule, with operator precedence built into which method calls which.</li>
+<li>The <strong>evaluator</strong> (Thursday) walks the tree, keeping variables in a chain of <strong>environments</strong> (scopes), and produces output.</li>
+<li>On Friday, <strong>tests</strong> pin it all down and a <strong>profile</strong> shows where it spends its time.</li>
+</ol>
+<p>Each stage has its own error class, and every error carries a position so the person writing Tiny code can find the problem. The program grows step by step; each exercise gives you the earlier steps&rsquo; code, so you can concentrate on the new piece.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>An interpreter runs programs in stages: a tokeniser turns characters into tokens, a parser turns tokens into a syntax tree, and an evaluator walks the tree. Every stage reports errors with a position, through one error family.</p></aside>
+<h2 id="step-1-the-error-family">Step 1: the error family</h2>
+<p>Start, as Week 38 did, with the errors: they shape everything else. Every error the interpreter raises on purpose is a <code>TinyError</code>, so a program running Tiny code can catch them all with one <code>except</code>, while a genuine bug in the interpreter still shows up as an ordinary Python exception.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d1-step1" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Step 1: the error family</div><div class="pc-prompt"><p>Write <code>TinyError(message, line=None, column=None)</code>, an <code>Exception</code> subclass that stores <code>message</code>, <code>line</code> and <code>column</code>, and whose <code>str()</code> is <code>"line 3, column 7: unexpected character '@'"</code>, or <code>"line 3: division by zero"</code> when there&rsquo;s no column, or just the message when there&rsquo;s no line. Then three subclasses with docstrings: <code>LexError</code>, <code>ParseError</code> and <code>TinyRuntimeError</code> (not <code>RuntimeError</code>, which is Python&rsquo;s own).</p></div><textarea class="pc-src pc-code" hidden>class TinyError(Exception):
+    ___
+
+class LexError(TinyError):
+    ___
+
+class ParseError(TinyError):
+    ___
+
+class TinyRuntimeError(TinyError):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_errors():
+    &quot;the error family&quot;
+    e = LexError(&quot;unexpected character &#x27;@&#x27;&quot;, 3, 7)
+    assert str(e) == &quot;line 3, column 7: unexpected character &#x27;@&#x27;&quot; and e.line == 3 and e.column == 7
+    assert e.message == &quot;unexpected character &#x27;@&#x27;&quot; and isinstance(e, TinyError) and isinstance(e, Exception)
+    assert str(TinyRuntimeError(&quot;division by zero&quot;, 2)) == &quot;line 2: division by zero&quot;
+    assert str(ParseError(&quot;oops&quot;)) == &quot;oops&quot; and ParseError(&quot;oops&quot;).line is None
+    assert issubclass(TinyRuntimeError, TinyError) and not issubclass(TinyRuntimeError, RuntimeError)
+    for cls in (LexError, ParseError, TinyRuntimeError):
+        assert cls.__doc__
+    try:
+        raise ParseError(&quot;expected &#x27;;&#x27;&quot;, 1, 5)
+    except TinyError as caught:
+        assert caught.column == 5</textarea><textarea class="pc-src pc-solution" hidden>class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;</textarea></div>
+<h2 id="step-2-showing-an-error">Step 2: showing an error</h2>
+<p>A position is only useful if the person can see it. Compilers and interpreters print the offending line with a marker under the column, and Python itself has done this for syntax errors for a long time.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d1-step2" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Step 2: showing an error</div><div class="pc-prompt"><p>Good error messages show where the problem is. Write <code>show_error(source, error)</code>: for an error with a line and column, return three lines: the error&rsquo;s <code>str()</code>, then the offending source line indented by four spaces, then a caret <code>^</code> under the column (four spaces plus <code>column - 1</code> spaces). Without a column, return just the first two lines; without a line, just <code>str(error)</code>. The error classes from Step 1 are given.</p></div><textarea class="pc-src pc-code" hidden>class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+def show_error(source, error):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_show():
+    &quot;error display&quot;
+    src = &quot;let x = 1;\nlet y = 3 @ 4;\n&quot;
+    assert show_error(src, LexError(&quot;unexpected character &#x27;@&#x27;&quot;, 2, 11)) == (
+        &quot;line 2, column 11: unexpected character &#x27;@&#x27;\n    let y = 3 @ 4;\n              ^&quot;)
+    assert show_error(src, TinyRuntimeError(&quot;division by zero&quot;, 1)) == &quot;line 1: division by zero\n    let x = 1;&quot;
+    assert show_error(src, ParseError(&quot;no line&quot;)) == &quot;no line&quot;
+    assert show_error(&quot;x&quot;, LexError(&quot;bad&quot;, 1, 1)).endswith(&quot;\n    ^&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+def show_error(source, error):
+    if error.line is None:
+        return str(error)
+    text = source.split(&quot;\n&quot;)[error.line - 1]
+    if error.column is None:
+        return f&quot;{error}\n    {text}&quot;
+    return f&quot;{error}\n    {text}\n    {&#x27; &#x27; * (error.column - 1)}^&quot;</textarea></div>
+<h2 id="step-3-tokens-and-a-cursor">Step 3: tokens and a cursor</h2>
+<p>A <strong>token</strong> is a small record: what kind of thing it is, the exact text, what it means, and where it started. A <strong>cursor</strong> walks through the source one character at a time and keeps track of the line and column, so every token can record its position.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d1-step3" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Step 3: tokens and a cursor</div><div class="pc-prompt"><p>Write <code>Token</code>, a <strong>frozen</strong> dataclass with <code>kind</code> (such as <code>"NUMBER"</code>), <code>text</code> (exactly as written), <code>value</code> (its meaning: the number, the string&rsquo;s contents&hellip;), <code>line</code> and <code>column</code>. Then <code>Cursor(source)</code>, which walks through the text keeping its position: <code>pos</code> (starting at 0), <code>line</code> and <code>column</code> (both starting at 1); <code>at_end()</code>; <code>peek(ahead=0)</code>, the character <code>ahead</code> places from the current one, or <code>""</code> past the end; and <code>advance()</code>, which returns the current character and moves on, going to column 1 of the next line after a newline.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class Token:
+    ___
+
+class Cursor:
+    def __init__(self, source):
+        ___</textarea><textarea class="pc-src pc-tests" hidden>def test_tokens():
+    &quot;tokens and positions&quot;
+    import dataclasses
+    t = Token(&quot;NUMBER&quot;, &quot;42&quot;, 42, 1, 5)
+    assert (t.kind, t.text, t.value, t.line, t.column) == (&quot;NUMBER&quot;, &quot;42&quot;, 42, 1, 5)
+    try:
+        t.value = 7
+        assert False
+    except dataclasses.FrozenInstanceError:
+        pass
+    c = Cursor(&quot;ab\ncd&quot;)
+    assert (c.pos, c.line, c.column) == (0, 1, 1) and c.peek() == &quot;a&quot; and c.peek(1) == &quot;b&quot; and c.peek(9) == &quot;&quot;
+    assert c.advance() == &quot;a&quot; and c.advance() == &quot;b&quot; and (c.line, c.column) == (1, 3)
+    assert c.advance() == &quot;\n&quot; and (c.line, c.column) == (2, 1) and c.peek() == &quot;c&quot;
+    c.advance(); c.advance()
+    assert c.at_end() and c.peek() == &quot;&quot; and (c.line, c.column, c.pos) == (2, 3, 5)
+    assert Cursor(&quot;&quot;).at_end()</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch</textarea></div>
+<h2 id="step-4-numbers">Step 4: numbers</h2>
+<p>Each kind of token gets a small function that starts at the token&rsquo;s first character and reads to its end, leaving the cursor just after it.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d1-step4" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Step 4: numbers</div><div class="pc-prompt"><p>Write <code>read_number(cursor)</code>: with the cursor at a digit, read the whole number and return a <code>NUMBER</code> token positioned where it <strong>started</strong>: whole numbers like <code>42</code> get an <code>int</code> value, and numbers with a decimal part like <code>3.25</code> a <code>float</code>. A dot only belongs to the number if a digit follows it, so <code>3.</code> reads as <code>3</code> (the dot is left for later) and <code>1.5.2</code> reads as <code>1.5</code>. <code>Token</code> and <code>Cursor</code> are given.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+
+def read_number(cursor):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_numbers():
+    &quot;reading numbers&quot;
+    c = Cursor(&quot;42 + 7&quot;)
+    assert read_number(c) == Token(&quot;NUMBER&quot;, &quot;42&quot;, 42, 1, 1) and c.peek() == &quot; &quot;
+    c = Cursor(&quot;x = 3.25;&quot;)
+    c.advance(); c.advance(); c.advance(); c.advance()
+    t = read_number(c)
+    assert t == Token(&quot;NUMBER&quot;, &quot;3.25&quot;, 3.25, 1, 5) and type(t.value) is float and c.peek() == &quot;;&quot;
+    c = Cursor(&quot;3.&quot;)
+    assert read_number(c).value == 3 and c.peek() == &quot;.&quot;
+    c = Cursor(&quot;1.5.2&quot;)
+    assert read_number(c).text == &quot;1.5&quot; and c.peek() == &quot;.&quot;
+    c = Cursor(&quot;\n  007&quot;)
+    c.advance(); c.advance(); c.advance()
+    assert read_number(c) == Token(&quot;NUMBER&quot;, &quot;007&quot;, 7, 2, 3)</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)</textarea></div>
+<h2 id="step-5-strings">Step 5: strings</h2>
+<p>Strings are the fiddliest token: they have a beginning and an end that must match, and escapes inside, each of which can be wrong.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w069d1-step5" data-points="20"><div class="pc-label"><span>Exercise</span><span class="pc-pts">20 points</span></div><div class="pc-title">Step 5: strings</div><div class="pc-prompt"><p>Write <code>read_string(cursor)</code>: with the cursor at a <code>"</code>, read a string up to its closing quote and return a <code>STRING</code> token whose <code>text</code> is exactly as written (quotes and backslashes included) and whose <code>value</code> is its contents, with the escapes in <code>ESCAPES</code> turned into the characters they stand for (<code>\\n</code> into a newline, and so on). Errors, as <code>LexError</code>: a string that reaches a newline or the end of the source is <code>"unterminated string"</code>, positioned at the <strong>opening</strong> quote; an unknown escape such as <code>\\q</code> is <code>"unknown escape \\q"</code> (with one backslash in the message), positioned at its backslash. The earlier pieces are given.</p></div><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_strings():
+    &quot;reading strings&quot;
+    c = Cursor(&#x27;&quot;hello&quot; rest&#x27;)
+    assert read_string(c) == Token(&quot;STRING&quot;, &#x27;&quot;hello&quot;&#x27;, &quot;hello&quot;, 1, 1) and c.peek() == &quot; &quot;
+    c = Cursor(r&#x27;&quot;a\tb\n\&quot;q\&quot; \\&quot;&#x27;)
+    t = read_string(c)
+    assert t.value == &#x27;a\tb\n&quot;q&quot; \\&#x27; and t.text == r&#x27;&quot;a\tb\n\&quot;q\&quot; \\&quot;&#x27; and c.at_end()
+    assert read_string(Cursor(&#x27;&quot;&quot;&#x27;)).value == &quot;&quot;
+    for src, message, column in ((&#x27;&quot;oops&#x27;, &quot;unterminated string&quot;, 1), (&#x27;&quot;line\nbreak&quot;&#x27;, &quot;unterminated string&quot;, 1),
+                                 (r&#x27;&quot;bad \q&quot;&#x27;, r&quot;unknown escape \q&quot;, 6)):
+        try:
+            read_string(Cursor(src))
+            assert False, src
+        except LexError as e:
+            assert e.message == message and e.column == column and e.line == 1</textarea><textarea class="pc-src pc-solution" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch</textarea><template class="pc-src pc-hint">Keep two strings as you go: <code>text</code> (every character, as written) and <code>value</code> (the meaning). After a backslash, remember the backslash&rsquo;s position before you advance past the escape letter.</template></div>
+<h2 id="checkpoint">Checkpoint</h2>
+<p>Here are today&rsquo;s pieces working together on a line of Tiny:</p>
+<div class="pc pc-example" data-kind="example" data-id="w069d1-e1"><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass
+
+
+class TinyError(Exception):
+    &quot;&quot;&quot;Base class for every error the Tiny interpreter reports.&quot;&quot;&quot;
+
+    def __init__(self, message, line=None, column=None):
+        super().__init__(message)
+        self.message, self.line, self.column = message, line, column
+
+    def __str__(self):
+        if self.line is None:
+            return self.message
+        if self.column is None:
+            return f&quot;line {self.line}: {self.message}&quot;
+        return f&quot;line {self.line}, column {self.column}: {self.message}&quot;
+
+
+class LexError(TinyError):
+    &quot;&quot;&quot;The source contains characters that don&#x27;t form a token.&quot;&quot;&quot;
+
+
+class ParseError(TinyError):
+    &quot;&quot;&quot;The tokens don&#x27;t follow Tiny&#x27;s grammar.&quot;&quot;&quot;
+
+
+class TinyRuntimeError(TinyError):
+    &quot;&quot;&quot;Something went wrong while a program ran.&quot;&quot;&quot;
+
+
+def show_error(source, error):
+    if error.line is None:
+        return str(error)
+    text = source.split(&quot;\n&quot;)[error.line - 1]
+    if error.column is None:
+        return f&quot;{error}\n    {text}&quot;
+    return f&quot;{error}\n    {text}\n    {&#x27; &#x27; * (error.column - 1)}^&quot;
+
+
+@dataclass(frozen=True)
+class Token:
+    kind: str
+    text: str
+    value: object
+    line: int
+    column: int
+
+
+class Cursor:
+    def __init__(self, source):
+        self.source, self.pos, self.line, self.column = source, 0, 1, 1
+
+    def at_end(self):
+        return self.pos &gt;= len(self.source)
+
+    def peek(self, ahead=0):
+        i = self.pos + ahead
+        return self.source[i] if i &lt; len(self.source) else &quot;&quot;
+
+    def advance(self):
+        ch = self.source[self.pos]
+        self.pos += 1
+        if ch == &quot;\n&quot;:
+            self.line, self.column = self.line + 1, 1
+        else:
+            self.column += 1
+        return ch
+
+
+def read_number(cursor):
+    line, column, text = cursor.line, cursor.column, &quot;&quot;
+    while cursor.peek().isdigit():
+        text += cursor.advance()
+    if cursor.peek() == &quot;.&quot; and cursor.peek(1).isdigit():
+        text += cursor.advance()
+        while cursor.peek().isdigit():
+            text += cursor.advance()
+        return Token(&quot;NUMBER&quot;, text, float(text), line, column)
+    return Token(&quot;NUMBER&quot;, text, int(text), line, column)
+
+
+ESCAPES = {&quot;n&quot;: &quot;\n&quot;, &quot;t&quot;: &quot;\t&quot;, &#x27;&quot;&#x27;: &#x27;&quot;&#x27;, &quot;\\&quot;: &quot;\\&quot;}
+
+
+def read_string(cursor):
+    line, column = cursor.line, cursor.column
+    text = cursor.advance()
+    value = &quot;&quot;
+    while True:
+        if cursor.at_end() or cursor.peek() == &quot;\n&quot;:
+            raise LexError(&quot;unterminated string&quot;, line, column)
+        ch = cursor.advance()
+        text += ch
+        if ch == &#x27;&quot;&#x27;:
+            return Token(&quot;STRING&quot;, text, value, line, column)
+        if ch == &quot;\\&quot;:
+            if cursor.at_end():
+                raise LexError(&quot;unterminated string&quot;, line, column)
+            esc_line, esc_col = cursor.line, cursor.column - 1
+            code = cursor.advance()
+            text += code
+            if code not in ESCAPES:
+                raise LexError(f&quot;unknown escape \\{code}&quot;, esc_line, esc_col)
+            value += ESCAPES[code]
+        else:
+            value += ch
+
+
+line = &#x27;print 3.5; print &quot;tab\there&quot;; print &quot;oops&#x27;
+cursor = Cursor(line)
+found = []
+try:
+    while not cursor.at_end():
+        ch = cursor.peek()
+        if ch.isdigit():
+            found.append(read_number(cursor))
+        elif ch == &#x27;&quot;&#x27;:
+            found.append(read_string(cursor))
+        else:
+            cursor.advance()
+except TinyError as e:
+    print(show_error(line, e))
+for tok in found:
+    print(tok.kind, repr(tok.value), &quot;at column&quot;, tok.column)</textarea></div>
+<aside class="callout c-think"><div class="callout-t">Why errors first?</div><p>It&rsquo;s tempting to start with the interesting part, running programs, and add error handling later. But in an interpreter, errors are half the user interface: most of the time someone runs a program, it&rsquo;s because they&rsquo;re still writing it and it doesn&rsquo;t work yet. Deciding today that every error has a class, a message and a position means each later stage has an obvious way to report problems, and the person using Tiny always gets told where to look.</p></aside>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w069d1-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What are the stages of the Tiny interpreter, in order?", "answer": 1, "explain": "Characters, then tokens, then a tree.", "options": ["Parse, tokenise, evaluate", "Tokenise, parse, evaluate", "Evaluate, parse, tokenise", "Compile, link, run"]}, {"type": "mc", "q": "What does a tokeniser know about grammar?", "answer": 1, "explain": "The parser handles grammar.", "options": ["Everything", "Nothing: it only groups characters into tokens", "Only precedence", "Only statements"]}, {"type": "mc", "q": "Why does every Tiny error inherit from TinyError?", "answer": 1, "explain": "The Week 38 pattern.", "options": ["Speed", "So callers can catch every deliberate error with one except, while interpreter bugs still surface", "Python requires it", "For pickling"]}, {"type": "mc", "q": "Why is TinyRuntimeError not called RuntimeError?", "answer": 1, "explain": "Avoid shadowing built-ins.", "options": ["Style", "That name is Python&rsquo;s own built-in exception", "It&rsquo;s too long", "No reason"]}, {"type": "mc", "q": "What does a token&rsquo;s text hold, as opposed to its value?", "answer": 1, "explain": "The text keeps the backslash; the value holds a real tab.", "options": ["Nothing", "Exactly what was written, where value is its meaning", "Its type", "Its position"]}, {"type": "mc", "q": "Why does the cursor track lines and columns?", "answer": 1, "explain": "Positions make errors useful.", "options": ["For speed", "So every token and error can report where it is", "For printing", "It doesn&rsquo;t need to"]}, {"type": "mc", "q": "How does Tiny read 3. (a digit then a dot)?", "answer": 1, "explain": "A dot belongs to a number only if a digit follows.", "options": ["As 3.0", "As the number 3, leaving the dot", "As an error", "As a string"]}, {"type": "mc", "q": "Where is an unterminated string&rsquo;s error positioned?", "answer": 1, "explain": "That&rsquo;s where the person needs to look.", "options": ["At the end of the file", "At its opening quote", "At the last character", "Nowhere"]}, {"type": "mc", "q": "What does peek return past the end of the source?", "answer": 1, "explain": "So checks like peek().isdigit() just fail safely.", "options": ["None", "An empty string", "An error", "The last character"]}, {"type": "output", "q": "What does this print?", "answer": "TinyError 3 bad", "explain": "super().<strong>init</strong> sets the message str() shows.", "code": "class TinyError(Exception):\n    def __init__(self, message, line=None):\n        super().__init__(message)\n        self.line = line\ntry:\n    raise TinyError(\"bad\", 3)\nexcept Exception as e:\n    print(type(e).__name__, e.line, e)"}]</script></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Write a three-line Tiny program on paper and list the tokens you&rsquo;d expect from it, with their kinds and columns. Tomorrow: the rest of the tokeniser, names, keywords, operators and comments, and the <code>tokenize</code> function that ties it together.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w068d6.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w069d2.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w069d1", "week": 69, "day": 1, "title": "Project: an interpreter", "exercises": [{"id": "w069d1-step1", "title": "Step 1: the error family", "points": 10}, {"id": "w069d1-step2", "title": "Step 2: showing an error", "points": 10}, {"id": "w069d1-step3", "title": "Step 3: tokens and a cursor", "points": 15}, {"id": "w069d1-step4", "title": "Step 4: numbers", "points": 15}, {"id": "w069d1-step5", "title": "Step 5: strings", "points": 20}], "points": 70}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
