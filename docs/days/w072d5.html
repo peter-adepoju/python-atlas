@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 72 Day 5: Test architecture | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="The last four days were about individual tests. Today is about the suite as a whole: hundreds or thousands of tests that a team relies on every day. A good...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w072d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 72 Day 5: Test architecture">
+<meta property="og:description" content="The last four days were about individual tests. Today is about the suite as a whole: hundreds or thousands of tests that a team relies on every day. A good...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w072d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-72">Week 72: Testing in depth</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#kinds-of-test-and-the-pyramid" data-sec="kinds-of-test-and-the-pyramid">Kinds of test, and the pyramid</a></li><li><a href="#designing-for-testability" data-sec="designing-for-testability">Designing for testability</a></li><li><a href="#contract-tests-and-test-data" data-sec="contract-tests-and-test-data">Contract tests and test data</a></li><li><a href="#flaky-tests-and-a-suite-s-layout" data-sec="flaky-tests-and-a-suite-s-layout">Flaky tests, and a suite’s layout</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w072d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-72">Week 72: Testing in depth</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 72, Day 5</span></p>
+      <h1>Test architecture</h1>
+      <div class="day-intro"><p>The last four days were about individual tests. Today is about the suite as a whole: hundreds or thousands of tests that a team relies on every day. A good suite is fast enough to run all the time, fails only when something is really wrong, and tells you where. A bad one is slow, flaky and so tangled that nobody dares change the code. The difference is mostly architecture: what kinds of test you write and how many of each, how the code is shaped so that it can be tested, how fakes are kept honest, how test data is built, and how flaky tests are found and fixed.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Balance unit, integration and end-to-end tests, and explain the test pyramid and its alternatives</li><li>Shape code for testing with ports and adapters, injecting the clock, configuration and services</li><li>Keep fakes honest with contract tests run against every implementation</li><li>Build test data with builders, structure tests as arrange, act, assert, and remove the causes of flakiness</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Kinds of test, and the pyramid: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Designing for testability: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Contract tests and test data: 20 min"></span><span class="plan-seg s0" style="flex:15" title="Flaky tests, and a suite&#x27;s layout: 15 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Kinds of test, and the pyramid</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Designing for testability</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Contract tests and test data</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Flaky tests, and a suite&rsquo;s layout</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:30</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w072d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w072d5.ipynb" download>download it</a>. Exercises today are worth 130 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w072d5-p1"><textarea class="pc-src pc-code" hidden>from datetime import date
+
+def membership_status(expiry):
+    days = (expiry - date.today()).days
+    if days &lt; 0:
+        return &quot;expired&quot;
+    if days &lt;= 30:
+        return &quot;renew soon&quot;
+    return &quot;active&quot;
+
+print(membership_status(date(2027, 1, 31)))
+print(membership_status(date(2026, 11, 30)))</textarea></div>
+<p>What this prints depends on the day you run it. A test written with these dates passed on the day it was written, and breaks, by itself, some weeks later: no code changed, nobody did anything wrong, and the build is red. The fix isn&rsquo;t in the test. It&rsquo;s in the code&rsquo;s <strong>shape</strong>: <code>membership_status</code> reaches out for the date instead of being given it.</p>
+<h2 id="kinds-of-test-and-the-pyramid">Kinds of test, and the pyramid</h2>
+<p>Tests differ in how much of the system they exercise:</p>
+<ul>
+<li><strong>Unit tests</strong> check one small piece (a function, a class) in isolation, with its slow or external collaborators replaced. They run in milliseconds, point straight at the broken code, and can test every edge case cheaply.</li>
+<li><strong>Integration tests</strong> check that pieces work <strong>together</strong> with real collaborators: your code with a real database, two modules through their real interface, a request handler with its real routing. They catch the bugs that live in the joins, which unit tests can&rsquo;t see, but they&rsquo;re slower and a failure is harder to locate.</li>
+<li><strong>End-to-end (system) tests</strong> drive the whole application as a user would: start the server, send real HTTP requests, check the responses. They give the most confidence per test and the least information per failure, and they&rsquo;re the slowest and flakiest.</li>
+</ul>
+<p>The <strong>test pyramid</strong> is the usual advice on proportions: <strong>many</strong> unit tests at the bottom, <strong>fewer</strong> integration tests, and a <strong>handful</strong> of end-to-end tests at the top, covering the most important journeys. The opposite shape, the <strong>ice-cream cone</strong> (mostly manual and end-to-end tests, few unit tests), is slow and brittle. Some teams argue for a <strong>trophy</strong> shape with integration tests as the widest band, because modern tools make them fast. The principle behind all three is the same: test each behaviour at the <strong>lowest level that can catch its bugs</strong>, and use the higher levels for what only they can check.</p>
+<p>&ldquo;Unit&rdquo; doesn&rsquo;t have to mean &ldquo;one function with every collaborator mocked&rdquo;. Testing a small cluster of real classes together, with doubles only at the edges (Day 2), usually gives tests that survive refactoring far better.</p>
+<h2 id="designing-for-testability">Designing for testability</h2>
+<p>Code is easy to test when its <strong>decisions</strong> are separated from its <strong>effects</strong>. <strong>Ports and adapters</strong> (also called <strong>hexagonal architecture</strong>) makes that a design rule:</p>
+<ul>
+<li>The <strong>core</strong> holds the logic, as plain functions and classes. It never reads the clock, the environment, files or the network itself.</li>
+<li>It talks to the outside world through <strong>ports</strong>: small interfaces it defines, such as <code>Clock.now()</code>, <code>Repository.save(order)</code> or <code>Mailer.send(to, subject)</code>.</li>
+<li><strong>Adapters</strong> implement the ports for real (a <code>SystemClock</code>, a <code>SqliteRepository</code>, an <code>SmtpMailer</code>) or for tests (a <code>FixedClock</code>, an <code>InMemoryRepository</code>, a <code>RecordingMailer</code>).</li>
+<li>The program&rsquo;s entry point (its <code>main</code>) <strong>wires</strong> the real adapters together. Tests wire the test ones. This is <strong>dependency injection</strong>: objects receive their collaborators instead of creating them.</li>
+</ul>
+<p>The payoff: the core is tested with fast unit tests and simple fakes; each adapter gets a few integration tests against the real thing; and the wiring gets one or two end-to-end tests.</p>
+<div class="pc pc-example" data-kind="example" data-id="w072d5-e2"><textarea class="pc-src pc-code" hidden>from dataclasses import dataclass, field
+from datetime import date
+
+class FixedClock:
+    def __init__(self, today):
+        self._today = today
+    def today(self):
+        return self._today
+
+@dataclass
+class RecordingMailer:
+    sent: list = field(default_factory=list)
+    def send(self, to, subject):
+        self.sent.append((to, subject))
+
+def remind_expiring(members, clock, mailer, within=30):
+    &quot;&quot;&quot;The core: decisions only, with the clock and the mailer passed in.&quot;&quot;&quot;
+    reminded = []
+    for email, expiry in members:
+        if 0 &lt;= (expiry - clock.today()).days &lt;= within:
+            mailer.send(email, &quot;Your membership is ending soon&quot;)
+            reminded.append(email)
+    return reminded
+
+members = [(&quot;ada@x&quot;, date(2026, 11, 20)), (&quot;bob@x&quot;, date(2027, 3, 1)), (&quot;cy@x&quot;, date(2026, 10, 1))]
+mailer = RecordingMailer()
+print(remind_expiring(members, FixedClock(date(2026, 11, 10)), mailer))
+print(mailer.sent)</textarea></div>
+<p>The same <code>remind_expiring</code> runs in production with a clock that reads the real date and a mailer that really sends; nothing in it changes.</p>
+<h2 id="contract-tests-and-test-data">Contract tests and test data</h2>
+<p><strong>Fakes drift.</strong> An <code>InMemoryRepository</code> written to match a real database can slowly stop matching it: the real one raises on a duplicate key and the fake silently overwrites, and every test using the fake now tests a fiction. The defence is a <strong>contract test</strong>: one suite describing what <strong>any</strong> implementation of the port must do, run against <strong>every</strong> implementation, the real adapter included. With pytest that&rsquo;s a parametrized fixture (Day 1): <code>@pytest.fixture(params=["memory", "file"])</code> that builds each implementation in turn.</p>
+<p><strong>Test data.</strong> Tests need objects, and building them inline buries the one value that matters among a dozen that don&rsquo;t. A <strong>test data builder</strong> provides sensible defaults and lets each test state only what it cares about: <code>an_order().with_item("tea", 3.50, qty=2).for_member().build()</code>. When the <code>Order</code> class gains a field, one builder changes, not three hundred tests.</p>
+<p><strong>Arrange, act, assert.</strong> Lay out each test in three parts, separated by a blank line: set up the situation, do the one thing being tested, check the result. One act per test; if the name of a test needs &ldquo;and&rdquo;, it&rsquo;s probably two tests.</p>
+<div class="pc pc-example" data-kind="example" data-id="w072d5-e3"><textarea class="pc-src pc-code" hidden>class OrderBuilder:
+    def __init__(self):
+        self._items, self._member, self._code = [], False, None
+
+    def with_item(self, name, price, qty=1):
+        self._items.append({&quot;name&quot;: name, &quot;price&quot;: price, &quot;qty&quot;: qty})
+        return self
+
+    def for_member(self):
+        self._member = True
+        return self
+
+    def with_code(self, code):
+        self._code = code
+        return self
+
+    def build(self):
+        items = self._items or [{&quot;name&quot;: &quot;tea&quot;, &quot;price&quot;: 3.0, &quot;qty&quot;: 1}]
+        return {&quot;items&quot;: items, &quot;member&quot;: self._member, &quot;code&quot;: self._code}
+
+def an_order():
+    return OrderBuilder()
+
+def total(order):
+    subtotal = sum(i[&quot;price&quot;] * i[&quot;qty&quot;] for i in order[&quot;items&quot;])
+    return round(subtotal * (0.9 if order[&quot;member&quot;] else 1), 2)
+
+# arrange
+order = an_order().with_item(&quot;jam&quot;, 4.0, qty=2).for_member().build()
+# act
+result = total(order)
+# assert
+assert result == 7.2
+print(result, an_order().build())</textarea></div>
+<h2 id="flaky-tests-and-a-suite-s-layout">Flaky tests, and a suite&rsquo;s layout</h2>
+<p>A <strong>flaky</strong> test sometimes passes and sometimes fails with no code change. Flaky tests are worse than no tests: people learn to re-run until green, and then ignore a real failure. The usual causes, and their cures:</p>
+<table>
+<thead>
+<tr>
+<th>Cause</th>
+<th>Cure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The current time or date</td>
+<td>inject a clock</td>
+</tr>
+<tr>
+<td>Randomness</td>
+<td>inject a seeded <code>random.Random</code></td>
+</tr>
+<tr>
+<td>Test order and shared state (globals, caches, module fixtures that tests change)</td>
+<td>fresh state per test; an autouse fixture that resets globals</td>
+</tr>
+<tr>
+<td>Waiting a fixed time for something asynchronous (<code>sleep(1)</code> and hope)</td>
+<td>wait for the condition with a timeout, or make the work synchronous in tests</td>
+</tr>
+<tr>
+<td>The network or another real service</td>
+<td>a fake, or a local container that the test controls</td>
+</tr>
+<tr>
+<td>Iteration order of sets, or floating-point details</td>
+<td>sort before comparing; <code>pytest.approx</code></td>
+</tr>
+</tbody>
+</table>
+<p>When you find one, don&rsquo;t add a retry: find the cause. Run the suite in random order (the <code>pytest-randomly</code> plugin) and repeatedly (<code>pytest-repeat</code>) to flush out order and timing problems.</p>
+<p><strong>Layout.</strong> Keep tests in a <code>tests/</code> folder mirroring the package (<code>tests/unit/</code>, <code>tests/integration/</code>, each with a <code>conftest.py</code>). Mark the slow ones (<code>@pytest.mark.slow</code>, registered in the project&rsquo;s configuration) so that developers can run <code>pytest -m "not slow"</code> every few minutes, and the full suite runs in CI (Week 74). Name tests for the behaviour they check (<code>test_expired_membership_is_not_renewed</code>), so the list of failures reads like a list of broken promises.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Unit tests are fast and precise, integration tests check the joins, end-to-end tests check whole journeys; aim for many unit tests, fewer integration tests and a few end-to-end tests, testing each behaviour at the lowest level that can catch its bugs. Ports and adapters keep the core free of effects: inject the clock, configuration and services, wire real adapters in main and test ones in tests. Contract tests run one suite against every implementation, so fakes stay honest. Builders make test data with defaults; tests read arrange, act, assert. Flaky tests come from time, randomness, shared state, sleeping, networks and ordering: fix the cause, never retry. Lay tests out by kind, mark the slow ones, and name tests after behaviour.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w072d5-shape" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Pyramid or cone?</div><div class="pc-prompt"><p>Write <code>shape(counts)</code>: <code>counts</code> is a dict with <code>"unit"</code>, <code>"integration"</code> and <code>"e2e"</code> numbers of tests. Return <code>"pyramid"</code> if unit &gt; integration &gt; e2e; <code>"ice-cream cone"</code> if e2e &gt; integration &gt; unit; <code>"hourglass"</code> if both unit and e2e are greater than integration; otherwise <code>"unclear"</code>. Then <code>suite_time(counts, seconds)</code>: the total running time, given average <code>seconds</code> per test of each kind (a dict with the same keys), and <code>fast_feedback(counts, seconds, budget)</code>: the kinds that can run within <code>budget</code> seconds, taken in the order unit, integration, e2e and stopping at the first that would go over.</p></div><textarea class="pc-src pc-code" hidden>def shape(counts):
+    ___
+
+def suite_time(counts, seconds):
+    ___
+
+def fast_feedback(counts, seconds, budget):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_shape():
+    &quot;shapes and budgets&quot;
+    assert shape({&quot;unit&quot;: 500, &quot;integration&quot;: 80, &quot;e2e&quot;: 10}) == &quot;pyramid&quot;
+    assert shape({&quot;unit&quot;: 20, &quot;integration&quot;: 60, &quot;e2e&quot;: 300}) == &quot;ice-cream cone&quot;
+    assert shape({&quot;unit&quot;: 400, &quot;integration&quot;: 20, &quot;e2e&quot;: 200}) == &quot;hourglass&quot;
+    assert shape({&quot;unit&quot;: 50, &quot;integration&quot;: 50, &quot;e2e&quot;: 50}) == &quot;unclear&quot;
+    secs = {&quot;unit&quot;: 0.01, &quot;integration&quot;: 0.5, &quot;e2e&quot;: 6}
+    counts = {&quot;unit&quot;: 500, &quot;integration&quot;: 80, &quot;e2e&quot;: 10}
+    assert abs(suite_time(counts, secs) - 105) &lt; 1e-9
+    assert fast_feedback(counts, secs, 60) == [&quot;unit&quot;, &quot;integration&quot;] and fast_feedback(counts, secs, 2) == []
+    assert fast_feedback(counts, secs, 200) == [&quot;unit&quot;, &quot;integration&quot;, &quot;e2e&quot;]</textarea><textarea class="pc-src pc-solution" hidden>KINDS = (&quot;unit&quot;, &quot;integration&quot;, &quot;e2e&quot;)
+
+def shape(counts):
+    u, i, e = (counts[k] for k in KINDS)
+    if u &gt; i &gt; e:
+        return &quot;pyramid&quot;
+    if e &gt; i &gt; u:
+        return &quot;ice-cream cone&quot;
+    if u &gt; i and e &gt; i:
+        return &quot;hourglass&quot;
+    return &quot;unclear&quot;
+
+def suite_time(counts, seconds):
+    return sum(counts[k] * seconds[k] for k in KINDS)
+
+def fast_feedback(counts, seconds, budget):
+    chosen, used = [], 0
+    for k in KINDS:
+        cost = counts[k] * seconds[k]
+        if used + cost &gt; budget:
+            break
+        chosen.append(k)
+        used += cost
+    return chosen</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w072d5-builder" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A test data builder</div><div class="pc-prompt"><p>Write <code>UserBuilder</code>, a builder for user dicts with the keys <code>"name"</code> (default <code>"Ada"</code>), <code>"email"</code> (default: the lower-cased name with <code>"@example.com"</code>, worked out at <code>build()</code> time, so it follows a changed name), <code>"roles"</code> (default an empty list) and <code>"active"</code> (default <code>True</code>). Methods, each returning the builder: <code>named(name)</code>, <code>with_email(email)</code>, <code>with_role(role)</code> (adding one), <code>inactive()</code>. <code>build()</code> returns a <strong>new</strong> dict each time, so changing one built user never affects another. Also <code>a_user()</code>, returning a new builder.</p></div><textarea class="pc-src pc-code" hidden>class UserBuilder:
+    ___
+
+def a_user():
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_builder():
+    &quot;defaults and overrides&quot;
+    assert a_user().build() == {&quot;name&quot;: &quot;Ada&quot;, &quot;email&quot;: &quot;ada@example.com&quot;, &quot;roles&quot;: [], &quot;active&quot;: True}
+    bob = a_user().named(&quot;Bob&quot;).with_role(&quot;admin&quot;).with_role(&quot;editor&quot;).inactive().build()
+    assert bob == {&quot;name&quot;: &quot;Bob&quot;, &quot;email&quot;: &quot;bob@example.com&quot;, &quot;roles&quot;: [&quot;admin&quot;, &quot;editor&quot;], &quot;active&quot;: False}
+    assert a_user().named(&quot;Cy&quot;).with_email(&quot;c@x&quot;).build()[&quot;email&quot;] == &quot;c@x&quot;
+    b = a_user().with_role(&quot;viewer&quot;)
+    one, two = b.build(), b.build()
+    one[&quot;roles&quot;].append(&quot;hacked&quot;)
+    assert two[&quot;roles&quot;] == [&quot;viewer&quot;] and b.build()[&quot;roles&quot;] == [&quot;viewer&quot;]</textarea><textarea class="pc-src pc-solution" hidden>class UserBuilder:
+    def __init__(self):
+        self._name, self._email, self._roles, self._active = &quot;Ada&quot;, None, [], True
+
+    def named(self, name):
+        self._name = name
+        return self
+
+    def with_email(self, email):
+        self._email = email
+        return self
+
+    def with_role(self, role):
+        self._roles.append(role)
+        return self
+
+    def inactive(self):
+        self._active = False
+        return self
+
+    def build(self):
+        email = self._email or f&quot;{self._name.lower()}@example.com&quot;
+        return {&quot;name&quot;: self._name, &quot;email&quot;: email, &quot;roles&quot;: list(self._roles), &quot;active&quot;: self._active}
+
+def a_user():
+    return UserBuilder()</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w072d5-ports" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Injecting the outside world</div><div class="pc-prompt"><p>The function in the starter reads the date, the environment and a file all by itself, so it can&rsquo;t be tested reliably. Rewrite it as <code>daily_message(today, config, read_quote)</code>: <code>today</code> is a <code>date</code>, <code>config</code> a dict (it reads <code>"NAME"</code>, defaulting to <code>"friend"</code>, and <code>"SHOUTY"</code>, where only <code>"1"</code> means yes), and <code>read_quote(n)</code> a function returning quote number <code>n</code>. The message is <code>f"Good {part}, {name}! Quote {n}: {quote}"</code>, where <code>part</code> is <code>"weekend"</code> on Saturday and Sunday and <code>"weekday"</code> otherwise, <code>n</code> is the day of the year (<code>today.timetuple().tm_yday</code>), and the whole message is upper-cased if shouty. Then <code>main()</code>, which wires in the real date, <code>os.environ</code> and a real file reader (it isn&rsquo;t called by the checks).</p></div><textarea class="pc-src pc-code" hidden>import os
+from datetime import date
+
+def daily_message():
+    today = date.today()
+    name = os.environ.get(&quot;NAME&quot;, &quot;friend&quot;)
+    n = today.timetuple().tm_yday
+    with open(&quot;quotes.txt&quot;) as f:
+        quote = f.read().splitlines()[n % 100]
+    part = &quot;weekend&quot; if today.weekday() &gt;= 5 else &quot;weekday&quot;
+    message = f&quot;Good {part}, {name}! Quote {n}: {quote}&quot;
+    return message.upper() if os.environ.get(&quot;SHOUTY&quot;) == &quot;1&quot; else message</textarea><textarea class="pc-src pc-tests" hidden>def test_injected():
+    &quot;everything the function needs is passed in&quot;
+    from datetime import date
+    asked = []
+    def fake_quote(n):
+        asked.append(n)
+        return &quot;Simple is better than complex.&quot;
+    msg = daily_message(date(2026, 11, 14), {&quot;NAME&quot;: &quot;Ada&quot;}, fake_quote)
+    assert msg == &quot;Good weekend, Ada! Quote 318: Simple is better than complex.&quot; and asked == [318]
+    loud = daily_message(date(2026, 11, 10), {&quot;SHOUTY&quot;: &quot;1&quot;}, lambda n: &quot;Flat is better.&quot;)
+    assert loud == &quot;GOOD WEEKDAY, FRIEND! QUOTE 314: FLAT IS BETTER.&quot;
+    assert daily_message(date(2026, 11, 10), {&quot;SHOUTY&quot;: &quot;yes&quot;}, lambda n: &quot;x&quot;).startswith(&quot;Good&quot;)
+    body = source.split(&quot;def daily_message&quot;)[1].split(&quot;\ndef &quot;)[0]
+    assert &quot;date.today&quot; not in body and &quot;environ&quot; not in body, &quot;daily_message still reads the date or the environment itself&quot;</textarea><textarea class="pc-src pc-solution" hidden>import os
+from datetime import date
+
+def daily_message(today, config, read_quote):
+    name = config.get(&quot;NAME&quot;, &quot;friend&quot;)
+    n = today.timetuple().tm_yday
+    quote = read_quote(n)
+    part = &quot;weekend&quot; if today.weekday() &gt;= 5 else &quot;weekday&quot;
+    message = f&quot;Good {part}, {name}! Quote {n}: {quote}&quot;
+    return message.upper() if config.get(&quot;SHOUTY&quot;) == &quot;1&quot; else message
+
+def read_quote_file(n, path=&quot;quotes.txt&quot;):
+    with open(path) as f:
+        return f.read().splitlines()[n % 100]
+
+def main():
+    print(daily_message(date.today(), os.environ, read_quote_file))</textarea><template class="pc-src pc-hint">The core keeps the logic and loses the reading: <code>name = config.get("NAME", "friend")</code>, <code>quote = read_quote(n)</code>. In <code>main</code>, pass <code>date.today()</code>, <code>os.environ</code>, and a small function that opens <code>quotes.txt</code> and returns line <code>n % 100</code>.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w072d5-contract" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">One contract, two implementations</div><div class="pc-prompt"><p><code>repos.py</code> has two implementations of a key-value repository port: <code>MemoryRepo()</code> and <code>FileRepo(path)</code> (storing JSON in a file). Both must: <code>add(key, value)</code> (raising <code>KeyError</code> if the key exists), <code>get(key)</code> (raising <code>KeyError</code> if it doesn&rsquo;t), <code>remove(key)</code> (raising <code>KeyError</code> if it doesn&rsquo;t exist) and <code>keys()</code> (a sorted list). Write <strong>contract tests</strong>: a fixture parametrized over both (use <code>tmp_path</code> for the file), and tests that pass on the correct code and catch a broken version of either.</p><details class="pc-file"><summary><code>repos.py</code></summary><pre class="pc-filetext">import json
+
+class MemoryRepo:
+    def __init__(self):
+        self._data = {}
+
+    def add(self, key, value):
+        if key in self._data:
+            raise KeyError(key)
+        self._data[key] = value
+
+    def get(self, key):
+        return self._data[key]
+
+    def remove(self, key):
+        del self._data[key]
+
+    def keys(self):
+        return sorted(self._data)
+
+
+class FileRepo:
+    def __init__(self, path):
+        self.path = path
+        if not path.exists():
+            path.write_text(&quot;{}&quot;)
+
+    def _load(self):
+        return json.loads(self.path.read_text())
+
+    def _save(self, data):
+        self.path.write_text(json.dumps(data))
+
+    def add(self, key, value):
+        data = self._load()
+        if key in data:
+            raise KeyError(key)
+        data[key] = value
+        self._save(data)
+
+    def get(self, key):
+        return self._load()[key]
+
+    def remove(self, key):
+        data = self._load()
+        del data[key]
+        self._save(data)
+
+    def keys(self):
+        return sorted(self._load())
+</pre></details></div><textarea class="pc-src pc-code" hidden>import pytest
+from repos import MemoryRepo, FileRepo
+
+@pytest.fixture
+def repo():
+    return MemoryRepo()
+
+def test_add_and_get(repo):
+    repo.add(&quot;a&quot;, 1)
+    assert repo.get(&quot;a&quot;) == 1</textarea><textarea class="pc-src pc-tests" hidden>GOOD = open(&quot;repos.py&quot;).read()
+BROKEN = {
+    &quot;memory overwrites duplicates&quot;: GOOD.replace(&quot;        if key in self._data:\n            raise KeyError(key)\n&quot;, &quot;&quot;),
+    &quot;file overwrites duplicates&quot;: GOOD.replace(&quot;        if key in data:\n            raise KeyError(key)\n&quot;, &quot;&quot;),
+    &quot;file remove doesn&#x27;t save&quot;: GOOD.replace(&quot;        del data[key]\n        self._save(data)&quot;, &quot;        del data[key]&quot;),
+    &quot;file keys unsorted&quot;: GOOD.replace(&quot;return sorted(self._load())&quot;, &quot;return list(self._load())&quot;),
+    &quot;memory remove of a missing key passes&quot;: GOOD.replace(&quot;        del self._data[key]&quot;, &quot;        self._data.pop(key, None)&quot;),
+}
+def test_contract():
+    &quot;one suite catches a bug in either implementation&quot;
+    r = pytest_run(source)
+    assert r[&quot;failed&quot;] == [] and len(r[&quot;passed&quot;]) &gt;= 8, r[&quot;output&quot;][-600:]
+    results = against(source, &quot;repos&quot;, {&quot;correct&quot;: GOOD, **BROKEN})
+    write_file(&quot;repos.py&quot;, GOOD)
+    assert results[&quot;correct&quot;] == [], f&quot;these fail on the correct code: {results[&#x27;correct&#x27;]}&quot;
+    missed = [k for k in BROKEN if not results[k]]
+    assert not missed, f&quot;not caught: {missed}&quot;</textarea><textarea class="pc-src pc-files" hidden>{&quot;repos.py&quot;: &quot;import json\n\nclass MemoryRepo:\n    def __init__(self):\n        self._data = {}\n\n    def add(self, key, value):\n        if key in self._data:\n            raise KeyError(key)\n        self._data[key] = value\n\n    def get(self, key):\n        return self._data[key]\n\n    def remove(self, key):\n        del self._data[key]\n\n    def keys(self):\n        return sorted(self._data)\n\n\nclass FileRepo:\n    def __init__(self, path):\n        self.path = path\n        if not path.exists():\n            path.write_text(\&quot;{}\&quot;)\n\n    def _load(self):\n        return json.loads(self.path.read_text())\n\n    def _save(self, data):\n        self.path.write_text(json.dumps(data))\n\n    def add(self, key, value):\n        data = self._load()\n        if key in data:\n            raise KeyError(key)\n        data[key] = value\n        self._save(data)\n\n    def get(self, key):\n        return self._load()[key]\n\n    def remove(self, key):\n        data = self._load()\n        del data[key]\n        self._save(data)\n\n    def keys(self):\n        return sorted(self._load())\n&quot;}</textarea><textarea class="pc-src pc-solution" hidden>import pytest
+from repos import MemoryRepo, FileRepo
+
+@pytest.fixture(params=[&quot;memory&quot;, &quot;file&quot;])
+def repo(request, tmp_path):
+    if request.param == &quot;memory&quot;:
+        return MemoryRepo()
+    return FileRepo(tmp_path / &quot;repo.json&quot;)
+
+def test_add_and_get(repo):
+    repo.add(&quot;a&quot;, 1)
+    assert repo.get(&quot;a&quot;) == 1
+
+def test_duplicate_rejected(repo):
+    repo.add(&quot;a&quot;, 1)
+    with pytest.raises(KeyError):
+        repo.add(&quot;a&quot;, 2)
+    assert repo.get(&quot;a&quot;) == 1
+
+def test_missing_get(repo):
+    with pytest.raises(KeyError):
+        repo.get(&quot;nope&quot;)
+
+def test_remove(repo):
+    repo.add(&quot;a&quot;, 1)
+    repo.add(&quot;b&quot;, 2)
+    repo.remove(&quot;a&quot;)
+    assert repo.keys() == [&quot;b&quot;]
+
+def test_missing_remove(repo):
+    with pytest.raises(KeyError):
+        repo.remove(&quot;nope&quot;)
+
+def test_keys_sorted(repo):
+    for k in [&quot;c&quot;, &quot;a&quot;, &quot;b&quot;]:
+        repo.add(k, 0)
+    assert repo.keys() == [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]</textarea><template class="pc-src pc-hint"><code>@pytest.fixture(params=["memory", "file"])</code> with <code>def repo(request, tmp_path)</code>, returning <code>MemoryRepo()</code> or <code>FileRepo(tmp_path / "repo.json")</code>. Test duplicates, a missing get, removing (then checking <code>keys()</code>), a missing remove, and sorting with keys added out of order. For the file, &ldquo;remove doesn&rsquo;t save&rdquo; shows up only when you read back after removing.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w072d5-integration" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">An integration test with real files</div><div class="pc-prompt"><p><code>notes_app.py</code> has two modules&rsquo; worth of code working together: <code>NoteStore(folder)</code> saves each note as a file in a folder, and <code>search(store, word)</code> finds notes containing a word. Write <strong>integration</strong> tests using real files in <code>tmp_path</code> (no mocks), checking what ends up on disk as well as what the functions return, that pass on the correct code and catch every broken version.</p><details class="pc-file"><summary><code>notes_app.py</code></summary><pre class="pc-filetext">from pathlib import Path
+
+class NoteStore:
+    def __init__(self, folder):
+        self.folder = Path(folder)
+        self.folder.mkdir(parents=True, exist_ok=True)
+
+    def save(self, title, text):
+        path = self.folder / f&quot;{title}.txt&quot;
+        path.write_text(text, encoding=&quot;utf-8&quot;)
+        return path
+
+    def titles(self):
+        return sorted(p.stem for p in self.folder.glob(&quot;*.txt&quot;))
+
+    def read(self, title):
+        return (self.folder / f&quot;{title}.txt&quot;).read_text(encoding=&quot;utf-8&quot;)
+
+def search(store, word):
+    word = word.lower()
+    return [t for t in store.titles() if word in store.read(t).lower()]
+</pre></details></div><textarea class="pc-src pc-code" hidden>from notes_app import NoteStore, search
+
+def test_save(tmp_path):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>GOOD = open(&quot;notes_app.py&quot;).read()
+BROKEN = {
+    &quot;saves without the extension&quot;: GOOD.replace(&#x27;f&quot;{title}.txt&quot;&#x27;, &#x27;f&quot;{title}&quot;&#x27;, 1),
+    &quot;doesn&#x27;t create nested folders&quot;: GOOD.replace(&quot;parents=True, exist_ok=True&quot;, &quot;exist_ok=True&quot;),
+    &quot;case-sensitive search&quot;: GOOD.replace(&quot;    word = word.lower()\n&quot;, &quot;&quot;).replace(&quot;store.read(t).lower()&quot;, &quot;store.read(t)&quot;),
+    &quot;titles unsorted&quot;: GOOD.replace(&quot;return sorted(p.stem&quot;, &quot;return list(p.stem&quot;),
+    &quot;search looks at titles only&quot;: GOOD.replace(&quot;if word in store.read(t).lower()&quot;, &quot;if word in t.lower()&quot;),
+}
+def test_catches():
+    &quot;real files catch all five broken versions&quot;
+    results = against(source, &quot;notes_app&quot;, {&quot;correct&quot;: GOOD, **BROKEN})
+    write_file(&quot;notes_app.py&quot;, GOOD)
+    assert results[&quot;correct&quot;] == [], f&quot;these fail on the correct code: {results[&#x27;correct&#x27;]}&quot;
+    missed = [k for k in BROKEN if not results[k]]
+    assert not missed, f&quot;not caught: {missed}&quot;</textarea><textarea class="pc-src pc-files" hidden>{&quot;notes_app.py&quot;: &quot;from pathlib import Path\n\nclass NoteStore:\n    def __init__(self, folder):\n        self.folder = Path(folder)\n        self.folder.mkdir(parents=True, exist_ok=True)\n\n    def save(self, title, text):\n        path = self.folder / f\&quot;{title}.txt\&quot;\n        path.write_text(text, encoding=\&quot;utf-8\&quot;)\n        return path\n\n    def titles(self):\n        return sorted(p.stem for p in self.folder.glob(\&quot;*.txt\&quot;))\n\n    def read(self, title):\n        return (self.folder / f\&quot;{title}.txt\&quot;).read_text(encoding=\&quot;utf-8\&quot;)\n\ndef search(store, word):\n    word = word.lower()\n    return [t for t in store.titles() if word in store.read(t).lower()]\n&quot;}</textarea><textarea class="pc-src pc-solution" hidden>from notes_app import NoteStore, search
+
+def make_store(tmp_path):
+    store = NoteStore(tmp_path / &quot;notes&quot; / &quot;2026&quot;)
+    store.save(&quot;shopping&quot;, &quot;Tea, JAM and bread&quot;)
+    store.save(&quot;ideas&quot;, &quot;A garden for bees&quot;)
+    return store
+
+def test_save_writes_a_file(tmp_path):
+    store = make_store(tmp_path)
+    assert (tmp_path / &quot;notes&quot; / &quot;2026&quot; / &quot;shopping.txt&quot;).read_text() == &quot;Tea, JAM and bread&quot;
+
+def test_titles_sorted(tmp_path):
+    assert make_store(tmp_path).titles() == [&quot;ideas&quot;, &quot;shopping&quot;]
+
+def test_search_reads_the_text(tmp_path):
+    store = make_store(tmp_path)
+    assert search(store, &quot;jam&quot;) == [&quot;shopping&quot;] and search(store, &quot;BEES&quot;) == [&quot;ideas&quot;]
+    assert search(store, &quot;shopping&quot;) == []</textarea><template class="pc-src pc-hint">Use <code>NoteStore(tmp_path / "notes" / "2026")</code> (nested folders), save a few notes out of alphabetical order, then check <code>(folder / "shopping.txt").exists()</code>, <code>titles()</code>, <code>read()</code>, and a search whose word appears only in a note&rsquo;s text, in a different case.</template></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w072d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A test that broke on its own</div><div class="pc-prompt"><p><code>membership_status</code> reads today&rsquo;s date itself, so this test passed when it was written and fails now. Give <code>membership_status</code> a <code>today</code> parameter and pass a fixed date in the test, so the test passes on any day.</p></div><textarea class="pc-src pc-code" hidden>from datetime import date
+
+def membership_status(expiry):
+    days = (expiry - date.today()).days
+    if days &lt; 0:
+        return &quot;expired&quot;
+    if days &lt;= 30:
+        return &quot;renew soon&quot;
+    return &quot;active&quot;
+
+def test_renew_soon():
+    assert membership_status(date(2025, 6, 20)) == &quot;renew soon&quot;
+
+def test_active():
+    assert membership_status(date(2025, 12, 31)) == &quot;active&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_fixed():
+    &quot;the date is injected&quot;
+    r = pytest_run(source)
+    assert sorted(r[&quot;passed&quot;]) == [&quot;test_active&quot;, &quot;test_renew_soon&quot;], r[&quot;output&quot;][-600:]
+    assert &quot;date.today()&quot; not in source.split(&quot;def test_&quot;)[0].split(&quot;def membership_status&quot;)[1], &quot;membership_status still reads the date itself&quot;</textarea><textarea class="pc-src pc-solution" hidden>from datetime import date
+
+def membership_status(expiry, today):
+    days = (expiry - today).days
+    if days &lt; 0:
+        return &quot;expired&quot;
+    if days &lt;= 30:
+        return &quot;renew soon&quot;
+    return &quot;active&quot;
+
+TODAY = date(2025, 6, 1)
+
+def test_renew_soon():
+    assert membership_status(date(2025, 6, 20), TODAY) == &quot;renew soon&quot;
+
+def test_active():
+    assert membership_status(date(2025, 12, 31), TODAY) == &quot;active&quot;</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w072d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">State left behind</div><div class="pc-prompt"><p><code>seen</code> is a module-level cache, and nothing resets it, so <code>test_first_visit</code> passes only if it runs before <code>test_second_visit</code> changes it. Add an <strong>autouse</strong> fixture that clears <code>seen</code> before each test, so the tests pass in any order.</p></div><textarea class="pc-src pc-code" hidden>import pytest
+
+seen = set()
+
+def visit(page):
+    first = page not in seen
+    seen.add(page)
+    return &quot;welcome&quot; if first else &quot;welcome back&quot;
+
+def test_second_visit():
+    visit(&quot;home&quot;)
+    assert visit(&quot;home&quot;) == &quot;welcome back&quot;
+
+def test_first_visit():
+    assert visit(&quot;home&quot;) == &quot;welcome&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_fixed():
+    &quot;independent of order&quot;
+    r = pytest_run(source)
+    assert sorted(r[&quot;passed&quot;]) == [&quot;test_first_visit&quot;, &quot;test_second_visit&quot;], r[&quot;output&quot;][-600:]
+    swapped = source.replace(&quot;def test_first_visit&quot;, &quot;def test_aaa_first_visit&quot;)
+    assert pytest_run(swapped)[&quot;failed&quot;] == []
+    assert &quot;autouse&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>import pytest
+
+seen = set()
+
+@pytest.fixture(autouse=True)
+def fresh_cache():
+    seen.clear()
+    yield
+    seen.clear()
+
+def visit(page):
+    first = page not in seen
+    seen.add(page)
+    return &quot;welcome&quot; if first else &quot;welcome back&quot;
+
+def test_second_visit():
+    visit(&quot;home&quot;)
+    assert visit(&quot;home&quot;) == &quot;welcome back&quot;
+
+def test_first_visit():
+    assert visit(&quot;home&quot;) == &quot;welcome&quot;</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w072d5-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Unseeded randomness</div><div class="pc-prompt"><p><code>shuffle_deck</code> uses the global random generator, so the test&rsquo;s expected first card is only right by luck: here it&rsquo;s wrong. Make <code>shuffle_deck</code> take a <code>random.Random</code> to use, and pass <code>random.Random(7)</code>, so this prints <code>True</code> every time.</p></div><textarea class="pc-src pc-code" hidden>import random
+
+def shuffle_deck(cards):
+    deck = list(cards)
+    random.shuffle(deck)
+    return deck
+
+deck = shuffle_deck(range(10))
+print(deck == shuffle_deck(range(10)))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;reproducible&quot;
+    expect_output(&quot;True&quot;)
+    assert &quot;Random(&quot; in source</textarea><textarea class="pc-src pc-solution" hidden>import random
+
+def shuffle_deck(cards, rng):
+    deck = list(cards)
+    rng.shuffle(deck)
+    return deck
+
+deck = shuffle_deck(range(10), random.Random(7))
+print(deck == shuffle_deck(range(10), random.Random(7)))</textarea></div>
+<div class="parsons" data-id="w072d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A contract-test fixture</div><div class="pc-prompt"><p>Arrange the lines of a fixture that gives each test an in-memory repository and then a file-based one. One line is a trap.</p></div><script type="application/json">{"lines": ["import pytest", "from repos import MemoryRepo, FileRepo", "@pytest.fixture(params=[\"memory\", \"file\"])", "def repo(request, tmp_path):", "    if request.param == \"memory\":", "        return MemoryRepo()", "    return FileRepo(tmp_path / \"repo.json\")"], "distractors": ["@pytest.fixture(scope=\"session\", params=[\"memory\", \"file\"])"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w072d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the shape with many end-to-end tests and few unit tests: &quot;pyramid&quot; or &quot;ice-cream cone&quot;
+q = ___   # the three parts of a well-laid-out test, joined with &quot;, &quot;
+r = ___   # True or False: adding a retry is a good fix for a flaky test
+s = ___   # what a contract test is run against: &quot;the fake only&quot; or &quot;every implementation&quot;
+t = ___   # in ports and adapters, the part that wires the real adapters together: &quot;main&quot; or &quot;the core&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;ice-cream cone&quot; and q == &quot;arrange, act, assert&quot; and r is False, &quot;p, q and r&quot;
+    assert s == &quot;every implementation&quot; and t == &quot;main&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;ice-cream cone&quot;
+q = &quot;arrange, act, assert&quot;
+r = False
+s = &quot;every implementation&quot;
+t = &quot;main&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w072d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does an integration test check that a unit test can&rsquo;t?", "answer": 1, "explain": "Bugs live in the joins.", "options": ["Speed", "That real pieces work together, through their real interfaces", "Edge cases", "Style"]}, {"type": "mc", "q": "What does the test pyramid recommend?", "answer": 1, "explain": "Test each behaviour at the lowest level that catches its bugs.", "options": ["Mostly end-to-end tests", "Many unit tests, fewer integration tests, a few end-to-end tests", "Equal numbers", "No unit tests"]}, {"type": "mc", "q": "In ports and adapters, what is a port?", "answer": 1, "explain": "Adapters implement it, for real or for tests.", "options": ["A network port", "A small interface the core defines for something outside it", "A test", "A module"]}, {"type": "mc", "q": "Why inject a clock instead of calling date.today() in the core?", "answer": 1, "explain": "The warm-up&rsquo;s test broke by itself.", "options": ["Speed", "Tests can fix the date, so results don&rsquo;t change from day to day", "It&rsquo;s shorter", "Time zones"]}, {"type": "mc", "q": "What problem do contract tests solve?", "answer": 1, "explain": "Run one suite against every implementation.", "options": ["Slow tests", "Fakes drifting away from how the real implementation behaves", "Coverage", "Flaky networks"]}, {"type": "mc", "q": "What does a test data builder give you?", "answer": 1, "explain": "One place changes when the class does.", "options": ["Random data", "Objects with sensible defaults, where each test states only what it cares about", "Fixtures", "Mocks"]}, {"type": "mc", "q": "Which is NOT a usual cause of flaky tests?", "answer": 2, "explain": "Pure functions with fixed inputs are deterministic.", "options": ["The current time", "Shared global state", "A pure function with fixed inputs", "Sleeping for a fixed time"]}, {"type": "mc", "q": "What&rsquo;s wrong with fixing a flaky test by retrying it?", "answer": 1, "explain": "Find and remove the cause.", "options": ["Nothing", "It hides the cause, and may hide a real intermittent bug", "Retries are slow", "pytest forbids it"]}, {"type": "mc", "q": "What does pytest -m &ldquo;not slow&rdquo; do?", "answer": 1, "explain": "Fast feedback while developing; everything in CI.", "options": ["Runs slow tests", "Skips tests marked slow", "Speeds tests up", "Marks tests"]}, {"type": "mc", "q": "A test is called test_order_total_and_email_sent. What does its name suggest?", "answer": 1, "explain": "One act per test.", "options": ["It&rsquo;s well named", "It probably tests two behaviours and should be split", "It&rsquo;s an integration test", "It&rsquo;s flaky"]}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w072d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: choosing which tests to run</div><div class="pc-prompt"><p>Large projects don&rsquo;t run every test on every change. Write <code>select_tests(changed, imports, covers, history)</code>: <code>changed</code> is a set of module names that changed; <code>imports</code> maps each module to the set of modules it imports; <code>covers</code> maps each test name to the set of modules it ran (from coverage); <code>history</code> maps a test name to <code>(failed_last_time, seconds)</code>. A module is <strong>affected</strong> if it changed or imports, directly or indirectly, an affected module. Select every test that covers an affected module, and return them ordered: tests that failed last time first, then by <code>seconds</code> (fastest first), then by name. A test missing from <code>history</code> counts as <code>(True, 0)</code> (new tests run early). Also <code>affected_modules(changed, imports)</code>, returning the sorted list.</p></div><textarea class="pc-src pc-code" hidden>def affected_modules(changed, imports):
+    ___
+
+def select_tests(changed, imports, covers, history):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_selection():
+    &quot;affected modules and test order&quot;
+    imports = {&quot;app&quot;: {&quot;orders&quot;, &quot;users&quot;}, &quot;orders&quot;: {&quot;pricing&quot;, &quot;db&quot;}, &quot;users&quot;: {&quot;db&quot;}, &quot;pricing&quot;: set(), &quot;db&quot;: set(), &quot;report&quot;: {&quot;app&quot;}}
+    assert affected_modules({&quot;pricing&quot;}, imports) == [&quot;app&quot;, &quot;orders&quot;, &quot;pricing&quot;, &quot;report&quot;]
+    assert affected_modules({&quot;db&quot;}, imports) == [&quot;app&quot;, &quot;db&quot;, &quot;orders&quot;, &quot;report&quot;, &quot;users&quot;]
+    covers = {
+        &quot;test_price&quot;: {&quot;pricing&quot;},
+        &quot;test_orders&quot;: {&quot;orders&quot;, &quot;pricing&quot;, &quot;db&quot;},
+        &quot;test_users&quot;: {&quot;users&quot;, &quot;db&quot;},
+        &quot;test_report&quot;: {&quot;report&quot;, &quot;app&quot;, &quot;orders&quot;, &quot;users&quot;, &quot;pricing&quot;, &quot;db&quot;},
+        &quot;test_new&quot;: {&quot;pricing&quot;},
+    }
+    history = {&quot;test_price&quot;: (False, 0.1), &quot;test_orders&quot;: (False, 2.0), &quot;test_users&quot;: (True, 0.5), &quot;test_report&quot;: (True, 9.0)}
+    assert select_tests({&quot;pricing&quot;}, imports, covers, history) == [&quot;test_new&quot;, &quot;test_report&quot;, &quot;test_price&quot;, &quot;test_orders&quot;]
+    assert select_tests({&quot;users&quot;}, imports, covers, history) == [&quot;test_users&quot;, &quot;test_report&quot;]
+    assert select_tests(set(), imports, covers, history) == []</textarea><textarea class="pc-src pc-solution" hidden>def affected_modules(changed, imports):
+    affected = set(changed)
+    grew = True
+    while grew:
+        grew = False
+        for module, deps in imports.items():
+            if module not in affected and deps &amp; affected:
+                affected.add(module)
+                grew = True
+    return sorted(affected)
+
+def select_tests(changed, imports, covers, history):
+    affected = set(affected_modules(changed, imports))
+    chosen = [t for t, modules in covers.items() if modules &amp; affected]
+
+    def key(test):
+        failed, seconds = history.get(test, (True, 0))
+        return (not failed, seconds, test)
+
+    return sorted(chosen, key=key)</textarea><template class="pc-src pc-hint">For the affected set, keep adding any module whose imports meet the set, until nothing changes (or build the reverse graph and search from the changed modules). Sort the selected tests with a key of <code>(not failed, seconds, name)</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Look at the tests you&rsquo;ve written in this course and sort a dozen of them into unit, integration and end-to-end. Tomorrow&rsquo;s Forge puts the whole week together: a test suite, from fixtures to properties to mutation testing, for a small booking system.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w072d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w072d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w072d5", "week": 72, "day": 5, "title": "Test architecture", "exercises": [{"id": "w072d5-shape", "title": "Pyramid or cone?", "points": 10}, {"id": "w072d5-builder", "title": "A test data builder", "points": 10}, {"id": "w072d5-ports", "title": "Injecting the outside world", "points": 15}, {"id": "w072d5-contract", "title": "One contract, two implementations", "points": 15}, {"id": "w072d5-integration", "title": "An integration test with real files", "points": 15}, {"id": "w072d5-bug1", "title": "A test that broke on its own", "points": 10}, {"id": "w072d5-bug2", "title": "State left behind", "points": 10}, {"id": "w072d5-bug3", "title": "Unseeded randomness", "points": 10}, {"id": "w072d5-trace", "title": "Predict them", "points": 10}, {"id": "w072d5-challenge", "title": "Challenge: choosing which tests to run", "points": 25}], "points": 130}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
