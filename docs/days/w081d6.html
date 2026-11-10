@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="b54d8b61c9">
+<title>Week 81 Day 6: Forge | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=b54d8b61c9">
+<link rel="stylesheet" href="../assets/css/site.css?v=b54d8b61c9">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=b54d8b61c9"></script>
+<script src="../assets/vendor/codemirror.js?v=b54d8b61c9" defer></script>
+<meta name="description" content="This week covered how services grow: measuring and estimating load, caches, queues, replicas and shards, and a first complete design. Today’s Forge is the...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w081d6.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 81 Day 6: Forge">
+<meta property="og:description" content="This week covered how services grow: measuring and estimating load, caches, queues, replicas and shards, and a first complete design. Today’s Forge is the...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w081d6.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-81">Week 81: System design I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#mixed-review" data-sec="mixed-review">Mixed review</a></li><li><a href="#forge-a-news-feed" data-sec="forge-a-news-feed">Forge: a news feed</a></li><li><a href="#forge-bonus-a-gateway-that-sheds-load" data-sec="forge-bonus-a-gateway-that-sheds-load">Forge bonus: a gateway that sheds load</a></li><li><a href="#weekly-quiz" data-sec="weekly-quiz">Weekly quiz</a></li><li><a href="#week-81-review" data-sec="week-81-review">Week 81 review</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w081d6.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-81">Week 81: System design I</a></li><li aria-current="page">Day 6 of 6</li></ol>
+      <p class="day-where"><span>Week 81, Day 6</span><span class="forge-tag">Forge day</span></p>
+      <h1>Forge</h1>
+      <div class="day-intro"><p>This week covered how services grow: measuring and estimating load, caches, queues, replicas and shards, and a first complete design. Today&rsquo;s Forge is the other classic design problem, a social news feed: people post, follow each other, and read a feed of the newest posts from everyone they follow. It looks simple until one account has ten million followers. You&rsquo;ll build it the way large feeds really work: posts fanned out to followers&rsquo; feeds through a queue, a pull model for the most-followed accounts so one post doesn&rsquo;t mean ten million writes, merged and paginated reads, and a short-lived cache in front. The bonus puts a gateway in front of it that sheds load gracefully when traffic spikes.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Choose between fan-out on write and fan-out on read, and combine them for very popular accounts</li><li>Move fan-out work onto a queue so posting stays fast</li><li>Merge precomputed and pulled posts into one newest-first feed with cursor pagination</li><li>Cache feed reads with a short time to live, and measure the hit rate</li><li>Protect a service with per-user rate limits, a concurrency limit and load shedding</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 55 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:15" title="Warm-up: predict: 15 min"></span><span class="plan-seg s1" style="flex:25" title="Mixed review practice: 25 min"></span><span class="plan-seg s0" style="flex:65" title="Forge: a news feed: 65 min"></span><span class="plan-seg s1" style="flex:35" title="Forge bonus: a gateway that sheds load: 35 min"></span><span class="plan-seg s0" style="flex:25" title="Weekly quiz: 25 min"></span><span class="plan-seg s1" style="flex:10" title="Week 81 review: 10 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">6 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up: predict</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:15</span><span class="plan-what">Mixed review practice</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:40</span><span class="plan-what">Forge: a news feed</span><span class="plan-min">65 min</span></li><li><span class="plan-at">1:45</span><span class="plan-what">Forge bonus: a gateway that sheds load</span><span class="plan-min">35 min</span></li><li><span class="plan-at">2:20</span><span class="plan-what">Weekly quiz</span><span class="plan-min">25 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Week 81 review</span><span class="plan-min">10 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w081d6.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w081d6.ipynb" download>download it</a>. Exercises today are worth 100 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w081d6-p1"><textarea class="pc-src pc-code" hidden>import math
+values = sorted([30, 10, 20, 40, 1000])
+print(values[math.ceil(0.5 * len(values)) - 1], values[math.ceil(0.99 * len(values)) - 1])</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w081d6-p2"><textarea class="pc-src pc-code" hidden>import math
+rate, latency = 2000, 0.025
+print(rate * latency, math.ceil(rate * latency / 0.7))</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w081d6-p3"><textarea class="pc-src pc-code" hidden>from collections import OrderedDict
+c = OrderedDict()
+for k in &quot;abcab&quot;:
+    c[k] = True
+    c.move_to_end(k)
+print(list(c), c.popitem(last=False))</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w081d6-p4"><textarea class="pc-src pc-code" hidden>import zlib
+print([zlib.crc32(k.encode()) % 2 == zlib.crc32(k.encode()) % 2 for k in (&quot;x&quot;, &quot;y&quot;)], hash(&quot;x&quot;) == hash(&quot;x&quot;))</textarea></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w081d6-p5"><textarea class="pc-src pc-code" hidden>import heapq
+a, b = [9, 5, 2], [8, 7, 1]
+print(list(heapq.merge(a, b, reverse=True))[:4])</textarea></div>
+<h2 id="mixed-review">Mixed review</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d6-mix_fanout" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">The cost of fan-out</div><div class="pc-prompt"><p>A social service has accounts with these follower counts. Write <code>daily_writes(follower_counts, posts_per_day)</code>: the feed writes per day if every post is copied into every follower&rsquo;s feed (fan-out on write: each post costs one write per follower). Then <code>split_writes(follower_counts, posts_per_day, threshold)</code>: <code>(pushed, pulled_accounts)</code>, where <code>pushed</code> is the daily feed writes counting only accounts with at most <code>threshold</code> followers (the others are read at feed time instead), and <code>pulled_accounts</code> is how many accounts are above the threshold. <code>follower_counts</code> and <code>posts_per_day</code> are lists of the same length, one entry per account.</p></div><textarea class="pc-src pc-code" hidden>def daily_writes(follower_counts, posts_per_day):
+    ___
+
+def split_writes(follower_counts, posts_per_day, threshold):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_fanout():
+    &quot;celebrities dominate&quot;
+    followers = [120, 300, 45, 10_000_000, 80, 2_500_000]
+    posts = [3, 1, 5, 4, 2, 10]
+    assert daily_writes(followers, posts) == 65_001_045
+    assert split_writes(followers, posts, 10_000) == (1_045, 2)
+    assert split_writes(followers, posts, 100_000_000) == (65_001_045, 0)</textarea><textarea class="pc-src pc-solution" hidden>def daily_writes(follower_counts, posts_per_day):
+    return sum(f * p for f, p in zip(follower_counts, posts_per_day))
+
+def split_writes(follower_counts, posts_per_day, threshold):
+    pushed = sum(f * p for f, p in zip(follower_counts, posts_per_day) if f &lt;= threshold)
+    return pushed, sum(1 for f in follower_counts if f &gt; threshold)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d6-mix_cache" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">LRU with expiry</div><div class="pc-prompt"><p>Write a class <code>ExpiringLRU(capacity, ttl, clock)</code> combining Tuesday&rsquo;s two caches: <code>put(key, value)</code> stores the value with the time it was stored (most recently used; evict the least recently used beyond <code>capacity</code>), and <code>get(key)</code> returns the value if present and younger than <code>ttl</code> (marking it used), or <code>None</code> (removing it if it has expired). Count <code>hits</code> and <code>misses</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections import OrderedDict
+
+class ExpiringLRU:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cache():
+    &quot;both limits&quot;
+    class Clock:
+        t = 0
+        def __call__(self):
+            return self.t
+    clock = Clock()
+    c = ExpiringLRU(2, 10, clock)
+    c.put(&quot;a&quot;, 1)
+    c.put(&quot;b&quot;, 2)
+    assert c.get(&quot;a&quot;) == 1
+    c.put(&quot;c&quot;, 3)
+    assert c.get(&quot;b&quot;) is None and c.get(&quot;c&quot;) == 3
+    clock.t = 10
+    assert c.get(&quot;a&quot;) is None and c.get(&quot;c&quot;) is None and (c.hits, c.misses) == (2, 3)</textarea><textarea class="pc-src pc-solution" hidden>from collections import OrderedDict
+
+class ExpiringLRU:
+    def __init__(self, capacity, ttl, clock):
+        self.capacity, self.ttl, self.clock = capacity, ttl, clock
+        self.data = OrderedDict()
+        self.hits = self.misses = 0
+
+    def put(self, key, value):
+        self.data[key] = (value, self.clock())
+        self.data.move_to_end(key)
+        while len(self.data) &gt; self.capacity:
+            self.data.popitem(last=False)
+
+    def get(self, key):
+        if key in self.data:
+            value, stored = self.data[key]
+            if self.clock() - stored &lt; self.ttl:
+                self.hits += 1
+                self.data.move_to_end(key)
+                return value
+            del self.data[key]
+        self.misses += 1
+        return None</textarea></div>
+<h2 id="forge-a-news-feed">Forge: a news feed</h2>
+<p>A feed shows each user the newest posts from everyone they follow. Two ways to build it:</p>
+<ul>
+<li><strong>Fan-out on write (push)</strong>: when someone posts, copy the post&rsquo;s id into the stored feed of each follower. Reading a feed is then one quick lookup. But a post by an account with ten million followers means ten million writes.</li>
+<li><strong>Fan-out on read (pull)</strong>: store nothing per reader; at read time, fetch the recent posts of everyone the reader follows and merge them. Posting is cheap, but every feed read does a lot of work.</li>
+</ul>
+<p>Large feeds use <strong>both</strong>: push for ordinary accounts, pull for the few with huge followings (&ldquo;celebrities&rdquo;), merged at read time. The push work goes through a <strong>queue</strong>, so posting stays fast.</p>
+<p>Build <code>FeedService(clock, celebrity_threshold=1000, feed_size=200, cache_ttl=30)</code>:</p>
+<ul>
+<li><code>follow(follower, followee)</code> and <code>unfollow(follower, followee)</code>; following yourself raises <code>ValueError("you can't follow yourself")</code>. Following or unfollowing clears the follower&rsquo;s cached feeds.</li>
+<li><code>post(author, text)</code> stores the post with the next id (from 1) and the current time, queues a fan-out job, and returns the id.</li>
+<li><code>process_fanout(batch=100)</code> handles up to <code>batch</code> queued jobs: for an author with <strong>at most</strong> <code>celebrity_threshold</code> followers, add the post id to each follower&rsquo;s stored feed (newest first, keeping only <code>feed_size</code> ids). Authors above the threshold are skipped (they&rsquo;ll be pulled). It returns the number of feed writes made.</li>
+<li><code>feed(user, limit=10, before=None)</code> returns <code>{"posts": [...], "next": CURSOR}</code>: posts (each <code>{"id", "author", "text"}</code>) newest first by id, drawn from the user&rsquo;s stored feed <strong>plus</strong> the posts of every celebrity they currently follow (above the threshold now), excluding authors they no longer follow, only ids <strong>below</strong> <code>before</code> if it&rsquo;s given, at most <code>limit</code> of them; <code>next</code> is the last post&rsquo;s id if there might be more (a full page), else <code>None</code>. Results are cached per <code>(user, limit, before)</code> for <code>cache_ttl</code> seconds; count <code>cache_hits</code> and <code>cache_misses</code>.</li>
+</ul>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d6-forge" data-points="50"><div class="pc-label"><span>Exercise</span><span class="pc-pts">50 points</span></div><div class="pc-title">Forge: a news feed</div><div class="pc-prompt"><p>Write <code>FeedService</code> as described above.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+from collections import deque
+
+class FeedService:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def _service(threshold=2):
+    class Clock:
+        t = 1000
+        def __call__(self):
+            return self.t
+    clock = Clock()
+    return FeedService(clock, celebrity_threshold=threshold, feed_size=5, cache_ttl=30), clock
+
+def ids(page):
+    return [p[&quot;id&quot;] for p in page[&quot;posts&quot;]]
+
+def test_push():
+    &quot;ordinary accounts are pushed through the queue&quot;
+    f, clock = _service()
+    f.follow(&quot;ada&quot;, &quot;bob&quot;)
+    f.follow(&quot;cy&quot;, &quot;bob&quot;)
+    p1 = f.post(&quot;bob&quot;, &quot;hello&quot;)
+    assert ids(f.feed(&quot;ada&quot;)) == [] and f.process_fanout() == 2
+    clock.t += 31
+    assert f.feed(&quot;ada&quot;) == {&quot;posts&quot;: [{&quot;id&quot;: p1, &quot;author&quot;: &quot;bob&quot;, &quot;text&quot;: &quot;hello&quot;}], &quot;next&quot;: None}
+    for n in range(6):
+        f.post(&quot;bob&quot;, f&quot;post {n}&quot;)
+    assert f.process_fanout(batch=4) == 8 and f.process_fanout() == 4
+    clock.t += 31
+    assert ids(f.feed(&quot;ada&quot;)) == [7, 6, 5, 4, 3] and ids(f.feed(&quot;ada&quot;, limit=2)) == [7, 6]
+    assert f.feed(&quot;ada&quot;, limit=2)[&quot;next&quot;] == 6 and ids(f.feed(&quot;ada&quot;, limit=2, before=6)) == [5, 4]
+    try:
+        f.follow(&quot;ada&quot;, &quot;ada&quot;)
+    except ValueError as e:
+        assert str(e) == &quot;you can&#x27;t follow yourself&quot;
+
+def test_celebrities_are_pulled():
+    &quot;no fan-out for huge accounts; merged at read time&quot;
+    f, clock = _service(threshold=2)
+    for fan in (&quot;ada&quot;, &quot;bob&quot;, &quot;cy&quot;):
+        f.follow(fan, &quot;star&quot;)
+    f.follow(&quot;ada&quot;, &quot;dan&quot;)
+    s1 = f.post(&quot;star&quot;, &quot;big news&quot;)
+    d1 = f.post(&quot;dan&quot;, &quot;small news&quot;)
+    s2 = f.post(&quot;star&quot;, &quot;more news&quot;)
+    assert f.process_fanout() == 1
+    assert ids(f.feed(&quot;ada&quot;)) == [s2, d1, s1] and ids(f.feed(&quot;bob&quot;)) == [s2, s1]
+    f.unfollow(&quot;ada&quot;, &quot;star&quot;)
+    assert ids(f.feed(&quot;ada&quot;)) == [d1]
+    f.unfollow(&quot;ada&quot;, &quot;dan&quot;)
+    assert ids(f.feed(&quot;ada&quot;)) == []
+
+def test_cache():
+    &quot;short-lived cached reads&quot;
+    f, clock = _service()
+    f.follow(&quot;ada&quot;, &quot;bob&quot;)
+    f.post(&quot;bob&quot;, &quot;one&quot;)
+    f.process_fanout()
+    first = f.feed(&quot;ada&quot;)
+    assert f.feed(&quot;ada&quot;) == first and (f.cache_hits, f.cache_misses) == (1, 1)
+    f.post(&quot;bob&quot;, &quot;two&quot;)
+    f.process_fanout()
+    assert ids(f.feed(&quot;ada&quot;)) == [1] and f.cache_hits == 2
+    clock.t += 30
+    assert ids(f.feed(&quot;ada&quot;)) == [2, 1] and f.cache_misses == 2
+    f.follow(&quot;ada&quot;, &quot;cy&quot;)
+    f.feed(&quot;ada&quot;)
+    assert f.cache_misses == 3, &quot;following clears the cached feed&quot;</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+from collections import deque
+
+class FeedService:
+    def __init__(self, clock, celebrity_threshold=1000, feed_size=200, cache_ttl=30):
+        self.clock = clock
+        self.threshold = celebrity_threshold
+        self.feed_size = feed_size
+        self.cache_ttl = cache_ttl
+        self.following = {}
+        self.followers = {}
+        self.posts = {}
+        self.by_author = {}
+        self.feeds = {}
+        self.queue = deque()
+        self.cache = {}
+        self.cache_hits = self.cache_misses = 0
+        self.next_id = 1
+
+    def _clear(self, user):
+        self.cache = {k: v for k, v in self.cache.items() if k[0] != user}
+
+    def follow(self, follower, followee):
+        if follower == followee:
+            raise ValueError(&quot;you can&#x27;t follow yourself&quot;)
+        self.following.setdefault(follower, set()).add(followee)
+        self.followers.setdefault(followee, set()).add(follower)
+        self._clear(follower)
+
+    def unfollow(self, follower, followee):
+        self.following.get(follower, set()).discard(followee)
+        self.followers.get(followee, set()).discard(follower)
+        self._clear(follower)
+
+    def post(self, author, text):
+        post_id = self.next_id
+        self.next_id += 1
+        self.posts[post_id] = {&quot;id&quot;: post_id, &quot;author&quot;: author, &quot;text&quot;: text, &quot;at&quot;: self.clock()}
+        self.by_author.setdefault(author, []).append(post_id)
+        self.queue.append(post_id)
+        return post_id
+
+    def _celebrity(self, author):
+        return len(self.followers.get(author, ())) &gt; self.threshold
+
+    def process_fanout(self, batch=100):
+        writes = 0
+        for _ in range(min(batch, len(self.queue))):
+            post_id = self.queue.popleft()
+            author = self.posts[post_id][&quot;author&quot;]
+            if self._celebrity(author):
+                continue
+            for follower in self.followers.get(author, ()):
+                feed = self.feeds.setdefault(follower, [])
+                feed.insert(0, post_id)
+                del feed[self.feed_size:]
+                writes += 1
+        return writes
+
+    def feed(self, user, limit=10, before=None):
+        key = (user, limit, before)
+        now = self.clock()
+        if key in self.cache and now - self.cache[key][1] &lt; self.cache_ttl:
+            self.cache_hits += 1
+            return self.cache[key][0]
+        self.cache_misses += 1
+        follows = self.following.get(user, set())
+        candidates = {i for i in self.feeds.get(user, []) if self.posts[i][&quot;author&quot;] in follows}
+        for author in follows:
+            if self._celebrity(author):
+                candidates.update(self.by_author.get(author, []))
+        if before is not None:
+            candidates = {i for i in candidates if i &lt; before}
+        chosen = heapq.nlargest(limit, candidates)
+        posts = [{&quot;id&quot;: i, &quot;author&quot;: self.posts[i][&quot;author&quot;], &quot;text&quot;: self.posts[i][&quot;text&quot;]} for i in chosen]
+        result = {&quot;posts&quot;: posts, &quot;next&quot;: chosen[-1] if len(chosen) == limit else None}
+        self.cache[key] = (result, now)
+        return result</textarea></div>
+<aside class="callout c-think"><div class="callout-t">Where each week&rsquo;s idea appeared</div><p>Look back at your feed: Monday&rsquo;s arithmetic (the mixed-review fan-out costs) decided the threshold; Tuesday&rsquo;s cache sits in front of <code>feed</code>, and its short TTL is why a new post can take up to 30 seconds to appear (is that acceptable here? for a bank statement it wouldn&rsquo;t be); Wednesday&rsquo;s queue keeps <code>post</code> fast and lets fan-out fall behind under load without anyone noticing; Thursday&rsquo;s sharding would split <code>feeds</code> by user id, and the celebrity posts would be read from wherever their author&rsquo;s shard is. Which of these would you change first if posting became slow? Which if reading did?</p></aside>
+<h2 id="forge-bonus-a-gateway-that-sheds-load">Forge bonus: a gateway that sheds load</h2>
+<p>When traffic exceeds what a service can handle, it&rsquo;s far better to refuse some requests quickly than to accept them all and answer everyone slowly. A <strong>gateway</strong> in front of the service does that: per-user rate limits stop one client hogging capacity, a <strong>concurrency limit</strong> caps the requests in progress, and when the service is overloaded it <strong>sheds</strong> the least important work first.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d6-forge2" data-points="30"><div class="pc-label"><span>Exercise</span><span class="pc-pts">30 points</span></div><div class="pc-title">Forge bonus: a gateway that sheds load</div><div class="pc-prompt"><p>Write a class <code>Gateway(clock, max_in_flight, per_user_rate, burst)</code>. <code>begin(user, kind)</code> decides whether a request may start, returning <code>(status, reason)</code>: requests of kind <code>"write"</code> or <code>"read"</code> (anything else is <code>(400, "unknown kind")</code>). A per-user token bucket (capacity <code>burst</code>, refilling at <code>per_user_rate</code> tokens a second, starting full) gives <code>(429, "rate limited")</code> when empty. If <code>in_flight</code> has reached <code>max_in_flight</code>, the request is shed: <code>(503, "overloaded")</code>. Also, once in-flight reaches 80% of <code>max_in_flight</code> (rounded down, at least 1), <strong>reads</strong> are shed with <code>(503, "shedding reads")</code> so writes, which matter more, still get through. Otherwise count it in flight and return <code>(200, "ok")</code>. Check in this order: kind, rate limit, full, shedding (a refused request doesn&rsquo;t use a token unless it was refused only for load). <code>end()</code> finishes one request. <code>stats()</code> returns a dict counting each status (as keys <code>200</code>, <code>429</code>, <code>503</code>, <code>400</code>, sorted, only those seen) plus <code>"in_flight"</code>.</p></div><textarea class="pc-src pc-code" hidden>class Gateway:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_gateway():
+    &quot;rate limits, full and shedding&quot;
+    class Clock:
+        t = 0.0
+        def __call__(self):
+            return self.t
+    clock = Clock()
+    g = Gateway(clock, max_in_flight=5, per_user_rate=1.0, burst=2)
+    assert g.begin(&quot;ada&quot;, &quot;read&quot;) == (200, &quot;ok&quot;) and g.begin(&quot;ada&quot;, &quot;read&quot;) == (200, &quot;ok&quot;)
+    assert g.begin(&quot;ada&quot;, &quot;read&quot;) == (429, &quot;rate limited&quot;)
+    assert g.begin(&quot;bob&quot;, &quot;write&quot;) == (200, &quot;ok&quot;) and g.begin(&quot;cy&quot;, &quot;read&quot;) == (200, &quot;ok&quot;)
+    assert g.begin(&quot;dan&quot;, &quot;read&quot;) == (503, &quot;shedding reads&quot;) and g.begin(&quot;dan&quot;, &quot;write&quot;) == (200, &quot;ok&quot;)
+    assert g.begin(&quot;eve&quot;, &quot;write&quot;) == (503, &quot;overloaded&quot;) and g.begin(&quot;eve&quot;, &quot;delete&quot;) == (400, &quot;unknown kind&quot;)
+    g.end()
+    g.end()
+    assert g.begin(&quot;eve&quot;, &quot;read&quot;) == (200, &quot;ok&quot;)
+    clock.t = 1.0
+    assert g.begin(&quot;ada&quot;, &quot;read&quot;) == (503, &quot;shedding reads&quot;)
+    assert g.stats() == {200: 6, 400: 1, 429: 1, 503: 3, &quot;in_flight&quot;: 4}
+
+def test_small_limits():
+    &quot;at least one slot before shedding&quot;
+    class Clock:
+        def __call__(self):
+            return 0.0
+    g = Gateway(Clock(), max_in_flight=1, per_user_rate=10, burst=10)
+    assert g.begin(&quot;a&quot;, &quot;read&quot;) == (200, &quot;ok&quot;) and g.begin(&quot;b&quot;, &quot;read&quot;) == (503, &quot;overloaded&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Gateway:
+    def __init__(self, clock, max_in_flight, per_user_rate, burst):
+        self.clock = clock
+        self.max_in_flight = max_in_flight
+        self.shed_at = max(1, int(max_in_flight * 0.8))
+        self.rate = per_user_rate
+        self.burst = burst
+        self.buckets = {}
+        self.in_flight = 0
+        self.counts = {}
+
+    def _answer(self, status, reason):
+        self.counts[status] = self.counts.get(status, 0) + 1
+        return status, reason
+
+    def _take(self, user):
+        now = self.clock()
+        tokens, last = self.buckets.get(user, (self.burst, now))
+        tokens = min(self.burst, tokens + (now - last) * self.rate)
+        if tokens &lt; 1:
+            self.buckets[user] = (tokens, now)
+            return False
+        self.buckets[user] = (tokens - 1, now)
+        return True
+
+    def begin(self, user, kind):
+        if kind not in (&quot;read&quot;, &quot;write&quot;):
+            return self._answer(400, &quot;unknown kind&quot;)
+        if not self._take(user):
+            return self._answer(429, &quot;rate limited&quot;)
+        if self.in_flight &gt;= self.max_in_flight:
+            return self._answer(503, &quot;overloaded&quot;)
+        if kind == &quot;read&quot; and self.in_flight &gt;= self.shed_at:
+            return self._answer(503, &quot;shedding reads&quot;)
+        self.in_flight += 1
+        return self._answer(200, &quot;ok&quot;)
+
+    def end(self):
+        self.in_flight -= 1
+
+    def stats(self):
+        out = {k: self.counts[k] for k in sorted(self.counts)}
+        out[&quot;in_flight&quot;] = self.in_flight
+        return out</textarea></div>
+<h2 id="weekly-quiz">Weekly quiz</h2>
+<div class="quiz" data-id="w081d6-weekly"><div class="pc-label"><span>Quiz</span><span>15 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why measure p99 latency?", "answer": 1, "explain": "Users remember the slow ones.", "options": ["It&rsquo;s always low", "It shows the slow requests averages hide", "It&rsquo;s required by HTTP", "It&rsquo;s the median"]}, {"type": "mc", "q": "What does Little&rsquo;s law relate?", "answer": 1, "explain": "L = \u03bbW.", "options": ["Cost and speed", "Requests in the system, arrival rate and time in the system", "Cache size and hit rate", "Shards and replicas"]}, {"type": "mc", "q": "Why plan for 50 to 70% utilisation at peak?", "answer": 1, "explain": "Headroom absorbs bursts.", "options": ["To save money", "Waiting time grows sharply as utilisation nears 100%", "Servers overheat", "Tradition"]}, {"type": "mc", "q": "What must a service be to scale out?", "answer": 1, "explain": "Any instance must serve any request.", "options": ["Written in C", "Stateless", "Single-threaded", "Cached"]}, {"type": "mc", "q": "On a write, what should cache-aside do to the cached entry?", "answer": 1, "explain": "The next read reloads the current value.", "options": ["Update it", "Delete it", "Leave it", "Double its TTL"]}, {"type": "mc", "q": "What stops a cache stampede?", "answer": 1, "explain": "One reload, not a thousand.", "options": ["Shorter TTLs", "Request coalescing or stale-while-revalidate", "A bigger cache", "More databases"]}, {"type": "mc", "q": "What must a cache key include?", "answer": 1, "explain": "Otherwise one user sees another&rsquo;s data.", "options": ["Only the path", "Everything the answer depends on, such as the user", "A timestamp", "The server name"]}, {"type": "mc", "q": "Why does at-least-once delivery need idempotent consumers?", "answer": 1, "explain": "Record message ids or make operations repeatable.", "options": ["It doesn&rsquo;t", "The same message can be delivered more than once", "It&rsquo;s faster", "Queues reorder messages"]}, {"type": "mc", "q": "Where do messages that keep failing go?", "answer": 1, "explain": "So they don&rsquo;t block everything else.", "options": ["They&rsquo;re deleted", "A dead-letter queue", "Back to the front", "The leader"]}, {"type": "mc", "q": "What causes &ldquo;I saved it and it&rsquo;s gone&rdquo;?", "answer": 1, "explain": "Give users read-your-writes.", "options": ["A failed write", "Reading from a replica that hasn&rsquo;t caught up", "A full cache", "A bad shard key"]}, {"type": "mc", "q": "What does consistent hashing improve?", "answer": 1, "explain": "Servers and keys share a ring.", "options": ["Encryption", "Adding a server moves about 1/N of the keys instead of nearly all", "Query speed", "Ordering"]}, {"type": "mc", "q": "With N = 3, which R and W guarantee reads see the latest write?", "answer": 1, "explain": "R + W &gt; N.", "options": ["R = 1, W = 1", "R = 2, W = 2", "R = 1, W = 2", "R = 2, W = 1"]}, {"type": "mc", "q": "Why does a URL shortener redirect with 302?", "answer": 1, "explain": "Every click comes back.", "options": ["It&rsquo;s faster", "301s are cached forever, breaking expiry and click counts", "302 is newer", "Browsers prefer it"]}, {"type": "mc", "q": "Why not fan out a celebrity&rsquo;s posts on write?", "answer": 1, "explain": "Combine push and pull.", "options": ["It&rsquo;s insecure", "One post would mean millions of writes; pull them at read time instead", "Celebrities post rarely", "Queues can&rsquo;t hold them"]}, {"type": "output", "q": "What does this print?", "answer": "50", "explain": "At 80% busy, a 10 ms job spends 50 ms in the system.", "code": "rho, service_ms = 0.8, 10\nmu = 1000 / service_ms\nprint(round(1 / (mu - rho * mu) * 1000))"}]</script></div>
+<h2 id="week-81-review">Week 81 review</h2>
+<p>Tick off each one honestly. If one feels shaky, go back and redo two exercises from that day.</p>
+<ul>
+<li>I can measure latency with percentiles, estimate load, apply Little&rsquo;s law, balance load and find bottlenecks. (<a href="w081d1.html">Day 1</a>)</li>
+<li>I can build LRU and TTL caches, keep them honest with invalidation, stop stampedes and design safe keys. (<a href="w081d2.html">Day 2</a>)</li>
+<li>I can use bounded queues, acknowledgements, dead letters, idempotent consumers, pub/sub and partitioned logs. (<a href="w081d3.html">Day 3</a>)</li>
+<li>I can reason about replication lag, failover, partitioning, consistent hashing, scatter-gather and quorums. (<a href="w081d4.html">Day 4</a>)</li>
+<li>I can design a URL shortener from requirements and estimates to ids, redirects, caching, click counts and rate limits. (<a href="w081d5.html">Day 5</a>)</li>
+<li>I built a news feed with push and pull fan-out, and a gateway that sheds load. (Today)</li>
+</ul>
+<p>Tomorrow is a <strong>rest day</strong>. Next week is <strong>System design II</strong>: distributed systems concepts, observability, reliability, and design interview practice.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w081d5.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w081d6", "week": 81, "day": 6, "title": "Forge", "exercises": [{"id": "w081d6-mix_fanout", "title": "The cost of fan-out", "points": 10}, {"id": "w081d6-mix_cache", "title": "LRU with expiry", "points": 10}, {"id": "w081d6-forge", "title": "Forge: a news feed", "points": 50}, {"id": "w081d6-forge2", "title": "Forge bonus: a gateway that sheds load", "points": 30}], "points": 100}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=b54d8b61c9"></script>
+</body>
+</html>
