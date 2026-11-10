@@ -1,0 +1,1721 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="b54d8b61c9">
+<title>Week 80 Day 4: Project: tests and CI | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=b54d8b61c9">
+<link rel="stylesheet" href="../assets/css/site.css?v=b54d8b61c9">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=b54d8b61c9"></script>
+<script src="../assets/vendor/codemirror.js?v=b54d8b61c9" defer></script>
+<meta name="description" content="The helpdesk works today. Tests are what make sure it still works after next month’s changes, made by someone in a hurry. Today you’ll write the test suite...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w080d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 80 Day 4: Project: tests and CI">
+<meta property="og:description" content="The helpdesk works today. Tests are what make sure it still works after next month’s changes, made by someone in a hurry. Today you’ll write the test suite...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w080d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-80">Week 80: Consolidation project</a>
+      <ol class="rail-toc"><li><a href="#where-we-are" data-sec="where-we-are">Where we are</a></li><li><a href="#step-16-testing-the-rules" data-sec="step-16-testing-the-rules">Step 16: testing the rules</a></li><li><a href="#step-17-tables-as-tests" data-sec="step-17-tables-as-tests">Step 17: tables as tests</a></li><li><a href="#step-18-testing-the-api" data-sec="step-18-testing-the-api">Step 18: testing the API</a></li><li><a href="#step-19-a-ci-workflow" data-sec="step-19-a-ci-workflow">Step 19: a CI workflow</a></li><li><a href="#step-20-what-the-tests-never-reach" data-sec="step-20-what-the-tests-never-reach">Step 20: what the tests never reach</a></li><li><a href="#checkpoint" data-sec="checkpoint">Checkpoint</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w080d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-80">Week 80: Consolidation project</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 80, Day 4</span></p>
+      <h1>Project: tests and CI</h1>
+      <div class="day-intro"><p>The helpdesk works today. Tests are what make sure it still works after next month&rsquo;s changes, made by someone in a hurry. Today you&rsquo;ll write the test suite the way Week 72 taught: tests for the rules that catch real mistakes (each exercise checks your tests against deliberately broken versions of the code), parametrized tests that turn the permission table and the state machine into one readable list of cases, and API tests with fixtures that build a fresh app and database for every test. Then the automation that runs them on every change: a continuous-integration workflow, checked against the habits from Weeks 74 and 79, and a report of which routes the tests never reach.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Write pytest tests that pass on correct code and fail on each realistic bug</li><li>Express tables of rules as parametrized tests</li><li>Test an HTTP API end to end with fixtures for the app, the database and the clock</li><li>Define a CI workflow that tests every push on several Python versions with hashed dependencies</li><li>Measure which routes a test run never reaches</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:15" title="Where we are: 15 min"></span><span class="plan-seg s1" style="flex:35" title="Step 16: testing the rules: 35 min"></span><span class="plan-seg s0" style="flex:25" title="Step 17: tables as tests: 25 min"></span><span class="plan-seg s1" style="flex:40" title="Step 18: testing the API: 40 min"></span><span class="plan-seg s0" style="flex:20" title="Step 19: a CI workflow: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Step 20: what the tests never reach: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Checkpoint and quiz: 25 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">7 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Where we are</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:15</span><span class="plan-what">Step 16: testing the rules</span><span class="plan-min">35 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Step 17: tables as tests</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Step 18: testing the API</span><span class="plan-min">40 min</span></li><li><span class="plan-at">1:55</span><span class="plan-what">Step 19: a CI workflow</span><span class="plan-min">20 min</span></li><li><span class="plan-at">2:15</span><span class="plan-what">Step 20: what the tests never reach</span><span class="plan-min">20 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Checkpoint and quiz</span><span class="plan-min">25 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w080d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w080d4.ipynb" download>download it</a>. Exercises today are worth 80 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="where-we-are">Where we are</h2>
+<p>All four modules are in the files panel. A good suite for a layered app has tests at each layer, as Week 72&rsquo;s test pyramid suggested: <strong>many fast tests of the rules</strong> (<code>helpdesk_domain</code> is pure functions, so these need no setup at all), a fair number of tests for the database layer, and <strong>fewer, broader API tests</strong> that go through HTTP, the database and the rules together, catching the mistakes that live between the layers (a permission check forgotten in one endpoint).</p>
+<div class="filebox"><div class="filebox-head">The files used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>miniflask.py</code></summary><pre class="pc-filetext">&quot;&quot;&quot;A small subset of Flask that runs in the page (Week 77).
+
+The names and behaviour follow Flask&#x27;s own, so code written against this module also runs with
+the real Flask (pip install flask): Flask, request, g, jsonify, abort, redirect, make_response,
+url_for, Blueprint, and app.test_client(). It&#x27;s a teaching copy, not the real thing: no templates,
+sessions, streaming or debugger.
+&quot;&quot;&quot;
+import io
+import json
+import re
+from contextvars import ContextVar
+from http import HTTPStatus
+from urllib.parse import parse_qs, urlencode, urlsplit
+
+_current = ContextVar(&quot;request&quot;)
+
+
+class HTTPException(Exception):
+    def __init__(self, code, description=None):
+        self.code = code
+        self.name = HTTPStatus(code).phrase
+        self.description = description or self.name
+        super().__init__(f&quot;{code} {self.name}: {self.description}&quot;)
+
+
+def abort(code, description=None):
+    raise HTTPException(code, description)
+
+
+class Headers:
+    &quot;&quot;&quot;Case-insensitive headers.&quot;&quot;&quot;
+    def __init__(self, items=()):
+        self._items = [(k, str(v)) for k, v in (items.items() if isinstance(items, dict) else items)]
+
+    def get(self, name, default=None):
+        for k, v in self._items:
+            if k.lower() == name.lower():
+                return v
+        return default
+
+    def __getitem__(self, name):
+        value = self.get(name)
+        if value is None:
+            raise KeyError(name)
+        return value
+
+    def __contains__(self, name):
+        return self.get(name) is not None
+
+    def __setitem__(self, name, value):
+        self._items = [(k, v) for k, v in self._items if k.lower() != name.lower()] + [(name, str(value))]
+
+    def items(self):
+        return list(self._items)
+
+
+class Args(dict):
+    &quot;&quot;&quot;Query or form values: .get(name) gives the first value; .getlist(name) all of them.&quot;&quot;&quot;
+    def __init__(self, pairs):
+        super().__init__()
+        self._lists = {}
+        for k, v in pairs:
+            self._lists.setdefault(k, []).append(v)
+            dict.setdefault(self, k, v)
+
+    def get(self, key, default=None, type=None):
+        if key not in self:
+            return default
+        value = self[key]
+        if type is not None:
+            try:
+                return type(value)
+            except (TypeError, ValueError):
+                return default
+        return value
+
+    def getlist(self, key):
+        return list(self._lists.get(key, []))
+
+
+class Request:
+    def __init__(self, environ):
+        self.environ = environ
+        self.method = environ[&quot;REQUEST_METHOD&quot;].upper()
+        self.path = environ.get(&quot;PATH_INFO&quot;, &quot;/&quot;) or &quot;/&quot;
+        self.args = Args(_pairs(environ.get(&quot;QUERY_STRING&quot;, &quot;&quot;)))
+        items = [(k[5:].replace(&quot;_&quot;, &quot;-&quot;).title(), v) for k, v in environ.items() if k.startswith(&quot;HTTP_&quot;)]
+        if environ.get(&quot;CONTENT_TYPE&quot;):
+            items.append((&quot;Content-Type&quot;, environ[&quot;CONTENT_TYPE&quot;]))
+        self.headers = Headers(items)
+        length = int(environ.get(&quot;CONTENT_LENGTH&quot;) or 0)
+        self.data = environ[&quot;wsgi.input&quot;].read(length) if length else b&quot;&quot;
+        self.content_type = environ.get(&quot;CONTENT_TYPE&quot;, &quot;&quot;)
+        self.form = Args(_pairs(self.data.decode(&quot;utf-8&quot;))) if self.content_type.startswith(&quot;application/x-www-form-urlencoded&quot;) else Args([])
+        self.view_args = {}
+        cookie = environ.get(&quot;HTTP_COOKIE&quot;, &quot;&quot;)
+        self.cookies = dict(p.strip().split(&quot;=&quot;, 1) for p in cookie.split(&quot;;&quot;) if &quot;=&quot; in p)
+
+    @property
+    def is_json(self):
+        return self.content_type.split(&quot;;&quot;)[0].strip() == &quot;application/json&quot;
+
+    def get_json(self, silent=False, force=False):
+        if not (self.is_json or force):
+            if silent:
+                return None
+            abort(415, &quot;expected a JSON body (Content-Type: application/json)&quot;)
+        try:
+            return json.loads(self.data or b&quot;null&quot;)
+        except ValueError:
+            if silent:
+                return None
+            abort(400, &quot;the body isn&#x27;t valid JSON&quot;)
+
+    @property
+    def json(self):
+        return self.get_json()
+
+
+def _pairs(text):
+    return [(k, v) for k, vs in parse_qs(text, keep_blank_values=True).items() for v in vs]
+
+
+class _Proxy:
+    def __init__(self, getter):
+        object.__setattr__(self, &quot;_getter&quot;, getter)
+
+    def __getattr__(self, name):
+        return getattr(self._getter(), name)
+
+    def __setattr__(self, name, value):
+        setattr(self._getter(), name, value)
+
+
+def _request():
+    try:
+        return _current.get()[0]
+    except LookupError:
+        raise RuntimeError(&quot;working outside of request context&quot;) from None
+
+
+def _g():
+    try:
+        return _current.get()[1]
+    except LookupError:
+        raise RuntimeError(&quot;working outside of request context&quot;) from None
+
+
+class _G:
+    def get(self, name, default=None):
+        return self.__dict__.get(name, default)
+
+
+request = _Proxy(_request)
+g = _Proxy(_g)
+
+
+class Response:
+    def __init__(self, response=b&quot;&quot;, status=200, headers=None, mimetype=None, content_type=None):
+        if isinstance(response, str):
+            response = response.encode(&quot;utf-8&quot;)
+        self.data = response
+        self.status_code = status
+        self.headers = Headers(headers or {})
+        if content_type or mimetype or &quot;Content-Type&quot; not in self.headers:
+            ctype = content_type or (f&quot;{mimetype}; charset=utf-8&quot; if mimetype and mimetype.startswith(&quot;text/&quot;) else mimetype) or &quot;text/html; charset=utf-8&quot;
+            self.headers[&quot;Content-Type&quot;] = ctype
+
+    @property
+    def status(self):
+        return f&quot;{self.status_code} {HTTPStatus(self.status_code).phrase}&quot;
+
+    @property
+    def text(self):
+        return self.data.decode(&quot;utf-8&quot;)
+
+    def get_json(self):
+        return json.loads(self.data)
+
+    @property
+    def json(self):
+        return self.get_json()
+
+    def set_cookie(self, key, value=&quot;&quot;, max_age=None, path=&quot;/&quot;, secure=False, httponly=False, samesite=None):
+        parts = [f&quot;{key}={value}&quot;]
+        if max_age is not None:
+            parts.append(f&quot;Max-Age={max_age}&quot;)
+        parts.append(f&quot;Path={path}&quot;)
+        if secure:
+            parts.append(&quot;Secure&quot;)
+        if httponly:
+            parts.append(&quot;HttpOnly&quot;)
+        if samesite:
+            parts.append(f&quot;SameSite={samesite}&quot;)
+        self.headers._items.append((&quot;Set-Cookie&quot;, &quot;; &quot;.join(parts)))
+
+
+def jsonify(*args, **kwargs):
+    data = args[0] if len(args) == 1 else (list(args) if args else kwargs)
+    return Response(json.dumps(data), headers={&quot;Content-Type&quot;: &quot;application/json&quot;})
+
+
+def redirect(location, code=302):
+    return Response(b&quot;&quot;, code, {&quot;Location&quot;: location})
+
+
+def make_response(*args):
+    rv = args[0] if len(args) == 1 else args
+    return _App._to_response(rv)
+
+
+def url_for(endpoint, **values):
+    return _current.get()[2].url_for(endpoint, **values)
+
+
+_CONVERTERS = {&quot;int&quot;: (r&quot;\d+&quot;, int), &quot;float&quot;: (r&quot;\d+(?:\.\d+)?&quot;, float), &quot;path&quot;: (r&quot;.+&quot;, str), &quot;string&quot;: (r&quot;[^/]+&quot;, str)}
+
+
+class _Rule:
+    def __init__(self, rule, endpoint, view, methods):
+        self.rule, self.endpoint, self.view = rule, endpoint, view
+        self.methods = {m.upper() for m in methods} | ({&quot;HEAD&quot;} if &quot;GET&quot; in {m.upper() for m in methods} else set())
+        regex, self.converters = &quot;&quot;, {}
+        for piece in re.split(r&quot;(&lt;[^&gt;]+&gt;)&quot;, rule):
+            m = re.fullmatch(r&quot;&lt;(?:(\w+):)?(\w+)&gt;&quot;, piece)
+            if m:
+                kind, name = m.group(1) or &quot;string&quot;, m.group(2)
+                pattern, convert = _CONVERTERS[kind]
+                regex += f&quot;(?P&lt;{name}&gt;{pattern})&quot;
+                self.converters[name] = convert
+            else:
+                regex += re.escape(piece)
+        self.regex = re.compile(regex)
+
+    def match(self, path):
+        m = self.regex.fullmatch(path)
+        if not m:
+            return None
+        return {k: self.converters[k](v) for k, v in m.groupdict().items()}
+
+    def build(self, values):
+        def fill(m):
+            return str(values.pop(m.group(2)))
+        path = re.sub(r&quot;&lt;(?:(\w+):)?(\w+)&gt;&quot;, fill, self.rule)
+        return path + (f&quot;?{urlencode(values)}&quot; if values else &quot;&quot;)
+
+
+class _Setup:
+    def route(self, rule, methods=(&quot;GET&quot;,), endpoint=None):
+        def decorate(view):
+            self._add(rule, endpoint or view.__name__, view, methods)
+            return view
+        return decorate
+
+    def get(self, rule, **kw):
+        return self.route(rule, methods=[&quot;GET&quot;], **kw)
+
+    def post(self, rule, **kw):
+        return self.route(rule, methods=[&quot;POST&quot;], **kw)
+
+    def put(self, rule, **kw):
+        return self.route(rule, methods=[&quot;PUT&quot;], **kw)
+
+    def patch(self, rule, **kw):
+        return self.route(rule, methods=[&quot;PATCH&quot;], **kw)
+
+    def delete(self, rule, **kw):
+        return self.route(rule, methods=[&quot;DELETE&quot;], **kw)
+
+
+class Blueprint(_Setup):
+    def __init__(self, name, import_name, url_prefix=&quot;&quot;):
+        self.name, self.url_prefix = name, url_prefix
+        self.deferred = []
+
+    def _add(self, rule, endpoint, view, methods):
+        self.deferred.append((rule, endpoint, view, methods))
+
+
+class _App(_Setup):
+    def __init__(self, import_name):
+        self.import_name = import_name
+        self.config = {&quot;TESTING&quot;: False}
+        self.rules = []
+        self.before_funcs, self.after_funcs, self.error_handlers = [], [], {}
+
+    def _add(self, rule, endpoint, view, methods):
+        self.rules.append(_Rule(rule, endpoint, view, methods))
+
+    def register_blueprint(self, bp, url_prefix=None):
+        prefix = url_prefix if url_prefix is not None else bp.url_prefix
+        for rule, endpoint, view, methods in bp.deferred:
+            self._add(prefix + rule, f&quot;{bp.name}.{endpoint}&quot;, view, methods)
+
+    def before_request(self, f):
+        self.before_funcs.append(f)
+        return f
+
+    def after_request(self, f):
+        self.after_funcs.append(f)
+        return f
+
+    def errorhandler(self, code):
+        def decorate(f):
+            self.error_handlers[code] = f
+            return f
+        return decorate
+
+    def url_for(self, endpoint, **values):
+        for r in self.rules:
+            if r.endpoint == endpoint:
+                return r.build(dict(values))
+        raise LookupError(f&quot;no endpoint {endpoint!r}&quot;)
+
+    @staticmethod
+    def _to_response(rv):
+        status, headers = None, None
+        if isinstance(rv, tuple):
+            if len(rv) == 3:
+                rv, status, headers = rv
+            elif isinstance(rv[1], (dict, list)):
+                rv, headers = rv
+            else:
+                rv, status = rv
+        if isinstance(rv, Response):
+            response = rv
+        elif isinstance(rv, (dict, list)):
+            response = jsonify(rv)
+        elif isinstance(rv, (str, bytes)):
+            response = Response(rv)
+        elif rv is None:
+            raise TypeError(&quot;the view function did not return a valid response&quot;)
+        else:
+            raise TypeError(f&quot;can&#x27;t turn {type(rv).__name__} into a response&quot;)
+        if status is not None:
+            response.status_code = status
+        for k, v in (headers.items() if isinstance(headers, dict) else headers or []):
+            response.headers[k] = v
+        return response
+
+    def _error(self, e):
+        handler = self.error_handlers.get(e.code)
+        if handler:
+            return self._to_response(handler(e))
+        body = f&quot;&lt;h1&gt;{e.code} {e.name}&lt;/h1&gt;&lt;p&gt;{e.description}&lt;/p&gt;&quot;
+        return Response(body, e.code)
+
+    def _dispatch(self, req):
+        path = req.path
+        allowed = set()
+        for r in self.rules:
+            values = r.match(path)
+            if values is None:
+                continue
+            if req.method in r.methods:
+                req.view_args = values
+                return r.view(**values)
+            allowed |= r.methods
+        if allowed:
+            raise _MethodNotAllowed(sorted(allowed | {&quot;OPTIONS&quot;}))
+        abort(404, &quot;The requested URL was not found on the server.&quot;)
+
+    def full_dispatch(self, environ):
+        req = Request(environ)
+        token = _current.set((req, _G(), self))
+        try:
+            try:
+                rv = None
+                for f in self.before_funcs:
+                    rv = f()
+                    if rv is not None:
+                        break
+                if rv is None:
+                    rv = self._dispatch(req)
+                response = self._to_response(rv)
+            except _MethodNotAllowed as e:
+                response = self._error(HTTPException(405))
+                response.headers[&quot;Allow&quot;] = &quot;, &quot;.join(e.allowed)
+            except HTTPException as e:
+                response = self._error(e)
+            except Exception as e:
+                if self.config.get(&quot;TESTING&quot;) and 500 not in self.error_handlers:
+                    raise
+                response = self._error(HTTPException(500)) if 500 not in self.error_handlers else self._to_response(self.error_handlers[500](e))
+                response.status_code = 500
+            for f in self.after_funcs:
+                response = f(response) or response
+            if req.method == &quot;HEAD&quot;:
+                response.headers[&quot;Content-Length&quot;] = len(response.data)
+                response.data = b&quot;&quot;
+            return response
+        finally:
+            _current.reset(token)
+
+    def __call__(self, environ, start_response):
+        response = self.full_dispatch(environ)
+        if &quot;Content-Length&quot; not in response.headers:
+            response.headers[&quot;Content-Length&quot;] = len(response.data)
+        start_response(response.status, response.headers.items())
+        return [response.data]
+
+    def test_client(self):
+        return _TestClient(self)
+
+
+class _MethodNotAllowed(Exception):
+    def __init__(self, allowed):
+        self.allowed = allowed
+
+
+class Flask(_App):
+    pass
+
+
+class _TestClient:
+    def __init__(self, app):
+        self.app = app
+        self.cookies = {}
+
+    def open(self, path, method=&quot;GET&quot;, json=None, data=None, headers=None, query_string=None):
+        url = urlsplit(path)
+        query = url.query
+        if query_string:
+            query = (query + &quot;&amp;&quot; if query else &quot;&quot;) + urlencode(query_string, doseq=True)
+        body, ctype = b&quot;&quot;, None
+        if json is not None:
+            import json as _json
+            body, ctype = _json.dumps(json).encode(&quot;utf-8&quot;), &quot;application/json&quot;
+        elif isinstance(data, dict):
+            body, ctype = urlencode(data, doseq=True).encode(&quot;utf-8&quot;), &quot;application/x-www-form-urlencoded&quot;
+        elif data is not None:
+            body = data.encode(&quot;utf-8&quot;) if isinstance(data, str) else data
+        environ = {&quot;REQUEST_METHOD&quot;: method.upper(), &quot;PATH_INFO&quot;: url.path or &quot;/&quot;, &quot;QUERY_STRING&quot;: query,
+                   &quot;SERVER_NAME&quot;: &quot;localhost&quot;, &quot;SERVER_PORT&quot;: &quot;80&quot;, &quot;wsgi.url_scheme&quot;: &quot;http&quot;,
+                   &quot;wsgi.input&quot;: io.BytesIO(body), &quot;CONTENT_LENGTH&quot;: str(len(body))}
+        headers = dict(headers or {})
+        if ctype and not any(k.lower() == &quot;content-type&quot; for k in headers):
+            environ[&quot;CONTENT_TYPE&quot;] = ctype
+        for k, v in headers.items():
+            if k.lower() == &quot;content-type&quot;:
+                environ[&quot;CONTENT_TYPE&quot;] = v
+            else:
+                environ[&quot;HTTP_&quot; + k.upper().replace(&quot;-&quot;, &quot;_&quot;)] = v
+        if self.cookies:
+            environ[&quot;HTTP_COOKIE&quot;] = &quot;; &quot;.join(f&quot;{k}={v}&quot; for k, v in self.cookies.items())
+        response = self.app.full_dispatch(environ)
+        for k, v in response.headers.items():
+            if k.lower() == &quot;set-cookie&quot;:
+                name, _, rest = v.partition(&quot;=&quot;)
+                self.cookies[name] = rest.split(&quot;;&quot;)[0]
+        return response
+
+    def get(self, path, **kw):
+        return self.open(path, &quot;GET&quot;, **kw)
+
+    def post(self, path, **kw):
+        return self.open(path, &quot;POST&quot;, **kw)
+
+    def put(self, path, **kw):
+        return self.open(path, &quot;PUT&quot;, **kw)
+
+    def patch(self, path, **kw):
+        return self.open(path, &quot;PATCH&quot;, **kw)
+
+    def delete(self, path, **kw):
+        return self.open(path, &quot;DELETE&quot;, **kw)
+</pre></details><details class="pc-file"><summary><code>helpdesk_domain.py</code></summary><pre class="pc-filetext">&quot;&quot;&quot;The helpdesk&#x27;s rules, with no web or database code (Week 80, Day 1).
+
+Everything here is plain data and pure functions, so it can be tested on its own and used by the
+database layer, the web layer and the tests alike.
+&quot;&quot;&quot;
+import re
+from http import HTTPStatus
+
+ROLES = (&quot;customer&quot;, &quot;agent&quot;, &quot;admin&quot;)
+PRIORITIES = (&quot;low&quot;, &quot;normal&quot;, &quot;high&quot;, &quot;urgent&quot;)
+STATUSES = (&quot;open&quot;, &quot;in_progress&quot;, &quot;waiting&quot;, &quot;resolved&quot;, &quot;closed&quot;)
+STAFF = {&quot;agent&quot;, &quot;admin&quot;}
+
+# status -&gt; {new status: roles that may make the change}
+TRANSITIONS = {
+    &quot;open&quot;: {&quot;in_progress&quot;: {&quot;agent&quot;, &quot;admin&quot;}, &quot;closed&quot;: {&quot;customer&quot;, &quot;admin&quot;}},
+    &quot;in_progress&quot;: {&quot;waiting&quot;: {&quot;agent&quot;, &quot;admin&quot;}, &quot;resolved&quot;: {&quot;agent&quot;, &quot;admin&quot;}},
+    &quot;waiting&quot;: {&quot;in_progress&quot;: {&quot;customer&quot;, &quot;agent&quot;, &quot;admin&quot;}},
+    &quot;resolved&quot;: {&quot;closed&quot;: {&quot;customer&quot;, &quot;admin&quot;}, &quot;in_progress&quot;: {&quot;customer&quot;, &quot;agent&quot;, &quot;admin&quot;}},
+    &quot;closed&quot;: {},
+}
+
+# action -&gt; (roles always allowed, roles allowed only on their own tickets)
+PERMISSIONS = {
+    &quot;create_ticket&quot;: ({&quot;customer&quot;}, set()),
+    &quot;view_ticket&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, {&quot;customer&quot;}),
+    &quot;list_all_tickets&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, set()),
+    &quot;edit_ticket&quot;: ({&quot;admin&quot;}, {&quot;customer&quot;}),
+    &quot;comment&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, {&quot;customer&quot;}),
+    &quot;internal_note&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, set()),
+    &quot;change_priority&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, set()),
+    &quot;assign&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, set()),
+    &quot;delete_ticket&quot;: ({&quot;admin&quot;}, set()),
+    &quot;view_stats&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, set()),
+}
+
+
+class ValidationError(Exception):
+    &quot;&quot;&quot;Raised with a dict of field -&gt; message.&quot;&quot;&quot;
+
+    def __init__(self, errors):
+        super().__init__(&quot;; &quot;.join(f&quot;{k}: {v}&quot; for k, v in sorted(errors.items())))
+        self.errors = errors
+
+
+def validate_ticket(data, partial=False):
+    &quot;&quot;&quot;Check a ticket body from a client. partial=True for PATCH: only the fields present are checked.&quot;&quot;&quot;
+    if not isinstance(data, dict):
+        raise ValidationError({&quot;_&quot;: &quot;expected a JSON object&quot;})
+    errors, clean = {}, {}
+    unknown = sorted(set(data) - {&quot;title&quot;, &quot;body&quot;, &quot;priority&quot;})
+    if unknown:
+        errors[&quot;_&quot;] = f&quot;unexpected field(s): {&#x27;, &#x27;.join(unknown)}&quot;
+    for field in (&quot;title&quot;, &quot;body&quot;):
+        if field not in data:
+            if not partial:
+                errors[field] = &quot;required&quot;
+            continue
+        value = data[field]
+        limit = (3, 120) if field == &quot;title&quot; else (1, 5000)
+        if not isinstance(value, str) or not limit[0] &lt;= len(value.strip()) &lt;= limit[1]:
+            errors[field] = f&quot;{limit[0]} to {limit[1]} characters&quot;
+        else:
+            clean[field] = value.strip()
+    if &quot;priority&quot; in data:
+        if data[&quot;priority&quot;] not in PRIORITIES:
+            errors[&quot;priority&quot;] = f&quot;one of {&#x27;, &#x27;.join(PRIORITIES)}&quot;
+        else:
+            clean[&quot;priority&quot;] = data[&quot;priority&quot;]
+    elif not partial:
+        clean[&quot;priority&quot;] = &quot;normal&quot;
+    if partial and not data:
+        errors[&quot;_&quot;] = &quot;nothing to change&quot;
+    if errors:
+        raise ValidationError(errors)
+    return clean
+
+
+def can_transition(current, new, role):
+    &quot;&quot;&quot;True if someone with this role may move a ticket from `current` to `new`.&quot;&quot;&quot;
+    return role in TRANSITIONS.get(current, {}).get(new, set())
+
+
+def allowed(role, action, is_owner=False):
+    &quot;&quot;&quot;True if the role may do the action (is_owner: the ticket is the user&#x27;s own).&quot;&quot;&quot;
+    always, own = PERMISSIONS[action]
+    return role in always or (is_owner and role in own)
+
+
+def problem(status, detail, title=None, **extra):
+    &quot;&quot;&quot;An RFC 9457 problem-details response: (body, status, headers).&quot;&quot;&quot;
+    body = {&quot;type&quot;: &quot;about:blank&quot;, &quot;title&quot;: title or HTTPStatus(status).phrase, &quot;status&quot;: status, &quot;detail&quot;: detail}
+    body.update(extra)
+    return body, status, {&quot;Content-Type&quot;: &quot;application/problem+json&quot;}
+
+
+ROUTES = [
+    (&quot;POST&quot;, &quot;/users&quot;, &quot;sign up as a customer&quot;, 201),
+    (&quot;POST&quot;, &quot;/tokens&quot;, &quot;log in and get a token&quot;, 201),
+    (&quot;GET&quot;, &quot;/me&quot;, &quot;who am I&quot;, 200),
+    (&quot;GET&quot;, &quot;/tickets&quot;, &quot;list tickets (customers see their own)&quot;, 200),
+    (&quot;POST&quot;, &quot;/tickets&quot;, &quot;open a ticket&quot;, 201),
+    (&quot;GET&quot;, &quot;/tickets/{ticket_id}&quot;, &quot;read a ticket&quot;, 200),
+    (&quot;PATCH&quot;, &quot;/tickets/{ticket_id}&quot;, &quot;change a ticket&#x27;s title, body or priority&quot;, 200),
+    (&quot;DELETE&quot;, &quot;/tickets/{ticket_id}&quot;, &quot;delete a ticket (admins)&quot;, 204),
+    (&quot;POST&quot;, &quot;/tickets/{ticket_id}/transitions&quot;, &quot;change a ticket&#x27;s status&quot;, 200),
+    (&quot;PUT&quot;, &quot;/tickets/{ticket_id}/assignee&quot;, &quot;assign a ticket to an agent&quot;, 200),
+    (&quot;GET&quot;, &quot;/tickets/{ticket_id}/comments&quot;, &quot;list a ticket&#x27;s comments&quot;, 200),
+    (&quot;POST&quot;, &quot;/tickets/{ticket_id}/comments&quot;, &quot;add a comment or internal note&quot;, 201),
+    (&quot;GET&quot;, &quot;/stats&quot;, &quot;ticket counts (staff)&quot;, 200),
+    (&quot;GET&quot;, &quot;/healthz&quot;, &quot;is the process alive&quot;, 200),
+    (&quot;GET&quot;, &quot;/readyz&quot;, &quot;can it serve requests&quot;, 200),
+]
+
+
+def docs_table(routes):
+    &quot;&quot;&quot;The routes as a Markdown table, for the README.&quot;&quot;&quot;
+    lines = [&quot;| Method | Path | What it does | Success |&quot;, &quot;|---|---|---|---|&quot;]
+    lines += [f&quot;| {m} | `{p}` | {what} | {code} {HTTPStatus(code).phrase} |&quot; for m, p, what, code in routes]
+    return &quot;\n&quot;.join(lines)
+</pre></details><details class="pc-file"><summary><code>helpdesk_db.py</code></summary><pre class="pc-filetext">&quot;&quot;&quot;The helpdesk&#x27;s database: migrations and the queries the app needs (Week 80, Day 2).
+
+Every query uses parameters; every change that touches more than one row runs in a transaction.
+&quot;&quot;&quot;
+import sqlite3
+
+MIGRATIONS = [
+    (1, &quot;users&quot;, &quot;&quot;&quot;
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN (&#x27;customer&#x27;, &#x27;agent&#x27;, &#x27;admin&#x27;)),
+            created_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (2, &quot;tickets&quot;, &quot;&quot;&quot;
+        CREATE TABLE tickets (
+            id INTEGER PRIMARY KEY,
+            customer_id INTEGER NOT NULL REFERENCES users (id),
+            assignee_id INTEGER REFERENCES users (id),
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT &#x27;normal&#x27; CHECK (priority IN (&#x27;low&#x27;, &#x27;normal&#x27;, &#x27;high&#x27;, &#x27;urgent&#x27;)),
+            status TEXT NOT NULL DEFAULT &#x27;open&#x27;
+                CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;waiting&#x27;, &#x27;resolved&#x27;, &#x27;closed&#x27;)),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (3, &quot;comments and events&quot;, &quot;&quot;&quot;
+        CREATE TABLE comments (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            author_id INTEGER NOT NULL REFERENCES users (id),
+            body TEXT NOT NULL,
+            internal INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE events (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            actor_id INTEGER NOT NULL REFERENCES users (id),
+            kind TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (4, &quot;indexes&quot;, &quot;&quot;&quot;
+        CREATE INDEX idx_tickets_status ON tickets (status, id);
+        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);
+        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)&quot;&quot;&quot;),
+]
+
+
+class ConflictError(Exception):
+    &quot;&quot;&quot;The row changed since it was read.&quot;&quot;&quot;
+
+
+def connect(path=&quot;:memory:&quot;):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    return conn
+
+
+def migrate(conn, migrations=MIGRATIONS):
+    &quot;&quot;&quot;Apply the migrations the database hasn&#x27;t had yet, each in its own transaction. Returns their versions.&quot;&quot;&quot;
+    conn.execute(&quot;CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL)&quot;)
+    conn.commit()
+    versions = [v for v, _, _ in migrations]
+    if versions != list(range(1, len(versions) + 1)):
+        raise ValueError(&quot;migrations must be numbered 1, 2, 3... with no gaps&quot;)
+    current = conn.execute(&quot;SELECT COALESCE(MAX(version), 0) FROM schema_migrations&quot;).fetchone()[0]
+    if current &gt; len(versions):
+        raise RuntimeError(f&quot;the database is at version {current}, newer than this code&quot;)
+    applied = []
+    for version, name, sql in migrations[current:]:
+        try:
+            conn.execute(&quot;BEGIN&quot;)
+            for statement in sql.split(&quot;;&quot;):
+                if statement.strip():
+                    conn.execute(statement)
+            conn.execute(&quot;INSERT INTO schema_migrations (version, name) VALUES (?, ?)&quot;, (version, name))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        applied.append(version)
+    return applied
+
+
+def _dict(row):
+    return dict(row) if row is not None else None
+
+
+def _event(conn, ticket_id, actor_id, kind, detail, now):
+    conn.execute(&quot;INSERT INTO events (ticket_id, actor_id, kind, detail, at) VALUES (?, ?, ?, ?, ?)&quot;,
+                 (ticket_id, actor_id, kind, detail, now))
+
+
+def create_user(conn, email, password_hash, role, now):
+    try:
+        with conn:
+            cur = conn.execute(&quot;INSERT INTO users (email, password, role, created_at) VALUES (?, ?, ?, ?)&quot;,
+                               (email, password_hash, role, now))
+    except sqlite3.IntegrityError as e:
+        if &quot;UNIQUE&quot; not in str(e):
+            raise
+        raise ValueError(&quot;email already registered&quot;) from None
+    return cur.lastrowid
+
+
+def get_user(conn, user_id):
+    return _dict(conn.execute(&quot;SELECT id, email, role, created_at FROM users WHERE id = ?&quot;, (user_id,)).fetchone())
+
+
+def get_user_by_email(conn, email):
+    return _dict(conn.execute(&quot;SELECT id, email, password, role FROM users WHERE email = ?&quot;, (email,)).fetchone())
+
+
+def create_ticket(conn, customer_id, clean, now):
+    with conn:
+        cur = conn.execute(
+            &quot;INSERT INTO tickets (customer_id, title, body, priority, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)&quot;,
+            (customer_id, clean[&quot;title&quot;], clean[&quot;body&quot;], clean.get(&quot;priority&quot;, &quot;normal&quot;), now, now))
+        _event(conn, cur.lastrowid, customer_id, &quot;created&quot;, clean[&quot;title&quot;], now)
+    return get_ticket(conn, cur.lastrowid)
+
+
+def get_ticket(conn, ticket_id):
+    return _dict(conn.execute(&quot;SELECT * FROM tickets WHERE id = ?&quot;, (ticket_id,)).fetchone())
+
+
+def _like(text):
+    return &quot;%&quot; + text.replace(&quot;\\&quot;, &quot;\\\\&quot;).replace(&quot;%&quot;, &quot;\\%&quot;).replace(&quot;_&quot;, &quot;\\_&quot;) + &quot;%&quot;
+
+
+def list_tickets(conn, customer_id=None, status=None, priority=None, assignee_id=None, q=None, after_id=0, limit=20):
+    &quot;&quot;&quot;Tickets matching the filters, by id, after a cursor. Returns (items, next_after or None).&quot;&quot;&quot;
+    where, values = [&quot;id &gt; ?&quot;], [after_id]
+    for column, value in ((&quot;customer_id&quot;, customer_id), (&quot;status&quot;, status), (&quot;priority&quot;, priority), (&quot;assignee_id&quot;, assignee_id)):
+        if value is not None:
+            where.append(f&quot;{column} = ?&quot;)
+            values.append(value)
+    if q:
+        where.append(&quot;title LIKE ? ESCAPE &#x27;\\&#x27;&quot;)
+        values.append(_like(q))
+    rows = conn.execute(f&quot;SELECT * FROM tickets WHERE {&#x27; AND &#x27;.join(where)} ORDER BY id LIMIT ?&quot;, values + [limit + 1]).fetchall()
+    items = [dict(r) for r in rows[:limit]]
+    return items, (items[-1][&quot;id&quot;] if len(rows) &gt; limit else None)
+
+
+def update_ticket(conn, ticket_id, changes, actor_id, now):
+    if not changes:
+        return get_ticket(conn, ticket_id)
+    columns = sorted(changes)
+    with conn:
+        conn.execute(f&quot;UPDATE tickets SET {&#x27;, &#x27;.join(f&#x27;{c} = ?&#x27; for c in columns)}, updated_at = ? WHERE id = ?&quot;,
+                     [changes[c] for c in columns] + [now, ticket_id])
+        _event(conn, ticket_id, actor_id, &quot;edited&quot;, &quot;,&quot;.join(columns), now)
+    return get_ticket(conn, ticket_id)
+
+
+def change_status(conn, ticket_id, expected, new, actor_id, now):
+    &quot;&quot;&quot;Move a ticket from `expected` to `new`, unless someone changed its status first.&quot;&quot;&quot;
+    with conn:
+        cur = conn.execute(&quot;UPDATE tickets SET status = ?, updated_at = ? WHERE id = ? AND status = ?&quot;,
+                           (new, now, ticket_id, expected))
+        if cur.rowcount != 1:
+            raise ConflictError(f&quot;ticket {ticket_id} is no longer {expected}&quot;)
+        _event(conn, ticket_id, actor_id, &quot;status&quot;, f&quot;{expected}-&gt;{new}&quot;, now)
+    return get_ticket(conn, ticket_id)
+
+
+def assign(conn, ticket_id, agent_id, actor_id, now):
+    agent = get_user(conn, agent_id)
+    if agent is None or agent[&quot;role&quot;] not in (&quot;agent&quot;, &quot;admin&quot;):
+        raise ValueError(f&quot;user {agent_id} is not an agent&quot;)
+    with conn:
+        conn.execute(&quot;UPDATE tickets SET assignee_id = ?, updated_at = ? WHERE id = ?&quot;, (agent_id, now, ticket_id))
+        _event(conn, ticket_id, actor_id, &quot;assigned&quot;, str(agent_id), now)
+    return get_ticket(conn, ticket_id)
+
+
+def add_comment(conn, ticket_id, author_id, body, internal, now):
+    with conn:
+        cur = conn.execute(&quot;INSERT INTO comments (ticket_id, author_id, body, internal, created_at) VALUES (?, ?, ?, ?, ?)&quot;,
+                           (ticket_id, author_id, body, int(internal), now))
+        conn.execute(&quot;UPDATE tickets SET updated_at = ? WHERE id = ?&quot;, (now, ticket_id))
+    return _dict(conn.execute(&quot;SELECT * FROM comments WHERE id = ?&quot;, (cur.lastrowid,)).fetchone())
+
+
+def list_comments(conn, ticket_id, include_internal):
+    sql = &quot;SELECT * FROM comments WHERE ticket_id = ?&quot; + (&quot;&quot; if include_internal else &quot; AND internal = 0&quot;) + &quot; ORDER BY id&quot;
+    return [dict(r) for r in conn.execute(sql, (ticket_id,)).fetchall()]
+
+
+def delete_ticket(conn, ticket_id):
+    with conn:
+        return conn.execute(&quot;DELETE FROM tickets WHERE id = ?&quot;, (ticket_id,)).rowcount == 1
+
+
+def events(conn, ticket_id):
+    return [dict(r) for r in conn.execute(&quot;SELECT kind, detail, actor_id, at FROM events WHERE ticket_id = ? ORDER BY id&quot;, (ticket_id,))]
+
+
+def stats(conn):
+    by_status = {s: 0 for s in (&quot;open&quot;, &quot;in_progress&quot;, &quot;waiting&quot;, &quot;resolved&quot;, &quot;closed&quot;)}
+    by_status.update(dict(conn.execute(&quot;SELECT status, COUNT(*) FROM tickets GROUP BY status&quot;).fetchall()))
+    by_priority = {p: 0 for p in (&quot;low&quot;, &quot;normal&quot;, &quot;high&quot;, &quot;urgent&quot;)}
+    by_priority.update(dict(conn.execute(&quot;SELECT priority, COUNT(*) FROM tickets WHERE status != &#x27;closed&#x27; GROUP BY priority&quot;).fetchall()))
+    unassigned = conn.execute(&quot;SELECT COUNT(*) FROM tickets WHERE assignee_id IS NULL AND status != &#x27;closed&#x27;&quot;).fetchone()[0]
+    return {&quot;by_status&quot;: by_status, &quot;open_by_priority&quot;: by_priority, &quot;unassigned&quot;: unassigned}
+</pre></details><details class="pc-file"><summary><code>helpdesk_security.py</code></summary><pre class="pc-filetext">&quot;&quot;&quot;Passwords and tokens for the helpdesk (Week 79&#x27;s tools, gathered in one place).&quot;&quot;&quot;
+import base64
+import hashlib
+import hmac
+import secrets
+
+
+def pbkdf2_sha256(password, salt, iterations, dklen=32):
+    base = hmac.new(password, digestmod=hashlib.sha256)
+    out, block = b&quot;&quot;, 1
+    while len(out) &lt; dklen:
+        h = base.copy()
+        h.update(salt + block.to_bytes(4, &quot;big&quot;))
+        u = h.digest()
+        total = int.from_bytes(u, &quot;big&quot;)
+        for _ in range(iterations - 1):
+            h = base.copy()
+            h.update(u)
+            u = h.digest()
+            total ^= int.from_bytes(u, &quot;big&quot;)
+        out += total.to_bytes(32, &quot;big&quot;)
+        block += 1
+    return out[:dklen]
+
+
+def hash_password(password, iterations):
+    salt = secrets.token_bytes(16)
+    digest = pbkdf2_sha256(password.encode(), salt, iterations)
+    return f&quot;pbkdf2_sha256${iterations}${base64.b64encode(salt).decode()}${base64.b64encode(digest).decode()}&quot;
+
+
+def check_password(password, stored):
+    try:
+        algorithm, iterations, salt, digest = stored.split(&quot;$&quot;)
+        expected = pbkdf2_sha256(password.encode(), base64.b64decode(salt), int(iterations))
+        return algorithm == &quot;pbkdf2_sha256&quot; and hmac.compare_digest(expected, base64.b64decode(digest))
+    except ValueError:
+        return False
+
+
+def issue_token(user_id, expires, key):
+    &quot;&quot;&quot;A signed bearer token: USER_ID.EXPIRES.SIGNATURE.&quot;&quot;&quot;
+    payload = f&quot;{user_id}.{expires}&quot;
+    return f&quot;{payload}.{hmac.new(key, payload.encode(), hashlib.sha256).hexdigest()}&quot;
+
+
+def verify_token(token, key, now):
+    &quot;&quot;&quot;The user id in a valid, unexpired token, else None.&quot;&quot;&quot;
+    parts = token.split(&quot;.&quot;)
+    if len(parts) != 3 or not parts[0].isdigit() or not parts[1].isdigit():
+        return None
+    payload = f&quot;{parts[0]}.{parts[1]}&quot;
+    expected = hmac.new(key, payload.encode(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(parts[2], expected) or now &gt;= int(parts[1]):
+        return None
+    return int(parts[0])
+</pre></details><details class="pc-file"><summary><code>helpdesk_app.py</code></summary><pre class="pc-filetext">&quot;&quot;&quot;The helpdesk&#x27;s HTTP API (Week 80, Day 3), built with miniflask (Week 77).&quot;&quot;&quot;
+import re
+import secrets
+import time
+from datetime import datetime, timezone
+
+import helpdesk_db as db
+from helpdesk_domain import ROLES, STATUSES, ValidationError, allowed, can_transition, problem, validate_ticket
+from helpdesk_security import check_password, hash_password, issue_token, verify_token
+from miniflask import Flask, HTTPException, g, request
+
+ERROR_CODES = (400, 401, 403, 404, 405, 409, 415, 422, 500, 503)
+
+
+class ApiError(HTTPException):
+    def __init__(self, code, detail, **extra):
+        super().__init__(code, detail)
+        self.extra = extra
+
+
+def iso(t):
+    return datetime.fromtimestamp(t, timezone.utc).strftime(&quot;%Y-%m-%dT%H:%M:%SZ&quot;)
+
+
+def create_app(settings, conn, clock=time.time, log=print):
+    app = Flask(__name__)
+    key = settings[&quot;SECRET_KEY&quot;].encode()
+    token_seconds = settings.get(&quot;TOKEN_SECONDS&quot;, 3600)
+    iterations = settings.get(&quot;PASSWORD_ITERATIONS&quot;, 600_000)
+    dummy = hash_password(secrets.token_hex(8), iterations)   # checked for unknown emails, so they take as long as real ones
+
+    # ---- step 11
+    for code in ERROR_CODES:
+        @app.errorhandler(code)
+        def handle(e, code=code):
+            if code == 500 and not isinstance(e, HTTPException):
+                incident = secrets.token_hex(4)
+                log(f&quot;incident {incident}: {type(e).__name__}: {e}&quot;)
+                return problem(500, &quot;something went wrong&quot;, incident=incident)
+            return problem(e.code, e.description, **getattr(e, &quot;extra&quot;, {}))
+
+    @app.get(&quot;/healthz&quot;)
+    def healthz():
+        return {&quot;status&quot;: &quot;ok&quot;}
+
+    @app.get(&quot;/readyz&quot;)
+    def readyz():
+        try:
+            version = conn.execute(&quot;SELECT MAX(version) FROM schema_migrations&quot;).fetchone()[0]
+        except Exception:
+            version = None
+        if version != len(db.MIGRATIONS):
+            raise ApiError(503, &quot;the database isn&#x27;t ready&quot;)
+        return {&quot;status&quot;: &quot;ready&quot;, &quot;schema&quot;: version}
+
+    # ---- step 12
+    @app.before_request
+    def authenticate():
+        g.user = None
+        header = request.headers.get(&quot;Authorization&quot;, &quot;&quot;)
+        if header.startswith(&quot;Bearer &quot;):
+            user_id = verify_token(header[7:], key, int(clock()))
+            if user_id is not None:
+                g.user = db.get_user(conn, user_id)
+
+    def user():
+        if g.user is None:
+            raise ApiError(401, &quot;log in first&quot;)
+        return g.user
+
+    def body():
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            raise ApiError(400, &quot;send a JSON object&quot;)
+        return data
+
+    @app.post(&quot;/users&quot;)
+    def signup():
+        data = body()
+        email = data.get(&quot;email&quot;, &quot;&quot;).strip().lower() if isinstance(data.get(&quot;email&quot;), str) else &quot;&quot;
+        password = data.get(&quot;password&quot;)
+        if not re.fullmatch(r&quot;[^@\s]+@[^@\s]+\.[a-z]{2,}&quot;, email) or not isinstance(password, str) or not 12 &lt;= len(password) &lt;= 128:
+            raise ApiError(422, &quot;a valid email and a password of 12 to 128 characters are needed&quot;)
+        try:
+            user_id = db.create_user(conn, email, hash_password(password, iterations), &quot;customer&quot;, iso(clock()))
+        except ValueError:
+            raise ApiError(409, &quot;email already registered&quot;) from None
+        return {&quot;id&quot;: user_id, &quot;email&quot;: email, &quot;role&quot;: &quot;customer&quot;}, 201
+
+    @app.post(&quot;/tokens&quot;)
+    def login():
+        data = body()
+        found = db.get_user_by_email(conn, str(data.get(&quot;email&quot;, &quot;&quot;)).strip().lower())
+        stored = found[&quot;password&quot;] if found else dummy
+        if not check_password(str(data.get(&quot;password&quot;, &quot;&quot;)), stored) or found is None:
+            raise ApiError(401, &quot;wrong email or password&quot;)
+        expires = int(clock()) + token_seconds
+        return {&quot;token&quot;: issue_token(found[&quot;id&quot;], expires, key), &quot;expires_at&quot;: iso(expires)}, 201
+
+    @app.get(&quot;/me&quot;)
+    def me():
+        return user()
+
+    # ---- step 13
+    def checked(data, partial=False):
+        try:
+            return validate_ticket(data, partial)
+        except ValidationError as e:
+            raise ApiError(422, &quot;the request has invalid fields&quot;, errors=e.errors) from None
+
+    def visible_ticket(ticket_id):
+        me = user()
+        ticket = db.get_ticket(conn, ticket_id)
+        if ticket is None or not allowed(me[&quot;role&quot;], &quot;view_ticket&quot;, ticket[&quot;customer_id&quot;] == me[&quot;id&quot;]):
+            raise ApiError(404, f&quot;no ticket {ticket_id}&quot;)
+        return me, ticket
+
+    def require(me, action, ticket=None, message=&quot;you can&#x27;t do that&quot;):
+        if not allowed(me[&quot;role&quot;], action, ticket is not None and ticket[&quot;customer_id&quot;] == me[&quot;id&quot;]):
+            raise ApiError(403, message)
+
+    @app.post(&quot;/tickets&quot;)
+    def open_ticket():
+        me = user()
+        require(me, &quot;create_ticket&quot;, message=&quot;only customers can open tickets&quot;)
+        ticket = db.create_ticket(conn, me[&quot;id&quot;], checked(body()), iso(clock()))
+        return ticket, 201, {&quot;Location&quot;: f&quot;/tickets/{ticket[&#x27;id&#x27;]}&quot;}
+
+    @app.get(&quot;/tickets&quot;)
+    def list_tickets():
+        me = user()
+        args = request.args
+        filters = {}
+        for name, choices in ((&quot;status&quot;, STATUSES), (&quot;priority&quot;, (&quot;low&quot;, &quot;normal&quot;, &quot;high&quot;, &quot;urgent&quot;))):
+            if name in args:
+                if args[name] not in choices:
+                    raise ApiError(400, f&quot;{name} must be one of {&#x27;, &#x27;.join(choices)}&quot;)
+                filters[name] = args[name]
+        for name, low, high, default in ((&quot;after&quot;, 0, 10 ** 9, 0), (&quot;limit&quot;, 1, 50, 20)):
+            value = args.get(name, str(default))
+            if not value.isdigit() or not low &lt;= int(value) &lt;= high:
+                raise ApiError(400, f&quot;{name} must be a whole number from {low} to {high}&quot;)
+            filters[name] = int(value)
+        if not allowed(me[&quot;role&quot;], &quot;list_all_tickets&quot;):
+            filters[&quot;customer_id&quot;] = me[&quot;id&quot;]
+        items, after = db.list_tickets(conn, customer_id=filters.get(&quot;customer_id&quot;), status=filters.get(&quot;status&quot;),
+                                       priority=filters.get(&quot;priority&quot;), q=args.get(&quot;q&quot;) or None,
+                                       after_id=filters[&quot;after&quot;], limit=filters[&quot;limit&quot;])
+        return {&quot;items&quot;: items, &quot;next&quot;: after}
+
+    @app.get(&quot;/tickets/&lt;int:ticket_id&gt;&quot;)
+    def read_ticket(ticket_id):
+        return visible_ticket(ticket_id)[1]
+
+    # ---- step 14
+    @app.patch(&quot;/tickets/&lt;int:ticket_id&gt;&quot;)
+    def edit_ticket(ticket_id):
+        me, ticket = visible_ticket(ticket_id)
+        changes = checked(body(), partial=True)
+        if &quot;priority&quot; in changes:
+            require(me, &quot;change_priority&quot;, ticket, &quot;only staff can change the priority&quot;)
+        if &quot;title&quot; in changes or &quot;body&quot; in changes:
+            require(me, &quot;edit_ticket&quot;, ticket, &quot;only the customer who opened it can edit it&quot;)
+            if me[&quot;role&quot;] == &quot;customer&quot; and ticket[&quot;status&quot;] != &quot;open&quot;:
+                raise ApiError(409, &quot;only open tickets can be edited&quot;)
+        return db.update_ticket(conn, ticket_id, changes, me[&quot;id&quot;], iso(clock()))
+
+    @app.post(&quot;/tickets/&lt;int:ticket_id&gt;/transitions&quot;)
+    def transition(ticket_id):
+        me, ticket = visible_ticket(ticket_id)
+        new = body().get(&quot;status&quot;)
+        if new not in STATUSES:
+            raise ApiError(422, f&quot;status must be one of {&#x27;, &#x27;.join(STATUSES)}&quot;)
+        if not can_transition(ticket[&quot;status&quot;], new, me[&quot;role&quot;]):
+            raise ApiError(403, f&quot;you can&#x27;t move a ticket from {ticket[&#x27;status&#x27;]} to {new}&quot;)
+        try:
+            return db.change_status(conn, ticket_id, ticket[&quot;status&quot;], new, me[&quot;id&quot;], iso(clock()))
+        except db.ConflictError:
+            raise ApiError(409, &quot;the ticket changed; reload it and try again&quot;) from None
+
+    @app.put(&quot;/tickets/&lt;int:ticket_id&gt;/assignee&quot;)
+    def assign(ticket_id):
+        me, ticket = visible_ticket(ticket_id)
+        require(me, &quot;assign&quot;, ticket, &quot;only staff can assign tickets&quot;)
+        agent_id = body().get(&quot;agent_id&quot;)
+        if not isinstance(agent_id, int) or isinstance(agent_id, bool):
+            raise ApiError(422, &quot;agent_id must be a user id&quot;)
+        try:
+            return db.assign(conn, ticket_id, agent_id, me[&quot;id&quot;], iso(clock()))
+        except ValueError as e:
+            raise ApiError(422, str(e)) from None
+
+    # ---- step 15
+    @app.delete(&quot;/tickets/&lt;int:ticket_id&gt;&quot;)
+    def remove_ticket(ticket_id):
+        me, ticket = visible_ticket(ticket_id)
+        require(me, &quot;delete_ticket&quot;, ticket, &quot;only admins can delete tickets&quot;)
+        db.delete_ticket(conn, ticket_id)
+        return &quot;&quot;, 204
+
+    @app.get(&quot;/tickets/&lt;int:ticket_id&gt;/comments&quot;)
+    def comments(ticket_id):
+        me, ticket = visible_ticket(ticket_id)
+        return {&quot;items&quot;: db.list_comments(conn, ticket_id, include_internal=allowed(me[&quot;role&quot;], &quot;internal_note&quot;))}
+
+    @app.post(&quot;/tickets/&lt;int:ticket_id&gt;/comments&quot;)
+    def comment(ticket_id):
+        me, ticket = visible_ticket(ticket_id)
+        require(me, &quot;comment&quot;, ticket)
+        data = body()
+        text, internal = data.get(&quot;body&quot;), data.get(&quot;internal&quot;, False)
+        if not isinstance(text, str) or not 1 &lt;= len(text.strip()) &lt;= 5000 or not isinstance(internal, bool):
+            raise ApiError(422, &quot;body must be 1 to 5000 characters and internal true or false&quot;)
+        if internal:
+            require(me, &quot;internal_note&quot;, ticket, &quot;only staff can add internal notes&quot;)
+        return db.add_comment(conn, ticket_id, me[&quot;id&quot;], text.strip(), internal, iso(clock())), 201
+
+    @app.get(&quot;/stats&quot;)
+    def stats():
+        require(user(), &quot;view_stats&quot;, message=&quot;only staff can see statistics&quot;)
+        return db.stats(conn)
+
+    return app
+</pre></details><script type="application/json" class="page-files">{"miniflask.py": "\"\"\"A small subset of Flask that runs in the page (Week 77).\n\nThe names and behaviour follow Flask's own, so code written against this module also runs with\nthe real Flask (pip install flask): Flask, request, g, jsonify, abort, redirect, make_response,\nurl_for, Blueprint, and app.test_client(). It's a teaching copy, not the real thing: no templates,\nsessions, streaming or debugger.\n\"\"\"\nimport io\nimport json\nimport re\nfrom contextvars import ContextVar\nfrom http import HTTPStatus\nfrom urllib.parse import parse_qs, urlencode, urlsplit\n\n_current = ContextVar(\"request\")\n\n\nclass HTTPException(Exception):\n    def __init__(self, code, description=None):\n        self.code = code\n        self.name = HTTPStatus(code).phrase\n        self.description = description or self.name\n        super().__init__(f\"{code} {self.name}: {self.description}\")\n\n\ndef abort(code, description=None):\n    raise HTTPException(code, description)\n\n\nclass Headers:\n    \"\"\"Case-insensitive headers.\"\"\"\n    def __init__(self, items=()):\n        self._items = [(k, str(v)) for k, v in (items.items() if isinstance(items, dict) else items)]\n\n    def get(self, name, default=None):\n        for k, v in self._items:\n            if k.lower() == name.lower():\n                return v\n        return default\n\n    def __getitem__(self, name):\n        value = self.get(name)\n        if value is None:\n            raise KeyError(name)\n        return value\n\n    def __contains__(self, name):\n        return self.get(name) is not None\n\n    def __setitem__(self, name, value):\n        self._items = [(k, v) for k, v in self._items if k.lower() != name.lower()] + [(name, str(value))]\n\n    def items(self):\n        return list(self._items)\n\n\nclass Args(dict):\n    \"\"\"Query or form values: .get(name) gives the first value; .getlist(name) all of them.\"\"\"\n    def __init__(self, pairs):\n        super().__init__()\n        self._lists = {}\n        for k, v in pairs:\n            self._lists.setdefault(k, []).append(v)\n            dict.setdefault(self, k, v)\n\n    def get(self, key, default=None, type=None):\n        if key not in self:\n            return default\n        value = self[key]\n        if type is not None:\n            try:\n                return type(value)\n            except (TypeError, ValueError):\n                return default\n        return value\n\n    def getlist(self, key):\n        return list(self._lists.get(key, []))\n\n\nclass Request:\n    def __init__(self, environ):\n        self.environ = environ\n        self.method = environ[\"REQUEST_METHOD\"].upper()\n        self.path = environ.get(\"PATH_INFO\", \"/\") or \"/\"\n        self.args = Args(_pairs(environ.get(\"QUERY_STRING\", \"\")))\n        items = [(k[5:].replace(\"_\", \"-\").title(), v) for k, v in environ.items() if k.startswith(\"HTTP_\")]\n        if environ.get(\"CONTENT_TYPE\"):\n            items.append((\"Content-Type\", environ[\"CONTENT_TYPE\"]))\n        self.headers = Headers(items)\n        length = int(environ.get(\"CONTENT_LENGTH\") or 0)\n        self.data = environ[\"wsgi.input\"].read(length) if length else b\"\"\n        self.content_type = environ.get(\"CONTENT_TYPE\", \"\")\n        self.form = Args(_pairs(self.data.decode(\"utf-8\"))) if self.content_type.startswith(\"application/x-www-form-urlencoded\") else Args([])\n        self.view_args = {}\n        cookie = environ.get(\"HTTP_COOKIE\", \"\")\n        self.cookies = dict(p.strip().split(\"=\", 1) for p in cookie.split(\";\") if \"=\" in p)\n\n    @property\n    def is_json(self):\n        return self.content_type.split(\";\")[0].strip() == \"application/json\"\n\n    def get_json(self, silent=False, force=False):\n        if not (self.is_json or force):\n            if silent:\n                return None\n            abort(415, \"expected a JSON body (Content-Type: application/json)\")\n        try:\n            return json.loads(self.data or b\"null\")\n        except ValueError:\n            if silent:\n                return None\n            abort(400, \"the body isn't valid JSON\")\n\n    @property\n    def json(self):\n        return self.get_json()\n\n\ndef _pairs(text):\n    return [(k, v) for k, vs in parse_qs(text, keep_blank_values=True).items() for v in vs]\n\n\nclass _Proxy:\n    def __init__(self, getter):\n        object.__setattr__(self, \"_getter\", getter)\n\n    def __getattr__(self, name):\n        return getattr(self._getter(), name)\n\n    def __setattr__(self, name, value):\n        setattr(self._getter(), name, value)\n\n\ndef _request():\n    try:\n        return _current.get()[0]\n    except LookupError:\n        raise RuntimeError(\"working outside of request context\") from None\n\n\ndef _g():\n    try:\n        return _current.get()[1]\n    except LookupError:\n        raise RuntimeError(\"working outside of request context\") from None\n\n\nclass _G:\n    def get(self, name, default=None):\n        return self.__dict__.get(name, default)\n\n\nrequest = _Proxy(_request)\ng = _Proxy(_g)\n\n\nclass Response:\n    def __init__(self, response=b\"\", status=200, headers=None, mimetype=None, content_type=None):\n        if isinstance(response, str):\n            response = response.encode(\"utf-8\")\n        self.data = response\n        self.status_code = status\n        self.headers = Headers(headers or {})\n        if content_type or mimetype or \"Content-Type\" not in self.headers:\n            ctype = content_type or (f\"{mimetype}; charset=utf-8\" if mimetype and mimetype.startswith(\"text/\") else mimetype) or \"text/html; charset=utf-8\"\n            self.headers[\"Content-Type\"] = ctype\n\n    @property\n    def status(self):\n        return f\"{self.status_code} {HTTPStatus(self.status_code).phrase}\"\n\n    @property\n    def text(self):\n        return self.data.decode(\"utf-8\")\n\n    def get_json(self):\n        return json.loads(self.data)\n\n    @property\n    def json(self):\n        return self.get_json()\n\n    def set_cookie(self, key, value=\"\", max_age=None, path=\"/\", secure=False, httponly=False, samesite=None):\n        parts = [f\"{key}={value}\"]\n        if max_age is not None:\n            parts.append(f\"Max-Age={max_age}\")\n        parts.append(f\"Path={path}\")\n        if secure:\n            parts.append(\"Secure\")\n        if httponly:\n            parts.append(\"HttpOnly\")\n        if samesite:\n            parts.append(f\"SameSite={samesite}\")\n        self.headers._items.append((\"Set-Cookie\", \"; \".join(parts)))\n\n\ndef jsonify(*args, **kwargs):\n    data = args[0] if len(args) == 1 else (list(args) if args else kwargs)\n    return Response(json.dumps(data), headers={\"Content-Type\": \"application/json\"})\n\n\ndef redirect(location, code=302):\n    return Response(b\"\", code, {\"Location\": location})\n\n\ndef make_response(*args):\n    rv = args[0] if len(args) == 1 else args\n    return _App._to_response(rv)\n\n\ndef url_for(endpoint, **values):\n    return _current.get()[2].url_for(endpoint, **values)\n\n\n_CONVERTERS = {\"int\": (r\"\\d+\", int), \"float\": (r\"\\d+(?:\\.\\d+)?\", float), \"path\": (r\".+\", str), \"string\": (r\"[^/]+\", str)}\n\n\nclass _Rule:\n    def __init__(self, rule, endpoint, view, methods):\n        self.rule, self.endpoint, self.view = rule, endpoint, view\n        self.methods = {m.upper() for m in methods} | ({\"HEAD\"} if \"GET\" in {m.upper() for m in methods} else set())\n        regex, self.converters = \"\", {}\n        for piece in re.split(r\"(<[^>]+>)\", rule):\n            m = re.fullmatch(r\"<(?:(\\w+):)?(\\w+)>\", piece)\n            if m:\n                kind, name = m.group(1) or \"string\", m.group(2)\n                pattern, convert = _CONVERTERS[kind]\n                regex += f\"(?P<{name}>{pattern})\"\n                self.converters[name] = convert\n            else:\n                regex += re.escape(piece)\n        self.regex = re.compile(regex)\n\n    def match(self, path):\n        m = self.regex.fullmatch(path)\n        if not m:\n            return None\n        return {k: self.converters[k](v) for k, v in m.groupdict().items()}\n\n    def build(self, values):\n        def fill(m):\n            return str(values.pop(m.group(2)))\n        path = re.sub(r\"<(?:(\\w+):)?(\\w+)>\", fill, self.rule)\n        return path + (f\"?{urlencode(values)}\" if values else \"\")\n\n\nclass _Setup:\n    def route(self, rule, methods=(\"GET\",), endpoint=None):\n        def decorate(view):\n            self._add(rule, endpoint or view.__name__, view, methods)\n            return view\n        return decorate\n\n    def get(self, rule, **kw):\n        return self.route(rule, methods=[\"GET\"], **kw)\n\n    def post(self, rule, **kw):\n        return self.route(rule, methods=[\"POST\"], **kw)\n\n    def put(self, rule, **kw):\n        return self.route(rule, methods=[\"PUT\"], **kw)\n\n    def patch(self, rule, **kw):\n        return self.route(rule, methods=[\"PATCH\"], **kw)\n\n    def delete(self, rule, **kw):\n        return self.route(rule, methods=[\"DELETE\"], **kw)\n\n\nclass Blueprint(_Setup):\n    def __init__(self, name, import_name, url_prefix=\"\"):\n        self.name, self.url_prefix = name, url_prefix\n        self.deferred = []\n\n    def _add(self, rule, endpoint, view, methods):\n        self.deferred.append((rule, endpoint, view, methods))\n\n\nclass _App(_Setup):\n    def __init__(self, import_name):\n        self.import_name = import_name\n        self.config = {\"TESTING\": False}\n        self.rules = []\n        self.before_funcs, self.after_funcs, self.error_handlers = [], [], {}\n\n    def _add(self, rule, endpoint, view, methods):\n        self.rules.append(_Rule(rule, endpoint, view, methods))\n\n    def register_blueprint(self, bp, url_prefix=None):\n        prefix = url_prefix if url_prefix is not None else bp.url_prefix\n        for rule, endpoint, view, methods in bp.deferred:\n            self._add(prefix + rule, f\"{bp.name}.{endpoint}\", view, methods)\n\n    def before_request(self, f):\n        self.before_funcs.append(f)\n        return f\n\n    def after_request(self, f):\n        self.after_funcs.append(f)\n        return f\n\n    def errorhandler(self, code):\n        def decorate(f):\n            self.error_handlers[code] = f\n            return f\n        return decorate\n\n    def url_for(self, endpoint, **values):\n        for r in self.rules:\n            if r.endpoint == endpoint:\n                return r.build(dict(values))\n        raise LookupError(f\"no endpoint {endpoint!r}\")\n\n    @staticmethod\n    def _to_response(rv):\n        status, headers = None, None\n        if isinstance(rv, tuple):\n            if len(rv) == 3:\n                rv, status, headers = rv\n            elif isinstance(rv[1], (dict, list)):\n                rv, headers = rv\n            else:\n                rv, status = rv\n        if isinstance(rv, Response):\n            response = rv\n        elif isinstance(rv, (dict, list)):\n            response = jsonify(rv)\n        elif isinstance(rv, (str, bytes)):\n            response = Response(rv)\n        elif rv is None:\n            raise TypeError(\"the view function did not return a valid response\")\n        else:\n            raise TypeError(f\"can't turn {type(rv).__name__} into a response\")\n        if status is not None:\n            response.status_code = status\n        for k, v in (headers.items() if isinstance(headers, dict) else headers or []):\n            response.headers[k] = v\n        return response\n\n    def _error(self, e):\n        handler = self.error_handlers.get(e.code)\n        if handler:\n            return self._to_response(handler(e))\n        body = f\"<h1>{e.code} {e.name}</h1><p>{e.description}</p>\"\n        return Response(body, e.code)\n\n    def _dispatch(self, req):\n        path = req.path\n        allowed = set()\n        for r in self.rules:\n            values = r.match(path)\n            if values is None:\n                continue\n            if req.method in r.methods:\n                req.view_args = values\n                return r.view(**values)\n            allowed |= r.methods\n        if allowed:\n            raise _MethodNotAllowed(sorted(allowed | {\"OPTIONS\"}))\n        abort(404, \"The requested URL was not found on the server.\")\n\n    def full_dispatch(self, environ):\n        req = Request(environ)\n        token = _current.set((req, _G(), self))\n        try:\n            try:\n                rv = None\n                for f in self.before_funcs:\n                    rv = f()\n                    if rv is not None:\n                        break\n                if rv is None:\n                    rv = self._dispatch(req)\n                response = self._to_response(rv)\n            except _MethodNotAllowed as e:\n                response = self._error(HTTPException(405))\n                response.headers[\"Allow\"] = \", \".join(e.allowed)\n            except HTTPException as e:\n                response = self._error(e)\n            except Exception as e:\n                if self.config.get(\"TESTING\") and 500 not in self.error_handlers:\n                    raise\n                response = self._error(HTTPException(500)) if 500 not in self.error_handlers else self._to_response(self.error_handlers[500](e))\n                response.status_code = 500\n            for f in self.after_funcs:\n                response = f(response) or response\n            if req.method == \"HEAD\":\n                response.headers[\"Content-Length\"] = len(response.data)\n                response.data = b\"\"\n            return response\n        finally:\n            _current.reset(token)\n\n    def __call__(self, environ, start_response):\n        response = self.full_dispatch(environ)\n        if \"Content-Length\" not in response.headers:\n            response.headers[\"Content-Length\"] = len(response.data)\n        start_response(response.status, response.headers.items())\n        return [response.data]\n\n    def test_client(self):\n        return _TestClient(self)\n\n\nclass _MethodNotAllowed(Exception):\n    def __init__(self, allowed):\n        self.allowed = allowed\n\n\nclass Flask(_App):\n    pass\n\n\nclass _TestClient:\n    def __init__(self, app):\n        self.app = app\n        self.cookies = {}\n\n    def open(self, path, method=\"GET\", json=None, data=None, headers=None, query_string=None):\n        url = urlsplit(path)\n        query = url.query\n        if query_string:\n            query = (query + \"&\" if query else \"\") + urlencode(query_string, doseq=True)\n        body, ctype = b\"\", None\n        if json is not None:\n            import json as _json\n            body, ctype = _json.dumps(json).encode(\"utf-8\"), \"application/json\"\n        elif isinstance(data, dict):\n            body, ctype = urlencode(data, doseq=True).encode(\"utf-8\"), \"application/x-www-form-urlencoded\"\n        elif data is not None:\n            body = data.encode(\"utf-8\") if isinstance(data, str) else data\n        environ = {\"REQUEST_METHOD\": method.upper(), \"PATH_INFO\": url.path or \"/\", \"QUERY_STRING\": query,\n                   \"SERVER_NAME\": \"localhost\", \"SERVER_PORT\": \"80\", \"wsgi.url_scheme\": \"http\",\n                   \"wsgi.input\": io.BytesIO(body), \"CONTENT_LENGTH\": str(len(body))}\n        headers = dict(headers or {})\n        if ctype and not any(k.lower() == \"content-type\" for k in headers):\n            environ[\"CONTENT_TYPE\"] = ctype\n        for k, v in headers.items():\n            if k.lower() == \"content-type\":\n                environ[\"CONTENT_TYPE\"] = v\n            else:\n                environ[\"HTTP_\" + k.upper().replace(\"-\", \"_\")] = v\n        if self.cookies:\n            environ[\"HTTP_COOKIE\"] = \"; \".join(f\"{k}={v}\" for k, v in self.cookies.items())\n        response = self.app.full_dispatch(environ)\n        for k, v in response.headers.items():\n            if k.lower() == \"set-cookie\":\n                name, _, rest = v.partition(\"=\")\n                self.cookies[name] = rest.split(\";\")[0]\n        return response\n\n    def get(self, path, **kw):\n        return self.open(path, \"GET\", **kw)\n\n    def post(self, path, **kw):\n        return self.open(path, \"POST\", **kw)\n\n    def put(self, path, **kw):\n        return self.open(path, \"PUT\", **kw)\n\n    def patch(self, path, **kw):\n        return self.open(path, \"PATCH\", **kw)\n\n    def delete(self, path, **kw):\n        return self.open(path, \"DELETE\", **kw)\n", "helpdesk_domain.py": "\"\"\"The helpdesk's rules, with no web or database code (Week 80, Day 1).\n\nEverything here is plain data and pure functions, so it can be tested on its own and used by the\ndatabase layer, the web layer and the tests alike.\n\"\"\"\nimport re\nfrom http import HTTPStatus\n\nROLES = (\"customer\", \"agent\", \"admin\")\nPRIORITIES = (\"low\", \"normal\", \"high\", \"urgent\")\nSTATUSES = (\"open\", \"in_progress\", \"waiting\", \"resolved\", \"closed\")\nSTAFF = {\"agent\", \"admin\"}\n\n# status -> {new status: roles that may make the change}\nTRANSITIONS = {\n    \"open\": {\"in_progress\": {\"agent\", \"admin\"}, \"closed\": {\"customer\", \"admin\"}},\n    \"in_progress\": {\"waiting\": {\"agent\", \"admin\"}, \"resolved\": {\"agent\", \"admin\"}},\n    \"waiting\": {\"in_progress\": {\"customer\", \"agent\", \"admin\"}},\n    \"resolved\": {\"closed\": {\"customer\", \"admin\"}, \"in_progress\": {\"customer\", \"agent\", \"admin\"}},\n    \"closed\": {},\n}\n\n# action -> (roles always allowed, roles allowed only on their own tickets)\nPERMISSIONS = {\n    \"create_ticket\": ({\"customer\"}, set()),\n    \"view_ticket\": ({\"agent\", \"admin\"}, {\"customer\"}),\n    \"list_all_tickets\": ({\"agent\", \"admin\"}, set()),\n    \"edit_ticket\": ({\"admin\"}, {\"customer\"}),\n    \"comment\": ({\"agent\", \"admin\"}, {\"customer\"}),\n    \"internal_note\": ({\"agent\", \"admin\"}, set()),\n    \"change_priority\": ({\"agent\", \"admin\"}, set()),\n    \"assign\": ({\"agent\", \"admin\"}, set()),\n    \"delete_ticket\": ({\"admin\"}, set()),\n    \"view_stats\": ({\"agent\", \"admin\"}, set()),\n}\n\n\nclass ValidationError(Exception):\n    \"\"\"Raised with a dict of field -> message.\"\"\"\n\n    def __init__(self, errors):\n        super().__init__(\"; \".join(f\"{k}: {v}\" for k, v in sorted(errors.items())))\n        self.errors = errors\n\n\ndef validate_ticket(data, partial=False):\n    \"\"\"Check a ticket body from a client. partial=True for PATCH: only the fields present are checked.\"\"\"\n    if not isinstance(data, dict):\n        raise ValidationError({\"_\": \"expected a JSON object\"})\n    errors, clean = {}, {}\n    unknown = sorted(set(data) - {\"title\", \"body\", \"priority\"})\n    if unknown:\n        errors[\"_\"] = f\"unexpected field(s): {', '.join(unknown)}\"\n    for field in (\"title\", \"body\"):\n        if field not in data:\n            if not partial:\n                errors[field] = \"required\"\n            continue\n        value = data[field]\n        limit = (3, 120) if field == \"title\" else (1, 5000)\n        if not isinstance(value, str) or not limit[0] <= len(value.strip()) <= limit[1]:\n            errors[field] = f\"{limit[0]} to {limit[1]} characters\"\n        else:\n            clean[field] = value.strip()\n    if \"priority\" in data:\n        if data[\"priority\"] not in PRIORITIES:\n            errors[\"priority\"] = f\"one of {', '.join(PRIORITIES)}\"\n        else:\n            clean[\"priority\"] = data[\"priority\"]\n    elif not partial:\n        clean[\"priority\"] = \"normal\"\n    if partial and not data:\n        errors[\"_\"] = \"nothing to change\"\n    if errors:\n        raise ValidationError(errors)\n    return clean\n\n\ndef can_transition(current, new, role):\n    \"\"\"True if someone with this role may move a ticket from `current` to `new`.\"\"\"\n    return role in TRANSITIONS.get(current, {}).get(new, set())\n\n\ndef allowed(role, action, is_owner=False):\n    \"\"\"True if the role may do the action (is_owner: the ticket is the user's own).\"\"\"\n    always, own = PERMISSIONS[action]\n    return role in always or (is_owner and role in own)\n\n\ndef problem(status, detail, title=None, **extra):\n    \"\"\"An RFC 9457 problem-details response: (body, status, headers).\"\"\"\n    body = {\"type\": \"about:blank\", \"title\": title or HTTPStatus(status).phrase, \"status\": status, \"detail\": detail}\n    body.update(extra)\n    return body, status, {\"Content-Type\": \"application/problem+json\"}\n\n\nROUTES = [\n    (\"POST\", \"/users\", \"sign up as a customer\", 201),\n    (\"POST\", \"/tokens\", \"log in and get a token\", 201),\n    (\"GET\", \"/me\", \"who am I\", 200),\n    (\"GET\", \"/tickets\", \"list tickets (customers see their own)\", 200),\n    (\"POST\", \"/tickets\", \"open a ticket\", 201),\n    (\"GET\", \"/tickets/{ticket_id}\", \"read a ticket\", 200),\n    (\"PATCH\", \"/tickets/{ticket_id}\", \"change a ticket's title, body or priority\", 200),\n    (\"DELETE\", \"/tickets/{ticket_id}\", \"delete a ticket (admins)\", 204),\n    (\"POST\", \"/tickets/{ticket_id}/transitions\", \"change a ticket's status\", 200),\n    (\"PUT\", \"/tickets/{ticket_id}/assignee\", \"assign a ticket to an agent\", 200),\n    (\"GET\", \"/tickets/{ticket_id}/comments\", \"list a ticket's comments\", 200),\n    (\"POST\", \"/tickets/{ticket_id}/comments\", \"add a comment or internal note\", 201),\n    (\"GET\", \"/stats\", \"ticket counts (staff)\", 200),\n    (\"GET\", \"/healthz\", \"is the process alive\", 200),\n    (\"GET\", \"/readyz\", \"can it serve requests\", 200),\n]\n\n\ndef docs_table(routes):\n    \"\"\"The routes as a Markdown table, for the README.\"\"\"\n    lines = [\"| Method | Path | What it does | Success |\", \"|---|---|---|---|\"]\n    lines += [f\"| {m} | `{p}` | {what} | {code} {HTTPStatus(code).phrase} |\" for m, p, what, code in routes]\n    return \"\\n\".join(lines)\n", "helpdesk_db.py": "\"\"\"The helpdesk's database: migrations and the queries the app needs (Week 80, Day 2).\n\nEvery query uses parameters; every change that touches more than one row runs in a transaction.\n\"\"\"\nimport sqlite3\n\nMIGRATIONS = [\n    (1, \"users\", \"\"\"\n        CREATE TABLE users (\n            id INTEGER PRIMARY KEY,\n            email TEXT NOT NULL UNIQUE,\n            password TEXT NOT NULL,\n            role TEXT NOT NULL CHECK (role IN ('customer', 'agent', 'admin')),\n            created_at TEXT NOT NULL\n        )\"\"\"),\n    (2, \"tickets\", \"\"\"\n        CREATE TABLE tickets (\n            id INTEGER PRIMARY KEY,\n            customer_id INTEGER NOT NULL REFERENCES users (id),\n            assignee_id INTEGER REFERENCES users (id),\n            title TEXT NOT NULL,\n            body TEXT NOT NULL,\n            priority TEXT NOT NULL DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),\n            status TEXT NOT NULL DEFAULT 'open'\n                CHECK (status IN ('open', 'in_progress', 'waiting', 'resolved', 'closed')),\n            created_at TEXT NOT NULL,\n            updated_at TEXT NOT NULL\n        )\"\"\"),\n    (3, \"comments and events\", \"\"\"\n        CREATE TABLE comments (\n            id INTEGER PRIMARY KEY,\n            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,\n            author_id INTEGER NOT NULL REFERENCES users (id),\n            body TEXT NOT NULL,\n            internal INTEGER NOT NULL DEFAULT 0,\n            created_at TEXT NOT NULL\n        );\n        CREATE TABLE events (\n            id INTEGER PRIMARY KEY,\n            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,\n            actor_id INTEGER NOT NULL REFERENCES users (id),\n            kind TEXT NOT NULL,\n            detail TEXT NOT NULL,\n            at TEXT NOT NULL\n        )\"\"\"),\n    (4, \"indexes\", \"\"\"\n        CREATE INDEX idx_tickets_status ON tickets (status, id);\n        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);\n        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)\"\"\"),\n]\n\n\nclass ConflictError(Exception):\n    \"\"\"The row changed since it was read.\"\"\"\n\n\ndef connect(path=\":memory:\"):\n    conn = sqlite3.connect(path)\n    conn.row_factory = sqlite3.Row\n    conn.execute(\"PRAGMA foreign_keys = ON\")\n    return conn\n\n\ndef migrate(conn, migrations=MIGRATIONS):\n    \"\"\"Apply the migrations the database hasn't had yet, each in its own transaction. Returns their versions.\"\"\"\n    conn.execute(\"CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL)\")\n    conn.commit()\n    versions = [v for v, _, _ in migrations]\n    if versions != list(range(1, len(versions) + 1)):\n        raise ValueError(\"migrations must be numbered 1, 2, 3... with no gaps\")\n    current = conn.execute(\"SELECT COALESCE(MAX(version), 0) FROM schema_migrations\").fetchone()[0]\n    if current > len(versions):\n        raise RuntimeError(f\"the database is at version {current}, newer than this code\")\n    applied = []\n    for version, name, sql in migrations[current:]:\n        try:\n            conn.execute(\"BEGIN\")\n            for statement in sql.split(\";\"):\n                if statement.strip():\n                    conn.execute(statement)\n            conn.execute(\"INSERT INTO schema_migrations (version, name) VALUES (?, ?)\", (version, name))\n            conn.commit()\n        except Exception:\n            conn.rollback()\n            raise\n        applied.append(version)\n    return applied\n\n\ndef _dict(row):\n    return dict(row) if row is not None else None\n\n\ndef _event(conn, ticket_id, actor_id, kind, detail, now):\n    conn.execute(\"INSERT INTO events (ticket_id, actor_id, kind, detail, at) VALUES (?, ?, ?, ?, ?)\",\n                 (ticket_id, actor_id, kind, detail, now))\n\n\ndef create_user(conn, email, password_hash, role, now):\n    try:\n        with conn:\n            cur = conn.execute(\"INSERT INTO users (email, password, role, created_at) VALUES (?, ?, ?, ?)\",\n                               (email, password_hash, role, now))\n    except sqlite3.IntegrityError as e:\n        if \"UNIQUE\" not in str(e):\n            raise\n        raise ValueError(\"email already registered\") from None\n    return cur.lastrowid\n\n\ndef get_user(conn, user_id):\n    return _dict(conn.execute(\"SELECT id, email, role, created_at FROM users WHERE id = ?\", (user_id,)).fetchone())\n\n\ndef get_user_by_email(conn, email):\n    return _dict(conn.execute(\"SELECT id, email, password, role FROM users WHERE email = ?\", (email,)).fetchone())\n\n\ndef create_ticket(conn, customer_id, clean, now):\n    with conn:\n        cur = conn.execute(\n            \"INSERT INTO tickets (customer_id, title, body, priority, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)\",\n            (customer_id, clean[\"title\"], clean[\"body\"], clean.get(\"priority\", \"normal\"), now, now))\n        _event(conn, cur.lastrowid, customer_id, \"created\", clean[\"title\"], now)\n    return get_ticket(conn, cur.lastrowid)\n\n\ndef get_ticket(conn, ticket_id):\n    return _dict(conn.execute(\"SELECT * FROM tickets WHERE id = ?\", (ticket_id,)).fetchone())\n\n\ndef _like(text):\n    return \"%\" + text.replace(\"\\\\\", \"\\\\\\\\\").replace(\"%\", \"\\\\%\").replace(\"_\", \"\\\\_\") + \"%\"\n\n\ndef list_tickets(conn, customer_id=None, status=None, priority=None, assignee_id=None, q=None, after_id=0, limit=20):\n    \"\"\"Tickets matching the filters, by id, after a cursor. Returns (items, next_after or None).\"\"\"\n    where, values = [\"id > ?\"], [after_id]\n    for column, value in ((\"customer_id\", customer_id), (\"status\", status), (\"priority\", priority), (\"assignee_id\", assignee_id)):\n        if value is not None:\n            where.append(f\"{column} = ?\")\n            values.append(value)\n    if q:\n        where.append(\"title LIKE ? ESCAPE '\\\\'\")\n        values.append(_like(q))\n    rows = conn.execute(f\"SELECT * FROM tickets WHERE {' AND '.join(where)} ORDER BY id LIMIT ?\", values + [limit + 1]).fetchall()\n    items = [dict(r) for r in rows[:limit]]\n    return items, (items[-1][\"id\"] if len(rows) > limit else None)\n\n\ndef update_ticket(conn, ticket_id, changes, actor_id, now):\n    if not changes:\n        return get_ticket(conn, ticket_id)\n    columns = sorted(changes)\n    with conn:\n        conn.execute(f\"UPDATE tickets SET {', '.join(f'{c} = ?' for c in columns)}, updated_at = ? WHERE id = ?\",\n                     [changes[c] for c in columns] + [now, ticket_id])\n        _event(conn, ticket_id, actor_id, \"edited\", \",\".join(columns), now)\n    return get_ticket(conn, ticket_id)\n\n\ndef change_status(conn, ticket_id, expected, new, actor_id, now):\n    \"\"\"Move a ticket from `expected` to `new`, unless someone changed its status first.\"\"\"\n    with conn:\n        cur = conn.execute(\"UPDATE tickets SET status = ?, updated_at = ? WHERE id = ? AND status = ?\",\n                           (new, now, ticket_id, expected))\n        if cur.rowcount != 1:\n            raise ConflictError(f\"ticket {ticket_id} is no longer {expected}\")\n        _event(conn, ticket_id, actor_id, \"status\", f\"{expected}->{new}\", now)\n    return get_ticket(conn, ticket_id)\n\n\ndef assign(conn, ticket_id, agent_id, actor_id, now):\n    agent = get_user(conn, agent_id)\n    if agent is None or agent[\"role\"] not in (\"agent\", \"admin\"):\n        raise ValueError(f\"user {agent_id} is not an agent\")\n    with conn:\n        conn.execute(\"UPDATE tickets SET assignee_id = ?, updated_at = ? WHERE id = ?\", (agent_id, now, ticket_id))\n        _event(conn, ticket_id, actor_id, \"assigned\", str(agent_id), now)\n    return get_ticket(conn, ticket_id)\n\n\ndef add_comment(conn, ticket_id, author_id, body, internal, now):\n    with conn:\n        cur = conn.execute(\"INSERT INTO comments (ticket_id, author_id, body, internal, created_at) VALUES (?, ?, ?, ?, ?)\",\n                           (ticket_id, author_id, body, int(internal), now))\n        conn.execute(\"UPDATE tickets SET updated_at = ? WHERE id = ?\", (now, ticket_id))\n    return _dict(conn.execute(\"SELECT * FROM comments WHERE id = ?\", (cur.lastrowid,)).fetchone())\n\n\ndef list_comments(conn, ticket_id, include_internal):\n    sql = \"SELECT * FROM comments WHERE ticket_id = ?\" + (\"\" if include_internal else \" AND internal = 0\") + \" ORDER BY id\"\n    return [dict(r) for r in conn.execute(sql, (ticket_id,)).fetchall()]\n\n\ndef delete_ticket(conn, ticket_id):\n    with conn:\n        return conn.execute(\"DELETE FROM tickets WHERE id = ?\", (ticket_id,)).rowcount == 1\n\n\ndef events(conn, ticket_id):\n    return [dict(r) for r in conn.execute(\"SELECT kind, detail, actor_id, at FROM events WHERE ticket_id = ? ORDER BY id\", (ticket_id,))]\n\n\ndef stats(conn):\n    by_status = {s: 0 for s in (\"open\", \"in_progress\", \"waiting\", \"resolved\", \"closed\")}\n    by_status.update(dict(conn.execute(\"SELECT status, COUNT(*) FROM tickets GROUP BY status\").fetchall()))\n    by_priority = {p: 0 for p in (\"low\", \"normal\", \"high\", \"urgent\")}\n    by_priority.update(dict(conn.execute(\"SELECT priority, COUNT(*) FROM tickets WHERE status != 'closed' GROUP BY priority\").fetchall()))\n    unassigned = conn.execute(\"SELECT COUNT(*) FROM tickets WHERE assignee_id IS NULL AND status != 'closed'\").fetchone()[0]\n    return {\"by_status\": by_status, \"open_by_priority\": by_priority, \"unassigned\": unassigned}\n", "helpdesk_security.py": "\"\"\"Passwords and tokens for the helpdesk (Week 79's tools, gathered in one place).\"\"\"\nimport base64\nimport hashlib\nimport hmac\nimport secrets\n\n\ndef pbkdf2_sha256(password, salt, iterations, dklen=32):\n    base = hmac.new(password, digestmod=hashlib.sha256)\n    out, block = b\"\", 1\n    while len(out) < dklen:\n        h = base.copy()\n        h.update(salt + block.to_bytes(4, \"big\"))\n        u = h.digest()\n        total = int.from_bytes(u, \"big\")\n        for _ in range(iterations - 1):\n            h = base.copy()\n            h.update(u)\n            u = h.digest()\n            total ^= int.from_bytes(u, \"big\")\n        out += total.to_bytes(32, \"big\")\n        block += 1\n    return out[:dklen]\n\n\ndef hash_password(password, iterations):\n    salt = secrets.token_bytes(16)\n    digest = pbkdf2_sha256(password.encode(), salt, iterations)\n    return f\"pbkdf2_sha256${iterations}${base64.b64encode(salt).decode()}${base64.b64encode(digest).decode()}\"\n\n\ndef check_password(password, stored):\n    try:\n        algorithm, iterations, salt, digest = stored.split(\"$\")\n        expected = pbkdf2_sha256(password.encode(), base64.b64decode(salt), int(iterations))\n        return algorithm == \"pbkdf2_sha256\" and hmac.compare_digest(expected, base64.b64decode(digest))\n    except ValueError:\n        return False\n\n\ndef issue_token(user_id, expires, key):\n    \"\"\"A signed bearer token: USER_ID.EXPIRES.SIGNATURE.\"\"\"\n    payload = f\"{user_id}.{expires}\"\n    return f\"{payload}.{hmac.new(key, payload.encode(), hashlib.sha256).hexdigest()}\"\n\n\ndef verify_token(token, key, now):\n    \"\"\"The user id in a valid, unexpired token, else None.\"\"\"\n    parts = token.split(\".\")\n    if len(parts) != 3 or not parts[0].isdigit() or not parts[1].isdigit():\n        return None\n    payload = f\"{parts[0]}.{parts[1]}\"\n    expected = hmac.new(key, payload.encode(), hashlib.sha256).hexdigest()\n    if not hmac.compare_digest(parts[2], expected) or now >= int(parts[1]):\n        return None\n    return int(parts[0])\n", "helpdesk_app.py": "\"\"\"The helpdesk's HTTP API (Week 80, Day 3), built with miniflask (Week 77).\"\"\"\nimport re\nimport secrets\nimport time\nfrom datetime import datetime, timezone\n\nimport helpdesk_db as db\nfrom helpdesk_domain import ROLES, STATUSES, ValidationError, allowed, can_transition, problem, validate_ticket\nfrom helpdesk_security import check_password, hash_password, issue_token, verify_token\nfrom miniflask import Flask, HTTPException, g, request\n\nERROR_CODES = (400, 401, 403, 404, 405, 409, 415, 422, 500, 503)\n\n\nclass ApiError(HTTPException):\n    def __init__(self, code, detail, **extra):\n        super().__init__(code, detail)\n        self.extra = extra\n\n\ndef iso(t):\n    return datetime.fromtimestamp(t, timezone.utc).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\n\n\ndef create_app(settings, conn, clock=time.time, log=print):\n    app = Flask(__name__)\n    key = settings[\"SECRET_KEY\"].encode()\n    token_seconds = settings.get(\"TOKEN_SECONDS\", 3600)\n    iterations = settings.get(\"PASSWORD_ITERATIONS\", 600_000)\n    dummy = hash_password(secrets.token_hex(8), iterations)   # checked for unknown emails, so they take as long as real ones\n\n    # ---- step 11\n    for code in ERROR_CODES:\n        @app.errorhandler(code)\n        def handle(e, code=code):\n            if code == 500 and not isinstance(e, HTTPException):\n                incident = secrets.token_hex(4)\n                log(f\"incident {incident}: {type(e).__name__}: {e}\")\n                return problem(500, \"something went wrong\", incident=incident)\n            return problem(e.code, e.description, **getattr(e, \"extra\", {}))\n\n    @app.get(\"/healthz\")\n    def healthz():\n        return {\"status\": \"ok\"}\n\n    @app.get(\"/readyz\")\n    def readyz():\n        try:\n            version = conn.execute(\"SELECT MAX(version) FROM schema_migrations\").fetchone()[0]\n        except Exception:\n            version = None\n        if version != len(db.MIGRATIONS):\n            raise ApiError(503, \"the database isn't ready\")\n        return {\"status\": \"ready\", \"schema\": version}\n\n    # ---- step 12\n    @app.before_request\n    def authenticate():\n        g.user = None\n        header = request.headers.get(\"Authorization\", \"\")\n        if header.startswith(\"Bearer \"):\n            user_id = verify_token(header[7:], key, int(clock()))\n            if user_id is not None:\n                g.user = db.get_user(conn, user_id)\n\n    def user():\n        if g.user is None:\n            raise ApiError(401, \"log in first\")\n        return g.user\n\n    def body():\n        data = request.get_json(silent=True)\n        if not isinstance(data, dict):\n            raise ApiError(400, \"send a JSON object\")\n        return data\n\n    @app.post(\"/users\")\n    def signup():\n        data = body()\n        email = data.get(\"email\", \"\").strip().lower() if isinstance(data.get(\"email\"), str) else \"\"\n        password = data.get(\"password\")\n        if not re.fullmatch(r\"[^@\\s]+@[^@\\s]+\\.[a-z]{2,}\", email) or not isinstance(password, str) or not 12 <= len(password) <= 128:\n            raise ApiError(422, \"a valid email and a password of 12 to 128 characters are needed\")\n        try:\n            user_id = db.create_user(conn, email, hash_password(password, iterations), \"customer\", iso(clock()))\n        except ValueError:\n            raise ApiError(409, \"email already registered\") from None\n        return {\"id\": user_id, \"email\": email, \"role\": \"customer\"}, 201\n\n    @app.post(\"/tokens\")\n    def login():\n        data = body()\n        found = db.get_user_by_email(conn, str(data.get(\"email\", \"\")).strip().lower())\n        stored = found[\"password\"] if found else dummy\n        if not check_password(str(data.get(\"password\", \"\")), stored) or found is None:\n            raise ApiError(401, \"wrong email or password\")\n        expires = int(clock()) + token_seconds\n        return {\"token\": issue_token(found[\"id\"], expires, key), \"expires_at\": iso(expires)}, 201\n\n    @app.get(\"/me\")\n    def me():\n        return user()\n\n    # ---- step 13\n    def checked(data, partial=False):\n        try:\n            return validate_ticket(data, partial)\n        except ValidationError as e:\n            raise ApiError(422, \"the request has invalid fields\", errors=e.errors) from None\n\n    def visible_ticket(ticket_id):\n        me = user()\n        ticket = db.get_ticket(conn, ticket_id)\n        if ticket is None or not allowed(me[\"role\"], \"view_ticket\", ticket[\"customer_id\"] == me[\"id\"]):\n            raise ApiError(404, f\"no ticket {ticket_id}\")\n        return me, ticket\n\n    def require(me, action, ticket=None, message=\"you can't do that\"):\n        if not allowed(me[\"role\"], action, ticket is not None and ticket[\"customer_id\"] == me[\"id\"]):\n            raise ApiError(403, message)\n\n    @app.post(\"/tickets\")\n    def open_ticket():\n        me = user()\n        require(me, \"create_ticket\", message=\"only customers can open tickets\")\n        ticket = db.create_ticket(conn, me[\"id\"], checked(body()), iso(clock()))\n        return ticket, 201, {\"Location\": f\"/tickets/{ticket['id']}\"}\n\n    @app.get(\"/tickets\")\n    def list_tickets():\n        me = user()\n        args = request.args\n        filters = {}\n        for name, choices in ((\"status\", STATUSES), (\"priority\", (\"low\", \"normal\", \"high\", \"urgent\"))):\n            if name in args:\n                if args[name] not in choices:\n                    raise ApiError(400, f\"{name} must be one of {', '.join(choices)}\")\n                filters[name] = args[name]\n        for name, low, high, default in ((\"after\", 0, 10 ** 9, 0), (\"limit\", 1, 50, 20)):\n            value = args.get(name, str(default))\n            if not value.isdigit() or not low <= int(value) <= high:\n                raise ApiError(400, f\"{name} must be a whole number from {low} to {high}\")\n            filters[name] = int(value)\n        if not allowed(me[\"role\"], \"list_all_tickets\"):\n            filters[\"customer_id\"] = me[\"id\"]\n        items, after = db.list_tickets(conn, customer_id=filters.get(\"customer_id\"), status=filters.get(\"status\"),\n                                       priority=filters.get(\"priority\"), q=args.get(\"q\") or None,\n                                       after_id=filters[\"after\"], limit=filters[\"limit\"])\n        return {\"items\": items, \"next\": after}\n\n    @app.get(\"/tickets/<int:ticket_id>\")\n    def read_ticket(ticket_id):\n        return visible_ticket(ticket_id)[1]\n\n    # ---- step 14\n    @app.patch(\"/tickets/<int:ticket_id>\")\n    def edit_ticket(ticket_id):\n        me, ticket = visible_ticket(ticket_id)\n        changes = checked(body(), partial=True)\n        if \"priority\" in changes:\n            require(me, \"change_priority\", ticket, \"only staff can change the priority\")\n        if \"title\" in changes or \"body\" in changes:\n            require(me, \"edit_ticket\", ticket, \"only the customer who opened it can edit it\")\n            if me[\"role\"] == \"customer\" and ticket[\"status\"] != \"open\":\n                raise ApiError(409, \"only open tickets can be edited\")\n        return db.update_ticket(conn, ticket_id, changes, me[\"id\"], iso(clock()))\n\n    @app.post(\"/tickets/<int:ticket_id>/transitions\")\n    def transition(ticket_id):\n        me, ticket = visible_ticket(ticket_id)\n        new = body().get(\"status\")\n        if new not in STATUSES:\n            raise ApiError(422, f\"status must be one of {', '.join(STATUSES)}\")\n        if not can_transition(ticket[\"status\"], new, me[\"role\"]):\n            raise ApiError(403, f\"you can't move a ticket from {ticket['status']} to {new}\")\n        try:\n            return db.change_status(conn, ticket_id, ticket[\"status\"], new, me[\"id\"], iso(clock()))\n        except db.ConflictError:\n            raise ApiError(409, \"the ticket changed; reload it and try again\") from None\n\n    @app.put(\"/tickets/<int:ticket_id>/assignee\")\n    def assign(ticket_id):\n        me, ticket = visible_ticket(ticket_id)\n        require(me, \"assign\", ticket, \"only staff can assign tickets\")\n        agent_id = body().get(\"agent_id\")\n        if not isinstance(agent_id, int) or isinstance(agent_id, bool):\n            raise ApiError(422, \"agent_id must be a user id\")\n        try:\n            return db.assign(conn, ticket_id, agent_id, me[\"id\"], iso(clock()))\n        except ValueError as e:\n            raise ApiError(422, str(e)) from None\n\n    # ---- step 15\n    @app.delete(\"/tickets/<int:ticket_id>\")\n    def remove_ticket(ticket_id):\n        me, ticket = visible_ticket(ticket_id)\n        require(me, \"delete_ticket\", ticket, \"only admins can delete tickets\")\n        db.delete_ticket(conn, ticket_id)\n        return \"\", 204\n\n    @app.get(\"/tickets/<int:ticket_id>/comments\")\n    def comments(ticket_id):\n        me, ticket = visible_ticket(ticket_id)\n        return {\"items\": db.list_comments(conn, ticket_id, include_internal=allowed(me[\"role\"], \"internal_note\"))}\n\n    @app.post(\"/tickets/<int:ticket_id>/comments\")\n    def comment(ticket_id):\n        me, ticket = visible_ticket(ticket_id)\n        require(me, \"comment\", ticket)\n        data = body()\n        text, internal = data.get(\"body\"), data.get(\"internal\", False)\n        if not isinstance(text, str) or not 1 <= len(text.strip()) <= 5000 or not isinstance(internal, bool):\n            raise ApiError(422, \"body must be 1 to 5000 characters and internal true or false\")\n        if internal:\n            require(me, \"internal_note\", ticket, \"only staff can add internal notes\")\n        return db.add_comment(conn, ticket_id, me[\"id\"], text.strip(), internal, iso(clock())), 201\n\n    @app.get(\"/stats\")\n    def stats():\n        require(user(), \"view_stats\", message=\"only staff can see statistics\")\n        return db.stats(conn)\n\n    return app\n"}</script></div>
+<p>How do you know a test suite is any good? Week 72&rsquo;s <strong>mutation testing</strong> answer: break the code on purpose, in small realistic ways, and see whether some test fails. A suite that passes on the broken code would have let that bug through. Steps 16 to 18 work exactly like that: the checks run your tests against the correct module and against several broken copies, and your tests must pass on the first and fail on each of the others.</p>
+<div class="pc pc-predict" data-kind="predict" data-id="w080d4-p1"><textarea class="pc-src pc-code" hidden>import pytest
+
+@pytest.mark.parametrize(&quot;role&quot;, [&quot;customer&quot;, &quot;agent&quot;])
+@pytest.mark.parametrize(&quot;action&quot;, [&quot;view&quot;, &quot;delete&quot;, &quot;assign&quot;])
+def test_example(action, role):
+    pass
+
+print(len([&quot;customer&quot;, &quot;agent&quot;]) * len([&quot;view&quot;, &quot;delete&quot;, &quot;assign&quot;]), &quot;test cases&quot;)</textarea></div>
+<h2 id="step-16-testing-the-rules">Step 16: testing the rules</h2>
+<p>Start where tests are cheapest: <code>validate_ticket</code>. Each rule from Monday deserves a test that would fail if that one rule were broken, and the <strong>edges</strong> are where bugs hide: the shortest title allowed and the one just too short, text that&rsquo;s long enough only because of its spaces, a field nobody should send. <code>pytest.raises</code> (Week 24) checks that the right error is raised, and <code>caught.value.errors</code> lets the test look at exactly which fields were refused.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w080d4-step16" data-points="20"><div class="pc-label"><span>Exercise</span><span class="pc-pts">20 points</span></div><div class="pc-title">Step 16: testing the rules</div><div class="pc-prompt"><p>Write <strong>pytest</strong> tests for <code>validate_ticket</code> (import it and <code>ValidationError</code> from <code>helpdesk_domain</code>). They must pass on the real module and fail on each of six broken versions, each with one realistic mistake: titles of 2 characters accepted; the clean values keep their surrounding spaces; the length checked <strong>before</strong> stripping (so <code>"   ab   "</code> passes as a title); unknown fields accepted; no default priority when creating; an empty update (<code>{}</code> with <code>partial=True</code>) accepted.</p></div><textarea class="pc-src pc-code" hidden>import pytest
+from helpdesk_domain import ValidationError, validate_ticket
+
+
+def test_good_ticket():
+    ___</textarea><textarea class="pc-src pc-tests" hidden>GOOD = open(&quot;helpdesk_domain.py&quot;).read()
+BROKEN = {
+    &quot;titles of 2 characters accepted&quot;: GOOD.replace(&#x27;limit = (3, 120) if field == &quot;title&quot;&#x27;, &#x27;limit = (2, 120) if field == &quot;title&quot;&#x27;),
+    &quot;spaces kept&quot;: GOOD.replace(&quot;clean[field] = value.strip()&quot;, &quot;clean[field] = value&quot;),
+    &quot;length checked before stripping&quot;: GOOD.replace(&quot;len(value.strip()) &lt;= limit[1]&quot;, &quot;len(value) &lt;= limit[1]&quot;),
+    &quot;unknown fields accepted&quot;: GOOD.replace(&#x27;unknown = sorted(set(data) - {&quot;title&quot;, &quot;body&quot;, &quot;priority&quot;})&#x27;, &quot;unknown = []&quot;),
+    &quot;no default priority&quot;: GOOD.replace(&#x27;    elif not partial:\n        clean[&quot;priority&quot;] = &quot;normal&quot;\n&#x27;, &quot;&quot;),
+    &quot;empty updates accepted&quot;: GOOD.replace(&quot;if partial and not data:&quot;, &quot;if False:&quot;),
+}
+
+def test_versions_differ():
+    &quot;every broken version really is broken&quot;
+    assert all(v != GOOD for v in BROKEN.values())
+
+def test_style():
+    &quot;pytest style&quot;
+    assert &quot;pytest.raises&quot; in source and &quot;def test_&quot; in source
+
+def test_catches():
+    &quot;your tests pass on the real rules and catch every broken one&quot;
+    results = against(source, &quot;helpdesk_domain&quot;, {&quot;correct&quot;: GOOD, **BROKEN})
+    write_file(&quot;helpdesk_domain.py&quot;, GOOD)
+    assert results[&quot;correct&quot;] == [], f&quot;these fail on the correct code: {results[&#x27;correct&#x27;]}&quot;
+    missed = [k for k in BROKEN if not results[k]]
+    assert not missed, f&quot;not caught: {missed}&quot;</textarea><textarea class="pc-src pc-solution" hidden>import pytest
+from helpdesk_domain import ValidationError, validate_ticket
+
+
+def errors(data, partial=False):
+    with pytest.raises(ValidationError) as caught:
+        validate_ticket(data, partial)
+    return caught.value.errors
+
+
+def test_good_ticket_is_cleaned():
+    assert validate_ticket({&quot;title&quot;: &quot;  Printer on fire &quot;, &quot;body&quot;: &quot; Smoke &quot;}) == {&quot;title&quot;: &quot;Printer on fire&quot;, &quot;body&quot;: &quot;Smoke&quot;, &quot;priority&quot;: &quot;normal&quot;}
+
+
+def test_title_limits():
+    assert validate_ticket({&quot;title&quot;: &quot;abc&quot;, &quot;body&quot;: &quot;x&quot;})[&quot;title&quot;] == &quot;abc&quot;
+    assert errors({&quot;title&quot;: &quot;ab&quot;, &quot;body&quot;: &quot;x&quot;}) == {&quot;title&quot;: &quot;3 to 120 characters&quot;}
+    assert errors({&quot;title&quot;: &quot;   ab   &quot;, &quot;body&quot;: &quot;x&quot;}) == {&quot;title&quot;: &quot;3 to 120 characters&quot;}
+
+
+def test_unknown_fields_refused():
+    assert errors({&quot;title&quot;: &quot;abc&quot;, &quot;body&quot;: &quot;x&quot;, &quot;status&quot;: &quot;closed&quot;}) == {&quot;_&quot;: &quot;unexpected field(s): status&quot;}
+
+
+def test_partial_updates():
+    assert validate_ticket({&quot;priority&quot;: &quot;high&quot;}, partial=True) == {&quot;priority&quot;: &quot;high&quot;}
+    assert errors({}, partial=True) == {&quot;_&quot;: &quot;nothing to change&quot;}</textarea><template class="pc-src pc-hint">One test per rule, at its edge: <code>"abc"</code> is a valid title and <code>"ab"</code> isn&rsquo;t; <code>"   ab   "</code> isn&rsquo;t either; a valid ticket&rsquo;s clean values have no surrounding spaces and include <code>"priority": "normal"</code>; <code>{"status": "closed"}</code> alongside a valid title and body is refused; <code>validate_ticket({}, partial=True)</code> raises.</template></div>
+<h2 id="step-17-tables-as-tests">Step 17: tables as tests</h2>
+<p>The permission table and the state machine are tables, and the clearest tests for a table are <strong>another table</strong>: the expected answer for every case, written out independently, by hand, from the brief. <code>@pytest.mark.parametrize</code> turns one test function into one test case per row, and each case is reported separately, so a failure names the exact role and action that went wrong. Two <code>parametrize</code> decorators on one function multiply: every action with every role.</p>
+<p>Writing the expectations out by hand matters: a test that <strong>computes</strong> its expected answers from <code>PERMISSIONS</code> itself would pass whatever the table said. The test is a second, independent statement of the rules.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w080d4-step17" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Step 17: tables as tests</div><div class="pc-prompt"><p>Write parametrized pytest tests (<code>@pytest.mark.parametrize</code>) for <code>allowed</code> and <code>can_transition</code> from <code>helpdesk_domain</code>, with the expected answers written out by hand from the brief. They must pass on the real module and catch each of six broken versions: agents can delete tickets; customers can view every ticket; customers can add internal notes; a closed ticket can be reopened; customers can&rsquo;t reopen a resolved ticket; and <code>allowed</code> ignores ownership (an &ldquo;own&rdquo; permission is granted even when <code>is_owner</code> is false).</p></div><textarea class="pc-src pc-code" hidden>import pytest
+from helpdesk_domain import allowed, can_transition
+
+___</textarea><textarea class="pc-src pc-tests" hidden>GOOD = open(&quot;helpdesk_domain.py&quot;).read()
+BROKEN = {
+    &quot;agents can delete&quot;: GOOD.replace(&#x27;&quot;delete_ticket&quot;: ({&quot;admin&quot;}, set())&#x27;, &#x27;&quot;delete_ticket&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, set())&#x27;),
+    &quot;customers view every ticket&quot;: GOOD.replace(&#x27;&quot;view_ticket&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, {&quot;customer&quot;})&#x27;, &#x27;&quot;view_ticket&quot;: ({&quot;agent&quot;, &quot;admin&quot;, &quot;customer&quot;}, set())&#x27;),
+    &quot;customers add internal notes&quot;: GOOD.replace(&#x27;&quot;internal_note&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, set())&#x27;, &#x27;&quot;internal_note&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, {&quot;customer&quot;})&#x27;),
+    &quot;closed tickets reopen&quot;: GOOD.replace(&#x27;&quot;closed&quot;: {},&#x27;, &#x27;&quot;closed&quot;: {&quot;in_progress&quot;: {&quot;admin&quot;}},&#x27;),
+    &quot;customers can&#x27;t reopen&quot;: GOOD.replace(&#x27;&quot;resolved&quot;: {&quot;closed&quot;: {&quot;customer&quot;, &quot;admin&quot;}, &quot;in_progress&quot;: {&quot;customer&quot;, &quot;agent&quot;, &quot;admin&quot;}}&#x27;,
+                                           &#x27;&quot;resolved&quot;: {&quot;closed&quot;: {&quot;customer&quot;, &quot;admin&quot;}, &quot;in_progress&quot;: {&quot;agent&quot;, &quot;admin&quot;}}&#x27;),
+    &quot;ownership ignored&quot;: GOOD.replace(&quot;return role in always or (is_owner and role in own)&quot;, &quot;return role in always or role in own&quot;),
+}
+
+def test_versions_differ():
+    &quot;every broken version really is broken&quot;
+    assert all(v != GOOD for v in BROKEN.values())
+
+def test_style():
+    &quot;parametrized, with expectations written out&quot;
+    assert &quot;parametrize&quot; in source and &quot;PERMISSIONS&quot; not in source and &quot;TRANSITIONS&quot; not in source
+
+def test_catches():
+    &quot;your tests pass on the real tables and catch every broken one&quot;
+    results = against(source, &quot;helpdesk_domain&quot;, {&quot;correct&quot;: GOOD, **BROKEN})
+    write_file(&quot;helpdesk_domain.py&quot;, GOOD)
+    assert results[&quot;correct&quot;] == [], f&quot;these fail on the correct code: {results[&#x27;correct&#x27;]}&quot;
+    missed = [k for k in BROKEN if not results[k]]
+    assert not missed, f&quot;not caught: {missed}&quot;</textarea><textarea class="pc-src pc-solution" hidden>import pytest
+from helpdesk_domain import allowed, can_transition
+
+ROLES = [&quot;customer&quot;, &quot;agent&quot;, &quot;admin&quot;]
+EXPECTED = {
+    &quot;view_ticket&quot;: [&quot;own&quot;, &quot;yes&quot;, &quot;yes&quot;],
+    &quot;delete_ticket&quot;: [&quot;-&quot;, &quot;-&quot;, &quot;yes&quot;],
+    &quot;internal_note&quot;: [&quot;-&quot;, &quot;yes&quot;, &quot;yes&quot;],
+    &quot;comment&quot;: [&quot;own&quot;, &quot;yes&quot;, &quot;yes&quot;],
+}
+
+
+@pytest.mark.parametrize(&quot;action&quot;, EXPECTED)
+@pytest.mark.parametrize(&quot;index&quot;, range(3))
+def test_permission(action, index):
+    role, want = ROLES[index], EXPECTED[action][index]
+    assert allowed(role, action, is_owner=True) == (want != &quot;-&quot;)
+    assert allowed(role, action, is_owner=False) == (want == &quot;yes&quot;)
+
+
+@pytest.mark.parametrize(&quot;old, new, role, ok&quot;, [
+    (&quot;open&quot;, &quot;in_progress&quot;, &quot;agent&quot;, True),
+    (&quot;open&quot;, &quot;in_progress&quot;, &quot;customer&quot;, False),
+    (&quot;resolved&quot;, &quot;in_progress&quot;, &quot;customer&quot;, True),
+    (&quot;resolved&quot;, &quot;closed&quot;, &quot;customer&quot;, True),
+    (&quot;closed&quot;, &quot;open&quot;, &quot;admin&quot;, False),
+    (&quot;closed&quot;, &quot;in_progress&quot;, &quot;admin&quot;, False),
+])
+def test_transition(old, new, role, ok):
+    assert can_transition(old, new, role) is ok</textarea><template class="pc-src pc-hint">Write a dict from action to the three answers for customer, agent and admin (<code>"own"</code>, <code>"yes"</code> or <code>"-"</code>), and check both <code>allowed(role, action, is_owner=True)</code> and <code>is_owner=False</code> for each. For transitions, a list of <code>(old, new, role, expected)</code> rows: include a customer reopening a resolved ticket, and an admin trying to move a closed one.</template></div>
+<h2 id="step-18-testing-the-api">Step 18: testing the API</h2>
+<p>API tests go through HTTP, so they need an app to talk to, and every test should get a <strong>fresh</strong> one, so tests can&rsquo;t affect each other through leftover data. That&rsquo;s what pytest <strong>fixtures</strong> are for (Week 72): a function marked <code>@pytest.fixture</code> builds something, and any test that names it as a parameter receives a new one. Fixtures can use other fixtures: a <code>client</code> fixture can use a <code>clock</code> fixture, and a test that asks for both gets the <strong>same</strong> clock its client uses, so it can move time forward and watch a token expire.</p>
+<pre><code class="language-python">@pytest.fixture
+def clock():
+    return {&quot;now&quot;: 1800000000}
+
+@pytest.fixture
+def client(clock):
+    conn = db.connect()
+    db.migrate(conn)
+    ...
+    return create_app(settings, conn, lambda: clock[&quot;now&quot;], [].append).test_client()
+
+def test_tokens_expire(client, clock):
+    ...
+    clock[&quot;now&quot;] += 600
+</code></pre>
+<p>Small helper functions (log in, sign up a customer and log in) keep each test to the few lines that state what it checks. API tests are slower than rule tests, so spend them on what only they can catch: the endpoints&rsquo; <strong>security</strong> behaviour, where a missing line in one view is enough to leak data.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w080d4-step18" data-points="20"><div class="pc-label"><span>Exercise</span><span class="pc-pts">20 points</span></div><div class="pc-title">Step 18: testing the API</div><div class="pc-prompt"><p>Write pytest API tests with fixtures (a <code>clock</code> fixture and a <code>client</code> fixture that builds a fresh migrated database with an agent, <code>grace@example.org</code> with password <code>agent password 1</code> hashed with 50 iterations, and the app with <code>{"SECRET_KEY": "k" * 40, "PASSWORD_ITERATIONS": 50, "TOKEN_SECONDS": 600}</code>). They must pass on the real <code>helpdesk_app</code> and catch each of six broken versions: anyone can read any ticket; customers see internal notes; tokens never expire; customers list everyone&rsquo;s tickets; sign-up lets the request choose its role (<code>"role": "admin"</code> in the body); and a wrong password is accepted for a known email.</p></div><textarea class="pc-src pc-code" hidden>import pytest
+
+import helpdesk_db as db
+from helpdesk_app import create_app
+from helpdesk_security import hash_password
+
+
+@pytest.fixture
+def clock():
+    return {&quot;now&quot;: 1800000000}
+
+
+@pytest.fixture
+def client(clock):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>GOOD = open(&quot;helpdesk_app.py&quot;).read()
+BROKEN = {
+    &quot;anyone reads any ticket&quot;: GOOD.replace(&#x27;if ticket is None or not allowed(me[&quot;role&quot;], &quot;view_ticket&quot;, ticket[&quot;customer_id&quot;] == me[&quot;id&quot;]):&#x27;, &quot;if ticket is None:&quot;),
+    &quot;customers see internal notes&quot;: GOOD.replace(&#x27;include_internal=allowed(me[&quot;role&quot;], &quot;internal_note&quot;)&#x27;, &quot;include_internal=True&quot;),
+    &quot;tokens never expire&quot;: GOOD.replace(&quot;verify_token(header[7:], key, int(clock()))&quot;, &quot;verify_token(header[7:], key, 0)&quot;),
+    &quot;customers list every ticket&quot;: GOOD.replace(&#x27;        if not allowed(me[&quot;role&quot;], &quot;list_all_tickets&quot;):\n            filters[&quot;customer_id&quot;] = me[&quot;id&quot;]\n&#x27;, &quot;&quot;),
+    &quot;sign-up chooses its role&quot;: GOOD.replace(&#x27;hash_password(password, iterations), &quot;customer&quot;, iso(clock())&#x27;, &#x27;hash_password(password, iterations), data.get(&quot;role&quot;, &quot;customer&quot;), iso(clock())&#x27;),
+    &quot;wrong passwords accepted&quot;: GOOD.replace(&#x27;if not check_password(str(data.get(&quot;password&quot;, &quot;&quot;)), stored) or found is None:&#x27;, &quot;if found is None:&quot;),
+}
+
+def test_versions_differ():
+    &quot;every broken version really is broken&quot;
+    assert all(v != GOOD for v in BROKEN.values())
+
+def test_style():
+    &quot;fixtures&quot;
+    assert &quot;@pytest.fixture&quot; in source and &quot;def test_&quot; in source
+
+def test_catches():
+    &quot;your tests pass on the real app and catch every broken one&quot;
+    results = against(source, &quot;helpdesk_app&quot;, {&quot;correct&quot;: GOOD, **BROKEN})
+    write_file(&quot;helpdesk_app.py&quot;, GOOD)
+    assert results[&quot;correct&quot;] == [], f&quot;these fail on the correct code: {results[&#x27;correct&#x27;]}&quot;
+    missed = [k for k in BROKEN if not results[k]]
+    assert not missed, f&quot;not caught: {missed}&quot;</textarea><textarea class="pc-src pc-solution" hidden>import pytest
+
+import helpdesk_db as db
+from helpdesk_app import create_app
+from helpdesk_security import hash_password
+
+
+@pytest.fixture
+def clock():
+    return {&quot;now&quot;: 1800000000}
+
+
+@pytest.fixture
+def client(clock):
+    conn = db.connect()
+    db.migrate(conn)
+    db.create_user(conn, &quot;grace@example.org&quot;, hash_password(&quot;agent password 1&quot;, 50), &quot;agent&quot;, &quot;t&quot;)
+    settings = {&quot;SECRET_KEY&quot;: &quot;k&quot; * 40, &quot;PASSWORD_ITERATIONS&quot;: 50, &quot;TOKEN_SECONDS&quot;: 600}
+    return create_app(settings, conn, lambda: clock[&quot;now&quot;], [].append).test_client()
+
+
+def login(client, email, password):
+    r = client.post(&quot;/tokens&quot;, json={&quot;email&quot;: email, &quot;password&quot;: password})
+    assert r.status_code == 201
+    return {&quot;Authorization&quot;: &quot;Bearer &quot; + r.get_json()[&quot;token&quot;]}
+
+
+def customer(client, name):
+    client.post(&quot;/users&quot;, json={&quot;email&quot;: f&quot;{name}@example.org&quot;, &quot;password&quot;: &quot;customer password&quot;})
+    return login(client, f&quot;{name}@example.org&quot;, &quot;customer password&quot;)
+
+
+def test_customers_only_see_their_own(client):
+    ada, bob = customer(client, &quot;ada&quot;), customer(client, &quot;bob&quot;)
+    client.post(&quot;/tickets&quot;, json={&quot;title&quot;: &quot;Printer on fire&quot;, &quot;body&quot;: &quot;x&quot;}, headers=ada)
+    assert client.get(&quot;/tickets/1&quot;, headers=bob).status_code == 404
+    assert client.get(&quot;/tickets&quot;, headers=bob).get_json()[&quot;items&quot;] == []
+
+
+def test_internal_notes_hidden(client):
+    ada = customer(client, &quot;ada&quot;)
+    grace = login(client, &quot;grace@example.org&quot;, &quot;agent password 1&quot;)
+    client.post(&quot;/tickets&quot;, json={&quot;title&quot;: &quot;Printer on fire&quot;, &quot;body&quot;: &quot;x&quot;}, headers=ada)
+    client.post(&quot;/tickets/1/comments&quot;, json={&quot;body&quot;: &quot;secret&quot;, &quot;internal&quot;: True}, headers=grace)
+    assert client.get(&quot;/tickets/1/comments&quot;, headers=ada).get_json()[&quot;items&quot;] == []
+
+
+def test_tokens_expire(client, clock):
+    ada = customer(client, &quot;ada&quot;)
+    clock[&quot;now&quot;] += 600
+    assert client.get(&quot;/me&quot;, headers=ada).status_code == 401
+
+
+def test_signup_makes_customers(client):
+    client.post(&quot;/users&quot;, json={&quot;email&quot;: &quot;eve@example.org&quot;, &quot;password&quot;: &quot;customer password&quot;, &quot;role&quot;: &quot;admin&quot;})
+    eve = login(client, &quot;eve@example.org&quot;, &quot;customer password&quot;)
+    assert client.get(&quot;/me&quot;, headers=eve).get_json()[&quot;role&quot;] == &quot;customer&quot;
+
+
+def test_wrong_password(client):
+    customer(client, &quot;ada&quot;)
+    assert client.post(&quot;/tokens&quot;, json={&quot;email&quot;: &quot;ada@example.org&quot;, &quot;password&quot;: &quot;wrong&quot;}).status_code == 401</textarea><template class="pc-src pc-hint">One test per risk, each from an attacker&rsquo;s or a customer&rsquo;s point of view: Bob asks for Ada&rsquo;s ticket (<code>404</code>) and lists tickets (none of Ada&rsquo;s); Ada reads the comments after Grace adds an internal note (none); a token is refused after <code>clock["now"] += 600</code>; Eve signs up with <code>"role": "admin"</code> and <code>/me</code> still says <code>customer</code>; logging in with the wrong password is <code>401</code>.</template></div>
+<h2 id="step-19-a-ci-workflow">Step 19: a CI workflow</h2>
+<p>Tests only protect you if they <strong>run</strong>, on every change, before it&rsquo;s merged. That&rsquo;s continuous integration (Week 74): on GitHub, a workflow file in <code>.github/workflows/</code> runs the tests on every push and pull request, and a red cross on the pull request stops the merge. The helpdesk&rsquo;s workflow, as data (the YAML file holds exactly this structure):</p>
+<pre><code class="language-python">def workflow():
+    &quot;&quot;&quot;The helpdesk's CI workflow, as the data a .github/workflows/ci.yml file would hold.&quot;&quot;&quot;
+    return {
+        &quot;name&quot;: &quot;CI&quot;,
+        &quot;on&quot;: {&quot;push&quot;: {&quot;branches&quot;: [&quot;main&quot;]}, &quot;pull_request&quot;: {}},
+        &quot;permissions&quot;: {&quot;contents&quot;: &quot;read&quot;},
+        &quot;jobs&quot;: {
+            &quot;test&quot;: {
+                &quot;runs-on&quot;: &quot;ubuntu-latest&quot;,
+                &quot;timeout-minutes&quot;: 15,
+                &quot;strategy&quot;: {&quot;matrix&quot;: {&quot;python-version&quot;: [&quot;3.12&quot;, &quot;3.13&quot;]}},
+                &quot;steps&quot;: [
+                    {&quot;uses&quot;: &quot;actions/checkout@v4&quot;},
+                    {&quot;uses&quot;: &quot;actions/setup-python@v5&quot;, &quot;with&quot;: {&quot;python-version&quot;: &quot;${{ matrix.python-version }}&quot;}},
+                    {&quot;run&quot;: &quot;pip install --require-hashes -r requirements.txt&quot;},
+                    {&quot;run&quot;: &quot;ruff check .&quot;},
+                    {&quot;run&quot;: &quot;pytest -q&quot;},
+                ],
+            }
+        },
+    }
+</code></pre>
+<p>Each line carries a lesson from this phase: run on <strong>pull requests</strong> as well as pushes (the point is to catch problems before they&rsquo;re merged); <strong>least privilege</strong> for the workflow&rsquo;s token (<code>contents: read</code>, Week 79); a <strong>timeout</strong> so a hung test can&rsquo;t run for six hours; a <strong>matrix</strong> of Python versions, because users run more than one; actions <strong>pinned</strong> to a version, never a moving branch like <code>main</code> (a compromised action is a supply-chain attack, Week 79); dependencies installed from the <strong>hashed</strong> lock file; and the <strong>linter</strong> as well as the tests (Week 74).</p>
+<p>Because the workflow is data, it can be checked by code, which is how teams keep dozens of repositories&rsquo; workflows consistent.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w080d4-step19" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Step 19: a CI workflow</div><div class="pc-prompt"><p>Write <code>check_workflow(wf)</code>: a sorted list of problems with a workflow dict: <code>"run on push and pull_request"</code> (unless both are keys of <code>wf["on"]</code>); <code>"set permissions to contents: read"</code> (unless <code>wf["permissions"]</code> is exactly that); if there&rsquo;s no <code>test</code> job under <code>jobs</code>, add <code>"add a test job"</code> and return at once (sorted). For the test job: <code>"run on ubuntu"</code> (<code>runs-on</code> must start with <code>ubuntu</code>); <code>"set timeout-minutes to at most 30"</code> (an int from 1 to 30); <code>"test on Python 3.12 and 3.13"</code> (both in <code>strategy.matrix.python-version</code>); for each step&rsquo;s <code>uses</code>, <code>"pin NAME to a version"</code> if it has no <code>@REF</code> or the ref is <code>main</code> or <code>master</code>; <code>"check out the code"</code> (no step uses <code>actions/checkout@...</code>); <code>"set up the matrix's Python version"</code> (the first <code>actions/setup-python@...</code> step must have <code>with.python-version</code> equal to <code>"${{ matrix.python-version }}"</code>); <code>"install dependencies with --require-hashes"</code> (some <code>run</code> step contains <code>pip install</code>, and every one that does has <code>--require-hashes</code>); <code>"run ruff check"</code> and <code>"run pytest"</code> (a <code>run</code> step starting with each). Then <code>workflow()</code>, returning a workflow with no problems.</p></div><textarea class="pc-src pc-code" hidden>def workflow():
+    ___
+
+
+def check_workflow(wf):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_good():
+    &quot;your workflow passes&quot;
+    assert check_workflow(workflow()) == []
+    wf = workflow()
+    assert &quot;3.12&quot; in wf[&quot;jobs&quot;][&quot;test&quot;][&quot;strategy&quot;][&quot;matrix&quot;][&quot;python-version&quot;]
+
+def test_problems():
+    &quot;every problem&quot;
+    import copy
+    base = {&quot;name&quot;: &quot;CI&quot;, &quot;on&quot;: {&quot;push&quot;: {}, &quot;pull_request&quot;: {}}, &quot;permissions&quot;: {&quot;contents&quot;: &quot;read&quot;},
+            &quot;jobs&quot;: {&quot;test&quot;: {&quot;runs-on&quot;: &quot;ubuntu-latest&quot;, &quot;timeout-minutes&quot;: 15, &quot;strategy&quot;: {&quot;matrix&quot;: {&quot;python-version&quot;: [&quot;3.12&quot;, &quot;3.13&quot;]}},
+                              &quot;steps&quot;: [{&quot;uses&quot;: &quot;actions/checkout@v4&quot;}, {&quot;uses&quot;: &quot;actions/setup-python@v5&quot;, &quot;with&quot;: {&quot;python-version&quot;: &quot;${{ matrix.python-version }}&quot;}},
+                                        {&quot;run&quot;: &quot;pip install --require-hashes -r requirements.txt&quot;}, {&quot;run&quot;: &quot;ruff check .&quot;}, {&quot;run&quot;: &quot;pytest -q&quot;}]}}}
+    assert check_workflow(base) == []
+    bad = copy.deepcopy(base)
+    bad[&quot;on&quot;] = {&quot;push&quot;: {}}
+    bad[&quot;permissions&quot;] = {&quot;contents&quot;: &quot;write&quot;}
+    job = bad[&quot;jobs&quot;][&quot;test&quot;]
+    job[&quot;runs-on&quot;], job[&quot;timeout-minutes&quot;] = &quot;windows-latest&quot;, 360
+    job[&quot;strategy&quot;][&quot;matrix&quot;][&quot;python-version&quot;] = [&quot;3.13&quot;]
+    job[&quot;steps&quot;][0] = {&quot;uses&quot;: &quot;actions/checkout@main&quot;}
+    job[&quot;steps&quot;][1][&quot;with&quot;][&quot;python-version&quot;] = &quot;3.13&quot;
+    job[&quot;steps&quot;][2] = {&quot;run&quot;: &quot;pip install -r requirements.txt&quot;}
+    del job[&quot;steps&quot;][3:]
+    job[&quot;steps&quot;].append({&quot;uses&quot;: &quot;some/action&quot;})
+    assert check_workflow(bad) == [&quot;install dependencies with --require-hashes&quot;, &quot;pin actions/checkout to a version&quot;, &quot;pin some/action to a version&quot;,
+                                   &quot;run on push and pull_request&quot;, &quot;run on ubuntu&quot;, &quot;run pytest&quot;, &quot;run ruff check&quot;, &quot;set permissions to contents: read&quot;,
+                                   &quot;set timeout-minutes to at most 30&quot;, &quot;set up the matrix&#x27;s Python version&quot;, &quot;test on Python 3.12 and 3.13&quot;]
+    assert &quot;check out the code&quot; in check_workflow({**base, &quot;jobs&quot;: {&quot;test&quot;: {**base[&quot;jobs&quot;][&quot;test&quot;], &quot;steps&quot;: base[&quot;jobs&quot;][&quot;test&quot;][&quot;steps&quot;][1:]}}})
+    assert check_workflow({&quot;on&quot;: [&quot;push&quot;], &quot;jobs&quot;: {}}) == [&quot;add a test job&quot;, &quot;run on push and pull_request&quot;, &quot;set permissions to contents: read&quot;]</textarea><textarea class="pc-src pc-solution" hidden>def workflow():
+    &quot;&quot;&quot;The helpdesk&#x27;s CI workflow, as the data a .github/workflows/ci.yml file would hold.&quot;&quot;&quot;
+    return {
+        &quot;name&quot;: &quot;CI&quot;,
+        &quot;on&quot;: {&quot;push&quot;: {&quot;branches&quot;: [&quot;main&quot;]}, &quot;pull_request&quot;: {}},
+        &quot;permissions&quot;: {&quot;contents&quot;: &quot;read&quot;},
+        &quot;jobs&quot;: {
+            &quot;test&quot;: {
+                &quot;runs-on&quot;: &quot;ubuntu-latest&quot;,
+                &quot;timeout-minutes&quot;: 15,
+                &quot;strategy&quot;: {&quot;matrix&quot;: {&quot;python-version&quot;: [&quot;3.12&quot;, &quot;3.13&quot;]}},
+                &quot;steps&quot;: [
+                    {&quot;uses&quot;: &quot;actions/checkout@v4&quot;},
+                    {&quot;uses&quot;: &quot;actions/setup-python@v5&quot;, &quot;with&quot;: {&quot;python-version&quot;: &quot;${{ matrix.python-version }}&quot;}},
+                    {&quot;run&quot;: &quot;pip install --require-hashes -r requirements.txt&quot;},
+                    {&quot;run&quot;: &quot;ruff check .&quot;},
+                    {&quot;run&quot;: &quot;pytest -q&quot;},
+                ],
+            }
+        },
+    }
+
+def check_workflow(wf):
+    &quot;&quot;&quot;Problems with a CI workflow, as a sorted list of strings.&quot;&quot;&quot;
+    problems = []
+    triggers = wf.get(&quot;on&quot;, {})
+    if not (&quot;push&quot; in triggers and &quot;pull_request&quot; in triggers):
+        problems.append(&quot;run on push and pull_request&quot;)
+    if wf.get(&quot;permissions&quot;) != {&quot;contents&quot;: &quot;read&quot;}:
+        problems.append(&quot;set permissions to contents: read&quot;)
+    job = wf.get(&quot;jobs&quot;, {}).get(&quot;test&quot;)
+    if job is None:
+        return sorted(problems + [&quot;add a test job&quot;])
+    if not str(job.get(&quot;runs-on&quot;, &quot;&quot;)).startswith(&quot;ubuntu&quot;):
+        problems.append(&quot;run on ubuntu&quot;)
+    timeout = job.get(&quot;timeout-minutes&quot;)
+    if not isinstance(timeout, int) or not 1 &lt;= timeout &lt;= 30:
+        problems.append(&quot;set timeout-minutes to at most 30&quot;)
+    versions = job.get(&quot;strategy&quot;, {}).get(&quot;matrix&quot;, {}).get(&quot;python-version&quot;, [])
+    if not {&quot;3.12&quot;, &quot;3.13&quot;} &lt;= set(versions):
+        problems.append(&quot;test on Python 3.12 and 3.13&quot;)
+    steps = job.get(&quot;steps&quot;, [])
+    uses = [s[&quot;uses&quot;] for s in steps if &quot;uses&quot; in s]
+    for action in uses:
+        name, _, ref = action.partition(&quot;@&quot;)
+        if not ref or ref in (&quot;main&quot;, &quot;master&quot;):
+            problems.append(f&quot;pin {name} to a version&quot;)
+    if not any(u.startswith(&quot;actions/checkout@&quot;) for u in uses):
+        problems.append(&quot;check out the code&quot;)
+    setup = [s for s in steps if s.get(&quot;uses&quot;, &quot;&quot;).startswith(&quot;actions/setup-python@&quot;)]
+    if not setup or setup[0].get(&quot;with&quot;, {}).get(&quot;python-version&quot;) != &quot;${{ matrix.python-version }}&quot;:
+        problems.append(&quot;set up the matrix&#x27;s Python version&quot;)
+    runs = [s[&quot;run&quot;] for s in steps if &quot;run&quot; in s]
+    if any(&quot;pip install&quot; in r and &quot;--require-hashes&quot; not in r for r in runs) or not any(&quot;pip install&quot; in r for r in runs):
+        problems.append(&quot;install dependencies with --require-hashes&quot;)
+    if not any(r.startswith(&quot;ruff check&quot;) for r in runs):
+        problems.append(&quot;run ruff check&quot;)
+    if not any(r.startswith(&quot;pytest&quot;) for r in runs):
+        problems.append(&quot;run pytest&quot;)
+    return sorted(problems)</textarea></div>
+<h2 id="step-20-what-the-tests-never-reach">Step 20: what the tests never reach</h2>
+<p>Line coverage (Week 72) tells you which lines ran. For an API there&rsquo;s a simpler, very useful question: which <strong>routes</strong> did the test suite never call, and which never once <strong>succeeded</strong>? A route whose tests only ever see <code>403</code> and <code>422</code> has had its refusals tested but never its main job. Because the route table is data (Monday), a small after-request hook can record every call, and Monday&rsquo;s <code>match_route</code> can tie each recorded path back to its route.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w080d4-step20" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Step 20: what the tests never reach</div><div class="pc-prompt"><p>With <code>ROUTES</code> and <code>match_route</code> (given), write <code>record(app, calls)</code>: register an <code>after_request</code> function that appends <code>(request.method, request.path, response.status_code)</code> to the list <code>calls</code> and returns the response; return the app. Then <code>untested(routes, calls)</code>: match each call with <code>match_route</code>; for each route in table order, report <code>"METHOD TEMPLATE: never called"</code> if no call matched it, or <code>"METHOD TEMPLATE: never succeeded (expects CODE)"</code> if none of its calls had the route&rsquo;s success status. Return the list.</p></div><textarea class="pc-src pc-code" hidden>from http import HTTPStatus
+
+from miniflask import request
+from helpdesk_domain import ROUTES
+
+def match_route(routes, method, path):
+    &quot;&quot;&quot;Which route handles METHOD PATH: (200, (template, params)), (404, None) or (405, allowed_methods).&quot;&quot;&quot;
+    allowed_methods = set()
+    parts = path.strip(&quot;/&quot;).split(&quot;/&quot;) if path != &quot;/&quot; else []
+    for m, template, _, _ in routes:
+        pattern = template.strip(&quot;/&quot;).split(&quot;/&quot;)
+        if len(pattern) != len(parts):
+            continue
+        params = {}
+        for want, got in zip(pattern, parts):
+            if want.startswith(&quot;{&quot;) and want.endswith(&quot;}&quot;):
+                if not got.isdigit():
+                    break
+                params[want[1:-1]] = int(got)
+            elif want != got:
+                break
+        else:
+            if m == method:
+                return 200, (template, params)
+            allowed_methods.add(m)
+    return (405, sorted(allowed_methods)) if allowed_methods else (404, None)
+
+
+def record(app, calls):
+    ___
+
+
+def untested(routes, calls):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_record_and_report():
+    &quot;a coverage report for routes&quot;
+    import helpdesk_db as db
+    from helpdesk_app import create_app
+    conn = db.connect()
+    db.migrate(conn)
+    calls = []
+    app = record(create_app({&quot;SECRET_KEY&quot;: &quot;k&quot; * 40, &quot;PASSWORD_ITERATIONS&quot;: 50}, conn, lambda: 1800000000, [].append), calls)
+    c = app.test_client()
+    c.get(&quot;/healthz&quot;)
+    c.post(&quot;/users&quot;, json={&quot;email&quot;: &quot;ada@example.org&quot;, &quot;password&quot;: &quot;customer password&quot;})
+    h = {&quot;Authorization&quot;: &quot;Bearer &quot; + c.post(&quot;/tokens&quot;, json={&quot;email&quot;: &quot;ada@example.org&quot;, &quot;password&quot;: &quot;customer password&quot;}).get_json()[&quot;token&quot;]}
+    c.post(&quot;/tickets&quot;, json={&quot;title&quot;: &quot;Printer on fire&quot;, &quot;body&quot;: &quot;x&quot;}, headers=h)
+    c.get(&quot;/tickets/1&quot;, headers=h)
+    c.get(&quot;/tickets/9&quot;, headers=h)
+    c.get(&quot;/stats&quot;, headers=h)
+    c.get(&quot;/nowhere&quot;)
+    assert calls[:3] == [(&quot;GET&quot;, &quot;/healthz&quot;, 200), (&quot;POST&quot;, &quot;/users&quot;, 201), (&quot;POST&quot;, &quot;/tokens&quot;, 201)] and calls[-1] == (&quot;GET&quot;, &quot;/nowhere&quot;, 404)
+    assert untested(ROUTES, calls) == [
+        &quot;GET /me: never called&quot;, &quot;GET /tickets: never called&quot;, &quot;PATCH /tickets/{ticket_id}: never called&quot;,
+        &quot;DELETE /tickets/{ticket_id}: never called&quot;, &quot;POST /tickets/{ticket_id}/transitions: never called&quot;,
+        &quot;PUT /tickets/{ticket_id}/assignee: never called&quot;, &quot;GET /tickets/{ticket_id}/comments: never called&quot;,
+        &quot;POST /tickets/{ticket_id}/comments: never called&quot;, &quot;GET /stats: never succeeded (expects 200)&quot;, &quot;GET /readyz: never called&quot;]
+    assert untested([(&quot;GET&quot;, &quot;/a&quot;, &quot;x&quot;, 200)], [(&quot;GET&quot;, &quot;/a&quot;, 500), (&quot;GET&quot;, &quot;/a&quot;, 200)]) == []</textarea><textarea class="pc-src pc-solution" hidden>from http import HTTPStatus
+
+from miniflask import request
+from helpdesk_domain import ROUTES
+
+def match_route(routes, method, path):
+    &quot;&quot;&quot;Which route handles METHOD PATH: (200, (template, params)), (404, None) or (405, allowed_methods).&quot;&quot;&quot;
+    allowed_methods = set()
+    parts = path.strip(&quot;/&quot;).split(&quot;/&quot;) if path != &quot;/&quot; else []
+    for m, template, _, _ in routes:
+        pattern = template.strip(&quot;/&quot;).split(&quot;/&quot;)
+        if len(pattern) != len(parts):
+            continue
+        params = {}
+        for want, got in zip(pattern, parts):
+            if want.startswith(&quot;{&quot;) and want.endswith(&quot;}&quot;):
+                if not got.isdigit():
+                    break
+                params[want[1:-1]] = int(got)
+            elif want != got:
+                break
+        else:
+            if m == method:
+                return 200, (template, params)
+            allowed_methods.add(m)
+    return (405, sorted(allowed_methods)) if allowed_methods else (404, None)
+
+
+def record(app, calls):
+    &quot;&quot;&quot;Make the app add (method, path, status) to `calls` for every response.&quot;&quot;&quot;
+    @app.after_request
+    def remember(response):
+        calls.append((request.method, request.path, response.status_code))
+        return response
+    return app
+
+def untested(routes, calls):
+    &quot;&quot;&quot;Routes the calls never reached, or never saw succeed with the status the table promises.&quot;&quot;&quot;
+    seen = {}
+    for method, path, status in calls:
+        found, info = match_route(routes, method, path)
+        if found == 200:
+            seen.setdefault((method, info[0]), []).append(status)
+    problems = []
+    for method, template, _, code in routes:
+        statuses = seen.get((method, template))
+        if not statuses:
+            problems.append(f&quot;{method} {template}: never called&quot;)
+        elif code not in statuses:
+            problems.append(f&quot;{method} {template}: never succeeded (expects {code})&quot;)
+    return problems</textarea></div>
+<h2 id="checkpoint">Checkpoint</h2>
+<p>On your own computer, today&rsquo;s tests live in a <code>tests/</code> folder beside the code, run with <code>pytest -q</code> from the project folder, and the CI workflow runs them on every push:</p>
+<pre><code>tests/
+  test_domain.py      # Steps 16 and 17: fast, no setup
+  test_db.py          # Tuesday's queries against a fresh in-memory database
+  test_api.py         # Step 18: fixtures, HTTP, the security behaviour
+.github/workflows/ci.yml   # Step 19
+</code></pre>
+<p>And here&rsquo;s the idea behind Step 20 on a handful of recorded calls: each path is tied back to the route that served it, which is all a route-coverage report needs.</p>
+<div class="pc pc-example" data-kind="example" data-id="w080d4-e2"><textarea class="pc-src pc-code" hidden>from helpdesk_domain import ROUTES
+
+def match_route(routes, method, path):
+    &quot;&quot;&quot;Which route handles METHOD PATH: (200, (template, params)), (404, None) or (405, allowed_methods).&quot;&quot;&quot;
+    allowed_methods = set()
+    parts = path.strip(&quot;/&quot;).split(&quot;/&quot;) if path != &quot;/&quot; else []
+    for m, template, _, _ in routes:
+        pattern = template.strip(&quot;/&quot;).split(&quot;/&quot;)
+        if len(pattern) != len(parts):
+            continue
+        params = {}
+        for want, got in zip(pattern, parts):
+            if want.startswith(&quot;{&quot;) and want.endswith(&quot;}&quot;):
+                if not got.isdigit():
+                    break
+                params[want[1:-1]] = int(got)
+            elif want != got:
+                break
+        else:
+            if m == method:
+                return 200, (template, params)
+            allowed_methods.add(m)
+    return (405, sorted(allowed_methods)) if allowed_methods else (404, None)
+
+calls = [(&quot;GET&quot;, &quot;/healthz&quot;, 200), (&quot;POST&quot;, &quot;/tickets&quot;, 201), (&quot;GET&quot;, &quot;/tickets/7&quot;, 404), (&quot;GET&quot;, &quot;/tickets/7&quot;, 200), (&quot;GET&quot;, &quot;/stats&quot;, 403)]
+for method, path, status in calls:
+    print(method, path, status, &quot;-&gt;&quot;, match_route(ROUTES, method, path)[1])</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w080d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "How do you know a test suite would catch a bug?", "answer": 1, "explain": "A suite that passes on broken code would have let the bug through.", "options": ["It passes", "Break the code on purpose and check that a test fails (mutation testing)", "Count the tests", "Measure line coverage"]}, {"type": "mc", "q": "Where do bugs in validation usually hide?", "answer": 1, "explain": "Test both sides of every limit.", "options": ["In the middle of ranges", "At the edges: the shortest allowed value and the one just outside", "In comments", "In imports"]}, {"type": "mc", "q": "Why write a permission test&rsquo;s expected answers by hand rather than computing them from PERMISSIONS?", "answer": 1, "explain": "The test is an independent statement of the rules.", "options": ["Speed", "A test that reads the table it checks would pass whatever the table said", "pytest requires it", "Readability only"]}, {"type": "mc", "q": "What do two parametrize decorators on one test do?", "answer": 1, "explain": "3 actions times 2 roles is 6 cases.", "options": ["Run it twice", "Run it for every combination of their values", "Merge the values", "Nothing"]}, {"type": "mc", "q": "Why give every API test a fresh app and database?", "answer": 1, "explain": "Fixtures build a new one for each test.", "options": ["Speed", "So tests can&rsquo;t affect each other through leftover data", "miniflask needs it", "To save memory"]}, {"type": "mc", "q": "How can a test move time forward to expire a token?", "answer": 1, "explain": "Inject the clock.", "options": ["time.sleep", "Share a clock fixture with the client fixture and change it", "Change the system clock", "It can&rsquo;t"]}, {"type": "mc", "q": "Why run CI on pull requests as well as pushes?", "answer": 1, "explain": "A red cross stops the merge.", "options": ["It&rsquo;s free", "To catch problems before they&rsquo;re merged", "GitHub requires it", "For speed"]}, {"type": "mc", "q": "Why pin actions to a version rather than @main?", "answer": 1, "explain": "Actions are dependencies too (Week 79).", "options": ["Speed", "A moving branch can change under you, including to something malicious", "Style", "GitHub requires it"]}, {"type": "mc", "q": "Why report routes that never succeeded in tests?", "answer": 1, "explain": "Test the happy path and the refusals.", "options": ["Vanity", "A route tested only with refusals has never had its main job tested", "To slow CI", "For documentation"]}, {"type": "output", "q": "What does this print?", "answer": "6 ('delete', 'customer')", "explain": "Every action with every role.", "code": "cases = [(a, r) for a in (\"view\", \"delete\") for r in (\"customer\", \"agent\", \"admin\")]\nprint(len(cases), cases[3])"}]</script></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>On your own computer, put the project in a folder with a <code>tests/</code> directory and a <code>.github/workflows/ci.yml</code>, push it to a repository of your own, and watch the first CI run. Tomorrow: <strong>deployment</strong>: settings, health checks, logs, a container, and changing the database while the service keeps running.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w080d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w080d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w080d4", "week": 80, "day": 4, "title": "Project: tests and CI", "exercises": [{"id": "w080d4-step16", "title": "Step 16: testing the rules", "points": 20}, {"id": "w080d4-step17", "title": "Step 17: tables as tests", "points": 15}, {"id": "w080d4-step18", "title": "Step 18: testing the API", "points": 20}, {"id": "w080d4-step19", "title": "Step 19: a CI workflow", "points": 10}, {"id": "w080d4-step20", "title": "Step 20: what the tests never reach", "points": 15}], "points": 80}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=b54d8b61c9"></script>
+</body>
+</html>

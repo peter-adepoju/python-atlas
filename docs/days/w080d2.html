@@ -1,0 +1,1868 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="b54d8b61c9">
+<title>Week 80 Day 2: Project: database and models | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=b54d8b61c9">
+<link rel="stylesheet" href="../assets/css/site.css?v=b54d8b61c9">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=b54d8b61c9"></script>
+<script src="../assets/vendor/codemirror.js?v=b54d8b61c9" defer></script>
+<meta name="description" content="Yesterday’s design decided what the helpdesk knows and allows. Today it gets a memory: a SQLite database (Week 75) with tables for users, tickets, comments...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w080d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 80 Day 2: Project: database and models">
+<meta property="og:description" content="Yesterday’s design decided what the helpdesk knows and allows. Today it gets a memory: a SQLite database (Week 75) with tables for users, tickets, comments...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w080d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-80">Week 80: Consolidation project</a>
+      <ol class="rail-toc"><li><a href="#where-we-are" data-sec="where-we-are">Where we are</a></li><li><a href="#the-schema" data-sec="the-schema">The schema</a></li><li><a href="#step-6-migrations" data-sec="step-6-migrations">Step 6: migrations</a></li><li><a href="#step-7-users-and-tickets" data-sec="step-7-users-and-tickets">Step 7: users and tickets</a></li><li><a href="#step-8-listing-tickets" data-sec="step-8-listing-tickets">Step 8: listing tickets</a></li><li><a href="#step-9-changes-that-can-t-half-happen" data-sec="step-9-changes-that-can-t-half-happen">Step 9: changes that can’t half-happen</a></li><li><a href="#step-10-indexes-and-statistics" data-sec="step-10-indexes-and-statistics">Step 10: indexes and statistics</a></li><li><a href="#checkpoint" data-sec="checkpoint">Checkpoint</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w080d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-80">Week 80: Consolidation project</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 80, Day 2</span></p>
+      <h1>Project: database and models</h1>
+      <div class="day-intro"><p>Yesterday&rsquo;s design decided what the helpdesk knows and allows. Today it gets a memory: a SQLite database (Week 75) with tables for users, tickets, comments and an audit trail of events. You&rsquo;ll write it the way production databases are run: the schema is created by numbered <strong>migrations</strong> that run in transactions and can be applied to a live database, every query uses parameters, anything that changes more than one row is atomic, a status change can&rsquo;t silently overwrite someone else&rsquo;s, and the queries the API runs most are backed by indexes you can prove are used.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Design tables, keys and constraints that enforce the rules in the database itself</li><li>Apply numbered migrations safely, each in its own transaction, recording which have run</li><li>Write create, read and list queries with parameters, filters and cursor pagination</li><li>Make multi-row changes atomic, and stop lost updates with a conditional UPDATE</li><li>Add indexes for the common queries and check with EXPLAIN QUERY PLAN that they&rsquo;re used</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:15" title="Where we are: 15 min"></span><span class="plan-seg s1" style="flex:20" title="The schema: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Step 6: migrations: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Step 7: users and tickets: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Step 8: listing tickets: 25 min"></span><span class="plan-seg s1" style="flex:25" title="Step 9: changes that can&#x27;t half-happen: 25 min"></span><span class="plan-seg s0" style="flex:20" title="Step 10: indexes and statistics: 20 min"></span><span class="plan-seg s1" style="flex:30" title="Checkpoint and quiz: 30 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">8 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Where we are</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:15</span><span class="plan-what">The schema</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Step 6: migrations</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:00</span><span class="plan-what">Step 7: users and tickets</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Step 8: listing tickets</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:45</span><span class="plan-what">Step 9: changes that can&rsquo;t half-happen</span><span class="plan-min">25 min</span></li><li><span class="plan-at">2:10</span><span class="plan-what">Step 10: indexes and statistics</span><span class="plan-min">20 min</span></li><li><span class="plan-at">2:30</span><span class="plan-what">Checkpoint and quiz</span><span class="plan-min">30 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w080d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w080d2.ipynb" download>download it</a>. Exercises today are worth 75 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="where-we-are">Where we are</h2>
+<p>Yesterday&rsquo;s decisions are in <code>helpdesk_domain</code> (in the files panel). Today&rsquo;s module is <code>helpdesk_db</code>: everything that talks to the database, and nothing else. The web layer (tomorrow) will call functions such as <code>create_ticket(conn, customer_id, clean, now)</code> and never write SQL itself, so all the SQL lives in one place, where it can be reviewed for injection and tested against a real database.</p>
+<div class="filebox"><div class="filebox-head">The file used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>helpdesk_domain.py</code></summary><pre class="pc-filetext">&quot;&quot;&quot;The helpdesk&#x27;s rules, with no web or database code (Week 80, Day 1).
+
+Everything here is plain data and pure functions, so it can be tested on its own and used by the
+database layer, the web layer and the tests alike.
+&quot;&quot;&quot;
+import re
+from http import HTTPStatus
+
+ROLES = (&quot;customer&quot;, &quot;agent&quot;, &quot;admin&quot;)
+PRIORITIES = (&quot;low&quot;, &quot;normal&quot;, &quot;high&quot;, &quot;urgent&quot;)
+STATUSES = (&quot;open&quot;, &quot;in_progress&quot;, &quot;waiting&quot;, &quot;resolved&quot;, &quot;closed&quot;)
+STAFF = {&quot;agent&quot;, &quot;admin&quot;}
+
+# status -&gt; {new status: roles that may make the change}
+TRANSITIONS = {
+    &quot;open&quot;: {&quot;in_progress&quot;: {&quot;agent&quot;, &quot;admin&quot;}, &quot;closed&quot;: {&quot;customer&quot;, &quot;admin&quot;}},
+    &quot;in_progress&quot;: {&quot;waiting&quot;: {&quot;agent&quot;, &quot;admin&quot;}, &quot;resolved&quot;: {&quot;agent&quot;, &quot;admin&quot;}},
+    &quot;waiting&quot;: {&quot;in_progress&quot;: {&quot;customer&quot;, &quot;agent&quot;, &quot;admin&quot;}},
+    &quot;resolved&quot;: {&quot;closed&quot;: {&quot;customer&quot;, &quot;admin&quot;}, &quot;in_progress&quot;: {&quot;customer&quot;, &quot;agent&quot;, &quot;admin&quot;}},
+    &quot;closed&quot;: {},
+}
+
+# action -&gt; (roles always allowed, roles allowed only on their own tickets)
+PERMISSIONS = {
+    &quot;create_ticket&quot;: ({&quot;customer&quot;}, set()),
+    &quot;view_ticket&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, {&quot;customer&quot;}),
+    &quot;list_all_tickets&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, set()),
+    &quot;edit_ticket&quot;: ({&quot;admin&quot;}, {&quot;customer&quot;}),
+    &quot;comment&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, {&quot;customer&quot;}),
+    &quot;internal_note&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, set()),
+    &quot;change_priority&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, set()),
+    &quot;assign&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, set()),
+    &quot;delete_ticket&quot;: ({&quot;admin&quot;}, set()),
+    &quot;view_stats&quot;: ({&quot;agent&quot;, &quot;admin&quot;}, set()),
+}
+
+
+class ValidationError(Exception):
+    &quot;&quot;&quot;Raised with a dict of field -&gt; message.&quot;&quot;&quot;
+
+    def __init__(self, errors):
+        super().__init__(&quot;; &quot;.join(f&quot;{k}: {v}&quot; for k, v in sorted(errors.items())))
+        self.errors = errors
+
+
+def validate_ticket(data, partial=False):
+    &quot;&quot;&quot;Check a ticket body from a client. partial=True for PATCH: only the fields present are checked.&quot;&quot;&quot;
+    if not isinstance(data, dict):
+        raise ValidationError({&quot;_&quot;: &quot;expected a JSON object&quot;})
+    errors, clean = {}, {}
+    unknown = sorted(set(data) - {&quot;title&quot;, &quot;body&quot;, &quot;priority&quot;})
+    if unknown:
+        errors[&quot;_&quot;] = f&quot;unexpected field(s): {&#x27;, &#x27;.join(unknown)}&quot;
+    for field in (&quot;title&quot;, &quot;body&quot;):
+        if field not in data:
+            if not partial:
+                errors[field] = &quot;required&quot;
+            continue
+        value = data[field]
+        limit = (3, 120) if field == &quot;title&quot; else (1, 5000)
+        if not isinstance(value, str) or not limit[0] &lt;= len(value.strip()) &lt;= limit[1]:
+            errors[field] = f&quot;{limit[0]} to {limit[1]} characters&quot;
+        else:
+            clean[field] = value.strip()
+    if &quot;priority&quot; in data:
+        if data[&quot;priority&quot;] not in PRIORITIES:
+            errors[&quot;priority&quot;] = f&quot;one of {&#x27;, &#x27;.join(PRIORITIES)}&quot;
+        else:
+            clean[&quot;priority&quot;] = data[&quot;priority&quot;]
+    elif not partial:
+        clean[&quot;priority&quot;] = &quot;normal&quot;
+    if partial and not data:
+        errors[&quot;_&quot;] = &quot;nothing to change&quot;
+    if errors:
+        raise ValidationError(errors)
+    return clean
+
+
+def can_transition(current, new, role):
+    &quot;&quot;&quot;True if someone with this role may move a ticket from `current` to `new`.&quot;&quot;&quot;
+    return role in TRANSITIONS.get(current, {}).get(new, set())
+
+
+def allowed(role, action, is_owner=False):
+    &quot;&quot;&quot;True if the role may do the action (is_owner: the ticket is the user&#x27;s own).&quot;&quot;&quot;
+    always, own = PERMISSIONS[action]
+    return role in always or (is_owner and role in own)
+
+
+def problem(status, detail, title=None, **extra):
+    &quot;&quot;&quot;An RFC 9457 problem-details response: (body, status, headers).&quot;&quot;&quot;
+    body = {&quot;type&quot;: &quot;about:blank&quot;, &quot;title&quot;: title or HTTPStatus(status).phrase, &quot;status&quot;: status, &quot;detail&quot;: detail}
+    body.update(extra)
+    return body, status, {&quot;Content-Type&quot;: &quot;application/problem+json&quot;}
+
+
+ROUTES = [
+    (&quot;POST&quot;, &quot;/users&quot;, &quot;sign up as a customer&quot;, 201),
+    (&quot;POST&quot;, &quot;/tokens&quot;, &quot;log in and get a token&quot;, 201),
+    (&quot;GET&quot;, &quot;/me&quot;, &quot;who am I&quot;, 200),
+    (&quot;GET&quot;, &quot;/tickets&quot;, &quot;list tickets (customers see their own)&quot;, 200),
+    (&quot;POST&quot;, &quot;/tickets&quot;, &quot;open a ticket&quot;, 201),
+    (&quot;GET&quot;, &quot;/tickets/{ticket_id}&quot;, &quot;read a ticket&quot;, 200),
+    (&quot;PATCH&quot;, &quot;/tickets/{ticket_id}&quot;, &quot;change a ticket&#x27;s title, body or priority&quot;, 200),
+    (&quot;DELETE&quot;, &quot;/tickets/{ticket_id}&quot;, &quot;delete a ticket (admins)&quot;, 204),
+    (&quot;POST&quot;, &quot;/tickets/{ticket_id}/transitions&quot;, &quot;change a ticket&#x27;s status&quot;, 200),
+    (&quot;PUT&quot;, &quot;/tickets/{ticket_id}/assignee&quot;, &quot;assign a ticket to an agent&quot;, 200),
+    (&quot;GET&quot;, &quot;/tickets/{ticket_id}/comments&quot;, &quot;list a ticket&#x27;s comments&quot;, 200),
+    (&quot;POST&quot;, &quot;/tickets/{ticket_id}/comments&quot;, &quot;add a comment or internal note&quot;, 201),
+    (&quot;GET&quot;, &quot;/stats&quot;, &quot;ticket counts (staff)&quot;, 200),
+    (&quot;GET&quot;, &quot;/healthz&quot;, &quot;is the process alive&quot;, 200),
+    (&quot;GET&quot;, &quot;/readyz&quot;, &quot;can it serve requests&quot;, 200),
+]
+
+
+def docs_table(routes):
+    &quot;&quot;&quot;The routes as a Markdown table, for the README.&quot;&quot;&quot;
+    lines = [&quot;| Method | Path | What it does | Success |&quot;, &quot;|---|---|---|---|&quot;]
+    lines += [f&quot;| {m} | `{p}` | {what} | {code} {HTTPStatus(code).phrase} |&quot; for m, p, what, code in routes]
+    return &quot;\n&quot;.join(lines)
+</pre></details><script type="application/json" class="page-files">{"helpdesk_domain.py": "\"\"\"The helpdesk's rules, with no web or database code (Week 80, Day 1).\n\nEverything here is plain data and pure functions, so it can be tested on its own and used by the\ndatabase layer, the web layer and the tests alike.\n\"\"\"\nimport re\nfrom http import HTTPStatus\n\nROLES = (\"customer\", \"agent\", \"admin\")\nPRIORITIES = (\"low\", \"normal\", \"high\", \"urgent\")\nSTATUSES = (\"open\", \"in_progress\", \"waiting\", \"resolved\", \"closed\")\nSTAFF = {\"agent\", \"admin\"}\n\n# status -> {new status: roles that may make the change}\nTRANSITIONS = {\n    \"open\": {\"in_progress\": {\"agent\", \"admin\"}, \"closed\": {\"customer\", \"admin\"}},\n    \"in_progress\": {\"waiting\": {\"agent\", \"admin\"}, \"resolved\": {\"agent\", \"admin\"}},\n    \"waiting\": {\"in_progress\": {\"customer\", \"agent\", \"admin\"}},\n    \"resolved\": {\"closed\": {\"customer\", \"admin\"}, \"in_progress\": {\"customer\", \"agent\", \"admin\"}},\n    \"closed\": {},\n}\n\n# action -> (roles always allowed, roles allowed only on their own tickets)\nPERMISSIONS = {\n    \"create_ticket\": ({\"customer\"}, set()),\n    \"view_ticket\": ({\"agent\", \"admin\"}, {\"customer\"}),\n    \"list_all_tickets\": ({\"agent\", \"admin\"}, set()),\n    \"edit_ticket\": ({\"admin\"}, {\"customer\"}),\n    \"comment\": ({\"agent\", \"admin\"}, {\"customer\"}),\n    \"internal_note\": ({\"agent\", \"admin\"}, set()),\n    \"change_priority\": ({\"agent\", \"admin\"}, set()),\n    \"assign\": ({\"agent\", \"admin\"}, set()),\n    \"delete_ticket\": ({\"admin\"}, set()),\n    \"view_stats\": ({\"agent\", \"admin\"}, set()),\n}\n\n\nclass ValidationError(Exception):\n    \"\"\"Raised with a dict of field -> message.\"\"\"\n\n    def __init__(self, errors):\n        super().__init__(\"; \".join(f\"{k}: {v}\" for k, v in sorted(errors.items())))\n        self.errors = errors\n\n\ndef validate_ticket(data, partial=False):\n    \"\"\"Check a ticket body from a client. partial=True for PATCH: only the fields present are checked.\"\"\"\n    if not isinstance(data, dict):\n        raise ValidationError({\"_\": \"expected a JSON object\"})\n    errors, clean = {}, {}\n    unknown = sorted(set(data) - {\"title\", \"body\", \"priority\"})\n    if unknown:\n        errors[\"_\"] = f\"unexpected field(s): {', '.join(unknown)}\"\n    for field in (\"title\", \"body\"):\n        if field not in data:\n            if not partial:\n                errors[field] = \"required\"\n            continue\n        value = data[field]\n        limit = (3, 120) if field == \"title\" else (1, 5000)\n        if not isinstance(value, str) or not limit[0] <= len(value.strip()) <= limit[1]:\n            errors[field] = f\"{limit[0]} to {limit[1]} characters\"\n        else:\n            clean[field] = value.strip()\n    if \"priority\" in data:\n        if data[\"priority\"] not in PRIORITIES:\n            errors[\"priority\"] = f\"one of {', '.join(PRIORITIES)}\"\n        else:\n            clean[\"priority\"] = data[\"priority\"]\n    elif not partial:\n        clean[\"priority\"] = \"normal\"\n    if partial and not data:\n        errors[\"_\"] = \"nothing to change\"\n    if errors:\n        raise ValidationError(errors)\n    return clean\n\n\ndef can_transition(current, new, role):\n    \"\"\"True if someone with this role may move a ticket from `current` to `new`.\"\"\"\n    return role in TRANSITIONS.get(current, {}).get(new, set())\n\n\ndef allowed(role, action, is_owner=False):\n    \"\"\"True if the role may do the action (is_owner: the ticket is the user's own).\"\"\"\n    always, own = PERMISSIONS[action]\n    return role in always or (is_owner and role in own)\n\n\ndef problem(status, detail, title=None, **extra):\n    \"\"\"An RFC 9457 problem-details response: (body, status, headers).\"\"\"\n    body = {\"type\": \"about:blank\", \"title\": title or HTTPStatus(status).phrase, \"status\": status, \"detail\": detail}\n    body.update(extra)\n    return body, status, {\"Content-Type\": \"application/problem+json\"}\n\n\nROUTES = [\n    (\"POST\", \"/users\", \"sign up as a customer\", 201),\n    (\"POST\", \"/tokens\", \"log in and get a token\", 201),\n    (\"GET\", \"/me\", \"who am I\", 200),\n    (\"GET\", \"/tickets\", \"list tickets (customers see their own)\", 200),\n    (\"POST\", \"/tickets\", \"open a ticket\", 201),\n    (\"GET\", \"/tickets/{ticket_id}\", \"read a ticket\", 200),\n    (\"PATCH\", \"/tickets/{ticket_id}\", \"change a ticket's title, body or priority\", 200),\n    (\"DELETE\", \"/tickets/{ticket_id}\", \"delete a ticket (admins)\", 204),\n    (\"POST\", \"/tickets/{ticket_id}/transitions\", \"change a ticket's status\", 200),\n    (\"PUT\", \"/tickets/{ticket_id}/assignee\", \"assign a ticket to an agent\", 200),\n    (\"GET\", \"/tickets/{ticket_id}/comments\", \"list a ticket's comments\", 200),\n    (\"POST\", \"/tickets/{ticket_id}/comments\", \"add a comment or internal note\", 201),\n    (\"GET\", \"/stats\", \"ticket counts (staff)\", 200),\n    (\"GET\", \"/healthz\", \"is the process alive\", 200),\n    (\"GET\", \"/readyz\", \"can it serve requests\", 200),\n]\n\n\ndef docs_table(routes):\n    \"\"\"The routes as a Markdown table, for the README.\"\"\"\n    lines = [\"| Method | Path | What it does | Success |\", \"|---|---|---|---|\"]\n    lines += [f\"| {m} | `{p}` | {what} | {code} {HTTPStatus(code).phrase} |\" for m, p, what, code in routes]\n    return \"\\n\".join(lines)\n"}</script></div>
+<div class="pc pc-predict" data-kind="predict" data-id="w080d2-p1"><textarea class="pc-src pc-code" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.execute(&quot;CREATE TABLE t (id INTEGER PRIMARY KEY, status TEXT NOT NULL CHECK (status IN (&#x27;open&#x27;, &#x27;closed&#x27;)))&quot;)
+conn.execute(&quot;INSERT INTO t (status) VALUES (&#x27;open&#x27;)&quot;)
+for bad in (&quot;lost&quot;, None):
+    try:
+        conn.execute(&quot;INSERT INTO t (status) VALUES (?)&quot;, (bad,))
+    except sqlite3.IntegrityError as e:
+        print(type(e).__name__, str(e).split(&quot;:&quot;)[0])
+print(conn.execute(&quot;SELECT id, status FROM t&quot;).fetchall())</textarea></div>
+<h2 id="the-schema">The schema</h2>
+<p>Four tables hold everything:</p>
+<pre><code class="language-sql">users    (id, email UNIQUE, password, role CHECK (role IN (...)), created_at)
+tickets  (id, customer_id -&gt; users, assignee_id -&gt; users, title, body,
+          priority CHECK (...), status CHECK (...), created_at, updated_at)
+comments (id, ticket_id -&gt; tickets ON DELETE CASCADE, author_id -&gt; users, body, internal, created_at)
+events   (id, ticket_id -&gt; tickets ON DELETE CASCADE, actor_id -&gt; users, kind, detail, at)
+</code></pre>
+<p>Three choices make the <strong>database</strong> enforce rules, so a bug in the code (or a hand-written fix at 2 a.m.) can&rsquo;t store nonsense:</p>
+<ul>
+<li><strong>Constraints</strong>: <code>NOT NULL</code>, <code>UNIQUE</code> on emails, and <code>CHECK</code> constraints that repeat the domain&rsquo;s lists of roles, priorities and statuses.</li>
+<li><strong>Foreign keys</strong> (<code>REFERENCES</code>): a ticket can&rsquo;t name a customer who doesn&rsquo;t exist. SQLite only enforces them after <code>PRAGMA foreign_keys = ON</code> on each connection, which <code>connect</code> does. <code>ON DELETE CASCADE</code> deletes a ticket&rsquo;s comments and events with it.</li>
+<li><strong>An audit trail</strong>: every significant change adds a row to <code>events</code> (who did what, when), written in the <strong>same transaction</strong> as the change, so the history can&rsquo;t disagree with the data.</li>
+</ul>
+<p>Times are stored as ISO 8601 text in UTC (<code>2026-11-10T09:00:00Z</code>), which sorts correctly as text. The <code>connect</code> helper sets <code>row_factory = sqlite3.Row</code>, so rows can be turned into dicts with <code>dict(row)</code>.</p>
+<pre><code class="language-python">def connect(path=&quot;:memory:&quot;):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    return conn
+</code></pre>
+<h2 id="step-6-migrations">Step 6: migrations</h2>
+<p>A database outlives the code that first created it. When the next version needs a new column or index, you can&rsquo;t drop the tables and start again: the data is there. So the schema is built by <strong>migrations</strong>: numbered changes, applied in order, each exactly once, with a table in the database recording which have run. Deploying a new version runs the ones that haven&rsquo;t (Week 77 Day 5); a fresh database runs them all.</p>
+<pre><code class="language-python">MIGRATIONS = [
+    (1, &quot;users&quot;, &quot;&quot;&quot;
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN ('customer', 'agent', 'admin')),
+            created_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (2, &quot;tickets&quot;, &quot;&quot;&quot;
+        CREATE TABLE tickets (
+            id INTEGER PRIMARY KEY,
+            customer_id INTEGER NOT NULL REFERENCES users (id),
+            assignee_id INTEGER REFERENCES users (id),
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
+            status TEXT NOT NULL DEFAULT 'open'
+                CHECK (status IN ('open', 'in_progress', 'waiting', 'resolved', 'closed')),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (3, &quot;comments and events&quot;, &quot;&quot;&quot;
+        CREATE TABLE comments (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            author_id INTEGER NOT NULL REFERENCES users (id),
+            body TEXT NOT NULL,
+            internal INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE events (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            actor_id INTEGER NOT NULL REFERENCES users (id),
+            kind TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (4, &quot;indexes&quot;, &quot;&quot;&quot;
+        CREATE INDEX idx_tickets_status ON tickets (status, id);
+        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);
+        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)&quot;&quot;&quot;),
+]
+</code></pre>
+<p>The rules for a safe migration runner:</p>
+<ul>
+<li>numbers are <code>1, 2, 3...</code> with no gaps or repeats (two people adding &ldquo;migration 5&rdquo; on different branches must be caught);</li>
+<li>each migration runs in its <strong>own transaction</strong> with its record in <code>schema_migrations</code>, so it&rsquo;s applied completely or not at all (SQLite, unlike some databases, can roll back <code>CREATE TABLE</code>);</li>
+<li>a database at a <strong>higher</strong> version than the code knows about means old code is running against a newer schema: refuse to start rather than guess.</li>
+</ul>
+<p>In Python&rsquo;s <code>sqlite3</code>, run <code>conn.execute("BEGIN")</code> to start the transaction explicitly (so the <code>CREATE</code> statements are part of it), then <code>conn.commit()</code> or, on any error, <code>conn.rollback()</code> and re-raise. <code>executescript</code> can&rsquo;t be used here, because it commits on its own; split the migration&rsquo;s SQL on <code>;</code> instead (fine for migrations you write yourself, which don&rsquo;t contain <code>;</code> inside strings).</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w080d2-step6" data-points="20"><div class="pc-label"><span>Exercise</span><span class="pc-pts">20 points</span></div><div class="pc-title">Step 6: migrations</div><div class="pc-prompt"><p>Write <code>migrate(conn, migrations=MIGRATIONS)</code>. Create the table <code>schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL)</code> if it doesn&rsquo;t exist, and commit. If the versions in <code>migrations</code> aren&rsquo;t exactly <code>1, 2, 3...</code> in order, raise <code>ValueError("migrations must be numbered 1, 2, 3... with no gaps")</code>. Read the current version (the highest recorded, or 0); if it&rsquo;s higher than the number of migrations, raise <code>RuntimeError(f"the database is at version N, newer than this code")</code>. Then apply each pending migration in order, each in its own transaction: <code>BEGIN</code>, every non-blank statement of its SQL split at <code>;</code>, then the insert into <code>schema_migrations</code>, then commit; on any error, roll back and re-raise. Return the list of versions applied.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+MIGRATIONS = [
+    (1, &quot;users&quot;, &quot;&quot;&quot;
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN (&#x27;customer&#x27;, &#x27;agent&#x27;, &#x27;admin&#x27;)),
+            created_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (2, &quot;tickets&quot;, &quot;&quot;&quot;
+        CREATE TABLE tickets (
+            id INTEGER PRIMARY KEY,
+            customer_id INTEGER NOT NULL REFERENCES users (id),
+            assignee_id INTEGER REFERENCES users (id),
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT &#x27;normal&#x27; CHECK (priority IN (&#x27;low&#x27;, &#x27;normal&#x27;, &#x27;high&#x27;, &#x27;urgent&#x27;)),
+            status TEXT NOT NULL DEFAULT &#x27;open&#x27;
+                CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;waiting&#x27;, &#x27;resolved&#x27;, &#x27;closed&#x27;)),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (3, &quot;comments and events&quot;, &quot;&quot;&quot;
+        CREATE TABLE comments (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            author_id INTEGER NOT NULL REFERENCES users (id),
+            body TEXT NOT NULL,
+            internal INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE events (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            actor_id INTEGER NOT NULL REFERENCES users (id),
+            kind TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (4, &quot;indexes&quot;, &quot;&quot;&quot;
+        CREATE INDEX idx_tickets_status ON tickets (status, id);
+        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);
+        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)&quot;&quot;&quot;),
+]
+
+def connect(path=&quot;:memory:&quot;):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    return conn
+
+
+def migrate(conn, migrations=MIGRATIONS):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_fresh_and_again():
+    &quot;everything once, then nothing&quot;
+    conn = connect()
+    assert migrate(conn) == [1, 2, 3, 4] and migrate(conn) == []
+    tables = {r[0] for r in conn.execute(&quot;SELECT name FROM sqlite_master WHERE type = &#x27;table&#x27;&quot;)}
+    assert {&quot;users&quot;, &quot;tickets&quot;, &quot;comments&quot;, &quot;events&quot;, &quot;schema_migrations&quot;} &lt;= tables
+    assert [tuple(r) for r in conn.execute(&quot;SELECT version, name FROM schema_migrations ORDER BY version&quot;)][-1] == (4, &quot;indexes&quot;)
+
+def test_partial_and_new():
+    &quot;an older database catches up&quot;
+    conn = connect()
+    assert migrate(conn, MIGRATIONS[:2]) == [1, 2]
+    assert migrate(conn) == [3, 4]
+    extra = MIGRATIONS + [(5, &quot;ticket source&quot;, &quot;ALTER TABLE tickets ADD COLUMN source TEXT NOT NULL DEFAULT &#x27;web&#x27;&quot;)]
+    assert migrate(conn, extra) == [5]
+    assert &quot;source&quot; in [r[1] for r in conn.execute(&quot;PRAGMA table_info(tickets)&quot;)]
+    try:
+        migrate(conn, MIGRATIONS)
+    except RuntimeError as e:
+        assert str(e) == &quot;the database is at version 5, newer than this code&quot;
+    else:
+        raise AssertionError(&quot;old code must not run on a newer schema&quot;)
+
+def test_failure_rolls_back():
+    &quot;a broken migration leaves nothing behind&quot;
+    conn = connect()
+    migrate(conn)
+    broken = MIGRATIONS + [(5, &quot;half-broken&quot;, &quot;CREATE TABLE tags (id INTEGER PRIMARY KEY, name TEXT); CREATE TABLE tags (id INTEGER)&quot;)]
+    try:
+        migrate(conn, broken)
+    except Exception:
+        pass
+    else:
+        raise AssertionError(&quot;the second CREATE TABLE should fail&quot;)
+    assert &quot;tags&quot; not in {r[0] for r in conn.execute(&quot;SELECT name FROM sqlite_master&quot;)}, &quot;roll back the whole migration&quot;
+    assert conn.execute(&quot;SELECT MAX(version) FROM schema_migrations&quot;).fetchone()[0] == 4
+    for bad in ([(1, &quot;a&quot;, &quot;SELECT 1&quot;), (3, &quot;c&quot;, &quot;SELECT 1&quot;)], [(2, &quot;b&quot;, &quot;SELECT 1&quot;)]):
+        try:
+            migrate(connect(), bad)
+        except ValueError as e:
+            assert str(e) == &quot;migrations must be numbered 1, 2, 3... with no gaps&quot;
+        else:
+            raise AssertionError(bad)</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+MIGRATIONS = [
+    (1, &quot;users&quot;, &quot;&quot;&quot;
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN (&#x27;customer&#x27;, &#x27;agent&#x27;, &#x27;admin&#x27;)),
+            created_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (2, &quot;tickets&quot;, &quot;&quot;&quot;
+        CREATE TABLE tickets (
+            id INTEGER PRIMARY KEY,
+            customer_id INTEGER NOT NULL REFERENCES users (id),
+            assignee_id INTEGER REFERENCES users (id),
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT &#x27;normal&#x27; CHECK (priority IN (&#x27;low&#x27;, &#x27;normal&#x27;, &#x27;high&#x27;, &#x27;urgent&#x27;)),
+            status TEXT NOT NULL DEFAULT &#x27;open&#x27;
+                CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;waiting&#x27;, &#x27;resolved&#x27;, &#x27;closed&#x27;)),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (3, &quot;comments and events&quot;, &quot;&quot;&quot;
+        CREATE TABLE comments (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            author_id INTEGER NOT NULL REFERENCES users (id),
+            body TEXT NOT NULL,
+            internal INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE events (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            actor_id INTEGER NOT NULL REFERENCES users (id),
+            kind TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (4, &quot;indexes&quot;, &quot;&quot;&quot;
+        CREATE INDEX idx_tickets_status ON tickets (status, id);
+        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);
+        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)&quot;&quot;&quot;),
+]
+
+def connect(path=&quot;:memory:&quot;):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    return conn
+
+def migrate(conn, migrations=MIGRATIONS):
+    &quot;&quot;&quot;Apply the migrations the database hasn&#x27;t had yet, each in its own transaction. Returns their versions.&quot;&quot;&quot;
+    conn.execute(&quot;CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL)&quot;)
+    conn.commit()
+    versions = [v for v, _, _ in migrations]
+    if versions != list(range(1, len(versions) + 1)):
+        raise ValueError(&quot;migrations must be numbered 1, 2, 3... with no gaps&quot;)
+    current = conn.execute(&quot;SELECT COALESCE(MAX(version), 0) FROM schema_migrations&quot;).fetchone()[0]
+    if current &gt; len(versions):
+        raise RuntimeError(f&quot;the database is at version {current}, newer than this code&quot;)
+    applied = []
+    for version, name, sql in migrations[current:]:
+        try:
+            conn.execute(&quot;BEGIN&quot;)
+            for statement in sql.split(&quot;;&quot;):
+                if statement.strip():
+                    conn.execute(statement)
+            conn.execute(&quot;INSERT INTO schema_migrations (version, name) VALUES (?, ?)&quot;, (version, name))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        applied.append(version)
+    return applied</textarea></div>
+<h2 id="step-7-users-and-tickets">Step 7: users and tickets</h2>
+<p>The basic operations are small functions, each one query (or one transaction), all with parameters. Two details matter:</p>
+<ul>
+<li><strong>Translate database errors into domain errors.</strong> A duplicate email is an <code>sqlite3.IntegrityError</code>, but the web layer shouldn&rsquo;t need to know that; <code>create_user</code> raises <code>ValueError("email already registered")</code>, which tomorrow becomes a <code>409</code>.</li>
+<li><strong>Return plain dicts</strong>, not database rows or cursors, so the layers above don&rsquo;t depend on the database library either.</li>
+</ul>
+<p>Creating a ticket writes two rows, the ticket and its <code>created</code> event, in one transaction. In Python&rsquo;s <code>sqlite3</code>, <strong><code>with conn:</code></strong> commits the transaction when the block finishes, or rolls it back if it raises.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w080d2-step7" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Step 7: users and tickets</div><div class="pc-prompt"><p>Write <code>create_user(conn, email, password_hash, role, now)</code>: insert a user (with <code>created_at</code> set to <code>now</code>) inside <code>with conn:</code> and return the new id; a duplicate email (an <code>sqlite3.IntegrityError</code> whose message contains <code>UNIQUE</code>) raises <code>ValueError("email already registered")</code>, while any other integrity error (such as a role the <code>CHECK</code> constraint refuses) is re-raised unchanged. <code>get_user(conn, user_id)</code>: a dict with <code>id</code>, <code>email</code>, <code>role</code> and <code>created_at</code> (never the password), or <code>None</code>. <code>get_user_by_email(conn, email)</code>: a dict with <code>id</code>, <code>email</code>, <code>password</code> and <code>role</code>, or <code>None</code>. <code>get_ticket(conn, ticket_id)</code>: every column as a dict, or <code>None</code>. And <code>create_ticket(conn, customer_id, clean, now)</code>: in one transaction, insert the ticket (<code>title</code>, <code>body</code>, <code>priority</code> from the <code>clean</code> dict, defaulting to <code>"normal"</code>; <code>created_at</code> and <code>updated_at</code> both <code>now</code>) and an event <code>(ticket_id, customer_id, "created", TITLE, now)</code> using the given <code>_event</code>; return the new ticket from <code>get_ticket</code>.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+MIGRATIONS = [
+    (1, &quot;users&quot;, &quot;&quot;&quot;
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN (&#x27;customer&#x27;, &#x27;agent&#x27;, &#x27;admin&#x27;)),
+            created_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (2, &quot;tickets&quot;, &quot;&quot;&quot;
+        CREATE TABLE tickets (
+            id INTEGER PRIMARY KEY,
+            customer_id INTEGER NOT NULL REFERENCES users (id),
+            assignee_id INTEGER REFERENCES users (id),
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT &#x27;normal&#x27; CHECK (priority IN (&#x27;low&#x27;, &#x27;normal&#x27;, &#x27;high&#x27;, &#x27;urgent&#x27;)),
+            status TEXT NOT NULL DEFAULT &#x27;open&#x27;
+                CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;waiting&#x27;, &#x27;resolved&#x27;, &#x27;closed&#x27;)),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (3, &quot;comments and events&quot;, &quot;&quot;&quot;
+        CREATE TABLE comments (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            author_id INTEGER NOT NULL REFERENCES users (id),
+            body TEXT NOT NULL,
+            internal INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE events (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            actor_id INTEGER NOT NULL REFERENCES users (id),
+            kind TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (4, &quot;indexes&quot;, &quot;&quot;&quot;
+        CREATE INDEX idx_tickets_status ON tickets (status, id);
+        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);
+        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)&quot;&quot;&quot;),
+]
+
+def connect(path=&quot;:memory:&quot;):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    return conn
+
+def migrate(conn, migrations=MIGRATIONS):
+    &quot;&quot;&quot;Apply the migrations the database hasn&#x27;t had yet, each in its own transaction. Returns their versions.&quot;&quot;&quot;
+    conn.execute(&quot;CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL)&quot;)
+    conn.commit()
+    versions = [v for v, _, _ in migrations]
+    if versions != list(range(1, len(versions) + 1)):
+        raise ValueError(&quot;migrations must be numbered 1, 2, 3... with no gaps&quot;)
+    current = conn.execute(&quot;SELECT COALESCE(MAX(version), 0) FROM schema_migrations&quot;).fetchone()[0]
+    if current &gt; len(versions):
+        raise RuntimeError(f&quot;the database is at version {current}, newer than this code&quot;)
+    applied = []
+    for version, name, sql in migrations[current:]:
+        try:
+            conn.execute(&quot;BEGIN&quot;)
+            for statement in sql.split(&quot;;&quot;):
+                if statement.strip():
+                    conn.execute(statement)
+            conn.execute(&quot;INSERT INTO schema_migrations (version, name) VALUES (?, ?)&quot;, (version, name))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        applied.append(version)
+    return applied
+
+def _dict(row):
+    return dict(row) if row is not None else None
+
+def _event(conn, ticket_id, actor_id, kind, detail, now):
+    conn.execute(&quot;INSERT INTO events (ticket_id, actor_id, kind, detail, at) VALUES (?, ?, ?, ?, ?)&quot;,
+                 (ticket_id, actor_id, kind, detail, now))
+
+
+def create_user(conn, email, password_hash, role, now):
+    ___
+
+
+def get_user(conn, user_id):
+    ___
+
+
+def get_user_by_email(conn, email):
+    ___
+
+
+def get_ticket(conn, ticket_id):
+    ___
+
+
+def create_ticket(conn, customer_id, clean, now):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def _db():
+    conn = connect()
+    migrate(conn)
+    return conn
+
+def test_users():
+    &quot;users, without passwords leaking&quot;
+    conn = _db()
+    ada = create_user(conn, &quot;ada@example.org&quot;, &quot;pbkdf2_sha256$...&quot;, &quot;customer&quot;, &quot;2026-11-10T09:00:00Z&quot;)
+    assert ada == 1 and get_user(conn, 1) == {&quot;id&quot;: 1, &quot;email&quot;: &quot;ada@example.org&quot;, &quot;role&quot;: &quot;customer&quot;, &quot;created_at&quot;: &quot;2026-11-10T09:00:00Z&quot;}
+    assert get_user_by_email(conn, &quot;ada@example.org&quot;)[&quot;password&quot;] == &quot;pbkdf2_sha256$...&quot; and get_user_by_email(conn, &quot;x@y.z&quot;) is None
+    assert get_user(conn, 99) is None
+    try:
+        create_user(conn, &quot;ada@example.org&quot;, &quot;h&quot;, &quot;customer&quot;, &quot;t&quot;)
+    except ValueError as e:
+        assert str(e) == &quot;email already registered&quot;
+    else:
+        raise AssertionError(&quot;duplicate&quot;)
+    try:
+        create_user(conn, &quot;eve@example.org&quot;, &quot;h&quot;, &quot;superuser&quot;, &quot;t&quot;)
+    except ValueError:
+        raise AssertionError(&quot;a bad role is a programming error, not a duplicate&quot;)
+    except sqlite3.IntegrityError:
+        pass
+
+def test_tickets():
+    &quot;a ticket and its event, together&quot;
+    conn = _db()
+    ada = create_user(conn, &quot;ada@example.org&quot;, &quot;h&quot;, &quot;customer&quot;, &quot;t0&quot;)
+    t = create_ticket(conn, ada, {&quot;title&quot;: &quot;Printer on fire&quot;, &quot;body&quot;: &quot;Smoke&quot;, &quot;priority&quot;: &quot;urgent&quot;}, &quot;2026-11-10T09:01:00Z&quot;)
+    assert t == {&quot;id&quot;: 1, &quot;customer_id&quot;: 1, &quot;assignee_id&quot;: None, &quot;title&quot;: &quot;Printer on fire&quot;, &quot;body&quot;: &quot;Smoke&quot;, &quot;priority&quot;: &quot;urgent&quot;,
+                 &quot;status&quot;: &quot;open&quot;, &quot;created_at&quot;: &quot;2026-11-10T09:01:00Z&quot;, &quot;updated_at&quot;: &quot;2026-11-10T09:01:00Z&quot;}
+    assert create_ticket(conn, ada, {&quot;title&quot;: &quot;Mouse&quot;, &quot;body&quot;: &quot;Gone&quot;}, &quot;t2&quot;)[&quot;priority&quot;] == &quot;normal&quot;
+    assert [tuple(r) for r in conn.execute(&quot;SELECT ticket_id, actor_id, kind, detail FROM events&quot;)] == [(1, 1, &quot;created&quot;, &quot;Printer on fire&quot;), (2, 1, &quot;created&quot;, &quot;Mouse&quot;)]
+    try:
+        create_ticket(conn, 42, {&quot;title&quot;: &quot;Nobody&quot;, &quot;body&quot;: &quot;x&quot;}, &quot;t3&quot;)
+    except sqlite3.IntegrityError:
+        pass
+    else:
+        raise AssertionError(&quot;foreign keys must stop a ticket for a missing user&quot;)
+    assert conn.execute(&quot;SELECT count(*) FROM events&quot;).fetchone()[0] == 2 and get_ticket(conn, 3) is None</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+MIGRATIONS = [
+    (1, &quot;users&quot;, &quot;&quot;&quot;
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN (&#x27;customer&#x27;, &#x27;agent&#x27;, &#x27;admin&#x27;)),
+            created_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (2, &quot;tickets&quot;, &quot;&quot;&quot;
+        CREATE TABLE tickets (
+            id INTEGER PRIMARY KEY,
+            customer_id INTEGER NOT NULL REFERENCES users (id),
+            assignee_id INTEGER REFERENCES users (id),
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT &#x27;normal&#x27; CHECK (priority IN (&#x27;low&#x27;, &#x27;normal&#x27;, &#x27;high&#x27;, &#x27;urgent&#x27;)),
+            status TEXT NOT NULL DEFAULT &#x27;open&#x27;
+                CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;waiting&#x27;, &#x27;resolved&#x27;, &#x27;closed&#x27;)),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (3, &quot;comments and events&quot;, &quot;&quot;&quot;
+        CREATE TABLE comments (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            author_id INTEGER NOT NULL REFERENCES users (id),
+            body TEXT NOT NULL,
+            internal INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE events (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            actor_id INTEGER NOT NULL REFERENCES users (id),
+            kind TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (4, &quot;indexes&quot;, &quot;&quot;&quot;
+        CREATE INDEX idx_tickets_status ON tickets (status, id);
+        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);
+        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)&quot;&quot;&quot;),
+]
+
+def connect(path=&quot;:memory:&quot;):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    return conn
+
+def migrate(conn, migrations=MIGRATIONS):
+    &quot;&quot;&quot;Apply the migrations the database hasn&#x27;t had yet, each in its own transaction. Returns their versions.&quot;&quot;&quot;
+    conn.execute(&quot;CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL)&quot;)
+    conn.commit()
+    versions = [v for v, _, _ in migrations]
+    if versions != list(range(1, len(versions) + 1)):
+        raise ValueError(&quot;migrations must be numbered 1, 2, 3... with no gaps&quot;)
+    current = conn.execute(&quot;SELECT COALESCE(MAX(version), 0) FROM schema_migrations&quot;).fetchone()[0]
+    if current &gt; len(versions):
+        raise RuntimeError(f&quot;the database is at version {current}, newer than this code&quot;)
+    applied = []
+    for version, name, sql in migrations[current:]:
+        try:
+            conn.execute(&quot;BEGIN&quot;)
+            for statement in sql.split(&quot;;&quot;):
+                if statement.strip():
+                    conn.execute(statement)
+            conn.execute(&quot;INSERT INTO schema_migrations (version, name) VALUES (?, ?)&quot;, (version, name))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        applied.append(version)
+    return applied
+
+def _dict(row):
+    return dict(row) if row is not None else None
+
+def _event(conn, ticket_id, actor_id, kind, detail, now):
+    conn.execute(&quot;INSERT INTO events (ticket_id, actor_id, kind, detail, at) VALUES (?, ?, ?, ?, ?)&quot;,
+                 (ticket_id, actor_id, kind, detail, now))
+
+def create_user(conn, email, password_hash, role, now):
+    try:
+        with conn:
+            cur = conn.execute(&quot;INSERT INTO users (email, password, role, created_at) VALUES (?, ?, ?, ?)&quot;,
+                               (email, password_hash, role, now))
+    except sqlite3.IntegrityError as e:
+        if &quot;UNIQUE&quot; not in str(e):
+            raise
+        raise ValueError(&quot;email already registered&quot;) from None
+    return cur.lastrowid
+
+def get_user(conn, user_id):
+    return _dict(conn.execute(&quot;SELECT id, email, role, created_at FROM users WHERE id = ?&quot;, (user_id,)).fetchone())
+
+def get_user_by_email(conn, email):
+    return _dict(conn.execute(&quot;SELECT id, email, password, role FROM users WHERE email = ?&quot;, (email,)).fetchone())
+
+def create_ticket(conn, customer_id, clean, now):
+    with conn:
+        cur = conn.execute(
+            &quot;INSERT INTO tickets (customer_id, title, body, priority, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)&quot;,
+            (customer_id, clean[&quot;title&quot;], clean[&quot;body&quot;], clean.get(&quot;priority&quot;, &quot;normal&quot;), now, now))
+        _event(conn, cur.lastrowid, customer_id, &quot;created&quot;, clean[&quot;title&quot;], now)
+    return get_ticket(conn, cur.lastrowid)
+
+def get_ticket(conn, ticket_id):
+    return _dict(conn.execute(&quot;SELECT * FROM tickets WHERE id = ?&quot;, (ticket_id,)).fetchone())</textarea></div>
+<h2 id="step-8-listing-tickets">Step 8: listing tickets</h2>
+<p>The ticket list is the API&rsquo;s busiest query, with optional filters (status, priority, assignee, a search in the title, and, for customers, only their own tickets) and <strong>cursor pagination</strong> (Week 77): instead of &ldquo;page 3&rdquo;, the client sends the id of the last ticket it has seen, and gets the next ones after it. Cursors don&rsquo;t skip or repeat items when tickets are added meanwhile, and they stay fast on page 1000, because <code>WHERE id &gt; ? ORDER BY id LIMIT ?</code> walks an index instead of counting past everything before.</p>
+<p>Building a query with optional filters is where injection creeps in, so the rule from Week 79 applies exactly: the SQL text is built only from <strong>fixed pieces written in the code</strong> (<code>"status = ?"</code>), and every value is a parameter. To know whether there&rsquo;s a next page without a second query, ask for <strong>one more</strong> row than the limit: if it comes back, there&rsquo;s more, and the cursor is the last id on this page.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w080d2-step8" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Step 8: listing tickets</div><div class="pc-prompt"><p>Write <code>list_tickets(conn, customer_id=None, status=None, priority=None, assignee_id=None, q=None, after_id=0, limit=20)</code>: tickets (as dicts) with <code>id &gt; after_id</code> that match every filter given (equality for the first four; <code>q</code> matches titles containing it, using <code>LIKE ? ESCAPE '\'</code> with <code>%</code>, <code>_</code> and <code>\</code> escaped by the given <code>_like</code>), ordered by id, at most <code>limit</code>. Return <code>(items, next_after)</code>, where <code>next_after</code> is the last item&rsquo;s id if there are more matching tickets after this page, else <code>None</code>. Build the <code>WHERE</code> clause only from fixed strings; all values are parameters.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+MIGRATIONS = [
+    (1, &quot;users&quot;, &quot;&quot;&quot;
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN (&#x27;customer&#x27;, &#x27;agent&#x27;, &#x27;admin&#x27;)),
+            created_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (2, &quot;tickets&quot;, &quot;&quot;&quot;
+        CREATE TABLE tickets (
+            id INTEGER PRIMARY KEY,
+            customer_id INTEGER NOT NULL REFERENCES users (id),
+            assignee_id INTEGER REFERENCES users (id),
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT &#x27;normal&#x27; CHECK (priority IN (&#x27;low&#x27;, &#x27;normal&#x27;, &#x27;high&#x27;, &#x27;urgent&#x27;)),
+            status TEXT NOT NULL DEFAULT &#x27;open&#x27;
+                CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;waiting&#x27;, &#x27;resolved&#x27;, &#x27;closed&#x27;)),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (3, &quot;comments and events&quot;, &quot;&quot;&quot;
+        CREATE TABLE comments (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            author_id INTEGER NOT NULL REFERENCES users (id),
+            body TEXT NOT NULL,
+            internal INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE events (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            actor_id INTEGER NOT NULL REFERENCES users (id),
+            kind TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (4, &quot;indexes&quot;, &quot;&quot;&quot;
+        CREATE INDEX idx_tickets_status ON tickets (status, id);
+        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);
+        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)&quot;&quot;&quot;),
+]
+
+def connect(path=&quot;:memory:&quot;):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    return conn
+
+def migrate(conn, migrations=MIGRATIONS):
+    &quot;&quot;&quot;Apply the migrations the database hasn&#x27;t had yet, each in its own transaction. Returns their versions.&quot;&quot;&quot;
+    conn.execute(&quot;CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL)&quot;)
+    conn.commit()
+    versions = [v for v, _, _ in migrations]
+    if versions != list(range(1, len(versions) + 1)):
+        raise ValueError(&quot;migrations must be numbered 1, 2, 3... with no gaps&quot;)
+    current = conn.execute(&quot;SELECT COALESCE(MAX(version), 0) FROM schema_migrations&quot;).fetchone()[0]
+    if current &gt; len(versions):
+        raise RuntimeError(f&quot;the database is at version {current}, newer than this code&quot;)
+    applied = []
+    for version, name, sql in migrations[current:]:
+        try:
+            conn.execute(&quot;BEGIN&quot;)
+            for statement in sql.split(&quot;;&quot;):
+                if statement.strip():
+                    conn.execute(statement)
+            conn.execute(&quot;INSERT INTO schema_migrations (version, name) VALUES (?, ?)&quot;, (version, name))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        applied.append(version)
+    return applied
+
+def _dict(row):
+    return dict(row) if row is not None else None
+
+def _event(conn, ticket_id, actor_id, kind, detail, now):
+    conn.execute(&quot;INSERT INTO events (ticket_id, actor_id, kind, detail, at) VALUES (?, ?, ?, ?, ?)&quot;,
+                 (ticket_id, actor_id, kind, detail, now))
+
+def create_user(conn, email, password_hash, role, now):
+    try:
+        with conn:
+            cur = conn.execute(&quot;INSERT INTO users (email, password, role, created_at) VALUES (?, ?, ?, ?)&quot;,
+                               (email, password_hash, role, now))
+    except sqlite3.IntegrityError as e:
+        if &quot;UNIQUE&quot; not in str(e):
+            raise
+        raise ValueError(&quot;email already registered&quot;) from None
+    return cur.lastrowid
+
+def get_user(conn, user_id):
+    return _dict(conn.execute(&quot;SELECT id, email, role, created_at FROM users WHERE id = ?&quot;, (user_id,)).fetchone())
+
+def create_ticket(conn, customer_id, clean, now):
+    with conn:
+        cur = conn.execute(
+            &quot;INSERT INTO tickets (customer_id, title, body, priority, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)&quot;,
+            (customer_id, clean[&quot;title&quot;], clean[&quot;body&quot;], clean.get(&quot;priority&quot;, &quot;normal&quot;), now, now))
+        _event(conn, cur.lastrowid, customer_id, &quot;created&quot;, clean[&quot;title&quot;], now)
+    return get_ticket(conn, cur.lastrowid)
+
+def get_ticket(conn, ticket_id):
+    return _dict(conn.execute(&quot;SELECT * FROM tickets WHERE id = ?&quot;, (ticket_id,)).fetchone())
+
+def _like(text):
+    return &quot;%&quot; + text.replace(&quot;\\&quot;, &quot;\\\\&quot;).replace(&quot;%&quot;, &quot;\\%&quot;).replace(&quot;_&quot;, &quot;\\_&quot;) + &quot;%&quot;
+
+
+def list_tickets(conn, customer_id=None, status=None, priority=None, assignee_id=None, q=None, after_id=0, limit=20):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def _db():
+    conn = connect()
+    migrate(conn)
+    ada = create_user(conn, &quot;ada@example.org&quot;, &quot;h&quot;, &quot;customer&quot;, &quot;t&quot;)
+    bob = create_user(conn, &quot;bob@example.org&quot;, &quot;h&quot;, &quot;customer&quot;, &quot;t&quot;)
+    for i, (who, title, prio) in enumerate([(ada, &quot;Printer on fire&quot;, &quot;urgent&quot;), (bob, &quot;100% CPU&quot;, &quot;high&quot;), (ada, &quot;Mouse gone&quot;, &quot;low&quot;),
+                                           (bob, &quot;Printer jam&quot;, &quot;normal&quot;), (ada, &quot;Email_bounces&quot;, &quot;normal&quot;)]):
+        create_ticket(conn, who, {&quot;title&quot;: title, &quot;body&quot;: &quot;x&quot;, &quot;priority&quot;: prio}, f&quot;t{i}&quot;)
+    conn.execute(&quot;UPDATE tickets SET status = &#x27;closed&#x27; WHERE id = 3&quot;)
+    conn.commit()
+    return conn
+
+def test_filters():
+    &quot;filters combine&quot;
+    conn = _db()
+    ids = lambda **kw: [t[&quot;id&quot;] for t in list_tickets(conn, **kw)[0]]
+    assert ids() == [1, 2, 3, 4, 5] and ids(customer_id=1) == [1, 3, 5] and ids(status=&quot;open&quot;, customer_id=1) == [1, 5]
+    assert ids(priority=&quot;normal&quot;) == [4, 5] and ids(q=&quot;printer&quot;) == [1, 4] and ids(q=&quot;%&quot;) == [2] and ids(q=&quot;r_j&quot;) == [] and ids(q=&quot;l_b&quot;) == [5]
+    assert ids(q=&quot;_&quot;) == [5] and ids(customer_id=2, q=&quot;printer&quot;) == [4] and ids(assignee_id=7) == []
+    assert ids(status=&quot;open&#x27; OR &#x27;1&#x27;=&#x27;1&quot;) == []
+
+def test_pages():
+    &quot;cursor pagination&quot;
+    conn = _db()
+    page, after = list_tickets(conn, limit=2)
+    assert [t[&quot;id&quot;] for t in page] == [1, 2] and after == 2
+    page, after = list_tickets(conn, after_id=after, limit=2)
+    assert [t[&quot;id&quot;] for t in page] == [3, 4] and after == 4
+    page, after = list_tickets(conn, after_id=after, limit=2)
+    assert [t[&quot;id&quot;] for t in page] == [5] and after is None
+    assert list_tickets(conn, customer_id=1, limit=3) == (list_tickets(conn, customer_id=1)[0], None)
+    assert list_tickets(conn, after_id=5) == ([], None)</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+MIGRATIONS = [
+    (1, &quot;users&quot;, &quot;&quot;&quot;
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN (&#x27;customer&#x27;, &#x27;agent&#x27;, &#x27;admin&#x27;)),
+            created_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (2, &quot;tickets&quot;, &quot;&quot;&quot;
+        CREATE TABLE tickets (
+            id INTEGER PRIMARY KEY,
+            customer_id INTEGER NOT NULL REFERENCES users (id),
+            assignee_id INTEGER REFERENCES users (id),
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT &#x27;normal&#x27; CHECK (priority IN (&#x27;low&#x27;, &#x27;normal&#x27;, &#x27;high&#x27;, &#x27;urgent&#x27;)),
+            status TEXT NOT NULL DEFAULT &#x27;open&#x27;
+                CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;waiting&#x27;, &#x27;resolved&#x27;, &#x27;closed&#x27;)),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (3, &quot;comments and events&quot;, &quot;&quot;&quot;
+        CREATE TABLE comments (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            author_id INTEGER NOT NULL REFERENCES users (id),
+            body TEXT NOT NULL,
+            internal INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE events (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            actor_id INTEGER NOT NULL REFERENCES users (id),
+            kind TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (4, &quot;indexes&quot;, &quot;&quot;&quot;
+        CREATE INDEX idx_tickets_status ON tickets (status, id);
+        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);
+        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)&quot;&quot;&quot;),
+]
+
+def connect(path=&quot;:memory:&quot;):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    return conn
+
+def migrate(conn, migrations=MIGRATIONS):
+    &quot;&quot;&quot;Apply the migrations the database hasn&#x27;t had yet, each in its own transaction. Returns their versions.&quot;&quot;&quot;
+    conn.execute(&quot;CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL)&quot;)
+    conn.commit()
+    versions = [v for v, _, _ in migrations]
+    if versions != list(range(1, len(versions) + 1)):
+        raise ValueError(&quot;migrations must be numbered 1, 2, 3... with no gaps&quot;)
+    current = conn.execute(&quot;SELECT COALESCE(MAX(version), 0) FROM schema_migrations&quot;).fetchone()[0]
+    if current &gt; len(versions):
+        raise RuntimeError(f&quot;the database is at version {current}, newer than this code&quot;)
+    applied = []
+    for version, name, sql in migrations[current:]:
+        try:
+            conn.execute(&quot;BEGIN&quot;)
+            for statement in sql.split(&quot;;&quot;):
+                if statement.strip():
+                    conn.execute(statement)
+            conn.execute(&quot;INSERT INTO schema_migrations (version, name) VALUES (?, ?)&quot;, (version, name))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        applied.append(version)
+    return applied
+
+def _dict(row):
+    return dict(row) if row is not None else None
+
+def _event(conn, ticket_id, actor_id, kind, detail, now):
+    conn.execute(&quot;INSERT INTO events (ticket_id, actor_id, kind, detail, at) VALUES (?, ?, ?, ?, ?)&quot;,
+                 (ticket_id, actor_id, kind, detail, now))
+
+def create_user(conn, email, password_hash, role, now):
+    try:
+        with conn:
+            cur = conn.execute(&quot;INSERT INTO users (email, password, role, created_at) VALUES (?, ?, ?, ?)&quot;,
+                               (email, password_hash, role, now))
+    except sqlite3.IntegrityError as e:
+        if &quot;UNIQUE&quot; not in str(e):
+            raise
+        raise ValueError(&quot;email already registered&quot;) from None
+    return cur.lastrowid
+
+def get_user(conn, user_id):
+    return _dict(conn.execute(&quot;SELECT id, email, role, created_at FROM users WHERE id = ?&quot;, (user_id,)).fetchone())
+
+def create_ticket(conn, customer_id, clean, now):
+    with conn:
+        cur = conn.execute(
+            &quot;INSERT INTO tickets (customer_id, title, body, priority, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)&quot;,
+            (customer_id, clean[&quot;title&quot;], clean[&quot;body&quot;], clean.get(&quot;priority&quot;, &quot;normal&quot;), now, now))
+        _event(conn, cur.lastrowid, customer_id, &quot;created&quot;, clean[&quot;title&quot;], now)
+    return get_ticket(conn, cur.lastrowid)
+
+def get_ticket(conn, ticket_id):
+    return _dict(conn.execute(&quot;SELECT * FROM tickets WHERE id = ?&quot;, (ticket_id,)).fetchone())
+
+def _like(text):
+    return &quot;%&quot; + text.replace(&quot;\\&quot;, &quot;\\\\&quot;).replace(&quot;%&quot;, &quot;\\%&quot;).replace(&quot;_&quot;, &quot;\\_&quot;) + &quot;%&quot;
+
+def list_tickets(conn, customer_id=None, status=None, priority=None, assignee_id=None, q=None, after_id=0, limit=20):
+    &quot;&quot;&quot;Tickets matching the filters, by id, after a cursor. Returns (items, next_after or None).&quot;&quot;&quot;
+    where, values = [&quot;id &gt; ?&quot;], [after_id]
+    for column, value in ((&quot;customer_id&quot;, customer_id), (&quot;status&quot;, status), (&quot;priority&quot;, priority), (&quot;assignee_id&quot;, assignee_id)):
+        if value is not None:
+            where.append(f&quot;{column} = ?&quot;)
+            values.append(value)
+    if q:
+        where.append(&quot;title LIKE ? ESCAPE &#x27;\\&#x27;&quot;)
+        values.append(_like(q))
+    rows = conn.execute(f&quot;SELECT * FROM tickets WHERE {&#x27; AND &#x27;.join(where)} ORDER BY id LIMIT ?&quot;, values + [limit + 1]).fetchall()
+    items = [dict(r) for r in rows[:limit]]
+    return items, (items[-1][&quot;id&quot;] if len(rows) &gt; limit else None)</textarea></div>
+<h2 id="step-9-changes-that-can-t-half-happen">Step 9: changes that can&rsquo;t half-happen</h2>
+<p>Three operations change tickets, and each must be safe when things go wrong or happen at once:</p>
+<ul>
+<li><strong>Status changes and lost updates.</strong> Two agents load ticket 7 (status <code>in_progress</code>). One marks it <code>resolved</code>; a moment later the other, still looking at <code>in_progress</code>, marks it <code>waiting</code>. A plain <code>UPDATE ... SET status = 'waiting' WHERE id = 7</code> silently overwrites the resolution. The fix is a <strong>conditional update</strong>: <code>UPDATE ... WHERE id = ? AND status = ?</code> with the status the agent saw. If someone changed it meanwhile, no row matches (<code>cursor.rowcount == 0</code>), and the function raises <code>ConflictError</code>, which becomes a <code>409</code> asking the person to reload. This is Week 77&rsquo;s ETag idea, in the database.</li>
+<li><strong>Assignment</strong> must check that the assignee is staff, and records an event.</li>
+<li><strong>Comments</strong> insert the comment and touch the ticket&rsquo;s <code>updated_at</code>, in one transaction.</li>
+</ul>
+<p>Each writes its change and its <code>events</code> row inside one <code>with conn:</code> block: if anything fails, neither is kept.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w080d2-step9" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Step 9: changes that can&rsquo;t half-happen</div><div class="pc-prompt"><p>Write <code>change_status(conn, ticket_id, expected, new, actor_id, now)</code>: in one transaction, set the ticket&rsquo;s status to <code>new</code> and <code>updated_at</code> to <code>now</code>, <strong>only if</strong> its status is still <code>expected</code>; if no row was updated, raise <code>ConflictError(f"ticket N is no longer EXPECTED")</code> (which also rolls the transaction back); otherwise add the event <code>(ticket_id, actor_id, "status", "EXPECTED-&gt;NEW", now)</code> and return the ticket. <code>assign(conn, ticket_id, agent_id, actor_id, now)</code>: raise <code>ValueError(f"user N is not an agent")</code> unless that user exists with role <code>agent</code> or <code>admin</code>; then set <code>assignee_id</code> and <code>updated_at</code>, add the event <code>"assigned"</code> with detail <code>str(agent_id)</code>, and return the ticket. <code>add_comment(conn, ticket_id, author_id, body, internal, now)</code>: insert the comment (<code>internal</code> stored as <code>0</code> or <code>1</code>) and update the ticket&rsquo;s <code>updated_at</code>, together; return the comment as a dict. <code>list_comments(conn, ticket_id, include_internal)</code>: the ticket&rsquo;s comments by id, leaving out internal ones unless <code>include_internal</code>.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+MIGRATIONS = [
+    (1, &quot;users&quot;, &quot;&quot;&quot;
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN (&#x27;customer&#x27;, &#x27;agent&#x27;, &#x27;admin&#x27;)),
+            created_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (2, &quot;tickets&quot;, &quot;&quot;&quot;
+        CREATE TABLE tickets (
+            id INTEGER PRIMARY KEY,
+            customer_id INTEGER NOT NULL REFERENCES users (id),
+            assignee_id INTEGER REFERENCES users (id),
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT &#x27;normal&#x27; CHECK (priority IN (&#x27;low&#x27;, &#x27;normal&#x27;, &#x27;high&#x27;, &#x27;urgent&#x27;)),
+            status TEXT NOT NULL DEFAULT &#x27;open&#x27;
+                CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;waiting&#x27;, &#x27;resolved&#x27;, &#x27;closed&#x27;)),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (3, &quot;comments and events&quot;, &quot;&quot;&quot;
+        CREATE TABLE comments (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            author_id INTEGER NOT NULL REFERENCES users (id),
+            body TEXT NOT NULL,
+            internal INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE events (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            actor_id INTEGER NOT NULL REFERENCES users (id),
+            kind TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (4, &quot;indexes&quot;, &quot;&quot;&quot;
+        CREATE INDEX idx_tickets_status ON tickets (status, id);
+        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);
+        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)&quot;&quot;&quot;),
+]
+
+def connect(path=&quot;:memory:&quot;):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    return conn
+
+def migrate(conn, migrations=MIGRATIONS):
+    &quot;&quot;&quot;Apply the migrations the database hasn&#x27;t had yet, each in its own transaction. Returns their versions.&quot;&quot;&quot;
+    conn.execute(&quot;CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL)&quot;)
+    conn.commit()
+    versions = [v for v, _, _ in migrations]
+    if versions != list(range(1, len(versions) + 1)):
+        raise ValueError(&quot;migrations must be numbered 1, 2, 3... with no gaps&quot;)
+    current = conn.execute(&quot;SELECT COALESCE(MAX(version), 0) FROM schema_migrations&quot;).fetchone()[0]
+    if current &gt; len(versions):
+        raise RuntimeError(f&quot;the database is at version {current}, newer than this code&quot;)
+    applied = []
+    for version, name, sql in migrations[current:]:
+        try:
+            conn.execute(&quot;BEGIN&quot;)
+            for statement in sql.split(&quot;;&quot;):
+                if statement.strip():
+                    conn.execute(statement)
+            conn.execute(&quot;INSERT INTO schema_migrations (version, name) VALUES (?, ?)&quot;, (version, name))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        applied.append(version)
+    return applied
+
+def _dict(row):
+    return dict(row) if row is not None else None
+
+def _event(conn, ticket_id, actor_id, kind, detail, now):
+    conn.execute(&quot;INSERT INTO events (ticket_id, actor_id, kind, detail, at) VALUES (?, ?, ?, ?, ?)&quot;,
+                 (ticket_id, actor_id, kind, detail, now))
+
+def create_user(conn, email, password_hash, role, now):
+    try:
+        with conn:
+            cur = conn.execute(&quot;INSERT INTO users (email, password, role, created_at) VALUES (?, ?, ?, ?)&quot;,
+                               (email, password_hash, role, now))
+    except sqlite3.IntegrityError as e:
+        if &quot;UNIQUE&quot; not in str(e):
+            raise
+        raise ValueError(&quot;email already registered&quot;) from None
+    return cur.lastrowid
+
+def get_user(conn, user_id):
+    return _dict(conn.execute(&quot;SELECT id, email, role, created_at FROM users WHERE id = ?&quot;, (user_id,)).fetchone())
+
+def create_ticket(conn, customer_id, clean, now):
+    with conn:
+        cur = conn.execute(
+            &quot;INSERT INTO tickets (customer_id, title, body, priority, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)&quot;,
+            (customer_id, clean[&quot;title&quot;], clean[&quot;body&quot;], clean.get(&quot;priority&quot;, &quot;normal&quot;), now, now))
+        _event(conn, cur.lastrowid, customer_id, &quot;created&quot;, clean[&quot;title&quot;], now)
+    return get_ticket(conn, cur.lastrowid)
+
+def get_ticket(conn, ticket_id):
+    return _dict(conn.execute(&quot;SELECT * FROM tickets WHERE id = ?&quot;, (ticket_id,)).fetchone())
+
+class ConflictError(Exception):
+    &quot;&quot;&quot;The row changed since it was read.&quot;&quot;&quot;
+
+
+def change_status(conn, ticket_id, expected, new, actor_id, now):
+    ___
+
+
+def assign(conn, ticket_id, agent_id, actor_id, now):
+    ___
+
+
+def add_comment(conn, ticket_id, author_id, body, internal, now):
+    ___
+
+
+def list_comments(conn, ticket_id, include_internal):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def _db():
+    conn = connect()
+    migrate(conn)
+    create_user(conn, &quot;ada@example.org&quot;, &quot;h&quot;, &quot;customer&quot;, &quot;t&quot;)
+    create_user(conn, &quot;grace@example.org&quot;, &quot;h&quot;, &quot;agent&quot;, &quot;t&quot;)
+    create_ticket(conn, 1, {&quot;title&quot;: &quot;Printer on fire&quot;, &quot;body&quot;: &quot;x&quot;}, &quot;t0&quot;)
+    return conn
+
+def _events(conn):
+    return [tuple(r) for r in conn.execute(&quot;SELECT kind, detail, actor_id FROM events WHERE kind != &#x27;created&#x27; ORDER BY id&quot;)]
+
+def test_status():
+    &quot;conditional updates stop lost updates&quot;
+    conn = _db()
+    assert change_status(conn, 1, &quot;open&quot;, &quot;in_progress&quot;, 2, &quot;t1&quot;)[&quot;status&quot;] == &quot;in_progress&quot;
+    assert change_status(conn, 1, &quot;in_progress&quot;, &quot;resolved&quot;, 2, &quot;t2&quot;)[&quot;updated_at&quot;] == &quot;t2&quot;
+    try:
+        change_status(conn, 1, &quot;in_progress&quot;, &quot;waiting&quot;, 2, &quot;t3&quot;)
+    except ConflictError as e:
+        assert str(e) == &quot;ticket 1 is no longer in_progress&quot;
+    else:
+        raise AssertionError(&quot;a stale status must be refused&quot;)
+    assert get_ticket(conn, 1)[&quot;status&quot;] == &quot;resolved&quot; and _events(conn) == [(&quot;status&quot;, &quot;open-&gt;in_progress&quot;, 2), (&quot;status&quot;, &quot;in_progress-&gt;resolved&quot;, 2)]
+
+def test_assign_and_comments():
+    &quot;staff only; comments with internal notes&quot;
+    conn = _db()
+    assert assign(conn, 1, 2, 2, &quot;t1&quot;)[&quot;assignee_id&quot;] == 2
+    for bad in (1, 99):
+        try:
+            assign(conn, 1, bad, 2, &quot;t2&quot;)
+        except ValueError as e:
+            assert str(e) == f&quot;user {bad} is not an agent&quot;
+        else:
+            raise AssertionError(bad)
+    c = add_comment(conn, 1, 2, &quot;On my way&quot;, False, &quot;t3&quot;)
+    assert c == {&quot;id&quot;: 1, &quot;ticket_id&quot;: 1, &quot;author_id&quot;: 2, &quot;body&quot;: &quot;On my way&quot;, &quot;internal&quot;: 0, &quot;created_at&quot;: &quot;t3&quot;}
+    add_comment(conn, 1, 2, &quot;Customer&#x27;s printer is ancient&quot;, True, &quot;t4&quot;)
+    assert [x[&quot;body&quot;] for x in list_comments(conn, 1, False)] == [&quot;On my way&quot;] and len(list_comments(conn, 1, True)) == 2
+    assert get_ticket(conn, 1)[&quot;updated_at&quot;] == &quot;t4&quot; and _events(conn) == [(&quot;assigned&quot;, &quot;2&quot;, 2)]</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+MIGRATIONS = [
+    (1, &quot;users&quot;, &quot;&quot;&quot;
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN (&#x27;customer&#x27;, &#x27;agent&#x27;, &#x27;admin&#x27;)),
+            created_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (2, &quot;tickets&quot;, &quot;&quot;&quot;
+        CREATE TABLE tickets (
+            id INTEGER PRIMARY KEY,
+            customer_id INTEGER NOT NULL REFERENCES users (id),
+            assignee_id INTEGER REFERENCES users (id),
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT &#x27;normal&#x27; CHECK (priority IN (&#x27;low&#x27;, &#x27;normal&#x27;, &#x27;high&#x27;, &#x27;urgent&#x27;)),
+            status TEXT NOT NULL DEFAULT &#x27;open&#x27;
+                CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;waiting&#x27;, &#x27;resolved&#x27;, &#x27;closed&#x27;)),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (3, &quot;comments and events&quot;, &quot;&quot;&quot;
+        CREATE TABLE comments (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            author_id INTEGER NOT NULL REFERENCES users (id),
+            body TEXT NOT NULL,
+            internal INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE events (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            actor_id INTEGER NOT NULL REFERENCES users (id),
+            kind TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (4, &quot;indexes&quot;, &quot;&quot;&quot;
+        CREATE INDEX idx_tickets_status ON tickets (status, id);
+        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);
+        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)&quot;&quot;&quot;),
+]
+
+def connect(path=&quot;:memory:&quot;):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    return conn
+
+def migrate(conn, migrations=MIGRATIONS):
+    &quot;&quot;&quot;Apply the migrations the database hasn&#x27;t had yet, each in its own transaction. Returns their versions.&quot;&quot;&quot;
+    conn.execute(&quot;CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL)&quot;)
+    conn.commit()
+    versions = [v for v, _, _ in migrations]
+    if versions != list(range(1, len(versions) + 1)):
+        raise ValueError(&quot;migrations must be numbered 1, 2, 3... with no gaps&quot;)
+    current = conn.execute(&quot;SELECT COALESCE(MAX(version), 0) FROM schema_migrations&quot;).fetchone()[0]
+    if current &gt; len(versions):
+        raise RuntimeError(f&quot;the database is at version {current}, newer than this code&quot;)
+    applied = []
+    for version, name, sql in migrations[current:]:
+        try:
+            conn.execute(&quot;BEGIN&quot;)
+            for statement in sql.split(&quot;;&quot;):
+                if statement.strip():
+                    conn.execute(statement)
+            conn.execute(&quot;INSERT INTO schema_migrations (version, name) VALUES (?, ?)&quot;, (version, name))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        applied.append(version)
+    return applied
+
+def _dict(row):
+    return dict(row) if row is not None else None
+
+def _event(conn, ticket_id, actor_id, kind, detail, now):
+    conn.execute(&quot;INSERT INTO events (ticket_id, actor_id, kind, detail, at) VALUES (?, ?, ?, ?, ?)&quot;,
+                 (ticket_id, actor_id, kind, detail, now))
+
+def create_user(conn, email, password_hash, role, now):
+    try:
+        with conn:
+            cur = conn.execute(&quot;INSERT INTO users (email, password, role, created_at) VALUES (?, ?, ?, ?)&quot;,
+                               (email, password_hash, role, now))
+    except sqlite3.IntegrityError as e:
+        if &quot;UNIQUE&quot; not in str(e):
+            raise
+        raise ValueError(&quot;email already registered&quot;) from None
+    return cur.lastrowid
+
+def get_user(conn, user_id):
+    return _dict(conn.execute(&quot;SELECT id, email, role, created_at FROM users WHERE id = ?&quot;, (user_id,)).fetchone())
+
+def create_ticket(conn, customer_id, clean, now):
+    with conn:
+        cur = conn.execute(
+            &quot;INSERT INTO tickets (customer_id, title, body, priority, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)&quot;,
+            (customer_id, clean[&quot;title&quot;], clean[&quot;body&quot;], clean.get(&quot;priority&quot;, &quot;normal&quot;), now, now))
+        _event(conn, cur.lastrowid, customer_id, &quot;created&quot;, clean[&quot;title&quot;], now)
+    return get_ticket(conn, cur.lastrowid)
+
+def get_ticket(conn, ticket_id):
+    return _dict(conn.execute(&quot;SELECT * FROM tickets WHERE id = ?&quot;, (ticket_id,)).fetchone())
+
+class ConflictError(Exception):
+    &quot;&quot;&quot;The row changed since it was read.&quot;&quot;&quot;
+
+def change_status(conn, ticket_id, expected, new, actor_id, now):
+    &quot;&quot;&quot;Move a ticket from `expected` to `new`, unless someone changed its status first.&quot;&quot;&quot;
+    with conn:
+        cur = conn.execute(&quot;UPDATE tickets SET status = ?, updated_at = ? WHERE id = ? AND status = ?&quot;,
+                           (new, now, ticket_id, expected))
+        if cur.rowcount != 1:
+            raise ConflictError(f&quot;ticket {ticket_id} is no longer {expected}&quot;)
+        _event(conn, ticket_id, actor_id, &quot;status&quot;, f&quot;{expected}-&gt;{new}&quot;, now)
+    return get_ticket(conn, ticket_id)
+
+def assign(conn, ticket_id, agent_id, actor_id, now):
+    agent = get_user(conn, agent_id)
+    if agent is None or agent[&quot;role&quot;] not in (&quot;agent&quot;, &quot;admin&quot;):
+        raise ValueError(f&quot;user {agent_id} is not an agent&quot;)
+    with conn:
+        conn.execute(&quot;UPDATE tickets SET assignee_id = ?, updated_at = ? WHERE id = ?&quot;, (agent_id, now, ticket_id))
+        _event(conn, ticket_id, actor_id, &quot;assigned&quot;, str(agent_id), now)
+    return get_ticket(conn, ticket_id)
+
+def add_comment(conn, ticket_id, author_id, body, internal, now):
+    with conn:
+        cur = conn.execute(&quot;INSERT INTO comments (ticket_id, author_id, body, internal, created_at) VALUES (?, ?, ?, ?, ?)&quot;,
+                           (ticket_id, author_id, body, int(internal), now))
+        conn.execute(&quot;UPDATE tickets SET updated_at = ? WHERE id = ?&quot;, (now, ticket_id))
+    return _dict(conn.execute(&quot;SELECT * FROM comments WHERE id = ?&quot;, (cur.lastrowid,)).fetchone())
+
+def list_comments(conn, ticket_id, include_internal):
+    sql = &quot;SELECT * FROM comments WHERE ticket_id = ?&quot; + (&quot;&quot; if include_internal else &quot; AND internal = 0&quot;) + &quot; ORDER BY id&quot;
+    return [dict(r) for r in conn.execute(sql, (ticket_id,)).fetchall()]</textarea></div>
+<h2 id="step-10-indexes-and-statistics">Step 10: indexes and statistics</h2>
+<p>Without an index, <code>WHERE status = 'open' ORDER BY id</code> reads <strong>every</strong> ticket. Migration 4 adds indexes on exactly the columns the common queries filter by, followed by <code>id</code> so the rows come out already in order: <code>(status, id)</code>, <code>(customer_id, id)</code>, and <code>(ticket_id, id)</code> for comments. Don&rsquo;t guess whether an index is used: ask the database. <strong><code>EXPLAIN QUERY PLAN</code></strong> in front of a query returns rows describing how SQLite will run it, such as <code>SEARCH tickets USING INDEX idx_tickets_status (status=? AND id&gt;?)</code>; a <code>SCAN tickets</code> means it reads the whole table. A test that checks the plan stops a later change from quietly losing the index.</p>
+<p>The statistics the manager asked for are <strong>aggregate</strong> queries (Week 75): <code>GROUP BY status</code> with <code>COUNT(*)</code>. One detail: a status with no tickets doesn&rsquo;t appear in a <code>GROUP BY</code> result at all, so start from a dict with every status at zero and update it, or the dashboard will be missing rows exactly when things are quiet.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w080d2-step10" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Step 10: indexes and statistics</div><div class="pc-prompt"><p>Write <code>uses_index(conn, sql, params, index)</code>: <code>True</code> if any row of <code>EXPLAIN QUERY PLAN</code> for that query (with those parameters) has <code>INDEX NAME</code> in its last column (the description). Then <code>stats(conn)</code>: a dict with <code>"by_status"</code> (every status in <code>STATUSES</code> order with its count, <code>0</code> if none), <code>"open_by_priority"</code> (every priority with its count among tickets that aren&rsquo;t closed) and <code>"unassigned"</code> (tickets with no assignee that aren&rsquo;t closed), using <code>GROUP BY</code> queries.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+STATUSES = (&quot;open&quot;, &quot;in_progress&quot;, &quot;waiting&quot;, &quot;resolved&quot;, &quot;closed&quot;)
+PRIORITIES = (&quot;low&quot;, &quot;normal&quot;, &quot;high&quot;, &quot;urgent&quot;)
+
+MIGRATIONS = [
+    (1, &quot;users&quot;, &quot;&quot;&quot;
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN (&#x27;customer&#x27;, &#x27;agent&#x27;, &#x27;admin&#x27;)),
+            created_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (2, &quot;tickets&quot;, &quot;&quot;&quot;
+        CREATE TABLE tickets (
+            id INTEGER PRIMARY KEY,
+            customer_id INTEGER NOT NULL REFERENCES users (id),
+            assignee_id INTEGER REFERENCES users (id),
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT &#x27;normal&#x27; CHECK (priority IN (&#x27;low&#x27;, &#x27;normal&#x27;, &#x27;high&#x27;, &#x27;urgent&#x27;)),
+            status TEXT NOT NULL DEFAULT &#x27;open&#x27;
+                CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;waiting&#x27;, &#x27;resolved&#x27;, &#x27;closed&#x27;)),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (3, &quot;comments and events&quot;, &quot;&quot;&quot;
+        CREATE TABLE comments (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            author_id INTEGER NOT NULL REFERENCES users (id),
+            body TEXT NOT NULL,
+            internal INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE events (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            actor_id INTEGER NOT NULL REFERENCES users (id),
+            kind TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (4, &quot;indexes&quot;, &quot;&quot;&quot;
+        CREATE INDEX idx_tickets_status ON tickets (status, id);
+        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);
+        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)&quot;&quot;&quot;),
+]
+
+def connect(path=&quot;:memory:&quot;):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    return conn
+
+def migrate(conn, migrations=MIGRATIONS):
+    &quot;&quot;&quot;Apply the migrations the database hasn&#x27;t had yet, each in its own transaction. Returns their versions.&quot;&quot;&quot;
+    conn.execute(&quot;CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL)&quot;)
+    conn.commit()
+    versions = [v for v, _, _ in migrations]
+    if versions != list(range(1, len(versions) + 1)):
+        raise ValueError(&quot;migrations must be numbered 1, 2, 3... with no gaps&quot;)
+    current = conn.execute(&quot;SELECT COALESCE(MAX(version), 0) FROM schema_migrations&quot;).fetchone()[0]
+    if current &gt; len(versions):
+        raise RuntimeError(f&quot;the database is at version {current}, newer than this code&quot;)
+    applied = []
+    for version, name, sql in migrations[current:]:
+        try:
+            conn.execute(&quot;BEGIN&quot;)
+            for statement in sql.split(&quot;;&quot;):
+                if statement.strip():
+                    conn.execute(statement)
+            conn.execute(&quot;INSERT INTO schema_migrations (version, name) VALUES (?, ?)&quot;, (version, name))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        applied.append(version)
+    return applied
+
+def _dict(row):
+    return dict(row) if row is not None else None
+
+def _event(conn, ticket_id, actor_id, kind, detail, now):
+    conn.execute(&quot;INSERT INTO events (ticket_id, actor_id, kind, detail, at) VALUES (?, ?, ?, ?, ?)&quot;,
+                 (ticket_id, actor_id, kind, detail, now))
+
+def create_user(conn, email, password_hash, role, now):
+    try:
+        with conn:
+            cur = conn.execute(&quot;INSERT INTO users (email, password, role, created_at) VALUES (?, ?, ?, ?)&quot;,
+                               (email, password_hash, role, now))
+    except sqlite3.IntegrityError as e:
+        if &quot;UNIQUE&quot; not in str(e):
+            raise
+        raise ValueError(&quot;email already registered&quot;) from None
+    return cur.lastrowid
+
+def create_ticket(conn, customer_id, clean, now):
+    with conn:
+        cur = conn.execute(
+            &quot;INSERT INTO tickets (customer_id, title, body, priority, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)&quot;,
+            (customer_id, clean[&quot;title&quot;], clean[&quot;body&quot;], clean.get(&quot;priority&quot;, &quot;normal&quot;), now, now))
+        _event(conn, cur.lastrowid, customer_id, &quot;created&quot;, clean[&quot;title&quot;], now)
+    return get_ticket(conn, cur.lastrowid)
+
+def get_ticket(conn, ticket_id):
+    return _dict(conn.execute(&quot;SELECT * FROM tickets WHERE id = ?&quot;, (ticket_id,)).fetchone())
+
+
+def uses_index(conn, sql, params, index):
+    ___
+
+
+def stats(conn):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def _db():
+    conn = connect()
+    migrate(conn)
+    create_user(conn, &quot;ada@example.org&quot;, &quot;h&quot;, &quot;customer&quot;, &quot;t&quot;)
+    for title, prio in [(&quot;A&quot;, &quot;urgent&quot;), (&quot;B&quot;, &quot;low&quot;), (&quot;C&quot;, &quot;low&quot;), (&quot;D&quot;, &quot;normal&quot;)]:
+        create_ticket(conn, 1, {&quot;title&quot;: title * 3, &quot;body&quot;: &quot;x&quot;, &quot;priority&quot;: prio}, &quot;t&quot;)
+    conn.execute(&quot;UPDATE tickets SET status = &#x27;closed&#x27; WHERE id = 2&quot;)
+    conn.execute(&quot;UPDATE tickets SET status = &#x27;in_progress&#x27;, assignee_id = 1 WHERE id = 1&quot;)
+    conn.commit()
+    return conn
+
+def test_indexes():
+    &quot;the plan uses the indexes&quot;
+    conn = _db()
+    assert uses_index(conn, &quot;SELECT * FROM tickets WHERE status = ? AND id &gt; ? ORDER BY id LIMIT 20&quot;, (&quot;open&quot;, 0), &quot;idx_tickets_status&quot;)
+    assert uses_index(conn, &quot;SELECT * FROM tickets WHERE customer_id = ? ORDER BY id&quot;, (1,), &quot;idx_tickets_customer&quot;)
+    assert not uses_index(conn, &quot;SELECT * FROM tickets WHERE title = ?&quot;, (&quot;x&quot;,), &quot;idx_tickets_status&quot;)
+    assert uses_index(conn, &quot;SELECT * FROM comments WHERE ticket_id = ? ORDER BY id&quot;, (1,), &quot;idx_comments_ticket&quot;)
+
+def test_stats():
+    &quot;every status, even at zero&quot;
+    conn = _db()
+    assert stats(conn) == {&quot;by_status&quot;: {&quot;open&quot;: 2, &quot;in_progress&quot;: 1, &quot;waiting&quot;: 0, &quot;resolved&quot;: 0, &quot;closed&quot;: 1},
+                           &quot;open_by_priority&quot;: {&quot;low&quot;: 1, &quot;normal&quot;: 1, &quot;high&quot;: 0, &quot;urgent&quot;: 1}, &quot;unassigned&quot;: 2}
+    empty = connect()
+    migrate(empty)
+    assert stats(empty)[&quot;by_status&quot;] == {s: 0 for s in STATUSES} and stats(empty)[&quot;unassigned&quot;] == 0
+    assert list(stats(conn)[&quot;by_status&quot;]) == list(STATUSES)</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+STATUSES = (&quot;open&quot;, &quot;in_progress&quot;, &quot;waiting&quot;, &quot;resolved&quot;, &quot;closed&quot;)
+PRIORITIES = (&quot;low&quot;, &quot;normal&quot;, &quot;high&quot;, &quot;urgent&quot;)
+
+MIGRATIONS = [
+    (1, &quot;users&quot;, &quot;&quot;&quot;
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN (&#x27;customer&#x27;, &#x27;agent&#x27;, &#x27;admin&#x27;)),
+            created_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (2, &quot;tickets&quot;, &quot;&quot;&quot;
+        CREATE TABLE tickets (
+            id INTEGER PRIMARY KEY,
+            customer_id INTEGER NOT NULL REFERENCES users (id),
+            assignee_id INTEGER REFERENCES users (id),
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT &#x27;normal&#x27; CHECK (priority IN (&#x27;low&#x27;, &#x27;normal&#x27;, &#x27;high&#x27;, &#x27;urgent&#x27;)),
+            status TEXT NOT NULL DEFAULT &#x27;open&#x27;
+                CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;waiting&#x27;, &#x27;resolved&#x27;, &#x27;closed&#x27;)),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (3, &quot;comments and events&quot;, &quot;&quot;&quot;
+        CREATE TABLE comments (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            author_id INTEGER NOT NULL REFERENCES users (id),
+            body TEXT NOT NULL,
+            internal INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE events (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            actor_id INTEGER NOT NULL REFERENCES users (id),
+            kind TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (4, &quot;indexes&quot;, &quot;&quot;&quot;
+        CREATE INDEX idx_tickets_status ON tickets (status, id);
+        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);
+        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)&quot;&quot;&quot;),
+]
+
+def connect(path=&quot;:memory:&quot;):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    return conn
+
+def migrate(conn, migrations=MIGRATIONS):
+    &quot;&quot;&quot;Apply the migrations the database hasn&#x27;t had yet, each in its own transaction. Returns their versions.&quot;&quot;&quot;
+    conn.execute(&quot;CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL)&quot;)
+    conn.commit()
+    versions = [v for v, _, _ in migrations]
+    if versions != list(range(1, len(versions) + 1)):
+        raise ValueError(&quot;migrations must be numbered 1, 2, 3... with no gaps&quot;)
+    current = conn.execute(&quot;SELECT COALESCE(MAX(version), 0) FROM schema_migrations&quot;).fetchone()[0]
+    if current &gt; len(versions):
+        raise RuntimeError(f&quot;the database is at version {current}, newer than this code&quot;)
+    applied = []
+    for version, name, sql in migrations[current:]:
+        try:
+            conn.execute(&quot;BEGIN&quot;)
+            for statement in sql.split(&quot;;&quot;):
+                if statement.strip():
+                    conn.execute(statement)
+            conn.execute(&quot;INSERT INTO schema_migrations (version, name) VALUES (?, ?)&quot;, (version, name))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        applied.append(version)
+    return applied
+
+def _dict(row):
+    return dict(row) if row is not None else None
+
+def _event(conn, ticket_id, actor_id, kind, detail, now):
+    conn.execute(&quot;INSERT INTO events (ticket_id, actor_id, kind, detail, at) VALUES (?, ?, ?, ?, ?)&quot;,
+                 (ticket_id, actor_id, kind, detail, now))
+
+def create_user(conn, email, password_hash, role, now):
+    try:
+        with conn:
+            cur = conn.execute(&quot;INSERT INTO users (email, password, role, created_at) VALUES (?, ?, ?, ?)&quot;,
+                               (email, password_hash, role, now))
+    except sqlite3.IntegrityError as e:
+        if &quot;UNIQUE&quot; not in str(e):
+            raise
+        raise ValueError(&quot;email already registered&quot;) from None
+    return cur.lastrowid
+
+def create_ticket(conn, customer_id, clean, now):
+    with conn:
+        cur = conn.execute(
+            &quot;INSERT INTO tickets (customer_id, title, body, priority, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)&quot;,
+            (customer_id, clean[&quot;title&quot;], clean[&quot;body&quot;], clean.get(&quot;priority&quot;, &quot;normal&quot;), now, now))
+        _event(conn, cur.lastrowid, customer_id, &quot;created&quot;, clean[&quot;title&quot;], now)
+    return get_ticket(conn, cur.lastrowid)
+
+def get_ticket(conn, ticket_id):
+    return _dict(conn.execute(&quot;SELECT * FROM tickets WHERE id = ?&quot;, (ticket_id,)).fetchone())
+
+
+def uses_index(conn, sql, params, index):
+    &quot;&quot;&quot;True if SQLite&#x27;s plan for this query uses the named index.&quot;&quot;&quot;
+    plan = conn.execute(&quot;EXPLAIN QUERY PLAN &quot; + sql, params).fetchall()
+    return any(f&quot;INDEX {index}&quot; in row[-1] for row in plan)
+
+
+def stats(conn):
+    by_status = {s: 0 for s in (&quot;open&quot;, &quot;in_progress&quot;, &quot;waiting&quot;, &quot;resolved&quot;, &quot;closed&quot;)}
+    by_status.update(dict(conn.execute(&quot;SELECT status, COUNT(*) FROM tickets GROUP BY status&quot;).fetchall()))
+    by_priority = {p: 0 for p in (&quot;low&quot;, &quot;normal&quot;, &quot;high&quot;, &quot;urgent&quot;)}
+    by_priority.update(dict(conn.execute(&quot;SELECT priority, COUNT(*) FROM tickets WHERE status != &#x27;closed&#x27; GROUP BY priority&quot;).fetchall()))
+    unassigned = conn.execute(&quot;SELECT COUNT(*) FROM tickets WHERE assignee_id IS NULL AND status != &#x27;closed&#x27;&quot;).fetchone()[0]
+    return {&quot;by_status&quot;: by_status, &quot;open_by_priority&quot;: by_priority, &quot;unassigned&quot;: unassigned}</textarea></div>
+<h2 id="checkpoint">Checkpoint</h2>
+<p>The whole database layer at work: migrate, sign two people up, open a ticket, work on it, and look at its history, the way tomorrow&rsquo;s endpoints will.</p>
+<div class="pc pc-example" data-kind="example" data-id="w080d2-e2"><textarea class="pc-src pc-code" hidden>&quot;&quot;&quot;The helpdesk&#x27;s database: migrations and the queries the app needs (Week 80, Day 2).
+
+Every query uses parameters; every change that touches more than one row runs in a transaction.
+&quot;&quot;&quot;
+import sqlite3
+
+MIGRATIONS = [
+    (1, &quot;users&quot;, &quot;&quot;&quot;
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK (role IN (&#x27;customer&#x27;, &#x27;agent&#x27;, &#x27;admin&#x27;)),
+            created_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (2, &quot;tickets&quot;, &quot;&quot;&quot;
+        CREATE TABLE tickets (
+            id INTEGER PRIMARY KEY,
+            customer_id INTEGER NOT NULL REFERENCES users (id),
+            assignee_id INTEGER REFERENCES users (id),
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            priority TEXT NOT NULL DEFAULT &#x27;normal&#x27; CHECK (priority IN (&#x27;low&#x27;, &#x27;normal&#x27;, &#x27;high&#x27;, &#x27;urgent&#x27;)),
+            status TEXT NOT NULL DEFAULT &#x27;open&#x27;
+                CHECK (status IN (&#x27;open&#x27;, &#x27;in_progress&#x27;, &#x27;waiting&#x27;, &#x27;resolved&#x27;, &#x27;closed&#x27;)),
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (3, &quot;comments and events&quot;, &quot;&quot;&quot;
+        CREATE TABLE comments (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            author_id INTEGER NOT NULL REFERENCES users (id),
+            body TEXT NOT NULL,
+            internal INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE events (
+            id INTEGER PRIMARY KEY,
+            ticket_id INTEGER NOT NULL REFERENCES tickets (id) ON DELETE CASCADE,
+            actor_id INTEGER NOT NULL REFERENCES users (id),
+            kind TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            at TEXT NOT NULL
+        )&quot;&quot;&quot;),
+    (4, &quot;indexes&quot;, &quot;&quot;&quot;
+        CREATE INDEX idx_tickets_status ON tickets (status, id);
+        CREATE INDEX idx_tickets_customer ON tickets (customer_id, id);
+        CREATE INDEX idx_comments_ticket ON comments (ticket_id, id)&quot;&quot;&quot;),
+]
+
+
+class ConflictError(Exception):
+    &quot;&quot;&quot;The row changed since it was read.&quot;&quot;&quot;
+
+
+def connect(path=&quot;:memory:&quot;):
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    return conn
+
+
+def migrate(conn, migrations=MIGRATIONS):
+    &quot;&quot;&quot;Apply the migrations the database hasn&#x27;t had yet, each in its own transaction. Returns their versions.&quot;&quot;&quot;
+    conn.execute(&quot;CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL)&quot;)
+    conn.commit()
+    versions = [v for v, _, _ in migrations]
+    if versions != list(range(1, len(versions) + 1)):
+        raise ValueError(&quot;migrations must be numbered 1, 2, 3... with no gaps&quot;)
+    current = conn.execute(&quot;SELECT COALESCE(MAX(version), 0) FROM schema_migrations&quot;).fetchone()[0]
+    if current &gt; len(versions):
+        raise RuntimeError(f&quot;the database is at version {current}, newer than this code&quot;)
+    applied = []
+    for version, name, sql in migrations[current:]:
+        try:
+            conn.execute(&quot;BEGIN&quot;)
+            for statement in sql.split(&quot;;&quot;):
+                if statement.strip():
+                    conn.execute(statement)
+            conn.execute(&quot;INSERT INTO schema_migrations (version, name) VALUES (?, ?)&quot;, (version, name))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        applied.append(version)
+    return applied
+
+
+def _dict(row):
+    return dict(row) if row is not None else None
+
+
+def _event(conn, ticket_id, actor_id, kind, detail, now):
+    conn.execute(&quot;INSERT INTO events (ticket_id, actor_id, kind, detail, at) VALUES (?, ?, ?, ?, ?)&quot;,
+                 (ticket_id, actor_id, kind, detail, now))
+
+
+def create_user(conn, email, password_hash, role, now):
+    try:
+        with conn:
+            cur = conn.execute(&quot;INSERT INTO users (email, password, role, created_at) VALUES (?, ?, ?, ?)&quot;,
+                               (email, password_hash, role, now))
+    except sqlite3.IntegrityError as e:
+        if &quot;UNIQUE&quot; not in str(e):
+            raise
+        raise ValueError(&quot;email already registered&quot;) from None
+    return cur.lastrowid
+
+
+def get_user(conn, user_id):
+    return _dict(conn.execute(&quot;SELECT id, email, role, created_at FROM users WHERE id = ?&quot;, (user_id,)).fetchone())
+
+
+def get_user_by_email(conn, email):
+    return _dict(conn.execute(&quot;SELECT id, email, password, role FROM users WHERE email = ?&quot;, (email,)).fetchone())
+
+
+def create_ticket(conn, customer_id, clean, now):
+    with conn:
+        cur = conn.execute(
+            &quot;INSERT INTO tickets (customer_id, title, body, priority, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)&quot;,
+            (customer_id, clean[&quot;title&quot;], clean[&quot;body&quot;], clean.get(&quot;priority&quot;, &quot;normal&quot;), now, now))
+        _event(conn, cur.lastrowid, customer_id, &quot;created&quot;, clean[&quot;title&quot;], now)
+    return get_ticket(conn, cur.lastrowid)
+
+
+def get_ticket(conn, ticket_id):
+    return _dict(conn.execute(&quot;SELECT * FROM tickets WHERE id = ?&quot;, (ticket_id,)).fetchone())
+
+
+def _like(text):
+    return &quot;%&quot; + text.replace(&quot;\\&quot;, &quot;\\\\&quot;).replace(&quot;%&quot;, &quot;\\%&quot;).replace(&quot;_&quot;, &quot;\\_&quot;) + &quot;%&quot;
+
+
+def list_tickets(conn, customer_id=None, status=None, priority=None, assignee_id=None, q=None, after_id=0, limit=20):
+    &quot;&quot;&quot;Tickets matching the filters, by id, after a cursor. Returns (items, next_after or None).&quot;&quot;&quot;
+    where, values = [&quot;id &gt; ?&quot;], [after_id]
+    for column, value in ((&quot;customer_id&quot;, customer_id), (&quot;status&quot;, status), (&quot;priority&quot;, priority), (&quot;assignee_id&quot;, assignee_id)):
+        if value is not None:
+            where.append(f&quot;{column} = ?&quot;)
+            values.append(value)
+    if q:
+        where.append(&quot;title LIKE ? ESCAPE &#x27;\\&#x27;&quot;)
+        values.append(_like(q))
+    rows = conn.execute(f&quot;SELECT * FROM tickets WHERE {&#x27; AND &#x27;.join(where)} ORDER BY id LIMIT ?&quot;, values + [limit + 1]).fetchall()
+    items = [dict(r) for r in rows[:limit]]
+    return items, (items[-1][&quot;id&quot;] if len(rows) &gt; limit else None)
+
+
+def update_ticket(conn, ticket_id, changes, actor_id, now):
+    if not changes:
+        return get_ticket(conn, ticket_id)
+    columns = sorted(changes)
+    with conn:
+        conn.execute(f&quot;UPDATE tickets SET {&#x27;, &#x27;.join(f&#x27;{c} = ?&#x27; for c in columns)}, updated_at = ? WHERE id = ?&quot;,
+                     [changes[c] for c in columns] + [now, ticket_id])
+        _event(conn, ticket_id, actor_id, &quot;edited&quot;, &quot;,&quot;.join(columns), now)
+    return get_ticket(conn, ticket_id)
+
+
+def change_status(conn, ticket_id, expected, new, actor_id, now):
+    &quot;&quot;&quot;Move a ticket from `expected` to `new`, unless someone changed its status first.&quot;&quot;&quot;
+    with conn:
+        cur = conn.execute(&quot;UPDATE tickets SET status = ?, updated_at = ? WHERE id = ? AND status = ?&quot;,
+                           (new, now, ticket_id, expected))
+        if cur.rowcount != 1:
+            raise ConflictError(f&quot;ticket {ticket_id} is no longer {expected}&quot;)
+        _event(conn, ticket_id, actor_id, &quot;status&quot;, f&quot;{expected}-&gt;{new}&quot;, now)
+    return get_ticket(conn, ticket_id)
+
+
+def assign(conn, ticket_id, agent_id, actor_id, now):
+    agent = get_user(conn, agent_id)
+    if agent is None or agent[&quot;role&quot;] not in (&quot;agent&quot;, &quot;admin&quot;):
+        raise ValueError(f&quot;user {agent_id} is not an agent&quot;)
+    with conn:
+        conn.execute(&quot;UPDATE tickets SET assignee_id = ?, updated_at = ? WHERE id = ?&quot;, (agent_id, now, ticket_id))
+        _event(conn, ticket_id, actor_id, &quot;assigned&quot;, str(agent_id), now)
+    return get_ticket(conn, ticket_id)
+
+
+def add_comment(conn, ticket_id, author_id, body, internal, now):
+    with conn:
+        cur = conn.execute(&quot;INSERT INTO comments (ticket_id, author_id, body, internal, created_at) VALUES (?, ?, ?, ?, ?)&quot;,
+                           (ticket_id, author_id, body, int(internal), now))
+        conn.execute(&quot;UPDATE tickets SET updated_at = ? WHERE id = ?&quot;, (now, ticket_id))
+    return _dict(conn.execute(&quot;SELECT * FROM comments WHERE id = ?&quot;, (cur.lastrowid,)).fetchone())
+
+
+def list_comments(conn, ticket_id, include_internal):
+    sql = &quot;SELECT * FROM comments WHERE ticket_id = ?&quot; + (&quot;&quot; if include_internal else &quot; AND internal = 0&quot;) + &quot; ORDER BY id&quot;
+    return [dict(r) for r in conn.execute(sql, (ticket_id,)).fetchall()]
+
+
+def delete_ticket(conn, ticket_id):
+    with conn:
+        return conn.execute(&quot;DELETE FROM tickets WHERE id = ?&quot;, (ticket_id,)).rowcount == 1
+
+
+def events(conn, ticket_id):
+    return [dict(r) for r in conn.execute(&quot;SELECT kind, detail, actor_id, at FROM events WHERE ticket_id = ? ORDER BY id&quot;, (ticket_id,))]
+
+
+def stats(conn):
+    by_status = {s: 0 for s in (&quot;open&quot;, &quot;in_progress&quot;, &quot;waiting&quot;, &quot;resolved&quot;, &quot;closed&quot;)}
+    by_status.update(dict(conn.execute(&quot;SELECT status, COUNT(*) FROM tickets GROUP BY status&quot;).fetchall()))
+    by_priority = {p: 0 for p in (&quot;low&quot;, &quot;normal&quot;, &quot;high&quot;, &quot;urgent&quot;)}
+    by_priority.update(dict(conn.execute(&quot;SELECT priority, COUNT(*) FROM tickets WHERE status != &#x27;closed&#x27; GROUP BY priority&quot;).fetchall()))
+    unassigned = conn.execute(&quot;SELECT COUNT(*) FROM tickets WHERE assignee_id IS NULL AND status != &#x27;closed&#x27;&quot;).fetchone()[0]
+    return {&quot;by_status&quot;: by_status, &quot;open_by_priority&quot;: by_priority, &quot;unassigned&quot;: unassigned}
+
+
+conn = connect()
+print(&quot;applied&quot;, migrate(conn))
+ada = create_user(conn, &quot;ada@example.org&quot;, &quot;hash&quot;, &quot;customer&quot;, &quot;2026-11-10T09:00:00Z&quot;)
+grace = create_user(conn, &quot;grace@example.org&quot;, &quot;hash&quot;, &quot;agent&quot;, &quot;2026-11-10T09:00:00Z&quot;)
+ticket = create_ticket(conn, ada, {&quot;title&quot;: &quot;Printer on fire&quot;, &quot;body&quot;: &quot;Smoke everywhere&quot;, &quot;priority&quot;: &quot;urgent&quot;}, &quot;2026-11-10T09:01:00Z&quot;)
+assign(conn, ticket[&quot;id&quot;], grace, grace, &quot;2026-11-10T09:02:00Z&quot;)
+change_status(conn, ticket[&quot;id&quot;], &quot;open&quot;, &quot;in_progress&quot;, grace, &quot;2026-11-10T09:02:30Z&quot;)
+add_comment(conn, ticket[&quot;id&quot;], grace, &quot;Unplug it, please&quot;, False, &quot;2026-11-10T09:03:00Z&quot;)
+try:
+    change_status(conn, ticket[&quot;id&quot;], &quot;open&quot;, &quot;closed&quot;, ada, &quot;2026-11-10T09:04:00Z&quot;)
+except ConflictError as e:
+    print(&quot;refused:&quot;, e)
+for event in events(conn, ticket[&quot;id&quot;]):
+    print(event[&quot;at&quot;][11:16], event[&quot;kind&quot;], event[&quot;detail&quot;])
+print(stats(conn)[&quot;by_status&quot;])</textarea></div>
+<p>The full <code>helpdesk_db</code> module, with <code>update_ticket</code>, <code>delete_ticket</code> and <code>events</code> as well, is in tomorrow&rsquo;s files panel.</p>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w080d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why repeat the allowed statuses as a CHECK constraint in the database?", "answer": 1, "explain": "Defence in depth.", "options": ["It&rsquo;s faster", "So nothing can store an invalid status, even code that bypasses the domain rules", "SQLite requires it", "For indexes"]}, {"type": "mc", "q": "What must you do for SQLite to enforce foreign keys?", "answer": 1, "explain": "They&rsquo;re off by default.", "options": ["Nothing", "PRAGMA foreign_keys = ON on each connection", "Use INTEGER keys", "Add an index"]}, {"type": "mc", "q": "Why does each migration run in its own transaction?", "answer": 1, "explain": "A half-applied migration is the worst state to be in.", "options": ["Speed", "So it&rsquo;s applied completely or not at all, with its record", "To lock the table", "SQLite needs it"]}, {"type": "mc", "q": "What should happen if the database&rsquo;s version is higher than the code knows?", "answer": 1, "explain": "Old code on a new schema can corrupt data.", "options": ["Apply the code&rsquo;s migrations", "Refuse to start", "Delete the extra tables", "Ignore it"]}, {"type": "mc", "q": "Why does create_user raise ValueError instead of letting sqlite3.IntegrityError escape?", "answer": 1, "explain": "Translate errors at the layer boundary.", "options": ["It&rsquo;s shorter", "So the layers above don&rsquo;t depend on the database library", "IntegrityError can&rsquo;t be caught", "For speed"]}, {"type": "mc", "q": "How does asking for limit + 1 rows help pagination?", "answer": 1, "explain": "Then return only limit rows.", "options": ["It&rsquo;s faster", "If the extra row comes back, there&rsquo;s another page, without a second query", "It avoids duplicates", "It sorts them"]}, {"type": "mc", "q": "What stops two agents overwriting each other&rsquo;s status changes?", "answer": 1, "explain": "Optimistic concurrency.", "options": ["A longer timeout", "UPDATE &hellip; WHERE id = ? AND status = ? with the status they saw, and a conflict if no row changed", "A bigger database", "Retrying"]}, {"type": "mc", "q": "Why is the events row written in the same transaction as the change?", "answer": 1, "explain": "Both or neither.", "options": ["Speed", "So the history can never disagree with the data", "Events need their own table", "SQLite requires it"]}, {"type": "mc", "q": "What does SCAN tickets in a query plan mean?", "answer": 1, "explain": "SEARCH &hellip; USING INDEX is what you want for filtered queries.", "options": ["An index is used", "The whole table is read", "The query failed", "It&rsquo;s cached"]}, {"type": "output", "q": "What does this print?", "answer": "{'open': 3, 'closed': 0}", "explain": "Start with every key at zero, then update.", "code": "counts = {\"open\": 0, \"closed\": 0}\ncounts.update(dict([(\"open\", 3)]))\nprint(counts)"}]</script></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Think of one more thing the helpdesk might need to store later (tags on tickets, say) and write the migration for it as migration 5. Tomorrow: the <strong>endpoints and authentication</strong>, where the domain rules and the database meet HTTP.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w080d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w080d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w080d2", "week": 80, "day": 2, "title": "Project: database and models", "exercises": [{"id": "w080d2-step6", "title": "Step 6: migrations", "points": 20}, {"id": "w080d2-step7", "title": "Step 7: users and tickets", "points": 15}, {"id": "w080d2-step8", "title": "Step 8: listing tickets", "points": 15}, {"id": "w080d2-step9", "title": "Step 9: changes that can't half-happen", "points": 15}, {"id": "w080d2-step10", "title": "Step 10: indexes and statistics", "points": 10}], "points": 75}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=b54d8b61c9"></script>
+</body>
+</html>
