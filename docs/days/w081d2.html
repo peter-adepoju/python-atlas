@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="b54d8b61c9">
+<title>Week 81 Day 2: Caching | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=b54d8b61c9">
+<link rel="stylesheet" href="../assets/css/site.css?v=b54d8b61c9">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=b54d8b61c9"></script>
+<script src="../assets/vendor/codemirror.js?v=b54d8b61c9" defer></script>
+<meta name="description" content="Yesterday’s estimate for the helpdesk had thirty reads for every write. When a system reads the same things over and over, the cheapest way to make it...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w081d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 81 Day 2: Caching">
+<meta property="og:description" content="Yesterday’s estimate for the helpdesk had thirty reads for every write. When a system reads the same things over and over, the cheapest way to make it...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w081d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-81">Week 81: System design I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#where-caches-live" data-sec="where-caches-live">Where caches live</a></li><li><a href="#eviction-and-expiry" data-sec="eviction-and-expiry">Eviction and expiry</a></li><li><a href="#keeping-caches-honest" data-sec="keeping-caches-honest">Keeping caches honest</a></li><li><a href="#stampedes-and-keys" data-sec="stampedes-and-keys">Stampedes and keys</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w081d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-81">Week 81: System design I</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 81, Day 2</span></p>
+      <h1>Caching</h1>
+      <div class="day-intro"><p>Yesterday&rsquo;s estimate for the helpdesk had thirty reads for every write. When a system reads the same things over and over, the cheapest way to make it faster is to stop recomputing them: keep recent answers somewhere quick, and serve them again. That&rsquo;s caching, and it&rsquo;s everywhere: in your CPU, your browser, content delivery networks, and services like Redis in front of databases. It&rsquo;s also famously hard to get right, because a cache is a second copy of the truth that can go out of date, run out of room, or be shared with the wrong person. Today you&rsquo;ll build the main kinds of cache, choose what to evict and when to expire, keep caches consistent when data changes, stop a crowd of requests from overwhelming the database when a popular entry expires, and design cache keys that never show one user another user&rsquo;s data.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain where caches sit and what hit rate and latency they buy</li><li>Build LRU and time-to-live caches, with clocks you can control</li><li>Use cache-aside reads with invalidation on writes, and know the other write strategies</li><li>Prevent stampedes with stale-while-revalidate and a single refresh per key</li><li>Design cache keys that include everything the answer depends on</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Where caches live: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Eviction and expiry: 20 min"></span><span class="plan-seg s1" style="flex:20" title="Keeping caches honest: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Stampedes and keys: 20 min"></span><span class="plan-seg s1" style="flex:70" title="Practice: 70 min"></span><span class="plan-seg s0" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">7 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Where caches live</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Eviction and expiry</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Keeping caches honest</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Stampedes and keys</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">70 min</span></li><li><span class="plan-at">2:40</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w081d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w081d2.ipynb" download>download it</a>. Exercises today are worth 135 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w081d2-p1"><textarea class="pc-src pc-code" hidden>from functools import lru_cache
+
+calls = []
+
+@lru_cache(maxsize=2)
+def ticket(n):
+    calls.append(n)
+    return f&quot;ticket {n}&quot;
+
+for n in [1, 2, 1, 3, 1, 2]:
+    ticket(n)
+print(calls)
+print(ticket.cache_info().hits, ticket.cache_info().misses)</textarea></div>
+<p><code>functools.lru_cache</code> (Phase 5) keeps the two most recently <strong>used</strong> answers. Fetching 3 pushed out 2 (used less recently than 1), so 2 had to be loaded again at the end. Which entry to throw out when space runs out, and when an entry is too old to trust, are the two questions every cache has to answer.</p>
+<h2 id="where-caches-live">Where caches live</h2>
+<p>A cache keeps copies of answers somewhere faster than where they came from. Between a user and the database there are several places to put one:</p>
+<table>
+<thead>
+<tr>
+<th>Where</th>
+<th>Example</th>
+<th>Shared by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>the browser</td>
+<td><code>Cache-Control: max-age=60</code> on a response (Week 76)</td>
+<td>one user</td>
+</tr>
+<tr>
+<td>a CDN (content delivery network)</td>
+<td>images, scripts and public pages copied to servers near users</td>
+<td>everyone</td>
+</tr>
+<tr>
+<td>a reverse proxy</td>
+<td>a cache in front of the app servers</td>
+<td>everyone</td>
+</tr>
+<tr>
+<td>the app&rsquo;s memory</td>
+<td>a dict, <code>lru_cache</code></td>
+<td>one app instance</td>
+</tr>
+<tr>
+<td>a distributed cache</td>
+<td>Redis or Memcached, used by every instance</td>
+<td>every instance</td>
+</tr>
+</tbody>
+</table>
+<p>The payoff is measured by the <strong>hit rate</strong>: the share of requests answered from the cache. If the database takes 20 ms and the cache 1 ms, a 90% hit rate makes the average read <code>0.9 × 1 + 0.1 × 21 = 3 ms</code> (a miss pays for both the cache lookup and the database), and the database sees a tenth of the reads (yesterday&rsquo;s <code>db_read_replicas</code> used exactly this).</p>
+<p>Caches suit data that is <strong>read often</strong>, <strong>changes rarely</strong>, and is <strong>expensive</strong> to produce. They&rsquo;re a poor fit for data that must always be exactly current (a bank balance during a transfer) or that&rsquo;s rarely read twice.</p>
+<div class="pc pc-example" data-kind="example" data-id="w081d2-e2"><textarea class="pc-src pc-code" hidden>def average_ms(hit_rate, cache_ms, source_ms):
+    return hit_rate * cache_ms + (1 - hit_rate) * (cache_ms + source_ms)
+
+for hit_rate in (0.0, 0.5, 0.9, 0.99):
+    print(f&quot;hit rate {hit_rate:.0%}: {average_ms(hit_rate, 1, 20):.1f} ms, database sees {1 - hit_rate:.0%} of reads&quot;)</textarea></div>
+<h2 id="eviction-and-expiry">Eviction and expiry</h2>
+<p><strong>Eviction</strong> decides what to drop when the cache is full:</p>
+<ul>
+<li><strong>LRU</strong> (least recently used): drop the entry untouched for longest. Recent use predicts future use for most workloads, and it&rsquo;s cheap: an <code>OrderedDict</code>, moving an entry to the end on each use (<code>move_to_end</code>) and dropping from the front (<code>popitem(last=False)</code>).</li>
+<li><strong>LFU</strong> (least frequently used): drop the entry used least often; good for steady popularity, slow to adapt when it changes.</li>
+<li><strong>FIFO</strong> (first in, first out): drop the oldest entry, however popular; simple, usually worse.</li>
+</ul>
+<p><strong>Expiry</strong> decides when an entry is too old to trust: each entry gets a <strong>time to live</strong> (TTL), and a lookup after it expires counts as a miss. The TTL is a promise about staleness: &ldquo;this answer may be up to 60 seconds out of date&rdquo;. Choose it per kind of data: a product description, an hour; a stock level, seconds; a user&rsquo;s permissions, short, or invalidate explicitly.</p>
+<p>Two useful variations: <strong>negative caching</strong> stores &ldquo;not found&rdquo; answers too (briefly), so repeated requests for something missing don&rsquo;t all reach the database; and <strong>jitter</strong> adds a small random amount to each TTL, so entries written together don&rsquo;t all expire at the same moment.</p>
+<p>As always (Weeks 77 and 78), the cache reads the time from an injected <strong>clock</strong>, so tests can step past an expiry instead of sleeping.</p>
+<h2 id="keeping-caches-honest">Keeping caches honest</h2>
+<p>The famous quip: there are only two hard things in computer science, cache invalidation and naming things. When the data changes, the cached copy is <strong>stale</strong>. The strategies:</p>
+<ul>
+<li><strong>Cache-aside</strong> (the most common): the app reads the cache; on a miss it reads the database and stores the answer. On a <strong>write</strong>, it updates the database and then <strong>deletes</strong> the cached entry, so the next read loads the new value. Deleting is safer than updating the cache, because two writes racing to update the cache can leave the older value there.</li>
+<li><strong>Read-through</strong>: the cache itself loads missing values (the app only talks to the cache).</li>
+<li><strong>Write-through</strong>: every write goes to the cache and the database together; reads are always fresh, writes are slower.</li>
+<li><strong>Write-behind</strong>: writes go to the cache and are copied to the database later; very fast, but a crash can lose writes.</li>
+</ul>
+<p>Whatever the strategy, a TTL is the safety net: even if an invalidation is missed, the stale value can&rsquo;t outlive its TTL.</p>
+<div class="pc pc-example" data-kind="example" data-id="w081d2-e3"><textarea class="pc-src pc-code" hidden>db = {7: &quot;open&quot;}
+cache = {}
+reads = []
+
+def get_status(ticket_id):
+    if ticket_id not in cache:
+        reads.append(ticket_id)
+        cache[ticket_id] = db[ticket_id]
+    return cache[ticket_id]
+
+def set_status(ticket_id, status):
+    db[ticket_id] = status
+    cache.pop(ticket_id, None)        # invalidate: the next read reloads
+
+print(get_status(7), get_status(7))
+set_status(7, &quot;resolved&quot;)
+print(get_status(7), reads)</textarea></div>
+<h2 id="stampedes-and-keys">Stampedes and keys</h2>
+<p><strong>Stampedes.</strong> A popular entry expires, and in the next second a thousand requests all miss and all ask the database for the same thing: the very load the cache existed to prevent, arriving all at once (a &ldquo;thundering herd&rdquo;). Two cures:</p>
+<ul>
+<li><strong>Request coalescing</strong> (&ldquo;single flight&rdquo;): only the first request for a missing key loads it; the others wait for that one answer.</li>
+<li><strong>Stale-while-revalidate</strong>: keep an entry a little <strong>past</strong> its TTL; when it&rsquo;s stale but not yet too old, serve the stale value at once and schedule <strong>one</strong> background refresh. Users never wait, and the database sees one request. HTTP has the same idea as a header: <code>Cache-Control: max-age=60, stale-while-revalidate=30</code>.</li>
+</ul>
+<p><strong>Keys.</strong> A cache key must include <strong>everything the answer depends on</strong>. Cache <code>/tickets</code> under the key <code>"/tickets"</code> and the first user&rsquo;s ticket list is served to everyone: a data leak caused by a cache, and a real, recurring kind of incident. So the key includes the user (or their role, if the answer depends only on that), the normalised path, and the query parameters in a fixed order (so <code>?a=1&amp;b=2</code> and <code>?b=2&amp;a=1</code> share an entry). Responses that are personal should only ever go into per-user caches; shared caches (CDNs, proxies) must be told with <code>Cache-Control: private</code> or <code>no-store</code>.</p>
+<h3 id="on-your-own-computer">On your own computer</h3>
+<p>Redis is the usual shared cache (<code>pip install redis</code>): <code>r.set("ticket:7", data, ex=60)</code> stores with a 60-second TTL, and <code>r.get("ticket:7")</code> reads; its <code>maxmemory-policy allkeys-lru</code> setting makes it evict like today&rsquo;s LRU. For HTTP, <code>Cache-Control</code>, <code>ETag</code> and <code>Vary</code> headers (Week 76) let browsers and CDNs cache for you.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Caches keep copies close to the reader: browser, CDN, reverse proxy, app memory, or a shared cache like Redis. Hit rate decides the payoff (average = hit × cache + miss × (cache + source)); cache data that&rsquo;s read often, changes rarely and is costly. Evict with LRU (OrderedDict, move_to_end, popitem(last=False)), LFU or FIFO; expire with TTLs read from an injected clock; cache &ldquo;not found&rdquo; briefly; add jitter. Cache-aside reads load on a miss, and writes update the database then delete the entry; read-through, write-through and write-behind trade freshness, speed and safety; TTLs are the safety net. Stop stampedes with request coalescing or stale-while-revalidate (serve stale, refresh once). Keys must include everything the answer depends on (user or role, normalised path, sorted parameters); personal responses never go into shared caches.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d2-lru" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">An LRU cache</div><div class="pc-prompt"><p>Write a class <code>LRUCache(capacity)</code> with <code>get(key, default=None)</code> (a hit marks the key as most recently used), <code>put(key, value)</code> (adding or replacing a value makes it most recently used; if the cache is then over capacity, evict the least recently used key and add it to <code>self.evicted</code>), <code>__len__</code>, <code>__contains__</code> (which does <strong>not</strong> count as a use) and <code>stats()</code>, returning <code>{"hits": H, "misses": M, "hit_rate": RATE}</code> with the rate rounded to 2 places (<code>0.0</code> before any lookup). Use <code>collections.OrderedDict</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections import OrderedDict
+
+class LRUCache:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_lru():
+    &quot;recency decides&quot;
+    c = LRUCache(2)
+    c.put(&quot;a&quot;, 1)
+    c.put(&quot;b&quot;, 2)
+    assert c.get(&quot;a&quot;) == 1
+    c.put(&quot;c&quot;, 3)
+    assert &quot;b&quot; not in c and c.evicted == [&quot;b&quot;] and len(c) == 2
+    assert c.get(&quot;b&quot;, &quot;missing&quot;) == &quot;missing&quot;
+    c.put(&quot;a&quot;, 10)
+    c.put(&quot;d&quot;, 4)
+    assert c.evicted == [&quot;b&quot;, &quot;c&quot;] and c.get(&quot;a&quot;) == 10 and &quot;d&quot; in c
+    assert c.stats() == {&quot;hits&quot;: 2, &quot;misses&quot;: 1, &quot;hit_rate&quot;: 0.67}
+    assert LRUCache(3).stats() == {&quot;hits&quot;: 0, &quot;misses&quot;: 0, &quot;hit_rate&quot;: 0.0}
+
+def test_contains_is_not_a_use():
+    &quot;peeking doesn&#x27;t refresh&quot;
+    c = LRUCache(2)
+    c.put(&quot;a&quot;, 1)
+    c.put(&quot;b&quot;, 2)
+    assert &quot;a&quot; in c
+    c.put(&quot;c&quot;, 3)
+    assert c.evicted == [&quot;a&quot;]</textarea><textarea class="pc-src pc-solution" hidden>from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.data = OrderedDict()
+        self.evicted = []
+        self.hits = self.misses = 0
+
+    def get(self, key, default=None):
+        if key in self.data:
+            self.hits += 1
+            self.data.move_to_end(key)
+            return self.data[key]
+        self.misses += 1
+        return default
+
+    def put(self, key, value):
+        self.data[key] = value
+        self.data.move_to_end(key)
+        while len(self.data) &gt; self.capacity:
+            old, _ = self.data.popitem(last=False)
+            self.evicted.append(old)
+
+    def __len__(self):
+        return len(self.data)
+
+    def __contains__(self, key):
+        return key in self.data
+
+    def stats(self):
+        total = self.hits + self.misses
+        return {&quot;hits&quot;: self.hits, &quot;misses&quot;: self.misses, &quot;hit_rate&quot;: round(self.hits / total, 2) if total else 0.0}</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d2-ttl" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Entries that expire</div><div class="pc-prompt"><p>Write a class <code>TTLCache(clock, ttl, negative_ttl=None)</code>. <code>set(key, value)</code> stores the value with an expiry time of <code>clock() + ttl</code>; but if the value is <code>None</code> (a &ldquo;not found&rdquo; answer), it&rsquo;s stored with <code>negative_ttl</code> instead, or not stored at all if <code>negative_ttl</code> is <code>None</code>. <code>get(key)</code> returns <code>(True, value)</code> for an entry that hasn&rsquo;t expired (it&rsquo;s expired when <code>clock()</code> is <strong>at or after</strong> its expiry; expired entries are removed), or <code>(False, None)</code>. <code>delete(key)</code> removes an entry if present. <code>purge()</code> removes every expired entry and returns how many it removed.</p></div><textarea class="pc-src pc-code" hidden>class TTLCache:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_ttl():
+    &quot;fresh, then gone&quot;
+    class Clock:
+        t = 100.0
+        def __call__(self):
+            return self.t
+    clock = Clock()
+    c = TTLCache(clock, 60, negative_ttl=5)
+    c.set(&quot;ticket:7&quot;, {&quot;status&quot;: &quot;open&quot;})
+    c.set(&quot;ticket:99&quot;, None)
+    assert c.get(&quot;ticket:7&quot;) == (True, {&quot;status&quot;: &quot;open&quot;}) and c.get(&quot;ticket:99&quot;) == (True, None)
+    clock.t = 105
+    assert c.get(&quot;ticket:99&quot;) == (False, None) and c.get(&quot;ticket:7&quot;)[0] is True
+    clock.t = 160
+    assert c.get(&quot;ticket:7&quot;) == (False, None)
+    c.set(&quot;a&quot;, 1)
+    c.set(&quot;b&quot;, 2)
+    c.delete(&quot;a&quot;)
+    c.delete(&quot;nothing&quot;)
+    assert c.get(&quot;a&quot;) == (False, None)
+    clock.t = 300
+    c.set(&quot;c&quot;, 3)
+    assert c.purge() == 1 and c.get(&quot;c&quot;) == (True, 3)
+    plain = TTLCache(clock, 10)
+    plain.set(&quot;x&quot;, None)
+    assert plain.get(&quot;x&quot;) == (False, None) and plain.purge() == 0</textarea><textarea class="pc-src pc-solution" hidden>class TTLCache:
+    def __init__(self, clock, ttl, negative_ttl=None):
+        self.clock = clock
+        self.ttl = ttl
+        self.negative_ttl = negative_ttl
+        self.data = {}
+
+    def set(self, key, value):
+        ttl = self.ttl if value is not None else self.negative_ttl
+        if ttl is None:
+            return
+        self.data[key] = (value, self.clock() + ttl)
+
+    def get(self, key):
+        if key in self.data:
+            value, expires = self.data[key]
+            if self.clock() &lt; expires:
+                return True, value
+            del self.data[key]
+        return False, None
+
+    def delete(self, key):
+        self.data.pop(key, None)
+
+    def purge(self):
+        now = self.clock()
+        old = [k for k, (_, expires) in self.data.items() if now &gt;= expires]
+        for k in old:
+            del self.data[k]
+        return len(old)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d2-aside" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Cache-aside with invalidation</div><div class="pc-prompt"><p>Write a class <code>CachedTickets(db, cache)</code>: <code>db</code> is a dict standing in for the database (ticket id to a dict), and <code>cache</code> is a dict standing in for the cache. Count database reads in <code>self.db_reads</code>. <code>get(ticket_id)</code>: from the cache if there, else read the database (counting it), store a <strong>copy</strong> of the ticket in the cache, and return it (a missing ticket returns <code>None</code> and isn&rsquo;t cached). <code>update(ticket_id, **changes)</code>: change the ticket in the database, then delete its cache entry. <code>delete(ticket_id)</code>: remove it from the database and the cache. Values returned from <code>get</code> must not let a caller change the cached copy: return a copy each time.</p></div><textarea class="pc-src pc-code" hidden>class CachedTickets:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_aside():
+    &quot;reads load once; writes invalidate&quot;
+    db = {7: {&quot;id&quot;: 7, &quot;status&quot;: &quot;open&quot;}, 8: {&quot;id&quot;: 8, &quot;status&quot;: &quot;open&quot;}}
+    t = CachedTickets(db, {})
+    assert t.get(7) == {&quot;id&quot;: 7, &quot;status&quot;: &quot;open&quot;} and t.get(7)[&quot;status&quot;] == &quot;open&quot; and t.db_reads == 1
+    t.update(7, status=&quot;resolved&quot;)
+    assert t.get(7)[&quot;status&quot;] == &quot;resolved&quot; and t.db_reads == 2
+    t.get(7)[&quot;status&quot;] = &quot;hacked&quot;
+    assert t.get(7)[&quot;status&quot;] == &quot;resolved&quot; and db[7][&quot;status&quot;] == &quot;resolved&quot;
+    assert t.get(99) is None and t.get(99) is None and t.db_reads == 4
+    t.get(8)
+    t.delete(8)
+    assert t.get(8) is None and 8 not in db</textarea><textarea class="pc-src pc-solution" hidden>class CachedTickets:
+    def __init__(self, db, cache):
+        self.db = db
+        self.cache = cache
+        self.db_reads = 0
+
+    def get(self, ticket_id):
+        if ticket_id not in self.cache:
+            self.db_reads += 1
+            row = self.db.get(ticket_id)
+            if row is None:
+                return None
+            self.cache[ticket_id] = dict(row)
+        return dict(self.cache[ticket_id])
+
+    def update(self, ticket_id, **changes):
+        self.db[ticket_id].update(changes)
+        self.cache.pop(ticket_id, None)
+
+    def delete(self, ticket_id):
+        self.db.pop(ticket_id, None)
+        self.cache.pop(ticket_id, None)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d2-swr" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Stale while revalidate</div><div class="pc-prompt"><p>Write a class <code>SWRCache(clock, ttl, stale_for)</code>. <code>get(key, loader)</code> returns a value: if the key is cached and younger than <code>ttl</code>, return it (a <strong>hit</strong>); if it&rsquo;s older than <code>ttl</code> but younger than <code>ttl + stale_for</code>, return the stale value at once and queue <strong>one</strong> refresh for that key (in <code>self.queue</code>, a list, never holding the same key twice); otherwise (missing, or too old) call <code>loader(key)</code> now, store the value with the current time, and return it (a <strong>miss</strong>). <code>refresh(loaders)</code> runs the queued refreshes (with the given dict from key to loader function), storing each new value with the current time, empties the queue, and returns the number refreshed. Count <code>self.hits</code>, <code>self.stale</code> and <code>self.misses</code>.</p></div><textarea class="pc-src pc-code" hidden>class SWRCache:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_swr():
+    &quot;a stampede becomes one refresh&quot;
+    class Clock:
+        t = 0
+        def __call__(self):
+            return self.t
+    clock = Clock()
+    calls = []
+    def load(key):
+        calls.append(key)
+        return f&quot;{key} v{len(calls)}&quot;
+    c = SWRCache(clock, ttl=60, stale_for=30)
+    assert c.get(&quot;stats&quot;, load) == &quot;stats v1&quot; and calls == [&quot;stats&quot;]
+    clock.t = 59
+    assert c.get(&quot;stats&quot;, load) == &quot;stats v1&quot;
+    clock.t = 70
+    for _ in range(1000):
+        assert c.get(&quot;stats&quot;, load) == &quot;stats v1&quot;
+    assert calls == [&quot;stats&quot;] and c.queue == [&quot;stats&quot;] and c.stale == 1000
+    assert c.refresh({&quot;stats&quot;: load}) == 1 and c.queue == [] and calls == [&quot;stats&quot;, &quot;stats&quot;]
+    assert c.get(&quot;stats&quot;, load) == &quot;stats v2&quot; and c.hits == 2
+    clock.t = 70 + 91
+    assert c.get(&quot;stats&quot;, load) == &quot;stats v3&quot; and c.misses == 2</textarea><textarea class="pc-src pc-solution" hidden>class SWRCache:
+    def __init__(self, clock, ttl, stale_for):
+        self.clock = clock
+        self.ttl = ttl
+        self.stale_for = stale_for
+        self.data = {}
+        self.queue = []
+        self.hits = self.stale = self.misses = 0
+
+    def get(self, key, loader):
+        now = self.clock()
+        if key in self.data:
+            value, stored = self.data[key]
+            age = now - stored
+            if age &lt; self.ttl:
+                self.hits += 1
+                return value
+            if age &lt; self.ttl + self.stale_for:
+                self.stale += 1
+                if key not in self.queue:
+                    self.queue.append(key)
+                return value
+        self.misses += 1
+        value = loader(key)
+        self.data[key] = (value, now)
+        return value
+
+    def refresh(self, loaders):
+        count = 0
+        for key in self.queue:
+            self.data[key] = (loaders[key](key), self.clock())
+            count += 1
+        self.queue = []
+        return count</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d2-policies" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Which eviction policy?</div><div class="pc-prompt"><p>Write <code>hit_rate(trace, capacity, policy)</code>: replay a list of keys (<code>trace</code>) through a cache holding at most <code>capacity</code> keys, where every miss loads the key into the cache (evicting one if it&rsquo;s full), and return the hit rate rounded to 2 places. <code>policy</code> is <code>"lru"</code> (evict the least recently used), <code>"fifo"</code> (evict the one that was loaded earliest; hits don&rsquo;t change anything) or <code>"lfu"</code> (evict the one with the fewest hits plus loads so far; ties go to the least recently used). Then <code>compare(trace, capacity)</code>: a dict from each policy name to its hit rate.</p></div><textarea class="pc-src pc-code" hidden>def hit_rate(trace, capacity, policy):
+    ___
+
+def compare(trace, capacity):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_policies():
+    &quot;different workloads, different winners&quot;
+    loop = list(&quot;abcabcabcd&quot; * 3)
+    assert compare(loop, 3) == {&quot;lru&quot;: 0.6, &quot;fifo&quot;: 0.6, &quot;lfu&quot;: 0.73}
+    recent = list(&quot;aaabbbcccdddaaa&quot;)
+    assert hit_rate(recent, 2, &quot;lru&quot;) == 0.67 and hit_rate(recent, 2, &quot;fifo&quot;) == 0.67
+    hot = [&quot;x&quot;, &quot;a&quot;, &quot;x&quot;, &quot;b&quot;, &quot;x&quot;, &quot;c&quot;, &quot;x&quot;, &quot;d&quot;, &quot;x&quot;, &quot;e&quot;, &quot;x&quot;, &quot;a&quot;]
+    assert compare(hot, 2) == {&quot;lru&quot;: 0.42, &quot;fifo&quot;: 0.25, &quot;lfu&quot;: 0.42}
+    assert hit_rate([], 2, &quot;lru&quot;) == 0.0</textarea><textarea class="pc-src pc-solution" hidden>def hit_rate(trace, capacity, policy):
+    cache = []
+    counts = {}
+    hits = 0
+    for key in trace:
+        if key in cache:
+            hits += 1
+            counts[key] += 1
+            if policy in (&quot;lru&quot;, &quot;lfu&quot;):
+                cache.remove(key)
+                cache.append(key)
+            continue
+        if len(cache) &gt;= capacity:
+            if policy == &quot;lfu&quot;:
+                victim = min(cache, key=lambda k: (counts[k], cache.index(k)))
+            else:
+                victim = cache[0]
+            cache.remove(victim)
+            del counts[victim]
+        cache.append(key)
+        counts[key] = 1
+    return round(hits / len(trace), 2) if trace else 0.0
+
+def compare(trace, capacity):
+    return {p: hit_rate(trace, capacity, p) for p in (&quot;lru&quot;, &quot;fifo&quot;, &quot;lfu&quot;)}</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d2-keys" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Keys that can&rsquo;t leak</div><div class="pc-prompt"><p>Write <code>cache_key(method, path, query, user_id=None, role=None, personal=False)</code>: a string key for a response. Only <code>GET</code> and <code>HEAD</code> are cacheable: for anything else return <code>None</code>. The path is lower-cased with any trailing <code>/</code> removed (except for <code>/</code> itself). The query (a dict, possibly with list values for repeated parameters) becomes <code>name=value</code> pairs sorted by name then value, joined with <code>&amp;</code>, dropping any parameter named <code>token</code> or <code>_</code> (cache-busters). The key is <code>METHOD PATH?QUERY</code> (without <code>?</code> if the query is empty), then <code>|role=ROLE</code> if a role is given, then <code>|user=ID</code> if <code>personal</code> is true; a personal response with no user id can&rsquo;t be cached safely, so raise <code>ValueError("personal responses need a user id")</code>.</p></div><textarea class="pc-src pc-code" hidden>def cache_key(method, path, query, user_id=None, role=None, personal=False):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_keys():
+    &quot;everything the answer depends on, nothing else&quot;
+    assert cache_key(&quot;GET&quot;, &quot;/Tickets/&quot;, {&quot;status&quot;: &quot;open&quot;, &quot;page&quot;: &quot;2&quot;}) == &quot;GET /tickets?page=2&amp;status=open&quot;
+    assert cache_key(&quot;GET&quot;, &quot;/tickets&quot;, {&quot;page&quot;: &quot;2&quot;, &quot;status&quot;: &quot;open&quot;}) == cache_key(&quot;GET&quot;, &quot;/tickets/&quot;, {&quot;status&quot;: &quot;open&quot;, &quot;page&quot;: &quot;2&quot;})
+    assert cache_key(&quot;GET&quot;, &quot;/tickets&quot;, {&quot;tag&quot;: [&quot;b&quot;, &quot;a&quot;], &quot;_&quot;: &quot;1699&quot;, &quot;token&quot;: &quot;abc&quot;}) == &quot;GET /tickets?tag=a&amp;tag=b&quot;
+    assert cache_key(&quot;GET&quot;, &quot;/&quot;, {}) == &quot;GET /&quot; and cache_key(&quot;POST&quot;, &quot;/tickets&quot;, {}) is None
+    assert cache_key(&quot;GET&quot;, &quot;/stats&quot;, {}, role=&quot;agent&quot;) == &quot;GET /stats|role=agent&quot;
+    assert cache_key(&quot;HEAD&quot;, &quot;/me&quot;, {}, user_id=7, personal=True) == &quot;HEAD /me|user=7&quot;
+    assert cache_key(&quot;GET&quot;, &quot;/me&quot;, {}, user_id=7, personal=True) != cache_key(&quot;GET&quot;, &quot;/me&quot;, {}, user_id=8, personal=True)
+    try:
+        cache_key(&quot;GET&quot;, &quot;/me&quot;, {}, personal=True)
+    except ValueError as e:
+        assert str(e) == &quot;personal responses need a user id&quot;
+    else:
+        raise AssertionError(&quot;personal without a user&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def cache_key(method, path, query, user_id=None, role=None, personal=False):
+    if method not in (&quot;GET&quot;, &quot;HEAD&quot;):
+        return None
+    path = path.lower()
+    if len(path) &gt; 1:
+        path = path.rstrip(&quot;/&quot;) or &quot;/&quot;
+    pairs = []
+    for name, value in query.items():
+        if name in (&quot;token&quot;, &quot;_&quot;):
+            continue
+        for v in value if isinstance(value, list) else [value]:
+            pairs.append((name, v))
+    q = &quot;&amp;&quot;.join(f&quot;{n}={v}&quot; for n, v in sorted(pairs))
+    key = f&quot;{method} {path}&quot; + (f&quot;?{q}&quot; if q else &quot;&quot;)
+    if role is not None:
+        key += f&quot;|role={role}&quot;
+    if personal:
+        if user_id is None:
+            raise ValueError(&quot;personal responses need a user id&quot;)
+        key += f&quot;|user={user_id}&quot;
+    return key</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w081d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Someone else&rsquo;s tickets</div><div class="pc-prompt"><p>The response cache keys on the path alone, so after Ada loads her ticket list, Bob is served <strong>Ada&rsquo;s</strong>: this prints <code>bob sees: ['Ada: printer']</code>. Include the user in the key, so it prints <code>bob sees: ['Bob: login']</code>.</p></div><textarea class="pc-src pc-code" hidden>TICKETS = {&quot;ada&quot;: [&quot;Ada: printer&quot;], &quot;bob&quot;: [&quot;Bob: login&quot;]}
+cache = {}
+
+def list_tickets(user, path):
+    key = path
+    if key not in cache:
+        cache[key] = TICKETS[user]
+    return cache[key]
+
+list_tickets(&quot;ada&quot;, &quot;/tickets&quot;)
+print(&quot;bob sees:&quot;, list_tickets(&quot;bob&quot;, &quot;/tickets&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the user is part of the key&quot;
+    expect_output(&quot;bob sees: [&#x27;Bob: login&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>TICKETS = {&quot;ada&quot;: [&quot;Ada: printer&quot;], &quot;bob&quot;: [&quot;Bob: login&quot;]}
+cache = {}
+
+def list_tickets(user, path):
+    key = (user, path)
+    if key not in cache:
+        cache[key] = TICKETS[user]
+    return cache[key]
+
+list_tickets(&quot;ada&quot;, &quot;/tickets&quot;)
+print(&quot;bob sees:&quot;, list_tickets(&quot;bob&quot;, &quot;/tickets&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w081d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A status that never changed</div><div class="pc-prompt"><p>The update writes the database but forgets the cache, so readers keep seeing the old status and this prints <code>after update: open</code>. Invalidate the entry when the ticket changes, so it prints <code>after update: resolved</code>.</p></div><textarea class="pc-src pc-code" hidden>db = {7: &quot;open&quot;}
+cache = {}
+
+def get(ticket_id):
+    if ticket_id not in cache:
+        cache[ticket_id] = db[ticket_id]
+    return cache[ticket_id]
+
+def update(ticket_id, status):
+    db[ticket_id] = status
+
+get(7)
+update(7, &quot;resolved&quot;)
+print(&quot;after update:&quot;, get(7))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;delete on write&quot;
+    expect_output(&quot;after update: resolved&quot;)</textarea><textarea class="pc-src pc-solution" hidden>db = {7: &quot;open&quot;}
+cache = {}
+
+def get(ticket_id):
+    if ticket_id not in cache:
+        cache[ticket_id] = db[ticket_id]
+    return cache[ticket_id]
+
+def update(ticket_id, status):
+    db[ticket_id] = status
+    cache.pop(ticket_id, None)
+
+get(7)
+update(7, &quot;resolved&quot;)
+print(&quot;after update:&quot;, get(7))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w081d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Entries that never expired</div><div class="pc-prompt"><p>The expiry check compares the wrong way round: an entry counts as fresh only <strong>after</strong> its expiry time, so a fresh entry is reloaded and an expired one is served. This prints <code>at 30: loaded, at 90: cached</code>. Fix it, so it prints <code>at 30: cached, at 90: loaded</code>.</p></div><textarea class="pc-src pc-code" hidden>cache = {&quot;price&quot;: (12.50, 60)}      # value, expires at t=60
+
+def lookup(now):
+    value, expires = cache[&quot;price&quot;]
+    return &quot;cached&quot; if now &gt; expires else &quot;loaded&quot;
+
+print(f&quot;at 30: {lookup(30)}, at 90: {lookup(90)}&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;fresh until it expires&quot;
+    expect_output(&quot;at 30: cached, at 90: loaded&quot;)</textarea><textarea class="pc-src pc-solution" hidden>cache = {&quot;price&quot;: (12.50, 60)}      # value, expires at t=60
+
+def lookup(now):
+    value, expires = cache[&quot;price&quot;]
+    return &quot;cached&quot; if now &lt; expires else &quot;loaded&quot;
+
+print(f&quot;at 30: {lookup(30)}, at 90: {lookup(90)}&quot;)</textarea></div>
+<div class="parsons" data-id="w081d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A cache-aside read and write</div><div class="pc-prompt"><p>Arrange a cache-aside read and a write that keeps the cache honest. One line is a trap.</p></div><script type="application/json">{"lines": ["def get_ticket(ticket_id):", "    found, value = cache.get(f\"ticket:{ticket_id}\")", "    if not found:", "        value = db.get_ticket(ticket_id)", "        cache.set(f\"ticket:{ticket_id}\", value)", "    return value", "def close_ticket(ticket_id):", "    db.close(ticket_id)", "    cache.delete(f\"ticket:{ticket_id}\")"], "distractors": ["    cache.set(f\"ticket:{ticket_id}\", \"closed\")"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the average read in ms with a 90% hit rate, a 1 ms cache and a 20 ms database
+q = ___   # &quot;lru&quot;, &quot;lfu&quot; or &quot;fifo&quot;: evicts the entry untouched for longest
+r = ___   # on a write, should cache-aside &quot;update&quot; or &quot;delete&quot; the cached entry?
+s = ___   # the Cache-Control directive that stops shared caches storing a personal response
+t = ___   # the name for many requests reloading one expired entry at once</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 3.0 and q == &quot;lru&quot; and r == &quot;delete&quot;, &quot;p, q and r&quot;
+    assert s == &quot;private&quot; and t in (&quot;stampede&quot;, &quot;thundering herd&quot;), &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 3.0
+q = &quot;lru&quot;
+r = &quot;delete&quot;
+s = &quot;private&quot;
+t = &quot;stampede&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w081d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What kind of data suits a cache best?", "answer": 1, "explain": "High hit rates and tolerable staleness.", "options": ["Data that changes every second", "Data that&rsquo;s read often, changes rarely and is costly to produce", "Data read once", "Bank balances mid-transfer"]}, {"type": "mc", "q": "What does LRU evict?", "answer": 1, "explain": "Recent use predicts future use.", "options": ["The oldest entry", "The entry untouched for longest", "The least frequently used", "A random entry"]}, {"type": "mc", "q": "What does a TTL promise?", "answer": 1, "explain": "Choose it per kind of data.", "options": ["The value is always current", "The value is at most that old", "The value never expires", "The cache is full"]}, {"type": "mc", "q": "In cache-aside, why delete the cache entry on a write rather than update it?", "answer": 1, "explain": "The next read reloads the current value.", "options": ["It&rsquo;s faster", "Racing writes updating the cache can leave the older value there", "Caches can&rsquo;t be updated", "To save memory"]}, {"type": "mc", "q": "Which write strategy can lose writes in a crash?", "answer": 1, "explain": "Writes reach the database later.", "options": ["Write-through", "Write-behind", "Cache-aside", "Read-through"]}, {"type": "mc", "q": "What is negative caching?", "answer": 1, "explain": "Missing things are looked up repeatedly too.", "options": ["Caching errors forever", "Briefly caching &ldquo;not found&rdquo; answers", "Deleting the cache", "A cache with no memory"]}, {"type": "mc", "q": "How does stale-while-revalidate prevent a stampede?", "answer": 1, "explain": "Users don&rsquo;t wait and the database sees one request.", "options": ["It blocks requests", "It serves the stale value and refreshes once in the background", "It doubles the TTL", "It uses two caches"]}, {"type": "mc", "q": "Why add jitter to TTLs?", "answer": 1, "explain": "Spread out the reloads.", "options": ["Security", "So entries written together don&rsquo;t all expire together", "To make caching random", "It&rsquo;s required"]}, {"type": "mc", "q": "What&rsquo;s wrong with caching /tickets under the key &ldquo;/tickets&rdquo;?", "answer": 1, "explain": "Keys must include everything the answer depends on.", "options": ["Nothing", "Every user would get the first user&rsquo;s list", "Keys need numbers", "It&rsquo;s too short"]}, {"type": "output", "q": "What does this print?", "answer": "('b', 2)", "explain": "a was moved to the end, so b is now the oldest.", "code": "from collections import OrderedDict\nc = OrderedDict(a=1, b=2, c=3)\nc.move_to_end(\"a\")\nprint(c.popitem(last=False))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a caching decorator</div><div class="pc-prompt"><p>Write a decorator factory <code>cached(ttl, maxsize, clock)</code>. The decorated function&rsquo;s results are cached by its arguments (the key is <code>(args, tuple(sorted(kwargs.items())))</code>), with LRU eviction beyond <code>maxsize</code> entries and expiry <code>ttl</code> seconds after an entry was stored (expired when <code>clock()</code> is at or after the expiry). Exceptions are <strong>not</strong> cached (they propagate, and the next call tries again). The wrapper keeps the function&rsquo;s name and docstring (<code>functools.wraps</code>) and has three attributes: <code>cache_info()</code> returning <code>{"hits": H, "misses": M, "size": S}</code>, <code>cache_clear()</code> emptying the cache (counts too), and <code>invalidate(*args, **kwargs)</code> removing the entry for those arguments, returning <code>True</code> if there was one.</p></div><textarea class="pc-src pc-code" hidden>import functools
+from collections import OrderedDict
+
+def cached(ttl, maxsize, clock):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cached():
+    &quot;hits, misses, expiry and eviction&quot;
+    class Clock:
+        t = 0
+        def __call__(self):
+            return self.t
+    clock = Clock()
+    calls = []
+
+    @cached(ttl=60, maxsize=2, clock=clock)
+    def stats(team, *, detail=False):
+        &quot;&quot;&quot;Ticket statistics for a team.&quot;&quot;&quot;
+        calls.append((team, detail))
+        return f&quot;{team}:{detail}:{len(calls)}&quot;
+
+    assert stats.__name__ == &quot;stats&quot; and stats.__doc__ == &quot;Ticket statistics for a team.&quot;
+    assert stats(&quot;red&quot;) == &quot;red:False:1&quot; and stats(&quot;red&quot;) == &quot;red:False:1&quot;
+    assert stats(&quot;red&quot;, detail=True) == &quot;red:True:2&quot;
+    stats(&quot;blue&quot;)
+    assert stats.cache_info() == {&quot;hits&quot;: 1, &quot;misses&quot;: 3, &quot;size&quot;: 2}
+    assert stats(&quot;red&quot;) == &quot;red:False:4&quot;
+    clock.t = 59
+    assert stats(&quot;blue&quot;) == &quot;blue:False:3&quot;
+    clock.t = 60
+    assert stats(&quot;blue&quot;) == &quot;blue:False:5&quot;
+    assert stats.invalidate(&quot;blue&quot;) is True and stats.invalidate(&quot;blue&quot;) is False
+    stats.cache_clear()
+    assert stats.cache_info() == {&quot;hits&quot;: 0, &quot;misses&quot;: 0, &quot;size&quot;: 0}
+
+def test_errors_not_cached():
+    &quot;a failure is retried&quot;
+    class Clock:
+        def __call__(self):
+            return 0
+    attempts = []
+
+    @cached(ttl=60, maxsize=10, clock=Clock())
+    def flaky(n):
+        attempts.append(n)
+        if len(attempts) == 1:
+            raise ConnectionError(&quot;database down&quot;)
+        return n * 2
+
+    try:
+        flaky(5)
+    except ConnectionError:
+        pass
+    else:
+        raise AssertionError(&quot;the error should propagate&quot;)
+    assert flaky(5) == 10 and flaky(5) == 10 and attempts == [5, 5]
+    assert flaky.cache_info() == {&quot;hits&quot;: 1, &quot;misses&quot;: 2, &quot;size&quot;: 1}</textarea><textarea class="pc-src pc-solution" hidden>import functools
+from collections import OrderedDict
+
+def cached(ttl, maxsize, clock):
+    def decorate(func):
+        store = OrderedDict()
+        counts = {&quot;hits&quot;: 0, &quot;misses&quot;: 0}
+
+        def key_of(args, kwargs):
+            return (args, tuple(sorted(kwargs.items())))
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            key = key_of(args, kwargs)
+            now = clock()
+            if key in store:
+                value, expires = store[key]
+                if now &lt; expires:
+                    counts[&quot;hits&quot;] += 1
+                    store.move_to_end(key)
+                    return value
+                del store[key]
+            counts[&quot;misses&quot;] += 1
+            value = func(*args, **kwargs)
+            store[key] = (value, now + ttl)
+            store.move_to_end(key)
+            while len(store) &gt; maxsize:
+                store.popitem(last=False)
+            return value
+
+        def cache_info():
+            return {&quot;hits&quot;: counts[&quot;hits&quot;], &quot;misses&quot;: counts[&quot;misses&quot;], &quot;size&quot;: len(store)}
+
+        def cache_clear():
+            store.clear()
+            counts[&quot;hits&quot;] = counts[&quot;misses&quot;] = 0
+
+        def invalidate(*args, **kwargs):
+            return store.pop(key_of(args, kwargs), None) is not None
+
+        wrapper.cache_info = cache_info
+        wrapper.cache_clear = cache_clear
+        wrapper.invalidate = invalidate
+        return wrapper
+    return decorate</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Open your browser&rsquo;s developer tools on a site you use, reload, and look at the <code>Cache-Control</code> headers on its images, scripts and pages: you&rsquo;ll see long TTLs on files whose names change with each release, and short or none on the pages themselves. Tomorrow: <strong>queues</strong>, for work that doesn&rsquo;t need to happen while the user waits.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w081d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w081d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w081d2", "week": 81, "day": 2, "title": "Caching", "exercises": [{"id": "w081d2-lru", "title": "An LRU cache", "points": 15}, {"id": "w081d2-ttl", "title": "Entries that expire", "points": 10}, {"id": "w081d2-aside", "title": "Cache-aside with invalidation", "points": 10}, {"id": "w081d2-swr", "title": "Stale while revalidate", "points": 15}, {"id": "w081d2-policies", "title": "Which eviction policy?", "points": 10}, {"id": "w081d2-keys", "title": "Keys that can't leak", "points": 10}, {"id": "w081d2-bug1", "title": "Someone else's tickets", "points": 10}, {"id": "w081d2-bug2", "title": "A status that never changed", "points": 10}, {"id": "w081d2-bug3", "title": "Entries that never expired", "points": 10}, {"id": "w081d2-trace", "title": "Predict them", "points": 10}, {"id": "w081d2-challenge", "title": "Challenge: a caching decorator", "points": 25}], "points": 135}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=b54d8b61c9"></script>
+</body>
+</html>

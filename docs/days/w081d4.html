@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="b54d8b61c9">
+<title>Week 81 Day 4: Databases at scale | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=b54d8b61c9">
+<link rel="stylesheet" href="../assets/css/site.css?v=b54d8b61c9">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=b54d8b61c9"></script>
+<script src="../assets/vendor/codemirror.js?v=b54d8b61c9" defer></script>
+<meta name="description" content="Caches and queues take load off the database, but eventually the database itself is the limit: too many reads for one server, too many writes, or simply too...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w081d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 81 Day 4: Databases at scale">
+<meta property="og:description" content="Caches and queues take load off the database, but eventually the database itself is the limit: too many reads for one server, too many writes, or simply too...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w081d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-81">Week 81: System design I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#replication" data-sec="replication">Replication</a></li><li><a href="#partitioning-and-sharding" data-sec="partitioning-and-sharding">Partitioning and sharding</a></li><li><a href="#consistent-hashing" data-sec="consistent-hashing">Consistent hashing</a></li><li><a href="#agreeing-on-answers" data-sec="agreeing-on-answers">Agreeing on answers</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w081d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-81">Week 81: System design I</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 81, Day 4</span></p>
+      <h1>Databases at scale</h1>
+      <div class="day-intro"><p>Caches and queues take load off the database, but eventually the database itself is the limit: too many reads for one server, too many writes, or simply too much data. Today is about spreading a database over several machines, which is where systems get genuinely hard, because copies can disagree and data can be in the wrong place. You&rsquo;ll build replication with its lag and the read-your-writes problem it causes, choose a failover candidate without losing data, partition data by range and by hash, use consistent hashing so adding a server moves only a small share of the data, query across shards and merge the results, and see how quorums let replicas agree. Each idea is simulated in a few lines, so you can watch exactly what goes wrong and why the fix works.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain leader-follower replication, replication lag, and how to give users read-your-writes consistency</li><li>Choose which follower to promote in a failover so no acknowledged write is lost</li><li>Partition data by range or hash, and spot hot partitions</li><li>Use consistent hashing so adding or removing a server moves only a small share of keys</li><li>Query across shards with scatter-gather, and reason about quorums (R + W &gt; N)</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:25" title="Replication: 25 min"></span><span class="plan-seg s0" style="flex:25" title="Partitioning and sharding: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Consistent hashing: 20 min"></span><span class="plan-seg s0" style="flex:15" title="Agreeing on answers: 15 min"></span><span class="plan-seg s1" style="flex:65" title="Practice: 65 min"></span><span class="plan-seg s0" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">7 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Replication</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:35</span><span class="plan-what">Partitioning and sharding</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:00</span><span class="plan-what">Consistent hashing</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Agreeing on answers</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Practice</span><span class="plan-min">65 min</span></li><li><span class="plan-at">2:40</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w081d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w081d4.ipynb" download>download it</a>. Exercises today are worth 135 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w081d4-p1"><textarea class="pc-src pc-code" hidden>import zlib
+
+keys = [f&quot;ticket:{i}&quot; for i in range(1000)]
+before = {k: zlib.crc32(k.encode()) % 3 for k in keys}
+after = {k: zlib.crc32(k.encode()) % 4 for k in keys}
+moved = sum(before[k] != after[k] for k in keys)
+print(f&quot;adding a fourth server moved {moved / len(keys):.0%} of the keys&quot;)</textarea></div>
+<p>Spreading keys over servers with <code>hash % N</code> looks fine until <code>N</code> changes: then almost every key&rsquo;s server changes, and adding one machine means moving most of the data. Today&rsquo;s <strong>consistent hashing</strong> moves only about a quarter (the share the new server should own), and that difference is why it&rsquo;s used by nearly every large distributed store.</p>
+<h2 id="replication">Replication</h2>
+<p><strong>Replication</strong> keeps copies of the same data on several machines. The most common arrangement is <strong>leader and followers</strong> (also called primary and replicas):</p>
+<ul>
+<li>every <strong>write</strong> goes to the <strong>leader</strong>, which records it in its <strong>log</strong> (an ordered list of changes) and applies it;</li>
+<li><strong>followers</strong> copy the leader&rsquo;s log and apply the same changes in the same order;</li>
+<li><strong>reads</strong> can go to any follower, so read capacity grows with each follower (Monday&rsquo;s <code>db_read_replicas</code>).</li>
+</ul>
+<p>Followers usually copy <strong>asynchronously</strong>: the leader confirms a write before followers have it, so they&rsquo;re a little behind. That delay is <strong>replication lag</strong>, normally milliseconds, but seconds or minutes under load. Lag causes a familiar bug: a user saves a change, the page reloads, the read goes to a follower that hasn&rsquo;t caught up, and the change seems to have vanished. The fix is <strong>read-your-writes consistency</strong>: remember the log position of each user&rsquo;s last write, and send that user&rsquo;s reads to a replica that has reached it (or to the leader).</p>
+<p><strong>Failover.</strong> When the leader dies, a follower is <strong>promoted</strong>. Pick the one that&rsquo;s <strong>furthest along</strong> (the highest log position), or acknowledged writes are lost. Writes the old leader confirmed but no follower received are lost anyway with asynchronous replication, which is why important systems use <strong>synchronous</strong> replication to at least one follower: the leader confirms a write only once a follower has it too, trading some write speed for durability.</p>
+<div class="pc pc-example" data-kind="example" data-id="w081d4-e2"><textarea class="pc-src pc-code" hidden>leader_log = []
+followers = {&quot;replica-1&quot;: 0, &quot;replica-2&quot;: 0}      # how far each has applied
+
+def write(change):
+    leader_log.append(change)
+    return len(leader_log)                       # the write&#x27;s log position
+
+def catch_up(name, steps):
+    followers[name] = min(len(leader_log), followers[name] + steps)
+
+position = write(&quot;ticket 7: status=resolved&quot;)
+catch_up(&quot;replica-1&quot;, 1)
+for name, applied in followers.items():
+    print(name, &quot;has the change&quot; if applied &gt;= position else &quot;is behind: the user would see the old status&quot;)</textarea></div>
+<h2 id="partitioning-and-sharding">Partitioning and sharding</h2>
+<p>When the <strong>data</strong> (or the write load) is too big for one leader, it&rsquo;s split into <strong>partitions</strong> (called <strong>shards</strong> when they live on separate servers), each holding a subset of the rows, each with its own leader and followers. Everything depends on the <strong>partition key</strong>, the column that decides where a row lives:</p>
+<ul>
+<li><strong>Range partitioning</strong>: each partition holds a range of keys (A to F, G to M&hellip;). Range queries are efficient (&ldquo;every ticket from last week&rdquo; reads one or two partitions), but popular ranges get <strong>hot</strong>: partition by date, and all of today&rsquo;s writes hit one server.</li>
+<li><strong>Hash partitioning</strong>: the partition is chosen by a hash of the key. Load spreads evenly, but range queries must ask every partition.</li>
+</ul>
+<p>A good key spreads load and keeps the data a request needs together. For the helpdesk, <code>customer_id</code> is a natural choice: a customer&rsquo;s tickets, comments and events all live on one shard, so most requests touch one server. Queries that span customers (an agent&rsquo;s view of all open tickets, the statistics) must <strong>scatter</strong> to every shard and <strong>gather</strong> the results: each shard returns its best results, and the router <strong>merges</strong> them. For a sorted, limited query, each shard returns its own top <code>limit</code> rows, and a merge of the sorted lists (<code>heapq.merge</code>) gives the overall top <code>limit</code>.</p>
+<div class="pc pc-example" data-kind="example" data-id="w081d4-e3"><textarea class="pc-src pc-code" hidden>import heapq
+
+shards = {
+    &quot;shard-a&quot;: [(1, &quot;Printer&quot;), (4, &quot;Wifi&quot;), (9, &quot;Mouse&quot;)],
+    &quot;shard-b&quot;: [(2, &quot;Login&quot;), (3, &quot;VPN&quot;), (12, &quot;Email&quot;)],
+    &quot;shard-c&quot;: [(5, &quot;Laptop&quot;), (6, &quot;Phone&quot;)],
+}
+limit = 4
+per_shard = [rows[:limit] for rows in shards.values()]      # each shard&#x27;s own first 4, by id
+print(list(heapq.merge(*per_shard))[:limit])</textarea></div>
+<h2 id="consistent-hashing">Consistent hashing</h2>
+<p><strong>Consistent hashing</strong> places both <strong>servers</strong> and <strong>keys</strong> on a ring of hash values (0 to 2^32 - 1 for <code>zlib.crc32</code>). A key belongs to the first server <strong>clockwise</strong> from the key&rsquo;s position. Add a server, and it takes over only the keys between its position and the previous server&rsquo;s: roughly <code>1 / N</code> of them. Remove one, and only its keys move, to the next server along.</p>
+<p>With few servers, their positions on the ring are uneven, so some get far more keys than others. The fix is <strong>virtual nodes</strong>: each server is placed on the ring many times (at the hashes of <code>"db-1#0"</code>, <code>"db-1#1"</code>, &hellip;), which averages out the gaps; more virtual nodes give an evener spread, and a bigger server can be given more.</p>
+<p>In Python, a ring is a sorted list of positions, with <code>bisect</code> (Week 18) finding the first position after a key&rsquo;s hash, wrapping round to the start at the end.</p>
+<h2 id="agreeing-on-answers">Agreeing on answers</h2>
+<p>Some stores (Cassandra, DynamoDB, Riak) have no leader: every write goes to several of the <code>N</code> replicas, and every read asks several. The arithmetic of <strong>quorums</strong>: if a write waits for <code>W</code> replicas to confirm and a read asks <code>R</code> replicas, then with <strong><code>R + W &gt; N</code></strong> every read set overlaps every write set in at least one replica, so a read always sees the latest write (taking the answer with the highest version). <code>N = 3, W = 2, R = 2</code> is the classic choice: one replica can be down for reads and writes.</p>
+<p>The deeper limit is the <strong>CAP theorem</strong>: when the network splits the replicas into groups that can&rsquo;t talk (a <strong>partition</strong>), a system must choose between <strong>consistency</strong> (refusing requests that can&rsquo;t be answered with the latest data) and <strong>availability</strong> (answering anyway, possibly with stale data). Most systems choose per operation: a balance check must be consistent; a &ldquo;likes&rdquo; counter can be a little behind (<strong>eventual consistency</strong>: replicas converge once the network heals).</p>
+<h3 id="on-your-own-computer">On your own computer</h3>
+<p>PostgreSQL and MySQL both do leader-follower replication (streaming replication in PostgreSQL), and connection poolers and proxies (PgBouncer, ProxySQL) route reads to replicas. Citus (for PostgreSQL) and Vitess (for MySQL) add sharding; CockroachDB and Spanner do it, with consensus, built in. Before any of that, the cheaper steps usually come first: indexes (Week 75), caches and read replicas.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Leader-follower replication sends writes to the leader&rsquo;s log and copies it to followers, which serve reads. Asynchronous copying means replication lag; give users read-your-writes by routing their reads to a replica that has reached their last write&rsquo;s log position. On failover promote the most up-to-date follower; synchronous replication to one follower stops confirmed writes being lost. Partition by range (efficient ranges, hot spots) or hash (even load, scatter for ranges); choose a key that keeps a request&rsquo;s data together; cross-shard queries scatter to every shard, take each shard&rsquo;s top results, and merge. Consistent hashing puts servers (with many virtual nodes) and keys on a ring, so adding a server moves about 1/N of the keys instead of nearly all. Quorums with R + W &gt; N make reads overlap writes; under a network partition, systems choose consistency or availability (CAP), often per operation.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d4-replicas" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Replication lag and read-your-writes</div><div class="pc-prompt"><p>Write a class <code>ReplicatedStore(replica_names)</code>. The leader keeps a log of <code>(key, value)</code> writes and its own data; each replica has its own data and the log position it has applied (starting at 0). <code>write(key, value, session=None)</code> appends to the log, applies it on the leader, records the new log position as that session&rsquo;s last write (if a session is given), and returns the position (the log&rsquo;s length). <code>replicate(name, steps=None)</code> applies up to <code>steps</code> more log entries (all remaining if <code>None</code>) to that replica. <code>read(key, replica, session=None)</code> returns the value from that replica, unless the session has written something the replica hasn&rsquo;t applied yet, in which case it reads from the leader instead; it returns <code>(value, served_by)</code>, where <code>served_by</code> is the replica&rsquo;s name or <code>"leader"</code>. <code>lag()</code> returns a dict of replica name to how many log entries it&rsquo;s behind.</p></div><textarea class="pc-src pc-code" hidden>class ReplicatedStore:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_replication():
+    &quot;lag, and reading your own writes&quot;
+    s = ReplicatedStore([&quot;r1&quot;, &quot;r2&quot;])
+    assert s.write(&quot;ticket:7&quot;, &quot;open&quot;, session=&quot;ada&quot;) == 1
+    assert s.read(&quot;ticket:7&quot;, &quot;r1&quot;) == (None, &quot;r1&quot;)
+    assert s.read(&quot;ticket:7&quot;, &quot;r1&quot;, session=&quot;ada&quot;) == (&quot;open&quot;, &quot;leader&quot;)
+    s.replicate(&quot;r1&quot;)
+    assert s.read(&quot;ticket:7&quot;, &quot;r1&quot;, session=&quot;ada&quot;) == (&quot;open&quot;, &quot;r1&quot;)
+    s.write(&quot;ticket:7&quot;, &quot;resolved&quot;, session=&quot;ada&quot;)
+    s.write(&quot;ticket:8&quot;, &quot;open&quot;, session=&quot;bob&quot;)
+    assert s.lag() == {&quot;r1&quot;: 2, &quot;r2&quot;: 3}
+    s.replicate(&quot;r2&quot;, steps=2)
+    assert s.read(&quot;ticket:7&quot;, &quot;r2&quot;, session=&quot;ada&quot;) == (&quot;resolved&quot;, &quot;r2&quot;)
+    assert s.read(&quot;ticket:8&quot;, &quot;r2&quot;, session=&quot;bob&quot;) == (&quot;open&quot;, &quot;leader&quot;) and s.read(&quot;ticket:8&quot;, &quot;r2&quot;) == (None, &quot;r2&quot;)
+    assert s.read(&quot;ticket:7&quot;, &quot;r1&quot;) == (&quot;open&quot;, &quot;r1&quot;) and s.lag() == {&quot;r1&quot;: 2, &quot;r2&quot;: 1}</textarea><textarea class="pc-src pc-solution" hidden>class ReplicatedStore:
+    def __init__(self, replica_names):
+        self.log = []
+        self.leader = {}
+        self.replicas = {name: {&quot;data&quot;: {}, &quot;applied&quot;: 0} for name in replica_names}
+        self.sessions = {}
+
+    def write(self, key, value, session=None):
+        self.log.append((key, value))
+        self.leader[key] = value
+        position = len(self.log)
+        if session is not None:
+            self.sessions[session] = position
+        return position
+
+    def replicate(self, name, steps=None):
+        r = self.replicas[name]
+        end = len(self.log) if steps is None else min(len(self.log), r[&quot;applied&quot;] + steps)
+        for key, value in self.log[r[&quot;applied&quot;]:end]:
+            r[&quot;data&quot;][key] = value
+        r[&quot;applied&quot;] = end
+
+    def read(self, key, replica, session=None):
+        r = self.replicas[replica]
+        if session is not None and self.sessions.get(session, 0) &gt; r[&quot;applied&quot;]:
+            return self.leader.get(key), &quot;leader&quot;
+        return r[&quot;data&quot;].get(key), replica
+
+    def lag(self):
+        return {name: len(self.log) - r[&quot;applied&quot;] for name, r in self.replicas.items()}</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d4-ring" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A consistent hash ring</div><div class="pc-prompt"><p>Write a class <code>HashRing(nodes=(), vnodes=100)</code>. Each node is placed on the ring <code>vnodes</code> times, at the positions <code>zlib.crc32(f"{node}#{i}".encode())</code> for <code>i</code> from 0. <code>add(node)</code> and <code>remove(node)</code> add or remove all of a node&rsquo;s positions. <code>node_for(key)</code> returns the node owning the first ring position at or after <code>zlib.crc32(key.encode())</code>, wrapping round to the lowest position if there&rsquo;s none after it; with no nodes, raise <code>LookupError("the ring is empty")</code>. Keep the positions in a sorted list and use <code>bisect</code>. Then <code>moved(ring_before, ring_after, keys)</code>: the fraction of <code>keys</code> whose node differs between two rings, rounded to 2 places.</p></div><textarea class="pc-src pc-code" hidden>import bisect
+import copy
+import zlib
+
+class HashRing:
+    ___
+
+def moved(ring_before, ring_after, keys):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_ring():
+    &quot;only a fair share moves&quot;
+    import copy, zlib
+    keys = [f&quot;ticket:{i}&quot; for i in range(4000)]
+    ring = HashRing([&quot;db-1&quot;, &quot;db-2&quot;, &quot;db-3&quot;])
+    owners = {k: ring.node_for(k) for k in keys}
+    assert set(owners.values()) == {&quot;db-1&quot;, &quot;db-2&quot;, &quot;db-3&quot;}
+    counts = {n: list(owners.values()).count(n) for n in (&quot;db-1&quot;, &quot;db-2&quot;, &quot;db-3&quot;)}
+    assert all(800 &lt; c &lt; 1900 for c in counts.values()), counts
+    bigger = copy.deepcopy(ring)
+    bigger.add(&quot;db-4&quot;)
+    share = moved(ring, bigger, keys)
+    assert 0.1 &lt; share &lt; 0.4, share
+    assert all(bigger.node_for(k) in (owners[k], &quot;db-4&quot;) for k in keys), &quot;keys only move to the new node&quot;
+    smaller = copy.deepcopy(ring)
+    smaller.remove(&quot;db-2&quot;)
+    assert all(smaller.node_for(k) == owners[k] for k in keys if owners[k] != &quot;db-2&quot;)
+    assert moved(ring, ring, keys) == 0.0
+
+def test_wrap_and_empty():
+    &quot;the ring wraps; an empty ring refuses&quot;
+    import zlib
+    ring = HashRing([&quot;only&quot;], vnodes=1)
+    assert ring.node_for(&quot;anything&quot;) == &quot;only&quot; and ring.node_for(&quot;&quot;) == &quot;only&quot;
+    try:
+        HashRing().node_for(&quot;x&quot;)
+    except LookupError as e:
+        assert str(e) == &quot;the ring is empty&quot;
+    else:
+        raise AssertionError(&quot;empty ring&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import bisect
+import copy
+import zlib
+
+class HashRing:
+    def __init__(self, nodes=(), vnodes=100):
+        self.vnodes = vnodes
+        self.positions = []
+        self.owner = {}
+        for node in nodes:
+            self.add(node)
+
+    def _points(self, node):
+        return [zlib.crc32(f&quot;{node}#{i}&quot;.encode()) for i in range(self.vnodes)]
+
+    def add(self, node):
+        for p in self._points(node):
+            bisect.insort(self.positions, p)
+            self.owner[p] = node
+
+    def remove(self, node):
+        for p in self._points(node):
+            self.positions.remove(p)
+            del self.owner[p]
+
+    def node_for(self, key):
+        if not self.positions:
+            raise LookupError(&quot;the ring is empty&quot;)
+        i = bisect.bisect_left(self.positions, zlib.crc32(key.encode()))
+        return self.owner[self.positions[i % len(self.positions)]]
+
+def moved(ring_before, ring_after, keys):
+    return round(sum(ring_before.node_for(k) != ring_after.node_for(k) for k in keys) / len(keys), 2)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d4-ranges" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Range partitions and hot spots</div><div class="pc-prompt"><p>Write a class <code>RangePartitions(bounds, names)</code>: <code>bounds</code> is a sorted list of upper bounds (exclusive) and <code>names</code> has one more name than bounds, so with bounds <code>["g", "n"]</code> and names <code>["p1", "p2", "p3"]</code>, keys below <code>"g"</code> go to <code>p1</code>, from <code>"g"</code> to below <code>"n"</code> to <code>p2</code>, and the rest to <code>p3</code>. <code>partition_for(key)</code> uses <code>bisect.bisect_right</code>. <code>record(key)</code> counts a write to that key&rsquo;s partition, and <code>hot(threshold)</code> returns the sorted names of partitions with more than <code>threshold</code> of all recorded writes (a fraction). <code>split(name, at, new_name)</code> splits a partition at a new bound: keys below <code>at</code> stay in <code>name</code>, the rest move to <code>new_name</code> (inserted just after it); the split point must lie inside the partition&rsquo;s range, else raise <code>ValueError(f"{at!r} is not inside {name}")</code>. Counts are reset after a split.</p></div><textarea class="pc-src pc-code" hidden>import bisect
+
+class RangePartitions:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_ranges():
+    &quot;date keys pile up on the newest partition&quot;
+    p = RangePartitions([&quot;2026-09&quot;, &quot;2026-11&quot;], [&quot;old&quot;, &quot;autumn&quot;, &quot;current&quot;])
+    assert p.partition_for(&quot;2026-08-30&quot;) == &quot;old&quot; and p.partition_for(&quot;2026-09&quot;) == &quot;autumn&quot; and p.partition_for(&quot;2026-11-10&quot;) == &quot;current&quot;
+    for day in [&quot;2026-11-01&quot;] * 70 + [&quot;2026-10-02&quot;] * 20 + [&quot;2026-05-05&quot;] * 10:
+        p.record(day)
+    assert p.hot(0.5) == [&quot;current&quot;] and p.hot(0.15) == [&quot;autumn&quot;, &quot;current&quot;]
+    p.split(&quot;current&quot;, &quot;2026-11-08&quot;, &quot;newest&quot;)
+    assert p.names == [&quot;old&quot;, &quot;autumn&quot;, &quot;current&quot;, &quot;newest&quot;] and p.bounds == [&quot;2026-09&quot;, &quot;2026-11&quot;, &quot;2026-11-08&quot;]
+    assert p.partition_for(&quot;2026-11-10&quot;) == &quot;newest&quot; and p.partition_for(&quot;2026-11-02&quot;) == &quot;current&quot; and p.hot(0.0) == []
+    for bad in (&quot;2026-10&quot;, &quot;2026-01&quot;):
+        try:
+            p.split(&quot;current&quot;, bad, &quot;x&quot;)
+        except ValueError as e:
+            assert str(e) == f&quot;{bad!r} is not inside current&quot;
+        else:
+            raise AssertionError(bad)</textarea><textarea class="pc-src pc-solution" hidden>import bisect
+
+class RangePartitions:
+    def __init__(self, bounds, names):
+        self.bounds = list(bounds)
+        self.names = list(names)
+        self.counts = {}
+
+    def partition_for(self, key):
+        return self.names[bisect.bisect_right(self.bounds, key)]
+
+    def record(self, key):
+        name = self.partition_for(key)
+        self.counts[name] = self.counts.get(name, 0) + 1
+
+    def hot(self, threshold):
+        total = sum(self.counts.values())
+        return sorted(n for n, c in self.counts.items() if total and c / total &gt; threshold)
+
+    def split(self, name, at, new_name):
+        i = self.names.index(name)
+        low = self.bounds[i - 1] if i &gt; 0 else None
+        high = self.bounds[i] if i &lt; len(self.bounds) else None
+        if (low is not None and at &lt;= low) or (high is not None and at &gt;= high):
+            raise ValueError(f&quot;{at!r} is not inside {name}&quot;)
+        self.bounds.insert(i, at)
+        self.names.insert(i + 1, new_name)
+        self.counts = {}</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d4-scatter" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Scatter and gather</div><div class="pc-prompt"><p>Tickets are sharded by customer. <code>shards</code> is a dict from shard name to a list of ticket dicts (<code>id</code>, <code>customer_id</code>, <code>status</code>, <code>created_at</code>). Write <code>shard_for(customer_id, names)</code>: <code>names[customer_id % len(names)]</code> (simple modulo sharding over a fixed, sorted list of shard names). <code>customer_tickets(shards, customer_id)</code>: that customer&rsquo;s tickets by id, asking <strong>only</strong> their shard (count each shard asked in a list <code>asked</code> that the function returns too: <code>(tickets, asked)</code>). And <code>newest_open(shards, limit)</code>: the <code>limit</code> newest open tickets across all shards (by <code>created_at</code> descending, then id descending), by asking every shard for its own newest <code>limit</code> and merging with <code>heapq.merge</code> (use a key and <code>reverse=True</code>); return <code>(tickets, asked)</code>.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+
+def shard_for(customer_id, names):
+    ___
+
+def customer_tickets(shards, customer_id):
+    ___
+
+def newest_open(shards, limit):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def _shards():
+    names = [&quot;s0&quot;, &quot;s1&quot;, &quot;s2&quot;]
+    shards = {n: [] for n in names}
+    data = [(1, 10, &quot;open&quot;, &quot;2026-11-01&quot;), (2, 11, &quot;open&quot;, &quot;2026-11-03&quot;), (3, 10, &quot;closed&quot;, &quot;2026-11-04&quot;), (4, 12, &quot;open&quot;, &quot;2026-11-05&quot;),
+            (5, 13, &quot;open&quot;, &quot;2026-11-02&quot;), (6, 11, &quot;open&quot;, &quot;2026-11-06&quot;), (7, 10, &quot;open&quot;, &quot;2026-11-06&quot;), (8, 14, &quot;open&quot;, &quot;2026-10-30&quot;)]
+    for i, c, s, t in data:
+        shards[shard_for(c, names)].append({&quot;id&quot;: i, &quot;customer_id&quot;: c, &quot;status&quot;: s, &quot;created_at&quot;: t})
+    return shards
+
+def test_scatter():
+    &quot;one shard for one customer, every shard for everyone&quot;
+    shards = _shards()
+    assert shard_for(10, [&quot;s0&quot;, &quot;s1&quot;, &quot;s2&quot;]) == &quot;s1&quot; and shard_for(12, [&quot;s0&quot;, &quot;s1&quot;, &quot;s2&quot;]) == &quot;s0&quot;
+    tickets, asked = customer_tickets(shards, 10)
+    assert [t[&quot;id&quot;] for t in tickets] == [1, 3, 7] and asked == [&quot;s1&quot;]
+    tickets, asked = newest_open(shards, 3)
+    assert [t[&quot;id&quot;] for t in tickets] == [7, 6, 4] and sorted(asked) == [&quot;s0&quot;, &quot;s1&quot;, &quot;s2&quot;]
+    assert [t[&quot;id&quot;] for t in newest_open(shards, 10)[0]] == [7, 6, 4, 2, 5, 1, 8]</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+
+def shard_for(customer_id, names):
+    return names[customer_id % len(names)]
+
+def customer_tickets(shards, customer_id):
+    name = shard_for(customer_id, sorted(shards))
+    return sorted((t for t in shards[name] if t[&quot;customer_id&quot;] == customer_id), key=lambda t: t[&quot;id&quot;]), [name]
+
+def newest_open(shards, limit):
+    key = lambda t: (t[&quot;created_at&quot;], t[&quot;id&quot;])
+    per_shard, asked = [], []
+    for name in sorted(shards):
+        asked.append(name)
+        rows = sorted((t for t in shards[name] if t[&quot;status&quot;] == &quot;open&quot;), key=key, reverse=True)[:limit]
+        per_shard.append(rows)
+    return list(heapq.merge(*per_shard, key=key, reverse=True))[:limit], asked</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d4-quorum" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Quorums</div><div class="pc-prompt"><p>Write <code>strongly_consistent(n, r, w)</code>: <code>True</code> if every read quorum must overlap every write quorum (<code>r + w &gt; n</code>), with <code>1 &lt;= r, w &lt;= n</code> (else <code>ValueError("quorums must be between 1 and n")</code>). Then <code>quorum_read(replies, r)</code>: <code>replies</code> is a list of <code>(version, value)</code> answers from replicas in the order they arrived, or <code>None</code> for a replica that didn&rsquo;t answer; once <code>r</code> real answers are in, return the value with the highest version among them; if fewer than <code>r</code> answered, raise <code>TimeoutError("not enough replicas answered")</code>. And <code>tolerates(n, r, w)</code>: how many replicas can be down while both reads and writes still succeed (<code>n - max(r, w)</code>).</p></div><textarea class="pc-src pc-code" hidden>def strongly_consistent(n, r, w):
+    ___
+
+def quorum_read(replies, r):
+    ___
+
+def tolerates(n, r, w):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_quorums():
+    &quot;R + W &gt; N&quot;
+    assert strongly_consistent(3, 2, 2) and not strongly_consistent(3, 1, 1) and strongly_consistent(3, 1, 3) and not strongly_consistent(5, 2, 3)
+    try:
+        strongly_consistent(3, 0, 2)
+    except ValueError as e:
+        assert str(e) == &quot;quorums must be between 1 and n&quot;
+    assert quorum_read([(3, &quot;resolved&quot;), (2, &quot;open&quot;), (1, &quot;new&quot;)], 2) == &quot;resolved&quot;
+    assert quorum_read([None, (2, &quot;open&quot;), (3, &quot;resolved&quot;)], 2) == &quot;resolved&quot;
+    assert quorum_read([(2, &quot;open&quot;), (3, &quot;resolved&quot;), (4, &quot;closed&quot;)], 2) == &quot;resolved&quot;
+    try:
+        quorum_read([None, (2, &quot;open&quot;), None], 2)
+    except TimeoutError as e:
+        assert str(e) == &quot;not enough replicas answered&quot;
+    assert tolerates(3, 2, 2) == 1 and tolerates(5, 3, 3) == 2 and tolerates(3, 1, 3) == 0</textarea><textarea class="pc-src pc-solution" hidden>def strongly_consistent(n, r, w):
+    if not (1 &lt;= r &lt;= n and 1 &lt;= w &lt;= n):
+        raise ValueError(&quot;quorums must be between 1 and n&quot;)
+    return r + w &gt; n
+
+def quorum_read(replies, r):
+    got = []
+    for reply in replies:
+        if reply is not None:
+            got.append(reply)
+            if len(got) == r:
+                return max(got)[1]
+    raise TimeoutError(&quot;not enough replicas answered&quot;)
+
+def tolerates(n, r, w):
+    return n - max(r, w)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d4-pool" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A connection pool</div><div class="pc-prompt"><p>Databases limit how many connections they accept, so app instances share a few through a <strong>pool</strong>. Write a class <code>Pool(create, size)</code>: <code>create()</code> makes a new connection. <code>acquire()</code> returns an idle connection if there is one (the most recently released first), else creates a new one if fewer than <code>size</code> exist, else raises <code>RuntimeError("pool exhausted")</code> and counts a wait. <code>release(conn)</code> returns a connection to the idle list (releasing one that isn&rsquo;t checked out raises <code>ValueError("not from this pool")</code>). <code>stats()</code> returns <code>{"created": C, "in_use": U, "idle": I, "exhausted": E}</code>.</p></div><textarea class="pc-src pc-code" hidden>class Pool:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_pool():
+    &quot;reuse before creating&quot;
+    made = []
+    def create():
+        made.append(f&quot;conn{len(made) + 1}&quot;)
+        return made[-1]
+    p = Pool(create, 2)
+    a = p.acquire()
+    b = p.acquire()
+    assert (a, b) == (&quot;conn1&quot;, &quot;conn2&quot;)
+    try:
+        p.acquire()
+    except RuntimeError as e:
+        assert str(e) == &quot;pool exhausted&quot;
+    p.release(a)
+    assert p.acquire() == &quot;conn1&quot; and p.stats() == {&quot;created&quot;: 2, &quot;in_use&quot;: 2, &quot;idle&quot;: 0, &quot;exhausted&quot;: 1}
+    p.release(b)
+    try:
+        p.release(b)
+    except ValueError as e:
+        assert str(e) == &quot;not from this pool&quot;
+    else:
+        raise AssertionError(&quot;double release&quot;)
+    assert p.stats()[&quot;idle&quot;] == 1 and len(made) == 2</textarea><textarea class="pc-src pc-solution" hidden>class Pool:
+    def __init__(self, create, size):
+        self.create = create
+        self.size = size
+        self.idle = []
+        self.in_use = []
+        self.created = self.exhausted = 0
+
+    def acquire(self):
+        if self.idle:
+            conn = self.idle.pop()
+        elif self.created &lt; self.size:
+            conn = self.create()
+            self.created += 1
+        else:
+            self.exhausted += 1
+            raise RuntimeError(&quot;pool exhausted&quot;)
+        self.in_use.append(conn)
+        return conn
+
+    def release(self, conn):
+        if conn not in self.in_use:
+            raise ValueError(&quot;not from this pool&quot;)
+        self.in_use.remove(conn)
+        self.idle.append(conn)
+
+    def stats(self):
+        return {&quot;created&quot;: self.created, &quot;in_use&quot;: len(self.in_use), &quot;idle&quot;: len(self.idle), &quot;exhausted&quot;: self.exhausted}</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w081d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A change that vanished</div><div class="pc-prompt"><p>After saving, the page reloads from a replica that hasn&rsquo;t caught up, so the user sees their old status: this prints <code>after saving: open</code>. Route the read to the leader when the replica is behind the user&rsquo;s last write, so it prints <code>after saving: resolved</code>.</p></div><textarea class="pc-src pc-code" hidden>leader = {&quot;ticket:7&quot;: &quot;open&quot;}
+replica = {&quot;ticket:7&quot;: &quot;open&quot;}
+replica_position, last_write = 0, 0
+
+def save(key, value):
+    global last_write
+    leader[key] = value
+    last_write += 1
+
+def load(key):
+    return replica[key]
+
+save(&quot;ticket:7&quot;, &quot;resolved&quot;)
+print(&quot;after saving:&quot;, load(&quot;ticket:7&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;read your writes&quot;
+    expect_output(&quot;after saving: resolved&quot;)</textarea><textarea class="pc-src pc-solution" hidden>leader = {&quot;ticket:7&quot;: &quot;open&quot;}
+replica = {&quot;ticket:7&quot;: &quot;open&quot;}
+replica_position, last_write = 0, 0
+
+def save(key, value):
+    global last_write
+    leader[key] = value
+    last_write += 1
+
+def load(key):
+    return replica[key] if replica_position &gt;= last_write else leader[key]
+
+save(&quot;ticket:7&quot;, &quot;resolved&quot;)
+print(&quot;after saving:&quot;, load(&quot;ticket:7&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w081d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A top three from one shard</div><div class="pc-prompt"><p>To find the three cheapest products across shards, this takes the first three rows of the first shard and stops, so it prints <code>[(3, 'cable'), (8, 'mug'), (12, 'lamp')]</code>. Take each shard&rsquo;s own cheapest three and merge them, so it prints <code>[(1, 'sticker'), (2, 'pen'), (3, 'cable')]</code>.</p></div><textarea class="pc-src pc-code" hidden>import heapq
+
+shards = [[(3, &quot;cable&quot;), (8, &quot;mug&quot;), (12, &quot;lamp&quot;)], [(2, &quot;pen&quot;), (9, &quot;book&quot;)], [(1, &quot;sticker&quot;), (15, &quot;chair&quot;)]]
+limit = 3
+print(shards[0][:limit])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;scatter and gather&quot;
+    expect_output(&quot;[(1, &#x27;sticker&#x27;), (2, &#x27;pen&#x27;), (3, &#x27;cable&#x27;)]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import heapq
+
+shards = [[(3, &quot;cable&quot;), (8, &quot;mug&quot;), (12, &quot;lamp&quot;)], [(2, &quot;pen&quot;), (9, &quot;book&quot;)], [(1, &quot;sticker&quot;), (15, &quot;chair&quot;)]]
+limit = 3
+print(list(heapq.merge(*[s[:limit] for s in shards]))[:limit])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w081d4-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Promoting the wrong follower</div><div class="pc-prompt"><p>When the leader fails, this promotes the follower with the <strong>lowest</strong> log position, losing the writes it never received: this prints <code>promoted replica-3, lost 40 writes</code>. Promote the follower that&rsquo;s furthest along, so it prints <code>promoted replica-2, lost 0 writes</code>.</p></div><textarea class="pc-src pc-code" hidden>positions = {&quot;replica-1&quot;: 980, &quot;replica-2&quot;: 1000, &quot;replica-3&quot;: 960}
+best = max(positions.values())
+promoted = min(positions, key=positions.get)
+print(f&quot;promoted {promoted}, lost {best - positions[promoted]} writes&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;the most up-to-date follower&quot;
+    expect_output(&quot;promoted replica-2, lost 0 writes&quot;)</textarea><textarea class="pc-src pc-solution" hidden>positions = {&quot;replica-1&quot;: 980, &quot;replica-2&quot;: 1000, &quot;replica-3&quot;: 960}
+best = max(positions.values())
+promoted = max(positions, key=positions.get)
+print(f&quot;promoted {promoted}, lost {best - positions[promoted]} writes&quot;)</textarea></div>
+<div class="parsons" data-id="w081d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Finding a key&rsquo;s server on the ring</div><div class="pc-prompt"><p>Arrange a ring lookup with wrap-around. One line is a trap.</p></div><script type="application/json">{"lines": ["def node_for(self, key):", "    if not self.positions:", "        raise LookupError(\"the ring is empty\")", "    point = zlib.crc32(key.encode())", "    i = bisect.bisect_left(self.positions, point)", "    if i == len(self.positions):", "        i = 0", "    return self.owner[self.positions[i]]"], "distractors": ["    point = hash(key)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the rough share of keys that move when a 4th server joins a consistent hash ring of 3
+q = ___   # True or False: N=3, R=2, W=2 gives reads that always see the latest write
+r = ___   # &quot;range&quot; or &quot;hash&quot;: partitioning that makes &quot;all of last week&quot; read one partition
+s = ___   # where every write goes in leader-follower replication
+t = ___   # which follower to promote: the one with the &quot;highest&quot; or &quot;lowest&quot; log position</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p in (0.25, &quot;1/4&quot;, &quot;a quarter&quot;) and q is True and r == &quot;range&quot;, &quot;p, q and r&quot;
+    assert s == &quot;leader&quot; and t == &quot;highest&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 0.25
+q = True
+r = &quot;range&quot;
+s = &quot;leader&quot;
+t = &quot;highest&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w081d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does a read replica add?", "answer": 1, "explain": "Writes still go to the leader.", "options": ["Write capacity", "Read capacity, and a copy that can take over", "Encryption", "Indexes"]}, {"type": "mc", "q": "Why can a user not see a change they just saved?", "answer": 1, "explain": "Route their reads to a replica at their last write&rsquo;s position.", "options": ["The write failed", "Their read went to a replica that hadn&rsquo;t caught up (replication lag)", "Caching only", "The leader is slow"]}, {"type": "mc", "q": "Which follower should be promoted when the leader fails?", "answer": 1, "explain": "Otherwise confirmed writes are lost.", "options": ["Any", "The most up-to-date one", "The newest machine", "The least busy"]}, {"type": "mc", "q": "What&rsquo;s the downside of range partitioning by date?", "answer": 1, "explain": "Hash partitioning spreads writes, at the cost of range queries.", "options": ["Range queries are slow", "Today&rsquo;s writes all hit one partition (a hot spot)", "It&rsquo;s random", "It needs hashing"]}, {"type": "mc", "q": "Why is customer_id a good shard key for the helpdesk?", "answer": 1, "explain": "Most requests then touch one server.", "options": ["It&rsquo;s short", "A customer&rsquo;s tickets, comments and events stay together on one shard", "It&rsquo;s random", "It sorts well"]}, {"type": "mc", "q": "How does a sorted, limited query work across shards?", "answer": 1, "explain": "Scatter and gather.", "options": ["Ask one shard", "Ask every shard for its own top results and merge them", "Copy all data first", "It can&rsquo;t"]}, {"type": "mc", "q": "What does consistent hashing improve on hash % N?", "answer": 1, "explain": "Keys only move to or from the changed server.", "options": ["Speed", "Adding a server moves about 1/N of the keys instead of nearly all", "Security", "Order"]}, {"type": "mc", "q": "Why use virtual nodes?", "answer": 1, "explain": "Many positions per server average out the gaps.", "options": ["Security", "To spread keys evenly across a few servers", "To save memory", "For replication"]}, {"type": "mc", "q": "With N = 3 replicas, which quorums make every read see the latest write?", "answer": 1, "explain": "R + W must be more than N.", "options": ["R = 1, W = 1", "R = 2, W = 2", "R = 1, W = 2", "R = 2, W = 1"]}, {"type": "output", "q": "What does this print?", "answer": "[10, 40, 70, 10]", "explain": "The first position at or after each hash, wrapping round.", "code": "import bisect\nring = [10, 40, 70]\nprint([ring[bisect.bisect_left(ring, h) % len(ring)] for h in (5, 40, 41, 90)])"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w081d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a sharded store that rebalances</div><div class="pc-prompt"><p>Using the given <code>HashRing</code>, write a class <code>ShardedStore(nodes, vnodes=100)</code> holding key-value data spread over nodes (each node&rsquo;s data is a dict in <code>self.data[node]</code>). <code>put(key, value)</code>, <code>get(key)</code> (or <code>None</code>) and <code>delete(key)</code> use the ring to find the key&rsquo;s node. <code>add_node(node)</code> adds it to the ring and <strong>moves</strong> every key whose owner changed to its new node (and nothing else), returning the number of keys moved. <code>remove_node(node)</code> refuses to remove the last node (<code>ValueError("can't remove the last node")</code>), otherwise removes it from the ring and moves each of its keys to its new owner, returning the number moved. <code>sizes()</code> returns a dict from node to the number of keys it holds, sorted by node name. <code>check()</code> returns the list of keys stored on a node that isn&rsquo;t their owner (an empty list means the store is consistent).</p></div><textarea class="pc-src pc-code" hidden>import bisect
+import zlib
+
+class HashRing:
+    def __init__(self, nodes=(), vnodes=100):
+        self.vnodes = vnodes
+        self.positions = []
+        self.owner = {}
+        for node in nodes:
+            self.add(node)
+
+    def _points(self, node):
+        return [zlib.crc32(f&quot;{node}#{i}&quot;.encode()) for i in range(self.vnodes)]
+
+    def add(self, node):
+        for p in self._points(node):
+            bisect.insort(self.positions, p)
+            self.owner[p] = node
+
+    def remove(self, node):
+        for p in self._points(node):
+            self.positions.remove(p)
+            del self.owner[p]
+
+    def node_for(self, key):
+        if not self.positions:
+            raise LookupError(&quot;the ring is empty&quot;)
+        i = bisect.bisect_left(self.positions, zlib.crc32(key.encode()))
+        return self.owner[self.positions[i % len(self.positions)]]
+
+class ShardedStore:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_store():
+    &quot;data follows the ring&quot;
+    s = ShardedStore([&quot;db-1&quot;, &quot;db-2&quot;, &quot;db-3&quot;])
+    keys = [f&quot;ticket:{i}&quot; for i in range(3000)]
+    for k in keys:
+        s.put(k, k.upper())
+    assert sum(s.sizes().values()) == 3000 and list(s.sizes()) == [&quot;db-1&quot;, &quot;db-2&quot;, &quot;db-3&quot;]
+    assert s.get(&quot;ticket:42&quot;) == &quot;TICKET:42&quot; and s.get(&quot;ticket:99999&quot;) is None
+    before = {k: s.ring.node_for(k) for k in keys}
+    moved = s.add_node(&quot;db-4&quot;)
+    assert moved == sum(1 for k in keys if s.ring.node_for(k) != before[k]) and 300 &lt; moved &lt; 1200
+    assert s.check() == [] and s.get(&quot;ticket:42&quot;) == &quot;TICKET:42&quot; and s.sizes()[&quot;db-4&quot;] == moved
+    gone = s.sizes()[&quot;db-2&quot;]
+    assert s.remove_node(&quot;db-2&quot;) == gone and &quot;db-2&quot; not in s.sizes() and s.check() == []
+    assert all(s.get(k) == k.upper() for k in keys)
+    s.delete(&quot;ticket:42&quot;)
+    assert s.get(&quot;ticket:42&quot;) is None and sum(s.sizes().values()) == 2999
+
+def test_last_node():
+    &quot;never lose everything&quot;
+    s = ShardedStore([&quot;solo&quot;])
+    s.put(&quot;a&quot;, 1)
+    try:
+        s.remove_node(&quot;solo&quot;)
+    except ValueError as e:
+        assert str(e) == &quot;can&#x27;t remove the last node&quot;
+    else:
+        raise AssertionError(&quot;last node&quot;)
+    assert s.get(&quot;a&quot;) == 1</textarea><textarea class="pc-src pc-solution" hidden>import bisect
+import zlib
+
+class HashRing:
+    def __init__(self, nodes=(), vnodes=100):
+        self.vnodes = vnodes
+        self.positions = []
+        self.owner = {}
+        for node in nodes:
+            self.add(node)
+
+    def _points(self, node):
+        return [zlib.crc32(f&quot;{node}#{i}&quot;.encode()) for i in range(self.vnodes)]
+
+    def add(self, node):
+        for p in self._points(node):
+            bisect.insort(self.positions, p)
+            self.owner[p] = node
+
+    def remove(self, node):
+        for p in self._points(node):
+            self.positions.remove(p)
+            del self.owner[p]
+
+    def node_for(self, key):
+        if not self.positions:
+            raise LookupError(&quot;the ring is empty&quot;)
+        i = bisect.bisect_left(self.positions, zlib.crc32(key.encode()))
+        return self.owner[self.positions[i % len(self.positions)]]
+
+class ShardedStore:
+    def __init__(self, nodes, vnodes=100):
+        self.ring = HashRing(nodes, vnodes)
+        self.data = {node: {} for node in nodes}
+
+    def put(self, key, value):
+        self.data[self.ring.node_for(key)][key] = value
+
+    def get(self, key):
+        return self.data[self.ring.node_for(key)].get(key)
+
+    def delete(self, key):
+        self.data[self.ring.node_for(key)].pop(key, None)
+
+    def _rebalance(self, nodes):
+        moved = 0
+        for node in nodes:
+            for key in list(self.data[node]):
+                owner = self.ring.node_for(key)
+                if owner != node:
+                    self.data[owner][key] = self.data[node].pop(key)
+                    moved += 1
+        return moved
+
+    def add_node(self, node):
+        self.ring.add(node)
+        self.data[node] = {}
+        return self._rebalance([n for n in self.data if n != node])
+
+    def remove_node(self, node):
+        if len(self.data) == 1:
+            raise ValueError(&quot;can&#x27;t remove the last node&quot;)
+        self.ring.remove(node)
+        moved = self._rebalance([node])
+        del self.data[node]
+        return moved
+
+    def sizes(self):
+        return {node: len(self.data[node]) for node in sorted(self.data)}
+
+    def check(self):
+        return sorted(k for node, d in self.data.items() for k in d if self.ring.node_for(k) != node)</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Look up how one large service you know shards its data (many have engineering blogs explaining it), and find its partition key. Tomorrow: <strong>designing a URL shortener</strong>, the classic design interview question, from requirements and estimates to a working core.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w081d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w081d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w081d4", "week": 81, "day": 4, "title": "Databases at scale", "exercises": [{"id": "w081d4-replicas", "title": "Replication lag and read-your-writes", "points": 15}, {"id": "w081d4-ring", "title": "A consistent hash ring", "points": 15}, {"id": "w081d4-ranges", "title": "Range partitions and hot spots", "points": 10}, {"id": "w081d4-scatter", "title": "Scatter and gather", "points": 10}, {"id": "w081d4-quorum", "title": "Quorums", "points": 10}, {"id": "w081d4-pool", "title": "A connection pool", "points": 10}, {"id": "w081d4-bug1", "title": "A change that vanished", "points": 10}, {"id": "w081d4-bug2", "title": "A top three from one shard", "points": 10}, {"id": "w081d4-bug3", "title": "Promoting the wrong follower", "points": 10}, {"id": "w081d4-trace", "title": "Predict them", "points": 10}, {"id": "w081d4-challenge", "title": "Challenge: a sharded store that rebalances", "points": 25}], "points": 135}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=b54d8b61c9"></script>
+</body>
+</html>
