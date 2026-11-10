@@ -1,6 +1,6 @@
 // Expression stepper: Python evaluates an expression one small step at a time.
-import { h, reducedMotion } from "../site.js?v=86aca22b42";
-import { py } from "../runtime.js?v=86aca22b42";
+import { h, reducedMotion } from "../site.js?v=b54d8b61c9";
+import { py } from "../runtime.js?v=b54d8b61c9";
 
 function highlighted(text, span) {
   if (!span) return document.createTextNode(text);

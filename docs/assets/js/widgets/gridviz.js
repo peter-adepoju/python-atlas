@@ -1,7 +1,7 @@
 // A grid (list of lists) drawn as a table of cells with row and column numbers.
 // Click a cell to see how to reach it; choose a view to highlight a row, a column,
 // a diagonal or a cell's neighbours.
-import { h } from "../site.js?v=86aca22b42";
+import { h } from "../site.js?v=b54d8b61c9";
 
 export default function gridviz(el, { rows = 4, cols = 5, name = "grid", values = null } = {}) {
   const R = rows, C = cols;

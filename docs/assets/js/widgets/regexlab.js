@@ -1,7 +1,7 @@
 // Regex lab: a pattern, some text, and every match highlighted, with its groups. It runs real
 // Python (re.finditer), so what you see is exactly what your code will do.
-import { h } from "../site.js?v=86aca22b42";
-import { py } from "../runtime.js?v=86aca22b42";
+import { h } from "../site.js?v=b54d8b61c9";
+import { py } from "../runtime.js?v=b54d8b61c9";
 
 export default function regexlab(el, { pattern = "\\d+", text = "Order 66 shipped on 2026-10-31 to Flat 4B, Leeds LS1 4AB.", presets = [], flags = [] } = {}) {
   const pat = h("input", { class: "w-input", value: pattern, spellcheck: "false", style: "flex:1 1 220px;font-family:var(--f-code)", "aria-label": "Pattern" });

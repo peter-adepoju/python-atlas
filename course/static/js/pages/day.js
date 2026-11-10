@@ -17,6 +17,14 @@ function start() {
   setTimeout(() => ensure().catch(() => {}), 400);
   progress.set("last:day", { id: data.id });
 
+  // The plan is folded into one line; the button opens the full timetable.
+  const planBtn = $(".plan-toggle");
+  if (planBtn) planBtn.addEventListener("click", () => {
+    const open = planBtn.closest(".day-plan").classList.toggle("is-open");
+    planBtn.setAttribute("aria-expanded", String(open));
+    planBtn.textContent = planBtn.textContent.replace(open ? "Show" : "Hide", open ? "Hide" : "Show");
+  });
+
   // Highlight the section being read in the outline.
   const links = $$(".rail-toc a");
   const heads = links.map((a) => document.getElementById(a.dataset.sec)).filter(Boolean);
