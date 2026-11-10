@@ -1,7 +1,7 @@
 // Quizzes and Parsons puzzles.
-import { h, $, $$ } from "./site.js?v=db5173407e";
-import { progress } from "./progress.js?v=db5173407e";
-import { makeEditor } from "./editor.js?v=db5173407e";
+import { h, $, $$ } from "./site.js?v=86aca22b42";
+import { progress } from "./progress.js?v=86aca22b42";
+import { makeEditor } from "./editor.js?v=86aca22b42";
 
 const clean = (s) => String(s).trim().replace(/\s+/g, " ").toLowerCase();
 const normOut = (s) => String(s).split("\n").map((l) => l.replace(/\s+$/, "")).join("\n").trim();
