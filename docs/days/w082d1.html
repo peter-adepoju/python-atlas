@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="b54d8b61c9">
+<title>Week 82 Day 1: Distributed systems concepts | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=b54d8b61c9">
+<link rel="stylesheet" href="../assets/css/site.css?v=b54d8b61c9">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=b54d8b61c9"></script>
+<script src="../assets/vendor/codemirror.js?v=b54d8b61c9" defer></script>
+<meta name="description" content="Last week spread a service over many machines. Today is about what makes that genuinely hard: machines and networks fail independently and partially, a slow...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w082d1.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 82 Day 1: Distributed systems concepts">
+<meta property="og:description" content="Last week spread a service over many machines. Today is about what makes that genuinely hard: machines and networks fail independently and partially, a slow...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w082d1.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-82">Week 82: System design II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#partial-failure" data-sec="partial-failure">Partial failure</a></li><li><a href="#time-and-order" data-sec="time-and-order">Time and order</a></li><li><a href="#agreement" data-sec="agreement">Agreement</a></li><li><a href="#transactions-across-services" data-sec="transactions-across-services">Transactions across services</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w082d1.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-82">Week 82: System design II</a></li><li aria-current="page">Day 1 of 6</li></ol>
+      <p class="day-where"><span>Week 82, Day 1</span></p>
+      <h1>Distributed systems concepts</h1>
+      <div class="day-intro"><p>Last week spread a service over many machines. Today is about what makes that genuinely hard: machines and networks fail independently and partially, a slow server looks exactly like a dead one, and every machine&rsquo;s clock tells a slightly different time. These facts shape everything from timeouts to databases. You&rsquo;ll order events without trusting clocks (Lamport and vector clocks), notice failed machines with heartbeats, elect a leader by majority vote the way Raft does, commit a change across several services with two-phase commit, undo multi-step operations with sagas, and finish by replicating a log with Raft&rsquo;s consistency check. All of it runs as small simulations, so you can make the network misbehave on purpose.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Explain partial failure, and why a timeout can&rsquo;t tell a slow server from a dead one</li><li>Order events with Lamport clocks, and detect concurrent events with vector clocks</li><li>Detect failures with heartbeats, and elect a leader by majority vote with terms</li><li>Commit across services with two-phase commit, and undo steps with sagas</li><li>Replicate a log with a consistency check and commit entries a majority holds</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Partial failure: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Time and order: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Agreement: 20 min"></span><span class="plan-seg s0" style="flex:20" title="Transactions across services: 20 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:25" title="Quiz and daily challenge: 25 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">7 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Partial failure</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Time and order</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Agreement</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Transactions across services</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">25 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w082d1.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w082d1.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w082d1-p1"><textarea class="pc-src pc-code" hidden>events = [
+    (&quot;server-a&quot;, 1000.000, &quot;ticket 7 created&quot;),
+    (&quot;server-b&quot;, 999.998, &quot;ticket 7 assigned&quot;),     # server-b&#x27;s clock runs 5 ms slow
+    (&quot;server-a&quot;, 1000.010, &quot;ticket 7 resolved&quot;),
+]
+for server, t, what in sorted(events, key=lambda e: e[1]):
+    print(f&quot;{t:.3f} {server}: {what}&quot;)</textarea></div>
+<p>Sorting by each server&rsquo;s clock puts &ldquo;assigned&rdquo; <strong>before</strong> &ldquo;created&rdquo;, which is impossible. Server clocks drift and are corrected in jumps, so timestamps from different machines can&rsquo;t be trusted to order events closer together than the drift. Distributed systems order events with <strong>logical clocks</strong> instead.</p>
+<h2 id="partial-failure">Partial failure</h2>
+<p>On one computer, a program usually works or crashes as a whole. In a distributed system, <strong>parts</strong> fail while others carry on: one server crashes, one network link drops messages, one disk slows down. And from the outside, many failures look the same: you sent a request and no answer came. Was the request lost? Did the server crash before doing the work, or <strong>after</strong> doing it but before replying? Is it just slow, or overloaded, or paused for garbage collection?</p>
+<p><strong>A timeout can&rsquo;t tell these apart.</strong> All it says is &ldquo;no answer yet&rdquo;. So:</p>
+<ul>
+<li>choose timeouts deliberately (from the p99 latency, Week 81, plus a margin), and remember a timed-out request <strong>may have succeeded</strong> (Week 77&rsquo;s idempotency keys exist for exactly this);</li>
+<li>detect failed machines with <strong>heartbeats</strong>: each node sends &ldquo;I&rsquo;m alive&rdquo; regularly; one silent for longer than a threshold is <strong>suspected</strong> dead. It might just be slow, so the threshold trades speed of detection against false alarms;</li>
+<li>design so that a node wrongly declared dead can&rsquo;t do harm when it comes back (Raft&rsquo;s <strong>terms</strong>, below, are one way).</li>
+</ul>
+<p>The famous <strong>two generals problem</strong> shows the limit: two parties communicating over a link that can lose messages can never be <strong>certain</strong> they agree, however many acknowledgements they exchange, because the last message can always be lost. Real systems settle for &ldquo;agree with high probability, and recover when we don&rsquo;t&rdquo;.</p>
+<h2 id="time-and-order">Time and order</h2>
+<p>Clocks on different machines disagree by milliseconds (or seconds), and NTP corrections make a clock jump, even backwards. So:</p>
+<ul>
+<li>for <strong>measuring durations</strong> on one machine, use a <strong>monotonic</strong> clock (<code>time.monotonic()</code>), which never jumps backwards (Week 78);</li>
+<li>for <strong>ordering events across machines</strong>, use <strong>logical clocks</strong>.</li>
+</ul>
+<p>A <strong>Lamport clock</strong> is a counter on each node: increment it before each local event or send; attach it to each message; on receiving, set the counter to <code>max(own, received) + 1</code>. Then if event A <strong>happened before</strong> B (A came first on the same node, or A was a send and B its receive, or a chain of these), A&rsquo;s timestamp is lower. Ties are broken by node id, giving a <strong>total order</strong> everyone agrees on. But the converse doesn&rsquo;t hold: a lower timestamp doesn&rsquo;t prove A happened first; they may be unrelated.</p>
+<p>A <strong>vector clock</strong> fixes that: each node keeps a counter <strong>per node</strong>. A node increments its own entry on each event; on receiving, it takes the element-wise maximum of the two vectors, then increments its own. Comparing two vectors tells you the relationship exactly: A happened before B if every entry of A is at most B&rsquo;s and at least one is smaller; if neither is before the other, the events are <strong>concurrent</strong>, meaning neither could know about the other. Databases such as DynamoDB&rsquo;s predecessors used them to spot conflicting writes (two people editing the same item at once) instead of silently losing one.</p>
+<div class="pc pc-example" data-kind="example" data-id="w082d1-e2"><textarea class="pc-src pc-code" hidden>def compare(a, b):
+    nodes = set(a) | set(b)
+    a_le_b = all(a.get(n, 0) &lt;= b.get(n, 0) for n in nodes)
+    b_le_a = all(b.get(n, 0) &lt;= a.get(n, 0) for n in nodes)
+    if a_le_b and b_le_a:
+        return &quot;equal&quot;
+    if a_le_b:
+        return &quot;before&quot;
+    if b_le_a:
+        return &quot;after&quot;
+    return &quot;concurrent&quot;
+
+edit_on_a = {&quot;a&quot;: 2, &quot;b&quot;: 1}
+edit_on_b = {&quot;a&quot;: 1, &quot;b&quot;: 2}
+later = {&quot;a&quot;: 2, &quot;b&quot;: 2}
+print(compare(edit_on_a, edit_on_b), compare(edit_on_a, later), compare(later, edit_on_b))</textarea></div>
+<h2 id="agreement">Agreement</h2>
+<p>Many systems need nodes to <strong>agree</strong>: on which node is the leader, or on the order of a log of changes (Week 81&rsquo;s replication). Doing that safely, despite crashes and lost messages, is <strong>consensus</strong>, and the algorithm most systems use today is <strong>Raft</strong> (etcd, Consul, CockroachDB, and the controller in Kafka).</p>
+<p>Raft&rsquo;s core ideas, simplified:</p>
+<ul>
+<li>Time is divided into numbered <strong>terms</strong>. Each term has at most one leader.</li>
+<li>A follower that hears nothing from a leader for a while becomes a <strong>candidate</strong>: it increases the term, votes for itself and asks the others for votes.</li>
+<li>A node grants <strong>at most one vote per term</strong>, and only to a candidate whose log is at least as up to date as its own (so a stale node can&rsquo;t become leader and erase committed entries).</li>
+<li>A candidate with votes from a <strong>majority</strong> (more than half of <strong>all</strong> nodes, not just those that answered) becomes leader. Two majorities always share a node, so two leaders can&rsquo;t be elected in the same term.</li>
+<li>Any node that sees a message with a <strong>higher term</strong> steps down to follower. So a leader that was cut off and comes back finds a higher term and stops acting as leader.</li>
+</ul>
+<p>With five nodes, a majority is three, so the cluster survives two failures; with four, a majority is still three, so it survives only one. That&rsquo;s why clusters have <strong>odd</strong> sizes.</p>
+<h2 id="transactions-across-services">Transactions across services</h2>
+<p>A transaction in one database is atomic (Week 75). When one operation spans <strong>several services</strong> (charge the card, reserve the seat, send the ticket), there are two main approaches:</p>
+<ul>
+<li><strong>Two-phase commit</strong> (2PC): a <strong>coordinator</strong> asks every participant to <strong>prepare</strong> (do everything except make it permanent, and promise to commit if asked). If <strong>all</strong> vote yes, it tells them to <strong>commit</strong>; if any votes no (or doesn&rsquo;t answer), it tells them all to <strong>abort</strong>. It&rsquo;s atomic, but participants hold locks while waiting, and if the coordinator dies between the phases, they&rsquo;re stuck. It&rsquo;s used inside databases more than between services.</li>
+<li><strong>Sagas</strong>: run the steps one after another, each a normal local transaction, and give each step a <strong>compensation</strong> that undoes it (refund the card, release the seat). If a step fails, run the compensations of the steps that <strong>already completed</strong>, in <strong>reverse</strong> order. Nothing is locked for long, at the cost of a moment when the system is visibly half-done, and compensations that must be written carefully (and be idempotent, because they may be retried).</li>
+</ul>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Distributed systems fail partially; a timeout can&rsquo;t tell lost, slow, crashed-before and crashed-after apart, so requests that time out may have succeeded (make them idempotent). Heartbeats with a threshold suspect failures, trading speed for false alarms. Clocks drift and jump: use monotonic clocks for durations and logical clocks for order. Lamport clocks (max(own, received) + 1) respect happened-before; vector clocks (element-wise max, then increment your own entry) detect concurrent events. Raft elects one leader per term by majority vote of all nodes (one vote per node per term, only for up-to-date candidates); higher terms make stale leaders step down; odd cluster sizes. Two-phase commit (prepare, then commit only if all vote yes) is atomic but can block; sagas run local steps and, on failure, run completed steps&rsquo; compensations in reverse.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d1-lamport" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Lamport clocks</div><div class="pc-prompt"><p>Write a class <code>LamportClock(node)</code> with <code>tick()</code> (a local event: increment and return the time), <code>send()</code> (increment and return <code>(time, node)</code>, the stamp to attach to a message) and <code>receive(stamp)</code> (set the time to <code>max(own, stamp_time) + 1</code> and return it). Then <code>total_order(events)</code>: <code>events</code> is a list of <code>(time, node, description)</code>; return the descriptions sorted by time, ties broken by node name.</p></div><textarea class="pc-src pc-code" hidden>class LamportClock:
+    ___
+
+def total_order(events):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_lamport():
+    &quot;happened-before is respected&quot;
+    a, b = LamportClock(&quot;a&quot;), LamportClock(&quot;b&quot;)
+    created = a.tick()
+    stamp = a.send()
+    assert (created, stamp) == (1, (2, &quot;a&quot;))
+    b.tick()
+    assigned = b.receive(stamp)
+    assert assigned == 3
+    for _ in range(5):
+        b.tick()
+    resolved_stamp = b.send()
+    assert a.receive(resolved_stamp) == 10
+    events = [(created, &quot;a&quot;, &quot;created&quot;), (assigned, &quot;b&quot;, &quot;assigned&quot;), (3, &quot;a&quot;, &quot;noted&quot;), (1, &quot;b&quot;, &quot;booted&quot;)]
+    assert total_order(events) == [&quot;created&quot;, &quot;booted&quot;, &quot;noted&quot;, &quot;assigned&quot;]</textarea><textarea class="pc-src pc-solution" hidden>class LamportClock:
+    def __init__(self, node):
+        self.node = node
+        self.time = 0
+
+    def tick(self):
+        self.time += 1
+        return self.time
+
+    def send(self):
+        return self.tick(), self.node
+
+    def receive(self, stamp):
+        self.time = max(self.time, stamp[0]) + 1
+        return self.time
+
+def total_order(events):
+    return [d for _, _, d in sorted(events, key=lambda e: (e[0], e[1]))]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d1-vector" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Vector clocks</div><div class="pc-prompt"><p>Write a class <code>VectorClock(node)</code> holding a dict of counters (missing nodes count as 0). <code>event()</code> increments its own entry and returns a <strong>copy</strong> of the vector; <code>send()</code> is the same as <code>event()</code>; <code>receive(vector)</code> takes the element-wise maximum with the received vector, then increments its own entry, and returns a copy. Then <code>compare(a, b)</code> for two vectors: <code>"equal"</code>, <code>"before"</code> (a happened before b), <code>"after"</code> or <code>"concurrent"</code>. And <code>conflicts(versions)</code>: given a list of <code>(vector, value)</code> versions of one item, return the values of the versions that <strong>no other version happened after</strong> (the ones still in play), in their original order.</p></div><textarea class="pc-src pc-code" hidden>class VectorClock:
+    ___
+
+def compare(a, b):
+    ___
+
+def conflicts(versions):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_vectors():
+    &quot;before, after and concurrent&quot;
+    a, b = VectorClock(&quot;a&quot;), VectorClock(&quot;b&quot;)
+    v1 = a.event()
+    msg = a.send()
+    v2 = b.receive(msg)
+    v3 = a.event()
+    assert v1 == {&quot;a&quot;: 1} and msg == {&quot;a&quot;: 2} and v2 == {&quot;a&quot;: 2, &quot;b&quot;: 1} and v3 == {&quot;a&quot;: 3}
+    assert compare(v1, v2) == &quot;before&quot; and compare(v2, v1) == &quot;after&quot; and compare(v2, v3) == &quot;concurrent&quot;
+    assert compare({&quot;a&quot;: 1}, {&quot;a&quot;: 1, &quot;b&quot;: 0}) == &quot;equal&quot;
+    v1[&quot;a&quot;] = 99
+    assert a.clock[&quot;a&quot;] == 3, &quot;return copies&quot;
+
+def test_conflicts():
+    &quot;siblings survive&quot;
+    versions = [({&quot;a&quot;: 1}, &quot;draft&quot;), ({&quot;a&quot;: 2}, &quot;Ada&#x27;s edit&quot;), ({&quot;a&quot;: 1, &quot;b&quot;: 1}, &quot;Bob&#x27;s edit&quot;), ({&quot;a&quot;: 2}, &quot;Ada&#x27;s edit again&quot;)]
+    assert conflicts(versions) == [&quot;Ada&#x27;s edit&quot;, &quot;Bob&#x27;s edit&quot;, &quot;Ada&#x27;s edit again&quot;]
+    assert conflicts([({&quot;a&quot;: 1}, &quot;x&quot;), ({&quot;a&quot;: 2, &quot;b&quot;: 1}, &quot;y&quot;)]) == [&quot;y&quot;]</textarea><textarea class="pc-src pc-solution" hidden>class VectorClock:
+    def __init__(self, node):
+        self.node = node
+        self.clock = {}
+
+    def event(self):
+        self.clock[self.node] = self.clock.get(self.node, 0) + 1
+        return dict(self.clock)
+
+    def send(self):
+        return self.event()
+
+    def receive(self, vector):
+        for n, t in vector.items():
+            self.clock[n] = max(self.clock.get(n, 0), t)
+        return self.event()
+
+def compare(a, b):
+    nodes = set(a) | set(b)
+    a_le_b = all(a.get(n, 0) &lt;= b.get(n, 0) for n in nodes)
+    b_le_a = all(b.get(n, 0) &lt;= a.get(n, 0) for n in nodes)
+    if a_le_b and b_le_a:
+        return &quot;equal&quot;
+    if a_le_b:
+        return &quot;before&quot;
+    if b_le_a:
+        return &quot;after&quot;
+    return &quot;concurrent&quot;
+
+def conflicts(versions):
+    return [value for vec, value in versions
+            if not any(compare(vec, other) == &quot;before&quot; for other, _ in versions)]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d1-heartbeats" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A heartbeat failure detector</div><div class="pc-prompt"><p>Write a class <code>FailureDetector(clock, timeout)</code>. <code>heartbeat(node)</code> records that the node was heard from now. <code>suspected()</code> returns the sorted nodes not heard from for <strong>more than</strong> <code>timeout</code> seconds. <code>status()</code> returns a dict from each node to <code>"alive"</code> or <code>"suspected"</code>, sorted by node. And <code>false_alarms(silences)</code>: given a list of <code>(node, gap_seconds)</code> gaps between one node&rsquo;s heartbeats in normal running, the number of gaps longer than the timeout (each would have been a false suspicion).</p></div><textarea class="pc-src pc-code" hidden>class FailureDetector:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_detector():
+    &quot;silent too long means suspected&quot;
+    class Clock:
+        t = 0
+        def __call__(self):
+            return self.t
+    clock = Clock()
+    d = FailureDetector(clock, timeout=5)
+    for n in (&quot;a&quot;, &quot;b&quot;, &quot;c&quot;):
+        d.heartbeat(n)
+    clock.t = 4
+    d.heartbeat(&quot;a&quot;)
+    clock.t = 5
+    assert d.suspected() == []
+    clock.t = 5.5
+    assert d.suspected() == [&quot;b&quot;, &quot;c&quot;] and d.status() == {&quot;a&quot;: &quot;alive&quot;, &quot;b&quot;: &quot;suspected&quot;, &quot;c&quot;: &quot;suspected&quot;}
+    d.heartbeat(&quot;b&quot;)
+    assert d.suspected() == [&quot;c&quot;]
+    assert d.false_alarms([(&quot;a&quot;, 1), (&quot;a&quot;, 6), (&quot;b&quot;, 5), (&quot;b&quot;, 9.5)]) == 2</textarea><textarea class="pc-src pc-solution" hidden>class FailureDetector:
+    def __init__(self, clock, timeout):
+        self.clock = clock
+        self.timeout = timeout
+        self.last = {}
+
+    def heartbeat(self, node):
+        self.last[node] = self.clock()
+
+    def suspected(self):
+        now = self.clock()
+        return sorted(n for n, t in self.last.items() if now - t &gt; self.timeout)
+
+    def status(self):
+        bad = set(self.suspected())
+        return {n: &quot;suspected&quot; if n in bad else &quot;alive&quot; for n in sorted(self.last)}
+
+    def false_alarms(self, silences):
+        return sum(1 for _, gap in silences if gap &gt; self.timeout)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d1-election" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Votes and terms</div><div class="pc-prompt"><p>Write a class <code>Node(name, cluster_size, last_log_term=0, last_log_index=0)</code> for Raft-style elections, with <code>term</code> (starting at 0), <code>voted_for</code> (<code>None</code>) and <code>role</code> (<code>"follower"</code>). <code>request_vote(term, candidate, cand_log_term, cand_log_index)</code> returns <code>(self.term, granted)</code>: a request with a <strong>lower</strong> term than the node&rsquo;s is refused; a <strong>higher</strong> term makes the node adopt that term, forget its vote and become a follower first. Then grant the vote only if the node hasn&rsquo;t voted for someone else this term <strong>and</strong> the candidate&rsquo;s log is at least as up to date (its last log term is higher, or equal with an index at least as high); record the vote. Then <code>run_election(candidate, others)</code>: the candidate becomes <code>"candidate"</code>, increments its term, votes for itself, asks each of the other nodes (a list of <code>Node</code>s) with its own log position, and becomes <code>"leader"</code> if its votes (including its own) are <strong>more than half of <code>cluster_size</code></strong>; otherwise it stays a candidate. Return the number of votes.</p></div><textarea class="pc-src pc-code" hidden>class Node:
+    ___
+
+def run_election(candidate, others):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_votes():
+    &quot;one vote per term, only for up-to-date logs&quot;
+    n = Node(&quot;n1&quot;, 5, last_log_term=2, last_log_index=7)
+    assert n.request_vote(1, &quot;x&quot;, 9, 9) == (1, True)
+    assert n.request_vote(1, &quot;y&quot;, 9, 9) == (1, False) and n.request_vote(1, &quot;x&quot;, 9, 9) == (1, True)
+    assert n.request_vote(0, &quot;z&quot;, 9, 9) == (1, False)
+    assert n.request_vote(2, &quot;stale&quot;, 2, 6) == (2, False) and n.request_vote(2, &quot;fresh&quot;, 2, 7) == (2, True)
+    assert n.request_vote(3, &quot;newer&quot;, 3, 1) == (3, True)
+
+def test_elections():
+    &quot;a majority of the whole cluster&quot;
+    nodes = [Node(f&quot;n{i}&quot;, 5, 1, 5) for i in range(5)]
+    assert run_election(nodes[0], nodes[1:3]) == 3 and nodes[0].role == &quot;leader&quot; and nodes[0].term == 1
+    lagging = Node(&quot;lag&quot;, 5, 1, 2)
+    others = [Node(f&quot;m{i}&quot;, 5, 1, 5) for i in range(4)]
+    assert run_election(lagging, others) == 1 and lagging.role == &quot;candidate&quot;
+    four = [Node(f&quot;f{i}&quot;, 4) for i in range(4)]
+    assert run_election(four[0], four[1:2]) == 2 and four[0].role == &quot;candidate&quot;
+    leader = nodes[0]
+    leader.request_vote(7, &quot;someone&quot;, 9, 9)
+    assert leader.role == &quot;follower&quot; and leader.term == 7</textarea><textarea class="pc-src pc-solution" hidden>class Node:
+    def __init__(self, name, cluster_size, last_log_term=0, last_log_index=0):
+        self.name = name
+        self.cluster_size = cluster_size
+        self.last_log_term = last_log_term
+        self.last_log_index = last_log_index
+        self.term = 0
+        self.voted_for = None
+        self.role = &quot;follower&quot;
+
+    def request_vote(self, term, candidate, cand_log_term, cand_log_index):
+        if term &lt; self.term:
+            return self.term, False
+        if term &gt; self.term:
+            self.term, self.voted_for, self.role = term, None, &quot;follower&quot;
+        up_to_date = (cand_log_term, cand_log_index) &gt;= (self.last_log_term, self.last_log_index)
+        if self.voted_for in (None, candidate) and up_to_date:
+            self.voted_for = candidate
+            return self.term, True
+        return self.term, False
+
+def run_election(candidate, others):
+    candidate.role = &quot;candidate&quot;
+    candidate.term += 1
+    candidate.voted_for = candidate.name
+    votes = 1
+    for node in others:
+        _, granted = node.request_vote(candidate.term, candidate.name, candidate.last_log_term, candidate.last_log_index)
+        votes += granted
+    if votes &gt; candidate.cluster_size / 2:
+        candidate.role = &quot;leader&quot;
+    return votes</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d1-twopc" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Two-phase commit</div><div class="pc-prompt"><p>Write <code>two_phase_commit(participants)</code>: each participant is a dict with <code>name</code>, <code>prepare</code> (a function returning <code>True</code> for &ldquo;yes&rdquo;, <code>False</code> for &ldquo;no&rdquo;, or raising <code>TimeoutError</code> for no answer) and lists <code>log</code> to which you append what happened to it. Phase 1: ask each participant to prepare, in order, stopping at the first that doesn&rsquo;t vote yes; append <code>"prepared"</code> to each that voted yes. Phase 2: if <strong>all</strong> voted yes, append <code>"committed"</code> to every participant and return <code>("committed", [])</code>; otherwise append <code>"aborted"</code> to every participant that had prepared and return <code>("aborted", [NAMES that voted no or timed out])</code>.</p></div><textarea class="pc-src pc-code" hidden>def two_phase_commit(participants):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def _p(name, answer):
+    def prepare():
+        if answer == &quot;timeout&quot;:
+            raise TimeoutError
+        return answer
+    return {&quot;name&quot;: name, &quot;prepare&quot;: prepare, &quot;log&quot;: []}
+
+def test_commit():
+    &quot;all yes&quot;
+    ps = [_p(&quot;payments&quot;, True), _p(&quot;seats&quot;, True), _p(&quot;email&quot;, True)]
+    assert two_phase_commit(ps) == (&quot;committed&quot;, [])
+    assert all(p[&quot;log&quot;] == [&quot;prepared&quot;, &quot;committed&quot;] for p in ps)
+
+def test_abort():
+    &quot;any no, or silence, aborts everyone who prepared&quot;
+    ps = [_p(&quot;payments&quot;, True), _p(&quot;seats&quot;, False), _p(&quot;email&quot;, True)]
+    assert two_phase_commit(ps) == (&quot;aborted&quot;, [&quot;seats&quot;])
+    assert [p[&quot;log&quot;] for p in ps] == [[&quot;prepared&quot;, &quot;aborted&quot;], [], []]
+    ps = [_p(&quot;payments&quot;, True), _p(&quot;seats&quot;, True), _p(&quot;email&quot;, &quot;timeout&quot;)]
+    assert two_phase_commit(ps) == (&quot;aborted&quot;, [&quot;email&quot;])
+    assert [p[&quot;log&quot;] for p in ps] == [[&quot;prepared&quot;, &quot;aborted&quot;], [&quot;prepared&quot;, &quot;aborted&quot;], []]</textarea><textarea class="pc-src pc-solution" hidden>def two_phase_commit(participants):
+    prepared = []
+    for p in participants:
+        try:
+            yes = p[&quot;prepare&quot;]()
+        except TimeoutError:
+            yes = False
+        if not yes:
+            for q in prepared:
+                q[&quot;log&quot;].append(&quot;aborted&quot;)
+            return &quot;aborted&quot;, [p[&quot;name&quot;]]
+        p[&quot;log&quot;].append(&quot;prepared&quot;)
+        prepared.append(p)
+    for p in participants:
+        p[&quot;log&quot;].append(&quot;committed&quot;)
+    return &quot;committed&quot;, []</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d1-saga" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">A saga</div><div class="pc-prompt"><p>Write <code>run_saga(steps)</code>: each step is <code>(name, action, compensation)</code>, where both are functions with no arguments. Run the actions in order. If one raises, run the compensations of the steps that <strong>completed</strong>, in <strong>reverse</strong> order, then return <code>("compensated", FAILED_STEP_NAME, [names of compensated steps in the order compensated])</code>. If all succeed, return <code>("done", None, [])</code>. If a compensation itself raises, carry on with the others, but put <code>NAME (compensation failed)</code> in the list instead of <code>NAME</code>, so a person knows to fix that one by hand.</p></div><textarea class="pc-src pc-code" hidden>def run_saga(steps):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_saga():
+    &quot;undo in reverse&quot;
+    log = []
+    def act(name, fail=False):
+        def f():
+            if fail:
+                raise RuntimeError(name)
+            log.append(name)
+        return f
+    def undo(name, fail=False):
+        def f():
+            if fail:
+                raise RuntimeError(&quot;undo &quot; + name)
+            log.append(&quot;undo &quot; + name)
+        return f
+    ok = [(&quot;charge&quot;, act(&quot;charge&quot;), undo(&quot;charge&quot;)), (&quot;seat&quot;, act(&quot;seat&quot;), undo(&quot;seat&quot;))]
+    assert run_saga(ok) == (&quot;done&quot;, None, []) and log == [&quot;charge&quot;, &quot;seat&quot;]
+    log.clear()
+    bad = [(&quot;charge&quot;, act(&quot;charge&quot;), undo(&quot;charge&quot;)), (&quot;seat&quot;, act(&quot;seat&quot;), undo(&quot;seat&quot;)), (&quot;ticket&quot;, act(&quot;ticket&quot;, True), undo(&quot;ticket&quot;))]
+    assert run_saga(bad) == (&quot;compensated&quot;, &quot;ticket&quot;, [&quot;seat&quot;, &quot;charge&quot;]) and log == [&quot;charge&quot;, &quot;seat&quot;, &quot;undo seat&quot;, &quot;undo charge&quot;]
+    log.clear()
+    worse = [(&quot;charge&quot;, act(&quot;charge&quot;), undo(&quot;charge&quot;, True)), (&quot;seat&quot;, act(&quot;seat&quot;), undo(&quot;seat&quot;)), (&quot;ticket&quot;, act(&quot;ticket&quot;, True), undo(&quot;ticket&quot;))]
+    assert run_saga(worse) == (&quot;compensated&quot;, &quot;ticket&quot;, [&quot;seat&quot;, &quot;charge (compensation failed)&quot;])</textarea><textarea class="pc-src pc-solution" hidden>def run_saga(steps):
+    done = []
+    for name, action, compensation in steps:
+        try:
+            action()
+        except Exception:
+            undone = []
+            for prev_name, prev_comp in reversed(done):
+                try:
+                    prev_comp()
+                    undone.append(prev_name)
+                except Exception:
+                    undone.append(f&quot;{prev_name} (compensation failed)&quot;)
+            return &quot;compensated&quot;, name, undone
+        done.append((name, compensation))
+    return &quot;done&quot;, None, []</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w082d1-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Ordering by wall clocks</div><div class="pc-prompt"><p>Events from two servers are ordered by their wall-clock timestamps, and server-b&rsquo;s clock runs slow, so a reply appears before the message it answers: this prints <code>['reply', 'question']</code>. Order them by Lamport timestamps instead (each event&rsquo;s <code>lamport</code> field), so it prints <code>['question', 'reply']</code>.</p></div><textarea class="pc-src pc-code" hidden>events = [
+    {&quot;what&quot;: &quot;question&quot;, &quot;wall&quot;: 1000.004, &quot;lamport&quot;: 4},
+    {&quot;what&quot;: &quot;reply&quot;, &quot;wall&quot;: 1000.001, &quot;lamport&quot;: 5},     # sent after receiving the question
+]
+print([e[&quot;what&quot;] for e in sorted(events, key=lambda e: e[&quot;wall&quot;])])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;logical time&quot;
+    expect_output(&quot;[&#x27;question&#x27;, &#x27;reply&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>events = [
+    {&quot;what&quot;: &quot;question&quot;, &quot;wall&quot;: 1000.004, &quot;lamport&quot;: 4},
+    {&quot;what&quot;: &quot;reply&quot;, &quot;wall&quot;: 1000.001, &quot;lamport&quot;: 5},     # sent after receiving the question
+]
+print([e[&quot;what&quot;] for e in sorted(events, key=lambda e: e[&quot;lamport&quot;])])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w082d1-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Two leaders</div><div class="pc-prompt"><p>The majority check uses <code>&gt;=</code> with half the cluster, so in a four-node cluster split in two, <strong>both</strong> halves think they&rsquo;ve won: this prints <code>side A leads: True, side B leads: True</code>. A majority is <strong>more than</strong> half of all nodes, so it prints <code>side A leads: False, side B leads: False</code>.</p></div><textarea class="pc-src pc-code" hidden>cluster_size = 4
+
+def wins(votes):
+    return votes &gt;= cluster_size / 2
+
+print(f&quot;side A leads: {wins(2)}, side B leads: {wins(2)}&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;strictly more than half&quot;
+    expect_output(&quot;side A leads: False, side B leads: False&quot;)</textarea><textarea class="pc-src pc-solution" hidden>cluster_size = 4
+
+def wins(votes):
+    return votes &gt; cluster_size / 2
+
+print(f&quot;side A leads: {wins(2)}, side B leads: {wins(2)}&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w082d1-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Undoing in the wrong order</div><div class="pc-prompt"><p>The saga compensates the completed steps in the order they ran, so it refunds the card before cancelling the hotel booking that the refund depends on: this prints <code>['refund card', 'cancel hotel']</code>. Compensate in reverse order, so it prints <code>['cancel hotel', 'refund card']</code>.</p></div><textarea class="pc-src pc-code" hidden>completed = [(&quot;charge card&quot;, &quot;refund card&quot;), (&quot;book hotel&quot;, &quot;cancel hotel&quot;)]
+undo = [comp for _, comp in completed]
+print(undo)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;last done, first undone&quot;
+    expect_output(&quot;[&#x27;cancel hotel&#x27;, &#x27;refund card&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>completed = [(&quot;charge card&quot;, &quot;refund card&quot;), (&quot;book hotel&quot;, &quot;cancel hotel&quot;)]
+undo = [comp for _, comp in reversed(completed)]
+print(undo)</textarea></div>
+<div class="parsons" data-id="w082d1-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Receiving with a vector clock</div><div class="pc-prompt"><p>Arrange the receive operation of a vector clock. One line is a trap.</p></div><script type="application/json">{"lines": ["def receive(self, vector):", "    for node, time in vector.items():", "        self.clock[node] = max(self.clock.get(node, 0), time)", "    self.clock[self.node] = self.clock.get(self.node, 0) + 1", "    return dict(self.clock)"], "distractors": ["    self.clock = vector"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d1-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # a Lamport clock at 4 receives a stamp of 9: its new time
+q = ___   # how many failures a 5-node Raft cluster survives
+r = ___   # compare({&quot;a&quot;: 1, &quot;b&quot;: 0}, {&quot;a&quot;: 0, &quot;b&quot;: 1}): before, after, equal or concurrent
+s = ___   # the clock to use for measuring a duration on one machine (&quot;wall&quot; or &quot;monotonic&quot;)
+t = ___   # True or False: a request that timed out definitely failed</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 10 and q == 2 and r == &quot;concurrent&quot;, &quot;p, q and r&quot;
+    assert s == &quot;monotonic&quot; and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 10
+q = 2
+r = &quot;concurrent&quot;
+s = &quot;monotonic&quot;
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w082d1-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What can a timeout tell you?", "answer": 1, "explain": "Slow, lost and crashed look the same.", "options": ["The server crashed", "Only that no answer came in time", "The request failed", "The network is down"]}, {"type": "mc", "q": "Why can&rsquo;t wall clocks order events across servers?", "answer": 1, "explain": "Use logical clocks.", "options": ["They&rsquo;re too slow", "They drift and jump, so timestamps can disagree with what really happened", "They use UTC", "They&rsquo;re integers"]}, {"type": "mc", "q": "What does a Lamport clock guarantee?", "answer": 1, "explain": "The converse doesn&rsquo;t hold.", "options": ["Real time", "If A happened before B, A&rsquo;s timestamp is lower", "Concurrent events are detected", "No ties"]}, {"type": "mc", "q": "What can vector clocks detect that Lamport clocks can&rsquo;t?", "answer": 1, "explain": "Neither vector is before the other.", "options": ["Crashes", "Concurrent events (neither knew about the other)", "Slow networks", "Leaders"]}, {"type": "mc", "q": "How many votes does a Raft candidate need in a 5-node cluster?", "answer": 1, "explain": "More than half of all nodes.", "options": ["2", "3", "4", "5"]}, {"type": "mc", "q": "Why does a node refuse to vote for a candidate with an older log?", "answer": 1, "explain": "Up-to-date logs only.", "options": ["Politeness", "So a stale node can&rsquo;t become leader and lose committed entries", "To save time", "It&rsquo;s random"]}, {"type": "mc", "q": "What happens to a leader that sees a higher term?", "answer": 1, "explain": "Terms stop stale leaders.", "options": ["Nothing", "It steps down to follower", "It doubles its term", "It shuts down"]}, {"type": "mc", "q": "What&rsquo;s the weakness of two-phase commit?", "answer": 1, "explain": "Prepared participants hold locks while waiting.", "options": ["It isn&rsquo;t atomic", "Participants can be blocked if the coordinator fails between phases", "It&rsquo;s too fast", "It needs no coordinator"]}, {"type": "mc", "q": "In a saga, what happens when a step fails?", "answer": 1, "explain": "Each step has an undo.", "options": ["Everything rolls back automatically", "Completed steps&rsquo; compensations run in reverse order", "The saga retries forever", "Nothing"]}, {"type": "output", "q": "What does this print?", "answer": "{'x': 2, 'y': 3}", "explain": "The element-wise maximum, as a vector clock receive does before incrementing.", "code": "a, b = {\"x\": 2, \"y\": 1}, {\"x\": 1, \"y\": 3}\nprint({k: max(a.get(k, 0), b.get(k, 0)) for k in sorted(a | b)})"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d1-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: replicating a log, Raft style</div><div class="pc-prompt"><p>Raft&rsquo;s leader replicates its log with <strong>AppendEntries</strong> messages. Each log entry is <code>(term, command)</code>; indexes count from 1. Write a class <code>Follower</code> with <code>log</code> (a list) and <code>append_entries(prev_index, prev_term, entries, leader_commit)</code>: if <code>prev_index &gt; 0</code> and the follower has no entry at <code>prev_index</code> or its term there isn&rsquo;t <code>prev_term</code>, reply <code>False</code> (the consistency check). Otherwise, for each new entry at position <code>prev_index + 1, ...</code>: if the follower already has an entry there with a <strong>different</strong> term, delete it and everything after it; append any entries it doesn&rsquo;t have. Then set <code>commit_index</code> to <code>min(leader_commit, len(log))</code> if that&rsquo;s higher than before, and reply <code>True</code>. Then a class <code>Leader(term, log, followers)</code> with <code>replicate()</code>: for each follower, starting from <code>next_index[f] = len(leader log) + 1</code> initially, send the entries from <code>next_index</code> on with the previous entry&rsquo;s index and term; on <code>False</code>, decrease that follower&rsquo;s <code>next_index</code> by one and retry until it succeeds (at worst from index 1); on success set <code>match_index[f]</code> to the last index sent. Then advance <code>commit_index</code> to the highest index <code>N</code> such that a <strong>majority</strong> of the cluster (the leader plus followers) has the entry (<code>match_index &gt;= N</code>, counting the leader itself) <strong>and</strong> the entry at <code>N</code> is from the leader&rsquo;s current term. <code>replicate</code> sends <code>leader_commit</code> with each message and returns the new commit index.</p></div><textarea class="pc-src pc-code" hidden>class Follower:
+    ___
+
+class Leader:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_follower():
+    &quot;the consistency check&quot;
+    f = Follower()
+    assert f.append_entries(0, 0, [(1, &quot;a&quot;), (1, &quot;b&quot;)], 1) is True and f.log == [(1, &quot;a&quot;), (1, &quot;b&quot;)] and f.commit_index == 1
+    assert f.append_entries(3, 1, [(1, &quot;d&quot;)], 1) is False
+    assert f.append_entries(2, 2, [(2, &quot;c&quot;)], 1) is False
+    assert f.append_entries(2, 1, [(2, &quot;c&quot;)], 3) is True and f.log == [(1, &quot;a&quot;), (1, &quot;b&quot;), (2, &quot;c&quot;)] and f.commit_index == 3
+    assert f.append_entries(1, 1, [(3, &quot;x&quot;)], 2) is True and f.log == [(1, &quot;a&quot;), (3, &quot;x&quot;)] and f.commit_index == 3
+    assert f.append_entries(1, 1, [(3, &quot;x&quot;)], 1) is True and f.log == [(1, &quot;a&quot;), (3, &quot;x&quot;)]
+
+def test_leader():
+    &quot;catching followers up and committing on a majority&quot;
+    up_to_date, behind, divergent = Follower(), Follower(), Follower()
+    base = [(1, &quot;set a&quot;), (1, &quot;set b&quot;), (2, &quot;set c&quot;)]
+    up_to_date.log = list(base)
+    behind.log = base[:1]
+    divergent.log = [(1, &quot;set a&quot;), (1, &quot;set b&quot;), (1, &quot;stale write&quot;), (1, &quot;stale write 2&quot;)]
+    leader = Leader(term=3, log=base + [(3, &quot;set d&quot;)], followers=[up_to_date, behind, divergent, Follower()])
+    assert leader.replicate() == 4
+    for f in (up_to_date, behind, divergent):
+        assert f.log == leader.log
+    assert leader.followers[3].log == leader.log and leader.match_index[behind] == 4
+
+def test_old_terms_not_committed_alone():
+    &quot;only entries from the current term are committed by counting&quot;
+    a, b = Follower(), Follower()
+    leader = Leader(term=4, log=[(2, &quot;old&quot;)], followers=[a, b])
+    assert leader.replicate() == 0 and a.log == [(2, &quot;old&quot;)]
+    leader.log.append((4, &quot;new&quot;))
+    assert leader.replicate() == 2 and a.commit_index == 0
+    assert leader.replicate() == 2 and a.commit_index == 2</textarea><textarea class="pc-src pc-solution" hidden>class Follower:
+    def __init__(self):
+        self.log = []
+        self.commit_index = 0
+
+    def append_entries(self, prev_index, prev_term, entries, leader_commit):
+        if prev_index &gt; 0 and (len(self.log) &lt; prev_index or self.log[prev_index - 1][0] != prev_term):
+            return False
+        for i, entry in enumerate(entries):
+            index = prev_index + 1 + i
+            if len(self.log) &gt;= index and self.log[index - 1][0] != entry[0]:
+                del self.log[index - 1:]
+            if len(self.log) &lt; index:
+                self.log.append(entry)
+        new_commit = min(leader_commit, len(self.log))
+        if new_commit &gt; self.commit_index:
+            self.commit_index = new_commit
+        return True
+
+class Leader:
+    def __init__(self, term, log, followers):
+        self.term = term
+        self.log = log
+        self.followers = followers
+        self.commit_index = 0
+        self.next_index = {f: len(log) + 1 for f in followers}
+        self.match_index = {f: 0 for f in followers}
+
+    def replicate(self):
+        for f in self.followers:
+            while True:
+                prev = self.next_index[f] - 1
+                prev_term = self.log[prev - 1][0] if prev &gt; 0 else 0
+                entries = self.log[prev:]
+                if f.append_entries(prev, prev_term, entries, self.commit_index):
+                    self.match_index[f] = len(self.log)
+                    self.next_index[f] = len(self.log) + 1
+                    break
+                self.next_index[f] -= 1
+        size = len(self.followers) + 1
+        for n in range(len(self.log), self.commit_index, -1):
+            holders = 1 + sum(1 for f in self.followers if self.match_index[f] &gt;= n)
+            if holders &gt; size / 2 and self.log[n - 1][0] == self.term:
+                self.commit_index = n
+                break
+        return self.commit_index</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Look up the Raft visualisation at raft.github.io and watch an election and a log being replicated; you&rsquo;ve now written the core of both. Tomorrow: <strong>observability</strong>, how to know what a distributed system is actually doing.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w081d6.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w082d2.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w082d1", "week": 82, "day": 1, "title": "Distributed systems concepts", "exercises": [{"id": "w082d1-lamport", "title": "Lamport clocks", "points": 10}, {"id": "w082d1-vector", "title": "Vector clocks", "points": 15}, {"id": "w082d1-heartbeats", "title": "A heartbeat failure detector", "points": 10}, {"id": "w082d1-election", "title": "Votes and terms", "points": 15}, {"id": "w082d1-twopc", "title": "Two-phase commit", "points": 15}, {"id": "w082d1-saga", "title": "A saga", "points": 10}, {"id": "w082d1-bug1", "title": "Ordering by wall clocks", "points": 10}, {"id": "w082d1-bug2", "title": "Two leaders", "points": 10}, {"id": "w082d1-bug3", "title": "Undoing in the wrong order", "points": 10}, {"id": "w082d1-trace", "title": "Predict them", "points": 10}, {"id": "w082d1-challenge", "title": "Challenge: replicating a log, Raft style", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=b54d8b61c9"></script>
+</body>
+</html>

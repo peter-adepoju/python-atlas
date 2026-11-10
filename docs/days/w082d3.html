@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="b54d8b61c9">
+<title>Week 82 Day 3: Reliability | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=b54d8b61c9">
+<link rel="stylesheet" href="../assets/css/site.css?v=b54d8b61c9">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=b54d8b61c9"></script>
+<script src="../assets/vendor/codemirror.js?v=b54d8b61c9" defer></script>
+<meta name="description" content="Everything fails eventually: disks, networks, whole data centres, and the deploy someone made on a Friday afternoon. Reliability engineering accepts that...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w082d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 82 Day 3: Reliability">
+<meta property="og:description" content="Everything fails eventually: disks, networks, whole data centres, and the deploy someone made on a Friday afternoon. Reliability engineering accepts that...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w082d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-82">Week 82: System design II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#availability-arithmetic" data-sec="availability-arithmetic">Availability arithmetic</a></li><li><a href="#slos-and-error-budgets" data-sec="slos-and-error-budgets">SLOs and error budgets</a></li><li><a href="#stopping-failures-spreading" data-sec="stopping-failures-spreading">Stopping failures spreading</a></li><li><a href="#when-it-goes-wrong-anyway" data-sec="when-it-goes-wrong-anyway">When it goes wrong anyway</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w082d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-82">Week 82: System design II</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 82, Day 3</span></p>
+      <h1>Reliability</h1>
+      <div class="day-intro"><p>Everything fails eventually: disks, networks, whole data centres, and the deploy someone made on a Friday afternoon. Reliability engineering accepts that and asks two questions: how reliable does this need to be, exactly, and how do we stop one failure becoming many? Today you&rsquo;ll put numbers on the first with availability arithmetic, SLOs and error budgets, and alerts based on how fast the budget is burning. Then the patterns that answer the second: timeouts and deadlines that don&rsquo;t outlive the request, retries with jitter that don&rsquo;t stampede, circuit breakers that stop hammering a broken service, and fallbacks that degrade gracefully instead of failing completely.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Compute the availability of components in series and in parallel, and what &ldquo;nines&rdquo; mean in downtime</li><li>Set SLOs, work out error budgets, and alert on fast budget burn across two windows</li><li>Propagate deadlines so no call outlives the request that needs it</li><li>Retry with exponential backoff, full jitter and a retry budget</li><li>Use circuit breakers, bulkheads and fallbacks to stop failures cascading</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Availability arithmetic: 20 min"></span><span class="plan-seg s0" style="flex:25" title="SLOs and error budgets: 25 min"></span><span class="plan-seg s1" style="flex:25" title="Stopping failures spreading: 25 min"></span><span class="plan-seg s0" style="flex:10" title="When it goes wrong anyway: 10 min"></span><span class="plan-seg s1" style="flex:65" title="Practice: 65 min"></span><span class="plan-seg s0" style="flex:25" title="Quiz and daily challenge: 25 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">7 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Availability arithmetic</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">SLOs and error budgets</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Stopping failures spreading</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">When it goes wrong anyway</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">65 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">25 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w082d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w082d3.ipynb" download>download it</a>. Exercises today are worth 135 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w082d3-p1"><textarea class="pc-src pc-code" hidden>minutes_per_year = 365 * 24 * 60
+for nines in (2, 3, 4, 5):
+    availability = 1 - 10 ** -nines
+    print(f&quot;{availability:.5%}: {minutes_per_year * (1 - availability):.0f} minutes down a year&quot;)</textarea></div>
+<p>Each extra <strong>nine</strong> of availability cuts the allowed downtime by ten, and costs much more than the one before. 99.9% allows almost nine hours a year; 99.999% allows five minutes, which is less than one bad deploy. Reliability is a choice with a price, so the first job is deciding how much you need.</p>
+<h2 id="availability-arithmetic">Availability arithmetic</h2>
+<p><strong>Availability</strong> is the fraction of time (or of requests) a service works. Combining components:</p>
+<ul>
+<li><strong>In series</strong> (a request needs <strong>all</strong> of them: load balancer, app, database), availabilities <strong>multiply</strong>: three components at 99.9% give <code>0.999³ = 99.7%</code>. Every dependency you add lowers the ceiling.</li>
+<li><strong>In parallel</strong> (any one <strong>will do</strong>: two replicas behind a load balancer), the system fails only if <strong>all</strong> fail: <code>1 - (1 - a)ⁿ</code>. Two 99% replicas give 99.99%, if their failures are independent, which is the hard part: replicas in one data centre, on one software version, fail together.</li>
+</ul>
+<p>So redundancy is how reliable systems are built from unreliable parts, and every shared dependency (one database, one DNS provider, one region) is a place where redundancy quietly stops.</p>
+<h2 id="slos-and-error-budgets">SLOs and error budgets</h2>
+<p>Three terms, used precisely:</p>
+<ul>
+<li>An <strong>SLI</strong> (service level <strong>indicator</strong>) is a measurement: the share of requests that succeed, or that succeed in under 300 ms.</li>
+<li>An <strong>SLO</strong> (objective) is a target for an SLI over a window: &ldquo;99.9% of requests succeed, over 30 days&rdquo;.</li>
+<li>An <strong>SLA</strong> (agreement) is a contract with consequences (refunds) when it&rsquo;s missed, usually looser than the SLO.</li>
+</ul>
+<p>The SLO&rsquo;s complement is the <strong>error budget</strong>: with 99.9% over 30 days, 0.1% of requests (or about 43 minutes of full outage) may fail. The budget turns reliability into a decision rule: while there&rsquo;s budget left, ship features and take risks; when it&rsquo;s spent, slow down and fix reliability. Aiming for 100% is a mistake: it&rsquo;s impossible, and trying makes every change too risky to make.</p>
+<p><strong>Alerting on the budget.</strong> &ldquo;Error rate above 0.1%&rdquo; pages someone for every small blip, and misses a slow leak. Better: page on the <strong>burn rate</strong>, how fast the budget is being used: the error rate divided by the allowed error rate (<code>1 - SLO</code>). A burn rate of 1 uses exactly the budget over the window; <strong>14.4</strong> would use 2% of a 30-day budget in one hour, which deserves a page now. To avoid paging for a burst that&rsquo;s already over, require the high burn rate over <strong>two windows</strong>: a long one (an hour: is it significant?) and a short one (five minutes: is it still happening?).</p>
+<div class="pc pc-example" data-kind="example" data-id="w082d3-e2"><textarea class="pc-src pc-code" hidden>slo = 0.999
+for errors, total, window in [(30, 10_000, &quot;5 min&quot;), (1_200, 100_000, &quot;1 hour&quot;), (90, 100_000, &quot;1 hour&quot;)]:
+    burn = (errors / total) / (1 - slo)
+    print(f&quot;{window}: error rate {errors / total:.2%}, burn rate {burn:.1f}&quot;)</textarea></div>
+<h2 id="stopping-failures-spreading">Stopping failures spreading</h2>
+<p>Most big outages are <strong>cascading</strong> failures: one slow dependency makes callers wait, their threads and connections fill up, they slow down, and their callers do the same, until everything is down. The defences:</p>
+<ul>
+<li><strong>Timeouts on every call</strong>, and <strong>deadlines</strong> for whole requests: if the user&rsquo;s request must finish in 2 seconds and 1.5 have gone, a downstream call gets at most 0.5, and if less than some minimum remains, don&rsquo;t make the call at all. The deadline travels with the request (gRPC sends it as a header), so work that nobody is waiting for any more is never started.</li>
+<li><strong>Retries, carefully</strong>: only for errors that might succeed next time (timeouts, <code>503</code>, connection resets; never <code>400</code>); only for idempotent operations (Week 77); with <strong>exponential backoff</strong> and <strong>jitter</strong>. With &ldquo;full jitter&rdquo;, each wait is a <strong>random</strong> time between 0 and the backoff ceiling, so a thousand clients that failed together don&rsquo;t all retry at the same instant. And with a <strong>retry budget</strong>: allow retries only up to, say, 10% of requests, so retries can&rsquo;t multiply the load on a service that&rsquo;s already struggling.</li>
+<li><strong>Circuit breakers</strong>: track a dependency&rsquo;s recent failures; after too many in a row, <strong>open</strong> the circuit and fail calls immediately (no waiting, no load on the struggling service) for a cool-down period; then go <strong>half-open</strong> and let one trial call through: success <strong>closes</strong> the circuit, failure opens it again.</li>
+<li><strong>Bulkheads</strong>: separate pools of connections or workers per dependency (named after a ship&rsquo;s watertight compartments), so one slow dependency can only exhaust its own pool.</li>
+<li><strong>Fallbacks and graceful degradation</strong>: when a non-essential dependency fails, serve something useful anyway: a cached value (Week 81&rsquo;s stale-while-revalidate), a default, the page without its recommendations panel.</li>
+<li><strong>Load shedding</strong> (last week&rsquo;s Forge bonus): refuse excess work quickly rather than serving everyone slowly.</li>
+</ul>
+<h2 id="when-it-goes-wrong-anyway">When it goes wrong anyway</h2>
+<p>Practices that make failures rarer and shorter:</p>
+<ul>
+<li><strong>Test failure on purpose</strong>: chaos engineering kills instances and injects latency in controlled experiments, so the fallbacks are known to work before they&rsquo;re needed.</li>
+<li><strong>Roll out gradually</strong> (Week 77): canaries and staged rollouts limit how many users a bad change reaches, and quick rollback limits for how long.</li>
+<li><strong>Incident response</strong>: one person coordinates, someone communicates, the priority is restoring service (roll back first, debug later).</li>
+<li><strong>Blameless postmortems</strong>: afterwards, write down what happened, why the system allowed it, and what will change, without blaming people: people make mistakes, and systems should make them hard to make and cheap to recover from.</li>
+</ul>
+<h3 id="on-your-own-computer">On your own computer</h3>
+<p><code>tenacity</code> (<code>pip install tenacity</code>) adds retries with backoff and jitter to any function; <code>pybreaker</code> provides circuit breakers; <code>httpx</code> and <code>requests</code> take a <code>timeout</code> on every call (and have <strong>no</strong> timeout by default, so always pass one). The SRE books from Google (free to read online) are the classic source for SLOs and error budgets.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Availability multiplies in series and combines as 1 - Π(1 - a) in parallel (if failures are independent); each nine is ten times less downtime. SLIs measure, SLOs set targets over a window, SLAs are contracts; the error budget (1 - SLO) is spent on risk until it runs out. Page on burn rate (error rate / (1 - SLO)), high in both a long and a short window (14.4 for an hour burns 2% of a 30-day budget). Prevent cascades: timeouts on every call and deadlines that shrink as a request proceeds; retries only for retryable errors on idempotent operations, with exponential backoff, full jitter and a retry budget; circuit breakers (closed, open after repeated failures, half-open trial); bulkheads per dependency; fallbacks to cached or default answers; load shedding. Test failures on purpose, roll out gradually, restore first, and write blameless postmortems.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d3-availability" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Nines</div><div class="pc-prompt"><p>Write <code>series(*availabilities)</code> (all must work: the product) and <code>parallel(*availabilities)</code> (any one is enough: <code>1 - product of (1 - a)</code>), each rounded to 6 places. Then <code>downtime_minutes(availability, days=365)</code>: the allowed downtime in minutes over that many days, rounded to 1 place. And <code>nines(availability)</code>: the number of leading nines in its percentage form, so <code>0.999</code> is 3, <code>0.9995</code> is 3 and <code>0.99</code> is 2 (use <code>-log10(1 - a)</code> rounded down, after a tiny nudge such as <code>+ 1e-9</code> for floating-point error; a perfect <code>1.0</code> raises <code>ValueError("nothing is 100% available")</code>).</p></div><textarea class="pc-src pc-code" hidden>import math
+
+def series(*availabilities):
+    ___
+
+def parallel(*availabilities):
+    ___
+
+def downtime_minutes(availability, days=365):
+    ___
+
+def nines(availability):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_nines():
+    &quot;series lowers, parallel raises&quot;
+    assert series(0.999, 0.999, 0.999) == 0.997003 and series(0.9999, 0.99) == 0.989901
+    assert parallel(0.99, 0.99) == 0.9999 and parallel(0.9, 0.9, 0.9) == 0.999
+    assert series(parallel(0.99, 0.99), 0.999) == 0.9989
+    assert downtime_minutes(0.999) == 525.6 and downtime_minutes(0.9999, 30) == 4.3
+    assert nines(0.999) == 3 and nines(0.9995) == 3 and nines(0.99) == 2 and nines(0.99999) == 5 and nines(0.5) == 0
+    try:
+        nines(1.0)
+    except ValueError as e:
+        assert str(e) == &quot;nothing is 100% available&quot;</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+def series(*availabilities):
+    return round(math.prod(availabilities), 6)
+
+def parallel(*availabilities):
+    return round(1 - math.prod(1 - a for a in availabilities), 6)
+
+def downtime_minutes(availability, days=365):
+    return round(days * 24 * 60 * (1 - availability), 1)
+
+def nines(availability):
+    if availability &gt;= 1:
+        raise ValueError(&quot;nothing is 100% available&quot;)
+    return math.floor(-math.log10(1 - availability) + 1e-9)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d3-budget" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Error budgets</div><div class="pc-prompt"><p>Write <code>budget(slo, total_requests)</code>: how many requests may fail in the window (rounded down). <code>remaining(slo, good, total)</code>: the fraction of the error budget left, as <code>1 - failures / allowed_failures</code> rounded to 3 places (it can go negative when the budget is overspent; with <code>total</code> 0, return <code>1.0</code>). And <code>policy(slo, good, total)</code>: <code>"ship"</code> if more than 25% of the budget remains, <code>"careful"</code> if any remains, else <code>"freeze"</code> (no risky changes until it recovers).</p></div><textarea class="pc-src pc-code" hidden>import math
+
+def budget(slo, total_requests):
+    ___
+
+def remaining(slo, good, total):
+    ___
+
+def policy(slo, good, total):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_budget():
+    &quot;spend it wisely&quot;
+    assert budget(0.999, 10_000_000) == 10_000 and budget(0.99, 150) == 1
+    assert remaining(0.999, 9_996_000, 10_000_000) == 0.6 and remaining(0.999, 9_985_000, 10_000_000) == -0.5
+    assert remaining(0.999, 0, 0) == 1.0
+    assert policy(0.999, 9_996_000, 10_000_000) == &quot;ship&quot; and policy(0.999, 9_991_000, 10_000_000) == &quot;careful&quot;
+    assert policy(0.999, 9_990_000, 10_000_000) == &quot;freeze&quot;</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+def budget(slo, total_requests):
+    return math.floor(total_requests * (1 - slo) + 1e-9)
+
+def remaining(slo, good, total):
+    if total == 0:
+        return 1.0
+    allowed = total * (1 - slo)
+    return round(1 - (total - good) / allowed, 3)
+
+def policy(slo, good, total):
+    left = remaining(slo, good, total)
+    if left &gt; 0.25:
+        return &quot;ship&quot;
+    if left &gt; 0:
+        return &quot;careful&quot;
+    return &quot;freeze&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d3-burn" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Burn-rate alerts</div><div class="pc-prompt"><p>Write <code>burn_rate(errors, total, slo)</code>: the error rate divided by <code>1 - slo</code>, rounded to 2 places (<code>0.0</code> with no traffic). Then <code>check_alerts(windows, slo)</code>: <code>windows</code> maps window names (<code>"5m"</code>, <code>"30m"</code>, <code>"1h"</code>, <code>"6h"</code>) to <code>(errors, total)</code>. Return a list of alerts using the standard multi-window rules: <code>"page"</code> if the burn rate is at least <strong>14.4</strong> in both <code>"1h"</code> and <code>"5m"</code>; <code>"page"</code> if at least <strong>6</strong> in both <code>"6h"</code> and <code>"30m"</code> (once: don&rsquo;t add <code>"page"</code> twice); <code>"ticket"</code> if at least <strong>1</strong> in <code>"6h"</code> but no page was raised. Return <code>[]</code> if all is well.</p></div><textarea class="pc-src pc-code" hidden>def burn_rate(errors, total, slo):
+    ___
+
+def check_alerts(windows, slo):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_burn():
+    &quot;fast burns page, slow burns ticket&quot;
+    assert burn_rate(30, 10_000, 0.999) == 3.0 and burn_rate(0, 0, 0.999) == 0.0
+    fast = {&quot;5m&quot;: (200, 10_000), &quot;30m&quot;: (900, 60_000), &quot;1h&quot;: (1_800, 120_000), &quot;6h&quot;: (2_000, 720_000)}
+    assert check_alerts(fast, 0.999) == [&quot;page&quot;]
+    over = {&quot;5m&quot;: (5, 10_000), &quot;30m&quot;: (900, 60_000), &quot;1h&quot;: (1_800, 120_000), &quot;6h&quot;: (2_000, 720_000)}
+    assert check_alerts(over, 0.999) == [&quot;ticket&quot;], &quot;a burst that has already stopped shouldn&#x27;t page&quot;
+    slow = {&quot;5m&quot;: (70, 10_000), &quot;30m&quot;: (420, 60_000), &quot;1h&quot;: (800, 120_000), &quot;6h&quot;: (4_600, 720_000)}
+    assert check_alerts(slow, 0.999) == [&quot;page&quot;]
+    leak = {&quot;5m&quot;: (15, 10_000), &quot;30m&quot;: (90, 60_000), &quot;1h&quot;: (180, 120_000), &quot;6h&quot;: (1_000, 720_000)}
+    assert check_alerts(leak, 0.999) == [&quot;ticket&quot;]
+    calm = {&quot;5m&quot;: (1, 10_000), &quot;30m&quot;: (5, 60_000), &quot;1h&quot;: (10, 120_000), &quot;6h&quot;: (60, 720_000)}
+    assert check_alerts(calm, 0.999) == []</textarea><textarea class="pc-src pc-solution" hidden>def burn_rate(errors, total, slo):
+    if total == 0:
+        return 0.0
+    return round((errors / total) / (1 - slo), 2)
+
+def check_alerts(windows, slo):
+    rate = {name: burn_rate(e, t, slo) for name, (e, t) in windows.items()}
+    page = (rate[&quot;1h&quot;] &gt;= 14.4 and rate[&quot;5m&quot;] &gt;= 14.4) or (rate[&quot;6h&quot;] &gt;= 6 and rate[&quot;30m&quot;] &gt;= 6)
+    if page:
+        return [&quot;page&quot;]
+    if rate[&quot;6h&quot;] &gt;= 1:
+        return [&quot;ticket&quot;]
+    return []</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d3-breaker" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A circuit breaker</div><div class="pc-prompt"><p>Write a class <code>CircuitBreaker(clock, failure_threshold, reset_timeout)</code> with <code>state</code> (<code>"closed"</code>, <code>"open"</code> or <code>"half-open"</code>). <code>call(func)</code>: when <strong>open</strong>, if <code>reset_timeout</code> seconds have passed since it opened, move to <strong>half-open</strong> and let this call through as a trial; otherwise raise <code>CircuitOpenError("circuit open")</code> without calling. When the call raises, count a consecutive failure; in half-open, or on reaching <code>failure_threshold</code> failures, <strong>open</strong> (recording the time) and re-raise. When it succeeds, reset the failure count, <strong>close</strong> the circuit, and return the result. Define <code>CircuitOpenError</code> as a subclass of <code>Exception</code>.</p></div><textarea class="pc-src pc-code" hidden>class CircuitOpenError(Exception):
+    pass
+
+class CircuitBreaker:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_breaker():
+    &quot;closed, open, half-open&quot;
+    class Clock:
+        t = 0
+        def __call__(self):
+            return self.t
+    clock = Clock()
+    b = CircuitBreaker(clock, failure_threshold=3, reset_timeout=30)
+    calls = []
+    def down():
+        calls.append(1)
+        raise ConnectionError(&quot;down&quot;)
+    for _ in range(3):
+        try:
+            b.call(down)
+        except ConnectionError:
+            pass
+    assert b.state == &quot;open&quot; and len(calls) == 3
+    try:
+        b.call(down)
+    except CircuitOpenError as e:
+        assert str(e) == &quot;circuit open&quot;
+    assert len(calls) == 3, &quot;an open circuit doesn&#x27;t call&quot;
+    clock.t = 30
+    try:
+        b.call(down)
+    except ConnectionError:
+        pass
+    assert b.state == &quot;open&quot; and len(calls) == 4
+    clock.t = 59
+    try:
+        b.call(lambda: &quot;ok&quot;)
+    except CircuitOpenError:
+        pass
+    else:
+        raise AssertionError(&quot;still cooling down&quot;)
+    clock.t = 60
+    assert b.call(lambda: &quot;ok&quot;) == &quot;ok&quot; and b.state == &quot;closed&quot;
+    try:
+        b.call(down)
+    except ConnectionError:
+        pass
+    assert b.state == &quot;closed&quot;, &quot;one failure isn&#x27;t enough once closed again&quot;</textarea><textarea class="pc-src pc-solution" hidden>class CircuitOpenError(Exception):
+    pass
+
+class CircuitBreaker:
+    def __init__(self, clock, failure_threshold, reset_timeout):
+        self.clock = clock
+        self.threshold = failure_threshold
+        self.reset_timeout = reset_timeout
+        self.state = &quot;closed&quot;
+        self.failures = 0
+        self.opened_at = None
+
+    def call(self, func):
+        if self.state == &quot;open&quot;:
+            if self.clock() - self.opened_at &gt;= self.reset_timeout:
+                self.state = &quot;half-open&quot;
+            else:
+                raise CircuitOpenError(&quot;circuit open&quot;)
+        try:
+            result = func()
+        except Exception:
+            self.failures += 1
+            if self.state == &quot;half-open&quot; or self.failures &gt;= self.threshold:
+                self.state = &quot;open&quot;
+                self.opened_at = self.clock()
+            raise
+        self.failures = 0
+        self.state = &quot;closed&quot;
+        return result</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d3-jitter" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Backoff with jitter, on a budget</div><div class="pc-prompt"><p>Write <code>full_jitter(attempt, base, cap, rng)</code>: the wait before retry number <code>attempt</code> (from 0): a random number between 0 and <code>min(cap, base * 2 ** attempt)</code>, using <code>rng.uniform(0, ceiling)</code>. Then a class <code>RetryBudget(ratio, minimum=10)</code>: <code>request()</code> counts a request; <code>can_retry()</code> returns <code>True</code> (and counts a retry) only if retries so far would stay at most <code>ratio</code> of requests, or fewer than <code>minimum</code> retries have been made in total; otherwise <code>False</code>.</p></div><textarea class="pc-src pc-code" hidden>def full_jitter(attempt, base, cap, rng):
+    ___
+
+class RetryBudget:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_jitter():
+    &quot;spread out, capped&quot;
+    import random
+    rng = random.Random(42)
+    waits = [full_jitter(a, 1.0, 30.0, rng) for a in range(8)]
+    assert all(0 &lt;= w &lt;= min(30, 2 ** a) for a, w in enumerate(waits))
+    assert len({round(w, 6) for w in waits}) == 8
+    class Fixed:
+        def uniform(self, lo, hi):
+            return hi
+    assert [full_jitter(a, 0.5, 4.0, Fixed()) for a in range(5)] == [0.5, 1.0, 2.0, 4.0, 4.0]
+
+def test_budget():
+    &quot;retries can&#x27;t multiply load&quot;
+    b = RetryBudget(0.1, minimum=2)
+    assert b.can_retry() and b.can_retry() and not b.can_retry()
+    for _ in range(30):
+        b.request()
+    assert b.can_retry() is True and b.can_retry() is False</textarea><textarea class="pc-src pc-solution" hidden>def full_jitter(attempt, base, cap, rng):
+    return rng.uniform(0, min(cap, base * 2 ** attempt))
+
+class RetryBudget:
+    def __init__(self, ratio, minimum=10):
+        self.ratio = ratio
+        self.minimum = minimum
+        self.requests = 0
+        self.retries = 0
+
+    def request(self):
+        self.requests += 1
+
+    def can_retry(self):
+        if self.retries &lt; self.minimum or self.retries + 1 &lt;= self.ratio * self.requests:
+            self.retries += 1
+            return True
+        return False</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d3-deadlines" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Deadlines that shrink</div><div class="pc-prompt"><p>Write a class <code>Deadline(clock, seconds)</code>: <code>remaining()</code> is the time left (never below 0), and <code>expired()</code> whether none is left. <code>timeout_for(call_timeout)</code> is the smaller of the call&rsquo;s own timeout and the time remaining. Then <code>run_steps(deadline, steps, minimum=0.05)</code>: <code>steps</code> is a list of <code>(name, timeout, duration, clock_advance)</code> where <code>clock_advance</code> is a function taking the seconds to advance the test clock. For each step, if less than <code>minimum</code> remains, add <code>"NAME skipped"</code> and stop (the caller has given up); otherwise use <code>t = deadline.timeout_for(timeout)</code>: if the step&rsquo;s <code>duration</code> is more than <code>t</code>, advance the clock by <code>t</code> and add <code>"NAME timed out"</code> and stop; else advance by <code>duration</code> and add <code>"NAME ok"</code>. Return the list.</p></div><textarea class="pc-src pc-code" hidden>class Deadline:
+    ___
+
+def run_steps(deadline, steps, minimum=0.05):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_deadline():
+    &quot;no call outlives the request&quot;
+    class Clock:
+        t = 0.0
+        def __call__(self):
+            return self.t
+        def advance(self, s):
+            self.t += s
+    clock = Clock()
+    d = Deadline(clock, 2.0)
+    assert d.remaining() == 2.0 and d.timeout_for(5.0) == 2.0 and d.timeout_for(0.5) == 0.5
+    steps = [(&quot;auth&quot;, 1.0, 0.1, clock.advance), (&quot;cart&quot;, 1.0, 0.4, clock.advance), (&quot;payments&quot;, 3.0, 1.9, clock.advance), (&quot;email&quot;, 1.0, 0.1, clock.advance)]
+    assert run_steps(d, steps) == [&quot;auth ok&quot;, &quot;cart ok&quot;, &quot;payments timed out&quot;]
+    assert d.expired() and d.remaining() == 0
+    clock.t = 0.0
+    d2 = Deadline(clock, 1.0)
+    clock.t = 0.97
+    assert run_steps(d2, [(&quot;late&quot;, 1.0, 0.01, clock.advance)]) == [&quot;late skipped&quot;]</textarea><textarea class="pc-src pc-solution" hidden>class Deadline:
+    def __init__(self, clock, seconds):
+        self.clock = clock
+        self.ends = clock() + seconds
+
+    def remaining(self):
+        return max(0.0, self.ends - self.clock())
+
+    def expired(self):
+        return self.remaining() == 0
+
+    def timeout_for(self, call_timeout):
+        return min(call_timeout, self.remaining())
+
+def run_steps(deadline, steps, minimum=0.05):
+    log = []
+    for name, timeout, duration, advance in steps:
+        if deadline.remaining() &lt; minimum:
+            log.append(f&quot;{name} skipped&quot;)
+            break
+        t = deadline.timeout_for(timeout)
+        if duration &gt; t:
+            advance(t)
+            log.append(f&quot;{name} timed out&quot;)
+            break
+        advance(duration)
+        log.append(f&quot;{name} ok&quot;)
+    return log</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w082d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Redundancy that made things worse</div><div class="pc-prompt"><p>Two replicas, either of which can serve requests, are combined as if both were needed, so the estimate claims the redundant pair is <strong>less</strong> available than one replica: <code>pair: 98.01%</code>. Combine them in parallel, so it prints <code>pair: 99.99%</code>.</p></div><textarea class="pc-src pc-code" hidden>replica = 0.99
+pair = replica * replica
+print(f&quot;pair: {pair:.2%}&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;parallel&quot;
+    expect_output(&quot;pair: 99.99%&quot;)</textarea><textarea class="pc-src pc-solution" hidden>replica = 0.99
+pair = 1 - (1 - replica) * (1 - replica)
+print(f&quot;pair: {pair:.2%}&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w082d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A thundering retry</div><div class="pc-prompt"><p>After an outage, 1,000 clients all retry after exactly the backoff time, so they hit the recovering service in the same instant: <code>busiest second: 1000 retries</code>. Use full jitter (a random wait between 0 and the backoff, from the seeded <code>rng</code>), so the retries spread out and the busiest second has far fewer: <code>busiest second: under 200 retries</code>.</p></div><textarea class="pc-src pc-code" hidden>import random
+from collections import Counter
+
+rng = random.Random(7)
+backoff = 8.0
+retry_times = [backoff for _ in range(1000)]
+busiest = max(Counter(int(t) for t in retry_times).values())
+print(f&quot;busiest second: {busiest} retries&quot; if busiest &gt;= 200 else &quot;busiest second: under 200 retries&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;jitter&quot;
+    expect_output(&quot;busiest second: under 200 retries&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import random
+from collections import Counter
+
+rng = random.Random(7)
+backoff = 8.0
+retry_times = [rng.uniform(0, backoff) for _ in range(1000)]
+busiest = max(Counter(int(t) for t in retry_times).values())
+print(f&quot;busiest second: {busiest} retries&quot; if busiest &gt;= 200 else &quot;busiest second: under 200 retries&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w082d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A circuit that never closed</div><div class="pc-prompt"><p>This breaker opens after three failures but never checks whether its cool-down has passed, so even after the dependency recovers every call is refused: <code>at 100s: refused</code>. Let one trial call through once 30 seconds have passed since it opened, closing the circuit if it works, so it prints <code>at 100s: ok</code>.</p></div><textarea class="pc-src pc-code" hidden>class Breaker:
+    def __init__(self):
+        self.open, self.failures, self.opened_at = False, 0, None
+
+    def call(self, func, now):
+        if self.open:
+            return &quot;refused&quot;
+        try:
+            func()
+        except Exception:
+            self.failures += 1
+            if self.failures &gt;= 3:
+                self.open, self.opened_at = True, now
+            return &quot;failed&quot;
+        self.failures = 0
+        return &quot;ok&quot;
+
+b = Breaker()
+def broken():
+    raise ConnectionError
+for t in range(3):
+    b.call(broken, t)
+print(f&quot;at 100s: {b.call(lambda: None, 100)}&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;half-open after the cool-down&quot;
+    expect_output(&quot;at 100s: ok&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Breaker:
+    def __init__(self):
+        self.open, self.failures, self.opened_at = False, 0, None
+
+    def call(self, func, now):
+        if self.open and now - self.opened_at &lt; 30:
+            return &quot;refused&quot;
+        try:
+            func()
+        except Exception:
+            self.failures += 1
+            if self.open or self.failures &gt;= 3:
+                self.open, self.opened_at = True, now
+            return &quot;failed&quot;
+        self.open, self.failures = False, 0
+        return &quot;ok&quot;
+
+b = Breaker()
+def broken():
+    raise ConnectionError
+for t in range(3):
+    b.call(broken, t)
+print(f&quot;at 100s: {b.call(lambda: None, 100)}&quot;)</textarea></div>
+<div class="parsons" data-id="w082d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A careful call to a dependency</div><div class="pc-prompt"><p>Arrange a call that respects the request&rsquo;s deadline, goes through a circuit breaker, and falls back to a cached value. One line is a trap.</p></div><script type="application/json">{"lines": ["def get_rates(deadline):", "    if deadline.remaining() < 0.05:", "        return cache.get(\"rates\"), \"cache\"", "    timeout = deadline.timeout_for(1.0)", "    try:", "        rates = breaker.call(lambda: rates_api.fetch(timeout=timeout))", "    except (CircuitOpenError, TimeoutError, ConnectionError):", "        return cache.get(\"rates\"), \"cache\"", "    cache.set(\"rates\", rates)", "    return rates, \"live\""], "distractors": ["        rates = rates_api.fetch(timeout=None)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # minutes of downtime a 99.9% SLO allows over 30 days (rounded to a whole number)
+q = ___   # the burn rate when the error rate is 1% and the SLO is 99.9%
+r = ___   # the breaker state that lets one trial call through
+s = ___   # True or False: retry a POST that returned 400
+t = ___   # the availability of two independent 90% replicas in parallel</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 43 and abs(q - 10) &lt; 1e-9 and r == &quot;half-open&quot;, &quot;p, q and r&quot;
+    assert s is False and abs(t - 0.99) &lt; 1e-9, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 43
+q = 10
+r = &quot;half-open&quot;
+s = False
+t = 0.99</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w082d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "How does availability combine for components a request needs all of?", "answer": 1, "explain": "Every dependency lowers the ceiling.", "options": ["It&rsquo;s the minimum", "It multiplies", "It averages", "It adds"]}, {"type": "mc", "q": "Why is redundancy&rsquo;s benefit often smaller than the formula says?", "answer": 1, "explain": "1 - (1 - a)^n assumes independent failures.", "options": ["Maths errors", "Replicas share failure causes (data centre, software version)", "Load balancers fail", "It isn&rsquo;t"]}, {"type": "mc", "q": "What&rsquo;s the difference between an SLO and an SLA?", "answer": 1, "explain": "SLAs are usually looser.", "options": ["None", "An SLO is an internal target; an SLA is a contract with consequences", "An SLA is internal", "SLOs are for databases"]}, {"type": "mc", "q": "What is an error budget for?", "answer": 1, "explain": "1 - SLO.", "options": ["Paying for errors", "Deciding how much risk to take: ship while it lasts, fix reliability when it&rsquo;s spent", "Counting bugs", "Budgeting servers"]}, {"type": "mc", "q": "Why alert on burn rate in two windows?", "answer": 1, "explain": "No pages for bursts that are already over.", "options": ["Twice the alerts", "The long window shows it matters; the short one that it&rsquo;s still happening", "To be slower", "Tradition"]}, {"type": "mc", "q": "What does a deadline add to timeouts?", "answer": 1, "explain": "No work for requests nobody is waiting for.", "options": ["Nothing", "Each call gets only the time the whole request has left", "Longer timeouts", "Retries"]}, {"type": "mc", "q": "Why add jitter to retries?", "answer": 1, "explain": "Spread out the load on a recovering service.", "options": ["Security", "So clients that failed together don&rsquo;t retry at the same instant", "To retry faster", "It&rsquo;s required"]}, {"type": "mc", "q": "What does an open circuit breaker do?", "answer": 1, "explain": "It gives the dependency room to recover.", "options": ["Retries faster", "Fails calls immediately, without calling the dependency", "Calls a backup", "Logs only"]}, {"type": "mc", "q": "What is a bulkhead?", "answer": 1, "explain": "Named after ships&rsquo; compartments.", "options": ["A firewall", "A separate pool per dependency, so one can&rsquo;t exhaust all resources", "A backup database", "A retry"]}, {"type": "output", "q": "What does this print?", "answer": "0.9975", "explain": "Two 95% replicas in parallel.", "code": "import math\nprint(round(1 - math.prod([1 - 0.95, 1 - 0.95]), 4))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a resilient client</div><div class="pc-prompt"><p>Write a class <code>ResilientClient(clock, call, breaker, cache, rng, max_attempts=3, base=0.1, cap=1.0)</code>: <code>call(key, timeout)</code> fetches a value from a dependency (it returns the value, or raises <code>TimeoutError</code> or <code>ConnectionError</code>, which are retryable, or <code>ValueError</code>, which isn&rsquo;t); <code>breaker</code> is a <code>CircuitBreaker</code> (given); <code>cache</code> is a dict used as a fallback. <code>get(key, deadline)</code> (a <code>Deadline</code>, given) returns <code>(value, source)</code>: try up to <code>max_attempts</code> times through the breaker with <code>timeout = deadline.timeout_for(1.0)</code>; on success store the value in the cache and return <code>(value, "live")</code>. On a retryable error, if attempts remain, wait <code>full_jitter(attempt, base, cap, rng)</code> (the given function) by appending the wait to <code>self.waits</code> and advancing the clock with <code>clock.advance(wait)</code>, but give up early if the deadline has less than 0.05 seconds left after waiting. A <code>CircuitOpenError</code> means stop trying at once. A <code>ValueError</code> is re-raised immediately (no retries, no fallback: a bad request is the caller&rsquo;s problem). When giving up, return <code>(cache[key], "stale")</code> if cached, else raise <code>LookupError(f"no value for {key}")</code>. Record each outcome in <code>self.log</code> as <code>"live"</code>, <code>"stale"</code>, <code>"error"</code>.</p></div><textarea class="pc-src pc-code" hidden>class CircuitOpenError(Exception):
+    pass
+
+class CircuitBreaker:
+    def __init__(self, clock, failure_threshold, reset_timeout):
+        self.clock, self.threshold, self.reset_timeout = clock, failure_threshold, reset_timeout
+        self.state, self.failures, self.opened_at = &quot;closed&quot;, 0, None
+    def call(self, func):
+        if self.state == &quot;open&quot;:
+            if self.clock() - self.opened_at &gt;= self.reset_timeout:
+                self.state = &quot;half-open&quot;
+            else:
+                raise CircuitOpenError(&quot;circuit open&quot;)
+        try:
+            result = func()
+        except Exception:
+            self.failures += 1
+            if self.state == &quot;half-open&quot; or self.failures &gt;= self.threshold:
+                self.state, self.opened_at = &quot;open&quot;, self.clock()
+            raise
+        self.failures, self.state = 0, &quot;closed&quot;
+        return result
+
+class Deadline:
+    def __init__(self, clock, seconds):
+        self.clock, self.ends = clock, clock() + seconds
+    def remaining(self):
+        return max(0.0, self.ends - self.clock())
+    def timeout_for(self, call_timeout):
+        return min(call_timeout, self.remaining())
+
+def full_jitter(attempt, base, cap, rng):
+    return rng.uniform(0, min(cap, base * 2 ** attempt))
+
+class ResilientClient:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>class Clock:
+    def __init__(self):
+        self.t = 0.0
+    def __call__(self):
+        return self.t
+    def advance(self, s):
+        self.t += s
+
+class Half:
+    def uniform(self, lo, hi):
+        return hi / 2
+
+def _client(behaviour, threshold=5):
+    clock = Clock()
+    calls = []
+    def call(key, timeout):
+        calls.append((key, round(timeout, 3)))
+        outcome = behaviour(len(calls))
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome
+    breaker = CircuitBreaker(clock, threshold, 30)
+    return ResilientClient(clock, call, breaker, {}, Half()), clock, calls
+
+def test_live_and_retries():
+    &quot;retries with jitter, then success&quot;
+    client, clock, calls = _client(lambda n: TimeoutError() if n &lt; 3 else {&quot;GBP&quot;: 1})
+    assert client.get(&quot;rates&quot;, Deadline(clock, 2.0)) == ({&quot;GBP&quot;: 1}, &quot;live&quot;)
+    assert client.waits == [0.05, 0.1] and len(calls) == 3 and client.cache[&quot;rates&quot;] == {&quot;GBP&quot;: 1} and client.log == [&quot;live&quot;]
+
+def test_stale_and_errors():
+    &quot;fallbacks, bad requests and empty caches&quot;
+    client, clock, calls = _client(lambda n: {&quot;v&quot;: 1} if n == 1 else ConnectionError())
+    client.get(&quot;rates&quot;, Deadline(clock, 2.0))
+    assert client.get(&quot;rates&quot;, Deadline(clock, 2.0)) == ({&quot;v&quot;: 1}, &quot;stale&quot;) and len(calls) == 4
+    try:
+        client.get(&quot;other&quot;, Deadline(clock, 2.0))
+    except LookupError as e:
+        assert str(e) == &quot;no value for other&quot;
+    assert client.log == [&quot;live&quot;, &quot;stale&quot;, &quot;error&quot;]
+    bad, clock2, calls2 = _client(lambda n: ValueError(&quot;bad currency&quot;))
+    try:
+        bad.get(&quot;rates&quot;, Deadline(clock2, 2.0))
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(&quot;ValueError isn&#x27;t retried or hidden&quot;)
+    assert len(calls2) == 1
+
+def test_breaker_and_deadline():
+    &quot;an open circuit and a short deadline stop early&quot;
+    client, clock, calls = _client(lambda n: {&quot;v&quot;: n} if n == 1 else ConnectionError(), threshold=2)
+    client.get(&quot;k&quot;, Deadline(clock, 2.0))
+    assert client.get(&quot;k&quot;, Deadline(clock, 2.0)) == ({&quot;v&quot;: 1}, &quot;stale&quot;) and len(calls) == 3
+    assert client.get(&quot;k&quot;, Deadline(clock, 2.0)) == ({&quot;v&quot;: 1}, &quot;stale&quot;) and len(calls) == 3, &quot;open circuit: no calls&quot;
+    slow, clock3, calls3 = _client(lambda n: TimeoutError())
+    slow.cache[&quot;k&quot;] = &quot;old&quot;
+    assert slow.get(&quot;k&quot;, Deadline(clock3, 0.08)) == (&quot;old&quot;, &quot;stale&quot;) and len(calls3) == 1</textarea><textarea class="pc-src pc-solution" hidden>class CircuitOpenError(Exception):
+    pass
+
+class CircuitBreaker:
+    def __init__(self, clock, failure_threshold, reset_timeout):
+        self.clock, self.threshold, self.reset_timeout = clock, failure_threshold, reset_timeout
+        self.state, self.failures, self.opened_at = &quot;closed&quot;, 0, None
+    def call(self, func):
+        if self.state == &quot;open&quot;:
+            if self.clock() - self.opened_at &gt;= self.reset_timeout:
+                self.state = &quot;half-open&quot;
+            else:
+                raise CircuitOpenError(&quot;circuit open&quot;)
+        try:
+            result = func()
+        except Exception:
+            self.failures += 1
+            if self.state == &quot;half-open&quot; or self.failures &gt;= self.threshold:
+                self.state, self.opened_at = &quot;open&quot;, self.clock()
+            raise
+        self.failures, self.state = 0, &quot;closed&quot;
+        return result
+
+class Deadline:
+    def __init__(self, clock, seconds):
+        self.clock, self.ends = clock, clock() + seconds
+    def remaining(self):
+        return max(0.0, self.ends - self.clock())
+    def timeout_for(self, call_timeout):
+        return min(call_timeout, self.remaining())
+
+def full_jitter(attempt, base, cap, rng):
+    return rng.uniform(0, min(cap, base * 2 ** attempt))
+
+class ResilientClient:
+    def __init__(self, clock, call, breaker, cache, rng, max_attempts=3, base=0.1, cap=1.0):
+        self.clock, self.call, self.breaker, self.cache, self.rng = clock, call, breaker, cache, rng
+        self.max_attempts, self.base, self.cap = max_attempts, base, cap
+        self.waits, self.log = [], []
+
+    def _give_up(self, key):
+        if key in self.cache:
+            self.log.append(&quot;stale&quot;)
+            return self.cache[key], &quot;stale&quot;
+        self.log.append(&quot;error&quot;)
+        raise LookupError(f&quot;no value for {key}&quot;)
+
+    def get(self, key, deadline):
+        for attempt in range(self.max_attempts):
+            timeout = deadline.timeout_for(1.0)
+            try:
+                value = self.breaker.call(lambda: self.call(key, timeout))
+            except CircuitOpenError:
+                return self._give_up(key)
+            except (TimeoutError, ConnectionError):
+                if attempt == self.max_attempts - 1:
+                    break
+                wait = full_jitter(attempt, self.base, self.cap, self.rng)
+                self.waits.append(wait)
+                self.clock.advance(wait)
+                if deadline.remaining() &lt; 0.05:
+                    break
+                continue
+            self.cache[key] = value
+            self.log.append(&quot;live&quot;)
+            return value, &quot;live&quot;
+        return self._give_up(key)</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Find the status page of a service you depend on (most large services publish one) and look at its incident history: you&rsquo;ll recognise cascading failures, bad deploys and dependency outages from today. Tomorrow: <strong>design interview practice</strong>, putting the last two weeks together under time pressure.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w082d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w082d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w082d3", "week": 82, "day": 3, "title": "Reliability", "exercises": [{"id": "w082d3-availability", "title": "Nines", "points": 10}, {"id": "w082d3-budget", "title": "Error budgets", "points": 10}, {"id": "w082d3-burn", "title": "Burn-rate alerts", "points": 15}, {"id": "w082d3-breaker", "title": "A circuit breaker", "points": 15}, {"id": "w082d3-jitter", "title": "Backoff with jitter, on a budget", "points": 10}, {"id": "w082d3-deadlines", "title": "Deadlines that shrink", "points": 10}, {"id": "w082d3-bug1", "title": "Redundancy that made things worse", "points": 10}, {"id": "w082d3-bug2", "title": "A thundering retry", "points": 10}, {"id": "w082d3-bug3", "title": "A circuit that never closed", "points": 10}, {"id": "w082d3-trace", "title": "Predict them", "points": 10}, {"id": "w082d3-challenge", "title": "Challenge: a resilient client", "points": 25}], "points": 135}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=b54d8b61c9"></script>
+</body>
+</html>
