@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="7343aa5d1b">
+<title>Week 74 Day 2: Code review | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=7343aa5d1b">
+<link rel="stylesheet" href="../assets/css/site.css?v=7343aa5d1b">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=7343aa5d1b"></script>
+<script src="../assets/vendor/codemirror.js?v=7343aa5d1b" defer></script>
+<meta name="description" content="On most teams, no change reaches the main branch until someone else has read it. Code review catches bugs, but that’s not even its main value: it spreads...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w074d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 74 Day 2: Code review">
+<meta property="og:description" content="On most teams, no change reaches the main branch until someone else has read it. Code review catches bugs, but that’s not even its main value: it spreads...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w074d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-74">Week 74: Code quality and collaboration</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#reading-a-diff" data-sec="reading-a-diff">Reading a diff</a></li><li><a href="#what-to-look-for" data-sec="what-to-look-for">What to look for</a></li><li><a href="#writing-comments" data-sec="writing-comments">Writing comments</a></li><li><a href="#being-reviewed" data-sec="being-reviewed">Being reviewed</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w074d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-74">Week 74: Code quality and collaboration</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 74, Day 2</span></p>
+      <h1>Code review</h1>
+      <div class="day-intro"><p>On most teams, no change reaches the main branch until someone else has read it. Code review catches bugs, but that&rsquo;s not even its main value: it spreads knowledge of the code around the team, keeps the codebase consistent, and teaches both the reviewer and the author. It&rsquo;s also a conversation between people, and done badly it&rsquo;s slow, nit-picking and discouraging. Today you&rsquo;ll learn to read a change as a diff, what to look for and in what order, how to write comments that help, and how to make your own pull requests easy to review. Along the way you&rsquo;ll write the tools that read diffs.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Read unified diffs, and parse them into files, hunks and line numbers</li><li>Review a change in a sensible order, from purpose and design down to details</li><li>Write review comments that are kind, specific and labelled by how much they matter</li><li>Prepare a small, well-described pull request, and automate the checks a machine can do</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Reading a diff: 20 min"></span><span class="plan-seg s0" style="flex:25" title="What to look for: 25 min"></span><span class="plan-seg s1" style="flex:20" title="Writing comments: 20 min"></span><span class="plan-seg s0" style="flex:15" title="Being reviewed: 15 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Reading a diff</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">What to look for</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Writing comments</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Being reviewed</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:30</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:30</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w074d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w074d2.ipynb" download>download it</a>. Exercises today are worth 125 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w074d2-p1"><textarea class="pc-src pc-code" hidden>import difflib
+
+before = [&quot;def total(prices):&quot;, &quot;    t = 0&quot;, &quot;    for p in prices:&quot;, &quot;        t += p&quot;, &quot;    return t&quot;, &quot;&quot;]
+after = [&quot;def total(prices, tax=0.0):&quot;, &#x27;    &quot;&quot;&quot;The total, with tax added.&quot;&quot;&quot;&#x27;, &quot;    return sum(prices) * (1 + tax)&quot;, &quot;&quot;]
+for line in difflib.unified_diff(before, after, &quot;a/shop.py&quot;, &quot;b/shop.py&quot;, lineterm=&quot;&quot;):
+    print(line)</textarea></div>
+<p>That&rsquo;s a <strong>unified diff</strong>, the format of every pull request, <code>git diff</code>, and patch file: <code>-</code> lines were removed, <code>+</code> lines were added, lines with a space are unchanged context, and the <code>@@</code> line says where in each version the change sits. Reviewing code mostly means reading this.</p>
+<h2 id="reading-a-diff">Reading a diff</h2>
+<p>A unified diff has, for each file:</p>
+<pre><code class="language-text">--- a/src/shop/cart.py
++++ b/src/shop/cart.py
+@@ -12,7 +12,8 @@ class Cart:
+     def add(self, item, qty=1):
+-        self.items.append(item)
++        for _ in range(qty):
++            self.items.append(item)
+         self.changed = True
+</code></pre>
+<ul>
+<li><code>---</code> and <code>+++</code> name the old and new versions of the file (<code>/dev/null</code> for a file that was added or deleted).</li>
+<li>Each <strong>hunk</strong> starts with <code>@@ -OLD_START,OLD_COUNT +NEW_START,NEW_COUNT @@</code>, optionally followed by the enclosing function or class as a hint. A count of 1 may be omitted (<code>@@ -5 +5 @@</code>).</li>
+<li>Then the lines: <code></code> context (in both versions), <code>-</code> only in the old, <code>+</code> only in the new. Walking the hunk, context and <code>-</code> lines advance the old line number; context and <code>+</code> lines advance the new one.</li>
+</ul>
+<p>Review tools attach comments to a <strong>line of the new file</strong> (or the old one, for a deleted line), so knowing which new line number each <code>+</code> line has is exactly what a review tool computes. Python&rsquo;s <code>difflib.unified_diff</code> writes this format; <code>git diff</code> writes it with a few extra header lines (<code>diff --git</code>, <code>index</code>).</p>
+<h2 id="what-to-look-for">What to look for</h2>
+<p>Review in order, from the top down, because a problem at the top makes the details irrelevant:</p>
+<ol>
+<li><strong>Purpose.</strong> Read the description first. What should this change do, and is that the right thing to do? Is it the right size, or several changes in one?</li>
+<li><strong>Design.</strong> Does it fit the codebase? Is anything in the wrong place, duplicated or more complicated than it needs to be? Will it be easy to change later?</li>
+<li><strong>Correctness.</strong> Does it do what it says? Edge cases: empty, one, many, missing, wrong types, errors half-way, concurrency. Is anything swallowed (<code>except: pass</code>)? Read the code paths, not just the happy one.</li>
+<li><strong>Tests.</strong> Is new behaviour tested, and would the tests catch the bugs you can imagine (Week 72)? Do they test behaviour, not implementation?</li>
+<li><strong>Security and data.</strong> User input reaching queries, files or shells; secrets in code; permissions checked; personal data logged (Week 79).</li>
+<li><strong>Readability.</strong> Names, function size, comments, the idioms of yesterday. Could a newcomer follow it?</li>
+<li><strong>Details</strong> that tools don&rsquo;t catch. Anything a formatter or linter <strong>can</strong> catch should be caught by them, in CI (Day 4), not by people.</li>
+</ol>
+<p>A reviewer can&rsquo;t hold more than about 400 changed lines in their head at once; beyond that, review quality falls off sharply. Small changes get better reviews <strong>and</strong> faster ones.</p>
+<h2 id="writing-comments">Writing comments</h2>
+<p>Comments are read by a person who worked hard on the change. Good ones are:</p>
+<ul>
+<li><strong>Kind and about the code</strong>, never the person: &ldquo;this loop reads the file twice&rdquo; rather than &ldquo;you read the file twice&rdquo;.</li>
+<li><strong>Specific and actionable</strong>: point at the line, say what the problem is, and if you can, suggest a fix (<code>suggestion:</code> blocks on GitHub apply in one click).</li>
+<li><strong>Asking when you&rsquo;re unsure</strong>: &ldquo;What happens here if <code>items</code> is empty?&rdquo; teaches more, and is less presumptuous, than &ldquo;this crashes when empty&rdquo; when you haven&rsquo;t checked.</li>
+<li><strong>Labelled by importance</strong>, so the author knows what must change. The <strong>Conventional Comments</strong> style starts each comment with a label: <code>issue:</code>, <code>suggestion:</code>, <code>question:</code>, <code>nitpick:</code> (or <code>nit:</code>), <code>praise:</code>, <code>thought:</code>, optionally with decorations such as <code>(blocking)</code> or <code>(non-blocking)</code>: <code>suggestion (non-blocking): ...</code>.</li>
+<li><strong>Generous with praise</strong> where it&rsquo;s earned: &ldquo;nice: this removes a whole class of bugs&rdquo; is information too.</li>
+</ul>
+<p>Then decide: <strong>approve</strong>, <strong>comment</strong> (no decision), or <strong>request changes</strong> (something must change before merging). Don&rsquo;t block on matters of taste; do block on bugs, missing tests and security problems.</p>
+<h2 id="being-reviewed">Being reviewed</h2>
+<p>Making your change easy to review is your job, not the reviewer&rsquo;s:</p>
+<ul>
+<li><strong>Keep it small and focused</strong>: one logical change per pull request. Split refactoring from behaviour changes, so each diff is easy to check.</li>
+<li><strong>Write a description</strong>: what and <strong>why</strong>, how you tested it, anything you&rsquo;re unsure of, and screenshots for anything visual. Link the issue.</li>
+<li><strong>Review it yourself first.</strong> Read your own diff as a reviewer would: you&rsquo;ll find the debugging <code>print</code>, the forgotten file and the confusing name before anyone else does.</li>
+<li><strong>Make the checks pass</strong> before asking for review.</li>
+<li><strong>Respond to every comment</strong>: fix it, or reply with your reasoning. Disagreement is fine; resolve it with evidence, or with a quick call when text goes round in circles.</li>
+</ul>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>A unified diff has &mdash;/+++ file headers and hunks @@ -old_start,count +new_start,count @@; context lines advance both line numbers, - lines the old, + lines the new; a missing count means 1. Review top down: purpose, design, correctness, tests, security, readability, then details; leave mechanical checks to tools; keep changes under a few hundred lines. Comments are kind, about the code, specific, actionable, questions when unsure, and labelled (issue, suggestion, question, nitpick, praise; blocking or not). Authors keep pull requests small and described, review their own diff first, get checks green, and answer every comment.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w074d2-parse" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Parsing a unified diff</div><div class="pc-prompt"><p>Write <code>parse_diff(text)</code>: return a list of files, each a dict with <code>"old"</code> and <code>"new"</code> (the paths after <code>---</code> and <code>+++</code>, with any leading <code>a/</code> or <code>b/</code> removed; keep <code>/dev/null</code> as it is) and <code>"hunks"</code>: a list of dicts with <code>"old_start"</code>, <code>"old_count"</code>, <code>"new_start"</code>, <code>"new_count"</code> (a missing count is 1) and <code>"lines"</code>: the hunk&rsquo;s lines as <code>(kind, text)</code> pairs, where kind is <code>" "</code>, <code>"-"</code> or <code>"+"</code> and text is the rest of the line. Ignore lines before the first <code>---</code> (such as <code>diff --git</code> and <code>index</code> lines) and <code>\ No newline at end of file</code> lines.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+def parse_diff(text):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_parse():
+    &quot;files, hunks and lines&quot;
+    diff = &quot;&quot;&quot;diff --git a/shop.py b/shop.py
+index 1a2b..3c4d 100644
+--- a/shop.py
++++ b/shop.py
+@@ -1,5 +1,3 @@
+-def total(prices):
+-    t = 0
+-    for p in prices:
+-        t += p
+-    return t
++def total(prices, tax=0.0):
++    return sum(prices) * (1 + tax)
++
+@@ -20 +18,2 @@ class Cart:
+-    pass
++    def clear(self):
++        self.items = []
+--- /dev/null
++++ b/notes.txt
+@@ -0,0 +1 @@
++hello
+\\ No newline at end of file
+&quot;&quot;&quot;
+    files = parse_diff(diff)
+    assert [(f[&quot;old&quot;], f[&quot;new&quot;]) for f in files] == [(&quot;shop.py&quot;, &quot;shop.py&quot;), (&quot;/dev/null&quot;, &quot;notes.txt&quot;)]
+    h1, h2 = files[0][&quot;hunks&quot;]
+    assert (h1[&quot;old_start&quot;], h1[&quot;old_count&quot;], h1[&quot;new_start&quot;], h1[&quot;new_count&quot;]) == (1, 5, 1, 3)
+    assert h1[&quot;lines&quot;][0] == (&quot;-&quot;, &quot;def total(prices):&quot;) and h1[&quot;lines&quot;][-1] == (&quot;+&quot;, &quot;&quot;)
+    assert (h2[&quot;old_start&quot;], h2[&quot;old_count&quot;], h2[&quot;new_start&quot;], h2[&quot;new_count&quot;]) == (20, 1, 18, 2)
+    assert files[1][&quot;hunks&quot;][0][&quot;lines&quot;] == [(&quot;+&quot;, &quot;hello&quot;)]</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+HUNK = re.compile(r&quot;@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@&quot;)
+
+def _path(p):
+    p = p.split(&quot;\t&quot;)[0].strip()
+    return p[2:] if p.startswith((&quot;a/&quot;, &quot;b/&quot;)) else p
+
+def parse_diff(text):
+    files, current, hunk = [], None, None
+    for line in text.splitlines():
+        if line.startswith(&quot;--- &quot;):
+            current = {&quot;old&quot;: _path(line[4:]), &quot;new&quot;: None, &quot;hunks&quot;: []}
+            files.append(current)
+            hunk = None
+        elif line.startswith(&quot;+++ &quot;) and current is not None and current[&quot;new&quot;] is None:
+            current[&quot;new&quot;] = _path(line[4:])
+        elif line.startswith(&quot;@@&quot;) and current is not None:
+            m = HUNK.match(line)
+            a, b, c, d = m.groups()
+            hunk = {&quot;old_start&quot;: int(a), &quot;old_count&quot;: int(b) if b is not None else 1,
+                    &quot;new_start&quot;: int(c), &quot;new_count&quot;: int(d) if d is not None else 1, &quot;lines&quot;: []}
+            current[&quot;hunks&quot;].append(hunk)
+        elif line.startswith(&quot;\\&quot;):
+            continue
+        elif hunk is not None and line[:1] in (&quot; &quot;, &quot;-&quot;, &quot;+&quot;):
+            hunk[&quot;lines&quot;].append((line[0], line[1:]))
+        elif hunk is not None and line == &quot;&quot;:
+            hunk[&quot;lines&quot;].append((&quot; &quot;, &quot;&quot;))
+    return files</textarea><template class="pc-src pc-hint">Match hunk headers with <code>re.match(r"@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", line)</code>. A <code>---</code> line starts a new file; the next <code>+++</code> line completes its name. Any other line inside a hunk starts with its kind character.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w074d2-numbers" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Which line is that?</div><div class="pc-prompt"><p>Using <code>parse_diff</code> (given), write <code>added_lines(diff)</code>: a dict from each new file path to the list of <code>(new_line_number, text)</code> for its added lines; and <code>removed_lines(diff)</code>: the same with old paths and old line numbers for removed lines. Files that were deleted (new path <code>/dev/null</code>) have no added lines; files that were added have no removed lines.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+HUNK = re.compile(r&quot;@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@&quot;)
+
+def _path(p):
+    p = p.split(&quot;\t&quot;)[0].strip()
+    return p[2:] if p.startswith((&quot;a/&quot;, &quot;b/&quot;)) else p
+
+def parse_diff(text):
+    files, current, hunk = [], None, None
+    for line in text.splitlines():
+        if line.startswith(&quot;--- &quot;):
+            current = {&quot;old&quot;: _path(line[4:]), &quot;new&quot;: None, &quot;hunks&quot;: []}
+            files.append(current)
+            hunk = None
+        elif line.startswith(&quot;+++ &quot;) and current is not None and current[&quot;new&quot;] is None:
+            current[&quot;new&quot;] = _path(line[4:])
+        elif line.startswith(&quot;@@&quot;) and current is not None:
+            a, b, c, d = HUNK.match(line).groups()
+            hunk = {&quot;old_start&quot;: int(a), &quot;old_count&quot;: int(b) if b is not None else 1,
+                    &quot;new_start&quot;: int(c), &quot;new_count&quot;: int(d) if d is not None else 1, &quot;lines&quot;: []}
+            current[&quot;hunks&quot;].append(hunk)
+        elif hunk is not None and line[:1] in (&quot; &quot;, &quot;-&quot;, &quot;+&quot;):
+            hunk[&quot;lines&quot;].append((line[0], line[1:]))
+    return files
+
+def added_lines(diff):
+    ___
+
+def removed_lines(diff):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_numbers():
+    &quot;line numbers for comments&quot;
+    diff = &quot;--- a/cart.py\n+++ b/cart.py\n@@ -10,4 +10,5 @@\n     def add(self, item, qty=1):\n-        self.items.append(item)\n+        for _ in range(qty):\n+            self.items.append(item)\n         self.changed = True\n         return self\n--- a/old.py\n+++ /dev/null\n@@ -1,2 +0,0 @@\n-x = 1\n-y = 2\n&quot;
+    assert added_lines(diff) == {&quot;cart.py&quot;: [(11, &quot;        for _ in range(qty):&quot;), (12, &quot;            self.items.append(item)&quot;)]}
+    assert removed_lines(diff) == {&quot;cart.py&quot;: [(11, &quot;        self.items.append(item)&quot;)], &quot;old.py&quot;: [(1, &quot;x = 1&quot;), (2, &quot;y = 2&quot;)]}</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+HUNK = re.compile(r&quot;@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@&quot;)
+
+def _path(p):
+    p = p.split(&quot;\t&quot;)[0].strip()
+    return p[2:] if p.startswith((&quot;a/&quot;, &quot;b/&quot;)) else p
+
+def parse_diff(text):
+    files, current, hunk = [], None, None
+    for line in text.splitlines():
+        if line.startswith(&quot;--- &quot;):
+            current = {&quot;old&quot;: _path(line[4:]), &quot;new&quot;: None, &quot;hunks&quot;: []}
+            files.append(current)
+            hunk = None
+        elif line.startswith(&quot;+++ &quot;) and current is not None and current[&quot;new&quot;] is None:
+            current[&quot;new&quot;] = _path(line[4:])
+        elif line.startswith(&quot;@@&quot;) and current is not None:
+            a, b, c, d = HUNK.match(line).groups()
+            hunk = {&quot;old_start&quot;: int(a), &quot;old_count&quot;: int(b) if b is not None else 1,
+                    &quot;new_start&quot;: int(c), &quot;new_count&quot;: int(d) if d is not None else 1, &quot;lines&quot;: []}
+            current[&quot;hunks&quot;].append(hunk)
+        elif hunk is not None and line[:1] in (&quot; &quot;, &quot;-&quot;, &quot;+&quot;):
+            hunk[&quot;lines&quot;].append((line[0], line[1:]))
+    return files
+
+def _walk(diff):
+    for f in parse_diff(diff):
+        for h in f[&quot;hunks&quot;]:
+            old, new = h[&quot;old_start&quot;], h[&quot;new_start&quot;]
+            for kind, text in h[&quot;lines&quot;]:
+                yield f, kind, old, new, text
+                if kind in (&quot; &quot;, &quot;-&quot;):
+                    old += 1
+                if kind in (&quot; &quot;, &quot;+&quot;):
+                    new += 1
+
+def added_lines(diff):
+    result = {}
+    for f, kind, old, new, text in _walk(diff):
+        if kind == &quot;+&quot; and f[&quot;new&quot;] != &quot;/dev/null&quot;:
+            result.setdefault(f[&quot;new&quot;], []).append((new, text))
+    return result
+
+def removed_lines(diff):
+    result = {}
+    for f, kind, old, new, text in _walk(diff):
+        if kind == &quot;-&quot; and f[&quot;old&quot;] != &quot;/dev/null&quot;:
+            result.setdefault(f[&quot;old&quot;], []).append((old, text))
+    return result</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w074d2-size" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Is this pull request too big?</div><div class="pc-prompt"><p>Write <code>diff_stats(diff)</code>: from a unified diff, a dict from each file&rsquo;s path (the new path, or the old one for a deleted file) to <code>(added, removed)</code> counts, plus a <code>"total"</code> entry. Count <code>+</code> and <code>-</code> lines inside hunks only (not the <code>+++</code> and <code>---</code> headers). Then <code>review_advice(stats, limit=400)</code>: <code>"small"</code> if added plus removed is at most 100, <code>"fine"</code> up to <code>limit</code>, and otherwise <code>"split it: N lines"</code> with the total changed lines.</p></div><textarea class="pc-src pc-code" hidden>def diff_stats(diff):
+    ___
+
+def review_advice(stats, limit=400):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_stats():
+    &quot;counting a change&quot;
+    diff = &quot;--- a/a.py\n+++ b/a.py\n@@ -1,2 +1,3 @@\n-x = 1\n+x = 2\n+y = 3\n z = 4\n--- a/b.py\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-gone = True\n&quot;
+    stats = diff_stats(diff)
+    assert stats == {&quot;a.py&quot;: (2, 1), &quot;b.py&quot;: (0, 1), &quot;total&quot;: (2, 2)}
+    assert review_advice(stats) == &quot;small&quot;
+    assert review_advice({&quot;total&quot;: (150, 30)}) == &quot;fine&quot; and review_advice({&quot;total&quot;: (390, 60)}) == &quot;split it: 450 lines&quot;</textarea><textarea class="pc-src pc-solution" hidden>def diff_stats(diff):
+    stats, current, in_hunk = {}, None, False
+    old = None
+    for line in diff.splitlines():
+        if line.startswith(&quot;--- &quot;):
+            old, in_hunk = line[4:].strip(), False
+            old = old[2:] if old.startswith(&quot;a/&quot;) else old
+        elif line.startswith(&quot;+++ &quot;) and not in_hunk:
+            new = line[4:].strip()
+            new = new[2:] if new.startswith(&quot;b/&quot;) else new
+            current = old if new == &quot;/dev/null&quot; else new
+            stats.setdefault(current, (0, 0))
+        elif line.startswith(&quot;@@&quot;):
+            in_hunk = True
+        elif in_hunk and line.startswith(&quot;+&quot;):
+            a, r = stats[current]
+            stats[current] = (a + 1, r)
+        elif in_hunk and line.startswith(&quot;-&quot;):
+            a, r = stats[current]
+            stats[current] = (a, r + 1)
+    stats[&quot;total&quot;] = (sum(a for a, _ in stats.values()), sum(r for _, r in stats.values()))
+    return stats
+
+def review_advice(stats, limit=400):
+    changed = sum(stats[&quot;total&quot;])
+    if changed &lt;= 100:
+        return &quot;small&quot;
+    if changed &lt;= limit:
+        return &quot;fine&quot;
+    return f&quot;split it: {changed} lines&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w074d2-comments" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Conventional comments</div><div class="pc-prompt"><p>Write <code>parse_comment(text)</code>: a review comment in the Conventional Comments style, <code>label (decoration, decoration): subject</code>, becomes a dict with <code>"label"</code> (lower case), <code>"decorations"</code> (a list, possibly empty), <code>"subject"</code> (stripped) and <code>"blocking"</code>: true for <code>issue</code> and <code>todo</code> labels unless decorated <code>non-blocking</code>, and for any label decorated <code>blocking</code>. Labels are <code>praise</code>, <code>nitpick</code>, <code>suggestion</code>, <code>issue</code>, <code>todo</code>, <code>question</code>, <code>thought</code>, <code>chore</code> and <code>note</code> (<code>nit</code> is accepted as <code>nitpick</code>). Text that doesn&rsquo;t match raises <code>ValueError</code>. Then <code>must_fix(comments)</code>: the subjects of the blocking ones, in order.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+LABELS = {&quot;praise&quot;, &quot;nitpick&quot;, &quot;suggestion&quot;, &quot;issue&quot;, &quot;todo&quot;, &quot;question&quot;, &quot;thought&quot;, &quot;chore&quot;, &quot;note&quot;}
+
+def parse_comment(text):
+    ___
+
+def must_fix(comments):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_comments():
+    &quot;labels and decorations&quot;
+    assert parse_comment(&quot;nit: trailing space&quot;) == {&quot;label&quot;: &quot;nitpick&quot;, &quot;decorations&quot;: [], &quot;subject&quot;: &quot;trailing space&quot;, &quot;blocking&quot;: False}
+    assert parse_comment(&quot;Issue: crashes when the cart is empty&quot;)[&quot;blocking&quot;] is True
+    assert parse_comment(&quot;issue (non-blocking): slow for big carts&quot;)[&quot;blocking&quot;] is False
+    assert parse_comment(&quot;suggestion (blocking, security): escape the name&quot;)[&quot;decorations&quot;] == [&quot;blocking&quot;, &quot;security&quot;]
+    assert parse_comment(&quot;suggestion (blocking, security): escape the name&quot;)[&quot;blocking&quot;] is True
+    for bad in [&quot;this is wrong&quot;, &quot;rant: why&quot;, &quot;issue crashes&quot;]:
+        try:
+            parse_comment(bad)
+            assert False, bad
+        except ValueError:
+            pass
+    comments = [&quot;praise: lovely tests&quot;, &quot;issue: off by one in the loop&quot;, &quot;nit: name&quot;, &quot;todo: add a changelog entry&quot;, &quot;question (blocking): is this thread-safe?&quot;]
+    assert must_fix(comments) == [&quot;off by one in the loop&quot;, &quot;add a changelog entry&quot;, &quot;is this thread-safe?&quot;]</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+LABELS = {&quot;praise&quot;, &quot;nitpick&quot;, &quot;suggestion&quot;, &quot;issue&quot;, &quot;todo&quot;, &quot;question&quot;, &quot;thought&quot;, &quot;chore&quot;, &quot;note&quot;}
+
+def parse_comment(text):
+    m = re.match(r&quot;\s*([A-Za-z]+)\s*(?:\(([^)]*)\))?\s*:\s*(.+)&quot;, text, re.S)
+    if not m:
+        raise ValueError(f&quot;not a conventional comment: {text!r}&quot;)
+    label = m.group(1).lower()
+    label = &quot;nitpick&quot; if label == &quot;nit&quot; else label
+    if label not in LABELS:
+        raise ValueError(f&quot;unknown label: {label}&quot;)
+    decorations = [d.strip().lower() for d in (m.group(2) or &quot;&quot;).split(&quot;,&quot;) if d.strip()]
+    blocking = &quot;blocking&quot; in decorations or (label in (&quot;issue&quot;, &quot;todo&quot;) and &quot;non-blocking&quot; not in decorations)
+    return {&quot;label&quot;: label, &quot;decorations&quot;: decorations, &quot;subject&quot;: m.group(3).strip(), &quot;blocking&quot;: blocking}
+
+def must_fix(comments):
+    return [c[&quot;subject&quot;] for c in map(parse_comment, comments) if c[&quot;blocking&quot;]]</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w074d2-fixpr" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Fixing what the review found</div><div class="pc-prompt"><p>A pull request added <code>summarise(orders)</code>, and the reviewer left three blocking comments: <strong>issue</strong>: an empty list crashes with <code>ZeroDivisionError</code> (it should return <code>{"count": 0, "total": 0, "average": 0}</code>); <strong>issue</strong>: refunded orders (with <code>"refunded": True</code>) are counted, and they shouldn&rsquo;t be, in any of the figures; <strong>issue</strong>: an exception from a malformed order is swallowed by <code>except Exception: pass</code>, hiding bad data (let a <code>KeyError</code> from a missing <code>"amount"</code> propagate). Fix all three, keeping the rest of the behaviour (the average is rounded to 2 places).</p></div><textarea class="pc-src pc-code" hidden>def summarise(orders):
+    total = 0
+    count = 0
+    for order in orders:
+        try:
+            total += order[&quot;amount&quot;]
+            count += 1
+        except Exception:
+            pass
+    return {&quot;count&quot;: count, &quot;total&quot;: total, &quot;average&quot;: round(total / count, 2)}</textarea><textarea class="pc-src pc-tests" hidden>def test_review_fixed():
+    &quot;all three review comments addressed&quot;
+    orders = [{&quot;amount&quot;: 10}, {&quot;amount&quot;: 25, &quot;refunded&quot;: True}, {&quot;amount&quot;: 5.5}, {&quot;amount&quot;: 4, &quot;refunded&quot;: False}]
+    assert summarise(orders) == {&quot;count&quot;: 3, &quot;total&quot;: 19.5, &quot;average&quot;: 6.5}
+    assert summarise([]) == {&quot;count&quot;: 0, &quot;total&quot;: 0, &quot;average&quot;: 0}
+    assert summarise([{&quot;amount&quot;: 3, &quot;refunded&quot;: True}]) == {&quot;count&quot;: 0, &quot;total&quot;: 0, &quot;average&quot;: 0}
+    try:
+        summarise([{&quot;amount&quot;: 1}, {&quot;price&quot;: 2}])
+        assert False, &quot;a malformed order should raise&quot;
+    except KeyError:
+        pass
+    assert &quot;except Exception&quot; not in source</textarea><textarea class="pc-src pc-solution" hidden>def summarise(orders):
+    kept = [order[&quot;amount&quot;] for order in orders if not order.get(&quot;refunded&quot;)]
+    total = sum(kept)
+    count = len(kept)
+    average = round(total / count, 2) if count else 0
+    return {&quot;count&quot;: count, &quot;total&quot;: total, &quot;average&quot;: average}</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w074d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A hunk count that was left out</div><div class="pc-prompt"><p>In the hunk header <code>@@ -7 +7,2 @@</code>, the old count is omitted, which means <strong>1</strong>. The parser uses <code>0</code> instead, so it thinks the hunk removes nothing and prints <code>old lines: 0</code>. Default a missing count to 1 so it prints <code>old lines: 1</code>.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+header = &quot;@@ -7 +7,2 @@ def total(prices):&quot;
+m = re.match(r&quot;@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@&quot;, header)
+old_count = int(m.group(2) or 0)
+print(&quot;old lines:&quot;, old_count)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;a missing count is one&quot;
+    expect_output(&quot;old lines: 1&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+header = &quot;@@ -7 +7,2 @@ def total(prices):&quot;
+m = re.match(r&quot;@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@&quot;, header)
+old_count = int(m.group(2) or 1)
+print(&quot;old lines:&quot;, old_count)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w074d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Removing while looping</div><div class="pc-prompt"><p>The reviewer asked: &ldquo;what happens with two expired items in a row?&rdquo; The function removes items from the list it&rsquo;s looping over, so the item after each removed one is skipped, and this prints <code>['milk', 'eggs']</code> (eggs has expired too). Build a new list instead, so it prints <code>['milk']</code>.</p></div><textarea class="pc-src pc-code" hidden>def drop_expired(items):
+    for item in items:
+        if item[&quot;expired&quot;]:
+            items.remove(item)
+    return [i[&quot;name&quot;] for i in items]
+
+stock = [{&quot;name&quot;: &quot;bread&quot;, &quot;expired&quot;: True}, {&quot;name&quot;: &quot;eggs&quot;, &quot;expired&quot;: True}, {&quot;name&quot;: &quot;milk&quot;, &quot;expired&quot;: False}]
+print(drop_expired(stock))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;every expired item removed&quot;
+    expect_output(&quot;[&#x27;milk&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def drop_expired(items):
+    kept = [item for item in items if not item[&quot;expired&quot;]]
+    return [i[&quot;name&quot;] for i in kept]
+
+stock = [{&quot;name&quot;: &quot;bread&quot;, &quot;expired&quot;: True}, {&quot;name&quot;: &quot;eggs&quot;, &quot;expired&quot;: True}, {&quot;name&quot;: &quot;milk&quot;, &quot;expired&quot;: False}]
+print(drop_expired(stock))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w074d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Counting the headers as changes</div><div class="pc-prompt"><p>The size check counts every line starting with <code>+</code> or <code>-</code>, including the <code>+++</code> and <code>---</code> file headers, so a one-line change looks like three, and this prints <code>added 2, removed 2</code>. Count only lines inside hunks (after an <code>@@</code> line), so it prints <code>added 1, removed 1</code>.</p></div><textarea class="pc-src pc-code" hidden>diff = &quot;--- a/x.py\n+++ b/x.py\n@@ -1 +1 @@\n-x = 1\n+x = 2\n&quot;
+added = sum(1 for line in diff.splitlines() if line.startswith(&quot;+&quot;))
+removed = sum(1 for line in diff.splitlines() if line.startswith(&quot;-&quot;))
+print(f&quot;added {added}, removed {removed}&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;headers aren&#x27;t changes&quot;
+    expect_output(&quot;added 1, removed 1&quot;)</textarea><textarea class="pc-src pc-solution" hidden>diff = &quot;--- a/x.py\n+++ b/x.py\n@@ -1 +1 @@\n-x = 1\n+x = 2\n&quot;
+added = removed = 0
+in_hunk = False
+for line in diff.splitlines():
+    if line.startswith(&quot;@@&quot;):
+        in_hunk = True
+    elif line.startswith(&quot;--- &quot;):
+        in_hunk = False
+    elif in_hunk and line.startswith(&quot;+&quot;):
+        added += 1
+    elif in_hunk and line.startswith(&quot;-&quot;):
+        removed += 1
+print(f&quot;added {added}, removed {removed}&quot;)</textarea></div>
+<div class="parsons" data-id="w074d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Reviewing in order</div><div class="pc-prompt"><p>Arrange the steps of reviewing a pull request from the top down. One line is a trap.</p></div><script type="application/json">{"lines": ["Read the description: what should this change do, and why?", "Check the design: does it fit, and is it in the right place?", "Check correctness: edge cases, errors, the paths besides the happy one", "Check the tests: would they catch the bugs you can imagine?", "Check security: input, secrets, permissions, personal data", "Check readability: names, size, comments", "Decide: approve, comment, or request changes"], "distractors": ["Start with spacing and quote style, since those are quickest to spot"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w074d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the line kind that advances both line numbers in a hunk: &quot;+&quot;, &quot;-&quot; or &quot; &quot;
+q = ___   # the new count in &quot;@@ -3,4 +3 @@&quot;
+r = ___   # True or False: style problems a formatter can fix are worth review comments
+s = ___   # the label for a comment that must be fixed before merging, in Conventional Comments: &quot;issue&quot; or &quot;nitpick&quot;
+t = ___   # roughly how many changed lines a reviewer can review well at once: 40, 400 or 4000</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot; &quot; and q == 1 and r is False, &quot;p, q and r&quot;
+    assert s == &quot;issue&quot; and t == 400, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot; &quot;
+q = 1
+r = False
+s = &quot;issue&quot;
+t = 400</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w074d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What is code review&rsquo;s biggest benefit, besides catching bugs?", "answer": 1, "explain": "Both the reviewer and the author learn.", "options": ["Slowing changes down", "Spreading knowledge of the code around the team, and keeping it consistent", "Finding someone to blame", "Formatting"]}, {"type": "mc", "q": "In a unified diff, what does a line starting with a space mean?", "answer": 2, "explain": "It advances both line numbers.", "options": ["Added", "Removed", "Unchanged context, in both versions", "A comment"]}, {"type": "mc", "q": "What does @@ -12,7 +12,8 @@ tell you?", "answer": 1, "explain": "Start and count for each version.", "options": ["12 lines changed", "The hunk covers 7 old lines from line 12, and 8 new lines from line 12", "Line 12 was deleted", "It&rsquo;s a merge"]}, {"type": "mc", "q": "In what order should you review?", "answer": 1, "explain": "A design problem makes the details irrelevant.", "options": ["Details first", "Purpose and design first, then correctness, tests, security, readability and details", "Tests only", "Random"]}, {"type": "mc", "q": "What should catch formatting and simple lint problems?", "answer": 1, "explain": "Spend human attention where only humans can help.", "options": ["The reviewer", "Tools, run automatically in CI", "The manager", "Nobody"]}, {"type": "mc", "q": "Which is the better review comment?", "answer": 1, "explain": "About the code, specific, and asking.", "options": ["You always forget edge cases.", "question: what happens here when items is empty? It looks like the average divides by zero.", "Wrong.", "Rewrite this."]}, {"type": "mc", "q": "What does a nitpick label tell the author?", "answer": 1, "explain": "Label comments by importance.", "options": ["It must be fixed", "It&rsquo;s minor and optional", "It&rsquo;s praise", "It&rsquo;s a security issue"]}, {"type": "mc", "q": "Why keep pull requests small?", "answer": 1, "explain": "Split refactoring from behaviour changes too.", "options": ["GitHub limits size", "Review quality drops sharply beyond a few hundred lines, and small changes are reviewed faster", "Small files compress better", "Tradition"]}, {"type": "mc", "q": "What should an author do before asking for review?", "answer": 1, "explain": "You&rsquo;ll catch the stray print yourself.", "options": ["Nothing", "Review their own diff, make the checks pass, and describe the what and why", "Merge it", "Add more changes"]}, {"type": "output", "q": "What does this print?", "answer": "1 1", "explain": "Only lines inside the hunk count.", "code": "lines = [\"--- a/x\", \"+++ b/x\", \"@@ -1,2 +1,2 @@\", \" keep\", \"-old\", \"+new\"]\nhunk = lines[lines.index(\"@@ -1,2 +1,2 @@\") + 1:]\nprint(sum(l.startswith(\"+\") for l in hunk), sum(l.startswith(\"-\") for l in hunk))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w074d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: an automatic first-pass reviewer</div><div class="pc-prompt"><p>Write <code>auto_review(diff)</code>: check only the <strong>added</strong> lines of a unified diff (as in the second exercise, whose helpers are given) and return a sorted list of <code>(path, new_line, message)</code> comments, for <code>.py</code> files only:
+- <code>"remove the debugging print"</code> for an added line containing a call to <code>print(</code> outside a string (a line whose stripped text starts with <code>print(</code> is enough here), unless the file is under <code>scripts/</code>;
+- <code>"bare except hides errors"</code> for an added line whose stripped text is <code>except:</code>;
+- <code>"TODO without an issue number"</code> for an added line containing <code>TODO</code> but no <code>#</code> followed by digits (like <code>#123</code>);
+- <code>"line too long (N &gt; 100)"</code> for an added line longer than 100 characters;
+- and once per pull request, as <code>("*", 0, "code changed but no tests changed")</code>, if any <code>.py</code> file outside <code>tests/</code> has added or removed lines but no file under <code>tests/</code> does.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+HUNK = re.compile(r&quot;@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@&quot;)
+
+def _path(p):
+    p = p.split(&quot;\t&quot;)[0].strip()
+    return p[2:] if p.startswith((&quot;a/&quot;, &quot;b/&quot;)) else p
+
+def parse_diff(text):
+    files, current, hunk = [], None, None
+    for line in text.splitlines():
+        if line.startswith(&quot;--- &quot;):
+            current = {&quot;old&quot;: _path(line[4:]), &quot;new&quot;: None, &quot;hunks&quot;: []}
+            files.append(current)
+            hunk = None
+        elif line.startswith(&quot;+++ &quot;) and current is not None and current[&quot;new&quot;] is None:
+            current[&quot;new&quot;] = _path(line[4:])
+        elif line.startswith(&quot;@@&quot;) and current is not None:
+            a, b, c, d = HUNK.match(line).groups()
+            hunk = {&quot;old_start&quot;: int(a), &quot;old_count&quot;: int(b) if b is not None else 1,
+                    &quot;new_start&quot;: int(c), &quot;new_count&quot;: int(d) if d is not None else 1, &quot;lines&quot;: []}
+            current[&quot;hunks&quot;].append(hunk)
+        elif hunk is not None and line[:1] in (&quot; &quot;, &quot;-&quot;, &quot;+&quot;):
+            hunk[&quot;lines&quot;].append((line[0], line[1:]))
+    return files
+
+def auto_review(diff):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_reviewer():
+    &quot;a first pass a machine can do&quot;
+    long_line = &quot;x = &quot; + &quot;1 + &quot; * 30 + &quot;1&quot;
+    diff = (
+        &quot;--- a/src/shop.py\n+++ b/src/shop.py\n@@ -1,3 +1,7 @@\n def total(xs):\n&quot;
+        &quot;+    print(xs)\n+    # TODO handle tax\n+    # TODO #42 rounding\n     try:\n&quot;
+        f&quot;+        {long_line}\n     except:\n+    except:\n&quot;
+        &quot;--- a/scripts/run.py\n+++ b/scripts/run.py\n@@ -1 +1,2 @@\n x = 1\n+print(x)\n&quot;
+        &quot;--- a/README.md\n+++ b/README.md\n@@ -1 +1,2 @@\n hi\n+print(\n&quot;
+    )
+    comments = auto_review(diff)
+    assert comments == [
+        (&quot;*&quot;, 0, &quot;code changed but no tests changed&quot;),
+        (&quot;src/shop.py&quot;, 2, &quot;remove the debugging print&quot;),
+        (&quot;src/shop.py&quot;, 3, &quot;TODO without an issue number&quot;),
+        (&quot;src/shop.py&quot;, 6, f&quot;line too long ({len(long_line) + 8} &gt; 100)&quot;),
+        (&quot;src/shop.py&quot;, 8, &quot;bare except hides errors&quot;),
+    ], comments
+    with_tests = diff + &quot;--- a/tests/test_shop.py\n+++ b/tests/test_shop.py\n@@ -1 +1,2 @@\n x\n+def test_total():\n&quot;
+    assert (&quot;*&quot;, 0, &quot;code changed but no tests changed&quot;) not in auto_review(with_tests)</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+HUNK = re.compile(r&quot;@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@&quot;)
+
+def _path(p):
+    p = p.split(&quot;\t&quot;)[0].strip()
+    return p[2:] if p.startswith((&quot;a/&quot;, &quot;b/&quot;)) else p
+
+def parse_diff(text):
+    files, current, hunk = [], None, None
+    for line in text.splitlines():
+        if line.startswith(&quot;--- &quot;):
+            current = {&quot;old&quot;: _path(line[4:]), &quot;new&quot;: None, &quot;hunks&quot;: []}
+            files.append(current)
+            hunk = None
+        elif line.startswith(&quot;+++ &quot;) and current is not None and current[&quot;new&quot;] is None:
+            current[&quot;new&quot;] = _path(line[4:])
+        elif line.startswith(&quot;@@&quot;) and current is not None:
+            a, b, c, d = HUNK.match(line).groups()
+            hunk = {&quot;old_start&quot;: int(a), &quot;old_count&quot;: int(b) if b is not None else 1,
+                    &quot;new_start&quot;: int(c), &quot;new_count&quot;: int(d) if d is not None else 1, &quot;lines&quot;: []}
+            current[&quot;hunks&quot;].append(hunk)
+        elif hunk is not None and line[:1] in (&quot; &quot;, &quot;-&quot;, &quot;+&quot;):
+            hunk[&quot;lines&quot;].append((line[0], line[1:]))
+    return files
+
+def auto_review(diff):
+    comments = []
+    code_changed = tests_changed = False
+    for f in parse_diff(diff):
+        path = f[&quot;new&quot;] if f[&quot;new&quot;] != &quot;/dev/null&quot; else f[&quot;old&quot;]
+        is_py = path.endswith(&quot;.py&quot;)
+        is_test = path.startswith(&quot;tests/&quot;)
+        for h in f[&quot;hunks&quot;]:
+            new = h[&quot;new_start&quot;]
+            for kind, text in h[&quot;lines&quot;]:
+                if kind in &quot;+-&quot; and is_py:
+                    if is_test:
+                        tests_changed = True
+                    else:
+                        code_changed = True
+                if kind == &quot;+&quot; and is_py:
+                    stripped = text.strip()
+                    if stripped.startswith(&quot;print(&quot;) and not path.startswith(&quot;scripts/&quot;):
+                        comments.append((path, new, &quot;remove the debugging print&quot;))
+                    if stripped == &quot;except:&quot;:
+                        comments.append((path, new, &quot;bare except hides errors&quot;))
+                    if &quot;TODO&quot; in text and not re.search(r&quot;#\d+&quot;, text):
+                        comments.append((path, new, &quot;TODO without an issue number&quot;))
+                    if len(text) &gt; 100:
+                        comments.append((path, new, f&quot;line too long ({len(text)} &gt; 100)&quot;))
+                if kind in (&quot; &quot;, &quot;+&quot;):
+                    new += 1
+    if code_changed and not tests_changed:
+        comments.append((&quot;*&quot;, 0, &quot;code changed but no tests changed&quot;))
+    return sorted(comments)</textarea><template class="pc-src pc-hint">Walk each file&rsquo;s hunks keeping the new line number (context and <code>+</code> lines advance it). Record whether any non-test <code>.py</code> file and any test file changed (any <code>+</code> or <code>-</code> line), and add the pull-request comment at the end.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Open a pull request on any open-source project you use and read its review conversation: notice which comments were labelled, which were questions, and how disagreements were settled. Tomorrow: <strong>documentation</strong>: docstrings that tools can read, doctests that keep examples honest, and documentation sites built from both.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w074d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w074d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w074d2", "week": 74, "day": 2, "title": "Code review", "exercises": [{"id": "w074d2-parse", "title": "Parsing a unified diff", "points": 15}, {"id": "w074d2-numbers", "title": "Which line is that?", "points": 10}, {"id": "w074d2-size", "title": "Is this pull request too big?", "points": 10}, {"id": "w074d2-comments", "title": "Conventional comments", "points": 10}, {"id": "w074d2-fixpr", "title": "Fixing what the review found", "points": 15}, {"id": "w074d2-bug1", "title": "A hunk count that was left out", "points": 10}, {"id": "w074d2-bug2", "title": "Removing while looping", "points": 10}, {"id": "w074d2-bug3", "title": "Counting the headers as changes", "points": 10}, {"id": "w074d2-trace", "title": "Predict them", "points": 10}, {"id": "w074d2-challenge", "title": "Challenge: an automatic first-pass reviewer", "points": 25}], "points": 125}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=7343aa5d1b"></script>
+</body>
+</html>
