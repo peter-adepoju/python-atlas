@@ -159,6 +159,10 @@ The block shows the files on the page (click to open) and gives every program on
 
 Checks can use `read_file(name)` (the text, or `None`), `write_file(name, text)`, `files_now()` (the names, sorted) and `reset_files()` (back to the starting files). The learner's program has already run once when the checks start, so reset first if a check depends on the files being untouched; `run()` does not reset them.
 
+## Figures
+
+matplotlib draws with the Agg backend (no window). After a **run**, every open figure is shown under the program's output as a PNG (up to six), and figures are closed before each run or check starts, so checks can inspect the figures a learner's functions return: `ax.get_title()`, `ax.lines[0].get_ydata()`, `[p.get_height() for p in ax.patches]`, `ax.collections[0].get_offsets()`, `ax.get_legend().get_texts()`, `fig.axes`. Call `fig.canvas.draw()` before reading tick labels. Don't compare pixels.
+
 ## Exams
 
 Add `exam=yes` to an exercise or bug hunt to leave its hints and solution off the page (the validator still checks the solution). The `examtimer` figure (params `minutes`, `key`) is a countdown that survives reloads; it never locks anything.

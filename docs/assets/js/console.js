@@ -1,9 +1,9 @@
 // Code consoles: editable Python with Run, X-ray, Check and a real-feeling terminal.
-import { h, $, $$, toast } from "./site.js?v=b54d8b61c9";
-import { py, onStatus, stop } from "./runtime.js?v=b54d8b61c9";
-import { makeEditor } from "./editor.js?v=b54d8b61c9";
-import { XRay } from "./xray.js?v=b54d8b61c9";
-import { progress } from "./progress.js?v=b54d8b61c9";
+import { h, $, $$, toast } from "./site.js?v=97b2d34bb1";
+import { py, onStatus, stop } from "./runtime.js?v=97b2d34bb1";
+import { makeEditor } from "./editor.js?v=97b2d34bb1";
+import { XRay } from "./xray.js?v=97b2d34bb1";
+import { progress } from "./progress.js?v=97b2d34bb1";
 
 const norm = (s) => String(s).split("\n").map((l) => l.replace(/\s+$/, "")).join("\n").replace(/\n+$/, "");
 
@@ -51,6 +51,13 @@ export class PyConsole {
     this.filesBox.hidden = false;
   }
 
+  showFigures(list) {
+    if (!list || !list.length) { this.figBox.hidden = true; this.figBox.replaceChildren(); return; }
+    this.figBox.replaceChildren(h("div", { class: "pc-termhead" }, list.length === 1 ? "Figure" : "Figures"),
+      ...list.map((b64, i) => h("img", { class: "pc-figure", src: "data:image/png;base64," + b64, alt: "Figure " + (i + 1) + " drawn by the program" })));
+    this.figBox.hidden = false;
+  }
+
   saved() { return this.id ? progress.get("code:" + this.id) : undefined; }
 
   build() {
@@ -62,6 +69,7 @@ export class PyConsole {
     this.errBox = h("div", { class: "pc-error", hidden: true });
     this.testBox = h("div", { class: "pc-tests", hidden: true });
     this.filesBox = h("div", { class: "pc-files", hidden: true });
+    this.figBox = h("div", { class: "pc-figures", hidden: true });
     this.status = h("span", { class: "pc-status", "aria-live": "polite" });
     this.xrayHost = h("div", { class: "pc-xrayhost" });
 
@@ -94,7 +102,7 @@ export class PyConsole {
     }
     this.hintArea = h("div", { class: "pc-hints" });
     this.solArea = h("div", { class: "pc-sol", hidden: true });
-    el.append(this.edWrap, ...kids, bar, this.termWrap, this.filesBox, this.errBox, this.testBox, this.hintArea, this.solArea, this.xrayHost);
+    el.append(this.edWrap, ...kids, bar, this.termWrap, this.figBox, this.filesBox, this.errBox, this.testBox, this.hintArea, this.solArea, this.xrayHost);
 
     const lines = Math.max(3, start.split("\n").length);
     this.ed = makeEditor(this.edWrap, start, {
@@ -125,6 +133,7 @@ export class PyConsole {
     this.errBox.hidden = true;
     this.testBox.hidden = true;
     this.filesBox.hidden = true;
+    this.figBox.hidden = true;
     this.ed.mark({});
   }
 
@@ -172,7 +181,7 @@ export class PyConsole {
       inputs.push(val);
     }
     this.busy(false);
-    if (!res.stopped) this.showFiles(res.files);
+    if (!res.stopped) { this.showFigures(res.figures); this.showFiles(res.files); }
     if (!res.stopped && !res.output && !res.error && !res.need_input) this.term.append(h("span", { class: "pc-dim" }, "(nothing was printed)"));
     if (res.error) this.showError(res.error, res.output);
     if (this.kind === "predict" && !res.stopped) this.compare(res.output || "", res.error);

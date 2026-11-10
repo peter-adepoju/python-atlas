@@ -1,5 +1,5 @@
 // Course guide: highlight the section you're reading in the side menu.
-import "./common.js?v=b54d8b61c9";
+import "./common.js?v=97b2d34bb1";
 
 const links = [...document.querySelectorAll(".gd-toc a")];
 const byId = new Map(links.map((a) => [a.hash.slice(1), a]));
