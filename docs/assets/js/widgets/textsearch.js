@@ -1,6 +1,6 @@
 // Naive substring search: slide the pattern along the text one position at a time,
 // comparing character by character until a mismatch or a full match.
-import { h, reducedMotion } from "../site.js?v=b54d8b61c9";
+import { h, reducedMotion } from "../site.js?v=97b2d34bb1";
 
 export default function textsearch(el, { text = "abracadabra", pattern = "abra" } = {}) {
   const it = h("input", { class: "w-input", value: text, spellcheck: "false", style: "flex:1 1 240px", "aria-label": "Text" });

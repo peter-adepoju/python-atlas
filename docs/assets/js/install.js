@@ -1,7 +1,7 @@
 // "Get the app": installs Python Atlas on a phone or computer as an app (a Progressive Web App).
 // Android and desktop Chrome/Edge show their own install prompt; iPhone and iPad need Safari's
 // Share menu, so for those we show the steps.
-import { h, SITE } from "./site.js?v=b54d8b61c9";
+import { h, SITE } from "./site.js?v=97b2d34bb1";
 
 let deferred = null;
 const listeners = new Set();

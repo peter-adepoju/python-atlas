@@ -1,6 +1,6 @@
 // Euclid's algorithm as geometry: cut the biggest squares you can from an a-by-b rectangle.
 // The side of the last square is the greatest common divisor.
-import { h, svg } from "../site.js?v=b54d8b61c9";
+import { h, svg } from "../site.js?v=97b2d34bb1";
 
 const COLS = ["var(--blue)", "var(--green)", "var(--violet)", "#c97a1e", "var(--red)", "var(--ink-3)"];
 

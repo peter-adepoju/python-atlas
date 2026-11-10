@@ -1,6 +1,6 @@
 // Sliding window: a window of k items moves along a list. Each step adds the item coming in and
 // subtracts the item going out, instead of adding the whole window up again.
-import { h } from "../site.js?v=b54d8b61c9";
+import { h } from "../site.js?v=97b2d34bb1";
 
 export default function slidewindow(el, { values = [4, 2, 12, 3, 8, 1, 7, 9, 2, 5], k = 3 } = {}) {
   let pos = 0, size = k;

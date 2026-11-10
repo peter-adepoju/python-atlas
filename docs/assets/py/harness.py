@@ -15,6 +15,9 @@ import keyword
 import random
 import sys
 
+# matplotlib draws into memory (no window, no DOM); figures are sent to the page after a run.
+os.environ["MPLBACKEND"] = "Agg"
+
 sys.dont_write_bytecode = True   # keep the working folder free of __pycache__
 
 
@@ -314,7 +317,37 @@ def _reset_logging():
     logging.disable(logging.NOTSET)
 
 
+def _close_figures():
+    """Start every run with no matplotlib figures left over from the last one."""
+    plt = sys.modules.get("matplotlib.pyplot")
+    if plt is not None:
+        try:
+            plt.close("all")
+        except Exception:  # noqa: BLE001 - never let clean-up break a run
+            pass
+
+
+def _figures(limit=6):
+    """The open matplotlib figures as base64 PNGs, so the page can show them after a run."""
+    plt = sys.modules.get("matplotlib.pyplot")
+    if plt is None:
+        return []
+    import base64
+    import io
+    images = []
+    try:
+        for num in plt.get_fignums()[:limit]:
+            buf = io.BytesIO()
+            plt.figure(num).savefig(buf, format="png", dpi=90, bbox_inches="tight")
+            images.append(base64.b64encode(buf.getvalue()).decode("ascii"))
+    except Exception:  # noqa: BLE001 - a broken figure shouldn't hide the program's output
+        pass
+    _close_figures()
+    return images
+
+
 def _execute(code, inputs, seed, emit=None, namespace=None, echo=True):
+    _close_figures()
     out = _Out(emit)
     ns = _fresh_namespace() if namespace is None else namespace
     old = sys.stdout, sys.stderr, builtins.input
@@ -346,7 +379,7 @@ def run_program(code, inputs, seed, emit):
     except OSError:
         files = []
     return {"output": output, "error": error, "need_input": need is not None,
-            "prompt": need or "", "files": files}
+            "prompt": need or "", "files": files, "figures": _figures()}
 
 
 def check_syntax(code):
