@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="db5173407e">
+<title>Week 75 Day 2: SQL II: joins and aggregation | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#e7ecf2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=db5173407e">
+<link rel="stylesheet" href="../assets/css/site.css?v=db5173407e">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=db5173407e"></script>
+<script src="../assets/vendor/codemirror.js?v=db5173407e" defer></script>
+<meta name="description" content="Yesterday’s queries each read one table. Real questions cross tables: which customer placed this order, what’s in it, how much did each customer spend? The...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w075d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 75 Day 2: SQL II: joins and aggregation">
+<meta property="og:description" content="Yesterday’s queries each read one table. Real questions cross tables: which customer placed this order, what’s in it, how much did each customer spend? The...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w075d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-75">Week 75: Databases</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#why-tables-are-split" data-sec="why-tables-are-split">Why tables are split</a></li><li><a href="#joins" data-sec="joins">Joins</a></li><li><a href="#aggregation" data-sec="aggregation">Aggregation</a></li><li><a href="#subqueries-and-with" data-sec="subqueries-and-with">Subqueries and WITH</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w075d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-75">Week 75: Databases</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 75, Day 2</span></p>
+      <h1>SQL II: joins and aggregation</h1>
+      <div class="day-intro"><p>Yesterday&rsquo;s queries each read one table. Real questions cross tables: which customer placed this order, what&rsquo;s in it, how much did each customer spend? The shop keeps each fact in one place (a customer&rsquo;s name lives only in customers, a price paid only in order_items), and joins put them back together. Then aggregation answers the questions about groups: how many, how much, on average, and which groups pass a test. Today: inner and outer joins, GROUP BY and HAVING, subqueries and common table expressions, and the classic mistakes, from rows that vanish to totals that double.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Join tables with JOIN &hellip; ON, and keep unmatched rows with LEFT JOIN</li><li>Summarise with count, sum, avg, min and max, per group with GROUP BY, filtered with HAVING</li><li>Use subqueries and WITH (common table expressions) to build queries in steps</li><li>Avoid the classic join bugs (fan-out double counting, filters that undo outer joins)</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Why tables are split: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Joins: 25 min"></span><span class="plan-seg s1" style="flex:25" title="Aggregation: 25 min"></span><span class="plan-seg s0" style="flex:15" title="Subqueries and WITH: 15 min"></span><span class="plan-seg s1" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s0" style="flex:20" title="Quiz and daily challenge: 20 min"></span></div><ol class="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Why tables are split</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Joins</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Aggregation</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Subqueries and WITH</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:30</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w075d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w075d2.ipynb" download>download it</a>. Exercises today are worth 135 points.</p>
+    </header>
+    <div class="day-body">
+<div class="filebox"><div class="filebox-head">The file used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>shopdb.py</code></summary><pre class="pc-filetext">&quot;&quot;&quot;A small shop database for practising SQL (Week 75).&quot;&quot;&quot;
+import sqlite3
+
+SCHEMA = &quot;&quot;&quot;
+CREATE TABLE customers (
+    id     INTEGER PRIMARY KEY,
+    name   TEXT NOT NULL,
+    city   TEXT NOT NULL,
+    joined TEXT NOT NULL,
+    email  TEXT
+);
+CREATE TABLE products (
+    id       INTEGER PRIMARY KEY,
+    name     TEXT NOT NULL,
+    category TEXT NOT NULL,
+    price    REAL NOT NULL,
+    stock    INTEGER
+);
+CREATE TABLE orders (
+    id          INTEGER PRIMARY KEY,
+    customer_id INTEGER NOT NULL REFERENCES customers(id),
+    placed      TEXT NOT NULL,
+    status      TEXT NOT NULL
+);
+CREATE TABLE order_items (
+    order_id   INTEGER NOT NULL REFERENCES orders(id),
+    product_id INTEGER NOT NULL REFERENCES products(id),
+    qty        INTEGER NOT NULL,
+    unit_price REAL NOT NULL,
+    PRIMARY KEY (order_id, product_id)
+);
+&quot;&quot;&quot;
+
+DATA = &quot;&quot;&quot;
+INSERT INTO customers VALUES
+    (1, &#x27;Ada Lovelace&#x27;, &#x27;London&#x27;, &#x27;2024-01-15&#x27;, &#x27;ada@example.com&#x27;),
+    (2, &#x27;Alan Turing&#x27;, &#x27;Manchester&#x27;, &#x27;2024-03-02&#x27;, &#x27;alan@example.com&#x27;),
+    (3, &#x27;Grace Hopper&#x27;, &#x27;New York&#x27;, &#x27;2024-03-20&#x27;, NULL),
+    (4, &#x27;Katherine Johnson&#x27;, &#x27;Leeds&#x27;, &#x27;2025-02-11&#x27;, &#x27;kj@example.com&#x27;),
+    (5, &#x27;Tim Berners-Lee&#x27;, &#x27;London&#x27;, &#x27;2025-06-30&#x27;, NULL),
+    (6, &#x27;Margaret Hamilton&#x27;, &#x27;Bristol&#x27;, &#x27;2025-09-09&#x27;, &#x27;mh@example.com&#x27;);
+INSERT INTO products VALUES
+    (1, &#x27;Tea&#x27;, &#x27;drinks&#x27;, 3.50, 120),
+    (2, &#x27;Coffee&#x27;, &#x27;drinks&#x27;, 6.00, 80),
+    (3, &#x27;Jam&#x27;, &#x27;food&#x27;, 4.25, 0),
+    (4, &#x27;Bread&#x27;, &#x27;food&#x27;, 2.10, 35),
+    (5, &#x27;Mug&#x27;, &#x27;kitchen&#x27;, 8.00, 15),
+    (6, &#x27;Teapot&#x27;, &#x27;kitchen&#x27;, 24.00, 4),
+    (7, &#x27;Biscuits&#x27;, &#x27;food&#x27;, 1.80, 200),
+    (8, &#x27;Hot chocolate&#x27;, &#x27;drinks&#x27;, 5.50, NULL);
+INSERT INTO orders VALUES
+    (1, 1, &#x27;2025-01-05&#x27;, &#x27;delivered&#x27;),
+    (2, 2, &#x27;2025-01-17&#x27;, &#x27;delivered&#x27;),
+    (3, 1, &#x27;2025-02-02&#x27;, &#x27;cancelled&#x27;),
+    (4, 3, &#x27;2025-03-11&#x27;, &#x27;delivered&#x27;),
+    (5, 4, &#x27;2025-03-29&#x27;, &#x27;shipped&#x27;),
+    (6, 1, &#x27;2025-04-14&#x27;, &#x27;delivered&#x27;),
+    (7, 5, &#x27;2025-05-01&#x27;, &#x27;pending&#x27;),
+    (8, 2, &#x27;2025-05-20&#x27;, &#x27;delivered&#x27;);
+INSERT INTO order_items VALUES
+    (1, 1, 2, 3.50), (1, 7, 3, 1.80),
+    (2, 2, 1, 6.00), (2, 5, 2, 8.00),
+    (3, 6, 1, 24.00),
+    (4, 1, 5, 3.25), (4, 3, 2, 4.25),
+    (5, 4, 1, 2.10), (5, 7, 2, 1.80), (5, 2, 1, 6.00),
+    (6, 6, 1, 22.00), (6, 5, 1, 8.00),
+    (7, 8, 2, 5.50),
+    (8, 1, 1, 3.50), (8, 4, 2, 2.10), (8, 7, 1, 1.80);
+&quot;&quot;&quot;
+
+
+def connect():
+    &quot;&quot;&quot;A fresh in-memory copy of the shop database.&quot;&quot;&quot;
+    conn = sqlite3.connect(&quot;:memory:&quot;)
+    conn.executescript(SCHEMA + DATA)
+    return conn
+
+
+def rows(sql, params=()):
+    &quot;&quot;&quot;Run a query on a fresh copy of the database and return every row.&quot;&quot;&quot;
+    conn = connect()
+    try:
+        return conn.execute(sql, params).fetchall()
+    finally:
+        conn.close()
+
+
+def show(sql, params=()):
+    &quot;&quot;&quot;Print a query&#x27;s result as a small table.&quot;&quot;&quot;
+    conn = connect()
+    cur = conn.execute(sql, params)
+    names = [d[0] for d in cur.description]
+    data = cur.fetchall()
+    widths = [max(len(str(x)) for x in [n] + [r[i] for r in data]) for i, n in enumerate(names)]
+    print(&quot;  &quot;.join(n.ljust(w) for n, w in zip(names, widths)).rstrip())
+    for r in data:
+        print(&quot;  &quot;.join(str(x).ljust(w) for x, w in zip(r, widths)).rstrip())
+    conn.close()
+</pre></details><script type="application/json" class="page-files">{"shopdb.py": "\"\"\"A small shop database for practising SQL (Week 75).\"\"\"\nimport sqlite3\n\nSCHEMA = \"\"\"\nCREATE TABLE customers (\n    id     INTEGER PRIMARY KEY,\n    name   TEXT NOT NULL,\n    city   TEXT NOT NULL,\n    joined TEXT NOT NULL,\n    email  TEXT\n);\nCREATE TABLE products (\n    id       INTEGER PRIMARY KEY,\n    name     TEXT NOT NULL,\n    category TEXT NOT NULL,\n    price    REAL NOT NULL,\n    stock    INTEGER\n);\nCREATE TABLE orders (\n    id          INTEGER PRIMARY KEY,\n    customer_id INTEGER NOT NULL REFERENCES customers(id),\n    placed      TEXT NOT NULL,\n    status      TEXT NOT NULL\n);\nCREATE TABLE order_items (\n    order_id   INTEGER NOT NULL REFERENCES orders(id),\n    product_id INTEGER NOT NULL REFERENCES products(id),\n    qty        INTEGER NOT NULL,\n    unit_price REAL NOT NULL,\n    PRIMARY KEY (order_id, product_id)\n);\n\"\"\"\n\nDATA = \"\"\"\nINSERT INTO customers VALUES\n    (1, 'Ada Lovelace', 'London', '2024-01-15', 'ada@example.com'),\n    (2, 'Alan Turing', 'Manchester', '2024-03-02', 'alan@example.com'),\n    (3, 'Grace Hopper', 'New York', '2024-03-20', NULL),\n    (4, 'Katherine Johnson', 'Leeds', '2025-02-11', 'kj@example.com'),\n    (5, 'Tim Berners-Lee', 'London', '2025-06-30', NULL),\n    (6, 'Margaret Hamilton', 'Bristol', '2025-09-09', 'mh@example.com');\nINSERT INTO products VALUES\n    (1, 'Tea', 'drinks', 3.50, 120),\n    (2, 'Coffee', 'drinks', 6.00, 80),\n    (3, 'Jam', 'food', 4.25, 0),\n    (4, 'Bread', 'food', 2.10, 35),\n    (5, 'Mug', 'kitchen', 8.00, 15),\n    (6, 'Teapot', 'kitchen', 24.00, 4),\n    (7, 'Biscuits', 'food', 1.80, 200),\n    (8, 'Hot chocolate', 'drinks', 5.50, NULL);\nINSERT INTO orders VALUES\n    (1, 1, '2025-01-05', 'delivered'),\n    (2, 2, '2025-01-17', 'delivered'),\n    (3, 1, '2025-02-02', 'cancelled'),\n    (4, 3, '2025-03-11', 'delivered'),\n    (5, 4, '2025-03-29', 'shipped'),\n    (6, 1, '2025-04-14', 'delivered'),\n    (7, 5, '2025-05-01', 'pending'),\n    (8, 2, '2025-05-20', 'delivered');\nINSERT INTO order_items VALUES\n    (1, 1, 2, 3.50), (1, 7, 3, 1.80),\n    (2, 2, 1, 6.00), (2, 5, 2, 8.00),\n    (3, 6, 1, 24.00),\n    (4, 1, 5, 3.25), (4, 3, 2, 4.25),\n    (5, 4, 1, 2.10), (5, 7, 2, 1.80), (5, 2, 1, 6.00),\n    (6, 6, 1, 22.00), (6, 5, 1, 8.00),\n    (7, 8, 2, 5.50),\n    (8, 1, 1, 3.50), (8, 4, 2, 2.10), (8, 7, 1, 1.80);\n\"\"\"\n\n\ndef connect():\n    \"\"\"A fresh in-memory copy of the shop database.\"\"\"\n    conn = sqlite3.connect(\":memory:\")\n    conn.executescript(SCHEMA + DATA)\n    return conn\n\n\ndef rows(sql, params=()):\n    \"\"\"Run a query on a fresh copy of the database and return every row.\"\"\"\n    conn = connect()\n    try:\n        return conn.execute(sql, params).fetchall()\n    finally:\n        conn.close()\n\n\ndef show(sql, params=()):\n    \"\"\"Print a query's result as a small table.\"\"\"\n    conn = connect()\n    cur = conn.execute(sql, params)\n    names = [d[0] for d in cur.description]\n    data = cur.fetchall()\n    widths = [max(len(str(x)) for x in [n] + [r[i] for r in data]) for i, n in enumerate(names)]\n    print(\"  \".join(n.ljust(w) for n, w in zip(names, widths)).rstrip())\n    for r in data:\n        print(\"  \".join(str(x).ljust(w) for x, w in zip(r, widths)).rstrip())\n    conn.close()\n"}</script></div>
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w075d2-p1"><textarea class="pc-src pc-code" hidden>from shopdb import show
+
+show(&quot;&quot;&quot;
+SELECT c.name, o.id AS order_id, o.status
+FROM orders AS o
+JOIN customers AS c ON c.id = o.customer_id
+WHERE c.city = &#x27;London&#x27;
+ORDER BY o.id
+&quot;&quot;&quot;)</textarea></div>
+<p><code>orders</code> only stores <code>customer_id</code>; the name is in <code>customers</code>. The <strong>join</strong> matches each order with the customer whose <code>id</code> equals its <code>customer_id</code>, giving rows that combine columns from both. Ada Lovelace appears three times because she placed three orders.</p>
+<h2 id="why-tables-are-split">Why tables are split</h2>
+<p>Why not one big table with the customer&rsquo;s name and city on every order? Because then each fact would be stored many times: change a customer&rsquo;s email, and you&rsquo;d have to change it on every one of their orders, and miss some. Splitting data so that each fact is stored <strong>once</strong>, with <strong>foreign keys</strong> pointing between tables, is called <strong>normalisation</strong>:</p>
+<ul>
+<li><code>customers</code> holds facts about customers; <code>products</code> facts about products.</li>
+<li><code>orders</code> holds facts about an order (who placed it and when), pointing at its customer.</li>
+<li><code>order_items</code> holds one row per product <strong>in</strong> an order: a <strong>many-to-many</strong> relationship (an order has many products, a product is in many orders) needs a table of its own. It records the <code>unit_price</code> actually paid, because a product&rsquo;s current price can change later.</li>
+</ul>
+<p>The price of splitting is that most questions need <strong>joins</strong> to put the facts back together. That&rsquo;s what relational databases are built to do quickly.</p>
+<h2 id="joins">Joins</h2>
+<pre><code class="language-sql">SELECT ...
+FROM orders AS o
+JOIN customers AS c ON c.id = o.customer_id
+</code></pre>
+<ul>
+<li><strong><code>JOIN ... ON condition</code></strong> (an <strong>inner join</strong>) pairs each row of the first table with each row of the second for which the condition is true. Rows with no match on the other side <strong>disappear</strong>.</li>
+<li><strong>Aliases</strong> (<code>orders AS o</code>, or just <code>orders o</code>) keep queries short; qualify columns with them (<code>o.id</code>, <code>c.id</code>) whenever a name exists in both tables.</li>
+<li>Joins chain: <code>orders</code> to <code>order_items</code> to <code>products</code>, each with its own <code>ON</code>.</li>
+<li><strong><code>LEFT JOIN</code></strong> keeps <strong>every</strong> row of the left table, filling the right table&rsquo;s columns with <code>NULL</code> where nothing matched. &ldquo;Customers with no orders&rdquo; is a <code>LEFT JOIN</code> plus <code>WHERE o.id IS NULL</code>.</li>
+<li>Where a condition goes matters with a <code>LEFT JOIN</code>: a condition in <strong><code>ON</code></strong> decides which right-hand rows match (unmatched left rows still appear), while the same condition in <strong><code>WHERE</code></strong> filters the joined result, throwing away the <code>NULL</code>-filled rows, and silently turning it back into an inner join.</li>
+<li>A table can be joined to <strong>itself</strong> (with two aliases), and <code>CROSS JOIN</code> gives every combination (rarely what you want).</li>
+</ul>
+<div class="pc pc-example" data-kind="example" data-id="w075d2-e2"><textarea class="pc-src pc-code" hidden>from shopdb import show
+
+show(&quot;&quot;&quot;
+SELECT o.id, p.name, i.qty, i.unit_price, i.qty * i.unit_price AS line_total
+FROM orders o
+JOIN order_items i ON i.order_id = o.id
+JOIN products p ON p.id = i.product_id
+WHERE o.id IN (1, 4)
+ORDER BY o.id, p.name
+&quot;&quot;&quot;)
+print()
+show(&quot;&quot;&quot;
+SELECT c.name, o.id AS order_id
+FROM customers c
+LEFT JOIN orders o ON o.customer_id = c.id AND o.status = &#x27;pending&#x27;
+ORDER BY c.id
+&quot;&quot;&quot;)</textarea></div>
+<h2 id="aggregation">Aggregation</h2>
+<p><strong>Aggregate functions</strong> turn many rows into one value: <code>count(*)</code> (rows), <code>count(column)</code> (rows where that column isn&rsquo;t <code>NULL</code>), <code>count(DISTINCT column)</code>, <code>sum</code>, <code>avg</code>, <code>min</code>, <code>max</code>, and in SQLite <code>group_concat(column, ', ')</code>. <code>sum</code> and <code>avg</code> ignore <code>NULL</code>s; <code>sum</code> of no rows is <code>NULL</code>, so wrap it in <code>coalesce(sum(x), 0)</code>.</p>
+<ul>
+<li><strong><code>GROUP BY columns</code></strong> splits the rows into groups with equal values in those columns, and the aggregates are computed <strong>per group</strong>: one result row per group.</li>
+<li>Every column in the <code>SELECT</code> must either be in the <code>GROUP BY</code> or inside an aggregate. (SQLite is lenient here and picks a value from some row; other databases refuse the query. Don&rsquo;t rely on the leniency.)</li>
+<li><strong><code>WHERE</code></strong> filters rows <strong>before</strong> grouping; <strong><code>HAVING</code></strong> filters <strong>groups after</strong> aggregating, so it can test aggregates: <code>HAVING sum(qty * unit_price) &gt; 20</code>.</li>
+</ul>
+<p>The full evaluation order: <code>FROM</code> and joins, <code>WHERE</code>, <code>GROUP BY</code>, aggregates, <code>HAVING</code>, <code>SELECT</code>, <code>DISTINCT</code>, <code>ORDER BY</code>, <code>LIMIT</code>.</p>
+<p><strong>Fan-out.</strong> Joining a table to one with several matching rows <strong>multiplies</strong> rows: a customer with two orders of three items each appears six times. Counting or summing after such a join counts the multiplied rows. Use <code>count(DISTINCT o.id)</code>, or aggregate each table before joining.</p>
+<div class="pc pc-example" data-kind="example" data-id="w075d2-e3"><textarea class="pc-src pc-code" hidden>from shopdb import show
+
+show(&quot;&quot;&quot;
+SELECT category, count(*) AS products, count(stock) AS known_stock,
+       round(avg(price), 2) AS average, max(price) AS dearest
+FROM products
+GROUP BY category
+ORDER BY category
+&quot;&quot;&quot;)
+print()
+show(&quot;&quot;&quot;
+SELECT o.id, round(sum(i.qty * i.unit_price), 2) AS total
+FROM orders o JOIN order_items i ON i.order_id = o.id
+WHERE o.status &lt;&gt; &#x27;cancelled&#x27;
+GROUP BY o.id
+HAVING total &gt; 20
+ORDER BY total DESC
+&quot;&quot;&quot;)</textarea></div>
+<h2 id="subqueries-and-with">Subqueries and WITH</h2>
+<p>A query can contain another:</p>
+<ul>
+<li>A <strong>scalar subquery</strong> in brackets gives one value: <code>WHERE price &gt; (SELECT avg(price) FROM products)</code>.</li>
+<li><strong><code>IN (SELECT ...)</code></strong> and <strong><code>EXISTS (SELECT ...)</code></strong> test membership: &ldquo;products that appear in some delivered order&rdquo;. Beware <code>NOT IN</code> with a subquery that can return <code>NULL</code>: <code>x NOT IN (1, NULL)</code> is unknown, never true; <code>NOT EXISTS</code> is safer.</li>
+<li>A <strong>correlated</strong> subquery refers to the outer row: <code>(SELECT max(placed) FROM orders o WHERE o.customer_id = c.id)</code>, evaluated once per customer.</li>
+<li>A subquery in <code>FROM</code> is a temporary table: <code>FROM (SELECT ...) AS t</code>.</li>
+</ul>
+<p><strong><code>WITH</code></strong> (a <strong>common table expression</strong>, CTE) names a subquery up front, so a complex query reads as a series of steps:</p>
+<pre><code class="language-sql">WITH totals AS (
+    SELECT o.customer_id, sum(i.qty * i.unit_price) AS spent
+    FROM orders o JOIN order_items i ON i.order_id = o.id
+    WHERE o.status = 'delivered'
+    GROUP BY o.customer_id
+)
+SELECT c.name, t.spent
+FROM totals t JOIN customers c ON c.id = t.customer_id
+WHERE t.spent &gt; (SELECT avg(spent) FROM totals);
+</code></pre>
+<p><code>UNION</code> (removing duplicates) and <code>UNION ALL</code> (keeping them) stack the results of two queries with the same columns.</p>
+<div class="pc pc-example" data-kind="example" data-id="w075d2-e4"><textarea class="pc-src pc-code" hidden>from shopdb import show
+
+show(&quot;&quot;&quot;
+WITH lines AS (
+    SELECT o.customer_id, i.product_id, i.qty
+    FROM orders o JOIN order_items i ON i.order_id = o.id
+    WHERE o.status &lt;&gt; &#x27;cancelled&#x27;
+)
+SELECT c.name,
+       (SELECT count(DISTINCT product_id) FROM lines l WHERE l.customer_id = c.id) AS different_products,
+       (SELECT coalesce(sum(qty), 0) FROM lines l WHERE l.customer_id = c.id) AS items
+FROM customers c
+ORDER BY items DESC, c.name
+&quot;&quot;&quot;)</textarea></div>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Normalised tables store each fact once, linked by foreign keys, with a table of its own for each many-to-many relationship; joins put facts back together. JOIN &hellip; ON keeps matching pairs only; LEFT JOIN keeps every left row, with NULLs where nothing matched (find &ldquo;none&rdquo; with WHERE right.id IS NULL); conditions on the right table belong in ON, since in WHERE they undo the outer join. Aggregates (count, sum, avg, min, max) summarise rows, per group with GROUP BY; WHERE filters rows before grouping, HAVING filters groups after. Joins to many rows multiply rows (fan-out), so count DISTINCT or aggregate first. Subqueries (scalar, IN, EXISTS, correlated) and WITH build queries in steps; prefer NOT EXISTS to NOT IN with NULLs.</p></aside>
+<h2 id="practice">Practice</h2>
+<p>As yesterday, write each query as a string; the checks run it on a fresh copy of the shop database.</p>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d2-inner" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Joining two and three tables</div><div class="pc-prompt"><p>Write two queries. <code>ORDER_FIVE</code>: the product name, quantity and unit price of every item in order 5, by product name. <code>MARCH</code>: the id, customer name and status of every order placed in March 2025, by order id.</p></div><textarea class="pc-src pc-code" hidden>ORDER_FIVE = ___
+MARCH = ___</textarea><textarea class="pc-src pc-tests" hidden>def test_joins():
+    &quot;inner joins&quot;
+    from shopdb import rows
+    assert rows(ORDER_FIVE) == [(&quot;Biscuits&quot;, 2, 1.8), (&quot;Bread&quot;, 1, 2.1), (&quot;Coffee&quot;, 1, 6.0)]
+    assert rows(MARCH) == [(4, &quot;Grace Hopper&quot;, &quot;delivered&quot;), (5, &quot;Katherine Johnson&quot;, &quot;shipped&quot;)]</textarea><textarea class="pc-src pc-solution" hidden>ORDER_FIVE = &quot;&quot;&quot;
+SELECT p.name, i.qty, i.unit_price
+FROM order_items AS i JOIN products AS p ON p.id = i.product_id
+WHERE i.order_id = 5
+ORDER BY p.name
+&quot;&quot;&quot;
+MARCH = &quot;&quot;&quot;
+SELECT o.id, c.name, o.status
+FROM orders AS o JOIN customers AS c ON c.id = o.customer_id
+WHERE o.placed LIKE &#x27;2025-03%&#x27;
+ORDER BY o.id
+&quot;&quot;&quot;</textarea><template class="pc-src pc-hint">Dates are ISO text, so <code>placed LIKE '2025-03%'</code> or <code>placed BETWEEN '2025-03-01' AND '2025-03-31'</code> both work.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d2-outer" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">The ones with nothing</div><div class="pc-prompt"><p>Write two queries. <code>NO_ORDERS</code>: the names of customers who have never placed an order (use a <code>LEFT JOIN</code>). <code>NEVER_DELIVERED</code>: the names of products that have never been part of a <strong>delivered</strong> order (use <code>NOT EXISTS</code>), by name.</p></div><textarea class="pc-src pc-code" hidden>NO_ORDERS = ___
+NEVER_DELIVERED = ___</textarea><textarea class="pc-src pc-tests" hidden>def test_outer():
+    &quot;finding what&#x27;s missing&quot;
+    from shopdb import rows
+    assert rows(NO_ORDERS) == [(&quot;Margaret Hamilton&quot;,)]
+    assert rows(NEVER_DELIVERED) == [(&quot;Hot chocolate&quot;,)]
+    assert &quot;LEFT JOIN&quot; in NO_ORDERS.upper() and &quot;NOT EXISTS&quot; in NEVER_DELIVERED.upper()</textarea><textarea class="pc-src pc-solution" hidden>NO_ORDERS = &quot;&quot;&quot;
+SELECT c.name
+FROM customers c LEFT JOIN orders o ON o.customer_id = c.id
+WHERE o.id IS NULL
+ORDER BY c.name
+&quot;&quot;&quot;
+NEVER_DELIVERED = &quot;&quot;&quot;
+SELECT p.name FROM products p
+WHERE NOT EXISTS (
+    SELECT 1 FROM order_items i JOIN orders o ON o.id = i.order_id
+    WHERE i.product_id = p.id AND o.status = &#x27;delivered&#x27;
+)
+ORDER BY p.name
+&quot;&quot;&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d2-groups" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Groups and totals</div><div class="pc-prompt"><p>Write three queries. <code>CATEGORIES</code>: each category with its number of products and average price (rounded to 2 places), by category. <code>TOTALS</code>: each order&rsquo;s id and total (<code>qty * unit_price</code> summed, rounded to 2 places), largest total first (ties by id). <code>BIG</code>: the ids of orders whose total is over 20, in id order (use <code>HAVING</code>).</p></div><textarea class="pc-src pc-code" hidden>CATEGORIES = ___
+TOTALS = ___
+BIG = ___</textarea><textarea class="pc-src pc-tests" hidden>def test_groups():
+    &quot;GROUP BY and HAVING&quot;
+    from shopdb import rows
+    assert rows(CATEGORIES) == [(&quot;drinks&quot;, 3, 5.0), (&quot;food&quot;, 3, 2.72), (&quot;kitchen&quot;, 2, 16.0)]
+    assert rows(TOTALS) == [(6, 30.0), (4, 24.75), (3, 24.0), (2, 22.0), (1, 12.4), (5, 11.7), (7, 11.0), (8, 9.5)]
+    assert rows(BIG) == [(2,), (3,), (4,), (6,)] and &quot;HAVING&quot; in BIG.upper()</textarea><textarea class="pc-src pc-solution" hidden>CATEGORIES = &quot;SELECT category, count(*), round(avg(price), 2) FROM products GROUP BY category ORDER BY category&quot;
+TOTALS = &quot;&quot;&quot;
+SELECT order_id, round(sum(qty * unit_price), 2) AS total
+FROM order_items GROUP BY order_id ORDER BY total DESC, order_id
+&quot;&quot;&quot;
+BIG = &quot;SELECT order_id FROM order_items GROUP BY order_id HAVING sum(qty * unit_price) &gt; 20 ORDER BY order_id&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d2-spend" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">What each customer spent</div><div class="pc-prompt"><p>Write <code>SPEND</code>: for <strong>every</strong> customer (including those with no orders), their name, the number of their <strong>delivered</strong> orders, and the total they spent on delivered orders (rounded to 2 places, <code>0</code> if none), most spent first, ties by name. Watch out for fan-out: joining items multiplies the order rows.</p></div><textarea class="pc-src pc-code" hidden>SPEND = ___</textarea><textarea class="pc-src pc-tests" hidden>def test_spend():
+    &quot;outer joins, conditions in ON, and counting distinct&quot;
+    from shopdb import rows
+    assert rows(SPEND) == [(&quot;Ada Lovelace&quot;, 2, 42.4), (&quot;Alan Turing&quot;, 2, 31.5), (&quot;Grace Hopper&quot;, 1, 24.75),
+                           (&quot;Katherine Johnson&quot;, 0, 0), (&quot;Margaret Hamilton&quot;, 0, 0), (&quot;Tim Berners-Lee&quot;, 0, 0)]</textarea><textarea class="pc-src pc-solution" hidden>SPEND = &quot;&quot;&quot;
+SELECT c.name,
+       count(DISTINCT o.id) AS orders,
+       round(coalesce(sum(i.qty * i.unit_price), 0), 2) AS spent
+FROM customers c
+LEFT JOIN orders o ON o.customer_id = c.id AND o.status = &#x27;delivered&#x27;
+LEFT JOIN order_items i ON i.order_id = o.id
+GROUP BY c.id
+ORDER BY spent DESC, c.name
+&quot;&quot;&quot;</textarea><template class="pc-src pc-hint"><code>LEFT JOIN orders o ON o.customer_id = c.id AND o.status = 'delivered'</code> (the status test in <code>ON</code>, so customers without delivered orders survive), then <code>LEFT JOIN order_items i ON i.order_id = o.id</code>, <code>GROUP BY c.id</code>, <code>count(DISTINCT o.id)</code> and <code>coalesce(sum(...), 0)</code>.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d2-subqueries" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Queries inside queries</div><div class="pc-prompt"><p>Write three queries. <code>ABOVE_AVERAGE</code>: the name and price of products dearer than the average price, dearest first (a scalar subquery). <code>LAST_ORDER</code>: each customer who has ordered, with the date of their latest order, latest first. <code>BEST_SELLERS</code>: the three products with the most units sold in orders that weren&rsquo;t cancelled, with the units, most first (ties by name).</p></div><textarea class="pc-src pc-code" hidden>ABOVE_AVERAGE = ___
+LAST_ORDER = ___
+BEST_SELLERS = ___</textarea><textarea class="pc-src pc-tests" hidden>def test_subqueries():
+    &quot;subqueries and grouped maximums&quot;
+    from shopdb import rows
+    assert rows(ABOVE_AVERAGE) == [(&quot;Teapot&quot;, 24.0), (&quot;Mug&quot;, 8.0)]
+    assert rows(LAST_ORDER) == [(&quot;Alan Turing&quot;, &quot;2025-05-20&quot;), (&quot;Tim Berners-Lee&quot;, &quot;2025-05-01&quot;), (&quot;Ada Lovelace&quot;, &quot;2025-04-14&quot;),
+                                (&quot;Katherine Johnson&quot;, &quot;2025-03-29&quot;), (&quot;Grace Hopper&quot;, &quot;2025-03-11&quot;)]
+    assert rows(BEST_SELLERS) == [(&quot;Tea&quot;, 8), (&quot;Biscuits&quot;, 6), (&quot;Bread&quot;, 3)]</textarea><textarea class="pc-src pc-solution" hidden>ABOVE_AVERAGE = &quot;SELECT name, price FROM products WHERE price &gt; (SELECT avg(price) FROM products) ORDER BY price DESC&quot;
+LAST_ORDER = &quot;&quot;&quot;
+SELECT c.name, max(o.placed) AS latest
+FROM customers c JOIN orders o ON o.customer_id = c.id
+GROUP BY c.id ORDER BY latest DESC
+&quot;&quot;&quot;
+BEST_SELLERS = &quot;&quot;&quot;
+SELECT p.name, sum(i.qty) AS sold
+FROM order_items i
+JOIN products p ON p.id = i.product_id
+JOIN orders o ON o.id = i.order_id
+WHERE o.status &lt;&gt; &#x27;cancelled&#x27;
+GROUP BY p.id ORDER BY sold DESC, p.name LIMIT 3
+&quot;&quot;&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d2-cte" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Building a query in steps</div><div class="pc-prompt"><p>Write <code>BIG_SPENDERS</code> using <code>WITH</code>: a first step computing each customer&rsquo;s total on delivered orders, then the names and totals (rounded to 2 places) of customers whose total is above the <strong>average</strong> of those totals, highest first.</p></div><textarea class="pc-src pc-code" hidden>BIG_SPENDERS = ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cte():
+    &quot;a common table expression&quot;
+    from shopdb import rows
+    assert rows(BIG_SPENDERS) == [(&quot;Ada Lovelace&quot;, 42.4)] and BIG_SPENDERS.strip().upper().startswith(&quot;WITH&quot;)</textarea><textarea class="pc-src pc-solution" hidden>BIG_SPENDERS = &quot;&quot;&quot;
+WITH totals AS (
+    SELECT o.customer_id, sum(i.qty * i.unit_price) AS spent
+    FROM orders o JOIN order_items i ON i.order_id = o.id
+    WHERE o.status = &#x27;delivered&#x27;
+    GROUP BY o.customer_id
+)
+SELECT c.name, round(t.spent, 2)
+FROM totals t JOIN customers c ON c.id = t.customer_id
+WHERE t.spent &gt; (SELECT avg(spent) FROM totals)
+ORDER BY t.spent DESC
+&quot;&quot;&quot;</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w075d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A customer with one order, who has none</div><div class="pc-prompt"><p><code>count(*)</code> counts rows, and the <code>LEFT JOIN</code> gives Margaret Hamilton one row (with <code>NULL</code>s for the order), so she&rsquo;s shown with 1 order: this prints <code>[('Ada Lovelace', 3), ('Alan Turing', 2), ('Grace Hopper', 1), ('Katherine Johnson', 1), ('Margaret Hamilton', 1), ('Tim Berners-Lee', 1)]</code>. Count only real orders, so she has 0.</p></div><textarea class="pc-src pc-code" hidden>from shopdb import rows
+
+print(rows(&quot;&quot;&quot;
+SELECT c.name, count(*) FROM customers c LEFT JOIN orders o ON o.customer_id = c.id
+GROUP BY c.id ORDER BY c.name
+&quot;&quot;&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;count a column, not rows&quot;
+    expect_output(&quot;[(&#x27;Ada Lovelace&#x27;, 3), (&#x27;Alan Turing&#x27;, 2), (&#x27;Grace Hopper&#x27;, 1), (&#x27;Katherine Johnson&#x27;, 1), (&#x27;Margaret Hamilton&#x27;, 0), (&#x27;Tim Berners-Lee&#x27;, 1)]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from shopdb import rows
+
+print(rows(&quot;&quot;&quot;
+SELECT c.name, count(o.id) FROM customers c LEFT JOIN orders o ON o.customer_id = c.id
+GROUP BY c.id ORDER BY c.name
+&quot;&quot;&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w075d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">An outer join that went inner</div><div class="pc-prompt"><p>The query should list <strong>every</strong> customer with their number of delivered orders, but the status test is in <code>WHERE</code>, which throws away the customers with no delivered orders (their status is <code>NULL</code>), so only three are printed. Move the test into the join&rsquo;s <code>ON</code>, so all six are printed.</p></div><textarea class="pc-src pc-code" hidden>from shopdb import rows
+
+for row in rows(&quot;&quot;&quot;
+SELECT c.name, count(o.id) FROM customers c
+LEFT JOIN orders o ON o.customer_id = c.id
+WHERE o.status = &#x27;delivered&#x27;
+GROUP BY c.id ORDER BY c.name
+&quot;&quot;&quot;):
+    print(row)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;every customer&quot;
+    lines = output.strip().splitlines()
+    assert len(lines) == 6 and lines[4] == &quot;(&#x27;Margaret Hamilton&#x27;, 0)&quot; and lines[0] == &quot;(&#x27;Ada Lovelace&#x27;, 2)&quot;, output</textarea><textarea class="pc-src pc-solution" hidden>from shopdb import rows
+
+for row in rows(&quot;&quot;&quot;
+SELECT c.name, count(o.id) FROM customers c
+LEFT JOIN orders o ON o.customer_id = c.id AND o.status = &#x27;delivered&#x27;
+GROUP BY c.id ORDER BY c.name
+&quot;&quot;&quot;):
+    print(row)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w075d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">An aggregate in WHERE</div><div class="pc-prompt"><p><code>WHERE</code> runs before grouping, so it can&rsquo;t test <code>sum(...)</code>, and SQLite refuses the query with &ldquo;misuse of aggregate&rdquo;. Filter the groups after aggregating instead, so this prints <code>[(2,), (3,), (4,), (6,)]</code>.</p></div><textarea class="pc-src pc-code" hidden>from shopdb import rows
+
+print(rows(&quot;SELECT order_id FROM order_items WHERE sum(qty * unit_price) &gt; 20 GROUP BY order_id ORDER BY order_id&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;HAVING&quot;
+    expect_output(&quot;[(2,), (3,), (4,), (6,)]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from shopdb import rows
+
+print(rows(&quot;SELECT order_id FROM order_items GROUP BY order_id HAVING sum(qty * unit_price) &gt; 20 ORDER BY order_id&quot;))</textarea></div>
+<div class="parsons" data-id="w075d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">A grouped report</div><div class="pc-prompt"><p>Arrange the clauses of a query for the categories whose products have an average price over 4, with their averages. One line is a trap.</p></div><script type="application/json">{"lines": ["SELECT category, round(avg(price), 2) AS average", "FROM products", "WHERE price IS NOT NULL", "GROUP BY category", "HAVING avg(price) > 4", "ORDER BY average DESC"], "distractors": ["WHERE avg(price) > 4"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # rows(&quot;SELECT count(*), count(email) FROM customers&quot;)[0]
+q = ___   # rows(&quot;SELECT sum(price) FROM products WHERE price &gt; 100&quot;)[0][0]
+r = ___   # the number of rows from customers JOIN orders ON orders.customer_id = customers.id
+s = ___   # rows(&quot;SELECT 1 NOT IN (2, NULL)&quot;)[0][0]
+t = ___   # which runs first: &quot;WHERE&quot; or &quot;HAVING&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == (6, 4) and q is None and r == 8, &quot;p, q and r&quot;
+    assert s is None and t == &quot;WHERE&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = (6, 4)
+q = None
+r = 8
+s = None
+t = &quot;WHERE&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w075d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why is the customer&rsquo;s name stored only in customers, not on every order?", "answer": 1, "explain": "Joins put the facts back together.", "options": ["To save typing", "So each fact is stored once and can&rsquo;t disagree with itself (normalisation)", "SQL requires it", "Speed only"]}, {"type": "mc", "q": "What happens to an order with no matching customer in an inner JOIN?", "answer": 1, "explain": "LEFT JOIN keeps unmatched rows.", "options": ["It appears with NULLs", "It disappears from the result", "An error", "It&rsquo;s duplicated"]}, {"type": "mc", "q": "How do you find customers with no orders?", "answer": 1, "explain": "Unmatched left rows have NULLs on the right.", "options": ["JOIN orders and WHERE o.id = 0", "LEFT JOIN orders and WHERE o.id IS NULL", "count(*) = 0 in WHERE", "NOT JOIN"]}, {"type": "mc", "q": "Why does WHERE o.status = &lsquo;delivered&rsquo; after a LEFT JOIN drop customers?", "answer": 1, "explain": "Put conditions on the right table in ON.", "options": ["It doesn&rsquo;t", "Their status is NULL, so the condition is unknown and the row is filtered out", "LEFT JOIN ignores WHERE", "Status is text"]}, {"type": "mc", "q": "What&rsquo;s the difference between count(*) and count(email)?", "answer": 1, "explain": "Use count(column) after a LEFT JOIN.", "options": ["None", "count(*) counts rows; count(email) counts rows where email isn&rsquo;t NULL", "count(email) is faster", "count(*) skips NULLs"]}, {"type": "mc", "q": "What&rsquo;s the difference between WHERE and HAVING?", "answer": 1, "explain": "Aggregates can only be tested in HAVING.", "options": ["None", "WHERE filters rows before grouping; HAVING filters groups after aggregating", "HAVING is faster", "WHERE only works with joins"]}, {"type": "mc", "q": "What is fan-out?", "answer": 1, "explain": "Count DISTINCT or aggregate before joining.", "options": ["Parallel queries", "A join to many matching rows multiplying rows, so counts and sums come out too big", "A kind of index", "Splitting tables"]}, {"type": "mc", "q": "Why is NOT EXISTS safer than NOT IN with a subquery?", "answer": 1, "explain": "Three-valued logic again.", "options": ["It&rsquo;s shorter", "If the subquery returns a NULL, NOT IN is never true", "NOT IN is deprecated", "They&rsquo;re the same"]}, {"type": "mc", "q": "What does WITH name AS (&hellip;) do?", "answer": 1, "explain": "A common table expression.", "options": ["Creates a permanent table", "Names a subquery so the main query can use it, reading as steps", "Starts a transaction", "Makes an index"]}, {"type": "output", "q": "What does this print?", "answer": "[('delivered', 5)]", "explain": "The other statuses have one order each.", "code": "from shopdb import rows\nprint(rows(\"SELECT status, count(*) FROM orders GROUP BY status HAVING count(*) > 1\"))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w075d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a monthly sales report</div><div class="pc-prompt"><p>Write <code>REPORT</code>: one row per month (as <code>'YYYY-MM'</code>, from the order&rsquo;s date) that has <strong>delivered</strong> orders, in month order, with: the month, the number of delivered orders, the revenue from them (<code>qty * unit_price</code> summed, rounded to 2 places), and the name of that month&rsquo;s best-selling product by units in delivered orders (ties go to the product whose name comes first). Use <code>substr(placed, 1, 7)</code> for the month, and a correlated subquery (or a <code>WITH</code> step) for the best seller.</p></div><textarea class="pc-src pc-code" hidden>REPORT = ___</textarea><textarea class="pc-src pc-tests" hidden>def test_report():
+    &quot;grouping, fan-out and a correlated subquery&quot;
+    from shopdb import rows, connect
+    assert rows(REPORT) == [(&quot;2025-01&quot;, 2, 34.4, &quot;Biscuits&quot;), (&quot;2025-03&quot;, 1, 24.75, &quot;Tea&quot;), (&quot;2025-04&quot;, 1, 30.0, &quot;Mug&quot;), (&quot;2025-05&quot;, 1, 9.5, &quot;Bread&quot;)]
+    conn = connect()
+    conn.execute(&quot;INSERT INTO orders VALUES (9, 6, &#x27;2025-05-28&#x27;, &#x27;delivered&#x27;)&quot;)
+    conn.execute(&quot;INSERT INTO order_items VALUES (9, 8, 4, 5.50)&quot;)
+    assert conn.execute(REPORT).fetchall()[-1] == (&quot;2025-05&quot;, 2, 31.5, &quot;Hot chocolate&quot;)</textarea><textarea class="pc-src pc-solution" hidden>REPORT = &quot;&quot;&quot;
+SELECT substr(o.placed, 1, 7) AS month,
+       count(DISTINCT o.id) AS orders,
+       round(sum(i.qty * i.unit_price), 2) AS revenue,
+       (SELECT p.name
+        FROM order_items i2
+        JOIN orders o2 ON o2.id = i2.order_id
+        JOIN products p ON p.id = i2.product_id
+        WHERE o2.status = &#x27;delivered&#x27; AND substr(o2.placed, 1, 7) = substr(o.placed, 1, 7)
+        GROUP BY p.id
+        ORDER BY sum(i2.qty) DESC, p.name
+        LIMIT 1) AS best_seller
+FROM orders o
+JOIN order_items i ON i.order_id = o.id
+WHERE o.status = &#x27;delivered&#x27;
+GROUP BY month
+ORDER BY month
+&quot;&quot;&quot;</textarea><template class="pc-src pc-hint">The outer query joins orders and items, keeps delivered orders, and groups by the month; count orders with <code>count(DISTINCT o.id)</code> because of fan-out. The subquery, in the <code>SELECT</code> list, joins items, orders and products again, filtered to delivered orders in the <strong>outer</strong> row&rsquo;s month, grouped by product, ordered by <code>sum(qty) DESC, name</code>, <code>LIMIT 1</code>.</template></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Answer yesterday&rsquo;s question about the shop with a join or a group. Tomorrow you&rsquo;ll drive the database from Python properly with <code>sqlite3</code>: connections, parameters (the safe way to put values in queries), transactions and rows as dictionaries.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w075d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w075d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w075d2", "week": 75, "day": 2, "title": "SQL II: joins and aggregation", "exercises": [{"id": "w075d2-inner", "title": "Joining two and three tables", "points": 10}, {"id": "w075d2-outer", "title": "The ones with nothing", "points": 10}, {"id": "w075d2-groups", "title": "Groups and totals", "points": 15}, {"id": "w075d2-spend", "title": "What each customer spent", "points": 15}, {"id": "w075d2-subqueries", "title": "Queries inside queries", "points": 10}, {"id": "w075d2-cte", "title": "Building a query in steps", "points": 10}, {"id": "w075d2-bug1", "title": "A customer with one order, who has none", "points": 10}, {"id": "w075d2-bug2", "title": "An outer join that went inner", "points": 10}, {"id": "w075d2-bug3", "title": "An aggregate in WHERE", "points": 10}, {"id": "w075d2-trace", "title": "Predict them", "points": 10}, {"id": "w075d2-challenge", "title": "Challenge: a monthly sales report", "points": 25}], "points": 135}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=db5173407e"></script>
+</body>
+</html>

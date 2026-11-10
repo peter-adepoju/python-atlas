@@ -1,7 +1,7 @@
 // String method lab: pick a method, type a string and arguments, see the result.
 // The original string is shown again underneath, unchanged, every time.
-import { h } from "../site.js?v=7343aa5d1b";
-import { py } from "../runtime.js?v=7343aa5d1b";
+import { h } from "../site.js?v=db5173407e";
+import { py } from "../runtime.js?v=db5173407e";
 
 const METHODS = [
   ["upper", ""], ["lower", ""], ["title", ""], ["capitalize", ""], ["swapcase", ""],

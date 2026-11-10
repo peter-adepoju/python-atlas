@@ -7,7 +7,7 @@
 // done bit by bit: close the page, come back tomorrow, and everything solved or typed so far is
 // still there. On a shared or borrowed device, "Forget progress on this device" on the account
 // page clears it. Progress made before signing in is added to the account you sign in to.
-import { SITE, today } from "./site.js?v=7343aa5d1b";
+import { SITE, today } from "./site.js?v=db5173407e";
 
 const GUEST = "atlas.progress.guest";
 const LEGACY = "atlas.progress.v1";   // the old signed-out space, kept on the device until sign-in

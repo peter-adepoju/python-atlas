@@ -45,7 +45,12 @@ self.onmessage = async (ev) => {
   const id = m.id;
   try {
     let result;
-    if (m.type === "run" || m.type === "trace" || m.type === "grade") await loadNeeded((m.code || "") + "\n" + (m.tests || ""));
+    if (m.type === "run" || m.type === "trace" || m.type === "grade") {
+      // Scan the page's files too: a helper module such as shopdb.py may import sqlite3 for the learner.
+      let filesText = "";
+      try { filesText = Object.values(JSON.parse(m.files || "{}")).filter((v) => typeof v === "string").join("\n"); } catch { /* no files */ }
+      await loadNeeded((m.code || "") + "\n" + (m.tests || "") + "\n" + filesText);
+    }
     if (m.type === "run" || m.type === "trace" || m.type === "grade") harness.set_files(m.files || "{}");
     if (m.type === "run") {
       let pending = "";
