@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="b54d8b61c9">
+<title>Week 82 Day 2: Observability | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=b54d8b61c9">
+<link rel="stylesheet" href="../assets/css/site.css?v=b54d8b61c9">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=b54d8b61c9"></script>
+<script src="../assets/vendor/codemirror.js?v=b54d8b61c9" defer></script>
+<meta name="description" content="Yesterday’s distributed system fails in parts, and somewhere among thirty services something is slow. How do you find out what, and where? Observability is...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w082d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 82 Day 2: Observability">
+<meta property="og:description" content="Yesterday’s distributed system fails in parts, and somewhere among thirty services something is slow. How do you find out what, and where? Observability is...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w082d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-82">Week 82: System design II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#three-kinds-of-signal" data-sec="three-kinds-of-signal">Three kinds of signal</a></li><li><a href="#metrics" data-sec="metrics">Metrics</a></li><li><a href="#traces" data-sec="traces">Traces</a></li><li><a href="#what-to-watch" data-sec="what-to-watch">What to watch</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w082d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-6">Phase 6: Professional engineering</a></li><li><a href="../map.html#week-82">Week 82: System design II</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 82, Day 2</span></p>
+      <h1>Observability</h1>
+      <div class="day-intro"><p>Yesterday&rsquo;s distributed system fails in parts, and somewhere among thirty services something is slow. How do you find out what, and where? Observability is the ability to answer questions about a running system from the outside, using what it reports about itself: logs (what happened), metrics (how much, how often, how fast) and traces (where the time went across services). Today you&rsquo;ll build the core of each: counters, gauges and histograms in the text format monitoring systems read, percentiles estimated from histogram buckets, rates from counters that reset, request dashboards from logs, traces assembled from spans with their critical path, trace context passed between services, and the guard against the mistake that breaks most metrics systems, unbounded labels.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Choose between logs, metrics and traces for a question, and know what each costs</li><li>Build counters, gauges and histograms with labels, and expose them as text</li><li>Estimate percentiles from histogram buckets, and compute rates from counters that reset</li><li>Assemble traces from spans, find where the time went, and propagate trace context between services</li><li>Watch the RED signals for every service, and keep label cardinality under control</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Three kinds of signal: 20 min"></span><span class="plan-seg s0" style="flex:25" title="Metrics: 25 min"></span><span class="plan-seg s1" style="flex:25" title="Traces: 25 min"></span><span class="plan-seg s0" style="flex:15" title="What to watch: 15 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:25" title="Quiz and daily challenge: 25 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">7 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Three kinds of signal</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Metrics</span><span class="plan-min">25 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Traces</span><span class="plan-min">25 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">What to watch</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:35</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">25 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w082d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w082d2.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w082d2-p1"><textarea class="pc-src pc-code" hidden>server_a = [10, 12, 11, 13, 900]          # p99 here is 900
+server_b = [10, 10, 11, 12, 12] * 20      # p99 here is 12
+average_of_p99s = (900 + 12) / 2
+combined = sorted(server_a + server_b)
+import math
+true_p99 = combined[math.ceil(0.99 * len(combined)) - 1]
+print(average_of_p99s, true_p99)</textarea></div>
+<p>Averaging two servers&rsquo; p99s gives 456 ms, a number that describes nothing: the real p99 of all requests is 13 ms, because server A handled only five of the 105. <strong>Percentiles can&rsquo;t be averaged.</strong> Metrics systems solve this by storing <strong>histograms</strong> (counts per latency range), which can be added across servers, and estimating percentiles from the totals.</p>
+<h2 id="three-kinds-of-signal">Three kinds of signal</h2>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>What it is</th>
+<th>Good for</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Logs</strong></td>
+<td>timestamped records of events (Week 80&rsquo;s JSON lines)</td>
+<td>the details of one request or error</td>
+<td>grows with traffic; expensive to keep and search</td>
+</tr>
+<tr>
+<td><strong>Metrics</strong></td>
+<td>numbers aggregated over time: counters, gauges, histograms</td>
+<td>dashboards, trends, alerts</td>
+<td>small and fixed, as long as labels are bounded</td>
+</tr>
+<tr>
+<td><strong>Traces</strong></td>
+<td>the path of one request through every service, as timed <strong>spans</strong></td>
+<td>finding which service or call is slow</td>
+<td>usually <strong>sampled</strong>: a fraction of requests</td>
+</tr>
+</tbody>
+</table>
+<p>They answer different questions. &ldquo;Is the error rate up?&rdquo; is a metric. &ldquo;Why did request <code>7b33fd1b</code> fail?&rdquo; is a log. &ldquo;Which of the six services this checkout touches made it slow?&rdquo; is a trace. And they work best linked: Week 80&rsquo;s request id in every log line, the trace id in logs and traces, so you can go from a spike on a dashboard to the traces behind it to the log lines of one bad request.</p>
+<h2 id="metrics">Metrics</h2>
+<p>Three kinds of metric cover nearly everything (the names are Prometheus&rsquo;s, now the common vocabulary):</p>
+<ul>
+<li><strong>Counter</strong>: a number that only goes <strong>up</strong> (requests served, errors, bytes sent). The interesting value is its <strong>rate</strong>: the increase per second over a window. Counters reset to 0 when a process restarts, so rate calculations treat a drop as a reset and count the new value as the increase.</li>
+<li><strong>Gauge</strong>: a number that goes up and down (requests in progress, queue length, memory used). Its current value is what matters.</li>
+<li><strong>Histogram</strong>: counts of observations falling at or below each of several <strong>bucket</strong> bounds (<code>le</code> means &ldquo;less than or equal&rdquo;: <code>le="0.1"</code> counts requests that took at most 0.1 seconds), plus their <code>sum</code> and <code>count</code>. Buckets are <strong>cumulative</strong>: each includes everything below it, and the last bucket, <code>le="+Inf"</code>, is the total. Histograms from different servers add up bucket by bucket, and percentiles are <strong>estimated</strong> from them by finding the bucket the target rank falls in and interpolating linearly inside it.</li>
+</ul>
+<p>Each metric can have <strong>labels</strong> (<code>method="GET"</code>, <code>route="/tickets"</code>, <code>status="200"</code>), and each distinct combination of label values is a separate <strong>time series</strong> stored separately. Monitoring systems typically <strong>scrape</strong> each process&rsquo;s metrics every 15 seconds or so, in a simple text format:</p>
+<pre><code># TYPE http_requests_total counter
+http_requests_total{method=&quot;GET&quot;,route=&quot;/tickets&quot;,status=&quot;200&quot;} 1027
+# TYPE request_seconds histogram
+request_seconds_bucket{le=&quot;0.1&quot;} 240
+request_seconds_bucket{le=&quot;0.5&quot;} 290
+request_seconds_bucket{le=&quot;+Inf&quot;} 300
+request_seconds_sum 41.7
+request_seconds_count 300
+</code></pre>
+<p><strong>Cardinality.</strong> The number of series is the product of each label&rsquo;s distinct values. <code>route</code> (20 values) times <code>status</code> (10) is 200 series: fine. Add <code>user_id</code> (a million values) and it&rsquo;s 200 million, enough to bring a monitoring system down. <strong>Labels must have a small, bounded set of values</strong>: route templates (<code>/tickets/{id}</code>, not <code>/tickets/7</code>), status classes, never user ids, emails, raw URLs or request ids. Those belong in logs and traces.</p>
+<div class="pc pc-example" data-kind="example" data-id="w082d2-e2"><textarea class="pc-src pc-code" hidden>buckets = [(0.1, 240), (0.5, 290), (1.0, 297), (float(&quot;inf&quot;), 300)]   # cumulative counts
+
+def quantile(q, buckets):
+    rank = q * buckets[-1][1]
+    lower_bound, lower_count = 0.0, 0
+    for bound, count in buckets:
+        if count &gt;= rank:
+            if bound == float(&quot;inf&quot;):
+                return lower_bound
+            return lower_bound + (bound - lower_bound) * (rank - lower_count) / (count - lower_count)
+        lower_bound, lower_count = bound, count
+
+for q in (0.5, 0.9, 0.99):
+    print(f&quot;p{int(q * 100)} is about {quantile(q, buckets):.3f} s&quot;)</textarea></div>
+<h2 id="traces">Traces</h2>
+<p>A <strong>trace</strong> follows one request through every service it touches. It&rsquo;s made of <strong>spans</strong>: each span is one unit of work (an HTTP request handled, a database query, a call to another service) with a name, a start and end time, a <strong>trace id</strong> (the same for every span in the request) and a <strong>parent span id</strong> (the span that caused it). Assembled into a tree, the spans show exactly where the time went:</p>
+<pre><code>GET /checkout                    0 ms ──────────────────────────── 340 ms
+  auth.verify                    2 ms ──  14 ms
+  cart.load                     15 ms ────── 60 ms
+    db.query                    18 ms ──── 55 ms
+  payments.charge               61 ms ────────────────── 330 ms
+</code></pre>
+<p>Two numbers matter for each span: its <strong>duration</strong>, and its <strong>self time</strong> (its duration minus the time covered by its children), which is the time spent in that span&rsquo;s own code. The <strong>critical path</strong> is the chain of spans that determined the total time: here, the request waited on <code>payments.charge</code>, so making <code>auth.verify</code> faster would change nothing.</p>
+<p><strong>Propagation.</strong> For spans in different services to join one trace, the trace id and the caller&rsquo;s span id must travel with each request. The W3C standard header is <strong><code>traceparent</code></strong>: <code>00-{32 hex trace id}-{16 hex parent span id}-{2 hex flags}</code>, where flag <code>01</code> means &ldquo;sampled&rdquo;. Each service reads it, starts its own span as a child, and sends a new <code>traceparent</code> (with its own span id) on its outgoing calls.</p>
+<p><strong>Sampling.</strong> Recording every span of every request is expensive, so traces are <strong>sampled</strong>. <strong>Head sampling</strong> decides at the start (keep 10% of traces, chosen from the trace id so every service makes the same decision); <strong>tail sampling</strong> decides at the end, keeping every trace that was slow or had an error, which are the ones people want.</p>
+<h2 id="what-to-watch">What to watch</h2>
+<p>Two simple checklists say which metrics every component should have:</p>
+<ul>
+<li><strong>RED</strong>, for every service (request-driven): <strong>R</strong>ate (requests per second), <strong>E</strong>rrors (the share that fail), <strong>D</strong>uration (the latency distribution: p50, p95, p99).</li>
+<li><strong>USE</strong>, for every resource (CPU, memory, disk, a connection pool): <strong>U</strong>tilisation (how busy), <strong>S</strong>aturation (how much work is waiting: a queue length), <strong>E</strong>rrors.</li>
+</ul>
+<p>Alert on <strong>symptoms</strong> users feel (error rate, latency, from RED), not on causes (high CPU is fine if requests are fast). Tomorrow turns this into <strong>SLOs</strong> and error budgets.</p>
+<h3 id="on-your-own-computer">On your own computer</h3>
+<p><strong>OpenTelemetry</strong> is the standard library for all three signals (<code>pip install opentelemetry-sdk</code>), with automatic instrumentation for Flask, FastAPI, requests and database drivers. <strong>Prometheus</strong> scrapes and stores metrics (and the <code>prometheus-client</code> package exposes them from Python with the exact counter, gauge and histogram types above); <strong>Grafana</strong> draws dashboards; <strong>Jaeger</strong> or <strong>Tempo</strong> store and show traces; Python&rsquo;s <code>logging</code> with a JSON formatter writes the logs.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Logs record events (details of one request), metrics aggregate numbers (dashboards and alerts, cheap if labels are bounded), traces follow one request through every service (where the time went; usually sampled); link them with request and trace ids. Counters only rise (use rates, treating drops as resets), gauges go up and down, histograms count observations into cumulative le buckets with sum and count; histograms add across servers, and percentiles are estimated by linear interpolation in the bucket holding the target rank. Never average percentiles. Each label-value combination is a series: keep labels bounded (route templates, status classes; never user ids or raw URLs). Spans have trace id, span id, parent, start and end; self time is duration minus children; the critical path is what to speed up. Propagate context with traceparent (00-trace-parent-flags); head sampling decides at the start, tail sampling keeps slow and failed traces. Watch RED for services and USE for resources; alert on symptoms.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d2-registry" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Counters, gauges and histograms</div><div class="pc-prompt"><p>Write a class <code>Registry</code> with <code>counter(name, value=1, **labels)</code> (add to a counter; a negative value raises <code>ValueError("counters only go up")</code>), <code>gauge(name, value, **labels)</code> (set a gauge) and <code>observe(name, value, buckets, **labels)</code> (record one observation in a histogram with those upper bounds, a sorted list of floats). Then <code>expose()</code>: the text format, one metric name at a time in name order, each starting with <code># TYPE NAME counter|gauge|histogram</code>, then its series sorted by their label text, where labels are written <code>{a="1",b="2"}</code> (sorted by label name; nothing at all when there are no labels). Counter and gauge lines are <code>NAME{LABELS} VALUE</code>. Histograms give, for each bucket bound and then <code>+Inf</code>, <code>NAME_bucket{LABELS,le="BOUND"} CUMULATIVE_COUNT</code> (the <code>le</code> label goes last; bounds written with <code>repr</code>-style shortest form via <code>str(float)</code>), then <code>NAME_sum{LABELS} SUM</code> and <code>NAME_count{LABELS} COUNT</code>. Values are written with <code>str()</code>; join the lines with newlines.</p></div><textarea class="pc-src pc-code" hidden>class Registry:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_expose():
+    &quot;the text format&quot;
+    r = Registry()
+    r.counter(&quot;http_requests_total&quot;, method=&quot;GET&quot;, status=&quot;200&quot;)
+    r.counter(&quot;http_requests_total&quot;, 2, method=&quot;GET&quot;, status=&quot;200&quot;)
+    r.counter(&quot;http_requests_total&quot;, method=&quot;POST&quot;, status=&quot;500&quot;)
+    r.gauge(&quot;queue_length&quot;, 7)
+    r.gauge(&quot;queue_length&quot;, 3)
+    for v in (0.05, 0.2, 0.7, 3.0):
+        r.observe(&quot;request_seconds&quot;, v, [0.1, 0.5, 1.0], route=&quot;/tickets&quot;)
+    assert r.expose().split(&quot;\n&quot;) == [
+        &quot;# TYPE http_requests_total counter&quot;,
+        &#x27;http_requests_total{method=&quot;GET&quot;,status=&quot;200&quot;} 3&#x27;,
+        &#x27;http_requests_total{method=&quot;POST&quot;,status=&quot;500&quot;} 1&#x27;,
+        &quot;# TYPE queue_length gauge&quot;,
+        &quot;queue_length 3&quot;,
+        &quot;# TYPE request_seconds histogram&quot;,
+        &#x27;request_seconds_bucket{route=&quot;/tickets&quot;,le=&quot;0.1&quot;} 1&#x27;,
+        &#x27;request_seconds_bucket{route=&quot;/tickets&quot;,le=&quot;0.5&quot;} 2&#x27;,
+        &#x27;request_seconds_bucket{route=&quot;/tickets&quot;,le=&quot;1.0&quot;} 3&#x27;,
+        &#x27;request_seconds_bucket{route=&quot;/tickets&quot;,le=&quot;+Inf&quot;} 4&#x27;,
+        &#x27;request_seconds_sum{route=&quot;/tickets&quot;} 3.95&#x27;,
+        &#x27;request_seconds_count{route=&quot;/tickets&quot;} 4&#x27;]
+    try:
+        r.counter(&quot;http_requests_total&quot;, -1)
+    except ValueError as e:
+        assert str(e) == &quot;counters only go up&quot;
+    else:
+        raise AssertionError(&quot;negative&quot;)
+    bare = Registry()
+    bare.observe(&quot;x&quot;, 1, [1.0])
+    assert bare.expose().split(&quot;\n&quot;)[1:3] == [&#x27;x_bucket{le=&quot;1.0&quot;} 1&#x27;, &#x27;x_bucket{le=&quot;+Inf&quot;} 1&#x27;]</textarea><textarea class="pc-src pc-solution" hidden>class Registry:
+    def __init__(self):
+        self.metrics = {}
+
+    def _series(self, name, kind, labels):
+        metric = self.metrics.setdefault(name, {&quot;kind&quot;: kind, &quot;series&quot;: {}})
+        return metric[&quot;series&quot;], tuple(sorted(labels.items()))
+
+    def counter(self, name, value=1, **labels):
+        if value &lt; 0:
+            raise ValueError(&quot;counters only go up&quot;)
+        series, key = self._series(name, &quot;counter&quot;, labels)
+        series[key] = series.get(key, 0) + value
+
+    def gauge(self, name, value, **labels):
+        series, key = self._series(name, &quot;gauge&quot;, labels)
+        series[key] = value
+
+    def observe(self, name, value, buckets, **labels):
+        series, key = self._series(name, &quot;histogram&quot;, labels)
+        h = series.setdefault(key, {&quot;buckets&quot;: list(buckets), &quot;counts&quot;: [0] * len(buckets), &quot;sum&quot;: 0, &quot;count&quot;: 0})
+        for i, bound in enumerate(h[&quot;buckets&quot;]):
+            if value &lt;= bound:
+                h[&quot;counts&quot;][i] += 1
+        h[&quot;sum&quot;] += value
+        h[&quot;count&quot;] += 1
+
+    @staticmethod
+    def _labels(pairs):
+        return &quot;{&quot; + &quot;,&quot;.join(f&#x27;{k}=&quot;{v}&quot;&#x27; for k, v in pairs) + &quot;}&quot; if pairs else &quot;&quot;
+
+    def expose(self):
+        lines = []
+        for name in sorted(self.metrics):
+            metric = self.metrics[name]
+            lines.append(f&quot;# TYPE {name} {metric[&#x27;kind&#x27;]}&quot;)
+            for key in sorted(metric[&quot;series&quot;], key=self._labels):
+                value = metric[&quot;series&quot;][key]
+                if metric[&quot;kind&quot;] != &quot;histogram&quot;:
+                    lines.append(f&quot;{name}{self._labels(key)} {value}&quot;)
+                    continue
+                for bound, count in zip(value[&quot;buckets&quot;], value[&quot;counts&quot;]):
+                    lines.append(f&quot;{name}_bucket{self._labels(key + ((&#x27;le&#x27;, str(float(bound))),))} {count}&quot;)
+                lines.append(f&quot;{name}_bucket{self._labels(key + ((&#x27;le&#x27;, &#x27;+Inf&#x27;),))} {value[&#x27;count&#x27;]}&quot;)
+                lines.append(f&quot;{name}_sum{self._labels(key)} {round(value[&#x27;sum&#x27;], 10)}&quot;)
+                lines.append(f&quot;{name}_count{self._labels(key)} {value[&#x27;count&#x27;]}&quot;)
+        return &quot;\n&quot;.join(lines)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d2-quantile" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Percentiles from buckets</div><div class="pc-prompt"><p>Write <code>merge(*histograms)</code>: each histogram is a list of <code>(upper_bound, cumulative_count)</code> pairs with the same bounds, the last being <code>float("inf")</code>; return their bucket-by-bucket sum. Then <code>quantile(q, buckets)</code>: estimate the <code>q</code>-quantile (0 to 1) like Prometheus&rsquo;s <code>histogram_quantile</code>: the target rank is <code>q × total</code>; find the first bucket whose cumulative count is at least the rank, and interpolate linearly between that bucket&rsquo;s lower bound (the previous bucket&rsquo;s bound, or 0 for the first) and its upper bound, by where the rank falls between the previous cumulative count and this one. If the rank falls in the <code>+Inf</code> bucket, return the highest finite bound. With no observations, return <code>None</code>. Round to 4 decimal places.</p></div><textarea class="pc-src pc-code" hidden>def merge(*histograms):
+    ___
+
+def quantile(q, buckets):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_quantile():
+    &quot;interpolated inside the bucket&quot;
+    inf = float(&quot;inf&quot;)
+    h = [(0.1, 240), (0.5, 290), (1.0, 297), (inf, 300)]
+    assert quantile(0.5, h) == 0.0625 and quantile(0.9, h) == 0.34 and quantile(0.99, h) == 1.0
+    assert quantile(0.98, h) == 0.7857 and quantile(0.5, [(0.1, 0), (inf, 0)]) is None
+    a = [(0.1, 5), (0.5, 5), (inf, 5)]
+    b = [(0.1, 100), (0.5, 100), (inf, 100)]
+    assert merge(a, b) == [(0.1, 105), (0.5, 105), (inf, 105)]
+    slow = [(0.1, 0), (0.5, 0), (1.0, 5), (inf, 5)]
+    assert quantile(0.99, slow) == 0.995 and quantile(0.5, merge(slow, [(0.1, 95), (0.5, 95), (1.0, 95), (float(&quot;inf&quot;), 95)])) == 0.0526</textarea><textarea class="pc-src pc-solution" hidden>def merge(*histograms):
+    return [(bound, sum(h[i][1] for h in histograms)) for i, (bound, _) in enumerate(histograms[0])]
+
+def quantile(q, buckets):
+    total = buckets[-1][1]
+    if total == 0:
+        return None
+    rank = q * total
+    lower_bound, lower_count = 0.0, 0
+    for bound, count in buckets:
+        if count &gt;= rank:
+            if bound == float(&quot;inf&quot;):
+                return round(lower_bound, 4)
+            if count == lower_count:
+                return round(bound, 4)
+            return round(lower_bound + (bound - lower_bound) * (rank - lower_count) / (count - lower_count), 4)
+        lower_bound, lower_count = bound, count
+    return round(lower_bound, 4)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d2-rates" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Rates from counters that reset</div><div class="pc-prompt"><p>A counter is scraped as a list of <code>(time, value)</code> samples. Write <code>increase(samples)</code>: the total increase over the samples, where a value <strong>lower</strong> than the previous one means the process restarted (the counter reset to 0), so the increase for that step is the new value itself. Then <code>rate(samples)</code>: the increase per second over the time from the first sample to the last (<code>0.0</code> if there are fewer than two samples), rounded to 3 places. And <code>error_ratio(errors, total)</code>: the rate of one counter over the rate of the other, rounded to 4 places (<code>0.0</code> when there&rsquo;s no traffic).</p></div><textarea class="pc-src pc-code" hidden>def increase(samples):
+    ___
+
+def rate(samples):
+    ___
+
+def error_ratio(errors, total):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_rates():
+    &quot;resets are not negative traffic&quot;
+    s = [(0, 100), (15, 160), (30, 220), (45, 10), (60, 70)]
+    assert increase(s) == 190 and rate(s) == 3.167
+    assert rate([(0, 5)]) == 0.0 and increase([]) == 0
+    errors = [(0, 2), (60, 5)]
+    total = [(0, 400), (60, 1000)]
+    assert error_ratio(errors, total) == 0.005 and error_ratio(errors, [(0, 10), (60, 10)]) == 0.0</textarea><textarea class="pc-src pc-solution" hidden>def increase(samples):
+    total = 0
+    for (_, before), (_, after) in zip(samples, samples[1:]):
+        total += after - before if after &gt;= before else after
+    return total
+
+def rate(samples):
+    if len(samples) &lt; 2:
+        return 0.0
+    return round(increase(samples) / (samples[-1][0] - samples[0][0]), 3)
+
+def error_ratio(errors, total):
+    t = rate(total)
+    return round(rate(errors) / t, 4) if t else 0.0</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d2-spans" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Where the time went</div><div class="pc-prompt"><p>Spans are dicts with <code>id</code>, <code>parent</code> (<code>None</code> for the root), <code>name</code>, <code>start</code> and <code>end</code> (milliseconds). Write <code>tree(spans)</code>: lines showing the trace, each <code>INDENT NAME DURATIONms</code>, children indented two spaces more than their parent and ordered by start time, starting from the root. <code>self_times(spans)</code>: a dict from span name to its duration minus the total duration of its direct children. And <code>critical_path(spans)</code>: from the root, repeatedly follow the child that <strong>ends last</strong> (ties to the earliest start), returning the list of names.</p></div><textarea class="pc-src pc-code" hidden>def tree(spans):
+    ___
+
+def self_times(spans):
+    ___
+
+def critical_path(spans):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>SPANS = [
+    {&quot;id&quot;: &quot;1&quot;, &quot;parent&quot;: None, &quot;name&quot;: &quot;GET /checkout&quot;, &quot;start&quot;: 0, &quot;end&quot;: 340},
+    {&quot;id&quot;: &quot;4&quot;, &quot;parent&quot;: &quot;1&quot;, &quot;name&quot;: &quot;payments.charge&quot;, &quot;start&quot;: 61, &quot;end&quot;: 330},
+    {&quot;id&quot;: &quot;2&quot;, &quot;parent&quot;: &quot;1&quot;, &quot;name&quot;: &quot;auth.verify&quot;, &quot;start&quot;: 2, &quot;end&quot;: 14},
+    {&quot;id&quot;: &quot;3&quot;, &quot;parent&quot;: &quot;1&quot;, &quot;name&quot;: &quot;cart.load&quot;, &quot;start&quot;: 15, &quot;end&quot;: 60},
+    {&quot;id&quot;: &quot;5&quot;, &quot;parent&quot;: &quot;3&quot;, &quot;name&quot;: &quot;db.query&quot;, &quot;start&quot;: 18, &quot;end&quot;: 55},
+    {&quot;id&quot;: &quot;6&quot;, &quot;parent&quot;: &quot;4&quot;, &quot;name&quot;: &quot;bank.api&quot;, &quot;start&quot;: 70, &quot;end&quot;: 320},
+]
+
+def test_tree():
+    &quot;the shape of a request&quot;
+    assert tree(SPANS) == [&quot;GET /checkout 340ms&quot;, &quot;  auth.verify 12ms&quot;, &quot;  cart.load 45ms&quot;, &quot;    db.query 37ms&quot;,
+                           &quot;  payments.charge 269ms&quot;, &quot;    bank.api 250ms&quot;]
+
+def test_times_and_path():
+    &quot;self time and the critical path&quot;
+    assert self_times(SPANS) == {&quot;GET /checkout&quot;: 14, &quot;payments.charge&quot;: 19, &quot;auth.verify&quot;: 12, &quot;cart.load&quot;: 8, &quot;db.query&quot;: 37, &quot;bank.api&quot;: 250}
+    assert critical_path(SPANS) == [&quot;GET /checkout&quot;, &quot;payments.charge&quot;, &quot;bank.api&quot;]</textarea><textarea class="pc-src pc-solution" hidden>def _children(spans):
+    kids = {}
+    for s in spans:
+        kids.setdefault(s[&quot;parent&quot;], []).append(s)
+    for k in kids.values():
+        k.sort(key=lambda s: s[&quot;start&quot;])
+    return kids
+
+def tree(spans):
+    kids = _children(spans)
+    lines = []
+
+    def walk(span, depth):
+        lines.append(f&quot;{&#x27;  &#x27; * depth}{span[&#x27;name&#x27;]} {span[&#x27;end&#x27;] - span[&#x27;start&#x27;]}ms&quot;)
+        for child in kids.get(span[&quot;id&quot;], []):
+            walk(child, depth + 1)
+
+    for root in kids.get(None, []):
+        walk(root, 0)
+    return lines
+
+def self_times(spans):
+    kids = _children(spans)
+    return {s[&quot;name&quot;]: (s[&quot;end&quot;] - s[&quot;start&quot;]) - sum(c[&quot;end&quot;] - c[&quot;start&quot;] for c in kids.get(s[&quot;id&quot;], [])) for s in spans}
+
+def critical_path(spans):
+    kids = _children(spans)
+    span = kids[None][0]
+    path = [span[&quot;name&quot;]]
+    while kids.get(span[&quot;id&quot;]):
+        span = max(kids[span[&quot;id&quot;]], key=lambda c: (c[&quot;end&quot;], -c[&quot;start&quot;]))
+        path.append(span[&quot;name&quot;])
+    return path</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d2-red" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">RED from logs</div><div class="pc-prompt"><p>Week 80&rsquo;s JSON access log lines look like <code>{"request_id": ..., "method": "GET", "path": "/tickets/7", "status": 200, "ms": 12, "route": "/tickets/{ticket_id}"}</code>. Write <code>red(lines, window_seconds)</code>: parse each line with <code>json.loads</code> (skip lines that aren&rsquo;t valid JSON), group by <code>route</code>, and return a dict from route (sorted) to <code>{"rate": REQUESTS_PER_SECOND, "errors": ERROR_SHARE, "p95": P95_MS}</code>: the rate over the window rounded to 2 places, the share of requests with a status of 500 or more rounded to 3 places, and the p95 duration by nearest rank.</p></div><textarea class="pc-src pc-code" hidden>import json
+import math
+
+def red(lines, window_seconds):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_red():
+    &quot;rate, errors, duration&quot;
+    import json
+    lines = []
+    for i in range(20):
+        lines.append(json.dumps({&quot;method&quot;: &quot;GET&quot;, &quot;path&quot;: f&quot;/tickets/{i}&quot;, &quot;status&quot;: 500 if i == 3 else 200, &quot;ms&quot;: 10 + i, &quot;route&quot;: &quot;/tickets/{ticket_id}&quot;}))
+    for ms in (5, 6, 7, 400):
+        lines.append(json.dumps({&quot;method&quot;: &quot;GET&quot;, &quot;path&quot;: &quot;/healthz&quot;, &quot;status&quot;: 200, &quot;ms&quot;: ms, &quot;route&quot;: &quot;/healthz&quot;}))
+    lines.append(&quot;not json&quot;)
+    assert red(lines, 60) == {&quot;/healthz&quot;: {&quot;rate&quot;: 0.07, &quot;errors&quot;: 0.0, &quot;p95&quot;: 400},
+                              &quot;/tickets/{ticket_id}&quot;: {&quot;rate&quot;: 0.33, &quot;errors&quot;: 0.05, &quot;p95&quot;: 28}}</textarea><textarea class="pc-src pc-solution" hidden>import json
+import math
+
+def red(lines, window_seconds):
+    groups = {}
+    for line in lines:
+        try:
+            record = json.loads(line)
+        except ValueError:
+            continue
+        groups.setdefault(record[&quot;route&quot;], []).append(record)
+    out = {}
+    for route in sorted(groups):
+        records = groups[route]
+        durations = sorted(r[&quot;ms&quot;] for r in records)
+        out[route] = {&quot;rate&quot;: round(len(records) / window_seconds, 2),
+                      &quot;errors&quot;: round(sum(1 for r in records if r[&quot;status&quot;] &gt;= 500) / len(records), 3),
+                      &quot;p95&quot;: durations[math.ceil(0.95 * len(durations)) - 1]}
+    return out</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d2-cardinality" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Keeping labels bounded</div><div class="pc-prompt"><p>Write a class <code>CardinalityGuard(max_series_per_metric, forbidden=("user_id", "email", "request_id", "url"))</code>. <code>allow(name, labels)</code> returns <code>True</code> if a series with these labels (a dict) may be recorded: any forbidden label name refuses it (<code>False</code>), as does a <strong>new</strong> label combination once the metric already has <code>max_series_per_metric</code> series; combinations already seen are always allowed. Count refusals per metric in <code>self.dropped</code>. Then <code>normalise_route(path)</code>: replace each path segment made only of digits, or that looks like a UUID (32 hex digits with or without hyphens in the 8-4-4-4-12 pattern), with <code>{id}</code>, so <code>/tickets/7/comments</code> becomes <code>/tickets/{id}/comments</code>.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+class CardinalityGuard:
+    ___
+
+def normalise_route(path):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_guard():
+    &quot;bounded series&quot;
+    g = CardinalityGuard(2)
+    assert g.allow(&quot;requests&quot;, {&quot;route&quot;: &quot;/a&quot;, &quot;status&quot;: &quot;200&quot;}) and g.allow(&quot;requests&quot;, {&quot;route&quot;: &quot;/b&quot;, &quot;status&quot;: &quot;200&quot;})
+    assert not g.allow(&quot;requests&quot;, {&quot;route&quot;: &quot;/c&quot;, &quot;status&quot;: &quot;200&quot;}) and g.allow(&quot;requests&quot;, {&quot;status&quot;: &quot;200&quot;, &quot;route&quot;: &quot;/a&quot;})
+    assert not g.allow(&quot;logins&quot;, {&quot;user_id&quot;: &quot;7&quot;}) and g.allow(&quot;logins&quot;, {&quot;result&quot;: &quot;ok&quot;})
+    assert g.dropped == {&quot;requests&quot;: 1, &quot;logins&quot;: 1}
+
+def test_routes():
+    &quot;ids become placeholders&quot;
+    assert normalise_route(&quot;/tickets/7/comments&quot;) == &quot;/tickets/{id}/comments&quot;
+    assert normalise_route(&quot;/users/550e8400-e29b-41d4-a716-446655440000&quot;) == &quot;/users/{id}&quot;
+    assert normalise_route(&quot;/files/550e8400e29b41d4a716446655440000/raw&quot;) == &quot;/files/{id}/raw&quot;
+    assert normalise_route(&quot;/v2/tickets&quot;) == &quot;/v2/tickets&quot; and normalise_route(&quot;/&quot;) == &quot;/&quot;</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+UUID = re.compile(r&quot;[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{4}-?[0-9a-fA-F]{12}&quot;)
+
+class CardinalityGuard:
+    def __init__(self, max_series_per_metric, forbidden=(&quot;user_id&quot;, &quot;email&quot;, &quot;request_id&quot;, &quot;url&quot;)):
+        self.max = max_series_per_metric
+        self.forbidden = set(forbidden)
+        self.seen = {}
+        self.dropped = {}
+
+    def _drop(self, name):
+        self.dropped[name] = self.dropped.get(name, 0) + 1
+        return False
+
+    def allow(self, name, labels):
+        if self.forbidden &amp; set(labels):
+            return self._drop(name)
+        key = tuple(sorted(labels.items()))
+        series = self.seen.setdefault(name, set())
+        if key in series:
+            return True
+        if len(series) &gt;= self.max:
+            return self._drop(name)
+        series.add(key)
+        return True
+
+def normalise_route(path):
+    parts = [&quot;{id}&quot; if p.isdigit() or UUID.fullmatch(p) else p for p in path.split(&quot;/&quot;)]
+    return &quot;/&quot;.join(parts)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w082d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Averaged percentiles</div><div class="pc-prompt"><p>The fleet dashboard averages each server&rsquo;s p99, which gives a number no request experienced: this prints <code>fleet p99: 456.0</code>. Merge the servers&rsquo; raw latencies and take the p99 of all of them (nearest rank), so it prints <code>fleet p99: 13</code>.</p></div><textarea class="pc-src pc-code" hidden>import math
+
+servers = {&quot;a&quot;: [10, 12, 11, 13, 900], &quot;b&quot;: [10, 10, 11, 12, 12] * 20}
+
+def p99(values):
+    ordered = sorted(values)
+    return ordered[math.ceil(0.99 * len(ordered)) - 1]
+
+print(&quot;fleet p99:&quot;, sum(p99(v) for v in servers.values()) / len(servers))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;percentiles don&#x27;t average&quot;
+    expect_output(&quot;fleet p99: 13&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+servers = {&quot;a&quot;: [10, 12, 11, 13, 900], &quot;b&quot;: [10, 10, 11, 12, 12] * 20}
+
+def p99(values):
+    ordered = sorted(values)
+    return ordered[math.ceil(0.99 * len(ordered)) - 1]
+
+print(&quot;fleet p99:&quot;, p99([x for v in servers.values() for x in v]))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w082d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Negative traffic</div><div class="pc-prompt"><p>A process restarted between two scrapes, so its counter dropped from 900 to 30, and the rate calculation reports a <strong>negative</strong> request rate: <code>requests/s: -14.5</code>. Treat a drop as a reset (the increase is the new value), so it prints <code>requests/s: 0.5</code>.</p></div><textarea class="pc-src pc-code" hidden>samples = [(0, 900), (60, 30)]
+(t0, v0), (t1, v1) = samples
+print(&quot;requests/s:&quot;, (v1 - v0) / (t1 - t0))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;resets&quot;
+    expect_output(&quot;requests/s: 0.5&quot;)</textarea><textarea class="pc-src pc-solution" hidden>samples = [(0, 900), (60, 30)]
+(t0, v0), (t1, v1) = samples
+increase = v1 - v0 if v1 &gt;= v0 else v1
+print(&quot;requests/s:&quot;, increase / (t1 - t0))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w082d2-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A label that exploded</div><div class="pc-prompt"><p>The request counter is labelled with the raw path, so every ticket id creates a new series: <code>1000 series</code>. Label it with the route template instead (replace digit-only segments with <code>{id}</code>), so it prints <code>1 series</code>.</p></div><textarea class="pc-src pc-code" hidden>from collections import Counter
+
+series = Counter()
+for ticket_id in range(1000):
+    path = f&quot;/tickets/{ticket_id}&quot;
+    series[(&quot;GET&quot;, path)] += 1
+print(len(series), &quot;series&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;bounded labels&quot;
+    expect_output(&quot;1 series&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from collections import Counter
+
+series = Counter()
+for ticket_id in range(1000):
+    path = f&quot;/tickets/{ticket_id}&quot;
+    route = &quot;/&quot;.join(&quot;{id}&quot; if p.isdigit() else p for p in path.split(&quot;/&quot;))
+    series[(&quot;GET&quot;, route)] += 1
+print(len(series), &quot;series&quot;)</textarea></div>
+<div class="parsons" data-id="w082d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Recording a request</div><div class="pc-prompt"><p>Arrange the observability work around one request: start a span, time it, and record RED metrics with bounded labels. One line is a trap.</p></div><script type="application/json">{"lines": ["route = normalise_route(request.path)", "span = tracer.start_span(f\"{request.method} {route}\", parent=incoming_context)", "started = time.monotonic()", "response = handle(request)", "seconds = time.monotonic() - started", "metrics.counter(\"http_requests_total\", method=request.method, route=route, status=str(response.status))", "metrics.observe(\"request_seconds\", seconds, BUCKETS, route=route)", "span.finish()"], "distractors": ["metrics.counter(\"http_requests_total\", user_id=request.user_id, path=request.path)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # &quot;counter&quot;, &quot;gauge&quot; or &quot;histogram&quot;: requests in progress right now
+q = ___   # the RED letter that stands for latency
+r = ___   # the series for labels route (20 values) times status (5 values)
+s = ___   # the W3C header that carries trace context
+t = ___   # &quot;head&quot; or &quot;tail&quot; sampling: keeps every slow or failed trace</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;gauge&quot; and q in (&quot;D&quot;, &quot;duration&quot;, &quot;Duration&quot;) and r == 100, &quot;p, q and r&quot;
+    assert s == &quot;traceparent&quot; and t == &quot;tail&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;gauge&quot;
+q = &quot;D&quot;
+r = 100
+s = &quot;traceparent&quot;
+t = &quot;tail&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w082d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Which signal answers &ldquo;why did request 7b33fd1b fail&rdquo;?", "answer": 1, "explain": "Details of one event belong in logs.", "options": ["Metrics", "Logs", "A gauge", "A histogram"]}, {"type": "mc", "q": "Why can&rsquo;t you average p99s from several servers?", "answer": 1, "explain": "Merge histograms instead.", "options": ["Rounding", "Percentiles don&rsquo;t combine; the servers handled different numbers of requests", "They&rsquo;re integers", "You can"]}, {"type": "mc", "q": "What does a counter reset look like, and how is it handled?", "answer": 1, "explain": "Processes restart.", "options": ["A spike; ignore it", "A drop in value; count the new value as the increase", "A gap; interpolate", "Negative values; keep them"]}, {"type": "mc", "q": "What does le=&rdquo;0.5&rdquo; mean in a histogram bucket?", "answer": 1, "explain": "Buckets are cumulative.", "options": ["Exactly 0.5", "Observations at or below 0.5", "Above 0.5", "The 50th percentile"]}, {"type": "mc", "q": "Why is user_id a bad metric label?", "answer": 1, "explain": "Keep labels bounded.", "options": ["Privacy only", "It creates a series per user, exploding the number of series", "It&rsquo;s too long", "Metrics can&rsquo;t hold ids"]}, {"type": "mc", "q": "What is a span&rsquo;s self time?", "answer": 1, "explain": "Time in its own code.", "options": ["Its start time", "Its duration minus its children&rsquo;s durations", "Its total duration", "The trace&rsquo;s duration"]}, {"type": "mc", "q": "Why look at the critical path?", "answer": 1, "explain": "Optimise what the request waited for.", "options": ["It&rsquo;s the longest span", "Speeding up spans off it doesn&rsquo;t make the request faster", "It&rsquo;s sampled", "It has errors"]}, {"type": "mc", "q": "How do spans in different services join one trace?", "answer": 1, "explain": "Propagation.", "options": ["Shared clocks", "The trace context (traceparent) is passed with each request", "Same host names", "Logs"]}, {"type": "mc", "q": "What should alerts usually watch?", "answer": 1, "explain": "RED for services.", "options": ["CPU", "Symptoms users feel: error rate and latency", "Disk space only", "Log volume"]}, {"type": "output", "q": "What does this print?", "answer": "{method=\"GET\",status=\"200\"}", "explain": "Labels sorted by name, in the text format.", "code": "labels = {\"status\": \"200\", \"method\": \"GET\"}\nprint(\"{\" + \",\".join(f'{k}=\"{v}\"' for k, v in sorted(labels.items())) + \"}\")"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w082d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a tracer with propagation</div><div class="pc-prompt"><p>Write a class <code>Tracer(service, sample_rate, ids)</code>: <code>ids</code> is a function returning random hex strings (<code>ids(32)</code> for trace ids, <code>ids(16)</code> for span ids), so tests can control them. <code>start_span(name, now, traceparent=None)</code>: if <code>traceparent</code> is given and valid (<code>00-</code> then 32 hex, <code>-</code>, 16 hex, <code>-</code>, 2 hex), continue that trace: the new span&rsquo;s parent is the header&rsquo;s span id and it&rsquo;s sampled if the flags are <code>01</code>; an invalid or missing header starts a new trace with a new trace id, no parent, and a <strong>head sampling</strong> decision: sampled if <code>int(trace_id[:8], 16) / 0xFFFFFFFF &lt; sample_rate</code>. Return a span dict <code>{"trace_id", "span_id", "parent_id", "name", "service", "start", "end": None, "sampled", "error": False}</code>. <code>inject(span)</code> returns the <code>traceparent</code> header for calls made from that span. <code>finish(span, now, error=False)</code> sets <code>end</code> and <code>error</code>, and <strong>exports</strong> the span (adds it to <code>self.exported</code>) if it&rsquo;s sampled. Then <code>tail_keep(spans, slow_ms)</code>: from a list of finished spans (any traces), return the sorted ids of traces that have any span with an error or any span lasting more than <code>slow_ms</code>.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+class Tracer:
+    ___
+
+def tail_keep(spans, slow_ms):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def _ids(values):
+    it = iter(values)
+    return lambda n: next(it)
+
+TRACE = &quot;0af7651916cd43dd8448eb211c80319c&quot;
+
+def test_propagation():
+    &quot;a trace across two services&quot;
+    web = Tracer(&quot;web&quot;, 1.0, _ids([TRACE, &quot;b7ad6b7169203331&quot;, &quot;00f067aa0ba902b7&quot;]))
+    root = web.start_span(&quot;GET /checkout&quot;, 0)
+    assert root[&quot;trace_id&quot;] == TRACE and root[&quot;parent_id&quot;] is None and root[&quot;sampled&quot;] is True
+    header = web.inject(root)
+    assert header == f&quot;00-{TRACE}-b7ad6b7169203331-01&quot;
+    payments = Tracer(&quot;payments&quot;, 0.0, _ids([&quot;53995c3f42cd8ad8&quot;]))
+    child = payments.start_span(&quot;charge&quot;, 61, traceparent=header)
+    assert child[&quot;trace_id&quot;] == TRACE and child[&quot;parent_id&quot;] == &quot;b7ad6b7169203331&quot; and child[&quot;sampled&quot;] is True and child[&quot;service&quot;] == &quot;payments&quot;
+    payments.finish(child, 330)
+    web.finish(root, 340, error=False)
+    assert child[&quot;end&quot;] == 330 and payments.exported == [child] and web.exported == [root]
+
+def test_sampling():
+    &quot;head sampling, unsampled headers and bad headers&quot;
+    low = &quot;1fffffff&quot; + &quot;0&quot; * 24
+    high = &quot;f0000000&quot; + &quot;0&quot; * 24
+    t = Tracer(&quot;web&quot;, 0.25, _ids([low, &quot;a&quot; * 16, high, &quot;b&quot; * 16, &quot;c&quot; * 32, &quot;d&quot; * 16]))
+    s1, s2 = t.start_span(&quot;a&quot;, 0), t.start_span(&quot;b&quot;, 0)
+    assert s1[&quot;sampled&quot;] is True and s2[&quot;sampled&quot;] is False and t.inject(s2).endswith(&quot;-00&quot;)
+    t.finish(s1, 5)
+    t.finish(s2, 5)
+    assert t.exported == [s1]
+    s3 = t.start_span(&quot;c&quot;, 0, traceparent=&quot;00-not-valid-01&quot;)
+    assert s3[&quot;trace_id&quot;] == &quot;c&quot; * 32 and s3[&quot;parent_id&quot;] is None
+    off = Tracer(&quot;x&quot;, 1.0, _ids([&quot;e&quot; * 16]))
+    child = off.start_span(&quot;x&quot;, 0, traceparent=f&quot;00-{TRACE}-{&#x27;f&#x27; * 16}-00&quot;)
+    off.finish(child, 1)
+    assert child[&quot;sampled&quot;] is False and off.exported == []
+
+def test_tail():
+    &quot;keep the interesting traces&quot;
+    spans = [{&quot;trace_id&quot;: &quot;t1&quot;, &quot;start&quot;: 0, &quot;end&quot;: 50, &quot;error&quot;: False}, {&quot;trace_id&quot;: &quot;t2&quot;, &quot;start&quot;: 0, &quot;end&quot;: 900, &quot;error&quot;: False},
+             {&quot;trace_id&quot;: &quot;t3&quot;, &quot;start&quot;: 0, &quot;end&quot;: 10, &quot;error&quot;: True}, {&quot;trace_id&quot;: &quot;t1&quot;, &quot;start&quot;: 10, &quot;end&quot;: 20, &quot;error&quot;: False}]
+    assert tail_keep(spans, 500) == [&quot;t2&quot;, &quot;t3&quot;]</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+HEADER = re.compile(r&quot;00-([0-9a-f]{32})-([0-9a-f]{16})-([0-9a-f]{2})&quot;)
+
+class Tracer:
+    def __init__(self, service, sample_rate, ids):
+        self.service = service
+        self.sample_rate = sample_rate
+        self.ids = ids
+        self.exported = []
+
+    def start_span(self, name, now, traceparent=None):
+        m = HEADER.fullmatch(traceparent) if traceparent else None
+        if m:
+            trace_id, parent, sampled = m[1], m[2], m[3] == &quot;01&quot;
+        else:
+            trace_id, parent = self.ids(32), None
+            sampled = int(trace_id[:8], 16) / 0xFFFFFFFF &lt; self.sample_rate
+        return {&quot;trace_id&quot;: trace_id, &quot;span_id&quot;: self.ids(16), &quot;parent_id&quot;: parent, &quot;name&quot;: name, &quot;service&quot;: self.service,
+                &quot;start&quot;: now, &quot;end&quot;: None, &quot;sampled&quot;: sampled, &quot;error&quot;: False}
+
+    def inject(self, span):
+        return f&quot;00-{span[&#x27;trace_id&#x27;]}-{span[&#x27;span_id&#x27;]}-{&#x27;01&#x27; if span[&#x27;sampled&#x27;] else &#x27;00&#x27;}&quot;
+
+    def finish(self, span, now, error=False):
+        span[&quot;end&quot;] = now
+        span[&quot;error&quot;] = error
+        if span[&quot;sampled&quot;]:
+            self.exported.append(span)
+
+def tail_keep(spans, slow_ms):
+    return sorted({s[&quot;trace_id&quot;] for s in spans if s[&quot;error&quot;] or s[&quot;end&quot;] - s[&quot;start&quot;] &gt; slow_ms})</textarea></div>
+<h2 id="before-you-go">Before you go</h2>
+<p>Open the network tab of your browser&rsquo;s developer tools on a large site and look for <code>traceparent</code> or similar trace headers on its requests; many sites send them. Tomorrow: <strong>reliability</strong>: SLOs and error budgets, redundancy, and the patterns (timeouts, retries, circuit breakers) that keep one failure from becoming many.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w082d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w082d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w082d2", "week": 82, "day": 2, "title": "Observability", "exercises": [{"id": "w082d2-registry", "title": "Counters, gauges and histograms", "points": 15}, {"id": "w082d2-quantile", "title": "Percentiles from buckets", "points": 15}, {"id": "w082d2-rates", "title": "Rates from counters that reset", "points": 10}, {"id": "w082d2-spans", "title": "Where the time went", "points": 15}, {"id": "w082d2-red", "title": "RED from logs", "points": 10}, {"id": "w082d2-cardinality", "title": "Keeping labels bounded", "points": 10}, {"id": "w082d2-bug1", "title": "Averaged percentiles", "points": 10}, {"id": "w082d2-bug2", "title": "Negative traffic", "points": 10}, {"id": "w082d2-bug3", "title": "A label that exploded", "points": 10}, {"id": "w082d2-trace", "title": "Predict them", "points": 10}, {"id": "w082d2-challenge", "title": "Challenge: a tracer with propagation", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=b54d8b61c9"></script>
+</body>
+</html>
