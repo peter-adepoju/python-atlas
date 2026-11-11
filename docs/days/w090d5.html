@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="97b2d34bb1">
+<title>Week 90 Day 5: Code review | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=97b2d34bb1">
+<link rel="stylesheet" href="../assets/css/site.css?v=97b2d34bb1">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=97b2d34bb1"></script>
+<script src="../assets/vendor/codemirror.js?v=97b2d34bb1" defer></script>
+<meta name="description" content="Sharing put part of Waymark in front of strangers, so this sprint’s code review is a security review. Security bugs are rarely clever: a secret written to a...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w090d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 90 Day 5: Code review">
+<meta property="og:description" content="Sharing put part of Waymark in front of strangers, so this sprint’s code review is a security review. Security bugs are rarely clever: a secret written to a...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w090d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-90">Week 90: Capstone 4: build sprint</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#secrets-in-logs" data-sec="secrets-in-logs">Secrets in logs</a></li><li><a href="#whose-record-is-it" data-sec="whose-record-is-it">Whose record is it?</a></li><li><a href="#what-a-machine-can-find" data-sec="what-a-machine-can-find">What a machine can find</a></li><li><a href="#dependencies" data-sec="dependencies">Dependencies</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#your-capstone-today" data-sec="your-capstone-today">Your capstone today</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w090d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-7">Phase 7: Mastery</a></li><li><a href="../map.html#week-90">Week 90: Capstone 4: build sprint</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 90, Day 5</span></p>
+      <h1>Code review</h1>
+      <div class="day-intro"><p>Sharing put part of Waymark in front of strangers, so this sprint&rsquo;s code review is a <strong>security review</strong>. Security bugs are rarely clever: a secret written to a log, a comparison that leaks timing, a code from the wrong random generator, a query built from a string, a record that anyone can read by changing a number in the URL, a dependency with a known hole. You&rsquo;ll learn to look for each, fix them, and automate the searches that a machine can do, with the syntax tree once more. The challenge is a security reviewer for a draft module from this sprint that has seven problems in thirty lines.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Keep secrets out of logs by redacting them at the source</li><li>Check ownership on every record access, and answer others&rsquo; records with 404</li><li>Find insecure randomness and plain comparisons on secrets automatically</li><li>Audit pinned dependencies against advisories</li><li>Review a module for security problems and rank what to fix first</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h 15 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="Secrets in logs: 15 min"></span><span class="plan-seg s0" style="flex:15" title="Whose record is it?: 15 min"></span><span class="plan-seg s1" style="flex:20" title="What a machine can find: 20 min"></span><span class="plan-seg s0" style="flex:15" title="Dependencies: 15 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:30" title="Quiz and daily challenge: 30 min"></span><span class="plan-seg s1" style="flex:30" title="Your capstone today: 30 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">8 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Secrets in logs</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">Whose record is it?</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:40</span><span class="plan-what">What a machine can find</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:00</span><span class="plan-what">Dependencies</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:15</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">30 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Your capstone today</span><span class="plan-min">30 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w090d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w090d5.ipynb" download>download it</a>. Exercises today are worth 105 points.</p>
+    </header>
+    <div class="day-body">
+<div class="filebox"><div class="filebox-head">The file used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>sharing_draft.py</code></summary><pre class="pc-filetext">import hashlib
+import logging
+import pickle
+import random
+import sqlite3
+
+log = logging.getLogger(&quot;waymark.sharing&quot;)
+
+
+def new_share_code():
+    return &quot;&quot;.join(random.choice(&quot;abcdefghijklmnopqrstuvwxyz234567&quot;) for _ in range(16))
+
+
+def check_code(stored_digest, code):
+    digest = hashlib.sha256(code.encode()).hexdigest()
+    return digest == stored_digest
+
+
+def open_share(conn, code):
+    log.info(&quot;opening share %s&quot;, code)
+    row = conn.execute(f&quot;SELECT route FROM share WHERE digest = &#x27;{hashlib.sha256(code.encode()).hexdigest()}&#x27;&quot;).fetchone()
+    return row[0] if row else None
+
+
+def import_settings(blob):
+    return pickle.loads(blob)
+
+
+def make_reset_token(user):
+    token = str(random.randint(100000, 999999))
+    print(&quot;reset token for&quot;, user, token)
+    return token
+</pre></details><script type="application/json" class="page-files">{"sharing_draft.py": "import hashlib\nimport logging\nimport pickle\nimport random\nimport sqlite3\n\nlog = logging.getLogger(\"waymark.sharing\")\n\n\ndef new_share_code():\n    return \"\".join(random.choice(\"abcdefghijklmnopqrstuvwxyz234567\") for _ in range(16))\n\n\ndef check_code(stored_digest, code):\n    digest = hashlib.sha256(code.encode()).hexdigest()\n    return digest == stored_digest\n\n\ndef open_share(conn, code):\n    log.info(\"opening share %s\", code)\n    row = conn.execute(f\"SELECT route FROM share WHERE digest = '{hashlib.sha256(code.encode()).hexdigest()}'\").fetchone()\n    return row[0] if row else None\n\n\ndef import_settings(blob):\n    return pickle.loads(blob)\n\n\ndef make_reset_token(user):\n    token = str(random.randint(100000, 999999))\n    print(\"reset token for\", user, token)\n    return token\n"}</script></div>
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w090d5-p1"><textarea class="pc-src pc-code" hidden>import re
+
+lines = [&quot;GET /s/mfrggzdfmztwq2lk 200&quot;, &quot;POST /login password=hunter2 302&quot;, &quot;GET /v1/walks?token=abc123&amp;limit=5 200&quot;]
+for line in lines:
+    print(re.sub(r&quot;(password|token)=[^&amp;\s]+&quot;, r&quot;\1=***&quot;, line))</textarea></div>
+<p>The share code is still in the first line, in plain sight in a log file that many people and tools can read. Anything that works as a key (share codes, tokens, passwords, reset codes) must never reach a log, an error message or an analytics event. Open <code>sharing_draft.py</code> above: it&rsquo;s a pull request from this sprint. Count its problems before reading on.</p>
+<h2 id="secrets-in-logs">Secrets in logs</h2>
+<p>Logs are copied, shipped to other services, kept for months and read by people who&rsquo;d never be given the database. So <strong>redact</strong> at the source: a function that replaces secret values (share codes in <code>/s/...</code> paths, <code>token=</code>, <code>password=</code>, <code>code=</code> parameters, and JSON fields with those names) with <code>***</code> before anything is written. Better still, log <strong>identifiers</strong> that aren&rsquo;t secrets (a share&rsquo;s database id, or the first few characters of the code&rsquo;s hash) rather than the secret itself. And never <code>print</code> a secret &ldquo;just while debugging&rdquo;: it ends up in a log too.</p>
+<h2 id="whose-record-is-it">Whose record is it?</h2>
+<p><strong>Insecure direct object reference</strong> (IDOR) is the most common access-control bug: <code>GET /v1/walks/17</code> returns walk 17 to <strong>anyone</strong> signed in, so changing the number reads other people&rsquo;s data. Every access to a user&rsquo;s record checks ownership, in the service or repository (<code>WHERE id = ? AND owner = ?</code>), not just in the interface. Answer another user&rsquo;s record with the same <code>404</code> as a missing one, so ids can&rsquo;t be probed.</p>
+<h2 id="what-a-machine-can-find">What a machine can find</h2>
+<p>Some security bugs have a recognisable shape, which the syntax tree can find:</p>
+<ul>
+<li><strong>Insecure randomness</strong>: <code>random.random</code>, <code>random.choice</code>, <code>random.randint</code> and <code>random.Random</code> in a function that makes a token, code, key or password (use <code>secrets</code>).</li>
+<li><strong>Plain comparisons on secrets</strong>: <code>==</code> or <code>!=</code> where one side&rsquo;s name mentions a token, digest, signature or code (use <code>hmac.compare_digest</code>).</li>
+<li><strong>SQL built from strings</strong>: f-strings or <code>%</code> formatting passed to <code>execute</code>.</li>
+<li><strong>Dangerous calls</strong>: <code>pickle.loads</code> on data from outside (it can run any code), <code>eval</code> and <code>exec</code> on input, <code>yaml.load</code> without a safe loader, <code>subprocess</code> with <code>shell=True</code>.</li>
+<li><strong>Secrets printed or logged</strong>: a call to <code>print</code> or a logger method with an argument named like a secret.</li>
+</ul>
+<p>A tool such as <strong>Bandit</strong> does this (and much more) on your own computer; today&rsquo;s version shows how it works, and like Week 88&rsquo;s reviewer it finds candidates for a person to judge.</p>
+<h2 id="dependencies">Dependencies</h2>
+<p>Code you didn&rsquo;t write runs with the same rights as yours. Pin your dependencies (Week 73), and <strong>audit</strong> them against published advisories: each advisory names a package, the affected versions and the version that fixes it. <code>pip-audit</code> does this against the Python advisory database on your own computer; in CI it can fail a build that depends on a vulnerable version.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Redact secrets at the source before logging (paths like <code>/s/CODE</code>, <code>token=</code>, <code>password=</code>, secret JSON fields), log identifiers instead of secrets, and never print them. Check ownership on every record access in the service or repository, and answer others&rsquo; records with 404. Automate the recognisable shapes: <code>random</code> for secrets, <code>==</code> on secrets, string-built SQL, <code>pickle.loads</code> and <code>eval</code> on input, secrets passed to print or loggers. Pin dependencies and audit them against advisories in CI. Tools find candidates; people judge them.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w090d5-redact" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Redacting logs</div><div class="pc-prompt"><p>Write <code>redact(line)</code>: replace share codes in paths (<code>/s/</code> followed by letters and digits) with <code>/s/***</code>; the values of query or form parameters named <code>token</code>, <code>password</code>, <code>code</code> or <code>key</code> (up to the next <code>&amp;</code>, space or end) with <code>***</code>; and the values of JSON string fields with those names (<code>"token": "..."</code>) with <code>"***"</code>. Leave everything else alone.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+def redact(line):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_redact():
+    &quot;no secrets in logs&quot;
+    assert redact(&quot;GET /s/mfrggzdfmztwq2lk 200 12ms&quot;) == &quot;GET /s/*** 200 12ms&quot;
+    assert redact(&quot;POST /login password=hunter2&amp;user=ada 302&quot;) == &quot;POST /login password=***&amp;user=ada 302&quot;
+    assert redact(&quot;GET /v1/walks?token=abc123&amp;limit=5 200&quot;) == &quot;GET /v1/walks?token=***&amp;limit=5 200&quot;
+    assert redact(&#x27;body {&quot;code&quot;: &quot;4f2a9&quot;, &quot;km&quot;: 6.0, &quot;key&quot;: &quot;k-1&quot;}&#x27;) == &#x27;body {&quot;code&quot;: &quot;***&quot;, &quot;km&quot;: 6.0, &quot;key&quot;: &quot;***&quot;}&#x27;
+    assert redact(&quot;GET /v1/walks?limit=5&amp;monkey=3 200&quot;) == &quot;GET /v1/walks?limit=5&amp;monkey=3 200&quot;</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+SECRET = r&quot;(token|password|code|key)&quot;
+
+def redact(line):
+    line = re.sub(r&quot;/s/[A-Za-z0-9]+&quot;, &quot;/s/***&quot;, line)
+    line = re.sub(r&quot;(?&lt;![A-Za-z])&quot; + SECRET + r&quot;=[^&amp;\s]+&quot;, r&quot;\1=***&quot;, line)
+    line = re.sub(r&#x27;&quot;&#x27; + SECRET + r&#x27;&quot;\s*:\s*&quot;[^&quot;]*&quot;&#x27;, r&#x27;&quot;\1&quot;: &quot;***&quot;&#x27;, line)
+    return line</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w090d5-idor" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Only your own walks</div><div class="pc-prompt"><p>Write <code>WalkRepository</code> (in memory) with <code>add(owner, walk)</code> returning the new id (from 1), <code>get(owner, walk_id)</code> returning the walk only if it belongs to <code>owner</code> (else <code>None</code>, the same for missing and someone else&rsquo;s), <code>list(owner)</code> returning that owner&rsquo;s walks in id order, and <code>delete(owner, walk_id)</code> returning whether one of the owner&rsquo;s walks was deleted. Stored walks include their <code>id</code> but not their owner.</p></div><textarea class="pc-src pc-code" hidden>class WalkRepository:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_ownership():
+    &quot;nobody else&#x27;s walks&quot;
+    repo = WalkRepository()
+    a = repo.add(&quot;ada&quot;, {&quot;km&quot;: 6.0})
+    b = repo.add(&quot;bo&quot;, {&quot;km&quot;: 9.0})
+    c = repo.add(&quot;ada&quot;, {&quot;km&quot;: 3.0})
+    assert (a, b, c) == (1, 2, 3)
+    assert repo.get(&quot;ada&quot;, 1) == {&quot;id&quot;: 1, &quot;km&quot;: 6.0} and repo.get(&quot;ada&quot;, 2) is None and repo.get(&quot;ada&quot;, 99) is None
+    assert [w[&quot;id&quot;] for w in repo.list(&quot;ada&quot;)] == [1, 3] and repo.list(&quot;cy&quot;) == []
+    assert repo.delete(&quot;ada&quot;, 2) is False and repo.get(&quot;bo&quot;, 2) == {&quot;id&quot;: 2, &quot;km&quot;: 9.0}
+    assert repo.delete(&quot;bo&quot;, 2) is True and repo.get(&quot;bo&quot;, 2) is None
+    assert &quot;owner&quot; not in repo.get(&quot;ada&quot;, 1)</textarea><textarea class="pc-src pc-solution" hidden>class WalkRepository:
+    def __init__(self):
+        self.rows = {}
+        self.next_id = 1
+
+    def add(self, owner, walk):
+        walk_id = self.next_id
+        self.next_id += 1
+        self.rows[walk_id] = (owner, {&quot;id&quot;: walk_id, **walk})
+        return walk_id
+
+    def get(self, owner, walk_id):
+        row = self.rows.get(walk_id)
+        return dict(row[1]) if row and row[0] == owner else None
+
+    def list(self, owner):
+        return [dict(walk) for wid, (who, walk) in sorted(self.rows.items()) if who == owner]
+
+    def delete(self, owner, walk_id):
+        row = self.rows.get(walk_id)
+        if row and row[0] == owner:
+            del self.rows[walk_id]
+            return True
+        return False</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w090d5-shapes" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Finding insecure shapes</div><div class="pc-prompt"><p>Write <code>insecure_random(source)</code>: a list of <code>(function, call)</code> for calls to <code>random.random</code>, <code>random.choice</code>, <code>random.randint</code>, <code>random.randrange</code>, <code>random.choices</code> or <code>random.Random</code> inside top-level functions whose names contain <code>token</code>, <code>code</code>, <code>key</code>, <code>secret</code> or <code>password</code>, in source order (<code>call</code> written as <code>"random.choice"</code>). Then <code>plain_secret_compares(source)</code>: a list of <code>(function, line)</code> for <code>==</code> or <code>!=</code> comparisons in any top-level function where either side is a name containing <code>token</code>, <code>digest</code>, <code>signature</code>, <code>secret</code> or <code>code</code>.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def insecure_random(source):
+    ___
+
+def plain_secret_compares(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_shapes():
+    &quot;in this sprint&#x27;s draft&quot;
+    src = open(&quot;sharing_draft.py&quot;).read()
+    assert insecure_random(src) == [(&quot;new_share_code&quot;, &quot;random.choice&quot;), (&quot;make_reset_token&quot;, &quot;random.randint&quot;)]
+    assert plain_secret_compares(src) == [(&quot;check_code&quot;, 16)]
+    safe = &quot;import secrets, hmac\n\ndef new_code():\n    return secrets.token_urlsafe(10)\n\ndef same(a, digest):\n    return hmac.compare_digest(a, digest)\n\ndef shuffle_walks(walks):\n    import random\n    return random.choice(walks)\n&quot;
+    assert insecure_random(safe) == [] and plain_secret_compares(safe) == []</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+SECRET_FUNCS = (&quot;token&quot;, &quot;code&quot;, &quot;key&quot;, &quot;secret&quot;, &quot;password&quot;)
+SECRET_NAMES = (&quot;token&quot;, &quot;digest&quot;, &quot;signature&quot;, &quot;secret&quot;, &quot;code&quot;)
+RANDOM_CALLS = {&quot;random&quot;, &quot;choice&quot;, &quot;randint&quot;, &quot;randrange&quot;, &quot;choices&quot;, &quot;Random&quot;}
+
+def _functions(source):
+    return [n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)]
+
+def insecure_random(source):
+    found = []
+    for func in _functions(source):
+        if not any(word in func.name for word in SECRET_FUNCS):
+            continue
+        for node in ast.walk(func):
+            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                    and isinstance(node.func.value, ast.Name) and node.func.value.id == &quot;random&quot;
+                    and node.func.attr in RANDOM_CALLS):
+                found.append((node.lineno, func.name, f&quot;random.{node.func.attr}&quot;))
+    return [(name, call) for _, name, call in sorted(found)]
+
+def _secretish(node):
+    return isinstance(node, ast.Name) and any(word in node.id for word in SECRET_NAMES)
+
+def plain_secret_compares(source):
+    found = []
+    for func in _functions(source):
+        for node in ast.walk(func):
+            if isinstance(node, ast.Compare) and any(isinstance(op, (ast.Eq, ast.NotEq)) for op in node.ops):
+                if _secretish(node.left) or any(_secretish(c) for c in node.comparators):
+                    found.append((func.name, node.lineno))
+    return sorted(found, key=lambda f: f[1])</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w090d5-audit" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Auditing dependencies</div><div class="pc-prompt"><p>Write <code>audit(lock_text, advisories)</code>: <code>lock_text</code> has one pinned requirement per line (<code>name==version</code>; ignore blank lines and lines starting with <code>#</code>; names compare in lower case); <code>advisories</code> maps a package name to a list of <code>(advisory_id, fixed_in)</code> meaning versions <strong>below</strong> <code>fixed_in</code> are affected. Return a sorted list of <code>"NAME VERSION: ID (fixed in FIXED)"</code>, comparing versions as tuples of integers.</p></div><textarea class="pc-src pc-code" hidden>def audit(lock_text, advisories):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>LOCK = &quot;&quot;&quot;# waymark requirements, pinned
+requests==2.30.0
+Rich==13.7.1
+
+urllib3==2.2.1
+pyyaml==5.3
+&quot;&quot;&quot;
+ADVISORIES = {&quot;requests&quot;: [(&quot;PYSEC-2023-74&quot;, &quot;2.31.0&quot;)], &quot;urllib3&quot;: [(&quot;PYSEC-2024-1&quot;, &quot;2.2.2&quot;), (&quot;PYSEC-2023-9&quot;, &quot;2.0.6&quot;)],
+              &quot;pyyaml&quot;: [(&quot;PYSEC-2021-142&quot;, &quot;5.4&quot;)], &quot;rich&quot;: []}
+
+def test_audit():
+    &quot;known holes in pinned versions&quot;
+    assert audit(LOCK, ADVISORIES) == [&quot;pyyaml 5.3: PYSEC-2021-142 (fixed in 5.4)&quot;, &quot;requests 2.30.0: PYSEC-2023-74 (fixed in 2.31.0)&quot;,
+                                       &quot;urllib3 2.2.1: PYSEC-2024-1 (fixed in 2.2.2)&quot;]
+    assert audit(&quot;requests==2.31.0\n&quot;, ADVISORIES) == []</textarea><textarea class="pc-src pc-solution" hidden>def _v(text):
+    return tuple(int(p) for p in text.split(&quot;.&quot;))
+
+def audit(lock_text, advisories):
+    found = []
+    for line in lock_text.splitlines():
+        line = line.strip()
+        if not line or line.startswith(&quot;#&quot;):
+            continue
+        name, _, version = line.partition(&quot;==&quot;)
+        name = name.strip().lower()
+        for advisory, fixed in advisories.get(name, []):
+            if _v(version) &lt; _v(fixed):
+                found.append(f&quot;{name} {version}: {advisory} (fixed in {fixed})&quot;)
+    return sorted(found)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w090d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A share code in the log</div><div class="pc-prompt"><p>The access log writes the whole path, including the share code, so anyone who can read the logs can open the shared route: it prints <code>GET /s/mfrggzdfmztwq2lk 200</code>. Redact the code before logging, so it prints <code>GET /s/*** 200</code>.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+def log_line(method, path, status):
+    return f&quot;{method} {path} {status}&quot;
+
+print(log_line(&quot;GET&quot;, &quot;/s/mfrggzdfmztwq2lk&quot;, 200))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;redact at the source&quot;
+    expect_output(&quot;GET /s/*** 200&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+def log_line(method, path, status):
+    return f&quot;{method} {re.sub(r&#x27;/s/[A-Za-z0-9]+&#x27;, &#x27;/s/***&#x27;, path)} {status}&quot;
+
+print(log_line(&quot;GET&quot;, &quot;/s/mfrggzdfmztwq2lk&quot;, 200))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w090d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Anyone&rsquo;s walk by number</div><div class="pc-prompt"><p>The handler returns any walk by its id, whoever asks, so Bo can read Ada&rsquo;s walk: it prints <code>bo sees: {'km': 6.0}</code>. Check the owner, and answer with <code>None</code> (a 404) for other people&rsquo;s walks, so it prints <code>bo sees: None</code>.</p></div><textarea class="pc-src pc-code" hidden>WALKS = {17: {&quot;owner&quot;: &quot;ada&quot;, &quot;km&quot;: 6.0}}
+
+def get_walk(user, walk_id):
+    walk = WALKS.get(walk_id)
+    return {&quot;km&quot;: walk[&quot;km&quot;]} if walk else None
+
+print(&quot;bo sees:&quot;, get_walk(&quot;bo&quot;, 17))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;ownership on every access&quot;
+    expect_output(&quot;bo sees: None&quot;)</textarea><textarea class="pc-src pc-solution" hidden>WALKS = {17: {&quot;owner&quot;: &quot;ada&quot;, &quot;km&quot;: 6.0}}
+
+def get_walk(user, walk_id):
+    walk = WALKS.get(walk_id)
+    return {&quot;km&quot;: walk[&quot;km&quot;]} if walk and walk[&quot;owner&quot;] == user else None
+
+print(&quot;bo sees:&quot;, get_walk(&quot;bo&quot;, 17))</textarea></div>
+<div class="parsons" data-id="w090d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Opening a share, fixed</div><div class="pc-prompt"><p>Arrange the fixed <code>open_share</code>: a parameterised query on the code&rsquo;s hash, no secret in the log, and no plain comparison. One line is a trap.</p></div><script type="application/json">{"lines": ["def open_share(conn, code):", "    digest = hashlib.sha256(code.encode()).hexdigest()", "    log.info(\"opening share %s...\", digest[:8])", "    row = conn.execute(\"SELECT route FROM share WHERE digest = ?\", (digest,)).fetchone()", "    return row[0] if row else None"], "distractors": ["    log.info(\"opening share %s\", code)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w090d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the acronym for reading other people&#x27;s records by changing an id (four capital letters)
+q = ___   # the module to use instead of random for share codes
+r = ___   # the function to use instead of == for comparing digests (module.function)
+s = ___   # True or False: pickle.loads is safe on data from a user&#x27;s upload
+t = ___   # the status for another user&#x27;s walk: 403 or 404</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;IDOR&quot; and q == &quot;secrets&quot; and r == &quot;hmac.compare_digest&quot;, &quot;p, q and r&quot;
+    assert s is False and t == 404, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;IDOR&quot;
+q = &quot;secrets&quot;
+r = &quot;hmac.compare_digest&quot;
+s = False
+t = 404</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w090d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Why are secrets in logs dangerous?", "answer": 1, "explain": "Redact at the source.", "options": ["Logs are slow", "Logs are copied, kept and read by many more people than the database", "They use space", "They aren&rsquo;t"]}, {"type": "mc", "q": "What&rsquo;s an IDOR?", "answer": 1, "explain": "Check ownership every time.", "options": ["A database index", "Reading or changing others&rsquo; records by changing an id in a request", "A type of injection", "A log format"]}, {"type": "mc", "q": "Where should ownership be checked?", "answer": 1, "explain": "WHERE id = ? AND owner = ?", "options": ["Only in the interface", "In the service or repository, on every access", "In the browser", "Nowhere"]}, {"type": "mc", "q": "Why use the same 404 for missing and not-yours?", "answer": 1, "explain": "Reveal nothing.", "options": ["Simplicity", "Different answers let attackers probe which ids exist", "HTTP rules", "Speed"]}, {"type": "mc", "q": "Why is random.choice wrong for share codes?", "answer": 1, "explain": "Secrets need a secure source.", "options": ["Slow", "Its output can be predicted; use secrets", "Too short", "It repeats"]}, {"type": "mc", "q": "Why is <code>digest == stored</code> a problem?", "answer": 1, "explain": "Constant-time comparison.", "options": ["It&rsquo;s wrong", "The comparison&rsquo;s time can reveal how much matched; use compare_digest", "Syntax", "It&rsquo;s slow"]}, {"type": "mc", "q": "Why is pickle.loads dangerous on outside data?", "answer": 1, "explain": "Use JSON for data from outside.", "options": ["It&rsquo;s slow", "Unpickling can run arbitrary code", "It loses data", "It&rsquo;s deprecated"]}, {"type": "mc", "q": "What does a dependency audit compare?", "answer": 1, "explain": "pip-audit, in CI.", "options": ["Licences", "Your pinned versions with published advisories", "Code style", "Download counts"]}, {"type": "mc", "q": "What should a security tool&rsquo;s findings be?", "answer": 1, "explain": "Machines find shapes; people judge risk.", "options": ["Final verdicts", "Candidates for a person to judge", "Ignored", "Automatically fixed"]}, {"type": "output", "q": "What does this print?", "answer": "a?token=***&b=2", "explain": "The value stops at the &amp;.", "code": "import re\nprint(re.sub(r\"(token)=[^&\\s]+\", r\"\\1=***\", \"a?token=x1&b=2\"))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w090d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a security reviewer</div><div class="pc-prompt"><p>Write <code>security_review(source)</code> using the given helpers (and your own <code>ast</code> walking). Return <code>(findings, verdict)</code>: <code>findings</code> is a list of <code>"LINE SEVERITY: MESSAGE (FUNCTION)"</code> strings sorted by line, then message, with these rules: <code>high: random used for a secret</code> for each <code>insecure_random</code> call (at the call&rsquo;s line); <code>high: secret compared with ==</code> for each <code>plain_secret_compares</code> result; <code>high: SQL built from a string</code> for any <code>execute</code> call whose first argument is an f-string (<code>ast.JoinedStr</code>) or a <code>%</code> formatting (<code>ast.BinOp</code> with <code>%</code>); <code>high: pickle.loads on outside data</code> for any call to <code>pickle.loads</code>; <code>medium: secret written to output</code> for any call to <code>print</code> or to a method <code>debug</code>, <code>info</code>, <code>warning</code> or <code>error</code> of a name, with an argument that&rsquo;s a name containing <code>token</code>, <code>code</code>, <code>password</code> or <code>secret</code>. <code>verdict</code> is <code>"block"</code> if any finding is high, <code>"fix soon"</code> if any is medium, else <code>"ok"</code>.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+SECRET_FUNCS = (&quot;token&quot;, &quot;code&quot;, &quot;key&quot;, &quot;secret&quot;, &quot;password&quot;)
+SECRET_NAMES = (&quot;token&quot;, &quot;digest&quot;, &quot;signature&quot;, &quot;secret&quot;, &quot;code&quot;)
+RANDOM_CALLS = {&quot;random&quot;, &quot;choice&quot;, &quot;randint&quot;, &quot;randrange&quot;, &quot;choices&quot;, &quot;Random&quot;}
+
+def _functions(tree):
+    return [n for n in tree.body if isinstance(n, ast.FunctionDef)]
+
+def insecure_random(tree):
+    found = []
+    for func in _functions(tree):
+        if any(word in func.name for word in SECRET_FUNCS):
+            for node in ast.walk(func):
+                if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name)
+                        and node.func.value.id == &quot;random&quot; and node.func.attr in RANDOM_CALLS):
+                    found.append((node.lineno, func.name))
+    return found
+
+def plain_secret_compares(tree):
+    secretish = lambda n: isinstance(n, ast.Name) and any(w in n.id for w in SECRET_NAMES)
+    found = []
+    for func in _functions(tree):
+        for node in ast.walk(func):
+            if isinstance(node, ast.Compare) and any(isinstance(op, (ast.Eq, ast.NotEq)) for op in node.ops):
+                if secretish(node.left) or any(secretish(c) for c in node.comparators):
+                    found.append((node.lineno, func.name))
+    return found
+
+def security_review(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_draft():
+    &quot;the sprint&#x27;s draft module&quot;
+    findings, verdict = security_review(open(&quot;sharing_draft.py&quot;).read())
+    assert findings == [
+        &quot;11 high: random used for a secret (new_share_code)&quot;,
+        &quot;16 high: secret compared with == (check_code)&quot;,
+        &quot;20 medium: secret written to output (open_share)&quot;,
+        &quot;21 high: SQL built from a string (open_share)&quot;,
+        &quot;26 high: pickle.loads on outside data (import_settings)&quot;,
+        &quot;30 high: random used for a secret (make_reset_token)&quot;,
+        &quot;31 medium: secret written to output (make_reset_token)&quot;,
+    ]
+    assert verdict == &quot;block&quot;
+
+def test_verdicts():
+    &quot;fix soon, and ok&quot;
+    medium = &quot;import logging\nlog = logging.getLogger()\n\ndef send(token):\n    log.info(&#x27;sent %s&#x27;, token)\n&quot;
+    assert security_review(medium) == ([&quot;5 medium: secret written to output (send)&quot;], &quot;fix soon&quot;)
+    clean = &quot;import secrets\n\ndef new_code():\n    return secrets.token_urlsafe(10)\n\ndef count(conn):\n    return conn.execute(&#x27;SELECT COUNT(*) FROM walk&#x27;).fetchone()\n&quot;
+    assert security_review(clean) == ([], &quot;ok&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+SECRET_FUNCS = (&quot;token&quot;, &quot;code&quot;, &quot;key&quot;, &quot;secret&quot;, &quot;password&quot;)
+SECRET_NAMES = (&quot;token&quot;, &quot;digest&quot;, &quot;signature&quot;, &quot;secret&quot;, &quot;code&quot;)
+RANDOM_CALLS = {&quot;random&quot;, &quot;choice&quot;, &quot;randint&quot;, &quot;randrange&quot;, &quot;choices&quot;, &quot;Random&quot;}
+
+def _functions(tree):
+    return [n for n in tree.body if isinstance(n, ast.FunctionDef)]
+
+def insecure_random(tree):
+    found = []
+    for func in _functions(tree):
+        if any(word in func.name for word in SECRET_FUNCS):
+            for node in ast.walk(func):
+                if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name)
+                        and node.func.value.id == &quot;random&quot; and node.func.attr in RANDOM_CALLS):
+                    found.append((node.lineno, func.name))
+    return found
+
+def plain_secret_compares(tree):
+    secretish = lambda n: isinstance(n, ast.Name) and any(w in n.id for w in SECRET_NAMES)
+    found = []
+    for func in _functions(tree):
+        for node in ast.walk(func):
+            if isinstance(node, ast.Compare) and any(isinstance(op, (ast.Eq, ast.NotEq)) for op in node.ops):
+                if secretish(node.left) or any(secretish(c) for c in node.comparators):
+                    found.append((node.lineno, func.name))
+    return found
+
+OUTPUT_SECRETS = (&quot;token&quot;, &quot;code&quot;, &quot;password&quot;, &quot;secret&quot;)
+
+def _is_output(call):
+    if isinstance(call.func, ast.Name) and call.func.id == &quot;print&quot;:
+        return True
+    return (isinstance(call.func, ast.Attribute) and isinstance(call.func.value, ast.Name)
+            and call.func.attr in (&quot;debug&quot;, &quot;info&quot;, &quot;warning&quot;, &quot;error&quot;))
+
+def security_review(source):
+    tree = ast.parse(source)
+    found = [(line, &quot;high: random used for a secret&quot;, name) for line, name in insecure_random(tree)]
+    found += [(line, &quot;high: secret compared with ==&quot;, name) for line, name in plain_secret_compares(tree)]
+    for func in _functions(tree):
+        for node in ast.walk(func):
+            if not isinstance(node, ast.Call):
+                continue
+            target = node.func
+            if isinstance(target, ast.Attribute) and target.attr == &quot;execute&quot; and node.args:
+                first = node.args[0]
+                if isinstance(first, ast.JoinedStr) or (isinstance(first, ast.BinOp) and isinstance(first.op, ast.Mod)):
+                    found.append((node.lineno, &quot;high: SQL built from a string&quot;, func.name))
+            if (isinstance(target, ast.Attribute) and target.attr == &quot;loads&quot; and isinstance(target.value, ast.Name)
+                    and target.value.id == &quot;pickle&quot;):
+                found.append((node.lineno, &quot;high: pickle.loads on outside data&quot;, func.name))
+            if _is_output(node) and any(isinstance(a, ast.Name) and any(w in a.id for w in OUTPUT_SECRETS) for a in node.args):
+                found.append((node.lineno, &quot;medium: secret written to output&quot;, func.name))
+    found.sort()
+    findings = [f&quot;{line} {message} ({name})&quot; for line, message, name in found]
+    if any(&quot; high:&quot; in f for f in findings):
+        verdict = &quot;block&quot;
+    elif findings:
+        verdict = &quot;fix soon&quot;
+    else:
+        verdict = &quot;ok&quot;
+    return findings, verdict</textarea></div>
+<h2 id="your-capstone-today">Your capstone today</h2>
+<ol>
+<li><strong>A security review</strong> of your capstone with today&rsquo;s list: logs, ownership, randomness, comparisons, string-built queries, dangerous calls.</li>
+<li><strong>Run Bandit and pip-audit</strong> on your own computer (both free), and add them to CI.</li>
+<li><strong>Fix every high finding</strong> before the sprint review, each in its own small pull request with a test.</li>
+</ol>
+<h2 id="before-you-go">Before you go</h2>
+<p>Tomorrow is the last sprint review: the feature freeze. After it, nothing new is built: the next week hardens what exists.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w090d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w090d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w090d5", "week": 90, "day": 5, "title": "Code review", "exercises": [{"id": "w090d5-redact", "title": "Redacting logs", "points": 10}, {"id": "w090d5-idor", "title": "Only your own walks", "points": 15}, {"id": "w090d5-shapes", "title": "Finding insecure shapes", "points": 15}, {"id": "w090d5-audit", "title": "Auditing dependencies", "points": 10}, {"id": "w090d5-bug1", "title": "A share code in the log", "points": 10}, {"id": "w090d5-bug2", "title": "Anyone's walk by number", "points": 10}, {"id": "w090d5-trace", "title": "Predict them", "points": 10}, {"id": "w090d5-challenge", "title": "Challenge: a security reviewer", "points": 25}], "points": 105}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=97b2d34bb1"></script>
+</body>
+</html>
