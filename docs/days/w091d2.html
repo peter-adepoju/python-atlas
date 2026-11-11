@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="97b2d34bb1">
+<title>Week 91 Day 2: Security review | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=97b2d34bb1">
+<link rel="stylesheet" href="../assets/css/site.css?v=97b2d34bb1">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=97b2d34bb1"></script>
+<script src="../assets/vendor/codemirror.js?v=97b2d34bb1" defer></script>
+<meta name="description" content="Last week’s review looked at one sprint’s code. Today’s looks at the whole of Waymark, and starts somewhere else: not with the code but with a map of where...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w091d2.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 91 Day 2: Security review">
+<meta property="og:description" content="Last week’s review looked at one sprint’s code. Today’s looks at the whole of Waymark, and starts somewhere else: not with the code but with a map of where...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w091d2.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-91">Week 91: Capstone 5: harden</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#a-threat-model" data-sec="a-threat-model">A threat model</a></li><li><a href="#limits-and-rate-limiting" data-sec="limits-and-rate-limiting">Limits and rate limiting</a></li><li><a href="#paths-and-headers" data-sec="paths-and-headers">Paths and headers</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#your-capstone-today" data-sec="your-capstone-today">Your capstone today</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w091d2.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-7">Phase 7: Mastery</a></li><li><a href="../map.html#week-91">Week 91: Capstone 5: harden</a></li><li aria-current="page">Day 2 of 6</li></ol>
+      <p class="day-where"><span>Week 91, Day 2</span></p>
+      <h1>Security review</h1>
+      <div class="day-intro"><p>Last week&rsquo;s review looked at one sprint&rsquo;s code. Today&rsquo;s looks at the <strong>whole</strong> of Waymark, and starts somewhere else: not with the code but with a map of where data comes from and who sends it. That map is a <strong>threat model</strong>: draw the data flows, mark the <strong>trust boundaries</strong> where data from strangers enters, and ask the STRIDE questions at each one. Then you&rsquo;ll harden the places the model points at: limits on what a request may contain, a <strong>rate limiter</strong> so one client can&rsquo;t drown the service, export files that can&rsquo;t escape their folder, and the response headers a browser needs. The challenge turns a data-flow description into a threat list automatically.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Draw data flows and mark the trust boundaries where untrusted data enters</li><li>Ask the six STRIDE questions at each boundary</li><li>Limit the size and depth of requests, and rate-limit clients with a token bucket</li><li>Keep file paths built from user input inside their folder</li><li>Check responses for the security headers a browser needs</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="A threat model: 20 min"></span><span class="plan-seg s0" style="flex:15" title="Limits and rate limiting: 15 min"></span><span class="plan-seg s1" style="flex:10" title="Paths and headers: 10 min"></span><span class="plan-seg s0" style="flex:65" title="Practice: 65 min"></span><span class="plan-seg s1" style="flex:30" title="Quiz and daily challenge: 30 min"></span><span class="plan-seg s0" style="flex:30" title="Your capstone today: 30 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">7 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">A threat model</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Limits and rate limiting</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:45</span><span class="plan-what">Paths and headers</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Practice</span><span class="plan-min">65 min</span></li><li><span class="plan-at">2:00</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">30 min</span></li><li><span class="plan-at">2:30</span><span class="plan-what">Your capstone today</span><span class="plan-min">30 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w091d2.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w091d2.ipynb" download>download it</a>. Exercises today are worth 115 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w091d2-p1"><textarea class="pc-src pc-code" hidden>import posixpath
+
+base = &quot;/srv/waymark/exports&quot;
+for name in [&quot;ridge.gpx&quot;, &quot;../../etc/passwd&quot;, &quot;walks/jan.gpx&quot;]:
+    print(posixpath.normpath(posixpath.join(base, name)))</textarea></div>
+<p>The second name walks out of the export folder. Any path built from user input needs the same suspicion as a SQL query built from it: check where it <strong>ends up</strong>, not what it looks like.</p>
+<h2 id="a-threat-model">A threat model</h2>
+<p>A threat model answers four questions (from Adam Shostack&rsquo;s <em>Threat Modeling</em>): what are we building, what can go wrong, what are we going to do about it, and did we do a good job?</p>
+<p>Start with a <strong>data-flow diagram</strong>: the <strong>external</strong> parties (a walker&rsquo;s browser, another app using the API), the <strong>processes</strong> (the Waymark service), the <strong>stores</strong> (the database, the export folder), and the <strong>flows</strong> between them. Then draw the <strong>trust boundaries</strong>: lines where data passes from someone you don&rsquo;t control to something you do. Every flow across a boundary is where attacks arrive.</p>
+<p>At each crossing ask the six <strong>STRIDE</strong> questions (devised at Microsoft by Loren Kohnfelder and Praerit Garg):</p>
+<ul>
+<li><strong>S</strong>poofing: can someone pretend to be another user? (Authentication.)</li>
+<li><strong>T</strong>ampering: can they change data they shouldn&rsquo;t, or send input that breaks things? (Validation.)</li>
+<li><strong>R</strong>epudiation: could someone deny doing something, with no record to show otherwise? (Audit logs.)</li>
+<li><strong>I</strong>nformation disclosure: can data leak, in transit or in errors? (Encryption, careful errors.)</li>
+<li><strong>D</strong>enial of service: can one client exhaust the service? (Limits, rate limiting.)</li>
+<li><strong>E</strong>levation of privilege: can someone do what only an administrator should? (Role checks.)</li>
+</ul>
+<h2 id="limits-and-rate-limiting">Limits and rate limiting</h2>
+<p><strong>Limits</strong> stop a single request costing too much: a maximum body size, a maximum number of items in a list (a route with 100,000 stops), a maximum string length, and a maximum <strong>nesting depth</strong> (JSON nested ten thousand levels deep can crash a parser that recurses). Check them before doing any real work.</p>
+<p><strong>Rate limiting</strong> stops a single client sending too many requests. A <strong>token bucket</strong> holds up to <code>capacity</code> tokens and gains <code>rate</code> tokens per second; each request spends one, and a request with no token left is refused (status 429). It allows short bursts up to the capacity while holding the long-run rate down. The bucket must never hold <strong>more</strong> than its capacity, however long it&rsquo;s been idle.</p>
+<h2 id="paths-and-headers">Paths and headers</h2>
+<p>A file name from a user (an export called <code>ridge.gpx</code>) is joined to a folder, so <code>../</code> can climb out of it. Normalise the joined path and check that it&rsquo;s still <strong>inside</strong> the folder, comparing path components with <code>posixpath.commonpath</code> (or <code>Path.is_relative_to</code>), not strings: <code>/srv/exports-old</code> starts with the text <code>/srv/exports</code> but isn&rsquo;t inside it.</p>
+<p>Pages a browser shows need a few <strong>security headers</strong>: <code>Content-Security-Policy</code> (which scripts may run), <code>X-Content-Type-Options: nosniff</code> (don&rsquo;t guess file types), <code>Strict-Transport-Security</code> (always use HTTPS), and <code>Cache-Control: no-store</code> on pages with private data, such as an opened share.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Model threats before reading code: draw the data flows, mark trust boundaries, and ask STRIDE at each crossing (authentication, validation, audit, disclosure, denial of service, privilege). Limit size, items, text and depth before doing work; rate-limit with a token bucket capped at its capacity. Normalise paths built from input and check they stay inside their folder by components. Send the security headers browsers need.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w091d2-boundaries" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Trust boundaries</div><div class="pc-prompt"><p>Write <code>crossings(flows, zones)</code>: <code>flows</code> is a list of <code>(source, target, data)</code> tuples and <code>zones</code> maps each component to a trust zone (<code>"internet"</code>, <code>"service"</code> or <code>"data"</code>, from least to most trusted). Return a list of <code>"SOURCE -&gt; TARGET: DATA (from ZONE to ZONE)"</code> for every flow between different zones <strong>into a more trusted zone</strong>, in the order given.</p></div><textarea class="pc-src pc-code" hidden>def crossings(flows, zones):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>ZONES = {&quot;browser&quot;: &quot;internet&quot;, &quot;partner app&quot;: &quot;internet&quot;, &quot;waymark&quot;: &quot;service&quot;, &quot;database&quot;: &quot;data&quot;, &quot;exports&quot;: &quot;data&quot;}
+FLOWS = [(&quot;browser&quot;, &quot;waymark&quot;, &quot;plan request&quot;), (&quot;waymark&quot;, &quot;browser&quot;, &quot;route&quot;), (&quot;partner app&quot;, &quot;waymark&quot;, &quot;walk upload&quot;),
+         (&quot;waymark&quot;, &quot;database&quot;, &quot;saved route&quot;), (&quot;database&quot;, &quot;waymark&quot;, &quot;walks&quot;), (&quot;waymark&quot;, &quot;exports&quot;, &quot;gpx file&quot;),
+         (&quot;browser&quot;, &quot;partner app&quot;, &quot;share link&quot;)]
+
+def test_crossings():
+    &quot;where untrusted data enters&quot;
+    assert crossings(FLOWS, ZONES) == [
+        &quot;browser -&gt; waymark: plan request (from internet to service)&quot;,
+        &quot;partner app -&gt; waymark: walk upload (from internet to service)&quot;,
+        &quot;waymark -&gt; database: saved route (from service to data)&quot;,
+        &quot;waymark -&gt; exports: gpx file (from service to data)&quot;,
+    ]</textarea><textarea class="pc-src pc-solution" hidden>ORDER = {&quot;internet&quot;: 0, &quot;service&quot;: 1, &quot;data&quot;: 2}
+
+def crossings(flows, zones):
+    found = []
+    for source, target, data in flows:
+        a, b = zones[source], zones[target]
+        if ORDER[b] &gt; ORDER[a]:
+            found.append(f&quot;{source} -&gt; {target}: {data} (from {a} to {b})&quot;)
+    return found</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w091d2-limits" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Limits on a request</div><div class="pc-prompt"><p>Write <code>limit_problems(value, max_depth=5, max_items=100, max_text=200)</code>, walking a JSON-like value (dicts, lists, strings, numbers) depth first in document order, and returning a list of problems with JSON paths (<code>$</code> for the whole value, <code>.key</code> for a dict key, <code>[i]</code> for a list index): <code>"PATH: N items (max M)"</code> for a dict or list with more than <code>max_items</code> entries (checked before its contents), <code>"PATH: N characters (max M)"</code> for a longer string, and <code>"PATH: nested too deep (max M)"</code> for a dict or list deeper than <code>max_depth</code> (the outermost container is depth 1), without looking inside it.</p></div><textarea class="pc-src pc-code" hidden>def limit_problems(value, max_depth=5, max_items=100, max_text=200):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_fine():
+    &quot;an ordinary request&quot;
+    assert limit_problems({&quot;start&quot;: &quot;Mill&quot;, &quot;end&quot;: &quot;Ridge&quot;, &quot;avoid&quot;: [&quot;Farm&quot;], &quot;prefs&quot;: {&quot;steep_limit&quot;: 80}}) == []
+
+def test_problems():
+    &quot;too big, too long, too deep&quot;
+    request = {&quot;stops&quot;: [&quot;Mill&quot;] * 150, &quot;note&quot;: &quot;x&quot; * 250, &quot;a&quot;: {&quot;b&quot;: {&quot;c&quot;: {&quot;d&quot;: {&quot;e&quot;: {&quot;f&quot;: 1}}}}}}
+    assert limit_problems(request) == [&quot;$.stops: 150 items (max 100)&quot;, &quot;$.note: 250 characters (max 200)&quot;,
+                                       &quot;$.a.b.c.d.e: nested too deep (max 5)&quot;]
+    assert limit_problems([[&quot;ok&quot;, &quot;y&quot; * 9]], max_text=8) == [&quot;$[0][1]: 9 characters (max 8)&quot;]
+    assert limit_problems([[[[[[[1]]]]]]], max_depth=3) == [&quot;$[0][0][0]: nested too deep (max 3)&quot;]</textarea><textarea class="pc-src pc-solution" hidden>def limit_problems(value, max_depth=5, max_items=100, max_text=200):
+    problems = []
+
+    def visit(item, path, depth):
+        if isinstance(item, (dict, list)):
+            if depth &gt; max_depth:
+                problems.append(f&quot;{path}: nested too deep (max {max_depth})&quot;)
+                return
+            if len(item) &gt; max_items:
+                problems.append(f&quot;{path}: {len(item)} items (max {max_items})&quot;)
+            children = item.items() if isinstance(item, dict) else enumerate(item)
+            for key, child in children:
+                visit(child, f&quot;{path}.{key}&quot; if isinstance(item, dict) else f&quot;{path}[{key}]&quot;, depth + 1)
+        elif isinstance(item, str) and len(item) &gt; max_text:
+            problems.append(f&quot;{path}: {len(item)} characters (max {max_text})&quot;)
+
+    visit(value, &quot;$&quot;, 1)
+    return problems</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w091d2-bucket" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A token bucket</div><div class="pc-prompt"><p>Write <code>TokenBucket(capacity, rate, clock)</code>: it starts full; <code>clock()</code> returns the time in seconds. <code>allow()</code> first adds <code>rate</code> tokens per second since the last call (never holding more than <code>capacity</code>), then spends one token and returns <code>True</code> if at least one is available, else returns <code>False</code>. Also write <code>RateLimiter(capacity, rate, clock)</code> with <code>allow(client)</code> keeping one bucket per client.</p></div><textarea class="pc-src pc-code" hidden>class TokenBucket:
+    ___
+
+class RateLimiter:
+    ___</textarea><textarea class="pc-src pc-tests" hidden>class Clock:
+    def __init__(self):
+        self.now = 0.0
+    def __call__(self):
+        return self.now
+
+def test_bucket():
+    &quot;bursts, then the rate&quot;
+    clock = Clock()
+    bucket = TokenBucket(5, 2, clock)
+    assert [bucket.allow() for _ in range(7)] == [True] * 5 + [False, False]
+    clock.now = 1.0
+    assert [bucket.allow() for _ in range(3)] == [True, True, False]
+    clock.now = 3600.0
+    assert sum(bucket.allow() for _ in range(100)) == 5
+
+def test_limiter():
+    &quot;one bucket each&quot;
+    clock = Clock()
+    limiter = RateLimiter(2, 1, clock)
+    assert [limiter.allow(&quot;ada&quot;) for _ in range(3)] == [True, True, False]
+    assert limiter.allow(&quot;bo&quot;) is True
+    clock.now = 1.5
+    assert limiter.allow(&quot;ada&quot;) is True and limiter.allow(&quot;ada&quot;) is False</textarea><textarea class="pc-src pc-solution" hidden>class TokenBucket:
+    def __init__(self, capacity, rate, clock):
+        self.capacity, self.rate, self.clock = capacity, rate, clock
+        self.tokens = capacity
+        self.last = clock()
+
+    def allow(self):
+        now = self.clock()
+        self.tokens = min(self.capacity, self.tokens + (now - self.last) * self.rate)
+        self.last = now
+        if self.tokens &gt;= 1:
+            self.tokens -= 1
+            return True
+        return False
+
+class RateLimiter:
+    def __init__(self, capacity, rate, clock):
+        self.capacity, self.rate, self.clock = capacity, rate, clock
+        self.buckets = {}
+
+    def allow(self, client):
+        if client not in self.buckets:
+            self.buckets[client] = TokenBucket(self.capacity, self.rate, self.clock)
+        return self.buckets[client].allow()</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w091d2-paths" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Export paths that stay put</div><div class="pc-prompt"><p>Write <code>export_path(base, name)</code>: join a user-supplied file <code>name</code> to the folder <code>base</code> (POSIX paths), normalise it, and return it as a string. Raise <code>ValueError("unsafe name")</code> if <code>name</code> is empty, contains a NUL character (<code>"\0"</code>), is absolute, or the normalised path isn&rsquo;t strictly inside <code>base</code> (compare components with <code>posixpath.commonpath</code>).</p></div><textarea class="pc-src pc-code" hidden>import posixpath
+
+def export_path(base, name):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_paths():
+    &quot;inside the folder&quot;
+    base = &quot;/srv/waymark/exports&quot;
+    assert export_path(base, &quot;ridge.gpx&quot;) == &quot;/srv/waymark/exports/ridge.gpx&quot;
+    assert export_path(base, &quot;walks/../jan.gpx&quot;) == &quot;/srv/waymark/exports/jan.gpx&quot;
+    for bad in [&quot;&quot;, &quot;../../etc/passwd&quot;, &quot;/etc/passwd&quot;, &quot;../exports-old/x.gpx&quot;, &quot;ok\0.gpx&quot;, &quot;.&quot;, &quot;walks/../..&quot;]:
+        try:
+            export_path(base, bad)
+        except ValueError as e:
+            assert str(e) == &quot;unsafe name&quot;
+        else:
+            raise AssertionError(repr(bad))</textarea><textarea class="pc-src pc-solution" hidden>import posixpath
+
+def export_path(base, name):
+    if not name or &quot;\0&quot; in name or posixpath.isabs(name):
+        raise ValueError(&quot;unsafe name&quot;)
+    base = posixpath.normpath(base)
+    path = posixpath.normpath(posixpath.join(base, name))
+    if path == base or posixpath.commonpath([base, path]) != base:
+        raise ValueError(&quot;unsafe name&quot;)
+    return path</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w091d2-headers" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Security headers</div><div class="pc-prompt"><p>Write <code>header_problems(headers, private=False)</code>: header names compare without regard to case. Return a list, in this order, of <code>"missing Content-Security-Policy"</code>, <code>"X-Content-Type-Options should be nosniff"</code> (if missing or any other value), <code>"missing Strict-Transport-Security"</code>, and, only when <code>private</code> is true, <code>"Cache-Control should include no-store"</code>, for each that applies.</p></div><textarea class="pc-src pc-code" hidden>def header_problems(headers, private=False):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>GOOD = {&quot;Content-Security-Policy&quot;: &quot;default-src &#x27;self&#x27;&quot;, &quot;X-Content-Type-Options&quot;: &quot;nosniff&quot;,
+        &quot;Strict-Transport-Security&quot;: &quot;max-age=31536000&quot;, &quot;Cache-Control&quot;: &quot;private, no-store&quot;}
+
+def test_headers():
+    &quot;what a browser needs&quot;
+    assert header_problems(GOOD, private=True) == []
+    lower = {k.lower(): v for k, v in GOOD.items()}
+    assert header_problems(lower, private=True) == []
+    assert header_problems({&quot;x-content-type-options&quot;: &quot;yes&quot;, &quot;Cache-Control&quot;: &quot;max-age=60&quot;}, private=True) == [
+        &quot;missing Content-Security-Policy&quot;, &quot;X-Content-Type-Options should be nosniff&quot;,
+        &quot;missing Strict-Transport-Security&quot;, &quot;Cache-Control should include no-store&quot;]
+    assert header_problems({**GOOD, &quot;Cache-Control&quot;: &quot;max-age=60&quot;}) == []</textarea><textarea class="pc-src pc-solution" hidden>def header_problems(headers, private=False):
+    h = {k.lower(): v for k, v in headers.items()}
+    problems = []
+    if &quot;content-security-policy&quot; not in h:
+        problems.append(&quot;missing Content-Security-Policy&quot;)
+    if h.get(&quot;x-content-type-options&quot;, &quot;&quot;).strip().lower() != &quot;nosniff&quot;:
+        problems.append(&quot;X-Content-Type-Options should be nosniff&quot;)
+    if &quot;strict-transport-security&quot; not in h:
+        problems.append(&quot;missing Strict-Transport-Security&quot;)
+    if private and &quot;no-store&quot; not in h.get(&quot;cache-control&quot;, &quot;&quot;).lower():
+        problems.append(&quot;Cache-Control should include no-store&quot;)
+    return problems</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w091d2-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A bucket that filled overnight</div><div class="pc-prompt"><p>After an hour of quiet, this bucket lets a burst of all 100 requests through: it prints <code>100</code>, though its capacity is 10. Cap the tokens at the capacity so it prints <code>10</code>.</p></div><textarea class="pc-src pc-code" hidden>class Bucket:
+    def __init__(self, capacity, rate):
+        self.capacity, self.rate = capacity, rate
+        self.tokens, self.last = capacity, 0.0
+
+    def allow(self, now):
+        self.tokens = self.tokens + (now - self.last) * self.rate
+        self.last = now
+        if self.tokens &gt;= 1:
+            self.tokens -= 1
+            return True
+        return False
+
+bucket = Bucket(10, 1)
+print(sum(bucket.allow(3600.0) for _ in range(100)))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;never more than the capacity&quot;
+    expect_output(&quot;10&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class Bucket:
+    def __init__(self, capacity, rate):
+        self.capacity, self.rate = capacity, rate
+        self.tokens, self.last = capacity, 0.0
+
+    def allow(self, now):
+        self.tokens = min(self.capacity, self.tokens + (now - self.last) * self.rate)
+        self.last = now
+        if self.tokens &gt;= 1:
+            self.tokens -= 1
+            return True
+        return False
+
+bucket = Bucket(10, 1)
+print(sum(bucket.allow(3600.0) for _ in range(100)))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w091d2-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Inside by the look of it</div><div class="pc-prompt"><p>This check compares text, so a path in the folder <code>exports-old</code> passes as if it were inside <code>exports</code>: it prints <code>True</code>. Compare path components instead, so it prints <code>False</code>.</p></div><textarea class="pc-src pc-code" hidden>import posixpath
+
+def inside(base, path):
+    return posixpath.normpath(path).startswith(posixpath.normpath(base))
+
+print(inside(&quot;/srv/waymark/exports&quot;, &quot;/srv/waymark/exports-old/walks.csv&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;components, not characters&quot;
+    expect_output(&quot;False&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import posixpath
+
+def inside(base, path):
+    base, path = posixpath.normpath(base), posixpath.normpath(path)
+    return posixpath.commonpath([base, path]) == base
+
+print(inside(&quot;/srv/waymark/exports&quot;, &quot;/srv/waymark/exports-old/walks.csv&quot;))</textarea></div>
+<div class="parsons" data-id="w091d2-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Spending a token</div><div class="pc-prompt"><p>Arrange <code>allow</code>: refill for the time passed, capped at the capacity, then spend a token if there is one. One line is a trap.</p></div><script type="application/json">{"lines": ["def allow(self):", "    now = self.clock()", "    self.tokens = min(self.capacity, self.tokens + (now - self.last) * self.rate)", "    self.last = now", "    if self.tokens >= 1:", "        self.tokens -= 1", "        return True", "    return False"], "distractors": ["    self.tokens = self.capacity"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w091d2-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the STRIDE letter for &quot;someone denies changing a saved route, and there&#x27;s no record&quot;
+q = ___   # the HTTP status for a request refused by a rate limiter
+r = ___   # tokens a bucket of capacity 5 and rate 2 per second holds after 1 hour idle
+s = ___   # posixpath.normpath(&quot;/srv/exports/a/../../b&quot;)
+t = ___   # True or False: the header X-Content-Type-Options should be &quot;nosniff&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;R&quot; and q == 429 and r == 5, &quot;p, q and r&quot;
+    assert s == &quot;/srv/b&quot; and t is True, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;R&quot;
+q = 429
+r = 5
+s = &quot;/srv/b&quot;
+t = True</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w091d2-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What&rsquo;s a trust boundary?", "answer": 1, "explain": "Attacks arrive across it.", "options": ["A firewall rule", "A line where data passes from someone you don&rsquo;t control to something you do", "A database table", "A login page"]}, {"type": "mc", "q": "Which STRIDE threat does authentication answer?", "answer": 1, "explain": "Pretending to be someone else.", "options": ["Tampering", "Spoofing", "Repudiation", "Denial of service"]}, {"type": "mc", "q": "Which STRIDE threat do audit logs answer?", "answer": 1, "explain": "A record nobody can deny.", "options": ["Spoofing", "Repudiation", "Elevation of privilege", "Tampering"]}, {"type": "mc", "q": "Why limit JSON nesting depth?", "answer": 1, "explain": "Denial of service by shape.", "options": ["Style", "Deeply nested input can crash a recursive parser or cost too much", "JSON forbids it", "Speed of typing"]}, {"type": "mc", "q": "What does a token bucket allow?", "answer": 1, "explain": "Capacity and rate.", "options": ["Unlimited requests", "Short bursts up to its capacity, and a long-run rate", "Exactly one request a second", "Only one client"]}, {"type": "mc", "q": "What goes wrong if the bucket isn&rsquo;t capped?", "answer": 1, "explain": "The overnight bucket.", "options": ["Nothing", "After a long quiet spell it allows an enormous burst", "It refuses everything", "It crashes"]}, {"type": "mc", "q": "Why compare path components rather than strings?", "answer": 1, "explain": "exports-old isn&rsquo;t inside exports.", "options": ["Speed", "A sibling folder can share a prefix as text without being inside", "Strings are slower", "Windows"]}, {"type": "mc", "q": "What does Content-Security-Policy control?", "answer": 1, "explain": "A strong defence against script injection.", "options": ["Caching", "Which scripts and resources a page may load", "Cookies", "Compression"]}, {"type": "mc", "q": "Why Cache-Control no-store on an opened share?", "answer": 1, "explain": "Private pages aren&rsquo;t cached.", "options": ["Speed", "Private data shouldn&rsquo;t be kept by shared caches or the browser", "It&rsquo;s required by HTTP", "To save space"]}, {"type": "output", "q": "What does this print?", "answer": "/srv", "explain": "Components: exports and exports-old differ.", "code": "import posixpath\nprint(posixpath.commonpath([\"/srv/exports\", \"/srv/exports-old/x\"]))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w091d2-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a threat list from the data flows</div><div class="pc-prompt"><p>Write <code>threats(components, flows)</code>. <code>components</code> maps a name to <code>{"zone": ..., "kind": ...}</code>, with zones <code>"internet"</code>, <code>"service"</code> and <code>"data"</code> and kinds <code>"external"</code>, <code>"process"</code> and <code>"store"</code>. Each flow is a dict with <code>from</code>, <code>to</code>, <code>data</code>, <code>checks</code> (a list of strings) and optional flags <code>secret</code>, <code>writes</code> and <code>admin</code> (false if missing). Apply these rules to each flow:</p>
+<ul>
+<li><strong>into</strong> the service from the internet: <code>Spoofing</code> if <code>"auth"</code> isn&rsquo;t checked (<code>"no authentication"</code>), <code>Tampering</code> if <code>"validate"</code> isn&rsquo;t (<code>"input not validated"</code>), <code>Denial of service</code> if <code>"rate limit"</code> isn&rsquo;t (<code>"not rate limited"</code>), and <code>Elevation of privilege</code> if it&rsquo;s an <code>admin</code> flow without <code>"role check"</code> (<code>"admin action without a role check"</code>);</li>
+<li><strong>out to</strong> the internet: <code>Information disclosure</code> if it&rsquo;s <code>secret</code> without <code>"tls"</code> (<code>"sent without TLS"</code>);</li>
+<li><strong>to a store</strong>: <code>Repudiation</code> if it <code>writes</code> without <code>"audit"</code> (<code>"changes not audited"</code>).</li>
+</ul>
+<p>Return a list of <code>"CATEGORY: FROM -&gt; TO (DATA): PROBLEM"</code>, sorted in STRIDE order (Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege), then in flow order.</p></div><textarea class="pc-src pc-code" hidden>def threats(components, flows):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>COMPONENTS = {&quot;browser&quot;: {&quot;zone&quot;: &quot;internet&quot;, &quot;kind&quot;: &quot;external&quot;}, &quot;partner app&quot;: {&quot;zone&quot;: &quot;internet&quot;, &quot;kind&quot;: &quot;external&quot;},
+              &quot;waymark&quot;: {&quot;zone&quot;: &quot;service&quot;, &quot;kind&quot;: &quot;process&quot;}, &quot;database&quot;: {&quot;zone&quot;: &quot;data&quot;, &quot;kind&quot;: &quot;store&quot;},
+              &quot;exports&quot;: {&quot;zone&quot;: &quot;data&quot;, &quot;kind&quot;: &quot;store&quot;}}
+FLOWS = [
+    {&quot;from&quot;: &quot;browser&quot;, &quot;to&quot;: &quot;waymark&quot;, &quot;data&quot;: &quot;plan request&quot;, &quot;checks&quot;: [&quot;auth&quot;, &quot;validate&quot;, &quot;rate limit&quot;]},
+    {&quot;from&quot;: &quot;partner app&quot;, &quot;to&quot;: &quot;waymark&quot;, &quot;data&quot;: &quot;walk upload&quot;, &quot;checks&quot;: [&quot;auth&quot;]},
+    {&quot;from&quot;: &quot;browser&quot;, &quot;to&quot;: &quot;waymark&quot;, &quot;data&quot;: &quot;delete user&quot;, &quot;checks&quot;: [&quot;auth&quot;, &quot;validate&quot;, &quot;rate limit&quot;], &quot;admin&quot;: True},
+    {&quot;from&quot;: &quot;waymark&quot;, &quot;to&quot;: &quot;browser&quot;, &quot;data&quot;: &quot;share page&quot;, &quot;checks&quot;: [], &quot;secret&quot;: True},
+    {&quot;from&quot;: &quot;waymark&quot;, &quot;to&quot;: &quot;browser&quot;, &quot;data&quot;: &quot;route&quot;, &quot;checks&quot;: [&quot;tls&quot;], &quot;secret&quot;: True},
+    {&quot;from&quot;: &quot;waymark&quot;, &quot;to&quot;: &quot;database&quot;, &quot;data&quot;: &quot;saved route&quot;, &quot;checks&quot;: [&quot;audit&quot;], &quot;writes&quot;: True},
+    {&quot;from&quot;: &quot;waymark&quot;, &quot;to&quot;: &quot;exports&quot;, &quot;data&quot;: &quot;gpx file&quot;, &quot;checks&quot;: [], &quot;writes&quot;: True},
+    {&quot;from&quot;: &quot;database&quot;, &quot;to&quot;: &quot;waymark&quot;, &quot;data&quot;: &quot;walks&quot;, &quot;checks&quot;: []},
+]
+
+def test_threats():
+    &quot;STRIDE at the boundaries&quot;
+    assert threats(COMPONENTS, FLOWS) == [
+        &quot;Tampering: partner app -&gt; waymark (walk upload): input not validated&quot;,
+        &quot;Repudiation: waymark -&gt; exports (gpx file): changes not audited&quot;,
+        &quot;Information disclosure: waymark -&gt; browser (share page): sent without TLS&quot;,
+        &quot;Denial of service: partner app -&gt; waymark (walk upload): not rate limited&quot;,
+        &quot;Elevation of privilege: browser -&gt; waymark (delete user): admin action without a role check&quot;,
+    ]
+
+def test_unauthenticated():
+    &quot;every check missing&quot;
+    flow = {&quot;from&quot;: &quot;browser&quot;, &quot;to&quot;: &quot;waymark&quot;, &quot;data&quot;: &quot;x&quot;, &quot;checks&quot;: [], &quot;admin&quot;: True}
+    assert [t.split(&quot;:&quot;)[0] for t in threats(COMPONENTS, [flow])] == [&quot;Spoofing&quot;, &quot;Tampering&quot;, &quot;Denial of service&quot;, &quot;Elevation of privilege&quot;]
+    assert threats(COMPONENTS, []) == []</textarea><textarea class="pc-src pc-solution" hidden>ORDER = [&quot;Spoofing&quot;, &quot;Tampering&quot;, &quot;Repudiation&quot;, &quot;Information disclosure&quot;, &quot;Denial of service&quot;, &quot;Elevation of privilege&quot;]
+
+def threats(components, flows):
+    found = []
+    for index, flow in enumerate(flows):
+        source, target = components[flow[&quot;from&quot;]], components[flow[&quot;to&quot;]]
+        checks = set(flow.get(&quot;checks&quot;, []))
+
+        def add(category, problem):
+            found.append((ORDER.index(category), index, f&quot;{category}: {flow[&#x27;from&#x27;]} -&gt; {flow[&#x27;to&#x27;]} ({flow[&#x27;data&#x27;]}): {problem}&quot;))
+
+        if source[&quot;zone&quot;] == &quot;internet&quot; and target[&quot;zone&quot;] == &quot;service&quot;:
+            if &quot;auth&quot; not in checks:
+                add(&quot;Spoofing&quot;, &quot;no authentication&quot;)
+            if &quot;validate&quot; not in checks:
+                add(&quot;Tampering&quot;, &quot;input not validated&quot;)
+            if &quot;rate limit&quot; not in checks:
+                add(&quot;Denial of service&quot;, &quot;not rate limited&quot;)
+            if flow.get(&quot;admin&quot;) and &quot;role check&quot; not in checks:
+                add(&quot;Elevation of privilege&quot;, &quot;admin action without a role check&quot;)
+        if source[&quot;zone&quot;] != &quot;internet&quot; and target[&quot;zone&quot;] == &quot;internet&quot;:
+            if flow.get(&quot;secret&quot;) and &quot;tls&quot; not in checks:
+                add(&quot;Information disclosure&quot;, &quot;sent without TLS&quot;)
+        if target[&quot;kind&quot;] == &quot;store&quot; and flow.get(&quot;writes&quot;) and &quot;audit&quot; not in checks:
+            add(&quot;Repudiation&quot;, &quot;changes not audited&quot;)
+    return [text for _, _, text in sorted(found)]</textarea></div>
+<h2 id="your-capstone-today">Your capstone today</h2>
+<ol>
+<li><strong>Draw your data-flow diagram</strong> (paper is fine): externals, processes, stores, flows, and the trust boundaries.</li>
+<li><strong>STRIDE at every crossing</strong>: write each threat you find, what stops it now, and what you&rsquo;ll do about the ones nothing stops.</li>
+<li><strong>Harden</strong> the top three: limits, a rate limiter, safe paths, headers, or whatever your model shows.</li>
+<li><strong>Scan the history</strong> for committed secrets with a free secret scanner, and rotate anything it finds.</li>
+</ol>
+<h2 id="before-you-go">Before you go</h2>
+<p>Tomorrow is about what happens when things go wrong anyway: errors users can act on, and logs you can act on.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w091d1.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w091d3.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w091d2", "week": 91, "day": 2, "title": "Security review", "exercises": [{"id": "w091d2-boundaries", "title": "Trust boundaries", "points": 10}, {"id": "w091d2-limits", "title": "Limits on a request", "points": 15}, {"id": "w091d2-bucket", "title": "A token bucket", "points": 15}, {"id": "w091d2-paths", "title": "Export paths that stay put", "points": 10}, {"id": "w091d2-headers", "title": "Security headers", "points": 10}, {"id": "w091d2-bug1", "title": "A bucket that filled overnight", "points": 10}, {"id": "w091d2-bug2", "title": "Inside by the look of it", "points": 10}, {"id": "w091d2-trace", "title": "Predict them", "points": 10}, {"id": "w091d2-challenge", "title": "Challenge: a threat list from the data flows", "points": 25}], "points": 115}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=97b2d34bb1"></script>
+</body>
+</html>
