@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="97b2d34bb1">
+<title>Week 91 Day 3: Error handling and logging | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=97b2d34bb1">
+<link rel="stylesheet" href="../assets/css/site.css?v=97b2d34bb1">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=97b2d34bb1"></script>
+<script src="../assets/vendor/codemirror.js?v=97b2d34bb1" defer></script>
+<meta name="description" content="Things will go wrong for Waymark’s users: a junction spelt wrongly, a map with no route, a file that isn’t there, a server that times out. Hardening means...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w091d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 91 Day 3: Error handling and logging">
+<meta property="og:description" content="Things will go wrong for Waymark’s users: a junction spelt wrongly, a map with no route, a file that isn’t there, a server that times out. Hardening means...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w091d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-91">Week 91: Capstone 5: harden</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#errors-users-can-act-on" data-sec="errors-users-can-act-on">Errors users can act on</a></li><li><a href="#keeping-the-cause" data-sec="keeping-the-cause">Keeping the cause</a></li><li><a href="#structured-logs" data-sec="structured-logs">Structured logs</a></li><li><a href="#retrying" data-sec="retrying">Retrying</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#your-capstone-today" data-sec="your-capstone-today">Your capstone today</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w091d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-7">Phase 7: Mastery</a></li><li><a href="../map.html#week-91">Week 91: Capstone 5: harden</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 91, Day 3</span></p>
+      <h1>Error handling and logging</h1>
+      <div class="day-intro"><p>Things will go wrong for Waymark&rsquo;s users: a junction spelt wrongly, a map with no route, a file that isn&rsquo;t there, a server that times out. Hardening means each failure does the right thing: the <strong>user</strong> gets a message they can act on, the <strong>program</strong> keeps the information it needs, and <strong>you</strong> get a log that explains what happened without guessing. You&rsquo;ll build an error hierarchy that turns into proper responses at the edge, keep the cause and the context of every error, write <strong>structured logs</strong> that machines can search, retry the failures that are worth retrying, and finish by reading a day of logs to find what broke.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Design an error hierarchy that becomes user messages and statuses at the edge</li><li>Keep causes with raise from, and add context with notes</li><li>Write structured (JSON) logs with levels and request ids</li><li>Retry transient failures with exponential backoff, and nothing else</li><li>Read structured logs to find failed and slow requests</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h 10 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Errors users can act on: 20 min"></span><span class="plan-seg s0" style="flex:15" title="Keeping the cause: 15 min"></span><span class="plan-seg s1" style="flex:20" title="Structured logs: 20 min"></span><span class="plan-seg s0" style="flex:10" title="Retrying: 10 min"></span><span class="plan-seg s1" style="flex:55" title="Practice: 55 min"></span><span class="plan-seg s0" style="flex:30" title="Quiz and daily challenge: 30 min"></span><span class="plan-seg s1" style="flex:30" title="Your capstone today: 30 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">8 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Errors users can act on</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Keeping the cause</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:45</span><span class="plan-what">Structured logs</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:05</span><span class="plan-what">Retrying</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Practice</span><span class="plan-min">55 min</span></li><li><span class="plan-at">2:10</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">30 min</span></li><li><span class="plan-at">2:40</span><span class="plan-what">Your capstone today</span><span class="plan-min">30 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w091d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w091d3.ipynb" download>download it</a>. Exercises today are worth 110 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w091d3-p1"><textarea class="pc-src pc-code" hidden>def parse_km(text):
+    try:
+        return float(text)
+    except Exception:
+        return 0.0
+
+print([parse_km(t) for t in [&quot;6.5&quot;, &quot;6,5&quot;, &quot;six&quot;]])</textarea></div>
+<p>Two typing mistakes became walks of 0 km, silently. Every statistic is now wrong and nothing says why. An error that&rsquo;s hidden doesn&rsquo;t go away: it turns up later, somewhere else, harder to explain.</p>
+<h2 id="errors-users-can-act-on">Errors users can act on</h2>
+<p>Inside the program, errors should be <strong>specific</strong>: <code>UnknownPlaceError</code>, <code>NoRouteError</code>, <code>BadInput</code>, all subclasses of one <code>WaymarkError</code>, so callers can catch the family or one member. Each carries what the <strong>edge</strong> needs: an HTTP status, a short machine-readable <code>code</code>, and a message written for the user (&ldquo;No junction called &lsquo;Ridgee&rsquo;. Did you mean Ridge?&rdquo;).</p>
+<p>At the <strong>edge</strong> (the API handler, the command line&rsquo;s <code>main</code>), translate:</p>
+<ul>
+<li>a <code>WaymarkError</code> becomes its status and message (or, on the command line, a message on standard error and exit status 1);</li>
+<li>anything else is a <strong>bug</strong>: log it in full, and tell the user only that something went wrong, with a <strong>reference</strong> they can quote. Never send a traceback or an internal message to a user: it confuses them and helps attackers.</li>
+</ul>
+<p>Catch <strong>narrowly</strong>: <code>except ValueError</code> around the one line that can raise it, not <code>except Exception</code> around a page of code.</p>
+<h2 id="keeping-the-cause">Keeping the cause</h2>
+<p>When you translate an error, keep the original: <code>raise BadInput("map file not found") from err</code> sets <code>__cause__</code>, and the traceback shows both. And when an error passes through a place that knows more (which line of a file, which junction), add it with <code>err.add_note("line 2 of walks.csv")</code> and re-raise the same error with a bare <code>raise</code>: the note is printed with the traceback and kept in <code>err.__notes__</code>.</p>
+<h2 id="structured-logs">Structured logs</h2>
+<p><code>logging</code> gives each message a <strong>level</strong>: <code>DEBUG</code> (details for a developer), <code>INFO</code> (normal events: a route was planned), <code>WARNING</code> (something unexpected, handled), <code>ERROR</code> (something failed), <code>CRITICAL</code> (the service can&rsquo;t continue). Use <code>logger = logging.getLogger("waymark.planner")</code> per module and configure handlers once, at the edge.</p>
+<p>Logs are read by machines first: searched, counted and alerted on. So write each record as one <strong>JSON</strong> object with fixed fields (<code>level</code>, <code>logger</code>, <code>message</code>) plus context passed with <code>extra=</code>: a <strong>request id</strong> that ties together every record from one request, the user, the duration. Pass values as arguments (<code>logger.info("planned %s to %s", a, b)</code>), not f-strings, so records with the same template can be grouped. And remember Week 90: secrets never reach a log.</p>
+<h2 id="retrying">Retrying</h2>
+<p>Some failures are <strong>transient</strong>: a timeout, a busy server. Retrying those, after a growing delay (<strong>exponential backoff</strong>: 0.5 s, 1 s, 2 s), often works. Retry only those: a <code>BadInput</code> will fail the same way every time. Limit the attempts, add a little random <strong>jitter</strong> in production so many clients don&rsquo;t retry in step, and only retry operations that are safe to repeat (Week 90&rsquo;s idempotency).</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Raise specific errors from one family that carry a status, a code and a user message; translate at the edge, and treat anything else as a bug: logged in full, reported to the user only with a reference. Catch narrowly. Keep causes with <code>raise ... from</code> and add context with <code>add_note</code>. Log JSON records with levels, a request id and arguments rather than f-strings. Retry only transient failures, a limited number of times, with exponential backoff.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w091d3-hierarchy" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Errors with a status</div><div class="pc-prompt"><p>Write <code>WaymarkError(Exception)</code> with class attributes <code>status = 400</code> and <code>code = "bad_request"</code>, and subclasses <code>UnknownPlaceError</code> (<code>404</code>, <code>"unknown_place"</code>), <code>NoRouteError</code> (<code>422</code>, <code>"no_route"</code>) and <code>BadInput</code> (<code>400</code>, <code>"bad_input"</code>). Then <code>to_response(exc, new_reference)</code>: for a <code>WaymarkError</code>, return <code>(status, {"error": {"code": CODE, "message": str(exc)}})</code>; for anything else, <code>(500, {"error": {"code": "internal", "message": "Something went wrong. Quote reference REF if you report it."}})</code>, where REF is <code>new_reference()</code>.</p></div><textarea class="pc-src pc-code" hidden>class WaymarkError(Exception):
+    ___
+
+def to_response(exc, new_reference):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_family():
+    &quot;one family&quot;
+    assert issubclass(UnknownPlaceError, WaymarkError) and issubclass(NoRouteError, WaymarkError) and issubclass(BadInput, WaymarkError)
+    assert not issubclass(WaymarkError, LookupError)
+
+def test_responses():
+    &quot;statuses and messages at the edge&quot;
+    ref = lambda: &quot;e-7f3a&quot;
+    assert to_response(UnknownPlaceError(&quot;No junction called &#x27;Ridgee&#x27;&quot;), ref) == (404, {&quot;error&quot;: {&quot;code&quot;: &quot;unknown_place&quot;, &quot;message&quot;: &quot;No junction called &#x27;Ridgee&#x27;&quot;}})
+    assert to_response(NoRouteError(&quot;No route from Mill to Island&quot;), ref)[0] == 422
+    assert to_response(BadInput(&quot;km must be positive&quot;), ref)[1][&quot;error&quot;][&quot;code&quot;] == &quot;bad_input&quot;
+    status, body = to_response(KeyError(&quot;internal_cache_key&quot;), ref)
+    assert status == 500 and body == {&quot;error&quot;: {&quot;code&quot;: &quot;internal&quot;, &quot;message&quot;: &quot;Something went wrong. Quote reference e-7f3a if you report it.&quot;}}
+    assert &quot;internal_cache_key&quot; not in str(body)</textarea><textarea class="pc-src pc-solution" hidden>class WaymarkError(Exception):
+    status = 400
+    code = &quot;bad_request&quot;
+
+class UnknownPlaceError(WaymarkError):
+    status = 404
+    code = &quot;unknown_place&quot;
+
+class NoRouteError(WaymarkError):
+    status = 422
+    code = &quot;no_route&quot;
+
+class BadInput(WaymarkError):
+    status = 400
+    code = &quot;bad_input&quot;
+
+def to_response(exc, new_reference):
+    if isinstance(exc, WaymarkError):
+        return exc.status, {&quot;error&quot;: {&quot;code&quot;: exc.code, &quot;message&quot;: str(exc)}}
+    ref = new_reference()
+    return 500, {&quot;error&quot;: {&quot;code&quot;: &quot;internal&quot;, &quot;message&quot;: f&quot;Something went wrong. Quote reference {ref} if you report it.&quot;}}</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w091d3-notes" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Which line?</div><div class="pc-prompt"><p>Write <code>load_walks(lines)</code>: each line is <code>day,km,minutes</code>; return a list of dicts with <code>day</code>, <code>km</code> (float) and <code>minutes</code> (int). If converting a line raises <code>ValueError</code>, add the note <code>"line N: LINE"</code> (N counting from 1, LINE written with <code>repr</code>) to that same error and re-raise it.</p></div><textarea class="pc-src pc-code" hidden>def load_walks(lines):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_ok():
+    &quot;good lines&quot;
+    assert load_walks([&quot;2026-01-04,6.0,105&quot;]) == [{&quot;day&quot;: &quot;2026-01-04&quot;, &quot;km&quot;: 6.0, &quot;minutes&quot;: 105}]
+
+def test_note():
+    &quot;the same error, with context&quot;
+    try:
+        load_walks([&quot;2026-01-04,6.0,105&quot;, &quot;2026-01-18,seven,98&quot;])
+    except ValueError as e:
+        assert &quot;seven&quot; in str(e), &quot;the original error, not a new one&quot;
+        assert e.__notes__ == [&quot;line 2: &#x27;2026-01-18,seven,98&#x27;&quot;]
+    else:
+        raise AssertionError(&quot;no error&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def load_walks(lines):
+    walks = []
+    for number, line in enumerate(lines, start=1):
+        try:
+            day, km, minutes = line.split(&quot;,&quot;)
+            walks.append({&quot;day&quot;: day, &quot;km&quot;: float(km), &quot;minutes&quot;: int(minutes)})
+        except ValueError as err:
+            err.add_note(f&quot;line {number}: {line!r}&quot;)
+            raise
+    return walks</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w091d3-json_log" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Logs as JSON</div><div class="pc-prompt"><p>Write <code>JsonFormatter(logging.Formatter)</code> whose <code>format(record)</code> returns one line of JSON with the keys <code>level</code> (the level name), <code>logger</code>, <code>message</code> (the message with its arguments filled in), then any of <code>request_id</code>, <code>user</code> and <code>duration_ms</code> the record has (passed with <code>extra=</code>), in that order, and, if the record carries exception information, <code>error</code> as <code>"TYPE: MESSAGE"</code>.</p></div><textarea class="pc-src pc-code" hidden>import json
+import logging
+
+class JsonFormatter(logging.Formatter):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import io, json, logging
+
+def capture():
+    stream = io.StringIO()
+    logger = logging.getLogger(&quot;waymark.check&quot;)
+    logger.handlers.clear()
+    handler = logging.StreamHandler(stream)
+    handler.setFormatter(JsonFormatter())
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    return logger, stream
+
+def test_records():
+    &quot;one JSON object per line&quot;
+    logger, stream = capture()
+    logger.info(&quot;planned %s to %s&quot;, &quot;Mill&quot;, &quot;Ridge&quot;, extra={&quot;request_id&quot;: &quot;r1&quot;, &quot;duration_ms&quot;: 4.2})
+    logger.debug(&quot;not shown&quot;)
+    logger.warning(&quot;slow plan&quot;, extra={&quot;user&quot;: &quot;ada&quot;, &quot;request_id&quot;: &quot;r2&quot;})
+    lines = stream.getvalue().splitlines()
+    assert len(lines) == 2
+    assert lines[0] == json.dumps({&quot;level&quot;: &quot;INFO&quot;, &quot;logger&quot;: &quot;waymark.check&quot;, &quot;message&quot;: &quot;planned Mill to Ridge&quot;, &quot;request_id&quot;: &quot;r1&quot;, &quot;duration_ms&quot;: 4.2})
+    assert list(json.loads(lines[1])) == [&quot;level&quot;, &quot;logger&quot;, &quot;message&quot;, &quot;request_id&quot;, &quot;user&quot;]
+
+def test_exception():
+    &quot;errors, summarised&quot;
+    logger, stream = capture()
+    try:
+        1 / 0
+    except ZeroDivisionError:
+        logger.exception(&quot;pace failed&quot;, extra={&quot;request_id&quot;: &quot;r3&quot;})
+    record = json.loads(stream.getvalue())
+    assert record[&quot;level&quot;] == &quot;ERROR&quot; and record[&quot;error&quot;] == &quot;ZeroDivisionError: division by zero&quot;</textarea><textarea class="pc-src pc-solution" hidden>import json
+import logging
+
+EXTRA = (&quot;request_id&quot;, &quot;user&quot;, &quot;duration_ms&quot;)
+
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        data = {&quot;level&quot;: record.levelname, &quot;logger&quot;: record.name, &quot;message&quot;: record.getMessage()}
+        for key in EXTRA:
+            if hasattr(record, key):
+                data[key] = getattr(record, key)
+        if record.exc_info and record.exc_info[1] is not None:
+            exc = record.exc_info[1]
+            data[&quot;error&quot;] = f&quot;{type(exc).__name__}: {exc}&quot;
+        return json.dumps(data)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w091d3-retry" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Retrying with backoff</div><div class="pc-prompt"><p>Write <code>retry(fn, attempts=3, base=0.5, retry_on=(TimeoutError,), sleep=time.sleep)</code>: call <code>fn()</code> and return its result. If it raises one of <code>retry_on</code>, sleep for <code>base * 2 ** i</code> seconds (i = 0, 1, &hellip;) and try again, up to <code>attempts</code> calls in all; if the last attempt fails, re-raise its error. Any other error is raised at once, without retrying.</p></div><textarea class="pc-src pc-code" hidden>import time
+
+def retry(fn, attempts=3, base=0.5, retry_on=(TimeoutError,), sleep=time.sleep):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def flaky(failures, error=TimeoutError):
+    calls = []
+    def fn():
+        calls.append(1)
+        if len(calls) &lt;= failures:
+            raise error(&quot;busy&quot;)
+        return &quot;ok&quot;
+    return fn, calls
+
+def test_recovers():
+    &quot;transient failures&quot;
+    fn, calls = flaky(2)
+    slept = []
+    assert retry(fn, sleep=slept.append) == &quot;ok&quot; and len(calls) == 3 and slept == [0.5, 1.0]
+
+def test_gives_up():
+    &quot;a limited number of attempts&quot;
+    fn, calls = flaky(10)
+    slept = []
+    try:
+        retry(fn, attempts=4, base=1, sleep=slept.append)
+    except TimeoutError:
+        assert len(calls) == 4 and slept == [1, 2, 4]
+    else:
+        raise AssertionError(&quot;should give up&quot;)
+
+def test_not_transient():
+    &quot;bad input fails at once&quot;
+    fn, calls = flaky(1, ValueError)
+    slept = []
+    try:
+        retry(fn, sleep=slept.append)
+    except ValueError:
+        assert len(calls) == 1 and slept == []
+    else:
+        raise AssertionError(&quot;ValueError&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import time
+
+def retry(fn, attempts=3, base=0.5, retry_on=(TimeoutError,), sleep=time.sleep):
+    for i in range(attempts):
+        try:
+            return fn()
+        except retry_on:
+            if i == attempts - 1:
+                raise
+            sleep(base * 2 ** i)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w091d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Zero-kilometre walks</div><div class="pc-prompt"><p><code>parse_km</code> swallows every error, so <code>"6,5"</code> becomes a walk of 0 km and the program prints <code>0.0</code>. Let only <code>ValueError</code> through as a <code>BadInput</code> with the message <code>'6,5' is not a distance in km</code>, so it prints <code>error: '6,5' is not a distance in km</code>.</p></div><textarea class="pc-src pc-code" hidden>class BadInput(Exception):
+    pass
+
+def parse_km(text):
+    try:
+        return float(text)
+    except Exception:
+        return 0.0
+
+try:
+    print(parse_km(&quot;6,5&quot;))
+except BadInput as e:
+    print(&quot;error:&quot;, e)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;fail loudly&quot;
+    expect_output(&quot;error: &#x27;6,5&#x27; is not a distance in km&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class BadInput(Exception):
+    pass
+
+def parse_km(text):
+    try:
+        return float(text)
+    except ValueError as err:
+        raise BadInput(f&quot;{text!r} is not a distance in km&quot;) from err
+
+try:
+    print(parse_km(&quot;6,5&quot;))
+except BadInput as e:
+    print(&quot;error:&quot;, e)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w091d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A cause thrown away</div><div class="pc-prompt"><p><code>load_map</code> translates the error but loses the original, so the program prints <code>NoneType</code>. Keep the cause, so it prints <code>FileNotFoundError</code>.</p></div><textarea class="pc-src pc-code" hidden>class WaymarkError(Exception):
+    pass
+
+def load_map(path):
+    try:
+        with open(path) as f:
+            return f.read()
+    except FileNotFoundError:
+        raise WaymarkError(f&quot;no map at {path}&quot;)
+
+try:
+    load_map(&quot;missing-map.csv&quot;)
+except WaymarkError as e:
+    print(type(e.__cause__).__name__)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;raise from&quot;
+    expect_output(&quot;FileNotFoundError&quot;)</textarea><textarea class="pc-src pc-solution" hidden>class WaymarkError(Exception):
+    pass
+
+def load_map(path):
+    try:
+        with open(path) as f:
+            return f.read()
+    except FileNotFoundError as err:
+        raise WaymarkError(f&quot;no map at {path}&quot;) from err
+
+try:
+    load_map(&quot;missing-map.csv&quot;)
+except WaymarkError as e:
+    print(type(e.__cause__).__name__)</textarea></div>
+<div class="parsons" data-id="w091d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Retrying</div><div class="pc-prompt"><p>Arrange <code>retry</code> so it tries up to <code>attempts</code> times, re-raises on the last failure, and backs off between tries. One line is a trap.</p></div><script type="application/json">{"lines": ["def retry(fn, attempts, base, sleep):", "    for i in range(attempts):", "        try:", "            return fn()", "        except TimeoutError:", "            if i == attempts - 1:", "                raise", "            sleep(base * 2 ** i)"], "distractors": ["        except Exception:"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w091d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # logging.WARNING as a number
+q = ___   # the level for &quot;a route was planned&quot; (a string)
+r = ___   # the sleeps retry makes with base 0.5 and 4 attempts that all fail (a list)
+s = ___   # the status of a NoRouteError in today&#x27;s hierarchy
+t = ___   # True or False: an unexpected error&#x27;s message should be shown to the user</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 30 and q == &quot;INFO&quot; and r == [0.5, 1.0, 2.0], &quot;p, q and r&quot;
+    assert s == 422 and t is False, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 30
+q = &quot;INFO&quot;
+r = [0.5, 1.0, 2.0]
+s = 422
+t = False</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w091d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What&rsquo;s wrong with <code>except Exception</code> returning a default?", "answer": 1, "explain": "Zero-kilometre walks.", "options": ["Nothing", "It hides mistakes, which turn up later as wrong results", "It&rsquo;s slow", "It&rsquo;s a syntax error"]}, {"type": "mc", "q": "Where should internal errors be translated for users?", "answer": 1, "explain": "Specific errors inside; translation at the edge.", "options": ["Everywhere", "At the edge: the API handler or the command line&rsquo;s main", "In the database", "Never"]}, {"type": "mc", "q": "What should a user see for an unexpected error?", "answer": 1, "explain": "Log the details; show a reference.", "options": ["The traceback", "A plain message and a reference to quote", "Nothing", "The exception&rsquo;s message"]}, {"type": "mc", "q": "What does <code>raise X from err</code> do?", "answer": 1, "explain": "<strong>cause</strong>.", "options": ["Hides err", "Keeps err as X&rsquo;s cause, shown in the traceback", "Retries", "Logs err"]}, {"type": "mc", "q": "What does <code>add_note</code> add?", "answer": 1, "explain": "Same error, more context.", "options": ["A log record", "Context printed with the traceback and kept in <strong>notes</strong>", "A comment", "A new error"]}, {"type": "mc", "q": "Why log JSON records?", "answer": 1, "explain": "Logs are read by machines first.", "options": ["Smaller files", "Machines can search, count and alert on fixed fields", "Faster", "Prettier"]}, {"type": "mc", "q": "What&rsquo;s a request id for?", "answer": 1, "explain": "Follow one request through the logs.", "options": ["Security", "Tying together every record from one request", "Rate limiting", "Caching"]}, {"type": "mc", "q": "Why pass log arguments rather than an f-string?", "answer": 1, "explain": "logger.info(&lsquo;planned %s&rsquo;, a).", "options": ["Faster always", "Records with the same template can be grouped, and formatting is skipped when filtered", "Required", "Shorter"]}, {"type": "mc", "q": "Which failures should be retried?", "answer": 1, "explain": "Bad input fails every time.", "options": ["All", "Transient ones, such as timeouts, on operations safe to repeat", "Bad input", "None"]}, {"type": "output", "q": "What does this print?", "answer": "ValueError", "explain": "The cause is kept.", "code": "try:\n    try:\n        int(\"x\")\n    except ValueError as err:\n        raise KeyError(\"k\") from err\nexcept KeyError as e:\n    print(type(e.__cause__).__name__)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w091d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: what broke today?</div><div class="pc-prompt"><p>Write <code>incident_report(lines)</code>. Each line should be a JSON object with at least <code>level</code> and <code>message</code>, perhaps with <code>logger</code>, <code>request_id</code> and <code>duration_ms</code>; anything else (not JSON, not an object, or missing either key) is <strong>unparsed</strong>. Return a dict with:</p>
+<ul>
+<li><code>"levels"</code>: counts per level for the levels present, in the order DEBUG, INFO, WARNING, ERROR, CRITICAL;</li>
+<li><code>"unparsed"</code>: the number of unparsed lines;</li>
+<li><code>"failed"</code>: for each request id (in order of first appearance; records without one use <code>"-"</code>) that has an ERROR or CRITICAL record, <code>"ID: MESSAGE (LOGGER)"</code> for its first such record (<code>LOGGER</code> is <code>"?"</code> if missing);</li>
+<li><code>"slowest"</code>: the three records with the largest <code>duration_ms</code> (ties by request id), as <code>"ID: D ms"</code>, with D as it appears in the record.</li>
+</ul></div><textarea class="pc-src pc-code" hidden>import json
+
+def incident_report(lines):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>LOG = [
+    &#x27;{&quot;level&quot;: &quot;INFO&quot;, &quot;logger&quot;: &quot;waymark.api&quot;, &quot;message&quot;: &quot;GET /v1/plan&quot;, &quot;request_id&quot;: &quot;r1&quot;, &quot;duration_ms&quot;: 4.2}&#x27;,
+    &#x27;{&quot;level&quot;: &quot;INFO&quot;, &quot;logger&quot;: &quot;waymark.api&quot;, &quot;message&quot;: &quot;GET /v1/walks&quot;, &quot;request_id&quot;: &quot;r2&quot;, &quot;duration_ms&quot;: 120}&#x27;,
+    &#x27;{&quot;level&quot;: &quot;WARNING&quot;, &quot;logger&quot;: &quot;waymark.planner&quot;, &quot;message&quot;: &quot;slow search&quot;, &quot;request_id&quot;: &quot;r2&quot;}&#x27;,
+    &#x27;Traceback (most recent call last):&#x27;,
+    &#x27;{&quot;level&quot;: &quot;ERROR&quot;, &quot;logger&quot;: &quot;waymark.share&quot;, &quot;message&quot;: &quot;share store unavailable&quot;, &quot;request_id&quot;: &quot;r3&quot;}&#x27;,
+    &#x27;{&quot;level&quot;: &quot;ERROR&quot;, &quot;logger&quot;: &quot;waymark.share&quot;, &quot;message&quot;: &quot;retry failed&quot;, &quot;request_id&quot;: &quot;r3&quot;, &quot;duration_ms&quot;: 2050}&#x27;,
+    &#x27;{&quot;level&quot;: &quot;CRITICAL&quot;, &quot;message&quot;: &quot;database connection lost&quot;}&#x27;,
+    &#x27;[&quot;not&quot;, &quot;an&quot;, &quot;object&quot;]&#x27;,
+    &#x27;{&quot;level&quot;: &quot;INFO&quot;, &quot;logger&quot;: &quot;waymark.api&quot;, &quot;message&quot;: &quot;GET /v1/plan&quot;, &quot;request_id&quot;: &quot;r4&quot;, &quot;duration_ms&quot;: 120}&#x27;,
+    &#x27;{&quot;level&quot;: &quot;DEBUG&quot;, &quot;logger&quot;: &quot;waymark.planner&quot;, &quot;message&quot;: &quot;heap size 12&quot;, &quot;request_id&quot;: &quot;r1&quot;}&#x27;,
+    &#x27;{&quot;message&quot;: &quot;no level&quot;}&#x27;,
+]
+
+def test_report():
+    &quot;a day of logs&quot;
+    report = incident_report(LOG)
+    assert report[&quot;levels&quot;] == {&quot;DEBUG&quot;: 1, &quot;INFO&quot;: 3, &quot;WARNING&quot;: 1, &quot;ERROR&quot;: 2, &quot;CRITICAL&quot;: 1}
+    assert list(report[&quot;levels&quot;]) == [&quot;DEBUG&quot;, &quot;INFO&quot;, &quot;WARNING&quot;, &quot;ERROR&quot;, &quot;CRITICAL&quot;]
+    assert report[&quot;unparsed&quot;] == 3
+    assert report[&quot;failed&quot;] == [&quot;r3: share store unavailable (waymark.share)&quot;, &quot;-: database connection lost (?)&quot;]
+    assert report[&quot;slowest&quot;] == [&quot;r3: 2050 ms&quot;, &quot;r2: 120 ms&quot;, &quot;r4: 120 ms&quot;]
+
+def test_quiet():
+    &quot;a quiet day&quot;
+    assert incident_report([&#x27;{&quot;level&quot;: &quot;INFO&quot;, &quot;message&quot;: &quot;ok&quot;}&#x27;]) == {&quot;levels&quot;: {&quot;INFO&quot;: 1}, &quot;unparsed&quot;: 0, &quot;failed&quot;: [], &quot;slowest&quot;: []}</textarea><textarea class="pc-src pc-solution" hidden>import json
+
+LEVELS = [&quot;DEBUG&quot;, &quot;INFO&quot;, &quot;WARNING&quot;, &quot;ERROR&quot;, &quot;CRITICAL&quot;]
+
+def incident_report(lines):
+    counts, unparsed, failed, timed = {}, 0, {}, []
+    order = []
+    for line in lines:
+        try:
+            record = json.loads(line)
+        except ValueError:
+            unparsed += 1
+            continue
+        if not isinstance(record, dict) or &quot;level&quot; not in record or &quot;message&quot; not in record:
+            unparsed += 1
+            continue
+        level = record[&quot;level&quot;]
+        counts[level] = counts.get(level, 0) + 1
+        rid = record.get(&quot;request_id&quot;, &quot;-&quot;)
+        if rid not in order:
+            order.append(rid)
+        if level in (&quot;ERROR&quot;, &quot;CRITICAL&quot;) and rid not in failed:
+            failed[rid] = f&quot;{rid}: {record[&#x27;message&#x27;]} ({record.get(&#x27;logger&#x27;, &#x27;?&#x27;)})&quot;
+        if &quot;duration_ms&quot; in record:
+            timed.append((-record[&quot;duration_ms&quot;], rid, record[&quot;duration_ms&quot;]))
+    return {
+        &quot;levels&quot;: {level: counts[level] for level in LEVELS if level in counts},
+        &quot;unparsed&quot;: unparsed,
+        &quot;failed&quot;: [failed[rid] for rid in order if rid in failed],
+        &quot;slowest&quot;: [f&quot;{rid}: {d} ms&quot; for _, rid, d in sorted(timed)[:3]],
+    }</textarea></div>
+<h2 id="your-capstone-today">Your capstone today</h2>
+<ol>
+<li><strong>An error family</strong> for your capstone, with statuses or exit codes, and one place at the edge that translates them.</li>
+<li><strong>Hunt the swallowers</strong>: search for <code>except Exception</code> and bare <code>except:</code>, and narrow or remove each one.</li>
+<li><strong>Structured logs</strong> with a request id (or a run id for a command-line tool), and no secrets in them.</li>
+<li><strong>Break it on purpose</strong>: wrong input, a missing file, a dead network. Check every failure gives a useful message and a useful log record.</li>
+</ol>
+<h2 id="before-you-go">Before you go</h2>
+<p>Tomorrow is documentation: the README, the reference, and docstrings that are checked so they can&rsquo;t drift from the code.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w091d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w091d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w091d3", "week": 91, "day": 3, "title": "Error handling and logging", "exercises": [{"id": "w091d3-hierarchy", "title": "Errors with a status", "points": 15}, {"id": "w091d3-notes", "title": "Which line?", "points": 10}, {"id": "w091d3-json_log", "title": "Logs as JSON", "points": 15}, {"id": "w091d3-retry", "title": "Retrying with backoff", "points": 15}, {"id": "w091d3-bug1", "title": "Zero-kilometre walks", "points": 10}, {"id": "w091d3-bug2", "title": "A cause thrown away", "points": 10}, {"id": "w091d3-trace", "title": "Predict them", "points": 10}, {"id": "w091d3-challenge", "title": "Challenge: what broke today?", "points": 25}], "points": 110}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=97b2d34bb1"></script>
+</body>
+</html>
