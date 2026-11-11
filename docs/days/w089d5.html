@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="97b2d34bb1">
+<title>Week 89 Day 5: Code review | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=97b2d34bb1">
+<link rel="stylesheet" href="../assets/css/site.css?v=97b2d34bb1">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=97b2d34bb1"></script>
+<script src="../assets/vendor/codemirror.js?v=97b2d34bb1" defer></script>
+<meta name="description" content="This sprint’s pull requests changed algorithms (A*, round walks, a cost function) and added many tests. Reviewing them needs more than last week’s...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w089d5.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 89 Day 5: Code review">
+<meta property="og:description" content="This sprint’s pull requests changed algorithms (A*, round walks, a cost function) and added many tests. Reviewing them needs more than last week’s...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w089d5.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-89">Week 89: Capstone 3: build sprint</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#reviewing-algorithm-changes" data-sec="reviewing-algorithm-changes">Reviewing algorithm changes</a></li><li><a href="#measuring-complexity" data-sec="measuring-complexity">Measuring complexity</a></li><li><a href="#the-public-interface" data-sec="the-public-interface">The public interface</a></li><li><a href="#reviewing-the-tests" data-sec="reviewing-the-tests">Reviewing the tests</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#your-capstone-today" data-sec="your-capstone-today">Your capstone today</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w089d5.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-7">Phase 7: Mastery</a></li><li><a href="../map.html#week-89">Week 89: Capstone 3: build sprint</a></li><li aria-current="page">Day 5 of 6</li></ol>
+      <p class="day-where"><span>Week 89, Day 5</span></p>
+      <h1>Code review</h1>
+      <div class="day-intro"><p>This sprint&rsquo;s pull requests changed algorithms (A*, round walks, a cost function) and added many tests. Reviewing them needs more than last week&rsquo;s checklist: an algorithm change can be correct and still much slower, a function can grow branches until nobody can follow it, and tests can pass while checking nothing. Today you&rsquo;ll review <strong>complexity</strong> (how many paths through a function, measured), <strong>documentation and type hints</strong> on the public interface, <strong>long functions</strong>, and the <strong>tests themselves</strong>, using Python&rsquo;s <code>ast</code> module to measure what can be measured, so the review conversation is about what can&rsquo;t. The challenge produces a quality report for a module and its tests.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Review algorithm changes for correctness, complexity and performance</li><li>Measure cyclomatic complexity and function length from the syntax tree</li><li>Check that public functions have docstrings and type hints</li><li>Recognise test smells that let tests pass without checking anything</li><li>Combine measurements into a report that guides, not replaces, the review</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h 15 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="Reviewing algorithm changes: 15 min"></span><span class="plan-seg s0" style="flex:20" title="Measuring complexity: 20 min"></span><span class="plan-seg s1" style="flex:15" title="The public interface: 15 min"></span><span class="plan-seg s0" style="flex:15" title="Reviewing the tests: 15 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:30" title="Quiz and daily challenge: 30 min"></span><span class="plan-seg s1" style="flex:30" title="Your capstone today: 30 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">8 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Reviewing algorithm changes</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">Measuring complexity</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:45</span><span class="plan-what">The public interface</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:00</span><span class="plan-what">Reviewing the tests</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:15</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:15</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">30 min</span></li><li><span class="plan-at">2:45</span><span class="plan-what">Your capstone today</span><span class="plan-min">30 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w089d5.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w089d5.ipynb" download>download it</a>. Exercises today are worth 105 points.</p>
+    </header>
+    <div class="day-body">
+<div class="filebox"><div class="filebox-head">The files used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>planner.py</code></summary><pre class="pc-filetext">import heapq
+import math
+
+
+def straight_km(positions, a, b):
+    &quot;&quot;&quot;Straight-line distance in km between two junctions.&quot;&quot;&quot;
+    return math.dist(positions[a], positions[b])
+
+
+def astar(paths, positions, start, end):
+    g, prev, done = {start: 0}, {}, set()
+    heap = [(straight_km(positions, start, end), start)]
+    while heap:
+        _, node = heapq.heappop(heap)
+        if node in done:
+            continue
+        done.add(node)
+        if node == end:
+            stops = [end]
+            while stops[-1] != start:
+                stops.append(prev[stops[-1]])
+            return stops[::-1], g[end]
+        for nxt, km in sorted(paths[node].items()):
+            if g[node] + km &lt; g.get(nxt, float(&quot;inf&quot;)):
+                g[nxt] = g[node] + km
+                prev[nxt] = node
+                heapq.heappush(heap, (g[nxt] + straight_km(positions, nxt, end), nxt))
+    return None
+
+
+def describe(stops: list, km: float, minutes: int) -&gt; str:
+    &quot;&quot;&quot;One line for the command-line tool.&quot;&quot;&quot;
+    hours, mins = divmod(minutes, 60)
+    return f&quot;{&#x27; -&gt; &#x27;.join(stops)}: {km:.1f} km, {hours} h {mins:02d} min&quot;
+
+
+def pick(routes, prefer):
+    if prefer == &quot;short&quot; or prefer == &quot;shortest&quot;:
+        return min(routes, key=lambda r: r[&quot;km&quot;])
+    elif prefer == &quot;flat&quot; and routes:
+        return min(routes, key=lambda r: r[&quot;climb&quot;])
+    elif prefer == &quot;quiet&quot;:
+        quiet = [r for r in routes if r[&quot;road_km&quot;] == 0]
+        if quiet:
+            return quiet[0]
+        else:
+            return min(routes, key=lambda r: r[&quot;road_km&quot;])
+    return routes[0] if routes else None
+
+
+def _cache_key(start, end):
+    return f&quot;{start}|{end}&quot;
+</pre></details><details class="pc-file"><summary><code>test_planner.py</code></summary><pre class="pc-filetext">import random
+import time
+import pytest
+from planner import astar, describe, pick
+
+
+def test_describe():
+    assert describe([&quot;A&quot;, &quot;B&quot;], 1.0, 75) == &quot;A -&gt; B: 1.0 km, 1 h 15 min&quot;
+
+
+def test_astar_runs():
+    astar({&quot;A&quot;: {&quot;B&quot;: 1}, &quot;B&quot;: {&quot;A&quot;: 1}}, {&quot;A&quot;: (0, 0), &quot;B&quot;: (1, 0)}, &quot;A&quot;, &quot;B&quot;)
+
+
+def test_pick_waits_for_cache():
+    time.sleep(0.01)
+    assert pick([{&quot;km&quot;: 2, &quot;climb&quot;: 0, &quot;road_km&quot;: 0}], &quot;short&quot;)[&quot;km&quot;] == 2
+
+
+def test_pick_errors():
+    with pytest.raises(Exception):
+        pick([], &quot;flat&quot;)[&quot;km&quot;]
+
+
+def test_random_routes():
+    rng = random.Random()
+    routes = [{&quot;km&quot;: rng.random(), &quot;climb&quot;: 0, &quot;road_km&quot;: 0} for _ in range(5)]
+    assert pick(routes, &quot;short&quot;)[&quot;km&quot;] == min(r[&quot;km&quot;] for r in routes)
+</pre></details><script type="application/json" class="page-files">{"planner.py": "import heapq\nimport math\n\n\ndef straight_km(positions, a, b):\n    \"\"\"Straight-line distance in km between two junctions.\"\"\"\n    return math.dist(positions[a], positions[b])\n\n\ndef astar(paths, positions, start, end):\n    g, prev, done = {start: 0}, {}, set()\n    heap = [(straight_km(positions, start, end), start)]\n    while heap:\n        _, node = heapq.heappop(heap)\n        if node in done:\n            continue\n        done.add(node)\n        if node == end:\n            stops = [end]\n            while stops[-1] != start:\n                stops.append(prev[stops[-1]])\n            return stops[::-1], g[end]\n        for nxt, km in sorted(paths[node].items()):\n            if g[node] + km < g.get(nxt, float(\"inf\")):\n                g[nxt] = g[node] + km\n                prev[nxt] = node\n                heapq.heappush(heap, (g[nxt] + straight_km(positions, nxt, end), nxt))\n    return None\n\n\ndef describe(stops: list, km: float, minutes: int) -> str:\n    \"\"\"One line for the command-line tool.\"\"\"\n    hours, mins = divmod(minutes, 60)\n    return f\"{' -> '.join(stops)}: {km:.1f} km, {hours} h {mins:02d} min\"\n\n\ndef pick(routes, prefer):\n    if prefer == \"short\" or prefer == \"shortest\":\n        return min(routes, key=lambda r: r[\"km\"])\n    elif prefer == \"flat\" and routes:\n        return min(routes, key=lambda r: r[\"climb\"])\n    elif prefer == \"quiet\":\n        quiet = [r for r in routes if r[\"road_km\"] == 0]\n        if quiet:\n            return quiet[0]\n        else:\n            return min(routes, key=lambda r: r[\"road_km\"])\n    return routes[0] if routes else None\n\n\ndef _cache_key(start, end):\n    return f\"{start}|{end}\"\n", "test_planner.py": "import random\nimport time\nimport pytest\nfrom planner import astar, describe, pick\n\n\ndef test_describe():\n    assert describe([\"A\", \"B\"], 1.0, 75) == \"A -> B: 1.0 km, 1 h 15 min\"\n\n\ndef test_astar_runs():\n    astar({\"A\": {\"B\": 1}, \"B\": {\"A\": 1}}, {\"A\": (0, 0), \"B\": (1, 0)}, \"A\", \"B\")\n\n\ndef test_pick_waits_for_cache():\n    time.sleep(0.01)\n    assert pick([{\"km\": 2, \"climb\": 0, \"road_km\": 0}], \"short\")[\"km\"] == 2\n\n\ndef test_pick_errors():\n    with pytest.raises(Exception):\n        pick([], \"flat\")[\"km\"]\n\n\ndef test_random_routes():\n    rng = random.Random()\n    routes = [{\"km\": rng.random(), \"climb\": 0, \"road_km\": 0} for _ in range(5)]\n    assert pick(routes, \"short\")[\"km\"] == min(r[\"km\"] for r in routes)\n"}</script></div>
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w089d5-p1"><textarea class="pc-src pc-code" hidden>import ast
+
+source = open(&quot;planner.py&quot;).read()
+tree = ast.parse(source)
+for node in tree.body:
+    if isinstance(node, ast.FunctionDef):
+        branches = sum(isinstance(n, (ast.If, ast.For, ast.While)) for n in ast.walk(node))
+        print(f&quot;{node.name:12} lines {node.end_lineno - node.lineno + 1:2}  branches {branches}  docstring {ast.get_docstring(node) is not None}&quot;)</textarea></div>
+<p>The syntax tree tells you each function&rsquo;s size, how many decisions it makes, and whether it explains itself. Open <code>planner.py</code> and <code>test_planner.py</code> above: they&rsquo;re from this sprint&rsquo;s pull requests, and they&rsquo;re what you&rsquo;ll review today.</p>
+<h2 id="reviewing-algorithm-changes">Reviewing algorithm changes</h2>
+<p>For a change to an algorithm, ask, in addition to last week&rsquo;s list:</p>
+<ul>
+<li><strong>Is it still correct on the awkward inputs?</strong> No route, start equal to end, ties, a disconnected map. The tests from yesterday (oracles, invariants, metamorphic relations, the regression suite) should already say; check they ran.</li>
+<li><strong>What does it cost?</strong> Read the loops: a <code>list</code> membership test or <code>sorted()</code> inside a loop over every junction turns a fast search slow. Ask for the growth test.</li>
+<li><strong>What does it assume?</strong> A* assumes paths are never shorter than the straight line; preferences assume factors of at least 1. Is the assumption written down, and checked?</li>
+<li><strong>Is the change contained?</strong> The search should change in one module; the API and CLI shouldn&rsquo;t notice.</li>
+</ul>
+<h2 id="measuring-complexity">Measuring complexity</h2>
+<p><strong>Cyclomatic complexity</strong> counts the independent paths through a function: start at 1 and add 1 for each decision (<code>if</code>, <code>elif</code>, <code>for</code>, <code>while</code>, each <code>except</code>, each extra condition in an <code>and</code> or <code>or</code>, each <code>if</code> in a comprehension, and each conditional expression). It&rsquo;s also the minimum number of tests needed to run every branch. Functions above about 10 are hard to understand and test; <code>pick</code> in <code>planner.py</code> is a candidate. The fix is usually a table instead of a chain of <code>elif</code>s, or smaller functions.</p>
+<p><strong>Length</strong> matters too: a function over about 30 to 40 lines usually does several things. Both are easy to measure with <code>ast</code> (each node knows its <code>lineno</code> and <code>end_lineno</code>), which means they can be checked in CI and discussed only when they&rsquo;re exceeded.</p>
+<h2 id="the-public-interface">The public interface</h2>
+<p>Functions and classes without a leading underscore are the module&rsquo;s <strong>public interface</strong>: other modules (and your future self) rely on them. Each should have a <strong>docstring</strong> saying what it does (not how), and <strong>type hints</strong> (Week 33) on its parameters and return value, so readers and tools know what goes in and comes out. Private helpers (<code>_cache_key</code>) can be terser. In <code>planner.py</code>, <code>astar</code> and <code>pick</code> have neither.</p>
+<h2 id="reviewing-the-tests">Reviewing the tests</h2>
+<p>Tests deserve review as much as code, because a bad test is worse than none: it gives confidence it hasn&rsquo;t earned. The usual <strong>test smells</strong>:</p>
+<ul>
+<li><strong>No assertion</strong>: <code>test_astar_runs</code> only checks that nothing crashed.</li>
+<li><strong>Sleeping</strong>: <code>time.sleep</code> makes tests slow and usually hides a timing dependency that should be injected.</li>
+<li><strong>Catching everything</strong>: <code>pytest.raises(Exception)</code> passes for <strong>any</strong> error, including a typo; name the exception you expect.</li>
+<li><strong>Unseeded randomness</strong>: <code>random.Random()</code> without a seed gives a different test each run.</li>
+<li><strong>Testing the mock</strong>, and <strong>assertions in loops</strong> that might run zero times.</li>
+</ul>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Review algorithm changes for correctness on awkward inputs, cost (loops inside loops, growth tests), written and checked assumptions, and containment. Measure cyclomatic complexity (1 plus each decision) and length from the syntax tree; flag functions above about 10 branches or 30 to 40 lines, and simplify with tables or smaller functions. Public functions need docstrings and type hints. Review tests for smells: no assertion, sleeps, <code>pytest.raises(Exception)</code>, unseeded randomness, testing mocks. Automate the measurements in CI, and spend the review on judgement.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w089d5-complexity" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Cyclomatic complexity</div><div class="pc-prompt"><p>Write <code>complexity(source)</code>: a dict from the name of each top-level function in the module source to its cyclomatic complexity: 1, plus 1 for each <code>if</code> (including <code>elif</code>, which is an <code>If</code> node), <code>for</code>, <code>while</code>, <code>except</code> handler, conditional expression (<code>IfExp</code>) and <code>if</code> clause in a comprehension, plus <code>len(values) - 1</code> for each <code>and</code>/<code>or</code> (<code>BoolOp</code>).</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def complexity(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_complexity():
+    &quot;paths through each function&quot;
+    c = complexity(open(&quot;planner.py&quot;).read())
+    assert c == {&quot;straight_km&quot;: 1, &quot;astar&quot;: 7, &quot;describe&quot;: 1, &quot;pick&quot;: 9, &quot;_cache_key&quot;: 1}
+    src = &quot;def f(x):\n    try:\n        y = [a for a in x if a and a &gt; 1]\n    except ValueError:\n        y = 0 if x else 1\n    return y\n&quot;
+    assert complexity(src) == {&quot;f&quot;: 5}</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+def complexity(source):
+    result = {}
+    for node in ast.parse(source).body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            score = 1
+            for inner in ast.walk(node):
+                if isinstance(inner, (ast.If, ast.For, ast.While, ast.ExceptHandler, ast.IfExp)):
+                    score += 1
+                elif isinstance(inner, ast.BoolOp):
+                    score += len(inner.values) - 1
+                elif isinstance(inner, ast.comprehension):
+                    score += len(inner.ifs)
+            result[node.name] = score
+    return result</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w089d5-interface" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Docstrings and type hints</div><div class="pc-prompt"><p>Write <code>missing_docstrings(source)</code>: the names of top-level <strong>public</strong> functions and classes (not starting with <code>_</code>) that have no docstring, in order. Then <code>missing_hints(source)</code>: the names of public top-level functions where any parameter other than <code>self</code> or <code>cls</code> has no annotation, or there&rsquo;s no return annotation, in order.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def missing_docstrings(source):
+    ___
+
+def missing_hints(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_interface():
+    &quot;what other modules rely on&quot;
+    src = open(&quot;planner.py&quot;).read()
+    assert missing_docstrings(src) == [&quot;astar&quot;, &quot;pick&quot;]
+    assert missing_hints(src) == [&quot;straight_km&quot;, &quot;astar&quot;, &quot;pick&quot;]
+    ok = &#x27;class A:\n    &quot;&quot;&quot;A thing.&quot;&quot;&quot;\n\ndef f(x: int) -&gt; int:\n    &quot;&quot;&quot;Double.&quot;&quot;&quot;\n    return 2 * x\n\ndef _g(y):\n    return y\n&#x27;
+    assert missing_docstrings(ok) == [] and missing_hints(ok) == []</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+def _public(tree, kinds):
+    return [n for n in tree.body if isinstance(n, kinds) and not n.name.startswith(&quot;_&quot;)]
+
+def missing_docstrings(source):
+    tree = ast.parse(source)
+    return [n.name for n in _public(tree, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) if ast.get_docstring(n) is None]
+
+def missing_hints(source):
+    missing = []
+    for node in _public(ast.parse(source), (ast.FunctionDef, ast.AsyncFunctionDef)):
+        args = node.args.posonlyargs + node.args.args + node.args.kwonlyargs
+        unhinted = [a for a in args if a.annotation is None and a.arg not in (&quot;self&quot;, &quot;cls&quot;)]
+        if unhinted or node.returns is None:
+            missing.append(node.name)
+    return missing</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w089d5-length" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Long functions</div><div class="pc-prompt"><p>Write <code>function_lengths(source)</code>: a dict from each top-level function&rsquo;s name to its length in lines (from its <code>def</code> line to its last line, using <code>lineno</code> and <code>end_lineno</code>). Then <code>too_long(source, limit=30)</code>: the names longer than <code>limit</code>, longest first (ties by name).</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def function_lengths(source):
+    ___
+
+def too_long(source, limit=30):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_length():
+    &quot;lines per function&quot;
+    src = open(&quot;planner.py&quot;).read()
+    assert function_lengths(src) == {&quot;straight_km&quot;: 3, &quot;astar&quot;: 19, &quot;describe&quot;: 4, &quot;pick&quot;: 12, &quot;_cache_key&quot;: 2}
+    assert too_long(src, 10) == [&quot;astar&quot;, &quot;pick&quot;] and too_long(src) == []</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+def function_lengths(source):
+    return {n.name: n.end_lineno - n.lineno + 1 for n in ast.parse(source).body
+            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+
+def too_long(source, limit=30):
+    lengths = function_lengths(source)
+    return sorted((n for n, l in lengths.items() if l &gt; limit), key=lambda n: (-lengths[n], n))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w089d5-smells" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Test smells</div><div class="pc-prompt"><p>Write <code>test_smells(source)</code> for a test module: a list of <code>(test_name, smell)</code> for top-level functions whose names start with <code>test</code>, in order, with each test&rsquo;s smells in this order: <code>"no assertion"</code> (no <code>assert</code> statement and no call to <code>pytest.raises</code>); <code>"sleeps"</code> (a call to <code>time.sleep</code> or <code>sleep</code>); <code>"catches everything"</code> (a call to <code>pytest.raises</code> whose first argument is the name <code>Exception</code> or <code>BaseException</code>); and <code>"unseeded random"</code> (a call to <code>random.Random</code> with no arguments).</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def test_smells(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def check_smells():
+    &quot;found in this sprint&#x27;s tests&quot;
+    assert test_smells(open(&quot;test_planner.py&quot;).read()) == [
+        (&quot;test_astar_runs&quot;, &quot;no assertion&quot;), (&quot;test_pick_waits_for_cache&quot;, &quot;sleeps&quot;),
+        (&quot;test_pick_errors&quot;, &quot;catches everything&quot;), (&quot;test_random_routes&quot;, &quot;unseeded random&quot;)]
+
+def check_clean():
+    &quot;nothing to say&quot;
+    clean = &quot;import pytest\nimport random\n\ndef test_a():\n    assert 1 == 1\n\ndef test_b():\n    with pytest.raises(ValueError):\n        int(&#x27;x&#x27;)\n\ndef test_c():\n    assert random.Random(4).random() &lt; 1\n\ndef helper():\n    pass\n&quot;
+    assert test_smells(clean) == []
+
+def test_all():
+    &quot;both&quot;
+    check_smells()
+    check_clean()</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+def _name(func):
+    if isinstance(func, ast.Name):
+        return func.id
+    if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+        return f&quot;{func.value.id}.{func.attr}&quot;
+    return &quot;&quot;
+
+def test_smells(source):
+    found = []
+    for node in ast.parse(source).body:
+        if not (isinstance(node, ast.FunctionDef) and node.name.startswith(&quot;test&quot;)):
+            continue
+        calls = [n for n in ast.walk(node) if isinstance(n, ast.Call)]
+        names = [_name(c.func) for c in calls]
+        has_assert = any(isinstance(n, ast.Assert) for n in ast.walk(node))
+        if not has_assert and &quot;pytest.raises&quot; not in names:
+            found.append((node.name, &quot;no assertion&quot;))
+        if &quot;time.sleep&quot; in names or &quot;sleep&quot; in names:
+            found.append((node.name, &quot;sleeps&quot;))
+        if any(_name(c.func) == &quot;pytest.raises&quot; and c.args and isinstance(c.args[0], ast.Name)
+               and c.args[0].id in (&quot;Exception&quot;, &quot;BaseException&quot;) for c in calls):
+            found.append((node.name, &quot;catches everything&quot;))
+        if any(_name(c.func) == &quot;random.Random&quot; and not c.args and not c.keywords for c in calls):
+            found.append((node.name, &quot;unseeded random&quot;))
+    return found</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w089d5-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A sort that reached the caller</div><div class="pc-prompt"><p><code>cheapest</code> sorts the list it&rsquo;s given <strong>in place</strong>, so the caller&rsquo;s list of routes changes order behind its back: it prints <code>['short', 'long']</code> for the caller&rsquo;s list, which should still be in its original order. Sort a copy (<code>sorted</code>), so it prints <code>['long', 'short']</code>.</p></div><textarea class="pc-src pc-code" hidden>def cheapest(routes):
+    routes.sort(key=lambda r: r[&quot;km&quot;])
+    return routes[0]
+
+offered = [{&quot;name&quot;: &quot;long&quot;, &quot;km&quot;: 9}, {&quot;name&quot;: &quot;short&quot;, &quot;km&quot;: 4}]
+cheapest(offered)
+print([r[&quot;name&quot;] for r in offered])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;don&#x27;t change your arguments&quot;
+    expect_output(&quot;[&#x27;long&#x27;, &#x27;short&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def cheapest(routes):
+    return sorted(routes, key=lambda r: r[&quot;km&quot;])[0]
+
+offered = [{&quot;name&quot;: &quot;long&quot;, &quot;km&quot;: 9}, {&quot;name&quot;: &quot;short&quot;, &quot;km&quot;: 4}]
+cheapest(offered)
+print([r[&quot;name&quot;] for r in offered])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w089d5-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Every factor is the last one</div><div class="pc-prompt"><p>The cost functions are made in a loop, and each lambda looks up <code>factor</code> when it&rsquo;s <strong>called</strong>, by which time the loop has finished: every one uses 3.0 and it prints <code>[6.0, 6.0]</code>. Bind the current value (a default argument), so it prints <code>[2.0, 6.0]</code>.</p></div><textarea class="pc-src pc-code" hidden>costs = []
+for factor in (1.0, 3.0):
+    costs.append(lambda km: km * factor)
+print([cost(2.0) for cost in costs])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;late binding&quot;
+    expect_output(&quot;[2.0, 6.0]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>costs = []
+for factor in (1.0, 3.0):
+    costs.append(lambda km, factor=factor: km * factor)
+print([cost(2.0) for cost in costs])</textarea></div>
+<div class="parsons" data-id="w089d5-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">pick, as a table</div><div class="pc-prompt"><p>Arrange a simpler <code>pick</code>: a table of key functions instead of a chain of <code>elif</code>s (complexity 2 instead of 9). One line is a trap.</p></div><script type="application/json">{"lines": ["CHOICE = {\"shortest\": lambda r: r[\"km\"], \"flattest\": lambda r: r[\"climb\"], \"quietest\": lambda r: r[\"road_km\"]}", "def pick(routes: list, prefer: str) -> dict | None:", "    \"\"\"The best route for a preference, or None if there are no routes.\"\"\"", "    if not routes:", "        return None", "    return min(routes, key=CHOICE[prefer])"], "distractors": ["    elif prefer == \"short\" or prefer == \"shortest\":"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w089d5-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the cyclomatic complexity of a function with one if, one for and one &quot;a and b and c&quot;
+q = ___   # the test smell in: with pytest.raises(Exception): ...
+r = ___   # True or False: a private helper like _cache_key needs a docstring by this standard
+s = ___   # the minimum number of tests to run every branch of a function of complexity 4
+t = ___   # what late binding makes a lambda in a loop use: &quot;the value at creation&quot; or &quot;the value when called&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 5 and q == &quot;catches everything&quot; and r is False, &quot;p, q and r&quot;
+    assert s == 4 and t == &quot;the value when called&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 5
+q = &quot;catches everything&quot;
+r = False
+s = 4
+t = &quot;the value when called&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w089d5-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What does cyclomatic complexity count?", "answer": 1, "explain": "Also the minimum number of tests for every branch.", "options": ["Lines", "Independent paths through a function: 1 plus each decision", "Calls", "Variables"]}, {"type": "mc", "q": "How do you usually reduce a long elif chain?", "answer": 1, "explain": "Data instead of branches.", "options": ["Add comments", "Use a table (dict) of functions or values", "Make it longer", "Use recursion"]}, {"type": "mc", "q": "Which functions need docstrings and type hints?", "answer": 1, "explain": "The interface.", "options": ["Every one", "The public ones other modules rely on", "None", "Only tests"]}, {"type": "mc", "q": "What&rsquo;s wrong with a test that only calls the code?", "answer": 1, "explain": "No assertion.", "options": ["Nothing", "It checks only that nothing crashed, not that anything is right", "It&rsquo;s slow", "It&rsquo;s too long"]}, {"type": "mc", "q": "Why is <code>pytest.raises(Exception)</code> a smell?", "answer": 1, "explain": "Name the exception you expect.", "options": ["It&rsquo;s slow", "Any error passes it, including a typo", "Syntax", "It&rsquo;s deprecated"]}, {"type": "mc", "q": "What should replace <code>time.sleep</code> in tests?", "answer": 1, "explain": "Sleeps hide timing dependencies.", "options": ["A longer sleep", "An injected clock or event", "Nothing", "A retry"]}, {"type": "mc", "q": "What should a reviewer of an algorithm change ask for?", "answer": 1, "explain": "Correct and not slower.", "options": ["A screenshot", "Evidence of correctness on awkward inputs and a growth test", "Comments", "A longer description"]}, {"type": "mc", "q": "Why measure complexity in CI?", "answer": 1, "explain": "Machines measure; people judge.", "options": ["To grade people", "So reviews discuss judgement, and measurements are only raised when exceeded", "It&rsquo;s required", "Speed"]}, {"type": "mc", "q": "Why shouldn&rsquo;t a function sort its argument in place?", "answer": 1, "explain": "Return a sorted copy.", "options": ["Speed", "It changes the caller&rsquo;s data behind its back", "It can&rsquo;t", "Style"]}, {"type": "output", "q": "What does this print?", "answer": "1 3", "explain": "The function spans lines 1 to 3.", "code": "import ast\ntree = ast.parse(\"def f():\\n    pass\\n    return 1\\n\")\nnode = tree.body[0]\nprint(node.lineno, node.end_lineno)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w089d5-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a quality report</div><div class="pc-prompt"><p>Write <code>quality_report(source, test_source, max_complexity=7, max_lines=15)</code> using the given helpers. Return <code>(findings, score)</code>: <code>findings</code> is a sorted list of strings: <code>"complexity N: NAME"</code> for functions above <code>max_complexity</code>; <code>"long (N lines): NAME"</code> for functions above <code>max_lines</code>; <code>"no docstring: NAME"</code>; <code>"no type hints: NAME"</code>; and <code>"test smell (SMELL): TEST"</code> for each test smell. <code>score</code> starts at 100 and loses 10 per complexity or length finding, 5 per docstring or hint finding, and 10 per test smell, never below 0.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def complexity(source):
+    result = {}
+    for node in ast.parse(source).body:
+        if isinstance(node, ast.FunctionDef):
+            score = 1
+            for inner in ast.walk(node):
+                if isinstance(inner, (ast.If, ast.For, ast.While, ast.ExceptHandler, ast.IfExp)):
+                    score += 1
+                elif isinstance(inner, ast.BoolOp):
+                    score += len(inner.values) - 1
+                elif isinstance(inner, ast.comprehension):
+                    score += len(inner.ifs)
+            result[node.name] = score
+    return result
+
+def function_lengths(source):
+    return {n.name: n.end_lineno - n.lineno + 1 for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)}
+
+def missing_docstrings(source):
+    return [n.name for n in ast.parse(source).body
+            if isinstance(n, (ast.FunctionDef, ast.ClassDef)) and not n.name.startswith(&quot;_&quot;) and ast.get_docstring(n) is None]
+
+def missing_hints(source):
+    out = []
+    for n in ast.parse(source).body:
+        if isinstance(n, ast.FunctionDef) and not n.name.startswith(&quot;_&quot;):
+            if any(a.annotation is None and a.arg not in (&quot;self&quot;, &quot;cls&quot;) for a in n.args.args) or n.returns is None:
+                out.append(n.name)
+    return out
+
+def test_smells(source):
+    found = []
+    for node in ast.parse(source).body:
+        if not (isinstance(node, ast.FunctionDef) and node.name.startswith(&quot;test&quot;)):
+            continue
+        text = ast.unparse(node)
+        if &quot;assert &quot; not in text and &quot;pytest.raises&quot; not in text:
+            found.append((node.name, &quot;no assertion&quot;))
+        if &quot;sleep(&quot; in text:
+            found.append((node.name, &quot;sleeps&quot;))
+        if &quot;pytest.raises(Exception)&quot; in text:
+            found.append((node.name, &quot;catches everything&quot;))
+        if &quot;random.Random()&quot; in text:
+            found.append((node.name, &quot;unseeded random&quot;))
+    return found
+
+def quality_report(source, test_source, max_complexity=7, max_lines=15):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_report():
+    &quot;this sprint&#x27;s planner&quot;
+    findings, score = quality_report(open(&quot;planner.py&quot;).read(), open(&quot;test_planner.py&quot;).read())
+    assert findings == [&quot;complexity 9: pick&quot;, &quot;long (19 lines): astar&quot;, &quot;no docstring: astar&quot;, &quot;no docstring: pick&quot;,
+                        &quot;no type hints: astar&quot;, &quot;no type hints: pick&quot;, &quot;no type hints: straight_km&quot;,
+                        &quot;test smell (catches everything): test_pick_errors&quot;, &quot;test smell (no assertion): test_astar_runs&quot;,
+                        &quot;test smell (sleeps): test_pick_waits_for_cache&quot;, &quot;test smell (unseeded random): test_random_routes&quot;]
+    assert score == 15
+
+def test_clean_and_floor():
+    &quot;a clean module, and a terrible one&quot;
+    clean = &#x27;def f(x: int) -&gt; int:\n    &quot;&quot;&quot;Double.&quot;&quot;&quot;\n    return 2 * x\n&#x27;
+    assert quality_report(clean, &quot;def test_f():\n    assert f(2) == 4\n&quot;) == ([], 100)
+    awful = &quot;\n&quot;.join(f&quot;def f{i}(x):\n    if x:\n        pass&quot; for i in range(30))
+    assert quality_report(awful, &quot;&quot;)[1] == 0</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+def complexity(source):
+    result = {}
+    for node in ast.parse(source).body:
+        if isinstance(node, ast.FunctionDef):
+            score = 1
+            for inner in ast.walk(node):
+                if isinstance(inner, (ast.If, ast.For, ast.While, ast.ExceptHandler, ast.IfExp)):
+                    score += 1
+                elif isinstance(inner, ast.BoolOp):
+                    score += len(inner.values) - 1
+                elif isinstance(inner, ast.comprehension):
+                    score += len(inner.ifs)
+            result[node.name] = score
+    return result
+
+def function_lengths(source):
+    return {n.name: n.end_lineno - n.lineno + 1 for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)}
+
+def missing_docstrings(source):
+    return [n.name for n in ast.parse(source).body
+            if isinstance(n, (ast.FunctionDef, ast.ClassDef)) and not n.name.startswith(&quot;_&quot;) and ast.get_docstring(n) is None]
+
+def missing_hints(source):
+    out = []
+    for n in ast.parse(source).body:
+        if isinstance(n, ast.FunctionDef) and not n.name.startswith(&quot;_&quot;):
+            if any(a.annotation is None and a.arg not in (&quot;self&quot;, &quot;cls&quot;) for a in n.args.args) or n.returns is None:
+                out.append(n.name)
+    return out
+
+def test_smells(source):
+    found = []
+    for node in ast.parse(source).body:
+        if not (isinstance(node, ast.FunctionDef) and node.name.startswith(&quot;test&quot;)):
+            continue
+        text = ast.unparse(node)
+        if &quot;assert &quot; not in text and &quot;pytest.raises&quot; not in text:
+            found.append((node.name, &quot;no assertion&quot;))
+        if &quot;sleep(&quot; in text:
+            found.append((node.name, &quot;sleeps&quot;))
+        if &quot;pytest.raises(Exception)&quot; in text:
+            found.append((node.name, &quot;catches everything&quot;))
+        if &quot;random.Random()&quot; in text:
+            found.append((node.name, &quot;unseeded random&quot;))
+    return found
+
+def quality_report(source, test_source, max_complexity=7, max_lines=15):
+    findings, penalty = [], 0
+    for name, c in complexity(source).items():
+        if c &gt; max_complexity:
+            findings.append(f&quot;complexity {c}: {name}&quot;)
+            penalty += 10
+    for name, n in function_lengths(source).items():
+        if n &gt; max_lines:
+            findings.append(f&quot;long ({n} lines): {name}&quot;)
+            penalty += 10
+    for name in missing_docstrings(source):
+        findings.append(f&quot;no docstring: {name}&quot;)
+        penalty += 5
+    for name in missing_hints(source):
+        findings.append(f&quot;no type hints: {name}&quot;)
+        penalty += 5
+    for test, smell in test_smells(test_source):
+        findings.append(f&quot;test smell ({smell}): {test}&quot;)
+        penalty += 10
+    return sorted(findings), max(0, 100 - penalty)</textarea></div>
+<h2 id="your-capstone-today">Your capstone today</h2>
+<ol>
+<li><strong>Measure</strong> your capstone with today&rsquo;s tools (or ruff&rsquo;s complexity rule, <code>C901</code>, and a docstring rule set): note the three worst functions.</li>
+<li><strong>Simplify one</strong> (a table instead of a chain, or smaller functions), with its tests passing before and after.</li>
+<li><strong>Review your tests</strong> for smells and fix every one.</li>
+<li><strong>Add docstrings and hints</strong> to your public interface, and the checks to CI.</li>
+<li><strong>Merge</strong> and update the burndown.</li>
+</ol>
+<h2 id="before-you-go">Before you go</h2>
+<p>Tomorrow is the <strong>sprint review</strong> for sprint 2: what was built, the numbers, and the plan for the last build sprint.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w089d4.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w089d6.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w089d5", "week": 89, "day": 5, "title": "Code review", "exercises": [{"id": "w089d5-complexity", "title": "Cyclomatic complexity", "points": 15}, {"id": "w089d5-interface", "title": "Docstrings and type hints", "points": 10}, {"id": "w089d5-length", "title": "Long functions", "points": 10}, {"id": "w089d5-smells", "title": "Test smells", "points": 15}, {"id": "w089d5-bug1", "title": "A sort that reached the caller", "points": 10}, {"id": "w089d5-bug2", "title": "Every factor is the last one", "points": 10}, {"id": "w089d5-trace", "title": "Predict them", "points": 10}, {"id": "w089d5-challenge", "title": "Challenge: a quality report", "points": 25}], "points": 105}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=97b2d34bb1"></script>
+</body>
+</html>
