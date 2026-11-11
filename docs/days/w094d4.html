@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="97b2d34bb1">
+<title>Week 94 Day 4: Building CPython from source | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=97b2d34bb1">
+<link rel="stylesheet" href="../assets/css/site.css?v=97b2d34bb1">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=97b2d34bb1"></script>
+<script src="../assets/vendor/codemirror.js?v=97b2d34bb1" defer></script>
+<meta name="description" content="To change CPython you need a CPython you built yourself: the interpreter from your clone, with your change in it, so you can run the tests against it....">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w094d4.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 94 Day 4: Building CPython from source">
+<meta property="og:description" content="To change CPython you need a CPython you built yourself: the interpreter from your clone, with your change in it, so you can run the tests against it....">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w094d4.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-94">Week 94: Open source I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#building-it" data-sec="building-it">Building it</a></li><li><a href="#from-source-to-running-code" data-sec="from-source-to-running-code">From source to running code</a></li><li><a href="#running-the-tests" data-sec="running-the-tests">Running the tests</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#your-turn-build-it" data-sec="your-turn-build-it">Your turn: build it</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w094d4.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-7">Phase 7: Mastery</a></li><li><a href="../map.html#week-94">Week 94: Open source I</a></li><li aria-current="page">Day 4 of 6</li></ol>
+      <p class="day-where"><span>Week 94, Day 4</span></p>
+      <h1>Building CPython from source</h1>
+      <div class="day-intro"><p>To change CPython you need a CPython you built yourself: the interpreter from your clone, with your change in it, so you can run the tests against it. Building it is less frightening than it sounds: on most computers it&rsquo;s two commands and a few minutes. Today you&rsquo;ll learn the build commands for each system and what a <strong>debug build</strong> adds, then look inside: how source becomes tokens, a syntax tree, bytecode and finally running code, using the same modules CPython&rsquo;s developers use. The day ends with the test suite: reading its summary, and telling failures your change caused from failures that were already there.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Build CPython from source on Linux, macOS or Windows, with a debug build</li><li>Read the interpreter&rsquo;s version string and test runner summary</li><li>Follow source through tokens, a syntax tree and a code object</li><li>Run the test suite and compare a run with a baseline</li><li>Tell failures you caused from failures that were already there</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Building it: 20 min"></span><span class="plan-seg s0" style="flex:20" title="From source to running code: 20 min"></span><span class="plan-seg s1" style="flex:15" title="Running the tests: 15 min"></span><span class="plan-seg s0" style="flex:65" title="Practice: 65 min"></span><span class="plan-seg s1" style="flex:30" title="Quiz and daily challenge: 30 min"></span><span class="plan-seg s0" style="flex:20" title="Your turn: build it: 20 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">7 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Building it</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">From source to running code</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Running the tests</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:05</span><span class="plan-what">Practice</span><span class="plan-min">65 min</span></li><li><span class="plan-at">2:10</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">30 min</span></li><li><span class="plan-at">2:40</span><span class="plan-what">Your turn: build it</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w094d4.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w094d4.ipynb" download>download it</a>. Exercises today are worth 115 points.</p>
+    </header>
+    <div class="day-body">
+<div class="filebox"><div class="filebox-head">The file used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>runs.py</code></summary><pre class="pc-filetext">BASELINE = &quot;&quot;&quot;== Tests result: FAILURE ==
+
+433 tests OK.
+
+1 test failed:
+    test_ssl
+
+5 tests skipped:
+    test_devpoll test_kqueue test_msvcrt
+    test_winreg test_winsound
+
+Total duration: 4 min 12 sec
+&quot;&quot;&quot;
+
+AFTER_CHANGE = &quot;&quot;&quot;== Tests result: FAILURE ==
+
+431 tests OK.
+
+3 tests failed:
+    test_ssl test_textwrap
+    test_pydoc
+
+4 tests skipped:
+    test_devpoll test_kqueue test_msvcrt
+    test_winreg
+
+Total duration: 4 min 31 sec
+&quot;&quot;&quot;
+</pre></details><script type="application/json" class="page-files">{"runs.py": "BASELINE = \"\"\"== Tests result: FAILURE ==\n\n433 tests OK.\n\n1 test failed:\n    test_ssl\n\n5 tests skipped:\n    test_devpoll test_kqueue test_msvcrt\n    test_winreg test_winsound\n\nTotal duration: 4 min 12 sec\n\"\"\"\n\nAFTER_CHANGE = \"\"\"== Tests result: FAILURE ==\n\n431 tests OK.\n\n3 tests failed:\n    test_ssl test_textwrap\n    test_pydoc\n\n4 tests skipped:\n    test_devpoll test_kqueue test_msvcrt\n    test_winreg\n\nTotal duration: 4 min 31 sec\n\"\"\"\n"}</script></div>
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w094d4-p1"><textarea class="pc-src pc-code" hidden>import sys
+
+print(sys.version_info[:2] &gt;= (3, 12), sys.implementation.name)
+print(type(sys.version), &quot;(&quot; in sys.version)</textarea></div>
+<p><code>sys.version</code> describes the interpreter you&rsquo;re running: its version, where it was built from and when, and the compiler. When you build CPython yourself, it names your branch and commit, which is how you know you&rsquo;re testing your own build.</p>
+<h2 id="building-it">Building it</h2>
+<p>The devguide&rsquo;s &ldquo;Setup and building&rdquo; page has the details and the list of libraries to install first. In outline, from the top of your clone:</p>
+<ul>
+<li><strong>Linux</strong>: <code>./configure --with-pydebug</code> then <code>make -j8</code> (use as many jobs as you have cores). The new interpreter is <code>./python</code>.</li>
+<li><strong>macOS</strong>: the same, but the interpreter is <code>./python.exe</code> (macOS file systems usually ignore case, so <code>python</code> would clash with the <code>Python</code> folder).</li>
+<li><strong>Windows</strong>: <code>PCbuild\build.bat -c Debug</code>, then run it with <code>python.bat</code>.</li>
+</ul>
+<p><code>--with-pydebug</code> makes a <strong>debug build</strong>: slower, but with extra checks that catch mistakes in C code early, and extra tools such as <code>sys.gettotalrefcount()</code>. It&rsquo;s what you want while developing. Rebuilding after a change to a <code>.py</code> file in <code>Lib/</code> needs nothing at all; after a change to C code, run <code>make</code> again, which only rebuilds what changed.</p>
+<h2 id="from-source-to-running-code">From source to running code</h2>
+<p>What happens when the interpreter runs your file is a pipeline you can watch from Python:</p>
+<ol>
+<li><strong>Tokens</strong>: the <code>tokenize</code> module splits source into names, operators, numbers and strings, plus <code>INDENT</code> and <code>DEDENT</code> for the blocks.</li>
+<li><strong>Syntax tree</strong>: the parser (generated from <code>Grammar/python.gram</code>) builds the tree that <code>ast.parse</code> shows you.</li>
+<li><strong>Code object</strong>: the compiler turns the tree into bytecode with tables of names and constants: <code>compile(source, "file", "exec")</code> returns it, and a function&rsquo;s is in <code>func.__code__</code>.</li>
+<li><strong>Evaluation</strong>: the loop in <code>Python/ceval.c</code> runs the bytecode. The <code>dis</code> module shows it, though the exact instructions change from version to version, so never write a test that depends on them.</li>
+</ol>
+<p>Knowing the stages tells you where to look: a new syntax error message lives in the parser, a wrong result from <code>sorted</code> lives in <code>Objects/listobject.c</code>, a bug in <code>textwrap</code> lives in <code>Lib/textwrap.py</code>.</p>
+<h2 id="running-the-tests">Running the tests</h2>
+<p><code>./python -m test</code> runs the whole suite (add <code>-j0</code> to use every core); <code>./python -m test test_textwrap</code> runs one module, and <code>-v</code> shows each test. The summary at the end says how many test modules passed, which <strong>failed</strong> and which were <strong>skipped</strong> (a test for Windows registry access is skipped on Linux). It looks something like the runs in <code>runs.py</code>, though the exact wording varies between versions.</p>
+<p>Before blaming your change for a failure, run the same tests on an unchanged <code>main</code> (a <strong>baseline</strong>). A test that fails there too isn&rsquo;t yours (perhaps your computer lacks a network or a library), though it&rsquo;s worth reporting if nobody has. A test that fails only with your change is yours to fix.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Build with <code>./configure --with-pydebug &amp;&amp; make -j8</code> (Linux, then <code>./python</code>; macOS, then <code>./python.exe</code>) or <code>PCbuild\build.bat -c Debug</code> (Windows, then <code>python.bat</code>). Debug builds add checks for development. Source becomes tokens (<code>tokenize</code>), a syntax tree (<code>ast</code>), a code object (<code>compile</code>, <code>__code__</code>) and runs in <code>ceval.c</code>; never test exact bytecode. Run <code>./python -m test</code>, read its summary, and compare failures with a baseline on unchanged <code>main</code>.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w094d4-commands" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">The build commands</div><div class="pc-prompt"><p>Write <code>build_commands(system, debug=True, jobs=8)</code> returning a list of commands. For <code>"linux"</code> and <code>"macos"</code>: <code>./configure --with-pydebug</code> (just <code>./configure</code> when not debug), <code>make -jJOBS</code>, and <code>BINARY -m test -jJOBS</code>, where BINARY is <code>./python</code> on Linux and <code>./python.exe</code> on macOS. For <code>"windows"</code>: <code>PCbuild\build.bat -c Debug</code> (or <code>-c Release</code>) and <code>python.bat -m test -jJOBS</code>. Raise <code>ValueError</code> for any other system.</p></div><textarea class="pc-src pc-code" hidden>def build_commands(system, debug=True, jobs=8):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_commands():
+    &quot;per system&quot;
+    assert build_commands(&quot;linux&quot;) == [&quot;./configure --with-pydebug&quot;, &quot;make -j8&quot;, &quot;./python -m test -j8&quot;]
+    assert build_commands(&quot;macos&quot;, jobs=4) == [&quot;./configure --with-pydebug&quot;, &quot;make -j4&quot;, &quot;./python.exe -m test -j4&quot;]
+    assert build_commands(&quot;linux&quot;, debug=False)[0] == &quot;./configure&quot;
+    assert build_commands(&quot;windows&quot;) == [&quot;PCbuild\\build.bat -c Debug&quot;, &quot;python.bat -m test -j8&quot;]
+    assert build_commands(&quot;windows&quot;, debug=False, jobs=2) == [&quot;PCbuild\\build.bat -c Release&quot;, &quot;python.bat -m test -j2&quot;]
+    try:
+        build_commands(&quot;amiga&quot;)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(&quot;amiga&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def build_commands(system, debug=True, jobs=8):
+    if system in (&quot;linux&quot;, &quot;macos&quot;):
+        binary = &quot;./python.exe&quot; if system == &quot;macos&quot; else &quot;./python&quot;
+        configure = &quot;./configure --with-pydebug&quot; if debug else &quot;./configure&quot;
+        return [configure, f&quot;make -j{jobs}&quot;, f&quot;{binary} -m test -j{jobs}&quot;]
+    if system == &quot;windows&quot;:
+        return [f&quot;PCbuild\\build.bat -c {&#x27;Debug&#x27; if debug else &#x27;Release&#x27;}&quot;, f&quot;python.bat -m test -j{jobs}&quot;]
+    raise ValueError(f&quot;unknown system: {system}&quot;)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w094d4-version" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Which interpreter is this?</div><div class="pc-prompt"><p>Write <code>parse_sys_version(text)</code> for strings like <code>3.15.0a1+ (heads/main:1a2b3c4, Nov 20 2026, 14:03:12) [GCC 13.2.0]</code>: return a dict with <code>version</code> (before the space), <code>branch</code> (between <code>heads/</code> and <code>:</code>, or <code>None</code> if there&rsquo;s no <code>heads/</code>), <code>commit</code> (after the colon, or <code>None</code>), <code>built</code> (the date and time, as written) and <code>compiler</code> (inside the square brackets).</p></div><textarea class="pc-src pc-code" hidden>import re
+
+def parse_sys_version(text):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_versions():
+    &quot;your build, or a release&quot;
+    assert parse_sys_version(&quot;3.15.0a1+ (heads/main:1a2b3c4, Nov 20 2026, 14:03:12) [GCC 13.2.0]&quot;) == {
+        &quot;version&quot;: &quot;3.15.0a1+&quot;, &quot;branch&quot;: &quot;main&quot;, &quot;commit&quot;: &quot;1a2b3c4&quot;, &quot;built&quot;: &quot;Nov 20 2026, 14:03:12&quot;, &quot;compiler&quot;: &quot;GCC 13.2.0&quot;}
+    assert parse_sys_version(&quot;3.14.1 (heads/fix-shorten:9f8e7d6, Dec  1 2026, 09:15:00) [Clang 17.0.6 ]&quot;)[&quot;branch&quot;] == &quot;fix-shorten&quot;
+    assert parse_sys_version(&quot;3.13.2 (main, Feb  4 2026, 12:00:00) [GCC 12.2.0]&quot;) == {
+        &quot;version&quot;: &quot;3.13.2&quot;, &quot;branch&quot;: None, &quot;commit&quot;: None, &quot;built&quot;: &quot;Feb  4 2026, 12:00:00&quot;, &quot;compiler&quot;: &quot;GCC 12.2.0&quot;}</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+def parse_sys_version(text):
+    match = re.match(r&quot;(\S+) \((.*?), (\w{3} +\d+ \d{4}, [\d:]+)\) \[(.*)\]&quot;, text)
+    version, source, built, compiler = match.groups()
+    branch = commit = None
+    if source.startswith(&quot;heads/&quot;) and &quot;:&quot; in source:
+        branch, commit = source[len(&quot;heads/&quot;):].split(&quot;:&quot;, 1)
+    return {&quot;version&quot;: version, &quot;branch&quot;: branch, &quot;commit&quot;: commit, &quot;built&quot;: built, &quot;compiler&quot;: compiler.strip()}</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w094d4-tokens" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Tokens</div><div class="pc-prompt"><p>Write <code>token_kinds(source)</code> with <code>tokenize</code>: return <code>(KIND, STRING)</code> pairs for every token whose kind is <code>NAME</code>, <code>OP</code>, <code>NUMBER</code>, <code>STRING</code>, <code>INDENT</code> or <code>DEDENT</code> (using <code>tokenize.tok_name</code> for the kind), in order. For <code>INDENT</code> and <code>DEDENT</code>, use an empty string.</p></div><textarea class="pc-src pc-code" hidden>import io
+import tokenize
+
+def token_kinds(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_tokens():
+    &quot;the first stage&quot;
+    assert token_kinds(&quot;total = km * 12\n&quot;) == [(&quot;NAME&quot;, &quot;total&quot;), (&quot;OP&quot;, &quot;=&quot;), (&quot;NAME&quot;, &quot;km&quot;), (&quot;OP&quot;, &quot;*&quot;), (&quot;NUMBER&quot;, &quot;12&quot;)]
+    assert token_kinds(&quot;if x:\n    y(&#x27;ok&#x27;)\n&quot;) == [(&quot;NAME&quot;, &quot;if&quot;), (&quot;NAME&quot;, &quot;x&quot;), (&quot;OP&quot;, &quot;:&quot;), (&quot;INDENT&quot;, &quot;&quot;), (&quot;NAME&quot;, &quot;y&quot;), (&quot;OP&quot;, &quot;(&quot;),
+                                               (&quot;STRING&quot;, &quot;&#x27;ok&#x27;&quot;), (&quot;OP&quot;, &quot;)&quot;), (&quot;DEDENT&quot;, &quot;&quot;)]</textarea><textarea class="pc-src pc-solution" hidden>import io
+import tokenize
+
+KINDS = {&quot;NAME&quot;, &quot;OP&quot;, &quot;NUMBER&quot;, &quot;STRING&quot;, &quot;INDENT&quot;, &quot;DEDENT&quot;}
+
+def token_kinds(source):
+    found = []
+    for tok in tokenize.generate_tokens(io.StringIO(source).readline):
+        kind = tokenize.tok_name[tok.type]
+        if kind in KINDS:
+            found.append((kind, &quot;&quot; if kind in (&quot;INDENT&quot;, &quot;DEDENT&quot;) else tok.string))
+    return found</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w094d4-code" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Inside a code object</div><div class="pc-prompt"><p>Write <code>code_summary(func)</code>: from <code>func.__code__</code>, return a dict with <code>arguments</code> (the names of its positional arguments, from <code>co_varnames</code> and <code>co_argcount</code>, as a list), <code>locals</code> (its other local variable names, as a list), and <code>globals</code> (the names it looks up that aren&rsquo;t local, from <code>co_names</code>, as a sorted list). Then <code>module_names(source)</code>: the sorted names in <code>co_names</code> of <code>compile(source, "&lt;module&gt;", "exec")</code>.</p></div><textarea class="pc-src pc-code" hidden>def code_summary(func):
+    ___
+
+def module_names(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import math
+
+def walk_minutes(km, climb_m):
+    flat = km / 5 * 60
+    hills = climb_m / 10
+    return round(flat + hills)
+
+def test_summary():
+    &quot;what the compiler recorded&quot;
+    assert code_summary(walk_minutes) == {&quot;arguments&quot;: [&quot;km&quot;, &quot;climb_m&quot;], &quot;locals&quot;: [&quot;flat&quot;, &quot;hills&quot;], &quot;globals&quot;: [&quot;round&quot;]}
+    def hypot(a, b):
+        return math.sqrt(a * a + b * b)
+    assert code_summary(hypot) == {&quot;arguments&quot;: [&quot;a&quot;, &quot;b&quot;], &quot;locals&quot;: [], &quot;globals&quot;: [&quot;math&quot;, &quot;sqrt&quot;]}
+
+def test_module():
+    &quot;a module&#x27;s names&quot;
+    assert module_names(&quot;import math\nx = math.sqrt(y)\n&quot;) == [&quot;math&quot;, &quot;sqrt&quot;, &quot;x&quot;, &quot;y&quot;]</textarea><textarea class="pc-src pc-solution" hidden>def code_summary(func):
+    code = func.__code__
+    return {&quot;arguments&quot;: list(code.co_varnames[:code.co_argcount]),
+            &quot;locals&quot;: list(code.co_varnames[code.co_argcount:code.co_nlocals]),
+            &quot;globals&quot;: sorted(code.co_names)}
+
+def module_names(source):
+    return sorted(compile(source, &quot;&lt;module&gt;&quot;, &quot;exec&quot;).co_names)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w094d4-summary" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Reading the test summary</div><div class="pc-prompt"><p>Write <code>parse_summary(output)</code> for summaries like those in <code>runs.py</code>: return a dict with <code>result</code> (from <code>== Tests result: X ==</code>), <code>ok</code> (the number from <code>N tests OK.</code> or <code>1 test OK.</code>, else 0), <code>failed</code> and <code>skipped</code> (lists of the test names listed under <code>N tests failed:</code> and <code>N tests skipped:</code>, which may run over several indented lines; empty if absent), and <code>duration</code> (after <code>Total duration:</code>, or <code>None</code>).</p></div><textarea class="pc-src pc-code" hidden>import re
+
+def parse_summary(output):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>from runs import BASELINE, AFTER_CHANGE
+
+def test_baseline():
+    &quot;unchanged main&quot;
+    assert parse_summary(BASELINE) == {&quot;result&quot;: &quot;FAILURE&quot;, &quot;ok&quot;: 433, &quot;failed&quot;: [&quot;test_ssl&quot;],
+                                       &quot;skipped&quot;: [&quot;test_devpoll&quot;, &quot;test_kqueue&quot;, &quot;test_msvcrt&quot;, &quot;test_winreg&quot;, &quot;test_winsound&quot;],
+                                       &quot;duration&quot;: &quot;4 min 12 sec&quot;}
+
+def test_after():
+    &quot;with a change&quot;
+    s = parse_summary(AFTER_CHANGE)
+    assert s[&quot;failed&quot;] == [&quot;test_ssl&quot;, &quot;test_textwrap&quot;, &quot;test_pydoc&quot;] and s[&quot;ok&quot;] == 431 and len(s[&quot;skipped&quot;]) == 4
+
+def test_success():
+    &quot;all passing&quot;
+    assert parse_summary(&quot;== Tests result: SUCCESS ==\n\n1 test OK.\n&quot;) == {&quot;result&quot;: &quot;SUCCESS&quot;, &quot;ok&quot;: 1, &quot;failed&quot;: [], &quot;skipped&quot;: [], &quot;duration&quot;: None}</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+def parse_summary(output):
+    summary = {&quot;result&quot;: None, &quot;ok&quot;: 0, &quot;failed&quot;: [], &quot;skipped&quot;: [], &quot;duration&quot;: None}
+    current = None
+    for line in output.splitlines():
+        if match := re.match(r&quot;== Tests result: (\w+) ==&quot;, line):
+            summary[&quot;result&quot;] = match.group(1)
+            current = None
+        elif match := re.match(r&quot;(\d+) tests? OK\.&quot;, line):
+            summary[&quot;ok&quot;] = int(match.group(1))
+            current = None
+        elif match := re.match(r&quot;\d+ tests? (failed|skipped):&quot;, line):
+            current = match.group(1)
+        elif line.startswith(&quot; &quot;) and current and line.strip():
+            summary[current] += line.split()
+        elif line.startswith(&quot;Total duration: &quot;):
+            summary[&quot;duration&quot;] = line[len(&quot;Total duration: &quot;):].strip()
+            current = None
+        elif not line.strip():
+            current = None
+    return summary</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w094d4-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">No ./python on a Mac</div><div class="pc-prompt"><p>On macOS the built interpreter is <code>./python.exe</code>, but this gives everyone <code>./python</code>, so it prints <code>./python -m test</code>. Fix it so it prints <code>./python.exe -m test</code> for macOS (and still <code>./python</code> on Linux).</p></div><textarea class="pc-src pc-code" hidden>def test_command(system):
+    return &quot;./python -m test&quot;
+
+print(test_command(&quot;macos&quot;))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;macOS&#x27;s binary&quot;
+    expect_output(&quot;./python.exe -m test&quot;)
+    assert test_command(&quot;linux&quot;) == &quot;./python -m test&quot;</textarea><textarea class="pc-src pc-solution" hidden>def test_command(system):
+    binary = &quot;./python.exe&quot; if system == &quot;macos&quot; else &quot;./python&quot;
+    return f&quot;{binary} -m test&quot;
+
+print(test_command(&quot;macos&quot;))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w094d4-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Two failures that looked like one</div><div class="pc-prompt"><p>The failed tests are separated by spaces, not commas, so splitting on <code>", "</code> keeps them together and this prints <code>1</code>. Split on whitespace so it prints <code>2</code>.</p></div><textarea class="pc-src pc-code" hidden>line = &quot;    test_ssl test_textwrap&quot;
+print(len(line.strip().split(&quot;, &quot;)))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;split()&quot;
+    expect_output(&quot;2&quot;)</textarea><textarea class="pc-src pc-solution" hidden>line = &quot;    test_ssl test_textwrap&quot;
+print(len(line.split()))</textarea></div>
+<div class="parsons" data-id="w094d4-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Commands for Linux and macOS</div><div class="pc-prompt"><p>Arrange <code>build_commands</code> for Linux and macOS: configure (with the debug flag if asked), make, then run the tests with the right binary. One line is a trap.</p></div><script type="application/json">{"lines": ["def unix_commands(system, debug, jobs):", "    binary = \"./python.exe\" if system == \"macos\" else \"./python\"", "    configure = \"./configure --with-pydebug\" if debug else \"./configure\"", "    return [configure, f\"make -j{jobs}\", f\"{binary} -m test -j{jobs}\"]"], "distractors": ["    binary = \"./python.exe\" if system == \"linux\" else \"./python\""]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w094d4-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the configure option for a debug build
+q = ___   # the name of the built interpreter on macOS, as you&#x27;d run it
+r = ___   # the C file whose loop runs bytecode, as a path
+s = ___   # True or False: a test may safely check exact bytecode instructions
+t = ___   # walk_minutes.__code__.co_argcount for def walk_minutes(km, climb_m)</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;--with-pydebug&quot; and q == &quot;./python.exe&quot; and r == &quot;Python/ceval.c&quot;, &quot;p, q and r&quot;
+    assert s is False and t == 2, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;--with-pydebug&quot;
+q = &quot;./python.exe&quot;
+r = &quot;Python/ceval.c&quot;
+s = False
+t = 2</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w094d4-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What two commands build CPython on Linux?", "answer": 1, "explain": "Then run ./python.", "options": ["pip install python", "./configure &ndash;with-pydebug, then make -j8", "python setup.py build", "cmake ."]}, {"type": "mc", "q": "What does a debug build add?", "answer": 1, "explain": "Slower, but safer to develop on.", "options": ["Speed", "Extra checks and tools that catch mistakes during development", "A debugger window", "Nothing"]}, {"type": "mc", "q": "After changing Lib/textwrap.py, what must you rebuild?", "answer": 1, "explain": "C changes need make again.", "options": ["Everything", "Nothing: the Python file is used directly", "Only the docs", "The C modules"]}, {"type": "mc", "q": "What does tokenize produce?", "answer": 1, "explain": "The first stage.", "options": ["Bytecode", "Names, operators, numbers, strings, indents and dedents", "A syntax tree", "Machine code"]}, {"type": "mc", "q": "Where is CPython&rsquo;s grammar?", "answer": 1, "explain": "The parser is generated from it.", "options": ["Lib/ast.py", "Grammar/python.gram", "Python/ceval.c", "Doc/grammar.rst"]}, {"type": "mc", "q": "What does co_varnames hold?", "answer": 1, "explain": "Arguments first.", "options": ["Global names", "Argument and local variable names", "Constants", "Attributes"]}, {"type": "mc", "q": "Why not test exact bytecode?", "answer": 1, "explain": "Test behaviour instead.", "options": ["It&rsquo;s secret", "The instructions change between versions", "It&rsquo;s slow", "dis is broken"]}, {"type": "mc", "q": "How do you run one test module?", "answer": 1, "explain": "Add -v for each test.", "options": ["./python test_textwrap.py", "./python -m test test_textwrap", "make test_textwrap", "pytest Lib/test"]}, {"type": "mc", "q": "A test fails with your change. What first?", "answer": 1, "explain": "A baseline.", "options": ["Delete it", "Run it on unchanged main to see if it fails there too", "Open a PR", "Ignore it"]}, {"type": "output", "q": "What does this print?", "answer": "('a', 'b', 'c') 2", "explain": "Arguments, then locals.", "code": "def f(a, b=2):\n    c = a + b\n    return c\nprint(f.__code__.co_varnames, f.__code__.co_argcount)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w094d4-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: was it my change?</div><div class="pc-prompt"><p>Write <code>compare_runs(baseline_output, change_output)</code> using <code>parse_summary</code> (given). Return <code>(lines, verdict)</code>:</p>
+<ul>
+<li><code>"new failures: ..."</code>: tests failing with the change but not on the baseline (in the change run&rsquo;s order);</li>
+<li><code>"failing on main too: ..."</code>: tests failing in both;</li>
+<li><code>"fixed: ..."</code>: tests failing on the baseline but not with the change;</li>
+<li><code>"skips changed: ..."</code>: tests skipped in one run but not the other, sorted, each followed by <code>(now skipped)</code> or <code>(no longer skipped)</code>;</li>
+<li><code>"passing: N (was M)"</code> from the <code>ok</code> counts.</li>
+</ul>
+<p>Write <code>none</code> for an empty list. <code>verdict</code> is <code>"your change looks safe"</code> if there are no new failures, otherwise <code>"investigate: "</code> and the new failures joined by <code>", "</code>.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+def parse_summary(output):
+    summary = {&quot;result&quot;: None, &quot;ok&quot;: 0, &quot;failed&quot;: [], &quot;skipped&quot;: [], &quot;duration&quot;: None}
+    current = None
+    for line in output.splitlines():
+        if match := re.match(r&quot;== Tests result: (\w+) ==&quot;, line):
+            summary[&quot;result&quot;], current = match.group(1), None
+        elif match := re.match(r&quot;(\d+) tests? OK\.&quot;, line):
+            summary[&quot;ok&quot;], current = int(match.group(1)), None
+        elif match := re.match(r&quot;\d+ tests? (failed|skipped):&quot;, line):
+            current = match.group(1)
+        elif line.startswith(&quot; &quot;) and current and line.strip():
+            summary[current] += line.split()
+        elif line.startswith(&quot;Total duration: &quot;):
+            summary[&quot;duration&quot;], current = line[len(&quot;Total duration: &quot;):].strip(), None
+        elif not line.strip():
+            current = None
+    return summary
+
+def compare_runs(baseline_output, change_output):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>from runs import BASELINE, AFTER_CHANGE
+
+def test_compare():
+    &quot;two failures to investigate&quot;
+    lines, verdict = compare_runs(BASELINE, AFTER_CHANGE)
+    assert lines == [&quot;new failures: test_textwrap, test_pydoc&quot;, &quot;failing on main too: test_ssl&quot;, &quot;fixed: none&quot;,
+                     &quot;skips changed: test_winsound (no longer skipped)&quot;, &quot;passing: 431 (was 433)&quot;]
+    assert verdict == &quot;investigate: test_textwrap, test_pydoc&quot;
+
+def test_safe():
+    &quot;nothing new broke&quot;
+    lines, verdict = compare_runs(AFTER_CHANGE, BASELINE)
+    assert lines[:3] == [&quot;new failures: none&quot;, &quot;failing on main too: test_ssl&quot;, &quot;fixed: test_textwrap, test_pydoc&quot;]
+    assert lines[3] == &quot;skips changed: test_winsound (now skipped)&quot; and verdict == &quot;your change looks safe&quot;</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+def parse_summary(output):
+    summary = {&quot;result&quot;: None, &quot;ok&quot;: 0, &quot;failed&quot;: [], &quot;skipped&quot;: [], &quot;duration&quot;: None}
+    current = None
+    for line in output.splitlines():
+        if match := re.match(r&quot;== Tests result: (\w+) ==&quot;, line):
+            summary[&quot;result&quot;], current = match.group(1), None
+        elif match := re.match(r&quot;(\d+) tests? OK\.&quot;, line):
+            summary[&quot;ok&quot;], current = int(match.group(1)), None
+        elif match := re.match(r&quot;\d+ tests? (failed|skipped):&quot;, line):
+            current = match.group(1)
+        elif line.startswith(&quot; &quot;) and current and line.strip():
+            summary[current] += line.split()
+        elif line.startswith(&quot;Total duration: &quot;):
+            summary[&quot;duration&quot;], current = line[len(&quot;Total duration: &quot;):].strip(), None
+        elif not line.strip():
+            current = None
+    return summary
+
+def _join(items):
+    return &quot;, &quot;.join(items) if items else &quot;none&quot;
+
+def compare_runs(baseline_output, change_output):
+    base, change = parse_summary(baseline_output), parse_summary(change_output)
+    new = [t for t in change[&quot;failed&quot;] if t not in base[&quot;failed&quot;]]
+    both = [t for t in change[&quot;failed&quot;] if t in base[&quot;failed&quot;]]
+    fixed = [t for t in base[&quot;failed&quot;] if t not in change[&quot;failed&quot;]]
+    skips = []
+    for test in sorted(set(base[&quot;skipped&quot;]) ^ set(change[&quot;skipped&quot;])):
+        skips.append(f&quot;{test} (now skipped)&quot; if test in change[&quot;skipped&quot;] else f&quot;{test} (no longer skipped)&quot;)
+    lines = [f&quot;new failures: {_join(new)}&quot;, f&quot;failing on main too: {_join(both)}&quot;, f&quot;fixed: {_join(fixed)}&quot;,
+             f&quot;skips changed: {_join(skips)}&quot;, f&quot;passing: {change[&#x27;ok&#x27;]} (was {base[&#x27;ok&#x27;]})&quot;]
+    return lines, &quot;your change looks safe&quot; if not new else &quot;investigate: &quot; + &quot;, &quot;.join(new)</textarea></div>
+<h2 id="your-turn-build-it">Your turn: build it</h2>
+<ol>
+<li><strong>Install the build dependencies</strong> for your system from the devguide&rsquo;s setup page.</li>
+<li><strong>Build a debug CPython</strong> from your clone, and check <code>./python -c "import sys; print(sys.version)"</code> names your branch.</li>
+<li><strong>Run the whole suite</strong> with <code>-j0</code> and save its summary as your baseline. Note anything that fails or is skipped, and why.</li>
+<li><strong>Make a harmless change</strong> (add a comment to <code>Lib/textwrap.py</code>), run <code>test_textwrap</code> again, and compare.</li>
+</ol>
+<h2 id="before-you-go">Before you go</h2>
+<p>Tomorrow you&rsquo;ll find an issue to work on: one that&rsquo;s small, wanted, and not already taken.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w094d3.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w094d5.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w094d4", "week": 94, "day": 4, "title": "Building CPython from source", "exercises": [{"id": "w094d4-commands", "title": "The build commands", "points": 10}, {"id": "w094d4-version", "title": "Which interpreter is this?", "points": 10}, {"id": "w094d4-tokens", "title": "Tokens", "points": 10}, {"id": "w094d4-code", "title": "Inside a code object", "points": 15}, {"id": "w094d4-summary", "title": "Reading the test summary", "points": 15}, {"id": "w094d4-bug1", "title": "No ./python on a Mac", "points": 10}, {"id": "w094d4-bug2", "title": "Two failures that looked like one", "points": 10}, {"id": "w094d4-trace", "title": "Predict them", "points": 10}, {"id": "w094d4-challenge", "title": "Challenge: was it my change?", "points": 25}], "points": 115}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=97b2d34bb1"></script>
+</body>
+</html>
