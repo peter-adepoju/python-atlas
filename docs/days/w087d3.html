@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="97b2d34bb1">
+<title>Week 87 Day 3: Architecture and design review | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=97b2d34bb1">
+<link rel="stylesheet" href="../assets/css/site.css?v=97b2d34bb1">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=97b2d34bb1"></script>
+<script src="../assets/vendor/codemirror.js?v=97b2d34bb1" defer></script>
+<meta name="description" content="A specification says what to build; an architecture says how it’s divided up: which parts there are, what each is responsible for, which may depend on...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w087d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 87 Day 3: Architecture and design review">
+<meta property="og:description" content="A specification says what to build; an architecture says how it’s divided up: which parts there are, what each is responsible for, which may depend on...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w087d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-87">Week 87: Capstone 1: specification</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#layers-and-the-dependency-rule" data-sec="layers-and-the-dependency-rule">Layers and the dependency rule</a></li><li><a href="#checking-the-rule" data-sec="checking-the-rule">Checking the rule</a></li><li><a href="#the-data-model-and-the-api" data-sec="the-data-model-and-the-api">The data model and the API</a></li><li><a href="#decisions-and-the-review" data-sec="decisions-and-the-review">Decisions and the review</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#your-capstone-today" data-sec="your-capstone-today">Your capstone today</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w087d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-7">Phase 7: Mastery</a></li><li><a href="../map.html#week-87">Week 87: Capstone 1: specification</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 87, Day 3</span></p>
+      <h1>Architecture and design review</h1>
+      <div class="day-intro"><p>A specification says what to build; an <strong>architecture</strong> says how it&rsquo;s divided up: which parts there are, what each is responsible for, which may depend on which, how the data is shaped, and how the outside world talks to it. Getting the divisions right early makes everything after easier: tests are simple, changes stay local, and the riskiest part can be built first. Today you&rsquo;ll split Waymark into layers with a dependency rule, check that rule automatically by reading the code&rsquo;s imports, look for cycles, turn the data model into a database schema, map the API to the stories, record decisions as short decision records, and run a <strong>design review</strong> of the kind you&rsquo;ll ask a friend to do for your own capstone.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Divide a program into layers (domain, storage, services, interfaces) with dependencies pointing inwards</li><li>Check a codebase&rsquo;s imports against its layering rules, and find import cycles</li><li>Turn a data model into a schema with keys and constraints</li><li>Map API routes to stories, and record decisions as architecture decision records</li><li>Prepare for and run a design review</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h 20 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:20" title="Layers and the dependency rule: 20 min"></span><span class="plan-seg s0" style="flex:15" title="Checking the rule: 15 min"></span><span class="plan-seg s1" style="flex:20" title="The data model and the API: 20 min"></span><span class="plan-seg s0" style="flex:15" title="Decisions and the review: 15 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:30" title="Quiz and daily challenge: 30 min"></span><span class="plan-seg s1" style="flex:30" title="Your capstone today: 30 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">8 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Layers and the dependency rule</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:30</span><span class="plan-what">Checking the rule</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:45</span><span class="plan-what">The data model and the API</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:05</span><span class="plan-what">Decisions and the review</span><span class="plan-min">15 min</span></li><li><span class="plan-at">1:20</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:20</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">30 min</span></li><li><span class="plan-at">2:50</span><span class="plan-what">Your capstone today</span><span class="plan-min">30 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w087d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w087d3.ipynb" download>download it</a>. Exercises today are worth 140 points.</p>
+    </header>
+    <div class="day-body">
+<div class="filebox"><div class="filebox-head">The files used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>waymark/domain.py</code></summary><pre class="pc-filetext">from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class Junction:
+    name: str
+    height_m: int
+
+def naismith_minutes(km, climb_m):
+    return round(km / 5 * 60 + climb_m / 600 * 60)
+</pre></details><details class="pc-file"><summary><code>waymark/routing.py</code></summary><pre class="pc-filetext">import heapq
+from waymark.domain import Junction, naismith_minutes
+from waymark.storage import load_paths
+
+def shortest(paths, start, end):
+    ...
+</pre></details><details class="pc-file"><summary><code>waymark/storage.py</code></summary><pre class="pc-filetext">import sqlite3
+from waymark.domain import Junction
+
+def load_paths(conn):
+    ...
+</pre></details><details class="pc-file"><summary><code>waymark/services.py</code></summary><pre class="pc-filetext">from waymark import routing
+from waymark.storage import load_paths, save_route
+
+def plan(conn, start, end):
+    ...
+</pre></details><details class="pc-file"><summary><code>waymark/api.py</code></summary><pre class="pc-filetext">import json
+from waymark.services import plan
+from waymark.storage import save_route
+
+def handle(method, path, body):
+    ...
+</pre></details><details class="pc-file"><summary><code>waymark/cli.py</code></summary><pre class="pc-filetext">import argparse
+from waymark.services import plan
+
+def main(argv):
+    ...
+</pre></details><script type="application/json" class="page-files">{"waymark/domain.py": "from dataclasses import dataclass\n\n@dataclass(frozen=True)\nclass Junction:\n    name: str\n    height_m: int\n\ndef naismith_minutes(km, climb_m):\n    return round(km / 5 * 60 + climb_m / 600 * 60)\n", "waymark/routing.py": "import heapq\nfrom waymark.domain import Junction, naismith_minutes\nfrom waymark.storage import load_paths\n\ndef shortest(paths, start, end):\n    ...\n", "waymark/storage.py": "import sqlite3\nfrom waymark.domain import Junction\n\ndef load_paths(conn):\n    ...\n", "waymark/services.py": "from waymark import routing\nfrom waymark.storage import load_paths, save_route\n\ndef plan(conn, start, end):\n    ...\n", "waymark/api.py": "import json\nfrom waymark.services import plan\nfrom waymark.storage import save_route\n\ndef handle(method, path, body):\n    ...\n", "waymark/cli.py": "import argparse\nfrom waymark.services import plan\n\ndef main(argv):\n    ...\n"}</script></div>
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w087d3-p1"><textarea class="pc-src pc-code" hidden>import ast
+
+source = &#x27;&#x27;&#x27;
+import json
+import waymark.storage
+from waymark.domain import Junction
+from . import helpers
+&#x27;&#x27;&#x27;
+tree = ast.parse(source)
+for node in ast.walk(tree):
+    if isinstance(node, ast.Import):
+        print(&quot;import&quot;, [a.name for a in node.names])
+    elif isinstance(node, ast.ImportFrom):
+        print(&quot;from&quot;, node.module, &quot;level&quot;, node.level, [a.name for a in node.names])</textarea></div>
+<p>Python can read its own code as a tree (Week 64&rsquo;s <code>ast</code>), so a program&rsquo;s <strong>imports</strong>, and therefore its dependencies, can be checked automatically. Today that turns an architecture diagram from a hope into a test.</p>
+<h2 id="layers-and-the-dependency-rule">Layers and the dependency rule</h2>
+<p>Most applications divide naturally into <strong>layers</strong>, each with one job:</p>
+<ul>
+<li><strong>Domain</strong>: the ideas the program is about and the rules about them: for Waymark, junctions, paths, routes, Naismith&rsquo;s rule and the route search. Plain Python, no files, no database, no network, so it&rsquo;s easy to test and to reason about.</li>
+<li><strong>Storage</strong>: getting domain objects in and out of the database (the repository pattern, Week 36).</li>
+<li><strong>Services</strong> (or use cases): one function per thing a user can do (&ldquo;plan a route&rdquo;, &ldquo;save a walk&rdquo;), coordinating domain and storage, and owning transactions.</li>
+<li><strong>Interfaces</strong>: the ways in: an HTTP API, a command-line tool, later perhaps a web page. They translate requests into service calls and results into responses, and nothing more.</li>
+</ul>
+<p>The <strong>dependency rule</strong>: dependencies point <strong>inwards</strong>, towards the domain. Interfaces may use services and the domain; services may use storage and the domain; storage may use the domain; the domain uses none of them. So the domain never changes because the database or the API did, and each outer part can be swapped or tested with a fake. Waymark&rsquo;s rule, as data:</p>
+<pre><code class="language-python">LAYERS = {&quot;waymark.domain&quot;: &quot;domain&quot;, &quot;waymark.routing&quot;: &quot;domain&quot;, &quot;waymark.storage&quot;: &quot;storage&quot;,
+          &quot;waymark.services&quot;: &quot;service&quot;, &quot;waymark.api&quot;: &quot;interface&quot;, &quot;waymark.cli&quot;: &quot;interface&quot;}
+ALLOWED = {&quot;domain&quot;: {&quot;domain&quot;}, &quot;storage&quot;: {&quot;storage&quot;, &quot;domain&quot;},
+           &quot;service&quot;: {&quot;service&quot;, &quot;storage&quot;, &quot;domain&quot;}, &quot;interface&quot;: {&quot;interface&quot;, &quot;service&quot;, &quot;domain&quot;}}
+</code></pre>
+<p>Notice the interfaces aren&rsquo;t allowed to reach past the services into storage: if the API saved routes directly, the rules in the service (validation, transactions) would be skipped.</p>
+<h2 id="checking-the-rule">Checking the rule</h2>
+<p>To check the rule, read each module&rsquo;s imports (<code>ast.Import</code> and <code>ast.ImportFrom</code> nodes), keep those that are modules of your project, and compare each importer&rsquo;s layer with the imported module&rsquo;s. Look in the files above: the skeleton already has two violations, of the kind that creep in when you&rsquo;re in a hurry. <code>routing.py</code>, in the domain, imports storage; <code>api.py</code> calls storage directly.</p>
+<p><strong>Cycles</strong> are the other thing to look for: <code>a</code> imports <code>b</code> imports <code>a</code>. They make modules impossible to understand (or import) separately, and in Python they can fail at import time. A depth-first search that tracks which modules are <strong>on the current path</strong> finds them (Week 49&rsquo;s cycle detection in directed graphs).</p>
+<div class="pc pc-example" data-kind="example" data-id="w087d3-e2"><textarea class="pc-src pc-code" hidden>import ast
+
+def project_imports(source, project=&quot;waymark&quot;):
+    found = set()
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Import):
+            found |= {a.name for a in node.names if a.name.split(&quot;.&quot;)[0] == project}
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module.split(&quot;.&quot;)[0] == project:
+            found.add(node.module)
+    return found
+
+for name in [&quot;domain&quot;, &quot;routing&quot;, &quot;api&quot;]:
+    print(name, sorted(project_imports(open(f&quot;waymark/{name}.py&quot;).read())))</textarea></div>
+<p><code>from waymark import routing</code> names the package <code>waymark</code>; a full checker also looks at the imported names to see that <code>routing</code> is a module (the challenge does).</p>
+<h2 id="the-data-model-and-the-api">The data model and the API</h2>
+<p>The <strong>data model</strong> lists the things the program stores and how they relate. Waymark&rsquo;s: a <code>junction</code> (a name and a height), a <code>path</code> between two junctions (length, climb each way), a saved <code>route</code> (a name and an ordered list of junctions), and a <code>walk</code> (a route, a date, how long it actually took). Turn it into a <strong>schema</strong> with:</p>
+<ul>
+<li>a <strong>primary key</strong> on every table;</li>
+<li><strong>foreign keys</strong> for relationships (<code>path.start</code> references <code>junction.id</code>), switched on in SQLite with <code>PRAGMA foreign_keys = ON</code>;</li>
+<li><strong>constraints</strong> that encode rules: <code>NOT NULL</code>, <code>UNIQUE</code> (no two routes with the same name), <code>CHECK (km &gt; 0)</code>.</li>
+</ul>
+<p>Constraints in the database are a second line of defence: even a bug in the code can&rsquo;t store a path of negative length.</p>
+<p>The <strong>API</strong> gets a table too: method, path, what it does, which story it serves, and its success and error codes. Every must-story should have a route (or a CLI command); every route should serve a story. Plural nouns for collections, no verbs in paths (Week 77).</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Story</th>
+<th>Success</th>
+<th>Errors</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td>/routes?from=A&amp;to=C</td>
+<td>S1, S2</td>
+<td>200</td>
+<td>400, 404</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>/saved-routes</td>
+<td>S3</td>
+<td>201</td>
+<td>400, 409</td>
+</tr>
+<tr>
+<td>GET</td>
+<td>/saved-routes</td>
+<td>S3</td>
+<td>200</td>
+<td></td>
+</tr>
+<tr>
+<td>GET</td>
+<td>/round-walks?from=A&amp;minutes=120</td>
+<td>S4</td>
+<td>200</td>
+<td>400</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>/walks</td>
+<td>S5</td>
+<td>201</td>
+<td>400, 404</td>
+</tr>
+<tr>
+<td>GET</td>
+<td>/walks/summary?year=2026</td>
+<td>S5</td>
+<td>200</td>
+<td>400</td>
+</tr>
+</tbody>
+</table>
+<div class="pc pc-example" data-kind="example" data-id="w087d3-e3"><textarea class="pc-src pc-code" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+conn.executescript(&#x27;&#x27;&#x27;
+CREATE TABLE junction (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE, height_m INTEGER NOT NULL);
+CREATE TABLE path (id INTEGER PRIMARY KEY,
+                   start INTEGER NOT NULL REFERENCES junction(id),
+                   finish INTEGER NOT NULL REFERENCES junction(id),
+                   km REAL NOT NULL CHECK (km &gt; 0));
+INSERT INTO junction (name, height_m) VALUES (&#x27;Mill&#x27;, 40), (&#x27;Ridge&#x27;, 310);
+&#x27;&#x27;&#x27;)
+for row in [(1, 2, 3.5), (1, 9, 2.0), (1, 2, -1.0)]:
+    try:
+        conn.execute(&quot;INSERT INTO path (start, finish, km) VALUES (?, ?, ?)&quot;, row)
+        print(row, &quot;stored&quot;)
+    except sqlite3.IntegrityError as e:
+        print(row, &quot;rejected:&quot;, e)</textarea></div>
+<h2 id="decisions-and-the-review">Decisions and the review</h2>
+<p>Some decisions are worth recording: anything that was hard to decide, would be expensive to change, or that someone will later ask &ldquo;why?&rdquo; about. An <strong>architecture decision record</strong> (ADR) is a short file per decision (<code>docs/adr/0003-use-sqlite.md</code>) with a <strong>title</strong>, a <strong>status</strong> (proposed, accepted, superseded by another), the <strong>context</strong> (the forces at play), the <strong>decision</strong>, and its <strong>consequences</strong> (good and bad). They&rsquo;re never edited after acceptance; a changed mind is a new ADR that supersedes the old one, so the history stays readable.</p>
+<p>Then hold a <strong>design review</strong>: give someone the spec, the layer diagram, the schema, the API table and the ADRs, and ask them to break it. A useful checklist:</p>
+<ul>
+<li>Does every must-story have a home (a service, a route or command, a table)?</li>
+<li>Do dependencies point inwards? Are there cycles?</li>
+<li>What happens when things fail: no route, a duplicate name, a database error halfway through?</li>
+<li>Can the data get into an impossible state? Which constraints stop it?</li>
+<li>Where&rsquo;s the riskiest part, and when will it be built? (Waymark&rsquo;s: route search on a big map, built in week one.)</li>
+<li>How will each part be tested, and what needs a fake?</li>
+<li>What&rsquo;s the simplest version of this that would still work?</li>
+</ul>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Divide an application into layers: a pure domain, storage, services (one per user action, owning transactions) and interfaces (API, CLI). Dependencies point inwards; interfaces go through services. Check the rule automatically by reading imports with <code>ast</code>, mapping modules to layers and comparing with an allowed table; find import cycles with a depth-first search that tracks the current path. Turn the data model into a schema with primary keys, foreign keys (with <code>PRAGMA foreign_keys = ON</code> in SQLite) and constraints. Map every route to a story. Record significant decisions as short, never-edited ADRs (title, status, context, decision, consequences). Review the design against a checklist before building.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w087d3-imports" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Reading imports</div><div class="pc-prompt"><p>Write <code>imports_of(source, project)</code>: the set of <strong>project</strong> modules a source file imports: for <code>import a.b</code>, the name <code>a.b</code>; for <code>from a.b import c</code>, the name <code>a.b</code>, or <code>a.b.c</code> when <code>a.b.c</code> is in the optional set <code>modules</code> (because then <code>c</code> is a module, as in <code>from waymark import routing</code>). Only names whose first part is <code>project</code> count; ignore relative imports (<code>from . import x</code>). Signature: <code>imports_of(source, project, modules=())</code>.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def imports_of(source, project, modules=()):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_imports():
+    &quot;Import and ImportFrom&quot;
+    mods = {&quot;waymark.domain&quot;, &quot;waymark.routing&quot;, &quot;waymark.storage&quot;, &quot;waymark.services&quot;}
+    src = &quot;import json\nimport waymark.storage\nfrom waymark.domain import Junction\nfrom waymark import routing\nfrom . import helpers\nimport waymarker\n&quot;
+    assert imports_of(src, &quot;waymark&quot;, mods) == {&quot;waymark.storage&quot;, &quot;waymark.domain&quot;, &quot;waymark.routing&quot;}
+    assert imports_of(src, &quot;waymark&quot;) == {&quot;waymark.storage&quot;, &quot;waymark.domain&quot;, &quot;waymark&quot;}
+    assert imports_of(open(&quot;waymark/services.py&quot;).read(), &quot;waymark&quot;, mods) == {&quot;waymark.routing&quot;, &quot;waymark.storage&quot;}
+    nested = &quot;def f():\n    from waymark.storage import save_route\n    return save_route\n&quot;
+    assert imports_of(nested, &quot;waymark&quot;, mods) == {&quot;waymark.storage&quot;}, &quot;imports inside functions count too&quot;</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+def imports_of(source, project, modules=()):
+    found = set()
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Import):
+            found |= {a.name for a in node.names if a.name.split(&quot;.&quot;)[0] == project}
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module and node.module.split(&quot;.&quot;)[0] == project:
+            subs = {f&quot;{node.module}.{a.name}&quot; for a in node.names} &amp; set(modules)
+            found |= subs if subs else {node.module}
+    return found</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w087d3-layers" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Checking the layers</div><div class="pc-prompt"><p>Write <code>violations(files, layers, allowed, project)</code>: <code>files</code> maps module names (like <code>"waymark.api"</code>) to source; <code>layers</code> maps module names to layer names; <code>allowed</code> maps each layer to the set of layers it may import. Using the given <code>imports_of</code> (with <code>modules</code> set to the keys of <code>files</code>), return a sorted list of <code>(importer, imported, importer_layer, imported_layer)</code> for every import that breaks the rule. Imported modules not in <code>layers</code> are ignored.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def imports_of(source, project, modules=()):
+    found = set()
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Import):
+            found |= {a.name for a in node.names if a.name.split(&quot;.&quot;)[0] == project}
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module and node.module.split(&quot;.&quot;)[0] == project:
+            subs = {f&quot;{node.module}.{a.name}&quot; for a in node.names} &amp; set(modules)
+            found |= subs if subs else {node.module}
+    return found
+
+def violations(files, layers, allowed, project):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import os
+
+LAYERS = {&quot;waymark.domain&quot;: &quot;domain&quot;, &quot;waymark.routing&quot;: &quot;domain&quot;, &quot;waymark.storage&quot;: &quot;storage&quot;,
+          &quot;waymark.services&quot;: &quot;service&quot;, &quot;waymark.api&quot;: &quot;interface&quot;, &quot;waymark.cli&quot;: &quot;interface&quot;}
+ALLOWED = {&quot;domain&quot;: {&quot;domain&quot;}, &quot;storage&quot;: {&quot;storage&quot;, &quot;domain&quot;},
+           &quot;service&quot;: {&quot;service&quot;, &quot;storage&quot;, &quot;domain&quot;}, &quot;interface&quot;: {&quot;interface&quot;, &quot;service&quot;, &quot;domain&quot;}}
+
+def _files():
+    return {f&quot;waymark.{name[:-3]}&quot;: open(f&quot;waymark/{name}&quot;).read() for name in sorted(os.listdir(&quot;waymark&quot;))}
+
+def test_layers():
+    &quot;the two shortcuts in the skeleton&quot;
+    assert violations(_files(), LAYERS, ALLOWED, &quot;waymark&quot;) == [
+        (&quot;waymark.api&quot;, &quot;waymark.storage&quot;, &quot;interface&quot;, &quot;storage&quot;),
+        (&quot;waymark.routing&quot;, &quot;waymark.storage&quot;, &quot;domain&quot;, &quot;storage&quot;)]
+    fixed = _files()
+    fixed[&quot;waymark.routing&quot;] = fixed[&quot;waymark.routing&quot;].replace(&quot;from waymark.storage import load_paths\n&quot;, &quot;&quot;)
+    fixed[&quot;waymark.api&quot;] = fixed[&quot;waymark.api&quot;].replace(&quot;from waymark.storage import save_route\n&quot;, &quot;&quot;)
+    assert violations(fixed, LAYERS, ALLOWED, &quot;waymark&quot;) == []</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+def imports_of(source, project, modules=()):
+    found = set()
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Import):
+            found |= {a.name for a in node.names if a.name.split(&quot;.&quot;)[0] == project}
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module and node.module.split(&quot;.&quot;)[0] == project:
+            subs = {f&quot;{node.module}.{a.name}&quot; for a in node.names} &amp; set(modules)
+            found |= subs if subs else {node.module}
+    return found
+
+def violations(files, layers, allowed, project):
+    found = []
+    for importer, source in files.items():
+        mine = layers.get(importer)
+        if mine is None:
+            continue
+        for imported in imports_of(source, project, files.keys()):
+            theirs = layers.get(imported)
+            if theirs is not None and theirs not in allowed[mine]:
+                found.append((importer, imported, mine, theirs))
+    return sorted(found)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w087d3-cycles" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Finding import cycles</div><div class="pc-prompt"><p>Write <code>find_cycle(graph)</code>: <code>graph</code> maps each module to the set of modules it imports. Return one cycle as a list that starts and ends with the same module (like <code>["a", "b", "c", "a"]</code>), or <code>None</code>. Search deterministically: start from modules in sorted order and visit dependencies in sorted order, returning the first cycle found; a module reached again while it&rsquo;s <strong>on the current path</strong> closes a cycle (reaching a module that&rsquo;s already finished is fine).</p></div><textarea class="pc-src pc-code" hidden>def find_cycle(graph):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cycles():
+    &quot;on the path, not merely seen&quot;
+    assert find_cycle({&quot;a&quot;: {&quot;b&quot;}, &quot;b&quot;: {&quot;c&quot;}, &quot;c&quot;: {&quot;a&quot;}}) == [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;a&quot;]
+    assert find_cycle({&quot;api&quot;: {&quot;services&quot;, &quot;domain&quot;}, &quot;services&quot;: {&quot;domain&quot;, &quot;storage&quot;}, &quot;storage&quot;: {&quot;domain&quot;}, &quot;domain&quot;: set()}) is None
+    assert find_cycle({&quot;a&quot;: {&quot;b&quot;, &quot;c&quot;}, &quot;b&quot;: {&quot;d&quot;}, &quot;c&quot;: {&quot;d&quot;}, &quot;d&quot;: set()}) is None, &quot;a diamond isn&#x27;t a cycle&quot;
+    assert find_cycle({&quot;x&quot;: {&quot;y&quot;}, &quot;y&quot;: {&quot;z&quot;}, &quot;z&quot;: {&quot;y&quot;}}) == [&quot;y&quot;, &quot;z&quot;, &quot;y&quot;]
+    assert find_cycle({&quot;self&quot;: {&quot;self&quot;}}) == [&quot;self&quot;, &quot;self&quot;]
+    assert find_cycle({&quot;a&quot;: {&quot;missing&quot;}}) is None</textarea><textarea class="pc-src pc-solution" hidden>def find_cycle(graph):
+    done, path = set(), []
+
+    def visit(node):
+        if node in path:
+            return path[path.index(node):] + [node]
+        if node in done:
+            return None
+        path.append(node)
+        for nxt in sorted(graph.get(node, ())):
+            cycle = visit(nxt)
+            if cycle:
+                return cycle
+        path.pop()
+        done.add(node)
+        return None
+
+    for start in sorted(graph):
+        cycle = visit(start)
+        if cycle:
+            return cycle
+    return None</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w087d3-schema" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">A schema from a data model</div><div class="pc-prompt"><p>Write <code>create_table(name, fields)</code>: <code>fields</code> is a list of <code>(column, type, rules)</code>, where <code>rules</code> is a list of strings: <code>"pk"</code> (<code>PRIMARY KEY</code>), <code>"required"</code> (<code>NOT NULL</code>), <code>"unique"</code> (<code>UNIQUE</code>), <code>"ref TABLE"</code> (<code>REFERENCES TABLE(id)</code>) and <code>"check EXPR"</code> (<code>CHECK (column EXPR)</code>). Return the statement as <code>CREATE TABLE name (</code> then each column on its own line, indented four spaces, as <code>column TYPE</code> followed by its rules in the order given, separated by commas, then <code>);</code>. Raise <code>ValueError("unknown rule R")</code> for anything else.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+def create_table(name, fields):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import sqlite3
+
+def test_schema():
+    &quot;keys and constraints&quot;
+    junction = create_table(&quot;junction&quot;, [(&quot;id&quot;, &quot;INTEGER&quot;, [&quot;pk&quot;]), (&quot;name&quot;, &quot;TEXT&quot;, [&quot;required&quot;, &quot;unique&quot;]),
+                                         (&quot;height_m&quot;, &quot;INTEGER&quot;, [&quot;required&quot;, &quot;check &gt;= -500&quot;])])
+    assert junction == (&quot;CREATE TABLE junction (\n    id INTEGER PRIMARY KEY,\n    name TEXT NOT NULL UNIQUE,\n&quot;
+                        &quot;    height_m INTEGER NOT NULL CHECK (height_m &gt;= -500)\n);&quot;)
+    path = create_table(&quot;path&quot;, [(&quot;id&quot;, &quot;INTEGER&quot;, [&quot;pk&quot;]), (&quot;start&quot;, &quot;INTEGER&quot;, [&quot;required&quot;, &quot;ref junction&quot;]),
+                                 (&quot;km&quot;, &quot;REAL&quot;, [&quot;required&quot;, &quot;check &gt; 0&quot;])])
+    conn = sqlite3.connect(&quot;:memory:&quot;)
+    conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+    conn.execute(junction)
+    conn.execute(path)
+    conn.execute(&quot;INSERT INTO junction (name, height_m) VALUES (&#x27;Mill&#x27;, 40)&quot;)
+    conn.execute(&quot;INSERT INTO path (start, km) VALUES (1, 2.5)&quot;)
+    for bad in (&quot;INSERT INTO path (start, km) VALUES (7, 2.5)&quot;, &quot;INSERT INTO path (start, km) VALUES (1, 0)&quot;,
+                &quot;INSERT INTO junction (name, height_m) VALUES (&#x27;Mill&#x27;, 10)&quot;):
+        try:
+            conn.execute(bad)
+        except sqlite3.IntegrityError:
+            pass
+        else:
+            raise AssertionError(bad)
+    try:
+        create_table(&quot;x&quot;, [(&quot;a&quot;, &quot;TEXT&quot;, [&quot;indexed&quot;])])
+    except ValueError as e:
+        assert str(e) == &quot;unknown rule indexed&quot;</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+def _rule(column, rule):
+    if rule == &quot;pk&quot;:
+        return &quot;PRIMARY KEY&quot;
+    if rule == &quot;required&quot;:
+        return &quot;NOT NULL&quot;
+    if rule == &quot;unique&quot;:
+        return &quot;UNIQUE&quot;
+    if rule.startswith(&quot;ref &quot;):
+        return f&quot;REFERENCES {rule[4:]}(id)&quot;
+    if rule.startswith(&quot;check &quot;):
+        return f&quot;CHECK ({column} {rule[6:]})&quot;
+    raise ValueError(f&quot;unknown rule {rule}&quot;)
+
+def create_table(name, fields):
+    lines = [&quot; &quot;.join([column, kind] + [_rule(column, r) for r in rules]) for column, kind, rules in fields]
+    return f&quot;CREATE TABLE {name} (\n&quot; + &quot;,\n&quot;.join(&quot;    &quot; + line for line in lines) + &quot;\n);&quot;</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w087d3-api" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Routes and stories</div><div class="pc-prompt"><p><code>routes</code> is a list of <code>(method, path, stories)</code>, with <code>stories</code> a list of ids. Write <code>uncovered(story_ids, routes)</code>: the story ids served by no route, in order. And <code>route_problems(routes)</code>: a sorted list of problems: <code>"verb in path: METHOD PATH"</code> for any path segment (ignoring the query string) that is one of <code>VERBS</code> (given) or starts with one followed by <code>-</code>; <code>"duplicate: METHOD PATH"</code> for a method and path that appear more than once (reported once); and <code>"no story: METHOD PATH"</code> for a route serving no story.</p></div><textarea class="pc-src pc-code" hidden>VERBS = {&quot;get&quot;, &quot;create&quot;, &quot;add&quot;, &quot;delete&quot;, &quot;remove&quot;, &quot;update&quot;, &quot;find&quot;, &quot;save&quot;, &quot;list&quot;}
+
+def uncovered(story_ids, routes):
+    ___
+
+def route_problems(routes):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_api():
+    &quot;every story served, every route explained&quot;
+    routes = [(&quot;GET&quot;, &quot;/routes?from=A&amp;to=C&quot;, [&quot;S1&quot;, &quot;S2&quot;]), (&quot;POST&quot;, &quot;/saved-routes&quot;, [&quot;S3&quot;]),
+              (&quot;GET&quot;, &quot;/saved-routes&quot;, [&quot;S3&quot;]), (&quot;POST&quot;, &quot;/walks&quot;, [&quot;S5&quot;])]
+    assert uncovered([&quot;S1&quot;, &quot;S2&quot;, &quot;S3&quot;, &quot;S4&quot;, &quot;S5&quot;], routes) == [&quot;S4&quot;]
+    assert route_problems(routes) == []
+    messy = routes + [(&quot;POST&quot;, &quot;/create-walk&quot;, [&quot;S5&quot;]), (&quot;GET&quot;, &quot;/walks/find&quot;, []), (&quot;POST&quot;, &quot;/walks&quot;, [&quot;S5&quot;])]
+    assert route_problems(messy) == [&quot;duplicate: POST /walks&quot;, &quot;no story: GET /walks/find&quot;,
+                                     &quot;verb in path: GET /walks/find&quot;, &quot;verb in path: POST /create-walk&quot;]</textarea><textarea class="pc-src pc-solution" hidden>VERBS = {&quot;get&quot;, &quot;create&quot;, &quot;add&quot;, &quot;delete&quot;, &quot;remove&quot;, &quot;update&quot;, &quot;find&quot;, &quot;save&quot;, &quot;list&quot;}
+
+def uncovered(story_ids, routes):
+    served = {s for _, _, stories in routes for s in stories}
+    return [s for s in story_ids if s not in served]
+
+def route_problems(routes):
+    problems, seen = set(), set()
+    for method, path, stories in routes:
+        label = f&quot;{method} {path}&quot;
+        for segment in path.split(&quot;?&quot;)[0].strip(&quot;/&quot;).split(&quot;/&quot;):
+            if segment in VERBS or segment.split(&quot;-&quot;)[0] in VERBS and &quot;-&quot; in segment:
+                problems.add(f&quot;verb in path: {label}&quot;)
+        if label in seen:
+            problems.add(f&quot;duplicate: {label}&quot;)
+        seen.add(label)
+        if not stories:
+            problems.add(f&quot;no story: {label}&quot;)
+    return sorted(problems)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w087d3-adrs" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Decision records</div><div class="pc-prompt"><p>An ADR looks like the example in the checks: a first line <code># ADR N: Title</code>, a line <code>Status: STATUS</code> (<code>proposed</code>, <code>accepted</code>, <code>rejected</code>, or <code>superseded by N</code>), then <code>## Context</code>, <code>## Decision</code> and <code>## Consequences</code> sections. Write <code>parse_adr(text)</code>: a dict with <code>number</code> (int), <code>title</code>, <code>status</code>, and <code>context</code>, <code>decision</code> and <code>consequences</code> (each section&rsquo;s text, stripped); raise <code>ValueError("missing SECTION")</code> for the first missing section, checked in that order. Then <code>index(adrs)</code>: lines <code>ADR N: Title (status)</code> sorted by number, for a list of parsed ADRs, with superseded ones shown as <code>(superseded by N)</code>, and <code>current(adrs)</code>: the numbers of accepted ADRs that nothing supersedes.</p></div><textarea class="pc-src pc-code" hidden>import re
+
+def parse_adr(text):
+    ___
+
+def index(adrs):
+    ___
+
+def current(adrs):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>ONE = &quot;&quot;&quot;# ADR 1: Use SQLite for storage
+Status: accepted
+
+## Context
+One user, one computer, a few thousand rows.
+
+## Decision
+Store everything in a single SQLite file.
+
+## Consequences
+No server to run. Only one writer at a time.
+&quot;&quot;&quot;
+TWO = &quot;&quot;&quot;# ADR 2: Use a JSON file for saved routes
+Status: superseded by 3
+
+## Context
+Saved routes are few.
+
+## Decision
+Keep them in routes.json.
+
+## Consequences
+Two storage mechanisms.
+&quot;&quot;&quot;
+THREE = &quot;&quot;&quot;# ADR 3: Keep saved routes in SQLite too
+Status: accepted
+
+## Context
+Two storage mechanisms caused bugs.
+
+## Decision
+Move saved routes into the database.
+
+## Consequences
+One place for all data.
+&quot;&quot;&quot;
+
+def test_adrs():
+    &quot;parse, index, current&quot;
+    one = parse_adr(ONE)
+    assert one == {&quot;number&quot;: 1, &quot;title&quot;: &quot;Use SQLite for storage&quot;, &quot;status&quot;: &quot;accepted&quot;,
+                   &quot;context&quot;: &quot;One user, one computer, a few thousand rows.&quot;,
+                   &quot;decision&quot;: &quot;Store everything in a single SQLite file.&quot;,
+                   &quot;consequences&quot;: &quot;No server to run. Only one writer at a time.&quot;}
+    adrs = [parse_adr(t) for t in (THREE, ONE, TWO)]
+    assert index(adrs) == [&quot;ADR 1: Use SQLite for storage (accepted)&quot;, &quot;ADR 2: Use a JSON file for saved routes (superseded by 3)&quot;,
+                           &quot;ADR 3: Keep saved routes in SQLite too (accepted)&quot;]
+    assert current(adrs) == [1, 3]
+    try:
+        parse_adr(ONE.replace(&quot;## Decision&quot;, &quot;## Choice&quot;))
+    except ValueError as e:
+        assert str(e) == &quot;missing Decision&quot;</textarea><textarea class="pc-src pc-solution" hidden>import re
+
+def parse_adr(text):
+    lines = text.strip().splitlines()
+    m = re.match(r&quot;# ADR (\d+): (.+)&quot;, lines[0])
+    status = next(line.split(&quot;:&quot;, 1)[1].strip() for line in lines if line.startswith(&quot;Status:&quot;))
+    parts = {}
+    for name in (&quot;Context&quot;, &quot;Decision&quot;, &quot;Consequences&quot;):
+        found = re.search(rf&quot;^## {name}\n(.*?)(?=^## |\Z)&quot;, text, re.S | re.M)
+        if not found:
+            raise ValueError(f&quot;missing {name}&quot;)
+        parts[name.lower()] = found.group(1).strip()
+    return {&quot;number&quot;: int(m.group(1)), &quot;title&quot;: m.group(2).strip(), &quot;status&quot;: status, **parts}
+
+def index(adrs):
+    return [f&quot;ADR {a[&#x27;number&#x27;]}: {a[&#x27;title&#x27;]} ({a[&#x27;status&#x27;]})&quot; for a in sorted(adrs, key=lambda a: a[&quot;number&quot;])]
+
+def current(adrs):
+    replaced = {a[&quot;number&quot;] for a in adrs if a[&quot;status&quot;].startswith(&quot;superseded&quot;)}
+    return sorted(a[&quot;number&quot;] for a in adrs if a[&quot;status&quot;] == &quot;accepted&quot; and a[&quot;number&quot;] not in replaced)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w087d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Imports that weren&rsquo;t seen</div><div class="pc-prompt"><p>The checker only looks at <code>import</code> statements, so it misses <code>from waymark.storage import load_paths</code> and prints <code>['waymark.domain']</code>. Handle <code>from ... import</code> as well, so it prints <code>['waymark.domain', 'waymark.storage']</code>.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+source = &quot;import waymark.domain\nfrom waymark.storage import load_paths\n&quot;
+found = set()
+for node in ast.walk(ast.parse(source)):
+    if isinstance(node, ast.Import):
+        found |= {a.name for a in node.names}
+print(sorted(found))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;ImportFrom too&quot;
+    expect_output(&quot;[&#x27;waymark.domain&#x27;, &#x27;waymark.storage&#x27;]&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+source = &quot;import waymark.domain\nfrom waymark.storage import load_paths\n&quot;
+found = set()
+for node in ast.walk(ast.parse(source)):
+    if isinstance(node, ast.Import):
+        found |= {a.name for a in node.names}
+    elif isinstance(node, ast.ImportFrom):
+        found.add(node.module)
+print(sorted(found))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w087d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A diamond mistaken for a cycle</div><div class="pc-prompt"><p><code>api</code> and <code>cli</code> both use <code>domain</code>, which is fine, but the search treats any module it has <strong>ever</strong> seen as a cycle: it prints <code>cycle at domain</code>. Track the modules on the <strong>current path</strong> separately from those already finished, so it prints <code>no cycle</code>.</p></div><textarea class="pc-src pc-code" hidden>graph = {&quot;app&quot;: [&quot;api&quot;, &quot;cli&quot;], &quot;api&quot;: [&quot;domain&quot;], &quot;cli&quot;: [&quot;domain&quot;], &quot;domain&quot;: []}
+seen = set()
+
+def visit(node):
+    if node in seen:
+        return node
+    seen.add(node)
+    for nxt in graph[node]:
+        found = visit(nxt)
+        if found:
+            return found
+    return None
+
+found = visit(&quot;app&quot;)
+print(f&quot;cycle at {found}&quot; if found else &quot;no cycle&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;on the path, not merely seen&quot;
+    expect_output(&quot;no cycle&quot;)</textarea><textarea class="pc-src pc-solution" hidden>graph = {&quot;app&quot;: [&quot;api&quot;, &quot;cli&quot;], &quot;api&quot;: [&quot;domain&quot;], &quot;cli&quot;: [&quot;domain&quot;], &quot;domain&quot;: []}
+seen, path = set(), set()
+
+def visit(node):
+    if node in path:
+        return node
+    if node in seen:
+        return None
+    path.add(node)
+    for nxt in graph[node]:
+        found = visit(nxt)
+        if found:
+            return found
+    path.discard(node)
+    seen.add(node)
+    return None
+
+found = visit(&quot;app&quot;)
+print(f&quot;cycle at {found}&quot; if found else &quot;no cycle&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w087d3-bug3" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A foreign key that wasn&rsquo;t checked</div><div class="pc-prompt"><p>SQLite doesn&rsquo;t enforce foreign keys unless asked, so a path to a junction that doesn&rsquo;t exist is stored: it prints <code>stored</code>. Turn enforcement on, so it prints <code>rejected</code>.</p></div><textarea class="pc-src pc-code" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.execute(&quot;CREATE TABLE junction (id INTEGER PRIMARY KEY, name TEXT)&quot;)
+conn.execute(&quot;CREATE TABLE path (id INTEGER PRIMARY KEY, start INTEGER REFERENCES junction(id))&quot;)
+try:
+    conn.execute(&quot;INSERT INTO path (start) VALUES (42)&quot;)
+    print(&quot;stored&quot;)
+except sqlite3.IntegrityError:
+    print(&quot;rejected&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;PRAGMA foreign_keys&quot;
+    expect_output(&quot;rejected&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import sqlite3
+
+conn = sqlite3.connect(&quot;:memory:&quot;)
+conn.execute(&quot;PRAGMA foreign_keys = ON&quot;)
+conn.execute(&quot;CREATE TABLE junction (id INTEGER PRIMARY KEY, name TEXT)&quot;)
+conn.execute(&quot;CREATE TABLE path (id INTEGER PRIMARY KEY, start INTEGER REFERENCES junction(id))&quot;)
+try:
+    conn.execute(&quot;INSERT INTO path (start) VALUES (42)&quot;)
+    print(&quot;stored&quot;)
+except sqlite3.IntegrityError:
+    print(&quot;rejected&quot;)</textarea></div>
+<div class="parsons" data-id="w087d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">An interface that goes through a service</div><div class="pc-prompt"><p>Arrange Waymark&rsquo;s API handler for saving a route so that it only translates: parse the request, call the service, turn the result or error into a response. One line is a trap.</p></div><script type="application/json">{"lines": ["from waymark.services import save_route, DuplicateName", "def post_saved_route(body):", "    data = json.loads(body)", "    try:", "        route = save_route(data[\"name\"], data[\"stops\"])", "    except DuplicateName:", "        return 409, {\"error\": \"a route with that name exists\"}", "    return 201, {\"name\": route.name, \"stops\": route.stops}"], "distractors": ["    conn.execute(\"INSERT INTO route (name) VALUES (?)\", (data[\"name\"],))"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w087d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the layer that holds Naismith&#x27;s rule: &quot;domain&quot;, &quot;storage&quot;, &quot;service&quot; or &quot;interface&quot;
+q = ___   # the layer that owns database transactions for &quot;save a walk&quot;
+r = ___   # True or False: an HTTP handler should run SQL itself
+s = ___   # the SQLite statement (without the semicolon) that switches foreign keys on
+t = ___   # what you write when an accepted ADR&#x27;s decision changes: &quot;edit it&quot; or &quot;a new ADR&quot;</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;domain&quot; and q == &quot;service&quot; and r is False, &quot;p, q and r&quot;
+    assert s.upper().replace(&quot; &quot;, &quot;&quot;) == &quot;PRAGMAFOREIGN_KEYS=ON&quot; and t == &quot;a new ADR&quot;, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;domain&quot;
+q = &quot;service&quot;
+r = False
+s = &quot;PRAGMA foreign_keys = ON&quot;
+t = &quot;a new ADR&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w087d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Which layer should know nothing about databases or HTTP?", "answer": 1, "explain": "Pure rules and ideas, easy to test.", "options": ["Interfaces", "The domain", "Services", "Storage"]}, {"type": "mc", "q": "Which way do dependencies point?", "answer": 1, "explain": "The domain changes for nobody.", "options": ["Outwards", "Inwards, towards the domain", "Any way", "Upwards"]}, {"type": "mc", "q": "Why shouldn&rsquo;t an API handler call storage directly?", "answer": 1, "explain": "Interfaces translate; services decide.", "options": ["It&rsquo;s slower", "It would skip the service&rsquo;s rules and transactions", "It&rsquo;s not allowed by Python", "No reason"]}, {"type": "mc", "q": "How can you check the dependency rule automatically?", "answer": 1, "explain": "An architecture test.", "options": ["You can&rsquo;t", "Read each module&rsquo;s imports with ast and compare their layers with an allowed table", "Run the program", "Count lines"]}, {"type": "mc", "q": "Why are import cycles a problem?", "answer": 1, "explain": "Break them by moving the shared part inwards.", "options": ["They&rsquo;re slow", "Modules can&rsquo;t be understood or imported separately, and imports can fail", "They waste memory", "They aren&rsquo;t"]}, {"type": "mc", "q": "Why put constraints in the database as well as the code?", "answer": 1, "explain": "A second line of defence.", "options": ["Duplication is good", "They stop impossible data even when the code has a bug", "Speed", "Required by SQL"]}, {"type": "mc", "q": "What does an ADR record?", "answer": 1, "explain": "Never edited; superseded by new ones.", "options": ["Every commit", "A significant decision: its context, the decision and its consequences", "Bugs", "Meeting minutes"]}, {"type": "mc", "q": "Which is a good REST path for saved routes?", "answer": 1, "explain": "A plural noun; the method says what to do.", "options": ["/saveRoute", "/saved-routes", "/routes/create", "/doSave"]}, {"type": "mc", "q": "What&rsquo;s the most important question in a design review?", "answer": 1, "explain": "Find the breakages on paper.", "options": ["Which colours?", "What happens when things fail, and where&rsquo;s the riskiest part?", "How many files?", "Which editor?"]}, {"type": "output", "q": "What does this print?", "answer": "ImportFrom waymark.domain 0", "explain": "Level 0 means an absolute import.", "code": "import ast\ntree = ast.parse(\"from waymark.domain import Junction\")\nnode = tree.body[0]\nprint(type(node).__name__, node.module, node.level)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w087d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: an architecture check</div><div class="pc-prompt"><p>Write <code>architecture_report(files, layers, allowed, project, entry_points)</code> for a project&rsquo;s modules (<code>files</code> maps module names to source). Using the given helpers, return a dict with: <code>graph</code> (each module, sorted, to the sorted list of project modules it imports, keeping only modules in <code>files</code>); <code>violations</code> (as in the exercise); <code>cycle</code> (from <code>find_cycle</code>, or <code>None</code>); <code>unused</code> (sorted modules that no other module imports and that aren&rsquo;t entry points); <code>fan_in</code> and <code>fan_out</code> (dicts from each module to how many modules import it and how many it imports); <code>unlayered</code> (sorted modules in <code>files</code> with no layer); and <code>ok</code> (<code>True</code> only if there are no violations, no cycle, nothing unused and nothing unlayered).</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def imports_of(source, project, modules=()):
+    found = set()
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Import):
+            found |= {a.name for a in node.names if a.name.split(&quot;.&quot;)[0] == project}
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module and node.module.split(&quot;.&quot;)[0] == project:
+            subs = {f&quot;{node.module}.{a.name}&quot; for a in node.names} &amp; set(modules)
+            found |= subs if subs else {node.module}
+    return found
+
+def find_cycle(graph):
+    done, path = set(), []
+    def visit(node):
+        if node in path:
+            return path[path.index(node):] + [node]
+        if node in done:
+            return None
+        path.append(node)
+        for nxt in sorted(graph.get(node, ())):
+            cycle = visit(nxt)
+            if cycle:
+                return cycle
+        path.pop()
+        done.add(node)
+        return None
+    for start in sorted(graph):
+        cycle = visit(start)
+        if cycle:
+            return cycle
+    return None
+
+def architecture_report(files, layers, allowed, project, entry_points):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import os
+
+LAYERS = {&quot;waymark.domain&quot;: &quot;domain&quot;, &quot;waymark.routing&quot;: &quot;domain&quot;, &quot;waymark.storage&quot;: &quot;storage&quot;,
+          &quot;waymark.services&quot;: &quot;service&quot;, &quot;waymark.api&quot;: &quot;interface&quot;, &quot;waymark.cli&quot;: &quot;interface&quot;}
+ALLOWED = {&quot;domain&quot;: {&quot;domain&quot;}, &quot;storage&quot;: {&quot;storage&quot;, &quot;domain&quot;},
+           &quot;service&quot;: {&quot;service&quot;, &quot;storage&quot;, &quot;domain&quot;}, &quot;interface&quot;: {&quot;interface&quot;, &quot;service&quot;, &quot;domain&quot;}}
+ENTRY = {&quot;waymark.api&quot;, &quot;waymark.cli&quot;}
+
+def _files():
+    return {f&quot;waymark.{name[:-3]}&quot;: open(f&quot;waymark/{name}&quot;).read() for name in sorted(os.listdir(&quot;waymark&quot;))}
+
+def test_skeleton():
+    &quot;the skeleton as it stands&quot;
+    r = architecture_report(_files(), LAYERS, ALLOWED, &quot;waymark&quot;, ENTRY)
+    assert r[&quot;graph&quot;] == {&quot;waymark.api&quot;: [&quot;waymark.services&quot;, &quot;waymark.storage&quot;], &quot;waymark.cli&quot;: [&quot;waymark.services&quot;],
+                          &quot;waymark.domain&quot;: [], &quot;waymark.routing&quot;: [&quot;waymark.domain&quot;, &quot;waymark.storage&quot;],
+                          &quot;waymark.services&quot;: [&quot;waymark.routing&quot;, &quot;waymark.storage&quot;], &quot;waymark.storage&quot;: [&quot;waymark.domain&quot;]}
+    assert [v[:2] for v in r[&quot;violations&quot;]] == [(&quot;waymark.api&quot;, &quot;waymark.storage&quot;), (&quot;waymark.routing&quot;, &quot;waymark.storage&quot;)]
+    assert r[&quot;cycle&quot;] is None and r[&quot;unused&quot;] == [] and r[&quot;unlayered&quot;] == []
+    assert r[&quot;fan_in&quot;][&quot;waymark.storage&quot;] == 3 and r[&quot;fan_out&quot;][&quot;waymark.services&quot;] == 2 and r[&quot;fan_in&quot;][&quot;waymark.api&quot;] == 0
+    assert r[&quot;ok&quot;] is False
+
+def test_problems():
+    &quot;cycles, orphans and missing layers&quot;
+    files = _files()
+    files[&quot;waymark.routing&quot;] = files[&quot;waymark.routing&quot;].replace(&quot;from waymark.storage import load_paths\n&quot;, &quot;&quot;)
+    files[&quot;waymark.api&quot;] = files[&quot;waymark.api&quot;].replace(&quot;from waymark.storage import save_route\n&quot;, &quot;&quot;)
+    assert architecture_report(files, LAYERS, ALLOWED, &quot;waymark&quot;, ENTRY)[&quot;ok&quot;] is True
+    files[&quot;waymark.domain&quot;] += &quot;\nfrom waymark.routing import shortest\n&quot;
+    files[&quot;waymark.export&quot;] = &quot;import waymark.domain\n&quot;
+    r = architecture_report(files, LAYERS, ALLOWED, &quot;waymark&quot;, ENTRY)
+    assert r[&quot;cycle&quot;] == [&quot;waymark.routing&quot;, &quot;waymark.domain&quot;, &quot;waymark.routing&quot;]
+    assert r[&quot;unused&quot;] == [&quot;waymark.export&quot;] and r[&quot;unlayered&quot;] == [&quot;waymark.export&quot;] and r[&quot;ok&quot;] is False</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+def imports_of(source, project, modules=()):
+    found = set()
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Import):
+            found |= {a.name for a in node.names if a.name.split(&quot;.&quot;)[0] == project}
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module and node.module.split(&quot;.&quot;)[0] == project:
+            subs = {f&quot;{node.module}.{a.name}&quot; for a in node.names} &amp; set(modules)
+            found |= subs if subs else {node.module}
+    return found
+
+def find_cycle(graph):
+    done, path = set(), []
+    def visit(node):
+        if node in path:
+            return path[path.index(node):] + [node]
+        if node in done:
+            return None
+        path.append(node)
+        for nxt in sorted(graph.get(node, ())):
+            cycle = visit(nxt)
+            if cycle:
+                return cycle
+        path.pop()
+        done.add(node)
+        return None
+    for start in sorted(graph):
+        cycle = visit(start)
+        if cycle:
+            return cycle
+    return None
+
+def architecture_report(files, layers, allowed, project, entry_points):
+    graph = {m: sorted(imports_of(files[m], project, files.keys()) &amp; set(files)) for m in sorted(files)}
+    violations = sorted((m, d, layers[m], layers[d]) for m, deps in graph.items() for d in deps
+                        if m in layers and d in layers and layers[d] not in allowed[layers[m]])
+    fan_in = {m: sum(m in deps for deps in graph.values()) for m in graph}
+    fan_out = {m: len(deps) for m, deps in graph.items()}
+    unused = sorted(m for m in graph if fan_in[m] == 0 and m not in entry_points)
+    unlayered = sorted(m for m in graph if m not in layers)
+    cycle = find_cycle({m: set(d) for m, d in graph.items()})
+    return {&quot;graph&quot;: graph, &quot;violations&quot;: violations, &quot;cycle&quot;: cycle, &quot;unused&quot;: unused, &quot;fan_in&quot;: fan_in,
+            &quot;fan_out&quot;: fan_out, &quot;unlayered&quot;: unlayered,
+            &quot;ok&quot;: not (violations or cycle or unused or unlayered)}</textarea></div>
+<h2 id="your-capstone-today">Your capstone today</h2>
+<p>On your own computer, in your capstone&rsquo;s <code>docs/</code> folder:</p>
+<ol>
+<li><strong>Layers</strong>: list your modules (even if they&rsquo;re empty files yet) and which layer each belongs to, as a <code>LAYERS</code> dict like Waymark&rsquo;s, with your <code>ALLOWED</code> table. Save today&rsquo;s <code>architecture_report</code> as <code>tools/check_architecture.py</code>; on Day 4 it becomes a CI step.</li>
+<li><strong>Data model</strong>: every table, its keys and constraints, as <code>create_table</code> calls or plain SQL in <code>docs/schema.sql</code>.</li>
+<li><strong>Interface table</strong>: every route or command, with the story it serves, its success and error results. Run <code>uncovered</code> against your stories.</li>
+<li><strong>Two or three ADRs</strong> in <code>docs/adr/</code>: at least your storage choice and your interface choice.</li>
+<li><strong>A design review</strong>: send the spec and these documents to someone (a friend from the course is ideal) with the checklist from today&rsquo;s lesson, and ask for their three biggest worries. Write each down with what you&rsquo;ll do about it.</li>
+</ol>
+<h2 id="before-you-go">Before you go</h2>
+<p>Find the riskiest part of your design and write down when you&rsquo;ll build it. If the answer is &ldquo;week four&rdquo;, move it to this week&rsquo;s first slice. Tomorrow is <strong>repository, CI and skeleton</strong>: the project&rsquo;s home, set up so that every change is checked from the first commit.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w087d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w087d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w087d3", "week": 87, "day": 3, "title": "Architecture and design review", "exercises": [{"id": "w087d3-imports", "title": "Reading imports", "points": 15}, {"id": "w087d3-layers", "title": "Checking the layers", "points": 15}, {"id": "w087d3-cycles", "title": "Finding import cycles", "points": 10}, {"id": "w087d3-schema", "title": "A schema from a data model", "points": 15}, {"id": "w087d3-api", "title": "Routes and stories", "points": 10}, {"id": "w087d3-adrs", "title": "Decision records", "points": 10}, {"id": "w087d3-bug1", "title": "Imports that weren't seen", "points": 10}, {"id": "w087d3-bug2", "title": "A diamond mistaken for a cycle", "points": 10}, {"id": "w087d3-bug3", "title": "A foreign key that wasn't checked", "points": 10}, {"id": "w087d3-trace", "title": "Predict them", "points": 10}, {"id": "w087d3-challenge", "title": "Challenge: an architecture check", "points": 25}], "points": 140}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=97b2d34bb1"></script>
+</body>
+</html>
