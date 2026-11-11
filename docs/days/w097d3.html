@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="97b2d34bb1">
+<title>Week 97 Day 3: System design | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=97b2d34bb1">
+<link rel="stylesheet" href="../assets/css/site.css?v=97b2d34bb1">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=97b2d34bb1"></script>
+<script src="../assets/vendor/codemirror.js?v=97b2d34bb1" defer></script>
+<meta name="description" content="Weeks 81 and 82 taught system design as building blocks: caches, queues, replication, sharding, rate limits. The interview version is a forty-five minute...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w097d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 97 Day 3: System design">
+<meta property="og:description" content="Weeks 81 and 82 taught system design as building blocks: caches, queues, replication, sharding, rate limits. The interview version is a forty-five minute...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w097d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-97">Week 97: Interview mastery I</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#forty-five-minutes" data-sec="forty-five-minutes">Forty-five minutes</a></li><li><a href="#numbers-you-can-do-aloud" data-sec="numbers-you-can-do-aloud">Numbers you can do aloud</a></li><li><a href="#trade-offs" data-sec="trade-offs">Trade-offs</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#a-mock-round" data-sec="a-mock-round">A mock round</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w097d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-7">Phase 7: Mastery</a></li><li><a href="../map.html#week-97">Week 97: Interview mastery I</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 97, Day 3</span></p>
+      <h1>System design</h1>
+      <div class="day-intro"><p>Weeks 81 and 82 taught system design as building blocks: caches, queues, replication, sharding, rate limits. The interview version is a forty-five minute conversation about one system (&ldquo;design a link shortener&rdquo;) in which you&rsquo;re judged on how you <strong>structure</strong> the problem, how you <strong>estimate</strong>, and how you <strong>reason about trade-offs</strong>, not on a perfect diagram. Today is the structure and the numbers: a timeline for the forty-five minutes, back-of-the-envelope estimates you can do aloud, the server, storage and cache sums interviewers expect, and a full capacity plan for the classic first question.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Run a system design interview in clear stages, on time</li><li>Estimate requests per second, storage and bandwidth aloud</li><li>Size servers with headroom, and caches from a hot fraction</li><li>Choose the length of random codes from their collision risk</li><li>Produce a capacity plan for a link shortener</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 50 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:5" title="Warm-up: 5 min"></span><span class="plan-seg s1" style="flex:15" title="Forty-five minutes: 15 min"></span><span class="plan-seg s0" style="flex:20" title="Numbers you can do aloud: 20 min"></span><span class="plan-seg s1" style="flex:10" title="Trade-offs: 10 min"></span><span class="plan-seg s0" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s1" style="flex:30" title="Quiz and daily challenge: 30 min"></span><span class="plan-seg s0" style="flex:30" title="A mock round: 30 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">7 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">5 min</span></li><li><span class="plan-at">0:05</span><span class="plan-what">Forty-five minutes</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:20</span><span class="plan-what">Numbers you can do aloud</span><span class="plan-min">20 min</span></li><li><span class="plan-at">0:40</span><span class="plan-what">Trade-offs</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:50</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">1:50</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">30 min</span></li><li><span class="plan-at">2:20</span><span class="plan-what">A mock round</span><span class="plan-min">30 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w097d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w097d3.ipynb" download>download it</a>. Exercises today are worth 115 points.</p>
+    </header>
+    <div class="day-body">
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w097d3-p1"><textarea class="pc-src pc-code" hidden>users, per_day = 10_000_000, 5
+print(users * per_day / 86_400, users * per_day / (24 * 60))</textarea></div>
+<p>A day has 86,400 seconds, not 1,440 (that&rsquo;s minutes). Fifty million actions a day is about 580 a second on average, and a common slip makes it 35,000. Interviewers forgive rough numbers; they notice wrong units.</p>
+<h2 id="forty-five-minutes">Forty-five minutes</h2>
+<p>A timeline keeps the conversation moving and shows you can lead it:</p>
+<ol>
+<li><strong>Requirements</strong> (about 5 minutes): what must it do (functional: shorten a link, redirect), and how well (non-functional: latency, availability, scale, how long links last). Ask; don&rsquo;t assume.</li>
+<li><strong>Estimates</strong> (5): traffic, storage, bandwidth, with the arithmetic aloud.</li>
+<li><strong>API</strong> (5): the endpoints and their inputs and outputs.</li>
+<li><strong>Data model</strong> (5): what&rsquo;s stored, keyed how.</li>
+<li><strong>High-level design</strong> (10): the boxes and arrows: clients, load balancer, services, database, cache, queue.</li>
+<li><strong>Deep dive</strong> (10): the hardest part, usually chosen with the interviewer: generating unique codes, the hot-key problem, consistency.</li>
+<li><strong>Trade-offs and wrap-up</strong> (5): what you&rsquo;d change at ten times the scale, what could fail, what you&rsquo;d monitor.</li>
+</ol>
+<p>Write the stage on the board as you go; the interviewer can then steer you to whatever they want to hear more about.</p>
+<h2 id="numbers-you-can-do-aloud">Numbers you can do aloud</h2>
+<ul>
+<li><strong>Requests per second</strong>: actions a day divided by 86,400 (call it 100,000 for mental arithmetic), times a <strong>peak factor</strong> (2 to 10) for the busiest hour.</li>
+<li><strong>Storage</strong>: items a day times bytes each times days kept, times a <strong>replication factor</strong> (often 3).</li>
+<li><strong>Servers</strong>: peak requests divided by what one server handles, leaving <strong>headroom</strong> (run at 70% so a spike or a failed server doesn&rsquo;t topple the rest), and never fewer than two.</li>
+<li><strong>Cache</strong>: the <strong>hot fraction</strong> (often 20% of items get 80% of reads) times the item size.</li>
+<li><strong>Code length</strong>: random codes from 62 characters (letters and digits) give 62^L possible codes; with n codes in use, the chance two random codes ever collided is about 1 - e^(-n²/2N) (the birthday problem). Choose L so the space is far larger than the codes you&rsquo;ll make.</li>
+</ul>
+<h2 id="trade-offs">Trade-offs</h2>
+<p>Every choice costs something, and saying what is the point: a cache makes reads fast but can serve stale data; random codes are hard to guess but need a collision check; a counter gives short codes but reveals how many links exist and needs coordination; replication improves availability but writes must reach several copies. &ldquo;It depends&rdquo; is only a good answer when followed by &ldquo;on what, and here&rsquo;s what I&rsquo;d choose for these requirements&rdquo;.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Lead the forty-five minutes in stages: requirements, estimates, API, data model, high-level design, deep dive, trade-offs. Per second = per day / 86,400, times a peak factor. Storage = items × bytes × days × replication. Servers = peak / capacity at 70%, at least two. Cache = hot fraction × items × bytes. Random code collisions follow the birthday problem: keep the space far larger than the codes. State each trade-off and choose.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w097d3-capacity" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Traffic and storage</div><div class="pc-prompt"><p>Write <code>capacity(users, actions_per_user, peak_factor, bytes_per_action, days, replication=3)</code>: return a dict with <code>avg_qps</code> (actions a day over 86,400, to 1 decimal place), <code>peak_qps</code> (average times the peak factor, rounded to a whole number) and <code>storage_gb</code> (actions a day times bytes times days times replication, in gigabytes of 10^9 bytes, to 1 decimal place).</p></div><textarea class="pc-src pc-code" hidden>def capacity(users, actions_per_user, peak_factor, bytes_per_action, days, replication=3):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_capacity():
+    &quot;aloud, then exactly&quot;
+    assert capacity(10_000_000, 5, 3, 500, 365) == {&quot;avg_qps&quot;: 578.7, &quot;peak_qps&quot;: 1736, &quot;storage_gb&quot;: 27375.0}
+    assert capacity(1000, 1, 2, 1000, 1, replication=1) == {&quot;avg_qps&quot;: 0.0, &quot;peak_qps&quot;: 0, &quot;storage_gb&quot;: 0.0}</textarea><textarea class="pc-src pc-solution" hidden>def capacity(users, actions_per_user, peak_factor, bytes_per_action, days, replication=3):
+    per_day = users * actions_per_user
+    avg = per_day / 86_400
+    return {&quot;avg_qps&quot;: round(avg, 1), &quot;peak_qps&quot;: round(avg * peak_factor),
+            &quot;storage_gb&quot;: round(per_day * bytes_per_action * days * replication / 1e9, 1)}</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w097d3-servers" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">How many servers?</div><div class="pc-prompt"><p>Write <code>servers_needed(peak_qps, per_server, headroom=0.3)</code>: the smallest whole number of servers that handles <code>peak_qps</code> with each running at no more than <code>1 - headroom</code> of <code>per_server</code>, and never fewer than 2.</p></div><textarea class="pc-src pc-code" hidden>import math
+
+def servers_needed(peak_qps, per_server, headroom=0.3):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_servers():
+    &quot;headroom and redundancy&quot;
+    assert servers_needed(1736, 500) == 5 and servers_needed(10_000, 2_000) == 8
+    assert servers_needed(10, 1000) == 2 and servers_needed(1400, 1000) == 2 and servers_needed(1401, 1000) == 3
+    assert servers_needed(900, 1000, headroom=0) == 2</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+def servers_needed(peak_qps, per_server, headroom=0.3):
+    return max(2, math.ceil(peak_qps / (per_server * (1 - headroom)) - 1e-9))</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w097d3-stages" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Keeping to time</div><div class="pc-prompt"><p>Write <code>stage_report(notes, end)</code>: <code>notes</code> is a list of <code>(minute, stage)</code> saying when each stage started, and <code>end</code> is the minute the interview ended. The stages are <code>requirements</code>, <code>estimates</code>, <code>api</code>, <code>data model</code>, <code>high level</code>, <code>deep dive</code> and <code>trade-offs</code>. Return lines: <code>"STAGE: N min"</code> for each stage visited, in the order visited (each lasts until the next note or <code>end</code>); then <code>"missing: A, B"</code> for stages never visited (in the standard order), if any; then <code>"warning: requirements under 3 min"</code> if requirements took less than 3 minutes (or never happened) and <code>"warning: out of order"</code> if the visited stages aren&rsquo;t in the standard order.</p></div><textarea class="pc-src pc-code" hidden>STAGES = [&quot;requirements&quot;, &quot;estimates&quot;, &quot;api&quot;, &quot;data model&quot;, &quot;high level&quot;, &quot;deep dive&quot;, &quot;trade-offs&quot;]
+
+def stage_report(notes, end):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_good():
+    &quot;on time, in order&quot;
+    notes = [(0, &quot;requirements&quot;), (5, &quot;estimates&quot;), (10, &quot;api&quot;), (15, &quot;data model&quot;), (20, &quot;high level&quot;), (30, &quot;deep dive&quot;), (40, &quot;trade-offs&quot;)]
+    assert stage_report(notes, 45) == [&quot;requirements: 5 min&quot;, &quot;estimates: 5 min&quot;, &quot;api: 5 min&quot;, &quot;data model: 5 min&quot;,
+                                       &quot;high level: 10 min&quot;, &quot;deep dive: 10 min&quot;, &quot;trade-offs: 5 min&quot;]
+
+def test_rushed():
+    &quot;straight to the boxes&quot;
+    notes = [(0, &quot;requirements&quot;), (1, &quot;high level&quot;), (25, &quot;api&quot;), (32, &quot;deep dive&quot;)]
+    assert stage_report(notes, 45) == [&quot;requirements: 1 min&quot;, &quot;high level: 24 min&quot;, &quot;api: 7 min&quot;, &quot;deep dive: 13 min&quot;,
+                                       &quot;missing: estimates, data model, trade-offs&quot;, &quot;warning: requirements under 3 min&quot;,
+                                       &quot;warning: out of order&quot;]</textarea><textarea class="pc-src pc-solution" hidden>STAGES = [&quot;requirements&quot;, &quot;estimates&quot;, &quot;api&quot;, &quot;data model&quot;, &quot;high level&quot;, &quot;deep dive&quot;, &quot;trade-offs&quot;]
+
+def stage_report(notes, end):
+    lines, minutes = [], {}
+    for (start, stage), nxt in zip(notes, notes[1:] + [(end, None)]):
+        minutes[stage] = minutes.get(stage, 0) + nxt[0] - start
+    order = []
+    for _, stage in notes:
+        if stage not in order:
+            order.append(stage)
+    lines = [f&quot;{stage}: {minutes[stage]} min&quot; for stage in order]
+    missing = [s for s in STAGES if s not in minutes]
+    if missing:
+        lines.append(&quot;missing: &quot; + &quot;, &quot;.join(missing))
+    if minutes.get(&quot;requirements&quot;, 0) &lt; 3:
+        lines.append(&quot;warning: requirements under 3 min&quot;)
+    if order != sorted(order, key=STAGES.index):
+        lines.append(&quot;warning: out of order&quot;)
+    return lines</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w097d3-codes" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">How long should codes be?</div><div class="pc-prompt"><p>Write <code>collision_chance(n, length, alphabet=62)</code>: the birthday approximation <code>1 - exp(-n² / (2N))</code> with <code>N = alphabet ** length</code>, and <code>code_length(n, max_chance=0.001, alphabet=62)</code>: the shortest length whose collision chance for <code>n</code> codes is at most <code>max_chance</code>.</p></div><textarea class="pc-src pc-code" hidden>import math
+
+def collision_chance(n, length, alphabet=62):
+    ___
+
+def code_length(n, max_chance=0.001, alphabet=62):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import math
+
+def test_chance():
+    &quot;the birthday problem&quot;
+    assert math.isclose(collision_chance(23, 1, alphabet=365), 1 - math.exp(-23 * 23 / 730))
+    assert collision_chance(1_000_000, 6) &gt; 0.5 and collision_chance(1_000_000, 8) &lt; 0.003
+    assert collision_chance(0, 4) == 0
+
+def test_length():
+    &quot;far larger than the codes&quot;
+    assert code_length(1_000_000) == 9 and code_length(1_000) == 5 and code_length(10) == 3
+    assert code_length(100_000_000, max_chance=0.01) == 10</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+def collision_chance(n, length, alphabet=62):
+    return 1 - math.exp(-n * n / (2 * alphabet ** length))
+
+def code_length(n, max_chance=0.001, alphabet=62):
+    length = 1
+    while collision_chance(n, length, alphabet) &gt; max_chance:
+        length += 1
+    return length</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w097d3-cache" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Sizing the cache</div><div class="pc-prompt"><p>Write <code>cache_gb(items, item_bytes, hot_fraction=0.2, overhead=1.5)</code>: the memory for the hot fraction of items, multiplied by an overhead for the cache&rsquo;s own structures, in gigabytes (10^9 bytes) rounded to 1 decimal place.</p></div><textarea class="pc-src pc-code" hidden>def cache_gb(items, item_bytes, hot_fraction=0.2, overhead=1.5):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_cache():
+    &quot;the hot 20%&quot;
+    assert cache_gb(500_000_000, 500) == 75.0 and cache_gb(1_000_000, 1_000, hot_fraction=0.1, overhead=1) == 0.1</textarea><textarea class="pc-src pc-solution" hidden>def cache_gb(items, item_bytes, hot_fraction=0.2, overhead=1.5):
+    return round(items * hot_fraction * item_bytes * overhead / 1e9, 1)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w097d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Minutes, not seconds</div><div class="pc-prompt"><p>A day has 86,400 seconds, but this divides by the minutes in a day and prints <code>34722.2</code>. Fix the unit so it prints <code>578.7</code>.</p></div><textarea class="pc-src pc-code" hidden>per_day = 10_000_000 * 5
+print(round(per_day / (24 * 60), 1))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;86,400&quot;
+    expect_output(&quot;578.7&quot;)</textarea><textarea class="pc-src pc-solution" hidden>per_day = 10_000_000 * 5
+print(round(per_day / 86_400, 1))</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w097d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Storage on one copy</div><div class="pc-prompt"><p>Every item is stored on three replicas, but this sizes the storage for one and prints <code>9125.0</code>. Multiply by the replication factor so it prints <code>27375.0</code>.</p></div><textarea class="pc-src pc-code" hidden>per_day, bytes_each, days, replication = 50_000_000, 500, 365, 3
+print(round(per_day * bytes_each * days / 1e9, 1))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;three copies&quot;
+    expect_output(&quot;27375.0&quot;)</textarea><textarea class="pc-src pc-solution" hidden>per_day, bytes_each, days, replication = 50_000_000, 500, 365, 3
+print(round(per_day * bytes_each * days * replication / 1e9, 1))</textarea></div>
+<div class="parsons" data-id="w097d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Servers with headroom</div><div class="pc-prompt"><p>Arrange <code>servers_needed</code>. One line is a trap.</p></div><script type="application/json">{"lines": ["def servers_needed(peak_qps, per_server, headroom=0.3):", "    usable = per_server * (1 - headroom)", "    needed = math.ceil(peak_qps / usable)", "    return max(2, needed)"], "distractors": ["    needed = round(peak_qps / usable)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w097d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # seconds in a day
+q = ___   # 62 ** 2
+r = ___   # servers_needed(10, 1000): the minimum, for redundancy
+s = ___   # True or False: start drawing boxes before asking about requirements
+t = ___   # the usual replication factor in these estimates</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 86_400 and q == 3844 and r == 2, &quot;p, q and r&quot;
+    assert s is False and t == 3, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 86_400
+q = 3844
+r = 2
+s = False
+t = 3</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w097d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "What are system design interviews mostly judged on?", "answer": 1, "explain": "How you think.", "options": ["A perfect diagram", "Structure, estimates and reasoning about trade-offs", "Knowing product names", "Speed of drawing"]}, {"type": "mc", "q": "What comes first?", "answer": 1, "explain": "Ask; don&rsquo;t assume.", "options": ["The database", "Requirements: functional and non-functional", "The cache", "Sharding"]}, {"type": "mc", "q": "How do you turn actions a day into a peak rate?", "answer": 1, "explain": "Seconds, then the busy hour.", "options": ["Divide by 1,440", "Divide by 86,400, then multiply by a peak factor", "Multiply by 60", "Divide by 24"]}, {"type": "mc", "q": "Why run servers at about 70%?", "answer": 1, "explain": "And never fewer than two.", "options": ["Electricity", "Headroom for spikes and for a failed server&rsquo;s load", "It&rsquo;s a law", "Cooling"]}, {"type": "mc", "q": "What&rsquo;s the hot fraction?", "answer": 1, "explain": "Often 20% for 80%.", "options": ["Server temperature", "The small share of items that get most reads", "The cache hit rate", "A peak factor"]}, {"type": "mc", "q": "What does the birthday problem tell you about random codes?", "answer": 1, "explain": "About the square root of the space.", "options": ["Nothing", "Collisions appear far sooner than the size of the code space suggests", "Codes never collide", "Use birthdays"]}, {"type": "mc", "q": "What&rsquo;s a cost of caching?", "answer": 1, "explain": "Every choice costs something.", "options": ["None", "Possibly stale data, and memory", "Slower reads", "More writes always"]}, {"type": "mc", "q": "When is &ldquo;it depends&rdquo; a good answer?", "answer": 1, "explain": "Then choose.", "options": ["Always", "When followed by on what, and your choice for these requirements", "Never", "In the deep dive only"]}, {"type": "mc", "q": "What&rsquo;s the deep dive for?", "answer": 1, "explain": "Ten minutes of depth.", "options": ["Small talk", "The hardest part, often chosen with the interviewer", "The API", "Estimates"]}, {"type": "output", "q": "What does this print?", "answer": "5", "explain": "350 each, so 4.96 rounds up.", "code": "import math\nprint(math.ceil(1736 / (500 * 0.7)))"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w097d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a link shortener&rsquo;s numbers</div><div class="pc-prompt"><p>Write <code>shortener_plan(req)</code> using today&rsquo;s helpers (given). <code>req</code> has <code>links_per_day</code>, <code>reads_per_link_per_day</code> (reads a day for every link created that day), <code>bytes_per_link</code>, <code>years</code>, <code>peak_factor</code>, <code>per_server</code> and <code>max_chance</code>. Return lines:</p>
+<ol>
+<li><code>"writes: A/s average, P/s peak"</code> (A to 1 decimal place, P rounded);</li>
+<li><code>"reads: A/s average, P/s peak"</code>;</li>
+<li><code>"storage: T TB over Y years (3 copies)"</code>: links a day × bytes × 365 × years × 3, in terabytes (10^12 bytes), 1 decimal place;</li>
+<li><code>"servers: N for reads"</code> from <code>servers_needed</code>;</li>
+<li><code>"codes: length L for M links"</code>: M the total links over the years, L from <code>code_length</code>;</li>
+<li><code>"cache: G GB"</code> from <code>cache_gb</code> with the total links.</li>
+</ol></div><textarea class="pc-src pc-code" hidden>import math
+
+def servers_needed(peak_qps, per_server, headroom=0.3):
+    return max(2, math.ceil(peak_qps / (per_server * (1 - headroom)) - 1e-9))
+
+def collision_chance(n, length, alphabet=62):
+    return 1 - math.exp(-n * n / (2 * alphabet ** length))
+
+def code_length(n, max_chance=0.001, alphabet=62):
+    length = 1
+    while collision_chance(n, length, alphabet) &gt; max_chance:
+        length += 1
+    return length
+
+def cache_gb(items, item_bytes, hot_fraction=0.2, overhead=1.5):
+    return round(items * hot_fraction * item_bytes * overhead / 1e9, 1)
+
+def shortener_plan(req):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>REQ = {&quot;links_per_day&quot;: 1_000_000, &quot;reads_per_link_per_day&quot;: 100, &quot;bytes_per_link&quot;: 500, &quot;years&quot;: 5,
+       &quot;peak_factor&quot;: 3, &quot;per_server&quot;: 2_000, &quot;max_chance&quot;: 0.001}
+
+def test_plan():
+    &quot;the classic first question&quot;
+    assert shortener_plan(REQ) == [
+        &quot;writes: 11.6/s average, 35/s peak&quot;,
+        &quot;reads: 1157.4/s average, 3472/s peak&quot;,
+        &quot;storage: 2.7 TB over 5 years (3 copies)&quot;,
+        &quot;servers: 3 for reads&quot;,
+        &quot;codes: length 12 for 1825000000 links&quot;,
+        &quot;cache: 273.8 GB&quot;,
+    ]
+
+def test_small():
+    &quot;a small one&quot;
+    lines = shortener_plan({**REQ, &quot;links_per_day&quot;: 1000, &quot;years&quot;: 1})
+    assert lines[3] == &quot;servers: 2 for reads&quot; and lines[4] == &quot;codes: length 8 for 365000 links&quot;</textarea><textarea class="pc-src pc-solution" hidden>import math
+
+def servers_needed(peak_qps, per_server, headroom=0.3):
+    return max(2, math.ceil(peak_qps / (per_server * (1 - headroom)) - 1e-9))
+
+def collision_chance(n, length, alphabet=62):
+    return 1 - math.exp(-n * n / (2 * alphabet ** length))
+
+def code_length(n, max_chance=0.001, alphabet=62):
+    length = 1
+    while collision_chance(n, length, alphabet) &gt; max_chance:
+        length += 1
+    return length
+
+def cache_gb(items, item_bytes, hot_fraction=0.2, overhead=1.5):
+    return round(items * hot_fraction * item_bytes * overhead / 1e9, 1)
+
+def shortener_plan(req):
+    writes = req[&quot;links_per_day&quot;] / 86_400
+    reads = writes * req[&quot;reads_per_link_per_day&quot;]
+    peak_reads = round(reads * req[&quot;peak_factor&quot;])
+    total = req[&quot;links_per_day&quot;] * 365 * req[&quot;years&quot;]
+    tb = req[&quot;links_per_day&quot;] * req[&quot;bytes_per_link&quot;] * 365 * req[&quot;years&quot;] * 3 / 1e12
+    return [
+        f&quot;writes: {writes:.1f}/s average, {round(writes * req[&#x27;peak_factor&#x27;])}/s peak&quot;,
+        f&quot;reads: {reads:.1f}/s average, {peak_reads}/s peak&quot;,
+        f&quot;storage: {tb:.1f} TB over {req[&#x27;years&#x27;]} years (3 copies)&quot;,
+        f&quot;servers: {servers_needed(peak_reads, req[&#x27;per_server&#x27;])} for reads&quot;,
+        f&quot;codes: length {code_length(total, req[&#x27;max_chance&#x27;])} for {total} links&quot;,
+        f&quot;cache: {cache_gb(total, req[&#x27;bytes_per_link&#x27;])} GB&quot;,
+    ]</textarea></div>
+<h2 id="a-mock-round">A mock round</h2>
+<p>With a friend (or aloud to yourself, recorded), take forty-five minutes on <strong>&ldquo;Design a service that shortens links&rdquo;</strong>. Note the minute each stage starts and run it through <code>stage_report</code> afterwards. Then try <strong>&ldquo;Design the walk-sharing feature of Waymark for a million users&rdquo;</strong>, using your capstone as the deep dive.</p>
+<h2 id="before-you-go">Before you go</h2>
+<p>Tomorrow is a code review interview: you&rsquo;re given someone&rsquo;s code and asked what you&rsquo;d change, which is Week 96&rsquo;s reviewing, under time.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w097d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w097d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w097d3", "week": 97, "day": 3, "title": "System design", "exercises": [{"id": "w097d3-capacity", "title": "Traffic and storage", "points": 10}, {"id": "w097d3-servers", "title": "How many servers?", "points": 10}, {"id": "w097d3-stages", "title": "Keeping to time", "points": 15}, {"id": "w097d3-codes", "title": "How long should codes be?", "points": 15}, {"id": "w097d3-cache", "title": "Sizing the cache", "points": 10}, {"id": "w097d3-bug1", "title": "Minutes, not seconds", "points": 10}, {"id": "w097d3-bug2", "title": "Storage on one copy", "points": 10}, {"id": "w097d3-trace", "title": "Predict them", "points": 10}, {"id": "w097d3-challenge", "title": "Challenge: a link shortener's numbers", "points": 25}], "points": 115}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=97b2d34bb1"></script>
+</body>
+</html>
