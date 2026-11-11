@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="97b2d34bb1">
+<title>Week 95 Day 1: Reproducing the issue | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=97b2d34bb1">
+<link rel="stylesheet" href="../assets/css/site.css?v=97b2d34bb1">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=97b2d34bb1"></script>
+<script src="../assets/vendor/codemirror.js?v=97b2d34bb1" defer></script>
+<meta name="description" content="This week follows one bug from report to merged fix, the way a first contribution goes. The project is a small module, wraptext.py, whose shorten function...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w095d1.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 95 Day 1: Reproducing the issue">
+<meta property="og:description" content="This week follows one bug from report to merged fix, the way a first contribution goes. The project is a small module, wraptext.py, whose shorten function...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w095d1.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-95">Week 95: Open source II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#is-it-really-a-bug" data-sec="is-it-really-a-bug">Is it really a bug?</a></li><li><a href="#making-it-small" data-sec="making-it-small">Making it small</a></li><li><a href="#when-did-it-start" data-sec="when-did-it-start">When did it start?</a></li><li><a href="#writing-it-up" data-sec="writing-it-up">Writing it up</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#your-turn" data-sec="your-turn">Your turn</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w095d1.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-7">Phase 7: Mastery</a></li><li><a href="../map.html#week-95">Week 95: Open source II</a></li><li aria-current="page">Day 1 of 6</li></ol>
+      <p class="day-where"><span>Week 95, Day 1</span></p>
+      <h1>Reproducing the issue</h1>
+      <div class="day-intro"><p>This week follows one bug from report to merged fix, the way a first contribution goes. The project is a small module, <code>wraptext.py</code>, whose <code>shorten</code> function cuts text to fit a width; someone has reported that it drops a word that would have fitted. Before changing a line, you <strong>reproduce</strong> it: run the reported case and see it fail, shrink it to the smallest input that still fails, find the commit that introduced it with <strong>bisection</strong>, and write all that up so a maintainer can see the problem in ten seconds. Every later step depends on this one: a fix for a bug you can&rsquo;t reproduce is a guess.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Run a reported case and confirm exactly what goes wrong</li><li>Shrink a failing input to a minimal reproduction</li><li>Find the commit that introduced a bug by bisection</li><li>Check documentation examples against the code</li><li>Write a reproduction a maintainer can read in seconds</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">3 h</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="Is it really a bug?: 15 min"></span><span class="plan-seg s0" style="flex:15" title="Making it small: 15 min"></span><span class="plan-seg s1" style="flex:20" title="When did it start?: 20 min"></span><span class="plan-seg s0" style="flex:10" title="Writing it up: 10 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:30" title="Quiz and daily challenge: 30 min"></span><span class="plan-seg s1" style="flex:20" title="Your turn: 20 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">8 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Is it really a bug?</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">Making it small</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:40</span><span class="plan-what">When did it start?</span><span class="plan-min">20 min</span></li><li><span class="plan-at">1:00</span><span class="plan-what">Writing it up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:10</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:10</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">30 min</span></li><li><span class="plan-at">2:40</span><span class="plan-what">Your turn</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w095d1.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w095d1.ipynb" download>download it</a>. Exercises today are worth 115 points.</p>
+    </header>
+    <div class="day-body">
+<div class="filebox"><div class="filebox-head">The files used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>wraptext.py</code></summary><pre class="pc-filetext">&quot;&quot;&quot;Shorten text to fit a width.
+
+&gt;&gt;&gt; shorten(&quot;Hello world, nice day&quot;, 18)
+&#x27;Hello world, [...]&#x27;
+&quot;&quot;&quot;
+
+
+def shorten(text, width, placeholder=&quot; [...]&quot;):
+    &quot;&quot;&quot;Collapse whitespace and cut text to fit width, ending with placeholder if anything was cut.&quot;&quot;&quot;
+    words = text.split()
+    joined = &quot; &quot;.join(words)
+    if len(joined) &lt;= width:
+        return joined
+    kept, length = [], 0
+    for word in words:
+        extra = len(word) + (1 if kept else 0)
+        if length + extra + len(placeholder) &gt;= width:
+            break
+        kept.append(word)
+        length += extra
+    if not kept:
+        raise ValueError(&quot;placeholder too large for max width&quot;)
+    return &quot; &quot;.join(kept) + placeholder
+</pre></details><details class="pc-file"><summary><code>history.py</code></summary><pre class="pc-filetext">GOOD = open(&quot;wraptext.py&quot;).read().replace(&quot;length + extra + len(placeholder) &gt;= width&quot;, &quot;length + extra + len(placeholder) &gt; width&quot;)
+BAD = open(&quot;wraptext.py&quot;).read()
+
+COMMITS = [
+    (&quot;a1f3c20&quot;, &quot;Add shorten()&quot;, GOOD),
+    (&quot;b27e9d4&quot;, &quot;Document shorten()&quot;, GOOD),
+    (&quot;c3d81aa&quot;, &quot;Collapse whitespace first&quot;, GOOD),
+    (&quot;d4b0e6f&quot;, &quot;Count the placeholder once&quot;, BAD),
+    (&quot;e58c7b1&quot;, &quot;Tidy names&quot;, BAD),
+    (&quot;f6a2d93&quot;, &quot;Add a module docstring&quot;, BAD),
+    (&quot;g7e4410&quot;, &quot;Raise ValueError for tiny widths&quot;, BAD),
+    (&quot;h8c95fe&quot;, &quot;Speed up the loop&quot;, BAD),
+]
+
+
+def load(source):
+    namespace = {}
+    exec(source, namespace)
+    return namespace[&quot;shorten&quot;]
+</pre></details><script type="application/json" class="page-files">{"wraptext.py": "\"\"\"Shorten text to fit a width.\n\n>>> shorten(\"Hello world, nice day\", 18)\n'Hello world, [...]'\n\"\"\"\n\n\ndef shorten(text, width, placeholder=\" [...]\"):\n    \"\"\"Collapse whitespace and cut text to fit width, ending with placeholder if anything was cut.\"\"\"\n    words = text.split()\n    joined = \" \".join(words)\n    if len(joined) <= width:\n        return joined\n    kept, length = [], 0\n    for word in words:\n        extra = len(word) + (1 if kept else 0)\n        if length + extra + len(placeholder) >= width:\n            break\n        kept.append(word)\n        length += extra\n    if not kept:\n        raise ValueError(\"placeholder too large for max width\")\n    return \" \".join(kept) + placeholder\n", "history.py": "GOOD = open(\"wraptext.py\").read().replace(\"length + extra + len(placeholder) >= width\", \"length + extra + len(placeholder) > width\")\nBAD = open(\"wraptext.py\").read()\n\nCOMMITS = [\n    (\"a1f3c20\", \"Add shorten()\", GOOD),\n    (\"b27e9d4\", \"Document shorten()\", GOOD),\n    (\"c3d81aa\", \"Collapse whitespace first\", GOOD),\n    (\"d4b0e6f\", \"Count the placeholder once\", BAD),\n    (\"e58c7b1\", \"Tidy names\", BAD),\n    (\"f6a2d93\", \"Add a module docstring\", BAD),\n    (\"g7e4410\", \"Raise ValueError for tiny widths\", BAD),\n    (\"h8c95fe\", \"Speed up the loop\", BAD),\n]\n\n\ndef load(source):\n    namespace = {}\n    exec(source, namespace)\n    return namespace[\"shorten\"]\n"}</script></div>
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w095d1-p1"><textarea class="pc-src pc-code" hidden>from wraptext import shorten
+
+print(repr(shorten(&quot;Hello world, nice day&quot;, 18)))
+print(len(&quot;Hello world, [...]&quot;))</textarea></div>
+<p><code>"Hello world, [...]"</code> is exactly 18 characters, so it fits, yet <code>shorten</code> stopped after <code>Hello</code>. That&rsquo;s the reported bug, reproduced. Notice what made it quick: the exact call, the exact output, and the length that proves the expected answer fits.</p>
+<h2 id="is-it-really-a-bug">Is it really a bug?</h2>
+<p>Before anything else, decide whether the behaviour is wrong, by the project&rsquo;s own standards: its <strong>documentation</strong>, its <strong>docstrings</strong> and examples, and its <strong>tests</strong>. Here the module&rsquo;s own docstring says <code>shorten("Hello world, nice day", 18)</code> gives <code>'Hello world, [...]'</code>, so the code disagrees with its documentation, and doctest can show it. If the documentation were silent, the issue would need a maintainer&rsquo;s decision first: some &ldquo;bugs&rdquo; are intended behaviour, and some are changes in behaviour that people now rely on.</p>
+<p>Reproduce on the <strong>current <code>main</code></strong> (your own build, last week), not an old release: the bug may already be fixed.</p>
+<h2 id="making-it-small">Making it small</h2>
+<p>A long report (&ldquo;I shortened my 400-word essay and a word went missing&rdquo;) is hard to reason about. Shrink it: remove a piece of the input, check the bug still happens, keep the smaller version, and repeat until nothing more can go. This is the idea behind <strong>delta debugging</strong> (Andreas Zeller&rsquo;s work, which also gives its name to the general technique). You need an <strong>oracle</strong> to decide &ldquo;still fails&rdquo;: here, the result differs from a version known to be correct (the first commit), or from the answer you can prove by hand.</p>
+<h2 id="when-did-it-start">When did it start?</h2>
+<p>If the bug wasn&rsquo;t always there, the commit that introduced it explains it. <code>git bisect</code> finds that commit by <strong>binary search</strong>: mark one commit good and a later one bad, and Git checks out the commit halfway; you test it and say <code>git bisect good</code> or <code>git bisect bad</code>, and the range halves each time. A thousand commits take about ten tests. <code>git bisect run ./check.sh</code> automates it with a script that exits 0 for good and 1 for bad. <code>history.py</code> holds <code>wraptext</code>&rsquo;s eight commits so you can bisect them here.</p>
+<h2 id="writing-it-up">Writing it up</h2>
+<p>A reproduction a maintainer can trust has: the <strong>version</strong> (and commit, if you built it), the <strong>smallest code</strong> that shows the problem, the <strong>expected</strong> result with why, the <strong>actual</strong> result, and, if you found it, the <strong>commit</strong> that introduced it. Put the code in a block that can be pasted and run as it is. That comment is often the most useful thing anyone writes on an issue.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Decide it&rsquo;s a bug by the project&rsquo;s documentation, docstrings and tests; reproduce on current <code>main</code>. Shrink the input with an oracle (delta debugging) until nothing more can be removed. Bisect between a good and a bad commit (<code>git bisect</code>, or <code>git bisect run</code> with a script) to find where it started. Write up the version, minimal code, expected (and why), actual, and the first bad commit.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w095d1-cases" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Running the reported cases</div><div class="pc-prompt"><p>Write <code>check_cases(fn, cases)</code>: each case is <code>(args, expected)</code> with <code>args</code> a tuple. Call <code>fn(*args)</code> and return, for each case whose result differs, <code>"NAME(A, B): expected X, got Y"</code>, where NAME is <code>fn.__name__</code>, the arguments and results are written with <code>repr</code>, and arguments are separated by <code>", "</code>.</p></div><textarea class="pc-src pc-code" hidden>def check_cases(fn, cases):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>from wraptext import shorten
+
+def test_cases():
+    &quot;the report, confirmed&quot;
+    cases = [((&quot;Hello world, nice day&quot;, 18), &quot;Hello world, [...]&quot;), ((&quot;Hello world&quot;, 40), &quot;Hello world&quot;),
+             ((&quot;Hello   world&quot;, 11), &quot;Hello world&quot;)]
+    assert check_cases(shorten, cases) == [&quot;shorten(&#x27;Hello world, nice day&#x27;, 18): expected &#x27;Hello world, [...]&#x27;, got &#x27;Hello [...]&#x27;&quot;]
+    assert check_cases(len, [((&quot;abc&quot;,), 3), (([1, 2],), 3)]) == [&quot;len([1, 2]): expected 3, got 2&quot;]</textarea><textarea class="pc-src pc-solution" hidden>def check_cases(fn, cases):
+    failures = []
+    for args, expected in cases:
+        actual = fn(*args)
+        if actual != expected:
+            shown = &quot;, &quot;.join(repr(a) for a in args)
+            failures.append(f&quot;{fn.__name__}({shown}): expected {expected!r}, got {actual!r}&quot;)
+    return failures</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w095d1-docs" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">What the documentation promises</div><div class="pc-prompt"><p>Write <code>doc_failures(source)</code>: run the doctest examples in a module&rsquo;s source (its docstring and the docstrings of its functions and classes, found with <code>ast</code>) with <code>doctest</code>, in a namespace made by executing the source, and return the source of each failing example, stripped, in order.</p></div><textarea class="pc-src pc-code" hidden>import ast
+import doctest
+
+def doc_failures(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>def test_wraptext():
+    &quot;the docstring disagrees with the code&quot;
+    assert doc_failures(open(&quot;wraptext.py&quot;).read()) == [&#x27;shorten(&quot;Hello world, nice day&quot;, 18)&#x27;]
+
+def test_good():
+    &quot;examples that pass&quot;
+    src = &#x27;&quot;&quot;&quot;\n&gt;&gt;&gt; double(2)\n4\n&quot;&quot;&quot;\n\ndef double(x):\n    &quot;&quot;&quot;\n    &gt;&gt;&gt; double(5)\n    10\n    &gt;&gt;&gt; double(0)\n    1\n    &quot;&quot;&quot;\n    return 2 * x\n&#x27;
+    assert doc_failures(src) == [&quot;double(0)&quot;]</textarea><textarea class="pc-src pc-solution" hidden>import ast
+import doctest
+
+class _Collector(doctest.DocTestRunner):
+    def __init__(self):
+        super().__init__(verbose=False)
+        self.failed = []
+
+    def report_failure(self, out, test, example, got):
+        self.failed.append(example.source.strip())
+
+    def report_unexpected_exception(self, out, test, example, exc_info):
+        self.failed.append(example.source.strip())
+
+def doc_failures(source):
+    tree = ast.parse(source)
+    docs = [ast.get_docstring(tree)]
+    docs += [ast.get_docstring(n) for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.ClassDef))]
+    globs = {}
+    exec(compile(source, &quot;module&quot;, &quot;exec&quot;), globs)
+    parser, runner = doctest.DocTestParser(), _Collector()
+    for doc in docs:
+        if doc:
+            runner.run(parser.get_doctest(doc, dict(globs), &quot;module&quot;, None, 0), out=lambda s: None)
+    return runner.failed</textarea><template class="pc-src pc-hint">Subclass <code>doctest.DocTestRunner</code> and override <code>report_failure(self, out, test, example, got)</code> and <code>report_unexpected_exception(self, out, test, example, exc_info)</code> to record <code>example.source</code>. <code>doctest.DocTestParser().get_doctest(doc, globs, name, None, 0)</code> turns a docstring into a test to run.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w095d1-minimise" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The smallest failing input</div><div class="pc-prompt"><p>Write <code>minimise(words, still_fails)</code>: start from the list of words; repeatedly try removing one word at a time (from the first), and as soon as a non-empty smaller list still fails (by <code>still_fails(candidate)</code>), keep it and start again from the first word. Stop when no single removal still fails, and return the list.</p></div><textarea class="pc-src pc-code" hidden>def minimise(words, still_fails):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>from history import COMMITS, load
+
+GOOD, BAD = load(COMMITS[0][2]), load(COMMITS[-1][2])
+
+def test_shorten():
+    &quot;a long report made small&quot;
+    text = &quot;Hello   world, what a lovely nice day today&quot;
+    fails = lambda ws: BAD(&quot; &quot;.join(ws), 18) != GOOD(&quot; &quot;.join(ws), 18)
+    assert fails(text.split())
+    assert minimise(text.split(), fails) == [&quot;Hello&quot;, &quot;a&quot;, &quot;nice&quot;, &quot;day&quot;, &quot;today&quot;]
+
+def test_generic():
+    &quot;any oracle&quot;
+    assert minimise(list(&quot;abcdef&quot;), lambda ws: &quot;c&quot; in ws and &quot;e&quot; in ws) == [&quot;c&quot;, &quot;e&quot;]
+    assert minimise([&quot;x&quot;], lambda ws: True) == [&quot;x&quot;]</textarea><textarea class="pc-src pc-solution" hidden>def minimise(words, still_fails):
+    words = list(words)
+    changed = True
+    while changed:
+        changed = False
+        for i in range(len(words)):
+            candidate = words[:i] + words[i + 1:]
+            if candidate and still_fails(candidate):
+                words = candidate
+                changed = True
+                break
+    return words</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w095d1-bisect" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Bisecting the history</div><div class="pc-prompt"><p>Write <code>bisect_commits(commits, is_bad)</code>: <code>commits</code> is a list from oldest to newest, the first known good and the last known bad. Keep a range <code>lo</code> (good) to <code>hi</code> (bad); while they&rsquo;re more than one apart, test the commit halfway (<code>(lo + hi) // 2</code>) and move one end to it. Return <code>(ID, calls)</code>: the first bad commit&rsquo;s id (each commit is <code>(id, message, source)</code>) and how many times you called <code>is_bad</code>.</p></div><textarea class="pc-src pc-code" hidden>def bisect_commits(commits, is_bad):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>from history import COMMITS, load
+
+GOOD = load(COMMITS[0][2])
+
+def test_history():
+    &quot;the commit that introduced it&quot;
+    is_bad = lambda c: load(c[2])(&quot;Hello world, nice day&quot;, 18) != GOOD(&quot;Hello world, nice day&quot;, 18)
+    assert bisect_commits(COMMITS, is_bad) == (&quot;d4b0e6f&quot;, 3)
+
+def test_long():
+    &quot;a thousand commits, ten tests&quot;
+    commits = [(f&quot;c{i}&quot;, &quot;&quot;, None) for i in range(1000)]
+    assert bisect_commits(commits, lambda c: int(c[0][1:]) &gt;= 637) == (&quot;c637&quot;, 10)</textarea><textarea class="pc-src pc-solution" hidden>def bisect_commits(commits, is_bad):
+    lo, hi, calls = 0, len(commits) - 1, 0
+    while hi - lo &gt; 1:
+        mid = (lo + hi) // 2
+        calls += 1
+        if is_bad(commits[mid]):
+            hi = mid
+        else:
+            lo = mid
+    return commits[hi][0], calls</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w095d1-comment" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Writing the reproduction</div><div class="pc-prompt"><p>Write <code>repro_comment(version, code, expected, actual, why, commit=None)</code>, returning Markdown lines joined by newlines: <code>Reproduced on VERSION:</code>, a blank line, a fenced Python block (three backticks and <code>python</code>, the code, three backticks), a blank line, <code>Expected: EXPECTED (WHY)</code>, <code>Actual: ACTUAL</code>, and, if <code>commit</code> is given, a blank line and <code>First bad commit: COMMIT</code>.</p></div><textarea class="pc-src pc-code" hidden>def repro_comment(version, code, expected, actual, why, commit=None):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>FENCE = &quot;`&quot; * 3
+
+def test_comment():
+    &quot;readable in ten seconds&quot;
+    text = repro_comment(&quot;main (3.15.0a1+, 2ebdaf8)&quot;, &quot;&gt;&gt;&gt; shorten(&#x27;Hello a nice day today&#x27;, 18)\n&#x27;Hello a [...]&#x27;&quot;,
+                         &quot;&#x27;Hello a nice [...]&#x27;&quot;, &quot;&#x27;Hello a [...]&#x27;&quot;, &quot;it is exactly 18 characters&quot;, &quot;d4b0e6f Count the placeholder once&quot;)
+    assert text == (f&quot;Reproduced on main (3.15.0a1+, 2ebdaf8):\n\n{FENCE}python\n&gt;&gt;&gt; shorten(&#x27;Hello a nice day today&#x27;, 18)\n&#x27;Hello a [...]&#x27;\n{FENCE}\n\n&quot;
+                    &quot;Expected: &#x27;Hello a nice [...]&#x27; (it is exactly 18 characters)\nActual: &#x27;Hello a [...]&#x27;\n\nFirst bad commit: d4b0e6f Count the placeholder once&quot;)
+    assert repro_comment(&quot;3.14.0&quot;, &quot;x&quot;, &quot;1&quot;, &quot;2&quot;, &quot;why&quot;).endswith(&quot;Actual: 2&quot;)</textarea><textarea class="pc-src pc-solution" hidden>def repro_comment(version, code, expected, actual, why, commit=None):
+    fence = &quot;`&quot; * 3
+    lines = [f&quot;Reproduced on {version}:&quot;, &quot;&quot;, f&quot;{fence}python&quot;, code, fence, &quot;&quot;, f&quot;Expected: {expected} ({why})&quot;, f&quot;Actual: {actual}&quot;]
+    if commit:
+        lines += [&quot;&quot;, f&quot;First bad commit: {commit}&quot;]
+    return &quot;\n&quot;.join(lines)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w095d1-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">The last good commit, not the first bad one</div><div class="pc-prompt"><p>At the end of a bisection, <code>lo</code> is the last good commit and <code>hi</code> the first bad one, but this returns <code>lo</code> and prints <code>c3d81aa</code>. Return the first bad commit, so it prints <code>d4b0e6f</code>.</p></div><textarea class="pc-src pc-code" hidden>ids = [&quot;a1f3c20&quot;, &quot;b27e9d4&quot;, &quot;c3d81aa&quot;, &quot;d4b0e6f&quot;, &quot;e58c7b1&quot;, &quot;f6a2d93&quot;, &quot;g7e4410&quot;, &quot;h8c95fe&quot;]
+bad_from = 3
+
+lo, hi = 0, len(ids) - 1
+while hi - lo &gt; 1:
+    mid = (lo + hi) // 2
+    if mid &gt;= bad_from:
+        hi = mid
+    else:
+        lo = mid
+print(ids[lo])</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;hi is bad&quot;
+    expect_output(&quot;d4b0e6f&quot;)</textarea><textarea class="pc-src pc-solution" hidden>ids = [&quot;a1f3c20&quot;, &quot;b27e9d4&quot;, &quot;c3d81aa&quot;, &quot;d4b0e6f&quot;, &quot;e58c7b1&quot;, &quot;f6a2d93&quot;, &quot;g7e4410&quot;, &quot;h8c95fe&quot;]
+bad_from = 3
+
+lo, hi = 0, len(ids) - 1
+while hi - lo &gt; 1:
+    mid = (lo + hi) // 2
+    if mid &gt;= bad_from:
+        hi = mid
+    else:
+        lo = mid
+print(ids[hi])</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w095d1-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">Every case fails</div><div class="pc-prompt"><p><code>is not</code> compares identity, and strings built at run time are rarely the same object as a literal, so this reports both cases as failing and prints <code>2</code>. Compare values so it prints <code>1</code>.</p></div><textarea class="pc-src pc-code" hidden>from wraptext import shorten
+
+cases = [((&quot;Hello world, nice day&quot;, 18), &quot;Hello world, [...]&quot;), ((&quot;Hello  there&quot;, 40), &quot;Hello there&quot;)]
+print(sum(1 for args, expected in cases if shorten(*args) is not expected))</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;equality, not identity&quot;
+    expect_output(&quot;1&quot;)</textarea><textarea class="pc-src pc-solution" hidden>from wraptext import shorten
+
+cases = [((&quot;Hello world, nice day&quot;, 18), &quot;Hello world, [...]&quot;), ((&quot;Hello  there&quot;, 40), &quot;Hello there&quot;)]
+print(sum(1 for args, expected in cases if shorten(*args) != expected))</textarea></div>
+<div class="parsons" data-id="w095d1-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Halving the range</div><div class="pc-prompt"><p>Arrange the bisection loop: test the middle commit and move the right end of the range. One line is a trap.</p></div><script type="application/json">{"lines": ["lo, hi = 0, len(commits) - 1", "while hi - lo > 1:", "    mid = (lo + hi) // 2", "    if is_bad(commits[mid]):", "        hi = mid", "    else:", "        lo = mid", "first_bad = commits[hi]"], "distractors": ["        hi = mid - 1"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w095d1-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # len(&quot;Hello world, [...]&quot;)
+q = ___   # how many tests bisection needs for about 1000 commits (a whole number)
+r = ___   # the git command that automates bisection with a script (three words)
+s = ___   # True or False: reproduce on an old release rather than current main
+t = ___   # the exit status a bisect script uses for a good commit</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == 18 and q == 10 and r == &quot;git bisect run&quot;, &quot;p, q and r&quot;
+    assert s is False and t == 0, &quot;s and t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = 18
+q = 10
+r = &quot;git bisect run&quot;
+s = False
+t = 0</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w095d1-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "How do you decide whether behaviour is a bug?", "answer": 1, "explain": "Here the docstring disagrees with the code.", "options": ["By your own taste", "By the project&rsquo;s documentation, docstrings and tests", "By the issue&rsquo;s title", "By votes"]}, {"type": "mc", "q": "Where should you reproduce a reported bug?", "answer": 1, "explain": "It may already be fixed.", "options": ["On the reporter&rsquo;s version only", "On current main", "On any release", "Nowhere"]}, {"type": "mc", "q": "What does delta debugging do?", "answer": 1, "explain": "Andreas Zeller&rsquo;s technique.", "options": ["Speeds code up", "Shrinks a failing input while it still fails", "Finds commits", "Formats code"]}, {"type": "mc", "q": "What does minimising need to decide &ldquo;still fails&rdquo;?", "answer": 1, "explain": "Here, the first commit.", "options": ["A debugger", "An oracle: a known-good version or a provable answer", "A profiler", "Nothing"]}, {"type": "mc", "q": "What does git bisect search for?", "answer": 1, "explain": "By halving the range.", "options": ["The largest commit", "The first commit where the bug appears", "Merge conflicts", "The author"]}, {"type": "mc", "q": "About how many tests does bisecting 1000 commits take?", "answer": 1, "explain": "log2(1000) is about 10.", "options": ["1000", "About 10", "500", "1"]}, {"type": "mc", "q": "What should a bisect script&rsquo;s exit status be for a bad commit?", "answer": 1, "explain": "125 means skip.", "options": ["0", "1 (non-zero, other than 125)", "Anything", "255"]}, {"type": "mc", "q": "What belongs in a reproduction comment?", "answer": 1, "explain": "Readable in seconds.", "options": ["Your opinion", "Version, minimal code, expected with why, actual, and the first bad commit", "A screenshot only", "The whole program"]}, {"type": "mc", "q": "Why put the reproduction in a code block?", "answer": 1, "explain": "Copy, paste, see it fail.", "options": ["Colour", "So it can be pasted and run as it is", "It&rsquo;s required", "Length"]}, {"type": "output", "q": "What does this print?", "answer": "3 3", "explain": "Commit 3 is the first bad one.", "code": "lo, hi, calls = 0, 7, 0\nwhile hi - lo > 1:\n    mid = (lo + hi) // 2\n    calls += 1\n    if mid >= 3:\n        hi = mid\n    else:\n        lo = mid\nprint(hi, calls)"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w095d1-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: a reproduction report</div><div class="pc-prompt"><p>Write <code>reproduction_report(text, width, commits)</code> using today&rsquo;s helpers (given) and <code>load</code> from <code>history.py</code>. The first commit is the oracle (known good), the last is current. Return a list of lines:</p>
+<ol>
+<li><code>"actual: A (expected E)"</code> with both written with <code>repr</code>, or <code>"no bug: R"</code> (and nothing else) if they agree;</li>
+<li><code>"minimal: shorten(T, WIDTH)"</code> (T with <code>repr</code>) from minimising the words of <code>text</code> with width fixed, using &ldquo;the current result differs from the oracle&rsquo;s&rdquo; as the test;</li>
+<li><code>"first bad commit: ID MESSAGE (N tests)"</code> from bisecting with the minimal text;</li>
+<li>the lines of <code>repro_comment("main", CODE, E, A, "the oracle's answer", "ID MESSAGE")</code>, where CODE is <code>&gt;&gt;&gt; shorten(T, WIDTH)</code> and the current result&rsquo;s <code>repr</code> on the next line, and E and A are for the minimal text.</li>
+</ol></div><textarea class="pc-src pc-code" hidden>from history import load
+
+def minimise(words, still_fails):
+    words = list(words)
+    changed = True
+    while changed:
+        changed = False
+        for i in range(len(words)):
+            candidate = words[:i] + words[i + 1:]
+            if candidate and still_fails(candidate):
+                words, changed = candidate, True
+                break
+    return words
+
+def bisect_commits(commits, is_bad):
+    lo, hi, calls = 0, len(commits) - 1, 0
+    while hi - lo &gt; 1:
+        mid = (lo + hi) // 2
+        calls += 1
+        if is_bad(commits[mid]):
+            hi = mid
+        else:
+            lo = mid
+    return commits[hi][0], calls
+
+def repro_comment(version, code, expected, actual, why, commit=None):
+    fence = &quot;`&quot; * 3
+    lines = [f&quot;Reproduced on {version}:&quot;, &quot;&quot;, f&quot;{fence}python&quot;, code, fence, &quot;&quot;, f&quot;Expected: {expected} ({why})&quot;, f&quot;Actual: {actual}&quot;]
+    if commit:
+        lines += [&quot;&quot;, f&quot;First bad commit: {commit}&quot;]
+    return &quot;\n&quot;.join(lines)
+
+def reproduction_report(text, width, commits):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>from history import COMMITS
+
+def test_report():
+    &quot;from a long report to a clear comment&quot;
+    lines = reproduction_report(&quot;Hello   world, what a lovely nice day today&quot;, 18, COMMITS)
+    assert lines[:3] == [&quot;actual: &#x27;Hello [...]&#x27; (expected &#x27;Hello world, [...]&#x27;)&quot;,
+                         &quot;minimal: shorten(&#x27;Hello a nice day today&#x27;, 18)&quot;,
+                         &quot;first bad commit: d4b0e6f Count the placeholder once (3 tests)&quot;]
+    assert lines[3:] == [&quot;Reproduced on main:&quot;, &quot;&quot;, &quot;`&quot; * 3 + &quot;python&quot;, &quot;&gt;&gt;&gt; shorten(&#x27;Hello a nice day today&#x27;, 18)&quot;, &quot;&#x27;Hello a [...]&#x27;&quot;, &quot;`&quot; * 3, &quot;&quot;,
+                         &quot;Expected: &#x27;Hello a nice [...]&#x27; (the oracle&#x27;s answer)&quot;, &quot;Actual: &#x27;Hello a [...]&#x27;&quot;, &quot;&quot;,
+                         &quot;First bad commit: d4b0e6f Count the placeholder once&quot;]
+
+def test_no_bug():
+    &quot;nothing to report&quot;
+    assert reproduction_report(&quot;Hello there&quot;, 40, COMMITS) == [&quot;no bug: &#x27;Hello there&#x27;&quot;]</textarea><textarea class="pc-src pc-solution" hidden>from history import load
+
+def minimise(words, still_fails):
+    words = list(words)
+    changed = True
+    while changed:
+        changed = False
+        for i in range(len(words)):
+            candidate = words[:i] + words[i + 1:]
+            if candidate and still_fails(candidate):
+                words, changed = candidate, True
+                break
+    return words
+
+def bisect_commits(commits, is_bad):
+    lo, hi, calls = 0, len(commits) - 1, 0
+    while hi - lo &gt; 1:
+        mid = (lo + hi) // 2
+        calls += 1
+        if is_bad(commits[mid]):
+            hi = mid
+        else:
+            lo = mid
+    return commits[hi][0], calls
+
+def repro_comment(version, code, expected, actual, why, commit=None):
+    fence = &quot;`&quot; * 3
+    lines = [f&quot;Reproduced on {version}:&quot;, &quot;&quot;, f&quot;{fence}python&quot;, code, fence, &quot;&quot;, f&quot;Expected: {expected} ({why})&quot;, f&quot;Actual: {actual}&quot;]
+    if commit:
+        lines += [&quot;&quot;, f&quot;First bad commit: {commit}&quot;]
+    return &quot;\n&quot;.join(lines)
+
+def reproduction_report(text, width, commits):
+    oracle, current = load(commits[0][2]), load(commits[-1][2])
+    actual, expected = current(text, width), oracle(text, width)
+    if actual == expected:
+        return [f&quot;no bug: {actual!r}&quot;]
+    words = minimise(text.split(), lambda ws: current(&quot; &quot;.join(ws), width) != oracle(&quot; &quot;.join(ws), width))
+    small = &quot; &quot;.join(words)
+    commit_id, calls = bisect_commits(commits, lambda c: load(c[2])(small, width) != oracle(small, width))
+    message = next(m for i, m, _ in commits if i == commit_id)
+    code = f&quot;&gt;&gt;&gt; shorten({small!r}, {width})\n{current(small, width)!r}&quot;
+    comment = repro_comment(&quot;main&quot;, code, repr(oracle(small, width)), repr(current(small, width)), &quot;the oracle&#x27;s answer&quot;,
+                            f&quot;{commit_id} {message}&quot;)
+    return [f&quot;actual: {actual!r} (expected {expected!r})&quot;, f&quot;minimal: shorten({small!r}, {width})&quot;,
+            f&quot;first bad commit: {commit_id} {message} ({calls} tests)&quot;] + comment.split(&quot;\n&quot;)</textarea></div>
+<h2 id="your-turn">Your turn</h2>
+<ol>
+<li><strong>Reproduce your issue</strong> (the one you chose last week) on your build of <code>main</code>, with the exact command and output.</li>
+<li><strong>Shrink it</strong> until nothing more can be removed, by hand or with a script.</li>
+<li><strong>Bisect it</strong> if it&rsquo;s a regression: <code>git bisect start</code>, <code>git bisect bad</code>, <code>git bisect good v3.13.0</code>, then test each commit Git offers (or <code>git bisect run</code>). Finish with <code>git bisect reset</code>.</li>
+<li><strong>Write the reproduction</strong> as a comment on the issue, if it adds something the issue doesn&rsquo;t already have.</li>
+</ol>
+<h2 id="before-you-go">Before you go</h2>
+<p>Tomorrow you&rsquo;ll write the fix: understand why the code goes wrong, then make the smallest change that puts it right without changing anything else.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w094d6.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w095d2.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w095d1", "week": 95, "day": 1, "title": "Reproducing the issue", "exercises": [{"id": "w095d1-cases", "title": "Running the reported cases", "points": 10}, {"id": "w095d1-docs", "title": "What the documentation promises", "points": 10}, {"id": "w095d1-minimise", "title": "The smallest failing input", "points": 15}, {"id": "w095d1-bisect", "title": "Bisecting the history", "points": 15}, {"id": "w095d1-comment", "title": "Writing the reproduction", "points": 10}, {"id": "w095d1-bug1", "title": "The last good commit, not the first bad one", "points": 10}, {"id": "w095d1-bug2", "title": "Every case fails", "points": 10}, {"id": "w095d1-trace", "title": "Predict them", "points": 10}, {"id": "w095d1-challenge", "title": "Challenge: a reproduction report", "points": 25}], "points": 115}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=97b2d34bb1"></script>
+</body>
+</html>
