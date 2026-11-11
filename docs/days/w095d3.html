@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-root" content="../">
+<meta name="site-version" content="97b2d34bb1">
+<title>Week 95 Day 3: Writing the test | Python Atlas</title>
+<link rel="icon" href="../assets/img/icon.svg?v=e4efbcf1e7" type="image/svg+xml">
+<link rel="manifest" href="../manifest.webmanifest?v=482f5997e4">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png?v=76b58fcd51">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1627" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Python Atlas">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/vendor/codemirror.css?v=97b2d34bb1">
+<link rel="stylesheet" href="../assets/css/site.css?v=97b2d34bb1">
+<script>try { const s = JSON.parse(localStorage.getItem("atlas.settings") || "{}"), r = document.documentElement; if (s.theme && s.theme !== "auto") r.dataset.theme = s.theme; if (s.textSize) r.style.setProperty("--text-scale", s.textSize); if (s.codeSize) r.style.setProperty("--code-scale", s.codeSize); if (s.motion === "reduce") r.classList.add("reduce-motion"); } catch (e) {}</script>
+<script src="../assets/config.js?v=97b2d34bb1"></script>
+<script src="../assets/vendor/codemirror.js?v=97b2d34bb1" defer></script>
+<meta name="description" content="A fix without a test is a fix that can quietly come undone: someone tidies the loop next year, &gt; becomes &gt;= again, and nothing complains. The test is often...">
+<link rel="canonical" href="https://peter-adepoju.github.io/python-atlas/days/w095d3.html">
+<meta property="og:site_name" content="Python Atlas">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Week 95 Day 3: Writing the test">
+<meta property="og:description" content="A fix without a test is a fix that can quietly come undone: someone tidies the loop next year, &gt; becomes &gt;= again, and nothing complains. The test is often...">
+<meta property="og:url" content="https://peter-adepoju.github.io/python-atlas/days/w095d3.html">
+<meta property="og:image" content="https://peter-adepoju.github.io/python-atlas/assets/img/share.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+</head>
+<body class="page-day">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <a class="brand" href="../index.html" aria-label="Python Atlas home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect class="bm-tile" x="1.6" y="3.6" width="28.8" height="24.8" rx="6"/><path class="bm-prompt" d="M8.4 11.4l4.8 4.6-4.8 4.6"/><path class="bm-line" d="M16.6 20.6h7"/></svg>
+    <span class="brand-name">Python Atlas</span>
+  </a>
+  <nav class="top-nav" aria-label="Main">
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Learn <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item dd-continue" href="../map.html" id="dd-continue"><strong>Continue learning</strong><span>Pick up where you left off</span></a>
+        <a class="dd-item" href="../map.html"><strong>Course map</strong><span>All 104 weeks, phase by phase</span></a>
+        <a class="dd-item" href="../guide.html"><strong>How it works</strong><span>The plan, the pace, and how to learn faster</span></a>
+      </div>
+    </div>
+    <div class="nav-dd">
+      <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Practise <span class="badge" id="due-badge" hidden></span> <svg class="dd-chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="dd-menu" hidden>
+        <a class="dd-item" href="../review.html"><strong>Daily review</strong><span>Quiz cards due today, spaced for memory</span></a>
+        <a class="dd-item" href="../playground.html"><strong>Playground</strong><span>Write, run and X-ray your own Python</span></a>
+      </div>
+    </div>
+  </nav>
+  <button type="button" class="search-btn" id="search-open" aria-label="Search the course">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" class="ico"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="search-label">Search</span><kbd class="search-kbd">Ctrl K</kbd>
+  </button>
+  <div class="top-right">
+    <span class="streak" id="streak" title="Days in a row you've practised" hidden></span>
+    <div class="account-slot" id="account-slot"><a class="btn btn-quiet btn-sm" href="../account.html">Sign in</a></div>
+  </div>
+</header>
+<main id="main">
+<div class="day">
+  <aside class="day-rail" aria-label="Today's outline">
+    <div class="rail-inner">
+      <a class="rail-week" href="../map.html#week-95">Week 95: Open source II</a>
+      <ol class="rail-toc"><li><a href="#warm-up" data-sec="warm-up">Warm-up</a></li><li><a href="#tests-in-cpython-s-style" data-sec="tests-in-cpython-s-style">Tests in CPython’s style</a></li><li><a href="#the-regression-test" data-sec="the-regression-test">The regression test</a></li><li><a href="#boundaries" data-sec="boundaries">Boundaries</a></li><li><a href="#is-the-test-any-good" data-sec="is-the-test-any-good">Is the test any good?</a></li><li><a href="#practice" data-sec="practice">Practice</a></li><li><a href="#quiz" data-sec="quiz">Quiz</a></li><li><a href="#daily-challenge" data-sec="daily-challenge">Daily challenge</a></li><li><a href="#your-turn" data-sec="your-turn">Your turn</a></li><li><a href="#before-you-go" data-sec="before-you-go">Before you go</a></li></ol>
+      <div class="rail-meter"><div class="meter"><span id="day-meter"></span></div><span id="day-meter-label">0% done</span></div>
+      <a class="btn btn-quiet rail-colab" href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w095d3.ipynb" target="_blank" rel="noopener">Open notebook in Colab</a>
+    </div>
+  </aside>
+  <article class="day-main">
+    <header class="day-head">
+      <ol class="crumbs" aria-label="You are here"><li><a href="../map.html">Course map</a></li><li><a href="../map.html#phase-7">Phase 7: Mastery</a></li><li><a href="../map.html#week-95">Week 95: Open source II</a></li><li aria-current="page">Day 3 of 6</li></ol>
+      <p class="day-where"><span>Week 95, Day 3</span></p>
+      <h1>Writing the test</h1>
+      <div class="day-intro"><p>A fix without a test is a fix that can quietly come undone: someone tidies the loop next year, <code>&gt;</code> becomes <code>&gt;=</code> again, and nothing complains. The test is often the more valuable half of a contribution, and reviewers look at it first. CPython&rsquo;s tests use <code>unittest</code>, so this week&rsquo;s do too: a test class, <code>assertEqual</code>, <code>assertRaises</code>, <code>subTest</code> for many cases in one test. You&rsquo;ll write a <strong>regression test</strong> that fails on the old code and passes on the fix, a set of <strong>boundary</strong> tests that catch other plausible mistakes, run test classes from code, look for test smells with the syntax tree, and finish by building a small <strong>mutation tester</strong> of your own.</p></div>
+      <div class="day-cards">
+        <section class="day-goals">
+          <div class="card-head"><h2 class="mini">By the end of today you can</h2></div>
+          <ul class="goal-list"><li>Write unittest tests in the style CPython uses</li><li>Write a regression test that fails before the fix and passes after it</li><li>Test the boundaries where similar bugs would hide</li><li>Run test classes from code and read the results</li><li>Measure a test suite by the broken versions it catches</li></ul>
+        </section>
+        <section class="day-plan">
+          <div class="card-head"><h2 class="mini">Today's plan</h2><span class="card-total">2 h 55 min</span></div>
+          <div class="plan-bar" aria-hidden="true"><span class="plan-seg s0" style="flex:10" title="Warm-up: 10 min"></span><span class="plan-seg s1" style="flex:15" title="Tests in CPython&#x27;s style: 15 min"></span><span class="plan-seg s0" style="flex:15" title="The regression test: 15 min"></span><span class="plan-seg s1" style="flex:15" title="Boundaries: 15 min"></span><span class="plan-seg s0" style="flex:10" title="Is the test any good?: 10 min"></span><span class="plan-seg s1" style="flex:60" title="Practice: 60 min"></span><span class="plan-seg s0" style="flex:30" title="Quiz and daily challenge: 30 min"></span><span class="plan-seg s1" style="flex:20" title="Your turn: 20 min"></span></div><button type="button" class="plan-toggle" aria-expanded="false" aria-controls="plan-list">8 parts. Show the plan</button><ol class="plan-list" id="plan-list"><li><span class="plan-at">0:00</span><span class="plan-what">Warm-up</span><span class="plan-min">10 min</span></li><li><span class="plan-at">0:10</span><span class="plan-what">Tests in CPython&rsquo;s style</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:25</span><span class="plan-what">The regression test</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:40</span><span class="plan-what">Boundaries</span><span class="plan-min">15 min</span></li><li><span class="plan-at">0:55</span><span class="plan-what">Is the test any good?</span><span class="plan-min">10 min</span></li><li><span class="plan-at">1:05</span><span class="plan-what">Practice</span><span class="plan-min">60 min</span></li><li><span class="plan-at">2:05</span><span class="plan-what">Quiz and daily challenge</span><span class="plan-min">30 min</span></li><li><span class="plan-at">2:35</span><span class="plan-what">Your turn</span><span class="plan-min">20 min</span></li></ol>
+        </section>
+      </div>
+      <p class="day-links"><a href="https://colab.research.google.com/github/peter-adepoju/python-atlas/blob/main/docs/notebooks/w095d3.ipynb" target="_blank" rel="noopener">Open today's notebook in Google Colab</a> or <a href="../notebooks/w095d3.ipynb" download>download it</a>. Exercises today are worth 110 points.</p>
+    </header>
+    <div class="day-body">
+<div class="filebox"><div class="filebox-head">The file used on this page<span>Every program on this page starts with a fresh copy. Click a name to see what's inside.</span></div><details class="pc-file"><summary><code>wraptext.py</code></summary><pre class="pc-filetext">&quot;&quot;&quot;Shorten text to fit a width.
+
+&gt;&gt;&gt; shorten(&quot;Hello world, nice day&quot;, 18)
+&#x27;Hello world, [...]&#x27;
+&quot;&quot;&quot;
+
+
+def shorten(text, width, placeholder=&quot; [...]&quot;):
+    &quot;&quot;&quot;Collapse whitespace and cut text to fit width, ending with placeholder if anything was cut.&quot;&quot;&quot;
+    words = text.split()
+    joined = &quot; &quot;.join(words)
+    if len(joined) &lt;= width:
+        return joined
+    kept, length = [], 0
+    for word in words:
+        extra = len(word) + (1 if kept else 0)
+        if length + extra + len(placeholder) &gt; width:
+            break
+        kept.append(word)
+        length += extra
+    if not kept:
+        raise ValueError(&quot;placeholder too large for max width&quot;)
+    return &quot; &quot;.join(kept) + placeholder
+</pre></details><script type="application/json" class="page-files">{"wraptext.py": "\"\"\"Shorten text to fit a width.\n\n>>> shorten(\"Hello world, nice day\", 18)\n'Hello world, [...]'\n\"\"\"\n\n\ndef shorten(text, width, placeholder=\" [...]\"):\n    \"\"\"Collapse whitespace and cut text to fit width, ending with placeholder if anything was cut.\"\"\"\n    words = text.split()\n    joined = \" \".join(words)\n    if len(joined) <= width:\n        return joined\n    kept, length = [], 0\n    for word in words:\n        extra = len(word) + (1 if kept else 0)\n        if length + extra + len(placeholder) > width:\n            break\n        kept.append(word)\n        length += extra\n    if not kept:\n        raise ValueError(\"placeholder too large for max width\")\n    return \" \".join(kept) + placeholder\n"}</script></div>
+<h2 id="warm-up">Warm-up</h2>
+<div class="pc pc-predict" data-kind="predict" data-id="w095d3-p1"><textarea class="pc-src pc-code" hidden>import unittest
+
+class TestShorten(unittest.TestCase):
+    def test_fits(self):
+        self.assertEqual(len(&quot;Hello world, [...]&quot;), 18)
+
+    def check_spaces(self):
+        self.assertEqual(1, 2)
+
+result = unittest.TestResult()
+unittest.defaultTestLoader.loadTestsFromTestCase(TestShorten).run(result)
+print(result.testsRun, len(result.failures))</textarea></div>
+<p>Only methods whose names start with <code>test</code> run. <code>check_spaces</code> would fail, but it never runs, so the suite looks greener than it is. That&rsquo;s one of the test smells you&rsquo;ll learn to spot today. <code>wraptext.py</code> on this page now has the fix from yesterday.</p>
+<h2 id="tests-in-cpython-s-style">Tests in CPython&rsquo;s style</h2>
+<p>CPython&rsquo;s tests live in <code>Lib/test/test_NAME.py</code> and use <code>unittest</code>: a class derived from <code>unittest.TestCase</code>, methods named <code>test_...</code>, and assertion methods that give helpful messages when they fail: <code>assertEqual(a, b)</code>, <code>assertTrue(x)</code>, <code>assertIn(a, b)</code>, <code>assertRaises(Error)</code> used as a context manager (<code>with self.assertRaises(ValueError): ...</code>). For many similar cases in one method, <code>with self.subTest(text=text, width=width):</code> reports each failing case separately instead of stopping at the first. Add your test next to the existing tests for the same function, in the same style, rather than in a new file. pytest runs <code>unittest</code> classes too, which is how this page checks yours.</p>
+<h2 id="the-regression-test">The regression test</h2>
+<p>A <strong>regression test</strong> reproduces the reported bug: it uses Day 1&rsquo;s minimal case and asserts the correct result. Write it <strong>first</strong>, run it against the unfixed code and watch it <strong>fail</strong> (if it passes, it doesn&rsquo;t test the bug), then apply the fix and watch it pass. CPython tests often mention the issue in a comment (<code># gh-140123: an exact fit is kept</code>) so the next reader knows why it exists.</p>
+<h2 id="boundaries">Boundaries</h2>
+<p>Bugs cluster at edges. For <code>shorten</code>: text that exactly fills the width, one character more and one fewer; text that fits without shortening; repeated spaces; a single word too long for the width; a width too small for even the placeholder; a different placeholder. One test per behaviour, each with a name that says what it checks (<code>test_exact_fit_is_kept</code>), is easier to read when it fails than one test that checks everything.</p>
+<h2 id="is-the-test-any-good">Is the test any good?</h2>
+<p>A test suite is good if it <strong>fails when the code is wrong</strong>. Week 24&rsquo;s mutation testing measures that directly: make small plausible mistakes in the code (a <strong>mutant</strong>: <code>&gt;</code> to <code>&gt;=</code>, removing the whitespace collapse) and check the suite catches each one. A surviving mutant points at a missing test. Smells to look for too: test methods that never run, tests with no assertion, and <code>assertTrue(a == b)</code> where <code>assertEqual(a, b)</code> would say what the values were.</p>
+<aside class="callout c-key"><div class="callout-t">Key idea</div><p>Test in CPython&rsquo;s style: <code>unittest.TestCase</code>, <code>test_</code> methods, <code>assertEqual</code>, <code>assertRaises</code> as a context manager, <code>subTest</code> for many cases, next to the existing tests. Write the regression test from the minimal case first and see it fail on the old code. Test the boundaries: exact fit, one either side, already fits, whitespace, too-long words, tiny widths. Measure the suite by the mutants it kills; watch for tests that never run, tests without assertions, and <code>assertTrue(a == b)</code>.</p></aside>
+<h2 id="practice">Practice</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w095d3-regression" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">The regression test</div><div class="pc-prompt"><p>Write a <code>unittest</code> test class for <code>shorten</code> from <code>wraptext.py</code> that passes on the fixed module and fails on the original bug and on a version that allows one character too many.</p></div><textarea class="pc-src pc-code" hidden>import unittest
+from wraptext import shorten
+
+class TestShorten(unittest.TestCase):
+    def test_fits_already(self):
+        self.assertEqual(shorten(&quot;Hello world&quot;, 40), &quot;Hello world&quot;)</textarea><textarea class="pc-src pc-tests" hidden>GOOD = open(&quot;wraptext.py&quot;).read()
+BROKEN = {
+    &quot;the original bug&quot;: GOOD.replace(&quot;len(placeholder) &gt; width&quot;, &quot;len(placeholder) &gt;= width&quot;),
+    &quot;one too many&quot;: GOOD.replace(&quot;len(placeholder) &gt; width&quot;, &quot;len(placeholder) &gt; width + 1&quot;),
+    &quot;no collapsing&quot;: GOOD.replace(&quot;if len(joined) &lt;= width&quot;, &quot;if len(text) &lt;= width&quot;),
+    &quot;no error&quot;: GOOD.replace(&#x27;raise ValueError(&quot;placeholder too large for max width&quot;)&#x27;, &quot;return placeholder.strip()&quot;),
+    &quot;placeholder ignored&quot;: GOOD.replace(&quot;length + extra + len(placeholder)&quot;, &quot;length + extra&quot;),
+    &quot;words run together&quot;: GOOD.replace(&#x27;return &quot; &quot;.join(kept) + placeholder&#x27;, &#x27;return &quot;&quot;.join(kept) + placeholder&#x27;),
+}
+WANTED = {k: BROKEN[k] for k in (&quot;the original bug&quot;, &quot;one too many&quot;)}
+
+def test_suite():
+    &quot;the bug, and its neighbour&quot;
+    for name, code in WANTED.items():
+        assert code != GOOD, name
+    r = pytest_run(source)
+    assert r[&quot;failed&quot;] == [] and r[&quot;passed&quot;], r[&quot;output&quot;][-600:]
+    results = against(source, &quot;wraptext&quot;, {&quot;correct&quot;: GOOD, **WANTED})
+    write_file(&quot;wraptext.py&quot;, GOOD)
+    missed = [k for k in WANTED if not results[k]]
+    assert results[&quot;correct&quot;] == [] and not missed, f&quot;not caught: {missed}&quot;</textarea><textarea class="pc-src pc-solution" hidden>import unittest
+from wraptext import shorten
+
+class TestShorten(unittest.TestCase):
+    def test_exact_fit_is_kept(self):
+        # gh-77: text that exactly fills the width fits
+        self.assertEqual(shorten(&quot;Hello a nice day today&quot;, 18), &quot;Hello a nice [...]&quot;)
+
+    def test_one_character_short(self):
+        self.assertEqual(shorten(&quot;Hello a nice day today&quot;, 17), &quot;Hello a [...]&quot;)</textarea><template class="pc-src pc-hint">The minimal case from Day 1, <code>shorten("Hello a nice day today", 18)</code>, should be <code>"Hello a nice [...]"</code> (exactly 18 characters). One character narrower, the last word no longer fits.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w095d3-boundaries" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Testing the boundaries</div><div class="pc-prompt"><p>Extend the tests so they catch all six broken versions: the original bug, one character too many, no whitespace collapsing, no error for a width too small, the placeholder ignored when measuring, and kept words run together. Use <code>subTest</code> for at least one group of cases.</p></div><textarea class="pc-src pc-code" hidden>import unittest
+from wraptext import shorten
+
+class TestShorten(unittest.TestCase):
+    def test_exact_fit_is_kept(self):
+        self.assertEqual(shorten(&quot;Hello a nice day today&quot;, 18), &quot;Hello a nice [...]&quot;)</textarea><textarea class="pc-src pc-tests" hidden>GOOD = open(&quot;wraptext.py&quot;).read()
+BROKEN = {
+    &quot;the original bug&quot;: GOOD.replace(&quot;len(placeholder) &gt; width&quot;, &quot;len(placeholder) &gt;= width&quot;),
+    &quot;one too many&quot;: GOOD.replace(&quot;len(placeholder) &gt; width&quot;, &quot;len(placeholder) &gt; width + 1&quot;),
+    &quot;no collapsing&quot;: GOOD.replace(&quot;if len(joined) &lt;= width&quot;, &quot;if len(text) &lt;= width&quot;),
+    &quot;no error&quot;: GOOD.replace(&#x27;raise ValueError(&quot;placeholder too large for max width&quot;)&#x27;, &quot;return placeholder.strip()&quot;),
+    &quot;placeholder ignored&quot;: GOOD.replace(&quot;length + extra + len(placeholder)&quot;, &quot;length + extra&quot;),
+    &quot;words run together&quot;: GOOD.replace(&#x27;return &quot; &quot;.join(kept) + placeholder&#x27;, &#x27;return &quot;&quot;.join(kept) + placeholder&#x27;),
+}
+
+def test_suite():
+    &quot;all six caught&quot;
+    for name, code in BROKEN.items():
+        assert code != GOOD, name
+    assert &quot;subTest&quot; in source, &quot;use subTest for a group of cases&quot;
+    r = pytest_run(source)
+    assert r[&quot;failed&quot;] == [] and r[&quot;passed&quot;], r[&quot;output&quot;][-600:]
+    results = against(source, &quot;wraptext&quot;, {&quot;correct&quot;: GOOD, **BROKEN})
+    write_file(&quot;wraptext.py&quot;, GOOD)
+    missed = [k for k in BROKEN if not results[k]]
+    assert results[&quot;correct&quot;] == [] and not missed, f&quot;not caught: {missed}&quot;</textarea><textarea class="pc-src pc-solution" hidden>import unittest
+from wraptext import shorten
+
+class TestShorten(unittest.TestCase):
+    def test_exact_fit_is_kept(self):
+        self.assertEqual(shorten(&quot;Hello a nice day today&quot;, 18), &quot;Hello a nice [...]&quot;)
+
+    def test_widths_around_the_fit(self):
+        cases = [(17, &quot;Hello a [...]&quot;), (18, &quot;Hello a nice [...]&quot;), (19, &quot;Hello a nice [...]&quot;), (22, &quot;Hello a nice day today&quot;)]
+        for width, expected in cases:
+            with self.subTest(width=width):
+                result = shorten(&quot;Hello a nice day today&quot;, width)
+                self.assertEqual(result, expected)
+                self.assertLessEqual(len(result), width)
+
+    def test_spaces_are_collapsed(self):
+        self.assertEqual(shorten(&quot;Hello   world&quot;, 11), &quot;Hello world&quot;)
+
+    def test_width_too_small(self):
+        with self.assertRaises(ValueError):
+            shorten(&quot;one two&quot;, 3)</textarea><template class="pc-src pc-hint">Add a case with repeated spaces that fits once collapsed, a width too small for the placeholder (<code>with self.assertRaises(ValueError):</code>), and check lengths never exceed the width for several widths.</template></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w095d3-run_suite" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Running a test class</div><div class="pc-prompt"><p>Write <code>run_suite(case_class)</code>: load the class&rsquo;s tests with <code>unittest.defaultTestLoader.loadTestsFromTestCase</code>, run them into a <code>unittest.TestResult</code>, and return <code>(run, problems, names)</code>: the number of tests run, the number of failures plus errors, and the sorted method names of the tests that failed or errored (each test&rsquo;s <code>_testMethodName</code>).</p></div><textarea class="pc-src pc-code" hidden>import unittest
+
+def run_suite(case_class):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>import unittest
+
+class Sample(unittest.TestCase):
+    def test_ok(self):
+        self.assertEqual(1, 1)
+    def test_wrong(self):
+        self.assertEqual(1, 2)
+    def test_crash(self):
+        {}[&quot;missing&quot;]
+    def helper(self):
+        self.fail(&quot;never runs&quot;)
+
+def test_run():
+    &quot;counts and names&quot;
+    assert run_suite(Sample) == (3, 2, [&quot;test_crash&quot;, &quot;test_wrong&quot;])</textarea><textarea class="pc-src pc-solution" hidden>import unittest
+
+def run_suite(case_class):
+    result = unittest.TestResult()
+    unittest.defaultTestLoader.loadTestsFromTestCase(case_class).run(result)
+    bad = result.failures + result.errors
+    return result.testsRun, len(bad), sorted(test._testMethodName for test, _ in bad)</textarea></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w095d3-smells" data-points="15"><div class="pc-label"><span>Exercise</span><span class="pc-pts">15 points</span></div><div class="pc-title">Test smells</div><div class="pc-prompt"><p>Write <code>find_smells(source)</code>: for every method of every class in the source whose base list includes a name or attribute ending in <code>TestCase</code>, report in source order: <code>"LINE NAME: never runs"</code> for a method not starting with <code>test</code> or <code>_</code> that calls an <code>assert...</code> method of <code>self</code>; <code>"LINE NAME: no assertion"</code> for a <code>test</code> method with no call to a <code>self.assert...</code> or <code>self.fail</code> method and no <code>assert</code> statement; and <code>"LINE NAME: use assertEqual"</code> (with the line of the call) for each <code>self.assertTrue(...)</code> whose argument is an <code>==</code> comparison.</p></div><textarea class="pc-src pc-code" hidden>import ast
+
+def find_smells(source):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>SOURCE = &#x27;&#x27;&#x27;import unittest
+from wraptext import shorten
+
+class TestShorten(unittest.TestCase):
+    def test_exact_fit(self):
+        self.assertTrue(shorten(&quot;Hello a nice day today&quot;, 18) == &quot;Hello a nice [...]&quot;)
+
+    def check_spaces(self):
+        self.assertEqual(shorten(&quot;a  b&quot;, 3), &quot;a b&quot;)
+
+    def test_runs(self):
+        shorten(&quot;Hello&quot;, 3)
+
+    def _helper(self):
+        return 1
+
+    def test_error(self):
+        with self.assertRaises(ValueError):
+            shorten(&quot;one two&quot;, 3)
+&#x27;&#x27;&#x27;
+
+def test_found():
+    &quot;three smells&quot;
+    assert find_smells(SOURCE) == [&quot;6 test_exact_fit: use assertEqual&quot;, &quot;8 check_spaces: never runs&quot;, &quot;11 test_runs: no assertion&quot;]
+    assert find_smells(&quot;class Plain:\n    def check(self):\n        self.assertEqual(1, 1)\n&quot;) == []</textarea><textarea class="pc-src pc-solution" hidden>import ast
+
+def _is_case(cls):
+    for base in cls.bases:
+        name = base.id if isinstance(base, ast.Name) else base.attr if isinstance(base, ast.Attribute) else &quot;&quot;
+        if name.endswith(&quot;TestCase&quot;):
+            return True
+    return False
+
+def _self_calls(func):
+    return [n for n in ast.walk(func) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+            and isinstance(n.func.value, ast.Name) and n.func.value.id == &quot;self&quot;]
+
+def find_smells(source):
+    found = []
+    for cls in [n for n in ast.walk(ast.parse(source)) if isinstance(n, ast.ClassDef) and _is_case(n)]:
+        for func in [n for n in cls.body if isinstance(n, ast.FunctionDef)]:
+            calls = _self_calls(func)
+            asserts = [c for c in calls if c.func.attr.startswith(&quot;assert&quot;) or c.func.attr == &quot;fail&quot;]
+            if not func.name.startswith((&quot;test&quot;, &quot;_&quot;)) and asserts:
+                found.append((func.lineno, f&quot;{func.lineno} {func.name}: never runs&quot;))
+            if func.name.startswith(&quot;test&quot;) and not asserts and not any(isinstance(n, ast.Assert) for n in ast.walk(func)):
+                found.append((func.lineno, f&quot;{func.lineno} {func.name}: no assertion&quot;))
+            for c in calls:
+                if c.func.attr == &quot;assertTrue&quot; and c.args and isinstance(c.args[0], ast.Compare) and isinstance(c.args[0].ops[0], ast.Eq):
+                    found.append((c.lineno, f&quot;{c.lineno} {func.name}: use assertEqual&quot;))
+    return [text for _, text in sorted(found)]</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w095d3-bug1" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A test that never ran</div><div class="pc-prompt"><p>The test method&rsquo;s name doesn&rsquo;t start with <code>test</code>, so the suite runs nothing and prints <code>0 run, 0 failed</code>. Rename it so it runs, and prints <code>1 run, 0 failed</code>.</p></div><textarea class="pc-src pc-code" hidden>import unittest
+from wraptext import shorten
+
+class TestShorten(unittest.TestCase):
+    def check_exact_fit(self):
+        self.assertEqual(shorten(&quot;Hello a nice day today&quot;, 18), &quot;Hello a nice [...]&quot;)
+
+result = unittest.TestResult()
+unittest.defaultTestLoader.loadTestsFromTestCase(TestShorten).run(result)
+print(f&quot;{result.testsRun} run, {len(result.failures)} failed&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;test_ methods run&quot;
+    expect_output(&quot;1 run, 0 failed&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import unittest
+from wraptext import shorten
+
+class TestShorten(unittest.TestCase):
+    def test_exact_fit(self):
+        self.assertEqual(shorten(&quot;Hello a nice day today&quot;, 18), &quot;Hello a nice [...]&quot;)
+
+result = unittest.TestResult()
+unittest.defaultTestLoader.loadTestsFromTestCase(TestShorten).run(result)
+print(f&quot;{result.testsRun} run, {len(result.failures)} failed&quot;)</textarea></div>
+<div class="pc pc-exercise pc-bughunt" data-kind="bughunt" data-id="w095d3-bug2" data-points="10"><div class="pc-label"><span>Bug hunt</span><span class="pc-pts">10 points</span></div><div class="pc-title">A test that can&rsquo;t fail</div><div class="pc-prompt"><p><code>assertTrue(x, msg)</code> only checks that <code>x</code> is truthy (the second argument is a message), so this test passes even against the buggy version defined here, and prints <code>0 failed</code>. Make it compare the values, so it catches the bug and prints <code>1 failed</code>.</p></div><textarea class="pc-src pc-code" hidden>import unittest
+
+def shorten(text, width, placeholder=&quot; [...]&quot;):
+    return &quot;Hello a [...]&quot;
+
+class TestShorten(unittest.TestCase):
+    def test_exact_fit(self):
+        self.assertTrue(shorten(&quot;Hello a nice day today&quot;, 18), &quot;Hello a nice [...]&quot;)
+
+result = unittest.TestResult()
+unittest.defaultTestLoader.loadTestsFromTestCase(TestShorten).run(result)
+print(f&quot;{len(result.failures)} failed&quot;)</textarea><textarea class="pc-src pc-tests" hidden>def test_output():
+    &quot;assertEqual&quot;
+    expect_output(&quot;1 failed&quot;)</textarea><textarea class="pc-src pc-solution" hidden>import unittest
+
+def shorten(text, width, placeholder=&quot; [...]&quot;):
+    return &quot;Hello a [...]&quot;
+
+class TestShorten(unittest.TestCase):
+    def test_exact_fit(self):
+        self.assertEqual(shorten(&quot;Hello a nice day today&quot;, 18), &quot;Hello a nice [...]&quot;)
+
+result = unittest.TestResult()
+unittest.defaultTestLoader.loadTestsFromTestCase(TestShorten).run(result)
+print(f&quot;{len(result.failures)} failed&quot;)</textarea></div>
+<div class="parsons" data-id="w095d3-pz1"><div class="pc-label"><span>Puzzle</span></div><div class="pc-title">Many cases, one test</div><div class="pc-prompt"><p>Arrange a test that checks several widths with <code>subTest</code>, so each failing width is reported separately. One line is a trap.</p></div><script type="application/json">{"lines": ["def test_widths(self):", "    cases = [(17, \"Hello a [...]\"), (18, \"Hello a nice [...]\")]", "    for width, expected in cases:", "        with self.subTest(width=width):", "            self.assertEqual(shorten(\"Hello a nice day today\", width), expected)"], "distractors": ["            self.assertTrue(shorten(\"Hello a nice day today\", width), expected)"]}</script></div>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w095d3-trace" data-points="10"><div class="pc-label"><span>Exercise</span><span class="pc-pts">10 points</span></div><div class="pc-title">Predict them</div><div class="pc-prompt"></div><textarea class="pc-src pc-code" hidden>p = ___   # the folder where CPython&#x27;s tests live (with its slash)
+q = ___   # the unittest method that checks an exception is raised
+r = ___   # True or False: a regression test should pass on the unfixed code
+s = ___   # what a mutation that no test catches is called (one word)
+t = ___   # the prefix a TestCase method needs to run</textarea><textarea class="pc-src pc-tests" hidden>def test_values():
+    &quot;each&quot;
+    assert p == &quot;Lib/test/&quot; and q == &quot;assertRaises&quot; and r is False, &quot;p, q and r&quot;
+    assert s == &quot;survivor&quot; or s == &quot;surviving&quot;, &quot;s&quot;
+    assert t == &quot;test&quot;, &quot;t&quot;</textarea><textarea class="pc-src pc-solution" hidden>p = &quot;Lib/test/&quot;
+q = &quot;assertRaises&quot;
+r = False
+s = &quot;survivor&quot;
+t = &quot;test&quot;</textarea></div>
+<h2 id="quiz">Quiz</h2>
+<div class="quiz" data-id="w095d3-quiz"><div class="pc-label"><span>Quiz</span><span>10 questions</span></div><script type="application/json">[{"type": "mc", "q": "Which framework do CPython&rsquo;s own tests use?", "answer": 1, "explain": "TestCase classes in Lib/test/.", "options": ["pytest", "unittest", "nose", "doctest only"]}, {"type": "mc", "q": "What must a regression test do on the unfixed code?", "answer": 1, "explain": "Otherwise it doesn&rsquo;t test the bug.", "options": ["Pass", "Fail", "Be skipped", "Crash"]}, {"type": "mc", "q": "What does subTest give you?", "answer": 1, "explain": "One loop, many reports.", "options": ["Speed", "Each failing case reported separately within one test", "Parallel runs", "Fixtures"]}, {"type": "mc", "q": "How is assertRaises usually used?", "answer": 1, "explain": "with self.assertRaises(ValueError):", "options": ["As a decorator", "As a context manager around the call", "With print", "In setUp"]}, {"type": "mc", "q": "Where should your new test go?", "answer": 1, "explain": "Lib/test/test_NAME.py.", "options": ["A new file", "Next to the existing tests for the same function, in their style", "In the module", "Anywhere"]}, {"type": "mc", "q": "Why name tests for the behaviour they check?", "answer": 1, "explain": "test_exact_fit_is_kept.", "options": ["Tradition", "A failing test&rsquo;s name then says what broke", "It&rsquo;s faster", "unittest requires it"]}, {"type": "mc", "q": "What&rsquo;s wrong with assertTrue(a == b)?", "answer": 1, "explain": "assertEqual shows both.", "options": ["It&rsquo;s wrong", "On failure it can&rsquo;t say what a and b were", "It&rsquo;s slower", "It always passes"]}, {"type": "mc", "q": "What does a surviving mutant tell you?", "answer": 1, "explain": "Add a test that kills it.", "options": ["The code is perfect", "A test is missing for that mistake", "The mutant is broken", "Nothing"]}, {"type": "mc", "q": "Which boundary is most important for this bug?", "answer": 1, "explain": "That&rsquo;s where it went wrong.", "options": ["Empty text", "Text that exactly fills the width", "Very long text", "Unicode"]}, {"type": "output", "q": "What does this print?", "answer": "2 True", "explain": "Both pass.", "code": "import unittest\nclass T(unittest.TestCase):\n    def test_a(self):\n        self.assertIn(\"a\", \"cat\")\n    def test_b(self):\n        self.assertEqual(len(\"Hello a nice [...]\"), 18)\nr = unittest.TestResult()\nunittest.defaultTestLoader.loadTestsFromTestCase(T).run(r)\nprint(r.testsRun, r.wasSuccessful())"}]</script></div>
+<h2 id="daily-challenge">Daily challenge</h2>
+<div class="pc pc-exercise pc-exercise" data-kind="exercise" data-id="w095d3-challenge" data-points="25"><div class="pc-label"><span>Exercise</span><span class="pc-pts">25 points</span></div><div class="pc-title">Challenge: your own mutation tester</div><div class="pc-prompt"><p>Write <code>mutation_score(test_source, module_name, good, mutants)</code> without pytest. For each version (the good source, then each mutant in order): create a module with <code>types.ModuleType(module_name)</code>, execute the version&rsquo;s source in its <code>__dict__</code>, put it in <code>sys.modules[module_name]</code>, execute <code>test_source</code> in a fresh namespace, and run every <code>unittest.TestCase</code> subclass defined there with <code>unittest.TestResult</code>. A version is <strong>caught</strong> if any test fails or errors. Restore <code>sys.modules</code> afterwards (remove the entry if it wasn&rsquo;t there). Return lines: <code>"tests: N"</code> (tests run on the good version), <code>"on the fix: all pass"</code> or <code>"on the fix: K fail"</code>, <code>"caught: ..."</code> and <code>"missed: ..."</code> (mutant names, or <code>none</code>), and <code>"score: P%"</code> (caught over mutants, rounded).</p></div><textarea class="pc-src pc-code" hidden>import sys
+import types
+import unittest
+
+def mutation_score(test_source, module_name, good, mutants):
+    ___</textarea><textarea class="pc-src pc-tests" hidden>GOOD = open(&quot;wraptext.py&quot;).read()
+BROKEN = {
+    &quot;the original bug&quot;: GOOD.replace(&quot;len(placeholder) &gt; width&quot;, &quot;len(placeholder) &gt;= width&quot;),
+    &quot;one too many&quot;: GOOD.replace(&quot;len(placeholder) &gt; width&quot;, &quot;len(placeholder) &gt; width + 1&quot;),
+    &quot;no collapsing&quot;: GOOD.replace(&quot;if len(joined) &lt;= width&quot;, &quot;if len(text) &lt;= width&quot;),
+    &quot;no error&quot;: GOOD.replace(&#x27;raise ValueError(&quot;placeholder too large for max width&quot;)&#x27;, &quot;return placeholder.strip()&quot;),
+    &quot;placeholder ignored&quot;: GOOD.replace(&quot;length + extra + len(placeholder)&quot;, &quot;length + extra&quot;),
+    &quot;words run together&quot;: GOOD.replace(&#x27;return &quot; &quot;.join(kept) + placeholder&#x27;, &#x27;return &quot;&quot;.join(kept) + placeholder&#x27;),
+}
+
+TESTS = &#x27;&#x27;&#x27;import unittest
+from wraptext import shorten
+
+class TestShorten(unittest.TestCase):
+    def test_exact_fit_is_kept(self):
+        self.assertEqual(shorten(&quot;Hello a nice day today&quot;, 18), &quot;Hello a nice [...]&quot;)
+
+    def test_one_short(self):
+        self.assertEqual(shorten(&quot;Hello a nice day today&quot;, 17), &quot;Hello a [...]&quot;)
+&#x27;&#x27;&#x27;
+
+def test_score():
+    &quot;two tests, six mutants&quot;
+    lines = mutation_score(TESTS, &quot;wraptext&quot;, GOOD, BROKEN)
+    assert lines == [&quot;tests: 2&quot;, &quot;on the fix: all pass&quot;, &quot;caught: the original bug, one too many, placeholder ignored, words run together&quot;,
+                     &quot;missed: no collapsing, no error&quot;, &quot;score: 67%&quot;]
+
+def test_restores():
+    &quot;sys.modules is left as it was&quot;
+    import sys
+    before = sys.modules.get(&quot;wraptext&quot;)
+    mutation_score(TESTS, &quot;wraptext&quot;, GOOD, {})
+    assert sys.modules.get(&quot;wraptext&quot;) is before
+    bad_tests = TESTS.replace(&#x27;&quot;Hello a [...]&quot;)&#x27;, &#x27;&quot;nope&quot;)&#x27;)
+    assert mutation_score(bad_tests, &quot;wraptext&quot;, GOOD, {})[1] == &quot;on the fix: 1 fail&quot;</textarea><textarea class="pc-src pc-solution" hidden>import sys
+import types
+import unittest
+
+def _run(test_source, module_name, code):
+    module = types.ModuleType(module_name)
+    exec(code, module.__dict__)
+    sys.modules[module_name] = module
+    namespace = {}
+    exec(test_source, namespace)
+    result = unittest.TestResult()
+    for obj in list(namespace.values()):
+        if isinstance(obj, type) and issubclass(obj, unittest.TestCase) and obj is not unittest.TestCase:
+            unittest.defaultTestLoader.loadTestsFromTestCase(obj).run(result)
+    return result.testsRun, len(result.failures) + len(result.errors)
+
+def mutation_score(test_source, module_name, good, mutants):
+    saved = sys.modules.get(module_name)
+    try:
+        run, bad = _run(test_source, module_name, good)
+        caught, missed = [], []
+        for name, code in mutants.items():
+            (caught if _run(test_source, module_name, code)[1] else missed).append(name)
+    finally:
+        if saved is None:
+            sys.modules.pop(module_name, None)
+        else:
+            sys.modules[module_name] = saved
+    score = round(100 * len(caught) / len(mutants)) if mutants else 100
+    return [f&quot;tests: {run}&quot;, &quot;on the fix: all pass&quot; if not bad else f&quot;on the fix: {bad} fail&quot;,
+            &quot;caught: &quot; + (&quot;, &quot;.join(caught) or &quot;none&quot;), &quot;missed: &quot; + (&quot;, &quot;.join(missed) or &quot;none&quot;), f&quot;score: {score}%&quot;]</textarea></div>
+<h2 id="your-turn">Your turn</h2>
+<ol>
+<li><strong>Write the regression test first</strong> for your issue, in the existing test file, and run it on unfixed <code>main</code>: it must fail.</li>
+<li><strong>Apply your fix</strong> and run it again (<code>./python -m test test_NAME -v</code>): it must pass.</li>
+<li><strong>Add boundary tests</strong> for the edges near your bug, using <code>subTest</code> where cases are alike.</li>
+<li><strong>Mutate your own fix</strong> by hand (undo it, or make it off by one) and check your tests catch each version.</li>
+</ol>
+<h2 id="before-you-go">Before you go</h2>
+<p>Tomorrow you&rsquo;ll open the pull request: a commit message, a description, a NEWS entry and a careful look at your own diff before anyone else sees it.</p>
+    </div>
+    <nav class="day-nav" aria-label="Day navigation"><a class="btn btn-quiet" href="w095d2.html">Previous day</a><button type="button" class="btn btn-quiet" id="save-progress" title="Progress is also saved automatically as you work">Save progress</button><button type="button" class="btn btn-run" id="mark-done">Mark today complete</button><a class="btn btn-step" href="w095d4.html">Next day</a></nav>
+  </article>
+</div>
+<script type="application/json" id="day-data">{"id": "w095d3", "week": 95, "day": 3, "title": "Writing the test", "exercises": [{"id": "w095d3-regression", "title": "The regression test", "points": 15}, {"id": "w095d3-boundaries", "title": "Testing the boundaries", "points": 15}, {"id": "w095d3-run_suite", "title": "Running a test class", "points": 10}, {"id": "w095d3-smells", "title": "Test smells", "points": 15}, {"id": "w095d3-bug1", "title": "A test that never ran", "points": 10}, {"id": "w095d3-bug2", "title": "A test that can't fail", "points": 10}, {"id": "w095d3-trace", "title": "Predict them", "points": 10}, {"id": "w095d3-challenge", "title": "Challenge: your own mutation tester", "points": 25}], "points": 110}</script>
+
+</main>
+<nav class="tabbar" aria-label="App">
+  <a class="tab" data-tab="home" href="../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a>
+  <a class="tab" data-tab="learn" href="../map.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><span>Course</span></a>
+  <a class="tab" data-tab="review" href="../review.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="13" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v12"/></svg><span>Review</span><span class="badge tab-badge" id="tab-due" hidden></span></a>
+  <a class="tab" data-tab="play" href="../playground.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>Playground</span></a>
+  <a class="tab" data-tab="me" href="../account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Me</span></a>
+</nav>
+<footer class="foot">
+  <p class="foot-copy">© 2026 Peter Oluwafemi Adepoju. All rights reserved.</p>
+  <nav class="foot-links" aria-label="Footer">
+    <a href="../guide.html">How it works</a>
+    <a href="../map.html">Course map</a>
+    <a href="../settings.html">Settings</a>
+    <a href="../privacy.html">Privacy</a>
+    <a href="#" class="install-link" data-install hidden>Get the app</a>
+    <button type="button" class="theme-btn" id="theme-btn" aria-label="Colour theme"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="theme-label">Auto</span></button>
+  </nav>
+</footer>
+<script type="module" src="../assets/js/pages/day.js?v=97b2d34bb1"></script>
+</body>
+</html>
